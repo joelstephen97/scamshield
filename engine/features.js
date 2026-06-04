@@ -61,9 +61,9 @@
     for (const brand of POPULAR_BRANDS) {
       const db = deglyph(brand);                                // deglyph brand too (symmetric)
       for (const cand of candidates) {
-        if (cand === db && sld !== brand) return 1;          // homoglyph exact
-        if (cand.includes(db) && sld !== brand) return 1;     // paypal-secure
-        if (levenshtein(cand, db) === 1) return 1;            // typosquat
+        if (cand === db && sld !== brand) return 1;                        // homoglyph exact
+        if (db.length >= 5 && cand.includes(db) && sld !== brand) return 1; // embedded brand (paypalsecure); length gate avoids 'wise' in 'otherwise'
+        if (levenshtein(cand, db) === 1) return 1;                          // typosquat
       }
     }
     return 0;
@@ -80,7 +80,7 @@
       host_length: host.length,
       path_length: path.length,
       num_dots_host: (host.match(/\./g) || []).length,
-      num_subdomains: Math.max(0, host.split('.').length - 2),
+      num_subdomains: IP_RE.test(host) ? 0 : Math.max(0, host.split('.').length - 2),
       num_hyphens_host: (host.match(/-/g) || []).length,
       num_digits_host: digitsHost,
       digit_ratio_host: host.length ? digitsHost / host.length : 0,

@@ -44,3 +44,18 @@ test('clean popular domain is not a lookalike', () => {
 test('parseHost handles malformed input without throwing', () => {
   assert.doesNotThrow(() => extractUrlFeatures('not a url'));
 });
+
+test('legit words containing short brand names are not lookalikes', () => {
+  assert.equal(extractUrlFeatures('https://otherwise.com/')[FEATURE_NAMES.indexOf('brand_lookalike')], 0);
+  assert.equal(extractUrlFeatures('https://jdbscripts.com/')[FEATURE_NAMES.indexOf('brand_lookalike')], 0);
+});
+
+test('raw IP host has zero subdomains', () => {
+  assert.equal(extractUrlFeatures('http://192.168.0.1/login')[FEATURE_NAMES.indexOf('num_subdomains')], 0);
+});
+
+test('empty string input does not throw and returns full-length vector', () => {
+  let v;
+  assert.doesNotThrow(() => { v = extractUrlFeatures(''); });
+  assert.equal(v.length, FEATURE_NAMES.length);
+});

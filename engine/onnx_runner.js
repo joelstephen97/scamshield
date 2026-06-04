@@ -25,7 +25,9 @@
         return null;
       }
     })();
-    return sessionPromise;
+    const session = await sessionPromise;
+    if (!session) sessionPromise = null; // allow retry on transient load failure
+    return session;
   }
 
   // Returns phishing probability 0..1, or null if the model is unavailable.

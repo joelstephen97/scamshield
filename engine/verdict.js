@@ -11,6 +11,10 @@
     const d = domRules || { score: 0, reasons: [], flags: [] };
     const ruleScore = Math.max(u.score || 0, d.score || 0);
 
+    // Policy: rules anchor the model. The model averages with the rule score and
+    // can only RAISE it, never lower it. A high model score with near-zero rules
+    // therefore tops out around "suspicious", not "dangerous" — deliberate, so a
+    // tiny-dataset model can't trigger a "dangerous" banner on its own.
     let score;
     const modelUsed = typeof modelProb === 'number' && !Number.isNaN(modelProb);
     if (!modelUsed) score = ruleScore;
