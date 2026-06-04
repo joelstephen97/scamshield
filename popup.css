@@ -1,0 +1,12 @@
+body{width:280px;margin:0;font:13px/1.4 system-ui,sans-serif;color:#111}
+header{display:flex;align-items:center;gap:8px;padding:10px 12px;background:#0b6e4f;color:#fff}
+header h1{font-size:15px;margin:0}
+.status{padding:12px;font-weight:600;text-align:center}
+.status.safe{background:#e7f6ee;color:#0b6e4f}
+.status.suspicious{background:#fdf3d6;color:#8a6d00}
+.status.dangerous{background:#fbe4e1;color:#c0392b}
+ul{margin:0;padding:8px 12px 0 28px;color:#444}
+li{margin-bottom:4px}
+.row{display:flex;justify-content:space-between;align-items:center;padding:8px 12px}
+button,#opts{display:block;margin:8px 12px;font:inherit}
+#opts{color:#0b6e4f}
