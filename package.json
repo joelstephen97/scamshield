@@ -5,9 +5,9 @@
   "private": true,
   "type": "commonjs",
   "scripts": {
-    "test:unit": "node --test tests/unit",
+    "test:unit": "node --test \"tests/unit/**/*.test.js\"",
     "test:e2e": "playwright test",
-    "test": "node --test tests/unit && playwright test",
+    "test": "node --test \"tests/unit/**/*.test.js\" && playwright test",
     "build": "node scripts/build.js"
   },
   "devDependencies": {
