@@ -1,0 +1,69 @@
+(function (root) {
+  'use strict';
+  const NS = 'scamshield';
+  function el(tag, cls, text) {
+    const e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+
+  function clearAll() {
+    document.querySelectorAll('.' + NS + '-banner, .' + NS + '-overlay').forEach((n) => n.remove());
+    document.querySelectorAll('.' + NS + '-hidden-block').forEach((n) => {
+      n.classList.remove(NS + '-hidden-block');
+      const t = n.querySelector('.' + NS + '-hidden-tag'); if (t) t.remove();
+    });
+  }
+
+  function showBanner(verdict, onAllow) {
+    if (document.querySelector('.' + NS + '-banner')) return;
+    const bar = el('div', NS + '-banner ' + (verdict.level === 'dangerous' ? 'danger' : 'suspicious'));
+    const icon = el('span', null, verdict.level === 'dangerous' ? '⛔' : '⚠️');
+    const msg = el('span', 'ss-msg',
+      (verdict.level === 'dangerous' ? 'Warning: this page looks dangerous. ' : 'Caution: this page looks suspicious. ')
+      + (verdict.reasons[0] || ''));
+    const trust = el('button', null, 'Trust this site');
+    trust.addEventListener('click', () => { onAllow && onAllow(); bar.remove(); });
+    const close = el('button', null, 'Dismiss');
+    close.addEventListener('click', () => bar.remove());
+    bar.append(icon, msg, trust, close);
+    (document.body || document.documentElement).appendChild(bar);
+  }
+
+  // Intercept submit on password forms that post off-domain.
+  function guardForms(foreignForms) {
+    foreignForms.forEach((form) => {
+      if (form.__scamshieldGuarded) return;
+      form.__scamshieldGuarded = true;
+      form.addEventListener('submit', (ev) => {
+        ev.preventDefault(); ev.stopPropagation();
+        const ov = el('div', NS + '-overlay');
+        const card = el('div', 'ss-card');
+        card.append(
+          el('h3', null, 'Stop — possible phishing'),
+          el('p', null, 'This form sends your password to a different website than the one you are visiting. This is a common way scammers steal logins.')
+        );
+        const actions = el('div', 'ss-actions');
+        const back = el('button', null, 'Cancel (recommended)');
+        back.addEventListener('click', () => ov.remove());
+        const go = el('button', null, 'Submit anyway');
+        go.addEventListener('click', () => { ov.remove(); form.__scamshieldGuarded = false; form.submit(); });
+        actions.append(back, go); card.append(actions); ov.append(card);
+        document.documentElement.appendChild(ov);
+      }, true);
+    });
+  }
+
+  function hideScamBlocks(blocks) {
+    blocks.forEach((node) => {
+      if (node.classList.contains(NS + '-hidden-block')) return;
+      node.classList.add(NS + '-hidden-block');
+      const tag = el('div', NS + '-hidden-tag', 'Hidden by ScamShield');
+      node.appendChild(tag);
+    });
+  }
+
+  root.ScamShield = root.ScamShield || {};
+  root.ScamShield.actions = { showBanner, guardForms, hideScamBlocks, clearAll };
+})(typeof globalThis !== 'undefined' ? globalThis : self);

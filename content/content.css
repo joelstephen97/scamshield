@@ -1,0 +1,17 @@
+.scamshield-banner{position:fixed;top:0;left:0;right:0;z-index:2147483647;
+  font:14px/1.4 system-ui,sans-serif;padding:10px 14px;display:flex;gap:10px;
+  align-items:center;color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.scamshield-banner.danger{background:#c0392b}
+.scamshield-banner.suspicious{background:#e1a200;color:#222}
+.scamshield-banner .ss-msg{flex:1}
+.scamshield-banner button{font:inherit;border:0;border-radius:6px;padding:4px 10px;
+  cursor:pointer;background:rgba(255,255,255,.9);color:#111}
+.scamshield-hidden-block{position:relative;filter:grayscale(1) blur(2px);opacity:.5}
+.scamshield-hidden-tag{position:absolute;top:4px;left:4px;background:#0b6e4f;color:#fff;
+  font:11px/1 system-ui;padding:3px 6px;border-radius:4px;z-index:2}
+.scamshield-overlay{position:fixed;inset:0;z-index:2147483646;background:rgba(0,0,0,.6);
+  display:flex;align-items:center;justify-content:center}
+.scamshield-overlay .ss-card{background:#fff;color:#111;max-width:360px;padding:20px;
+  border-radius:10px;font:14px/1.5 system-ui,sans-serif}
+.scamshield-overlay h3{margin:0 0 8px;color:#c0392b}
+.scamshield-overlay .ss-actions{display:flex;gap:8px;margin-top:14px;justify-content:flex-end}
