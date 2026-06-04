@@ -1,0 +1,23 @@
+<!doctype html><meta charset="utf-8"><title>ScamShield icon render</title>
+<body style="font-family:sans-serif">
+<div id="b"></div>
+<script>
+const sizes=[16,32,48,128];
+for(const s of sizes){
+  const c=document.createElement('canvas');c.width=c.height=s;
+  const x=c.getContext('2d');
+  // shield
+  x.fillStyle='#0b6e4f';x.beginPath();
+  x.moveTo(s*0.5,s*0.08);x.lineTo(s*0.9,s*0.22);x.lineTo(s*0.9,s*0.55);
+  x.quadraticCurveTo(s*0.9,s*0.85,s*0.5,s*0.95);
+  x.quadraticCurveTo(s*0.1,s*0.85,s*0.1,s*0.55);
+  x.lineTo(s*0.1,s*0.22);x.closePath();x.fill();
+  // check
+  x.strokeStyle='#fff';x.lineWidth=Math.max(1,s*0.08);x.lineCap='round';
+  x.beginPath();x.moveTo(s*0.32,s*0.52);x.lineTo(s*0.45,s*0.65);x.lineTo(s*0.7,s*0.35);x.stroke();
+  const a=document.createElement('a');
+  a.textContent='Download icon'+s+'.png';a.download='icon'+s+'.png';
+  a.href=c.toDataURL('image/png');a.style.display='block';
+  document.getElementById('b').appendChild(c);document.getElementById('b').appendChild(a);
+}
+</script>
