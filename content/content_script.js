@@ -1,0 +1,85 @@
+(function (root) {
+  'use strict';
+  const api = root.browser || root.chrome;
+  const SS = root.ScamShield;
+
+  function send(type, extra) {
+    return new Promise((res) => {
+      try { api.runtime.sendMessage(Object.assign({ type }, extra), (r) => res(r)); }
+      catch (_) { res(null); }
+    });
+  }
+
+  function registrable(host) {
+    return String(host || '').toLowerCase().split('.').filter(Boolean).slice(-2).join('.');
+  }
+
+  function collectSignals() {
+    const pageHost = location.hostname;
+    const passwordForms = [...document.querySelectorAll('form')]
+      .filter((f) => f.querySelector('input[type="password"]'));
+    const passwordFormActions = passwordForms.map((f) => f.getAttribute('action') || location.href);
+    const foreignForms = passwordForms.filter((f) => {
+      try {
+        const h = new URL(f.getAttribute('action') || location.href, location.href).hostname;
+        return registrable(h) !== registrable(pageHost);
+      } catch (_) { return false; }
+    });
+    const hiddenIframeCount = [...document.querySelectorAll('iframe')].filter((fr) => {
+      const cs = getComputedStyle(fr);
+      return cs.display === 'none' || cs.visibility === 'hidden' ||
+        (fr.offsetWidth <= 1 && fr.offsetHeight <= 1);
+    }).length;
+
+    const text = (document.body ? document.body.innerText : '').toLowerCase().slice(0, 20000);
+    const scamPhrases = SS.SCAM_PHRASES.filter((p) => text.includes(p));
+
+    // Candidate scam blocks: elements whose text contains a scam phrase, kept small.
+    const scamBlocks = [];
+    if (SS && SS.SCAM_PHRASES) {
+      for (const node of document.querySelectorAll('div,section,aside,a')) {
+        if (scamBlocks.length >= 10) break;
+        const t = (node.innerText || '').toLowerCase();
+        if (t.length < 200 && SS.SCAM_PHRASES.some((p) => t.includes(p))) scamBlocks.push(node);
+      }
+    }
+
+    return {
+      signals: { pageHost, hasPasswordField: passwordForms.length > 0, passwordFormActions, hiddenIframeCount, scamPhrases },
+      foreignForms, scamBlocks
+    };
+  }
+
+  async function run() {
+    const settings = await send('getSettings');
+    if (!settings || !settings.enabled) return;
+    const pageDomain = registrable(location.hostname);
+    if ((settings.allowlist || []).includes(pageDomain)) return;
+
+    const { signals, foreignForms, scamBlocks } = collectSignals();
+    const urlRules = SS.scoreUrl(location.href);
+    const domRules = SS.scoreDom(signals);
+
+    // Model: only invoke when borderline or credentials present, to limit overhead.
+    let modelProb = null;
+    const borderline = Math.max(urlRules.score, domRules.score) >= 0.3 || signals.hasPasswordField;
+    if (borderline && SS.isAvailable && SS.isAvailable()) {
+      modelProb = await SS.predict(SS.extractUrlFeatures(location.href));
+    }
+
+    const verdict = SS.fuse({ modelProb, urlRules, domRules });
+    await send('reportVerdict', { verdict });
+
+    if (verdict.level !== 'safe') {
+      SS.actions.showBanner(verdict, async () => {
+        await send('allowSite', { domain: pageDomain });
+        SS.actions.clearAll();
+      });
+    }
+    if (foreignForms.length) SS.actions.guardForms(foreignForms);
+    if (settings.hideScamContent && scamBlocks.length) SS.actions.hideScamBlocks(scamBlocks);
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+})(typeof globalThis !== 'undefined' ? globalThis : self);
