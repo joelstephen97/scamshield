@@ -16,10 +16,12 @@ browser's local extension storage. This never leaves your device and is removed
 when you uninstall the extension.
 
 ## Optional anonymous reporting
-If you explicitly turn on "Send anonymous threat reports" in Settings (off by
-default), ScamShield may send anonymized, non-identifying risk features about a
-flagged page. These reports never include full URLs, page content, your IP-based
-identity, cookies, or anything that identifies you or the specific page.
+Settings includes an opt-in "Send anonymous threat reports" toggle (off by
+default). In this version it is a stored preference only — no reports are
+transmitted. If a future version activates it, reports would contain only
+anonymized, non-identifying risk features about a flagged page, never full URLs,
+page content, your IP-based identity, cookies, or anything that identifies you
+or the specific page.
 
 ## Permissions
 See the permissions justification in the listing. We request the minimum needed

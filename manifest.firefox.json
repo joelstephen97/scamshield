@@ -12,7 +12,7 @@
     {
       "matches": ["http://*/*", "https://*/*"],
       "run_at": "document_idle",
-      "js": ["vendor/ort.min.js","engine/constants.js","engine/features.js","engine/heuristics.js","engine/verdict.js","engine/onnx_runner.js","content/actions.js","content/content_script.js"],
+      "js": ["vendor/ort.wasm.min.js","engine/constants.js","engine/features.js","engine/heuristics.js","engine/verdict.js","engine/onnx_runner.js","content/actions.js","content/content_script.js"],
       "css": ["content/content.css"]
     }
   ],

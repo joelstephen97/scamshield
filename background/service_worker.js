@@ -18,6 +18,13 @@ async function getSettings() {
 async function setSettings(patch) {
   const next = Object.assign(await getSettings(), patch);
   await api.storage.local.set({ settings: next });
+  if ('blockKnownBad' in patch && api.declarativeNetRequest && api.declarativeNetRequest.updateEnabledRulesets) {
+    try {
+      await api.declarativeNetRequest.updateEnabledRulesets(
+        patch.blockKnownBad ? { enableRulesetIds: ['blocklist'] } : { disableRulesetIds: ['blocklist'] }
+      );
+    } catch (e) { /* ruleset toggle is best-effort */ }
+  }
   return next;
 }
 
