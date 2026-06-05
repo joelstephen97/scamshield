@@ -19,6 +19,7 @@
   function showBanner(verdict, onAllow) {
     if (document.querySelector('.' + NS + '-banner')) return;
     const bar = el('div', NS + '-banner ' + (verdict.level === 'dangerous' ? 'danger' : 'suspicious'));
+    bar.setAttribute('role', 'alert');
     const icon = el('span', null, verdict.level === 'dangerous' ? '⛔' : '⚠️');
     const msg = el('span', 'ss-msg',
       (verdict.level === 'dangerous' ? 'Warning: this page looks dangerous. ' : 'Caution: this page looks suspicious. ')
@@ -44,6 +45,9 @@
         ev.preventDefault(); ev.stopPropagation();
         if (document.querySelector('.' + NS + '-overlay')) return;
         const ov = el('div', NS + '-overlay');
+        ov.setAttribute('role', 'dialog');
+        ov.setAttribute('aria-modal', 'true');
+        ov.setAttribute('aria-label', 'Possible phishing warning');
         const card = el('div', 'ss-card');
         card.append(
           el('h3', null, 'Stop — possible phishing'),
@@ -51,13 +55,17 @@
         );
         const actions = el('div', 'ss-actions');
         const back = el('button', null, 'Cancel (recommended)');
-        back.addEventListener('click', () => ov.remove());
+        const onKey = (e) => { if (e.key === 'Escape') { e.preventDefault(); close(); } };
+        const close = () => { document.removeEventListener('keydown', onKey, true); ov.remove(); };
+        back.addEventListener('click', close);
         const go = el('button', null, 'Submit anyway');
         // form.submit() here runs the isolated world's native (unhooked) method,
         // so it really submits without re-triggering this guard.
-        go.addEventListener('click', () => { ov.remove(); form.__scamshieldGuarded = false; form.submit(); });
+        go.addEventListener('click', () => { document.removeEventListener('keydown', onKey, true); ov.remove(); form.__scamshieldGuarded = false; form.submit(); });
         actions.append(back, go); card.append(actions); ov.append(card);
         document.documentElement.appendChild(ov);
+        document.addEventListener('keydown', onKey, true);
+        back.focus();
       };
       form.addEventListener('submit', onSubmit, true);
       form.addEventListener('scamshield:formsubmit', onSubmit, true);

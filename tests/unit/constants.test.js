@@ -18,3 +18,9 @@ test('brand and tld lists are present', () => {
   assert.ok(C.SUSPICIOUS_TLDS.includes('zip'));
   assert.ok(C.SUSPICIOUS_TOKENS.includes('verify'));
 });
+
+test('SAFE_DOMAINS is a non-empty list of top legitimate sites', () => {
+  assert.ok(Array.isArray(C.SAFE_DOMAINS));
+  assert.ok(C.SAFE_DOMAINS.includes('google.com'));
+  assert.ok(C.SAFE_DOMAINS.includes('paypal.com'));
+});

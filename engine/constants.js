@@ -41,5 +41,18 @@
     'unusual activity', 'confirm your identity'
   ];
 
-  return { FEATURE_NAMES, THRESHOLDS, POPULAR_BRANDS, SUSPICIOUS_TLDS, SUSPICIOUS_TOKENS, SCAM_PHRASES };
+  // Very-high-traffic legitimate sites; we skip warnings on these to avoid
+  // embarrassing false positives. NOT a security boundary — just FP control.
+  // Matched by exact host or any subdomain (host.endsWith('.' + d)), so
+  // multi-label suffixes like dbs.com.sg work without eTLD parsing.
+  const SAFE_DOMAINS = [
+    'google.com', 'youtube.com', 'gmail.com', 'facebook.com', 'instagram.com',
+    'whatsapp.com', 'microsoft.com', 'live.com', 'office.com', 'outlook.com',
+    'apple.com', 'icloud.com', 'amazon.com', 'netflix.com', 'linkedin.com',
+    'github.com', 'wikipedia.org', 'x.com', 'twitter.com', 'reddit.com',
+    'paypal.com', 'binance.com', 'coinbase.com', 'cloudflare.com', 'mozilla.org',
+    'dbs.com.sg', 'maybank2u.com.my', 'wise.com', 'revolut.com'
+  ];
+
+  return { FEATURE_NAMES, THRESHOLDS, POPULAR_BRANDS, SUSPICIOUS_TLDS, SUSPICIOUS_TOKENS, SCAM_PHRASES, SAFE_DOMAINS };
 });

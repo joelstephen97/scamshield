@@ -58,6 +58,13 @@
     const pageDomain = registrable(location.hostname);
     if ((settings.allowlist || []).includes(pageDomain)) return;
 
+    // Built-in safe-domain allowlist: skip warnings on top legitimate sites.
+    const host = location.hostname.toLowerCase();
+    if ((SS.SAFE_DOMAINS || []).some((d) => host === d || host.endsWith('.' + d))) {
+      await send('reportVerdict', { verdict: { level: 'safe', score: 0, reasons: [], modelUsed: false } });
+      return;
+    }
+
     const { signals, foreignForms, scamBlocks } = collectSignals();
     const urlRules = SS.scoreUrl(location.href);
     const domRules = SS.scoreDom(signals);
