@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "ScamShield — Scam & Phishing Protection",
+  "short_name": "ScamShield",
+  "version": "0.1.0",
+  "description": "Detects scam and phishing pages on-device and warns you before you get tricked. No browsing data leaves your device.",
+  "permissions": ["storage", "declarativeNetRequest", "scripting"],
+  "host_permissions": ["http://*/*", "https://*/*"],
+  "browser_specific_settings": { "gecko": { "id": "scamshield@joel.dev", "strict_min_version": "121.0" } },
+  "background": { "scripts": ["background/service_worker.js"] },
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "run_at": "document_idle",
+      "js": ["vendor/ort.min.js","engine/constants.js","engine/features.js","engine/heuristics.js","engine/verdict.js","engine/onnx_runner.js","content/actions.js","content/content_script.js"],
+      "css": ["content/content.css"]
+    }
+  ],
+  "declarative_net_request": { "rule_resources": [ { "id": "blocklist", "enabled": true, "path": "rules/blocklist.json" } ] },
+  "web_accessible_resources": [ { "resources": ["model/phishing-url.onnx","vendor/*"], "matches": ["http://*/*","https://*/*"] } ],
+  "content_security_policy": { "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'" },
+  "icons": { "16": "assets/icons/icon16.png","32":"assets/icons/icon32.png","48": "assets/icons/icon48.png", "128": "assets/icons/icon128.png" },
+  "action": { "default_title": "ScamShield", "default_popup": "popup.html", "default_icon": { "16": "assets/icons/icon16.png","32":"assets/icons/icon32.png","48": "assets/icons/icon48.png", "128": "assets/icons/icon128.png" } },
+  "options_ui": { "page": "options.html", "open_in_tab": true }
+}
