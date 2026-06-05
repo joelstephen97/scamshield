@@ -1,8 +1,15 @@
 """Train the ScamShield phishing-URL classifier and export to ONNX.
 
 Feature order MUST match engine/constants.js FEATURE_NAMES exactly.
-Default data: model/data/sample.csv (url,label). To use a full dataset,
-point --data at any CSV with the same two columns.
+Default data: model/data/sample.csv (url,label).
+
+NOTE: model/data/sample.csv is a SYNTHETIC seed set (hand-crafted legit/
+phishing strings with hard negatives and positives). It exists so the
+pipeline is reproducible and the parity guard has fixtures; it is NOT a
+production-grade corpus. To train on real data, swap it in with
+`--data path/to/urls.csv` where the CSV has the same `url,label` columns
+(label 0 = legit, 1 = phishing). Holdout metrics below are only as
+trustworthy as the data they are computed on.
 """
 import argparse, math, re
 from urllib.parse import urlparse
@@ -10,6 +17,8 @@ import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.calibration import CalibratedClassifierCV
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import classification_report, confusion_matrix, roc_auc_score
 from skl2onnx import to_onnx
 from skl2onnx.common.data_types import FloatTensorType
 
@@ -85,6 +94,11 @@ def features(url):
     }
     return [f[name] for name in FEATURE_NAMES]
 
+def build_clf(n):
+    """Fresh CalibratedClassifierCV(RandomForest) sized for n training rows."""
+    base=RandomForestClassifier(n_estimators=120,max_depth=8,random_state=42)
+    return CalibratedClassifierCV(base,cv=3 if n>=30 else 2)
+
 def main():
     ap=argparse.ArgumentParser()
     ap.add_argument('--data',default='model/data/sample.csv')
@@ -93,13 +107,34 @@ def main():
     df=pd.read_csv(a.data)
     X=np.array([features(u) for u in df['url']],dtype=np.float32)
     y=df['label'].astype(int).values
-    base=RandomForestClassifier(n_estimators=120,max_depth=8,random_state=42)
-    clf=CalibratedClassifierCV(base,cv=3 if len(df)>=30 else 2)
+
+    # --- Honest holdout evaluation: stratified 75/25 split ---
+    X_tr,X_te,y_tr,y_te=train_test_split(X,y,test_size=0.25,stratify=y,random_state=42)
+    eval_clf=build_clf(len(X_tr))
+    eval_clf.fit(X_tr,y_tr)
+    y_pred=eval_clf.predict(X_te)
+    y_proba=eval_clf.predict_proba(X_te)[:,1]
+    print(f'Holdout evaluation (test_size=0.25, stratified, n_test={len(y_te)}):')
+    print(classification_report(y_te,y_pred,target_names=['legit','phishing'],digits=3))
+    print('Confusion matrix [rows=true 0/1, cols=pred 0/1]:')
+    print(confusion_matrix(y_te,y_pred))
+    auc=roc_auc_score(y_te,y_proba)
+    acc=(y_pred==y_te).mean()
+    from sklearn.metrics import precision_score,recall_score,f1_score
+    prec=precision_score(y_te,y_pred,zero_division=0)
+    rec=recall_score(y_te,y_pred,zero_division=0)
+    f1=f1_score(y_te,y_pred,zero_division=0)
+    print(f'ROC-AUC (holdout): {auc:.3f}')
+
+    # --- Ship a model trained on ALL rows (uses every labelled example) ---
+    clf=build_clf(len(X))
     clf.fit(X,y)
     onx=to_onnx(clf,initial_types=[('input',FloatTensorType([None,len(FEATURE_NAMES)]))],
                 options={'zipmap':False})
-    with open(a.out,'wb') as fh: fh.write(onx.SerializeToString())
-    print(f'Wrote {a.out} ({len(onx.SerializeToString())} bytes). Train acc='
-          f'{clf.score(X,y):.3f} on {len(df)} rows.')
+    blob=onx.SerializeToString()
+    with open(a.out,'wb') as fh: fh.write(blob)
+    print(f'Wrote {a.out} ({len(blob)} bytes).')
+    print(f'Holdout: acc={acc:.3f} precision={prec:.3f} recall={rec:.3f} '
+          f'f1={f1:.3f} auc={auc:.3f} | shipped model trained on {len(df)} rows.')
 
 if __name__=='__main__': main()
