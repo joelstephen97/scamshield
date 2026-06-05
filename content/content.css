@@ -15,3 +15,12 @@
   border-radius:10px;font:14px/1.5 system-ui,sans-serif}
 .scamshield-overlay h3{margin:0 0 8px;color:#c0392b}
 .scamshield-overlay .ss-actions{display:flex;gap:8px;margin-top:14px;justify-content:flex-end}
+.scamshield-overlay .ss-sub{color:#666;font-size:13px;margin:6px 0 0}
+.scamshield-overlay button{font:inherit;border:0;border-radius:6px;padding:6px 12px;cursor:pointer;background:#eee;color:#111}
+.scamshield-overlay .ss-actions button:last-child{background:#c0392b;color:#fff}
+.scamshield-toast{position:fixed;right:16px;bottom:16px;z-index:2147483647;max-width:360px;
+  background:#fff;color:#222;border-left:5px solid #e1a200;box-shadow:0 6px 24px rgba(0,0,0,.25);
+  border-radius:8px;padding:12px 14px;font:14px/1.4 system-ui,sans-serif;display:flex;gap:8px;align-items:flex-start}
+.scamshield-toast.danger{border-left-color:#c0392b}
+.scamshield-toast .ss-msg{flex:1}
+.scamshield-toast button{font:inherit;margin-left:8px;border:0;background:#f0f0f0;border-radius:6px;padding:4px 8px;cursor:pointer}

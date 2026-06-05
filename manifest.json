@@ -4,7 +4,7 @@
   "short_name": "ScamShield",
   "version": "0.2.0",
   "description": "Detects scam and phishing pages on-device and warns you before you get tricked. No browsing data leaves your device.",
-  "permissions": ["storage", "declarativeNetRequest", "scripting"],
+  "permissions": ["storage", "declarativeNetRequest", "scripting", "alarms"],
   "host_permissions": ["http://*/*", "https://*/*"],
   "background": { "service_worker": "background/service_worker.js" },
   "content_scripts": [
@@ -16,6 +16,7 @@
         "engine/constants.js",
         "engine/features.js",
         "engine/heuristics.js",
+        "engine/techscam_rules.js",
         "engine/verdict.js",
         "engine/onnx_runner.js",
         "content/actions.js",
@@ -27,7 +28,15 @@
       "matches": ["http://*/*", "https://*/*"],
       "run_at": "document_start",
       "world": "MAIN",
-      "js": ["content/main_world_guard.js"]
+      "js": [
+        "engine/constants.js",
+        "engine/wallet_rules.js",
+        "engine/clipboard_rules.js",
+        "content/main_world_guard.js",
+        "content/detectors/wallet.js",
+        "content/detectors/clipboard.js",
+        "content/detectors/techscam.js"
+      ]
     }
   ],
   "declarative_net_request": {
