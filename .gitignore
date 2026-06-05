@@ -2,6 +2,7 @@ node_modules/
 dist/
 test-results/
 playwright-report/
+_metadata/
 model/data/full*.csv
 model/.venv/
 __pycache__/
