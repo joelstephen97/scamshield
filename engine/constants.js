@@ -51,8 +51,24 @@
     'apple.com', 'icloud.com', 'amazon.com', 'netflix.com', 'linkedin.com',
     'github.com', 'wikipedia.org', 'x.com', 'twitter.com', 'reddit.com',
     'paypal.com', 'binance.com', 'coinbase.com', 'cloudflare.com', 'mozilla.org',
-    'dbs.com.sg', 'maybank2u.com.my', 'wise.com', 'revolut.com'
+    'dbs.com.sg', 'maybank2u.com.my', 'wise.com', 'revolut.com',
+    'discord.com', 'spotify.com', 'tiktok.com', 'shopee.sg', 'lazada.sg',
+    'grab.com', 'metamask.io', 'opensea.io', 'etherscan.io'
   ];
 
-  return { FEATURE_NAMES, THRESHOLDS, POPULAR_BRANDS, SUSPICIOUS_TLDS, SUSPICIOUS_TOKENS, SCAM_PHRASES, SAFE_DOMAINS };
+  // Known legitimate domains per brand (registrable form). If a page *names* a
+  // brand but its domain is not in that brand's list, it's likely impersonation.
+  const BRAND_DOMAINS = {
+    paypal: ['paypal.com'], google: ['google.com', 'gmail.com', 'youtube.com'],
+    apple: ['apple.com', 'icloud.com'], microsoft: ['microsoft.com', 'live.com', 'office.com', 'outlook.com'],
+    amazon: ['amazon.com'], facebook: ['facebook.com'], instagram: ['instagram.com'],
+    whatsapp: ['whatsapp.com'], netflix: ['netflix.com'], binance: ['binance.com'],
+    coinbase: ['coinbase.com'], metamask: ['metamask.io'], dbs: ['dbs.com.sg'],
+    maybank: ['maybank2u.com.my', 'maybank.com'], wise: ['wise.com'], revolut: ['revolut.com'],
+    linkedin: ['linkedin.com'], outlook: ['outlook.com', 'live.com'], gmail: ['gmail.com', 'google.com']
+  };
+  // Phrases that indicate a wallet recovery-phrase harvesting attempt.
+  const SEED_PHRASE_HINTS = ['recovery phrase', 'seed phrase', 'secret phrase', 'mnemonic', 'private key'];
+
+  return { FEATURE_NAMES, THRESHOLDS, POPULAR_BRANDS, SUSPICIOUS_TLDS, SUSPICIOUS_TOKENS, SCAM_PHRASES, SAFE_DOMAINS, BRAND_DOMAINS, SEED_PHRASE_HINTS };
 });

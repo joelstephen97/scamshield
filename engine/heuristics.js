@@ -67,6 +67,34 @@
       reasons.push('Page shows classic scam/giveaway language ("' + phrases[0] + '").');
     }
 
+    // Seed-phrase / recovery-phrase harvesting (no legit site asks for this).
+    if (s.seedPhraseForm) {
+      score = Math.max(score, 0.9);
+      flags.push('seed-phrase-harvest');
+      reasons.push('This page asks for your wallet recovery phrase — never enter it; this steals your funds.');
+    }
+
+    // Content-based brand impersonation: page *names* a brand but is not on that
+    // brand's real domain, and collects a password.
+    const named = [];
+    if (s.titleBrand) named.push(String(s.titleBrand).toLowerCase());
+    if (s.ogSiteName) named.push(String(s.ogSiteName).toLowerCase());
+    for (const b of (s.logoAltBrands || [])) named.push(String(b).toLowerCase());
+    const BRANDS = C.POPULAR_BRANDS || [];
+    const BRAND_DOMAINS = C.BRAND_DOMAINS || {};
+    const matchedBrand = BRANDS.find((b) => named.some((n) => n && n.includes(b)));
+    if (matchedBrand && s.hasPasswordField) {
+      const legit = BRAND_DOMAINS[matchedBrand] || [];
+      const host = String(s.pageHost || '').toLowerCase();
+      const onBrand = legit.some((d) => pageDomain === d || host.endsWith('.' + d))
+        || (s.faviconHost && legit.some((d) => String(s.faviconHost).toLowerCase().endsWith(d)));
+      if (!onBrand) {
+        score = Math.max(score, 0.85);
+        flags.push('brand-impersonation-content');
+        reasons.push('This page looks like "' + matchedBrand + '" but is not on its real website.');
+      }
+    }
+
     return { score: Math.max(0, Math.min(1, score)), reasons, flags };
   }
 
