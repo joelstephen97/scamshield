@@ -1,0 +1,9 @@
+<!doctype html><meta charset="utf-8"><title>App</title>
+<div id="app"><h1>Dashboard</h1></div>
+<button id="nav">Go to offers</button>
+<script>
+document.getElementById('nav').addEventListener('click', function(){
+  document.getElementById('app').innerHTML = '<div id="prize">Congratulations you have been selected! Claim your prize now, free gift waiting.</div>';
+  history.pushState({}, '', '/offers');
+});
+</script>

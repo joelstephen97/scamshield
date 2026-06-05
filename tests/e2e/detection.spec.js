@@ -36,3 +36,20 @@ test('popup reflects a dangerous verdict', async ({ context, extensionId }) => {
   await popup.reload();
   await expect(popup.locator('#status')).toHaveClass(/dangerous|suspicious/, { timeout: 5000 });
 });
+
+test('programmatic form.submit() on a foreign credential form is intercepted', async ({ context }) => {
+  const page = await context.newPage();
+  await page.goto(BASE + '/phishing-autosubmit.html');
+  await expect(page.locator('.scamshield-banner.danger')).toBeVisible({ timeout: 8000 });
+  await page.click('#go');
+  await expect(page.locator('.scamshield-overlay')).toBeVisible();
+});
+
+test('SPA navigation re-scans and hides newly injected scam content', async ({ context }) => {
+  const page = await context.newPage();
+  await page.goto(BASE + '/spa.html');
+  await page.waitForTimeout(500);
+  await expect(page.locator('#prize')).toHaveCount(0);
+  await page.click('#nav');
+  await expect(page.locator('#prize.scamshield-hidden-block')).toBeVisible({ timeout: 8000 });
+});

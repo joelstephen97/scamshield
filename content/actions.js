@@ -40,8 +40,9 @@
     foreignForms.forEach((form) => {
       if (form.__scamshieldGuarded) return;
       form.__scamshieldGuarded = true;
-      form.addEventListener('submit', (ev) => {
+      const onSubmit = (ev) => {
         ev.preventDefault(); ev.stopPropagation();
+        if (document.querySelector('.' + NS + '-overlay')) return;
         const ov = el('div', NS + '-overlay');
         const card = el('div', 'ss-card');
         card.append(
@@ -52,10 +53,14 @@
         const back = el('button', null, 'Cancel (recommended)');
         back.addEventListener('click', () => ov.remove());
         const go = el('button', null, 'Submit anyway');
+        // form.submit() here runs the isolated world's native (unhooked) method,
+        // so it really submits without re-triggering this guard.
         go.addEventListener('click', () => { ov.remove(); form.__scamshieldGuarded = false; form.submit(); });
         actions.append(back, go); card.append(actions); ov.append(card);
         document.documentElement.appendChild(ov);
-      }, true);
+      };
+      form.addEventListener('submit', onSubmit, true);
+      form.addEventListener('scamshield:formsubmit', onSubmit, true);
     });
   }
 

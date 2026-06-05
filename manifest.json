@@ -22,6 +22,12 @@
         "content/content_script.js"
       ],
       "css": ["content/content.css"]
+    },
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "run_at": "document_start",
+      "world": "MAIN",
+      "js": ["content/main_world_guard.js"]
     }
   ],
   "declarative_net_request": {

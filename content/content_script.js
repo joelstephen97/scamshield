@@ -82,6 +82,15 @@
     if (settings.hideScamContent && scamBlocks.length) SS.actions.hideScamBlocks(scamBlocks);
   }
 
+  let lastUrl = location.href;
+  let navTimer = null;
+  window.addEventListener('scamshield:navigate', () => {
+    if (location.href === lastUrl) return;
+    lastUrl = location.href;
+    clearTimeout(navTimer);
+    navTimer = setTimeout(() => { if (SS && SS.actions) SS.actions.clearAll(); run(); }, 400);
+  });
+
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
   else run();
 })(typeof globalThis !== 'undefined' ? globalThis : self);
