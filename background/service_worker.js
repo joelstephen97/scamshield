@@ -55,7 +55,7 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
           if (level === 'dangerous') api.action.setBadgeText({ tabId, text: '!' });
           else if (level === 'suspicious') api.action.setBadgeText({ tabId, text: '?' });
           else api.action.setBadgeText({ tabId, text: '' });
-          api.action.setBadgeBackgroundColor({ tabId, color: level === 'dangerous' ? '#c0392b' : '#e1a200' });
+          if (level !== 'safe') api.action.setBadgeBackgroundColor({ tabId, color: level === 'dangerous' ? '#c0392b' : '#e1a200' });
         }
         sendResponse({ ok: true }); break;
       }

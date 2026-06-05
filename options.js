@@ -12,7 +12,7 @@ async function load() {
 }
 function renderAllow(list) {
   $('allowlist').innerHTML = '';
-  if (!list.length) { $('allowlist').innerHTML = '<li>None yet</li>'; return; }
+  if (!list.length) { const li = document.createElement('li'); li.textContent = 'None yet'; $('allowlist').appendChild(li); return; }
   for (const d of list) {
     const li = document.createElement('li');
     li.textContent = d;

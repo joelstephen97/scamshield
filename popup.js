@@ -6,6 +6,7 @@ function registrable(host){return String(host||'').toLowerCase().split('.').filt
 
 async function init() {
   const settings = await api.runtime.sendMessage({ type: 'getSettings' });
+  if (!settings) { $('level').textContent = 'Extension error — try reopening.'; return; }
   $('enabled').checked = !!settings.enabled;
   $('hide').checked = !!settings.hideScamContent;
 
@@ -16,7 +17,12 @@ async function init() {
   $('level').textContent = level === 'safe' ? 'No threats detected'
     : level === 'suspicious' ? 'Suspicious page' : 'Dangerous page';
   const reasons = (verdict && verdict.reasons) || [];
-  $('reasons').innerHTML = reasons.map((r) => '<li>' + r.replace(/[<>&]/g, '') + '</li>').join('');
+  $('reasons').textContent = '';
+  for (const r of reasons) {
+    const li = document.createElement('li');
+    li.textContent = r;
+    $('reasons').appendChild(li);
+  }
 
   if (tab && tab.url && /^https?:/.test(tab.url)) {
     const domain = registrable(new URL(tab.url).hostname);
@@ -34,4 +40,7 @@ async function init() {
   $('hide').addEventListener('change', () => api.runtime.sendMessage({ type: 'setSettings', patch: { hideScamContent: $('hide').checked } }));
   $('opts').addEventListener('click', (e) => { e.preventDefault(); api.runtime.openOptionsPage(); });
 }
-init();
+init().catch((err) => {
+  $('level').textContent = 'Extension error — try reopening.';
+  console.error('[ScamShield] popup init failed:', err);
+});

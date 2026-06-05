@@ -37,8 +37,9 @@
     // Candidate scam blocks: elements whose text contains a scam phrase, kept small.
     const scamBlocks = [];
     if (SS && SS.SCAM_PHRASES) {
+      let scanned = 0;
       for (const node of document.querySelectorAll('div,section,aside,a')) {
-        if (scamBlocks.length >= 10) break;
+        if (scamBlocks.length >= 10 || ++scanned > 2000) break;
         const t = (node.innerText || '').toLowerCase();
         if (t.length < 200 && SS.SCAM_PHRASES.some((p) => t.includes(p))) scamBlocks.push(node);
       }
@@ -51,6 +52,7 @@
   }
 
   async function run() {
+    if (!SS || typeof SS.scoreUrl !== 'function') return; // engine not loaded
     const settings = await send('getSettings');
     if (!settings || !settings.enabled) return;
     const pageDomain = registrable(location.hostname);

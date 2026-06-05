@@ -32,6 +32,10 @@
   }
 
   // Intercept submit on password forms that post off-domain.
+  // NOTE: capture-phase 'submit' catches user-initiated submits (click, Enter,
+  // requestSubmit) — the path credential phishing relies on. It does NOT catch
+  // programmatic HTMLFormElement.submit(), which bypasses event listeners and
+  // would require a MAIN-world injected hook (deferred to a later version).
   function guardForms(foreignForms) {
     foreignForms.forEach((form) => {
       if (form.__scamshieldGuarded) return;
