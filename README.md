@@ -10,6 +10,19 @@ ONNX model (onnxruntime-web, on-device), and fuses them into a verdict
 forms, and hides scam content. A declarativeNetRequest ruleset blocks known-bad
 domains. See docs/superpowers/specs for the design.
 
+## Features
+- On-device heuristics + ONNX URL classifier (no data leaves the device).
+- Warning banner for suspicious/dangerous pages (with reasons).
+- Fake-login-form guard: intercepts submits to a foreign domain — including
+  programmatic `form.submit()` via a MAIN-world hook — and confirms before send.
+- Hides "you won a prize" / giveaway scam content.
+- Re-scans on SPA route changes (history pushState/replaceState/popstate).
+- Built-in safe-domain allowlist for top sites to minimize false positives.
+- `declarativeNetRequest` blocklist for known-bad domains (toggle wired to
+  `updateEnabledRulesets`).
+- Accessible warnings (role=alert / role=dialog, Escape-to-cancel, focus mgmt).
+- Chromium (Chrome/Edge/Brave) and Firefox (128+) builds.
+
 ## Develop
 - `npm install` then `npx playwright install chromium`
 - Unit tests: `npm run test:unit`
@@ -32,8 +45,13 @@ cd model
 python -m venv .venv && .venv\Scripts\python -m pip install -r requirements.txt
 .venv\Scripts\python train.py --data data/sample.csv --out phishing-url.onnx
 ```
-To use a bigger dataset, pass `--data path/to/urls.csv` with `url,label` columns
-(label 1 = phishing). Then re-run the parity check (tests/unit/parity.test.js).
+`train.py` reports honest holdout metrics (stratified 25% test split:
+precision/recall/F1/AUC) and then refits on all rows for the shipped model. The
+bundled `data/sample.csv` is a small **synthetic seed set** — its holdout scores
+are optimistic because it's trivially separable. For realistic metrics, pass
+`--data path/to/urls.csv` with `url,label` columns (label 1 = phishing), e.g. a
+PhishTank/OpenPhish + Tranco mix. Then re-run the parity check
+(tests/unit/parity.test.js).
 
 ## Take it live
 See store/submission-checklist.md. You need: a Chrome Web Store developer
