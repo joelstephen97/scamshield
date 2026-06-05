@@ -8,7 +8,10 @@ const DEFAULTS = {
   reportingOptIn: false,     // anonymized reporting, OFF by default
   allowlist: [],             // array of registrable domains the user trusts
   blocklistVersion: 1,
-  modelVersion: 1
+  modelVersion: 1,
+  otaUrl: '',                // user-set static JSON URL for blocklist updates; '' = disabled
+  threatsBlocked: 0,         // local-only stat, never transmitted
+  lastBlocklistVersion: 0
 };
 
 async function getSettings() {
@@ -29,9 +32,45 @@ async function setSettings(patch) {
   return next;
 }
 
-api.runtime.onInstalled.addListener(async () => {
+// Download-only over-the-air blocklist update. Fetches a user-configured JSON
+// ({ version, rules: [...] }); never uploads anything. Falls back silently.
+async function runOtaUpdate() {
+  const s = await getSettings();
+  if (!s.otaUrl) return { ok: false, reason: 'no-url' };
+  try {
+    const res = await fetch(s.otaUrl, { method: 'GET', cache: 'no-cache' });
+    if (!res.ok) return { ok: false, reason: 'http-' + res.status };
+    const data = await res.json();
+    if (!data || typeof data.version !== 'number' || !Array.isArray(data.rules)) return { ok: false, reason: 'bad-shape' };
+    if (data.version <= (s.lastBlocklistVersion || 0)) return { ok: true, version: data.version, updated: false };
+    const rules = data.rules.slice(0, 5000).map((r, i) => ({
+      id: 100000 + i, priority: 1, action: { type: 'block' },
+      condition: { urlFilter: String(r.urlFilter || r), resourceTypes: ['main_frame', 'sub_frame'] }
+    }));
+    if (api.declarativeNetRequest && api.declarativeNetRequest.updateDynamicRules) {
+      const existing = await api.declarativeNetRequest.getDynamicRules();
+      await api.declarativeNetRequest.updateDynamicRules({
+        removeRuleIds: existing.map((r) => r.id), addRules: s.blockKnownBad ? rules : []
+      });
+    }
+    await setSettings({ lastBlocklistVersion: data.version });
+    return { ok: true, version: data.version, updated: true, count: rules.length };
+  } catch (e) {
+    return { ok: false, reason: 'fetch-failed' };
+  }
+}
+
+if (api.alarms) {
+  api.alarms.create('ota', { periodInMinutes: 720 }); // every 12h
+  api.alarms.onAlarm.addListener((a) => { if (a.name === 'ota') runOtaUpdate(); });
+}
+
+api.runtime.onInstalled.addListener(async (details) => {
   const cur = await api.storage.local.get('settings');
   if (!cur.settings) await api.storage.local.set({ settings: DEFAULTS });
+  if (details && details.reason === 'install' && api.tabs) {
+    try { api.tabs.create({ url: api.runtime.getURL('onboarding.html') }); } catch (_) {}
+  }
 });
 
 // Per-tab last verdict, kept in memory but re-derivable; popup reads via message.
@@ -70,11 +109,13 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       case 'getVerdict': {
         sendResponse(lastVerdict.get(msg.tabId) || null); break;
       }
+      case 'bumpThreats': {
+        const s = await getSettings();
+        await setSettings({ threatsBlocked: (s.threatsBlocked || 0) + 1 });
+        sendResponse({ ok: true }); break;
+      }
       case 'checkForUpdates':
-        // Stub for OTA blocklist/model updates. Real impl fetches a signed
-        // manifest and calls api.declarativeNetRequest.updateDynamicRules.
-        sendResponse({ ok: true, blocklistVersion: (await getSettings()).blocklistVersion });
-        break;
+        sendResponse(await runOtaUpdate()); break;
       default:
         sendResponse({ ok: false, error: 'unknown message' });
     }
