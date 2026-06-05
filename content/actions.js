@@ -55,13 +55,13 @@
         );
         const actions = el('div', 'ss-actions');
         const back = el('button', null, 'Cancel (recommended)');
-        const onKey = (e) => { if (e.key === 'Escape') { e.preventDefault(); close(); } };
         const close = () => { document.removeEventListener('keydown', onKey, true); ov.remove(); };
+        const onKey = (e) => { if (e.key === 'Escape') { e.preventDefault(); close(); } };
         back.addEventListener('click', close);
         const go = el('button', null, 'Submit anyway');
         // form.submit() here runs the isolated world's native (unhooked) method,
         // so it really submits without re-triggering this guard.
-        go.addEventListener('click', () => { document.removeEventListener('keydown', onKey, true); ov.remove(); form.__scamshieldGuarded = false; form.submit(); });
+        go.addEventListener('click', () => { document.removeEventListener('keydown', onKey, true); ov.remove(); form.submit(); });
         actions.append(back, go); card.append(actions); ov.append(card);
         document.documentElement.appendChild(ov);
         document.addEventListener('keydown', onKey, true);

@@ -20,9 +20,10 @@ async function setSettings(patch) {
   await api.storage.local.set({ settings: next });
   if ('blockKnownBad' in patch && api.declarativeNetRequest && api.declarativeNetRequest.updateEnabledRulesets) {
     try {
-      await api.declarativeNetRequest.updateEnabledRulesets(
-        patch.blockKnownBad ? { enableRulesetIds: ['blocklist'] } : { disableRulesetIds: ['blocklist'] }
-      );
+      await api.declarativeNetRequest.updateEnabledRulesets({
+        enableRulesetIds: patch.blockKnownBad ? ['blocklist'] : [],
+        disableRulesetIds: patch.blockKnownBad ? [] : ['blocklist']
+      });
     } catch (e) { /* ruleset toggle is best-effort */ }
   }
   return next;

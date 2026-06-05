@@ -1,5 +1,7 @@
 (function (root) {
   'use strict';
+  if (root.__scamshieldIsolatedGuard) return; // avoid duplicate listeners on re-injection
+  root.__scamshieldIsolatedGuard = true;
   const api = root.browser || root.chrome;
   const SS = root.ScamShield;
 
