@@ -15,13 +15,29 @@ domains. See docs/superpowers/specs for the design.
 - Warning banner for suspicious/dangerous pages (with reasons).
 - Fake-login-form guard: intercepts submits to a foreign domain — including
   programmatic `form.submit()` via a MAIN-world hook — and confirms before send.
+- **Crypto-wallet guard**: warns before risky `window.ethereum` requests
+  (blind-sign, unlimited approvals, setApprovalForAll, Permit2/Seaport grants)
+  and flags wallet recovery-phrase harvesting.
+- **Clipboard-hijack guard**: warns when a page copies a shell command or swaps a
+  crypto address onto your clipboard ("paste this to verify" / ClickFix scams).
+- **Tech-support scare-page guard**: throttles alert/`beforeunload` loops, detects
+  fake-virus scare text + "call this number", and offers a one-click escape.
+- **Brand-visual phishing**: catches pages that impersonate a brand by name/logo
+  on an off-brand domain with a login form.
 - Hides "you won a prize" / giveaway scam content.
 - Re-scans on SPA route changes (history pushState/replaceState/popstate).
 - Built-in safe-domain allowlist for top sites to minimize false positives.
-- `declarativeNetRequest` blocklist for known-bad domains (toggle wired to
-  `updateEnabledRulesets`).
+- `declarativeNetRequest` blocklist + optional download-only OTA blocklist updates.
+- Local-only "threats blocked" counter (never transmitted) and first-run onboarding.
 - Accessible warnings (role=alert / role=dialog, Escape-to-cancel, focus mgmt).
 - Chromium (Chrome/Edge/Brave) and Firefox (128+) builds.
+
+## Support
+ScamShield is free and on-device. If it helped you, please consider supporting
+development — [GitHub Sponsors](https://github.com/sponsors/PLACEHOLDER),
+[Ko-fi](https://ko-fi.com/PLACEHOLDER), or
+[Buy Me a Coffee](https://www.buymeacoffee.com/PLACEHOLDER). Donations never change
+the privacy promise: nothing leaves your device. See `docs/MONETIZATION.md`.
 
 ## Develop
 - `npm install` then `npx playwright install chromium`

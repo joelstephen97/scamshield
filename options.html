@@ -9,6 +9,13 @@
   <p class="hint">Reports never include URLs, page content, or anything that identifies you — only anonymized risk features. Off by default.</p>
   <h2>Trusted sites</h2>
   <ul id="allowlist"></ul>
+  <h2>Threat-list updates (optional)</h2>
+  <label class="row"><span>Update URL (a JSON list you host)</span><input type="url" id="otaurl" placeholder="https://…/blocklist.json"></label>
+  <button id="checkupd">Check for updates now</button>
+  <p class="hint">ScamShield only downloads this list. It never uploads your browsing. Leave blank to disable.</p>
+  <h2>Support</h2>
+  <p>ScamShield is free and runs entirely on your device. If it helped you, consider supporting development.</p>
+  <a id="support" href="https://github.com/sponsors/PLACEHOLDER" target="_blank" rel="noopener">❤ Sponsor / Donate</a>
   <p id="status" class="status"></p>
   <script src="options.js"></script>
 </body></html>

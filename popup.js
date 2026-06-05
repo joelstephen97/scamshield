@@ -10,6 +10,13 @@ async function init() {
   $('enabled').checked = !!settings.enabled;
   $('hide').checked = !!settings.hideScamContent;
 
+  const n = settings.threatsBlocked || 0;
+  $('stat').textContent = n ? ('Threats blocked on this device: ' + n) : 'No threats blocked yet — stay safe out there.';
+  $('support').addEventListener('click', (e) => {
+    e.preventDefault();
+    api.tabs.create({ url: 'https://github.com/sponsors/PLACEHOLDER' }); // TODO: replace with your sponsor URL
+  });
+
   const [tab] = await api.tabs.query({ active: true, currentWindow: true });
   const verdict = tab ? await api.runtime.sendMessage({ type: 'getVerdict', tabId: tab.id }) : null;
   const level = (verdict && verdict.level) || 'safe';

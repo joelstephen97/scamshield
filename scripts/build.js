@@ -9,7 +9,7 @@ const DIST = path.join(ROOT, 'dist');
 const SHARED = [
   'background', 'content', 'engine', 'rules', 'model/phishing-url.onnx',
   'vendor', 'assets', 'popup.html', 'popup.css', 'popup.js',
-  'options.html', 'options.css', 'options.js'
+  'options.html', 'options.css', 'options.js', 'onboarding.html'
 ];
 
 function copyRecursive(src, dest) {

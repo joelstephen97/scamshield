@@ -8,6 +8,7 @@ async function load() {
   $('block').checked = !!s.blockKnownBad;
   $('hide').checked = !!s.hideScamContent;
   $('report').checked = !!s.reportingOptIn;
+  $('otaurl').value = s.otaUrl || '';
   renderAllow(s.allowlist || []);
 }
 function renderAllow(list) {
@@ -30,4 +31,14 @@ function bind(id, key) {
 }
 bind('enabled', 'enabled'); bind('block', 'blockKnownBad');
 bind('hide', 'hideScamContent'); bind('report', 'reportingOptIn');
+
+$('otaurl').addEventListener('change', async () => {
+  await api.runtime.sendMessage({ type: 'setSettings', patch: { otaUrl: $('otaurl').value.trim() } });
+  flash('Saved');
+});
+$('checkupd').addEventListener('click', async () => {
+  flash('Checking…');
+  const r = await api.runtime.sendMessage({ type: 'checkForUpdates' });
+  flash(r && r.ok ? (r.updated ? ('Updated to v' + r.version) : 'Already up to date') : 'Update failed');
+});
 load();
