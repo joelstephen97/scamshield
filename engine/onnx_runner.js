@@ -18,6 +18,7 @@
       if (!api || !api.runtime || !api.runtime.getURL) return null;
       // wasm assets are bundled in vendor/ and exposed as web-accessible resources
       root.ort.env.wasm.wasmPaths = api.runtime.getURL('vendor/');
+      root.ort.env.wasm.numThreads = 1; // content scripts lack cross-origin isolation (no SharedArrayBuffer)
       const modelUrl = api.runtime.getURL('model/phishing-url.onnx');
       try {
         return await root.ort.InferenceSession.create(modelUrl);

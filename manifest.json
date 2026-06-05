@@ -12,6 +12,7 @@
       "matches": ["http://*/*", "https://*/*"],
       "run_at": "document_idle",
       "js": [
+        "vendor/ort.min.js",
         "engine/constants.js",
         "engine/features.js",
         "engine/heuristics.js",
