@@ -34,11 +34,9 @@ domains. See docs/superpowers/specs for the design.
 
 ## Support
 ScamShield is free and on-device. If it helped you, please consider supporting
-development — [GitHub Sponsors](https://github.com/sponsors/joelstephen97),
-[Buy Me a Coffee](https://www.buymeacoffee.com/joelstephen97),
-[Ko-fi](https://ko-fi.com/joelstephen97), or
-[PayPal](https://www.paypal.me/joelstephen97). Donations never change the privacy
-promise: nothing leaves your device. See `docs/MONETIZATION.md`.
+development — [GitHub Sponsors](https://github.com/sponsors/joelstephen97) or
+[PayPal](https://www.paypal.me/YOUR-PAYPALME-HANDLE). Donations never change the
+privacy promise: nothing leaves your device. See `docs/MONETIZATION.md`.
 
 ## Develop
 - `npm install` then `npx playwright install chromium`

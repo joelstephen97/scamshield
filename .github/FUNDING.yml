@@ -1,8 +1,5 @@
-# GitHub username is set. The Ko-fi, Buy Me a Coffee, and PayPal accounts must
-# exist for those links to work (create them, keeping the same handle if you can).
-# GitHub Sponsors also requires enrolling in the Sponsors program — until then the
-# "github:" line shows nothing. See docs/MONETIZATION.md.
+# GitHub Sponsors requires enrolling in the Sponsors program before the button
+# appears (see docs/MONETIZATION.md). The PayPal link below needs your real
+# PayPal.Me handle — replace YOUR-PAYPALME-HANDLE once you've set it up.
 github: [joelstephen97]
-ko_fi: joelstephen97
-buy_me_a_coffee: joelstephen97
-custom: ["https://www.paypal.me/joelstephen97"]
+custom: ["https://www.paypal.me/YOUR-PAYPALME-HANDLE"]
