@@ -14,7 +14,7 @@ async function init() {
   $('stat').textContent = n ? ('Threats blocked on this device: ' + n) : 'No threats blocked yet — stay safe out there.';
   $('support').addEventListener('click', (e) => {
     e.preventDefault();
-    api.tabs.create({ url: 'https://github.com/sponsors/PLACEHOLDER' }); // TODO: replace with your sponsor URL
+    api.tabs.create({ url: 'https://github.com/sponsors/joelstephen97' });
   });
 
   const [tab] = await api.tabs.query({ active: true, currentWindow: true });
