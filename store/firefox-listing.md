@@ -13,4 +13,4 @@
 - All analysis is on-device; optional anonymous reporting is off by default.
 - Source of the model: trained offline via model/train.py (included in the repo).
 
-**Privacy policy URL:** (host store/privacy-policy.md and paste the URL)
+**Privacy policy URL:** https://joelstephen97.github.io/scamshield/privacy.html
