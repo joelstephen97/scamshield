@@ -35,7 +35,7 @@ domains. See docs/superpowers/specs for the design.
 ## Support
 ScamShield is free and on-device. If it helped you, please consider supporting
 development — [GitHub Sponsors](https://github.com/sponsors/joelstephen97) or
-[PayPal](https://www.paypal.me/YOUR-PAYPALME-HANDLE). Donations never change the
+[PayPal](https://www.paypal.me/joelstephen1). Donations never change the
 privacy promise: nothing leaves your device. See `docs/MONETIZATION.md`.
 
 ## Develop
