@@ -8,7 +8,7 @@ A pure engine (engine/) extracts URL + DOM features, runs heuristics and a small
 ONNX model (onnxruntime-web, on-device), and fuses them into a verdict
 (safe / suspicious / dangerous). A content script warns you, guards fake login
 forms, and hides scam content. A declarativeNetRequest ruleset blocks known-bad
-domains. See docs/superpowers/specs for the design.
+domains.
 
 ## Features
 - On-device heuristics + ONNX URL classifier (no data leaves the device).
@@ -36,7 +36,7 @@ domains. See docs/superpowers/specs for the design.
 ScamShield is free and on-device. If it helped you, please consider supporting
 development — [GitHub Sponsors](https://github.com/sponsors/joelstephen97) or
 [PayPal](https://www.paypal.me/joelstephen1). Donations never change the
-privacy promise: nothing leaves your device. See `docs/MONETIZATION.md`.
+privacy promise: nothing leaves your device.
 
 ## Develop
 - `npm install` then `npx playwright install chromium`
@@ -67,11 +67,6 @@ are optimistic because it's trivially separable. For realistic metrics, pass
 `--data path/to/urls.csv` with `url,label` columns (label 1 = phishing), e.g. a
 PhishTank/OpenPhish + Tranco mix. Then re-run the parity check
 (tests/unit/parity.test.js).
-
-## Take it live
-See [docs/PUBLISHING.md](docs/PUBLISHING.md) for the full Chrome Web Store +
-Firefox AMO submission guide — accounts, fees, assets, permission justifications,
-and reviewer notes.
 
 ## Privacy
 No browsing data is transmitted. Optional anonymous reporting is off by default.

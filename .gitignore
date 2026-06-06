@@ -7,5 +7,5 @@ model/data/full*.csv
 model/.venv/
 __pycache__/
 
-# Internal planning docs — kept local, not published
-docs/superpowers/
+# Internal docs (guides, monetization, publishing, planning) — kept local, not published
+docs/
