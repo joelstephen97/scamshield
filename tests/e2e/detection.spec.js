@@ -53,3 +53,33 @@ test('SPA navigation re-scans and hides newly injected scam content', async ({ c
   await page.click('#nav');
   await expect(page.locator('#prize.scamshield-hidden-block')).toBeVisible({ timeout: 8000 });
 });
+
+test('brand-visual phishing shows a danger banner', async ({ context }) => {
+  const page = await context.newPage();
+  await page.goto(BASE + '/brand-visual.html');
+  await expect(page.locator('.scamshield-banner')).toBeVisible({ timeout: 8000 });
+});
+
+test('clipboard hijack shows a warning toast', async ({ context }) => {
+  const page = await context.newPage();
+  await page.goto(BASE + '/clipboard.html');
+  await page.bringToFront();
+  await page.click('#c');
+  await expect(page.locator('.scamshield-toast')).toBeVisible({ timeout: 6000 });
+});
+
+test('tech-support scare page shows escape overlay', async ({ context }) => {
+  const page = await context.newPage();
+  await page.goto(BASE + '/techscam.html');
+  await expect(page.locator('.scamshield-overlay')).toBeVisible({ timeout: 8000 });
+});
+
+test('wallet drainer request is intercepted and rejected on cancel', async ({ context }) => {
+  const page = await context.newPage();
+  await page.goto(BASE + '/drainer.html');
+  await page.waitForTimeout(600); // let the MAIN-world hook wrap window.ethereum
+  await page.click('#go');
+  await expect(page.locator('.scamshield-overlay')).toBeVisible({ timeout: 6000 });
+  await page.click('.scamshield-overlay .ss-actions button'); // Cancel (first button)
+  await expect.poll(() => page.evaluate(() => window.__rejected), { timeout: 5000 }).toBe(4001);
+});

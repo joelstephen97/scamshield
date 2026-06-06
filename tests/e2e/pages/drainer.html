@@ -1,0 +1,10 @@
+<!doctype html><meta charset="utf-8"><title>Claim Airdrop</title>
+<h1>Claim your free airdrop</h1>
+<button id="go">Connect &amp; Claim</button>
+<script>
+  window.ethereum = { request: async (a) => { window.__lastCall = a; return '0x1'; } };
+  document.getElementById('go').onclick = () => {
+    window.ethereum.request({ method: 'eth_sign', params: ['0xabc', '0xdeadbeef'] })
+      .catch((e) => { window.__rejected = e && e.code; });
+  };
+</script>

