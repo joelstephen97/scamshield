@@ -69,10 +69,10 @@ PhishTank/OpenPhish + Tranco mix. Then re-run the parity check
 (tests/unit/parity.test.js).
 
 ## Take it live
-See store/submission-checklist.md. You need: a Chrome Web Store developer
-account ($5 one-time), a Firefox AMO account (free), final icons, screenshots,
-and a hosted privacy-policy URL (text in store/privacy-policy.md).
+See [docs/PUBLISHING.md](docs/PUBLISHING.md) for the full Chrome Web Store +
+Firefox AMO submission guide — accounts, fees, assets, permission justifications,
+and reviewer notes.
 
 ## Privacy
 No browsing data is transmitted. Optional anonymous reporting is off by default.
-See store/privacy-policy.md.
+Read the [privacy policy](https://joelstephen97.github.io/scamshield/privacy.html).
