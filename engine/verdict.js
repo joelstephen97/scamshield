@@ -31,7 +31,7 @@
     else if (score >= THRESHOLDS.suspicious) level = 'suspicious';
 
     const reasons = [...new Set([...(u.reasons || []), ...(d.reasons || [])])];
-    return { level, score: Number(score.toFixed(4)), reasons, modelUsed };
+    return { level, score: Number(score.toFixed(4)), reasons, modelUsed, brand: d.brand };
   }
 
   return { fuse };

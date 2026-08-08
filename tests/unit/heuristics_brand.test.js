@@ -52,6 +52,18 @@ test('multi-label-suffix brand storefront login is not flagged (amazon.co.uk)', 
   assert.ok(!r.flags.includes('brand-impersonation-content'), JSON.stringify(r));
 });
 
+test('impersonation verdict names the brand for the rescue button', () => {
+  const r = scoreDom({
+    pageHost: 'paypal-secure-login.xyz', hasPasswordField: true,
+    passwordFormActions: ['https://paypal-secure-login.xyz/go'],
+    titleBrand: 'paypal', ogSiteName: '', faviconHost: '', logoAltBrands: []
+  });
+  assert.equal(r.brand, 'paypal');
+  const clean = scoreDom({ pageHost: 'paypal.com', hasPasswordField: true,
+    passwordFormActions: ['https://paypal.com/go'], titleBrand: 'paypal' });
+  assert.equal(clean.brand, undefined);
+});
+
 test('exact brand SLD on a high-abuse TLD still flags impersonation', () => {
   const r = scoreDom({
     pageHost: 'amazon.tk', hasPasswordField: true,

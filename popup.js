@@ -8,7 +8,26 @@ function registrable(host){
   return String(host||'').toLowerCase().split('.').filter(Boolean).slice(-2).join('.');
 }
 
+function wireMessageChecker() {
+  const SS = globalThis.ScamShield;
+  if (!SS || typeof SS.scoreMessage !== 'function') { $('msgcheck').hidden = true; return; }
+  $('msgbtn').addEventListener('click', () => {
+    const r = SS.scoreMessage($('msgtext').value);
+    $('msgresult').hidden = false;
+    $('msgstatus').className = 'status ' + r.level;
+    $('msglevel').textContent = r.level === 'safe' ? 'Looks safe — no scam signals found'
+      : r.level === 'suspicious' ? 'Suspicious — treat with caution' : 'Dangerous — almost certainly a scam';
+    $('msgreasons').textContent = '';
+    for (const reason of r.reasons.slice(0, 4)) {
+      const li = document.createElement('li');
+      li.textContent = reason;
+      $('msgreasons').appendChild(li);
+    }
+  });
+}
+
 async function init() {
+  wireMessageChecker();
   const settings = await api.runtime.sendMessage({ type: 'getSettings' });
   if (!settings) { $('level').textContent = 'Extension error — try reopening.'; return; }
   $('enabled').checked = !!settings.enabled;

@@ -10,6 +10,23 @@ async function load() {
   $('report').checked = !!s.reportingOptIn;
   $('otaurl').value = s.otaUrl || '';
   renderAllow(s.allowlist || []);
+  const h = await api.runtime.sendMessage({ type: 'getHistory' });
+  renderHistory((h && h.history) || []);
+}
+const KIND_LABELS = {
+  page: 'Scam page warning', wallet: 'Wallet request blocked',
+  clipboard: 'Clipboard hijack caught', techscam: 'Scare page blocked'
+};
+function renderHistory(list) {
+  $('history').replaceChildren();
+  if (!list.length) { const li = document.createElement('li'); li.textContent = 'Nothing yet — that’s a good thing.'; $('history').appendChild(li); return; }
+  for (const e of list.slice(0, 50)) {
+    const li = document.createElement('li');
+    const when = new Date(e.ts).toLocaleString();
+    li.textContent = `${when} — ${KIND_LABELS[e.kind] || e.kind} (${e.level}) — ${e.host || 'unknown site'}`;
+    li.className = 'hist-' + e.level;
+    $('history').appendChild(li);
+  }
 }
 function renderAllow(list) {
   $('allowlist').innerHTML = '';
@@ -40,5 +57,17 @@ $('checkupd').addEventListener('click', async () => {
   flash('Checking…');
   const r = await api.runtime.sendMessage({ type: 'checkForUpdates' });
   flash(r && r.ok ? (r.updated ? ('Updated to v' + r.version) : 'Already up to date') : 'Update failed');
+});
+$('clearhist').addEventListener('click', async () => {
+  await api.runtime.sendMessage({ type: 'clearHistory' });
+  renderHistory([]);
+  flash('History cleared');
+});
+$('resetfeed').addEventListener('click', async () => {
+  const d = await api.runtime.sendMessage({ type: 'getDefaultFeedUrl' });
+  if (!d || !d.url) return;
+  $('otaurl').value = d.url;
+  await api.runtime.sendMessage({ type: 'setSettings', patch: { otaUrl: d.url } });
+  flash('Reset to official feed');
 });
 load();

@@ -96,6 +96,18 @@ test('SSO form posting to a known auth provider shows no banner and no submit mo
   await page.waitForURL(/accounts\.google\.com:5599\/clean\.html/, { timeout: 5000 });
 });
 
+test('popup message checker flags a scam text on-device', async ({ context, extensionId }) => {
+  const popup = await context.newPage();
+  await popup.goto(`chrome-extension://${extensionId}/popup.html`);
+  await popup.click('#msgcheck summary');
+  await popup.fill('#msgtext', 'Your account will be blocked today. Share your OTP to verify: http://verify-bank-login.tk/otp');
+  await popup.click('#msgbtn');
+  await expect(popup.locator('#msgstatus')).toHaveClass(/dangerous/);
+  await popup.fill('#msgtext', 'Team lunch tomorrow at 1pm, bring the slides please.');
+  await popup.click('#msgbtn');
+  await expect(popup.locator('#msgstatus')).toHaveClass(/safe/);
+});
+
 test('wallet drainer request is intercepted and rejected on cancel', async ({ context }) => {
   const page = await context.newPage();
   await page.goto(BASE + '/drainer.html');

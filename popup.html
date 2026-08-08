@@ -8,8 +8,21 @@
   <label class="row"><span>Hide scam content</span><input type="checkbox" id="hide"></label>
   <button id="trust" hidden>Trust this site</button>
   <p id="stat" class="stat"></p>
+  <details id="msgcheck">
+    <summary>📩 Check a message</summary>
+    <p class="hint">Paste a suspicious SMS, WhatsApp, or email text. Checked entirely on your device — nothing is sent anywhere.</p>
+    <textarea id="msgtext" rows="4" placeholder="Paste the message here…"></textarea>
+    <button id="msgbtn">Check message</button>
+    <div id="msgresult" hidden>
+      <div id="msgstatus" class="status safe"><span id="msglevel"></span></div>
+      <ul id="msgreasons"></ul>
+    </div>
+  </details>
   <a id="support" href="#" class="support">❤ Support ScamShield</a>
   <a id="opts" href="#">Settings</a>
   <script src="engine/constants.js"></script>
+  <script src="engine/features.js"></script>
+  <script src="engine/heuristics.js"></script>
+  <script src="engine/message_rules.js"></script>
   <script src="popup.js"></script>
 </body></html>

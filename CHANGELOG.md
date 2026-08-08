@@ -1,5 +1,36 @@
 # Changelog
 
+## 0.4.0 — 2026-08-08
+
+### Added
+- **Real threat feed, on by default.** The blocklist now actually blocks
+  things: a daily-rebuilt open-source feed
+  (github.com/joelstephen97/scamshield-feed; OpenPhish + URLhaus sources,
+  Tranco top-10k false-positive guard, shared-hosting scoping, 5,000-rule
+  cap) is the default OTA source, fetched on install and every 12 h. A
+  500-rule static snapshot ships inside the package for out-of-the-box
+  protection. Options gained a "Reset to official feed" button. Existing
+  installs with an unconfigured feed URL are migrated to the default.
+- **Scam message checker.** Paste any SMS/WhatsApp/email text into the popup
+  for an instant on-device verdict (`engine/message_rules.js`): credential-ask
+  detection with a negation guard (real "do not share your OTP" messages stay
+  safe), grouped scam-topic phrases (delivery-fee, bank-threat, job, crypto,
+  prize) with urgency as an amplifier only, and every embedded link scored by
+  the page URL engine.
+- **Protection history.** Local-only ring buffer (200 events, hostnames only,
+  never full URLs) of warnings and blocks across all detectors, rendered in
+  Settings with a clear button.
+- **"Take me to the real site."** Brand-impersonation warnings now include a
+  one-click rescue button to the impersonated brand's genuine website.
+- **One-time support ask.** After the first dangerous block, a single
+  never-repeated toast invites sponsoring the project.
+
+### Changed
+- **Model retrained on real-world data** (18,032 rows: OpenPhish + URLhaus
+  positives, Tranco-derived negatives incl. regional ccTLD storefront logins).
+  Holdout: accuracy 0.987, precision 0.998, recall 0.976, ROC-AUC 0.996.
+  Dataset builder: `model/build_dataset.py` (deterministic, public sources).
+
 ## 0.3.1 — 2026-08-08
 
 ### Fixed

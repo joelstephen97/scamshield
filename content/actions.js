@@ -24,12 +24,32 @@
     const msg = el('span', 'ss-msg',
       (verdict.level === 'dangerous' ? 'Warning: this page looks dangerous. ' : 'Caution: this page looks suspicious. ')
       + (verdict.reasons[0] || ''));
+    bar.append(icon, msg);
+    if (verdict.brandUrl) {
+      // Turn the warning into a rescue: one click to the brand's real site.
+      const rescue = el('button', 'ss-rescue', 'Take me to the real site');
+      rescue.addEventListener('click', () => { location.href = verdict.brandUrl; });
+      bar.appendChild(rescue);
+    }
     const trust = el('button', null, 'Trust this site');
     trust.addEventListener('click', () => { onAllow && onAllow(); bar.remove(); });
     const close = el('button', null, 'Dismiss');
     close.addEventListener('click', () => bar.remove());
-    bar.append(icon, msg, trust, close);
+    bar.append(trust, close);
     (document.body || document.documentElement).appendChild(bar);
+  }
+
+  // One-time-ever, shown only right after a dangerous page was blocked.
+  function supportToast() {
+    if (document.querySelector('.' + NS + '-toast')) return;
+    const t = el('div', NS + '-toast warn');
+    t.setAttribute('role', 'status');
+    const a = el('a', null, 'ScamShield just protected you — it’s free and runs on your device. Chip in? ❤');
+    a.href = 'https://github.com/sponsors/joelstephen97';
+    a.target = '_blank'; a.rel = 'noopener';
+    const x = el('button', null, 'Dismiss'); x.addEventListener('click', () => t.remove());
+    t.append(a, x); (document.body || document.documentElement).appendChild(t);
+    setTimeout(() => t.remove(), 20000);
   }
 
   // Intercept submit on password forms that post off-domain.
@@ -148,5 +168,5 @@
   }
 
   root.ScamShield = root.ScamShield || {};
-  root.ScamShield.actions = { showBanner, guardForms, hideScamBlocks, clearAll, walletConfirmOverlay, clipboardToast, techScamEscapeOverlay };
+  root.ScamShield.actions = { showBanner, guardForms, hideScamBlocks, clearAll, walletConfirmOverlay, clipboardToast, techScamEscapeOverlay, supportToast };
 })(typeof globalThis !== 'undefined' ? globalThis : self);

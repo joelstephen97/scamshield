@@ -1,6 +1,12 @@
 'use strict';
 const api = globalThis.browser || globalThis.chrome;
 
+// Official ScamShield feed: rebuilt daily by GitHub Actions from OpenPhish +
+// URLhaus with a Tranco top-10k false-positive guard. Download-only static
+// JSON — no user or browsing data is ever sent. Users can point this at
+// their own feed or clear it in settings to disable updates.
+const DEFAULT_FEED_URL = 'https://raw.githubusercontent.com/joelstephen97/scamshield-feed/main/blocklist.json';
+
 const DEFAULTS = {
   enabled: true,
   hideScamContent: true,
@@ -9,10 +15,30 @@ const DEFAULTS = {
   allowlist: [],             // array of registrable domains the user trusts
   blocklistVersion: 1,
   modelVersion: 1,
-  otaUrl: '',                // user-set static JSON URL for blocklist updates; '' = disabled
+  otaUrl: DEFAULT_FEED_URL,  // static JSON URL for blocklist updates; '' = disabled
   threatsBlocked: 0,         // local-only stat, never transmitted
-  lastBlocklistVersion: 0
+  lastBlocklistVersion: 0,
+  supportAskShown: false     // one-time "you were just protected" support toast
 };
+
+// Local-only protection history: ring buffer of { ts, host, kind, level }.
+// Hostnames only, never full URLs; capped; user-clearable. Never transmitted.
+const HISTORY_CAP = 200;
+async function recordEvent(evt) {
+  try {
+    const cur = await api.storage.local.get('history');
+    const list = Array.isArray(cur.history) ? cur.history : [];
+    const last = list[0];
+    // collapse repeats (SPA rescans, repeated toasts) within a minute
+    if (last && last.host === evt.host && last.kind === evt.kind &&
+        last.level === evt.level && Date.now() - last.ts < 60000) return;
+    list.unshift({ ts: Date.now(), host: evt.host || '', kind: evt.kind || 'page', level: evt.level || 'suspicious' });
+    await api.storage.local.set({ history: list.slice(0, HISTORY_CAP) });
+  } catch (_) { /* history is best-effort */ }
+}
+function hostOfSender(sender) {
+  try { return new URL(sender.tab && sender.tab.url).hostname; } catch (_) { return ''; }
+}
 
 async function getSettings() {
   const stored = await api.storage.local.get('settings');
@@ -68,9 +94,17 @@ if (api.alarms) {
 api.runtime.onInstalled.addListener(async (details) => {
   const cur = await api.storage.local.get('settings');
   if (!cur.settings) await api.storage.local.set({ settings: DEFAULTS });
+  // Migration: pre-0.4.0 installs stored otaUrl '' (feature existed but had no
+  // default). '' means "never configured", so it is safe to adopt the official
+  // feed; users who intentionally clear the field afterwards stay cleared
+  // because the migration only runs on version updates.
+  else if (details && details.reason === 'update' && cur.settings.otaUrl === '') {
+    await api.storage.local.set({ settings: Object.assign({}, cur.settings, { otaUrl: DEFAULT_FEED_URL }) });
+  }
   if (details && details.reason === 'install' && api.tabs) {
     try { api.tabs.create({ url: api.runtime.getURL('onboarding.html') }); } catch (_) {}
   }
+  runOtaUpdate(); // fresh rules right away instead of waiting for the 12h alarm
 });
 
 // Per-tab last verdict, kept in memory but re-derivable; popup reads via message.
@@ -102,7 +136,10 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
           if (level === 'dangerous') api.action.setBadgeText({ tabId, text: '!' });
           else if (level === 'suspicious') api.action.setBadgeText({ tabId, text: '?' });
           else api.action.setBadgeText({ tabId, text: '' });
-          if (level !== 'safe') api.action.setBadgeBackgroundColor({ tabId, color: level === 'dangerous' ? '#c0392b' : '#e1a200' });
+          if (level !== 'safe') {
+            api.action.setBadgeBackgroundColor({ tabId, color: level === 'dangerous' ? '#c0392b' : '#e1a200' });
+            recordEvent({ host: hostOfSender(sender), kind: 'page', level });
+          }
         }
         sendResponse({ ok: true }); break;
       }
@@ -112,10 +149,22 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       case 'bumpThreats': {
         const s = await getSettings();
         await setSettings({ threatsBlocked: (s.threatsBlocked || 0) + 1 });
+        // 'page' threats are already logged by reportVerdict; detector kinds
+        // (wallet/clipboard/techscam) log here with their own label.
+        if (msg.kind) recordEvent({ host: hostOfSender(sender), kind: msg.kind, level: 'dangerous' });
         sendResponse({ ok: true }); break;
       }
+      case 'getHistory': {
+        const cur = await api.storage.local.get('history');
+        sendResponse({ history: Array.isArray(cur.history) ? cur.history : [] }); break;
+      }
+      case 'clearHistory':
+        await api.storage.local.set({ history: [] });
+        sendResponse({ ok: true }); break;
       case 'checkForUpdates':
         sendResponse(await runOtaUpdate()); break;
+      case 'getDefaultFeedUrl':
+        sendResponse({ url: DEFAULT_FEED_URL }); break;
       default:
         sendResponse({ ok: false, error: 'unknown message' });
     }

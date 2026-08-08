@@ -37,7 +37,7 @@
     if (!SS || !SS.actions) { reply(detail.id, true); return; }
     SS.actions.walletConfirmOverlay(detail, (allow, meta) => {
       reply(detail.id, allow);
-      if (!allow && !(meta && meta.collision)) send('bumpThreats');
+      if (!allow && !(meta && meta.collision)) send('bumpThreats', { kind: 'wallet' });
     });
   });
   window.addEventListener('scamshield:clipboard-alert', async (e) => {
@@ -45,7 +45,7 @@
     if (!settings || !settings.enabled || !SS || !SS.actions) return;
     if (isTrustedHost(location.hostname, settings)) return;
     SS.actions.clipboardToast((e && e.detail) || {});
-    send('bumpThreats');
+    send('bumpThreats', { kind: 'clipboard' });
   });
   let techSignal = { dialogFloodCount: 0, fullscreenOnLoad: false, beforeUnloadCount: 0 };
   let techShown = false;
@@ -66,7 +66,7 @@
         try { window.dispatchEvent(new CustomEvent('scamshield:techscam-escape')); } catch (_) {}
       });
       send('reportVerdict', { verdict: { level: 'dangerous', score: r.score, reasons: r.reasons, modelUsed: false } });
-      send('bumpThreats');
+      send('bumpThreats', { kind: 'techscam' });
     }
   });
 
@@ -157,10 +157,19 @@
     if (verdict.level === 'dangerous') send('bumpThreats');
 
     if (verdict.level !== 'safe') {
+      // Impersonation verdicts get a rescue link to the brand's real site.
+      if (verdict.brand && SS.BRAND_DOMAINS && SS.BRAND_DOMAINS[verdict.brand]) {
+        verdict.brandUrl = 'https://' + SS.BRAND_DOMAINS[verdict.brand][0] + '/';
+      }
       SS.actions.showBanner(verdict, async () => {
         await send('allowSite', { domain: pageDomain });
         SS.actions.clearAll();
       });
+      // One-time-ever support ask, only after ScamShield visibly earned it.
+      if (verdict.level === 'dangerous' && !settings.supportAskShown && SS.actions.supportToast) {
+        send('setSettings', { patch: { supportAskShown: true } });
+        setTimeout(() => SS.actions.supportToast(), 1500);
+      }
     }
     if (foreignForms.length) SS.actions.guardForms(foreignForms);
     if (settings.hideScamContent && scamBlocks.length) SS.actions.hideScamBlocks(scamBlocks);

@@ -37,6 +37,7 @@
     const reasons = [];
     const flags = [];
     let score = 0;
+    let brand; // set when impersonation is flagged, so UI can offer the real site
     const pageDomain = registrableDomain(s.pageHost);
 
     if (s.hasPasswordField) {
@@ -102,11 +103,12 @@
       if (!onBrand) {
         score = Math.max(score, 0.85);
         flags.push('brand-impersonation-content');
+        brand = matchedBrand;
         reasons.push('This page looks like "' + matchedBrand + '" but is not on its real website.');
       }
     }
 
-    return { score: Math.max(0, Math.min(1, score)), reasons, flags };
+    return { score: Math.max(0, Math.min(1, score)), reasons, flags, brand };
   }
 
   return { scoreUrl, scoreDom, registrableDomain };
