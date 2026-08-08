@@ -2,9 +2,9 @@
   "manifest_version": 3,
   "name": "ScamShield — Scam & Phishing Protection",
   "short_name": "ScamShield",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Detects scam and phishing pages on-device and warns you before you get tricked. No browsing data leaves your device.",
-  "permissions": ["storage", "declarativeNetRequest", "scripting", "alarms"],
+  "permissions": ["storage", "declarativeNetRequest", "alarms"],
   "host_permissions": ["http://*/*", "https://*/*"],
   "background": { "service_worker": "background/service_worker.js" },
   "content_scripts": [
@@ -46,7 +46,11 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["model/phishing-url.onnx", "vendor/*"],
+      "resources": [
+        "model/phishing-url.onnx",
+        "vendor/ort-wasm-simd-threaded.mjs",
+        "vendor/ort-wasm-simd-threaded.wasm"
+      ],
       "matches": ["http://*/*", "https://*/*"]
     }
   ],

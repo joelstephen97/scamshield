@@ -74,6 +74,28 @@ test('tech-support scare page shows escape overlay', async ({ context }) => {
   await expect(page.locator('.scamshield-overlay')).toBeVisible({ timeout: 8000 });
 });
 
+test('safe-domain host suppresses warnings even on scammy content', async ({ context }) => {
+  const page = await context.newPage();
+  // amazon.ae resolves to the local fixtures server (see fixtures.js);
+  // lookalike.html carries scam phrases that would otherwise warn.
+  await page.goto('http://amazon.ae:5599/lookalike.html');
+  await page.waitForTimeout(800);
+  await expect(page.locator('.scamshield-banner')).toHaveCount(0);
+  await expect(page.locator('.scamshield-overlay')).toHaveCount(0);
+});
+
+test('SSO form posting to a known auth provider shows no banner and no submit modal', async ({ context }) => {
+  const page = await context.newPage();
+  await page.goto(BASE + '/sso-login.html');
+  await page.waitForTimeout(800);
+  await expect(page.locator('.scamshield-banner.danger')).toHaveCount(0);
+  await page.fill('input[name="pw"]', 'secret');
+  await page.click('button[type="submit"]');
+  await expect(page.locator('.scamshield-overlay')).toHaveCount(0);
+  // the form actually submits (navigates to the auth provider)
+  await page.waitForURL(/accounts\.google\.com:5599\/clean\.html/, { timeout: 5000 });
+});
+
 test('wallet drainer request is intercepted and rejected on cancel', async ({ context }) => {
   const page = await context.newPage();
   await page.goto(BASE + '/drainer.html');

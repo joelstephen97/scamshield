@@ -82,7 +82,21 @@
   }
 
   function walletConfirmOverlay(detail, onDecision) {
-    if (document.querySelector('.' + NS + '-overlay')) { onDecision(true); return; }
+    if (document.querySelector('.' + NS + '-overlay')) {
+      // Another warning is already on screen. Deny, never silently approve —
+      // a drainer could fire a decoy request first and slip the real one
+      // through the collision path. The dApp receives a standard user-rejected
+      // error (4001) and can simply retry. collision:true tells the bridge
+      // this denial is synthetic, not a user-confirmed threat.
+      const t = el('div', NS + '-toast warn');
+      t.setAttribute('role', 'alert');
+      t.append(el('span', null, '🛡️ '), el('span', 'ss-msg',
+        'ScamShield blocked a wallet request while another warning was open. Close it and retry.'));
+      (document.body || document.documentElement).appendChild(t);
+      setTimeout(() => t.remove(), 12000);
+      onDecision(false, { collision: true });
+      return;
+    }
     const ov = el('div', NS + '-overlay');
     ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true');
     ov.setAttribute('aria-label', 'Risky wallet request');

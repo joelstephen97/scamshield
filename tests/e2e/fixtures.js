@@ -11,7 +11,10 @@ const test = base.extend({
         ...(isHeadless ? ['--headless=new'] : []),
         `--disable-extensions-except=${EXTENSION_PATH}`,
         `--load-extension=${EXTENSION_PATH}`,
-        '--no-first-run', '--disable-gpu', '--disable-dev-shm-usage'
+        '--no-first-run', '--disable-gpu', '--disable-dev-shm-usage',
+        // Let specs exercise real hostnames (SAFE_DOMAINS, SSO providers)
+        // against the local fixtures server. Hostname matching ignores ports.
+        '--host-resolver-rules=MAP amazon.ae 127.0.0.1, MAP accounts.google.com 127.0.0.1'
       ]
     });
     for (let i = 0; i < 30 && !context.serviceWorkers()[0]; i++) await new Promise((r) => setTimeout(r, 100));

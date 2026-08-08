@@ -6,9 +6,10 @@
   blocking is rule-based and privacy-preserving.
 - **alarms** — schedule an optional, periodic (12h) download-only refresh of the
   scam-domain blocklist. Only runs if the user sets an update URL; nothing is uploaded.
-- **scripting / content scripts on http(s)** — read the current page's URL and
-  DOM to detect phishing forms and scam content. Analysis is on-device; no page
-  data is transmitted.
+- **content scripts on http(s)** — statically declared in the manifest (the
+  `chrome.scripting` API is not used and not requested). They read the current
+  page's URL and DOM to detect phishing forms and scam content. Analysis is
+  on-device; no page data is transmitted.
 - **host_permissions http/https** — required so protection works on any site the
   user visits, since scams can be hosted anywhere.
 

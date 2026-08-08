@@ -1,5 +1,14 @@
 # Submission Checklist
 
+## 0.3.1 re-submission (after the Jun 2026 "Use of Permissions" rejection)
+Reviewer note to include with the draft:
+> Removed the unused `scripting` permission flagged in the previous review
+> (violation ref "Purple Potassium"). Content scripts are statically declared
+> in the manifest; the `chrome.scripting` API is not used anywhere. All
+> remaining permissions (storage, declarativeNetRequest, alarms) are actively
+> used — see the updated permissions justification. No functional change to
+> injection behavior; `web_accessible_resources` was additionally narrowed.
+
 ## Pre-flight
 - [ ] `npm test` passes (unit + e2e).
 - [ ] `npm run build` produces dist/scamshield-chrome.zip and -firefox.zip.

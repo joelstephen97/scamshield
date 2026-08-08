@@ -1,5 +1,49 @@
 # Changelog
 
+## 0.3.1 — 2026-08-08
+
+### Fixed
+- **Chrome Web Store rejection (Use of Permissions).** Removed the unused
+  `scripting` permission from both manifests — content scripts are statically
+  declared and the `chrome.scripting` API was never called.
+- **False positives on real regional brand sites.** `amazon.ae`, `amazon.co.uk`,
+  `google.com.sg`, `netflix.co.jp` and similar ccTLD storefront logins were
+  flagged as brand impersonation / lookalikes. `BRAND_DOMAINS` and
+  `SAFE_DOMAINS` now carry regional storefronts and brand infra
+  (`microsoftonline.com`, `primevideo.com`, …), and an exact-brand SLD on an
+  ordinary ccTLD is treated as on-brand — while `amazon.tk` (high-abuse TLD)
+  is now correctly flagged, a new true positive.
+- **Approximate eTLD+1 parsing.** One canonical `registrableDomain()` (with a
+  ~150-entry multi-label public-suffix subset) in `engine/constants.js`
+  replaces three naive last-two-label copies; `.co.uk`/`.com.sg`-style hosts
+  now parse correctly everywhere, including the popup trust list. Cross-domain
+  credential posts between different `.com.sg` domains are now detected (they
+  previously compared equal).
+- **SSO logins were blocked as phishing.** Password forms posting to known
+  identity providers (Google, Microsoft, Okta, Auth0, …
+  `KNOWN_AUTH_PROVIDERS`) no longer trigger the dangerous verdict or the
+  submit-guard modal.
+- **Suspicious-token matching uses word boundaries.** "windows" no longer
+  counts as `win`, "accountant" as `account`, "freelance" as `free`.
+- **Trusted sites could still show wallet/clipboard/tech-scam warnings.** The
+  MAIN-world detector bridges now respect the built-in safe list and the
+  user's trusted-sites list, like the page scanner always did.
+- **Wallet overlay collision auto-allowed the request.** If a second risky
+  wallet request arrived while a warning was already on screen it was silently
+  approved; it is now denied with the standard user-rejected error (4001) and
+  a toast, and does not inflate the threats-blocked counter.
+
+### Changed
+- Narrowed `web_accessible_resources` from `vendor/*` to the two ONNX-runtime
+  files actually loaded from page context (smaller fingerprinting surface).
+- `SUSPICIOUS_TLDS` gained `pw`, `cc`, `ws`, `icu`, `buzz`.
+- Parity fixtures are now generated (`npm run gen:parity`, 15 URLs) and
+  cross-checked against the Python extractor (`model/check_parity.py`);
+  `model/train.py` mirrors the new feature semantics. Model retrain on real
+  data is deferred to the next release (rule fusion bounds the drift: the
+  model can only raise the rule score, never lower it).
+- Tests: 89 unit (+28), 12 e2e (+2: safe-domain suppression, SSO no-modal).
+
 ## 0.3.0 — 2026-06-06
 
 ### Added

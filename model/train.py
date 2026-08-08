@@ -32,11 +32,71 @@ POPULAR_BRANDS = ['paypal','google','apple','microsoft','amazon','facebook','ins
     'netflix','whatsapp','binance','coinbase','metamask','dbs','maybank','wise',
     'revolut','linkedin','outlook','gmail']
 SUSPICIOUS_TLDS = ['zip','mov','xyz','top','club','click','link','gq','cf','tk','ml',
-    'ga','work','support','rest','country','kim']
+    'ga','work','support','rest','country','kim','pw','cc','ws','icu','buzz']
 SUSPICIOUS_TOKENS = ['login','signin','verify','verification','account','secure','update',
     'confirm','bank','wallet','free','win','winner','gift','prize','bonus','claim',
     'unlock','suspended','limited','security']
 IP_RE = re.compile(r'^(\d{1,3}\.){3}\d{1,3}$')
+
+# Mirrors engine/constants.js MULTI_LABEL_SUFFIXES — keep in sync.
+MULTI_LABEL_SUFFIXES = {
+    'co.uk','org.uk','me.uk','net.uk','ltd.uk','plc.uk','ac.uk','gov.uk','sch.uk','nhs.uk',
+    'co.jp','ne.jp','or.jp','ac.jp','go.jp',
+    'com.sg','edu.sg','gov.sg','net.sg','org.sg',
+    'com.au','net.au','org.au','edu.au','gov.au','id.au',
+    'com.my','net.my','org.my','edu.my','gov.my',
+    'co.in','net.in','org.in','ac.in','edu.in','gov.in','res.in',
+    'com.br','net.br','org.br','gov.br','edu.br',
+    'com.mx','org.mx','gob.mx','edu.mx',
+    'co.nz','net.nz','org.nz','govt.nz','ac.nz',
+    'com.tr','net.tr','org.tr','gov.tr','edu.tr',
+    'com.hk','net.hk','org.hk','edu.hk','gov.hk',
+    'co.kr','ne.kr','or.kr','go.kr','ac.kr',
+    'com.tw','net.tw','org.tw','edu.tw','gov.tw',
+    'co.za','net.za','org.za','gov.za','ac.za',
+    'com.ar','net.ar','org.ar','gob.ar','edu.ar',
+    'com.sa','net.sa','org.sa','gov.sa','edu.sa',
+    'com.eg','net.eg','org.eg','gov.eg','edu.eg',
+    'co.th','in.th','or.th','ac.th','go.th',
+    'com.ph','net.ph','org.ph','gov.ph','edu.ph',
+    'com.vn','net.vn','org.vn','gov.vn','edu.vn',
+    'co.id','com.cn','net.cn','org.cn','gov.cn','edu.cn',
+    'com.pk','com.bd','com.ng','co.ke',
+    'co.il','org.il','ac.il','gov.il',
+    'com.ua','com.co','com.pe','com.cl','com.ec','com.uy',
+    'com.ve','co.ve','com.do','com.gt','co.cr','com.pa','com.py','com.bo',
+    'com.kw','com.qa','com.bh','com.om','com.jo','com.lb',
+    'com.lk','com.np','com.kh','com.mm',
+}
+
+# Mirrors engine/constants.js BRAND_DOMAINS (flattened KNOWN_BRAND_REGISTRABLES).
+BRAND_DOMAINS = {
+    'paypal': ['paypal.com'], 'google': ['google.com','gmail.com','youtube.com'],
+    'apple': ['apple.com','icloud.com'],
+    'microsoft': ['microsoft.com','live.com','office.com','outlook.com',
+        'microsoftonline.com','office365.com','azure.com','sharepoint.com'],
+    'amazon': ['amazon.com','amazon.ae','amazon.co.uk','amazon.de','amazon.fr',
+        'amazon.it','amazon.es','amazon.nl','amazon.ca','amazon.in','amazon.sg',
+        'amazon.sa','amazon.eg','amazon.com.au','amazon.com.br','amazon.com.mx',
+        'amazon.com.tr','amazon.co.jp','primevideo.com','media-amazon.com'],
+    'facebook': ['facebook.com'], 'instagram': ['instagram.com'],
+    'whatsapp': ['whatsapp.com'], 'netflix': ['netflix.com'], 'binance': ['binance.com'],
+    'coinbase': ['coinbase.com'], 'metamask': ['metamask.io'], 'dbs': ['dbs.com.sg'],
+    'maybank': ['maybank2u.com.my','maybank.com'], 'wise': ['wise.com'], 'revolut': ['revolut.com'],
+    'linkedin': ['linkedin.com'], 'outlook': ['outlook.com','live.com'], 'gmail': ['gmail.com','google.com'],
+}
+KNOWN_BRAND_REGISTRABLES = {d for ds in BRAND_DOMAINS.values() for d in ds}
+
+def registrable_parts(host):
+    """Mirrors engine/constants.js registrableParts (approximate eTLD+1)."""
+    h = str(host or '').lower().rstrip('.')
+    labels = [x for x in h.split('.') if x]
+    if IP_RE.match(h) or len(labels) <= 1:
+        return h, h, ''
+    last_two = '.'.join(labels[-2:])
+    if last_two in MULTI_LABEL_SUFFIXES and len(labels) >= 3:
+        return '.'.join(labels[-3:]), labels[-3], last_two
+    return last_two, labels[-2], labels[-1]
 
 def entropy(s):
     if not s: return 0.0
@@ -62,15 +122,23 @@ def lev(a,b):
     return dp[n]
 
 def brand_lookalike(host):
-    labels=host.split('.'); sld=labels[-2] if len(labels)>=2 else host
-    if sld in POPULAR_BRANDS: return 0
-    cands=[sld,deglyph(sld)]+[deglyph(x) for x in labels]
+    """Mirrors engine/features.js isBrandLookalike (0.3.1 semantics)."""
+    domain, sld, suffix = registrable_parts(host)
+    if not suffix: return 0
+    if domain in KNOWN_BRAND_REGISTRABLES: return 0
+    if sld in POPULAR_BRANDS:
+        return 1 if suffix.split('.')[-1] in SUSPICIOUS_TLDS else 0
+    cands=[sld,deglyph(sld)]
+    labels=[x for x in host.lower().split('.') if x]
+    sub_labels=labels[:max(0,len(labels)-len(domain.split('.')))]
     for brand in POPULAR_BRANDS:
         db=deglyph(brand)
         for c in cands:
-            if c==db and sld!=brand: return 1
-            if len(db)>=5 and db in c and sld!=brand: return 1
+            if c==db: return 1
+            if len(db)>=5 and db in c: return 1
             if lev(c,db)==1: return 1
+        for lab in sub_labels:
+            if len(db)>=5 and db in deglyph(lab): return 1
     return 0
 
 def features(url):
@@ -89,7 +157,8 @@ def features(url):
         'has_punycode':1 if 'xn--' in host else 0,'is_https':1 if s.lower().startswith('https:') else 0,
         'num_query_params':len(urlparse(s).query.split('&')) if urlparse(s).query else 0,
         'suspicious_tld':1 if tld in SUSPICIOUS_TLDS else 0,
-        'suspicious_token_count':sum(1 for t in SUSPICIOUS_TOKENS if t in low),
+        'suspicious_token_count':(lambda toks: sum(1 for t in SUSPICIOUS_TOKENS if t in toks))(
+            set(re.split(r'[^a-z0-9]+', low))),
         'host_entropy':round(entropy(host),4),'brand_lookalike':brand_lookalike(host),
     }
     return [f[name] for name in FEATURE_NAMES]

@@ -13,7 +13,16 @@
   }
 
   function registrable(host) {
+    if (SS && typeof SS.registrableDomain === 'function') return SS.registrableDomain(host);
     return String(host || '').toLowerCase().split('.').filter(Boolean).slice(-2).join('.');
+  }
+
+  // Built-in safe list OR the user's own trusted sites. Gates every warning
+  // surface (page scan, wallet overlay, clipboard toast, tech-scam overlay) —
+  // a site the user trusts must never nag them.
+  function isTrustedHost(host, settings) {
+    if (SS && typeof SS.isSafeHost === 'function' && SS.isSafeHost(host)) return true;
+    return ((settings && settings.allowlist) || []).includes(registrable(host));
   }
 
   // --- MAIN-world detector bridges (registered once; re-injection guard above) ---
@@ -24,12 +33,17 @@
     const detail = (e && e.detail) || {};
     const settings = await send('getSettings');
     if (!settings || !settings.enabled) { reply(detail.id, true); return; }
+    if (isTrustedHost(location.hostname, settings)) { reply(detail.id, true); return; }
     if (!SS || !SS.actions) { reply(detail.id, true); return; }
-    SS.actions.walletConfirmOverlay(detail, (allow) => { reply(detail.id, allow); if (!allow) send('bumpThreats'); });
+    SS.actions.walletConfirmOverlay(detail, (allow, meta) => {
+      reply(detail.id, allow);
+      if (!allow && !(meta && meta.collision)) send('bumpThreats');
+    });
   });
   window.addEventListener('scamshield:clipboard-alert', async (e) => {
     const settings = await send('getSettings');
     if (!settings || !settings.enabled || !SS || !SS.actions) return;
+    if (isTrustedHost(location.hostname, settings)) return;
     SS.actions.clipboardToast((e && e.detail) || {});
     send('bumpThreats');
   });
@@ -40,6 +54,7 @@
     if (techShown || !SS || typeof SS.scoreTechScam !== 'function' || !SS.actions) return;
     const settings = await send('getSettings');
     if (!settings || !settings.enabled) return;
+    if (isTrustedHost(location.hostname, settings)) return;
     const text = (document.body ? document.body.innerText : '').slice(0, 20000);
     const r = SS.scoreTechScam({
       text, fullscreenOnLoad: techSignal.fullscreenOnLoad,
@@ -60,10 +75,14 @@
     const passwordForms = [...document.querySelectorAll('form')]
       .filter((f) => f.querySelector('input[type="password"]'));
     const passwordFormActions = passwordForms.map((f) => f.getAttribute('action') || location.href);
+    const AUTH = (SS && SS.KNOWN_AUTH_PROVIDERS) || [];
     const foreignForms = passwordForms.filter((f) => {
       try {
         const h = new URL(f.getAttribute('action') || location.href, location.href).hostname;
-        return registrable(h) !== registrable(pageHost);
+        const actionDomain = registrable(h);
+        // Mirrors scoreDom: posting to a known identity provider is federated
+        // login (SSO), not credential exfiltration — no submit guard.
+        return actionDomain !== registrable(pageHost) && !AUTH.includes(actionDomain);
       } catch (_) { return false; }
     });
     const hiddenIframeCount = [...document.querySelectorAll('iframe')].filter((fr) => {
@@ -116,11 +135,8 @@
     const settings = await send('getSettings');
     if (!settings || !settings.enabled) return;
     const pageDomain = registrable(location.hostname);
-    if ((settings.allowlist || []).includes(pageDomain)) return;
-
-    // Built-in safe-domain allowlist: skip warnings on top legitimate sites.
-    const host = location.hostname.toLowerCase();
-    if ((SS.SAFE_DOMAINS || []).some((d) => host === d || host.endsWith('.' + d))) {
+    // Trusted (built-in safe list or user allowlist): report safe, do nothing else.
+    if (isTrustedHost(location.hostname, settings)) {
       await send('reportVerdict', { verdict: { level: 'safe', score: 0, reasons: [], modelUsed: false } });
       return;
     }

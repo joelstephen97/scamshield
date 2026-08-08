@@ -2,7 +2,11 @@
 const api = globalThis.browser || globalThis.chrome;
 const $ = (id) => document.getElementById(id);
 
-function registrable(host){return String(host||'').toLowerCase().split('.').filter(Boolean).slice(-2).join('.');}
+function registrable(host){
+  const SS = globalThis.ScamShield;
+  if (SS && typeof SS.registrableDomain === 'function') return SS.registrableDomain(host);
+  return String(host||'').toLowerCase().split('.').filter(Boolean).slice(-2).join('.');
+}
 
 async function init() {
   const settings = await api.runtime.sendMessage({ type: 'getSettings' });

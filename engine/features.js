@@ -53,17 +53,31 @@
   }
 
   function isBrandLookalike(host) {
-    const labels = host.split('.');
-    const sld = labels.length >= 2 ? labels[labels.length - 2] : host;
-    // exact match to a real brand SLD is NOT a lookalike
-    if (POPULAR_BRANDS.includes(sld)) return 0;
-    const candidates = [sld, deglyph(sld), ...labels.map(deglyph)];
+    const parts = C.registrableParts(host);
+    if (!parts.suffix) return 0; // IP or single label — no SLD to judge
+    // A registrable domain a brand actually controls is never a lookalike
+    // (login.microsoftonline.com, accounts.google.com, media-amazon.com, ...).
+    if (C.KNOWN_BRAND_REGISTRABLES.includes(parts.domain)) return 0;
+    const sld = parts.sld;
+    // Exact brand SLD: trusted on ordinary TLDs (amazon.ae, paypal.co.uk —
+    // regional storefronts), but a brand name registered on a free/high-abuse
+    // TLD (amazon.tk) is a classic phish.
+    if (POPULAR_BRANDS.includes(sld)) {
+      return SUSPICIOUS_TLDS.includes(parts.suffix.split('.').pop()) ? 1 : 0;
+    }
+    const candidates = [sld, deglyph(sld)];
+    const labels = host.toLowerCase().split('.').filter(Boolean);
+    const domainLabelCount = parts.domain.split('.').length;
+    const subLabels = labels.slice(0, Math.max(0, labels.length - domainLabelCount));
     for (const brand of POPULAR_BRANDS) {
       const db = deglyph(brand);                                // deglyph brand too (symmetric)
       for (const cand of candidates) {
-        if (cand === db && sld !== brand) return 1;                        // homoglyph exact
-        if (db.length >= 5 && cand.includes(db) && sld !== brand) return 1; // embedded brand (paypalsecure); length gate avoids 'wise' in 'otherwise'
-        if (levenshtein(cand, db) === 1) return 1;                          // typosquat
+        if (cand === db) return 1;                                // homoglyph exact (amaz0n)
+        if (db.length >= 5 && cand.includes(db)) return 1;        // embedded brand (paypalsecure); length gate avoids 'wise' in 'otherwise'
+        if (levenshtein(cand, db) === 1) return 1;                // typosquat
+      }
+      for (const lab of subLabels) {                              // brand hidden in a subdomain
+        if (db.length >= 5 && deglyph(lab).includes(db)) return 1; // (secure-paypal.com-verify.tk)
       }
     }
     return 0;
@@ -90,7 +104,12 @@
       is_https: /^https:/i.test(s) ? 1 : 0,
       num_query_params: url ? [...url.searchParams.keys()].length : 0,
       suspicious_tld: SUSPICIOUS_TLDS.includes(host.split('.').pop()) ? 1 : 0,
-      suspicious_token_count: SUSPICIOUS_TOKENS.filter((t) => lower.includes(t)).length,
+      suspicious_token_count: (() => {
+        // Whole-token match only: "windows" must not count as "win",
+        // "accountant" must not count as "account".
+        const tokens = new Set(lower.split(/[^a-z0-9]+/));
+        return SUSPICIOUS_TOKENS.filter((t) => tokens.has(t)).length;
+      })(),
       host_entropy: Number(shannonEntropy(host).toFixed(4)),
       brand_lookalike: isBrandLookalike(host)
     };

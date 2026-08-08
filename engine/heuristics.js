@@ -29,11 +29,8 @@
     return { score: clamp(score), reasons };
   }
 
-  function registrableDomain(host) {
-    // Approximate eTLD+1: last two labels. Good enough for "foreign form" checks.
-    const parts = String(host || '').toLowerCase().split('.').filter(Boolean);
-    return parts.slice(-2).join('.');
-  }
+  // Canonical implementation lives in constants.js; re-exported here for API compat.
+  const registrableDomain = C.registrableDomain;
 
   function scoreDom(signals) {
     const s = signals || {};
@@ -43,10 +40,15 @@
     const pageDomain = registrableDomain(s.pageHost);
 
     if (s.hasPasswordField) {
+      const AUTH = C.KNOWN_AUTH_PROVIDERS || [];
       const foreign = (s.passwordFormActions || []).some((action) => {
         try {
           const h = new URL(action, 'https://' + (s.pageHost || 'x')).hostname;
-          return registrableDomain(h) !== pageDomain;
+          const actionDomain = registrableDomain(h);
+          if (actionDomain === pageDomain) return false;
+          // Federated login: posting to a known identity provider is normal.
+          if (AUTH.includes(actionDomain)) return false;
+          return true;
         } catch (_) { return false; }
       });
       if (foreign) {
@@ -86,7 +88,16 @@
     if (matchedBrand && s.hasPasswordField) {
       const legit = BRAND_DOMAINS[matchedBrand] || [];
       const host = String(s.pageHost || '').toLowerCase();
-      const onBrand = legit.some((d) => pageDomain === d || host.endsWith('.' + d))
+      // Also treat exact-brand SLD on a ccTLD-shaped suffix as on-brand
+      // (amazon.ae, amazon.co.uk — brands defend their name on real ccTLDs),
+      // but never on a high-abuse TLD (amazon.tk) or generic gTLD (amazon.pizza).
+      const parts = C.registrableParts(host);
+      const tld = parts.suffix.split('.').pop();
+      const ccShaped = (C.MULTI_LABEL_SUFFIXES || []).includes(parts.suffix) || tld.length === 2;
+      const exactBrandCc = parts.sld === matchedBrand && ccShaped &&
+        !(C.SUSPICIOUS_TLDS || []).includes(tld);
+      const onBrand = exactBrandCc
+        || legit.some((d) => pageDomain === d || host.endsWith('.' + d))
         || (s.faviconHost && legit.some((d) => String(s.faviconHost).toLowerCase().endsWith(d)));
       if (!onBrand) {
         score = Math.max(score, 0.85);

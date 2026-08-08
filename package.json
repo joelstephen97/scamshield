@@ -1,6 +1,6 @@
 {
   "name": "scamshield",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "On-device scam & phishing detection for Chromium and Firefox.",
   "private": true,
   "type": "commonjs",
@@ -9,6 +9,7 @@
     "test:e2e": "playwright test",
     "test": "node --test \"tests/unit/**/*.test.js\" && playwright test",
     "build": "node scripts/build.js",
+    "gen:parity": "node scripts/gen-parity.js",
     "screenshots": "node tools/screenshots.js"
   },
   "devDependencies": {

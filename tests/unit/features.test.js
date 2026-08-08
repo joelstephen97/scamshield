@@ -59,3 +59,41 @@ test('empty string input does not throw and returns full-length vector', () => {
   assert.doesNotThrow(() => { v = extractUrlFeatures(''); });
   assert.equal(v.length, FEATURE_NAMES.length);
 });
+
+const lookalike = (u) => extractUrlFeatures(u)[FEATURE_NAMES.indexOf('brand_lookalike')];
+const tokens = (u) => extractUrlFeatures(u)[FEATURE_NAMES.indexOf('suspicious_token_count')];
+
+test('regional brand ccTLD domains are not lookalikes', () => {
+  assert.equal(lookalike('https://www.amazon.co.uk/'), 0);
+  assert.equal(lookalike('https://amazon.ae/'), 0);
+  assert.equal(lookalike('https://www.paypal.co.uk/'), 0);
+  assert.equal(lookalike('https://www.google.com.sg/'), 0);
+  assert.equal(lookalike('https://www.netflix.co.jp/'), 0);
+});
+
+test('brand infrastructure subdomains are not lookalikes', () => {
+  assert.equal(lookalike('https://login.microsoftonline.com/'), 0);
+  assert.equal(lookalike('https://accounts.google.com/'), 0);
+});
+
+test('exact brand SLD on a high-abuse TLD IS a lookalike', () => {
+  assert.equal(lookalike('http://amazon.tk/'), 1);
+  assert.equal(lookalike('http://paypal.ml/'), 1);
+});
+
+test('typosquats and embedded brands are still detected', () => {
+  assert.equal(lookalike('https://paypa1-secure.tk/login'), 1);
+  assert.equal(lookalike('http://amaz0n.xyz/login'), 1);
+  assert.equal(lookalike('http://secure-paypal.com-verify.tk/'), 1);
+});
+
+test('suspicious tokens require word boundaries', () => {
+  assert.equal(tokens('https://www.microsoft.com/windows'), 0);
+  assert.equal(tokens('https://accountant-services.example.org/'), 0);
+  assert.equal(tokens('https://freelance.example.org/'), 0);
+});
+
+test('token count matches distinct boundary-delimited tokens', () => {
+  assert.equal(tokens('http://free-gift-win.tk/claim'), 4);
+  assert.equal(tokens('https://example.com/win-a-prize'), 2);
+});
