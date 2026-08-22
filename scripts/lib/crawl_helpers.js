@@ -34,6 +34,14 @@ function parseUrlhaus(csv) {
     .map((l) => l.split('","')[2]).filter((u) => u && /^https?:\/\//i.test(u));
 }
 
+// parsePhishingDatabase(text) → string[]
+// Source: mitchellkrogza/Phishing.Database phishing-links-ACTIVE.txt — one
+// URL per line, may contain blank lines and `#` comments. Keeps only lines
+// that are themselves http(s) URLs, trimmed.
+function parsePhishingDatabase(text) {
+  return String(text).split('\n').map((l) => l.trim()).filter((l) => /^https?:\/\//i.test(l));
+}
+
 // dedupKey(label, url) → string
 // Dedup key is `label + hostname + pathname` (hostname lowercased), NOT
 // `label + regDomain` — a plain regDomain key would collapse every phishing
@@ -136,4 +144,4 @@ function readFirstZipEntry(buf) {
   return method === 8 ? zlib.inflateRawSync(data) : Buffer.from(data);
 }
 
-module.exports = { pickLoginLink, rowFor, parseOpenPhish, parseUrlhaus, readFirstZipEntry, dedupKey, shouldKeep };
+module.exports = { pickLoginLink, rowFor, parseOpenPhish, parseUrlhaus, parsePhishingDatabase, readFirstZipEntry, dedupKey, shouldKeep };

@@ -27,6 +27,11 @@ test('feed parsers', () => {
   assert.deepEqual(H.parseUrlhaus(csv), ['http://c.top/z']);
 });
 
+test('parsePhishingDatabase: keeps http(s) URL lines, skips comments/blanks/non-URLs', () => {
+  const text = '# comment\nhttp://a.tk/x\n\nhttps://b.xyz/y/z?q=1\nnot-a-url\n';
+  assert.deepEqual(H.parsePhishingDatabase(text), ['http://a.tk/x', 'https://b.xyz/y/z?q=1']);
+});
+
 // --- dedupKey / shouldKeep ---------------------------------------------------
 // The dedup key must be label+hostname+pathname (not label+regDomain), so a
 // site's homepage and its same-regDomain login page both survive, and

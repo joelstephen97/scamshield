@@ -11,9 +11,28 @@ const C = require('../engine/constants');
 
 const OUT = path.join(__dirname, '..', 'model', 'data', 'pages.jsonl');
 const UA = 'ScamShieldCrawler/0.5 (+https://github.com/joelstephen97/scamshield)';
-const CONC = 8, TIMEOUT = 8000, CAP = 1.5 * 1024 * 1024;
+const TIMEOUT = 8000, CAP = 1.5 * 1024 * 1024;
 const args = Object.fromEntries(process.argv.slice(2).map((a) => a.replace(/^--/, '').split('=')));
 const NEG_SITES = Number(args.negatives || 6000), POS_MAX = Number(args.positives || 6000);
+const CONC = Number(args.conc || 8);
+const SHUFFLE = Object.prototype.hasOwnProperty.call(args, 'shuffle');
+
+// seededShuffle(arr, seed) → array — deterministic Fisher-Yates shuffle
+// using a simple LCG PRNG, so positives don't always take the head of one
+// source (e.g. all-OpenPhish) when later sliced to POS_MAX.
+function seededShuffle(arr, seed) {
+  const out = arr.slice();
+  let s = seed >>> 0;
+  const rand = () => {
+    s = (s * 1664525 + 1013904223) >>> 0;
+    return s / 0x100000000;
+  };
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}
 
 async function fetchText(url, init) {
   const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), TIMEOUT);
@@ -47,9 +66,17 @@ function featuresOf(html, url) {
   // label/regDomain/features (via rowFor) are ever written to disk.
   const push = (label, url, f) => { if (!H.shouldKeep(seen, hostCounts, label, url)) return; rows.push(H.rowFor(label, url, f)); };
 
-  console.log('Positives…');
-  const op = await fetchText('https://openphish.com/feed.txt'); const uh = await fetchText('https://urlhaus.abuse.ch/downloads/csv_online/');
-  const posUrls = [...new Set([...(op ? H.parseOpenPhish(op.text) : []), ...(uh ? H.parseUrlhaus(uh.text) : [])])].slice(0, POS_MAX);
+  console.log('Positives… (concurrency=' + CONC + (SHUFFLE ? ', shuffle=on' : '') + ')');
+  const op = await fetchText('https://openphish.com/feed.txt');
+  const uh = await fetchText('https://urlhaus.abuse.ch/downloads/csv_online/');
+  const pd = await fetchText('https://raw.githubusercontent.com/mitchellkrogza/Phishing.Database/master/phishing-links-ACTIVE.txt');
+  const opUrls = op ? H.parseOpenPhish(op.text) : [];
+  const uhUrls = uh ? H.parseUrlhaus(uh.text) : [];
+  const pdUrls = pd ? H.parsePhishingDatabase(pd.text) : [];
+  let posUrls = [...new Set([...opUrls, ...uhUrls, ...pdUrls])];
+  console.log(`  sources: openphish=${opUrls.length} urlhaus=${uhUrls.length} phishdb=${pdUrls.length} → unique=${posUrls.length}`);
+  if (SHUFFLE) posUrls = seededShuffle(posUrls, 20260822);
+  posUrls = posUrls.slice(0, POS_MAX);
   await pool(posUrls, async (u) => { const r = await fetchText(u, { html: true }); if (!r) return; push(1, r.url, featuresOf(r.text, r.url).f); });
   console.log('  positives:', rows.length);
 
