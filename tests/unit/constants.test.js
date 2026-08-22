@@ -78,3 +78,22 @@ test('SUSPICIOUS_TLDS includes newer high-abuse TLDs', () => {
     assert.ok(C.SUSPICIOUS_TLDS.includes(t), t);
   }
 });
+
+const C2 = require('../../engine/constants');
+test('BRANDS has ≥ 55 entries with keys, names, domains', () => {
+  assert.ok(C2.BRANDS.length >= 55);
+  for (const b of C2.BRANDS) { assert.ok(b.key && b.names.length && b.domains.length); assert.equal(typeof b.nameMatch, 'boolean'); }
+});
+test('original 19 brands still in POPULAR_BRANDS (URL lookalike behaviour floor)', () => {
+  for (const k of ['paypal','google','apple','microsoft','amazon','facebook','instagram','netflix','whatsapp','binance','coinbase','metamask','dbs','maybank','wise','revolut','linkedin','outlook','gmail']) assert.ok(C2.POPULAR_BRANDS.includes(k), k);
+});
+test('brandNameIn is word-boundary and skips icon-only brands', () => {
+  assert.equal(C2.brandNameIn('Log in to PayPal'), 'paypal');
+  assert.equal(C2.brandNameIn('paypalsecure'), null);
+  assert.equal(C2.brandNameIn('Our products are on sale'), null); // "du" must not match inside "products"
+  assert.equal(C2.brandNameIn('Emirates NBD Online Banking'), 'emiratesnbd');
+});
+test('BRAND_DOMAINS carries auth domains for microsoft and uaepass', () => {
+  assert.ok(C2.BRAND_DOMAINS.microsoft.includes('microsoftonline.com'));
+  assert.ok(C2.BRAND_DOMAINS.uaepass.includes('uaepass.ae'));
+});

@@ -17,11 +17,85 @@
   const THRESHOLDS = { suspicious: 0.5, dangerous: 0.8,
     contentSuspicious: 0.9, contentCorroborateRule: 0.3, contentCorroborateModel: 0.7, iconHamming: 6 };
 
-  const POPULAR_BRANDS = [
-    'paypal', 'google', 'apple', 'microsoft', 'amazon', 'facebook',
-    'instagram', 'netflix', 'whatsapp', 'binance', 'coinbase', 'metamask',
-    'dbs', 'maybank', 'wise', 'revolut', 'linkedin', 'outlook', 'gmail'
+  // key, display names (word-boundary matched when nameMatch), legit registrable domains (incl. auth), nameMatch
+  const B = (key, names, domains, nameMatch = true) => ({ key, names, domains, nameMatch });
+  const BRANDS = [
+    B('paypal', ['paypal'], ['paypal.com']),
+    B('google', ['google', 'gmail', 'youtube'], ['google.com', 'gmail.com', 'youtube.com', 'googleapis.com', 'gstatic.com']),
+    B('apple', ['apple', 'icloud', 'apple id'], ['apple.com', 'icloud.com']),
+    B('microsoft', ['microsoft', 'office 365', 'onedrive', 'sharepoint', 'azure'], ['microsoft.com', 'live.com', 'office.com', 'outlook.com', 'microsoftonline.com', 'office365.com', 'azure.com', 'sharepoint.com', 'onedrive.com', 'msftauth.net', 'msauth.net']),
+    B('amazon', ['amazon', 'prime video'], ['amazon.com', 'amazon.ae', 'amazon.co.uk', 'amazon.de', 'amazon.fr', 'amazon.it', 'amazon.es', 'amazon.nl', 'amazon.ca', 'amazon.in', 'amazon.sg', 'amazon.sa', 'amazon.eg', 'amazon.com.au', 'amazon.com.br', 'amazon.com.mx', 'amazon.com.tr', 'amazon.co.jp', 'primevideo.com', 'media-amazon.com']),
+    B('facebook', ['facebook', 'meta'], ['facebook.com', 'fb.com', 'fbcdn.net']),
+    B('instagram', ['instagram'], ['instagram.com', 'cdninstagram.com']),
+    B('netflix', ['netflix'], ['netflix.com', 'nflxext.com']),
+    B('whatsapp', ['whatsapp'], ['whatsapp.com', 'whatsapp.net']),
+    B('binance', ['binance'], ['binance.com']),
+    B('coinbase', ['coinbase'], ['coinbase.com']),
+    B('metamask', ['metamask'], ['metamask.io']),
+    B('dbs', ['dbs bank', 'posb'], ['dbs.com.sg', 'dbs.com', 'posb.com.sg'], false),
+    B('maybank', ['maybank'], ['maybank2u.com.my', 'maybank.com']),
+    B('wise', ['wise'], ['wise.com'], false),
+    B('revolut', ['revolut'], ['revolut.com']),
+    B('linkedin', ['linkedin'], ['linkedin.com', 'licdn.com']),
+    B('outlook', ['outlook', 'hotmail'], ['outlook.com', 'live.com', 'hotmail.com']),
+    B('gmail', ['gmail'], ['gmail.com', 'google.com']),
+    B('telegram', ['telegram'], ['telegram.org', 'telegram.me', 't.me']),
+    B('steam', ['steam'], ['steampowered.com', 'steamcommunity.com'], false),
+    B('roblox', ['roblox'], ['roblox.com', 'rbxcdn.com']),
+    B('dhl', ['dhl'], ['dhl.com', 'dhl.de']),
+    B('fedex', ['fedex'], ['fedex.com']),
+    B('usps', ['usps'], ['usps.com']),
+    B('ups', ['ups'], ['ups.com'], false),
+    B('docusign', ['docusign'], ['docusign.com', 'docusign.net']),
+    B('dropbox', ['dropbox'], ['dropbox.com']),
+    B('adobe', ['adobe'], ['adobe.com', 'adobelogin.com']),
+    B('spotify', ['spotify'], ['spotify.com', 'scdn.co']),
+    B('chase', ['chase bank', 'jpmorgan'], ['chase.com', 'jpmorgan.com'], false),
+    B('wellsfargo', ['wells fargo'], ['wellsfargo.com']),
+    B('bankofamerica', ['bank of america'], ['bankofamerica.com', 'bofa.com']),
+    B('citi', ['citibank'], ['citi.com', 'citibank.com', 'citibank.ae']),
+    B('hsbc', ['hsbc'], ['hsbc.com', 'hsbc.ae', 'hsbc.co.uk', 'hsbc.com.sg', 'hsbc.com.hk']),
+    B('barclays', ['barclays'], ['barclays.co.uk', 'barclays.com']),
+    B('santander', ['santander'], ['santander.com', 'santander.co.uk', 'santander.es']),
+    B('ing', ['ing bank'], ['ing.com', 'ing.nl', 'ing.be'], false),
+    B('sbi', ['state bank of india', 'onlinesbi'], ['sbi.co.in', 'onlinesbi.sbi', 'onlinesbi.com']),
+    B('hdfc', ['hdfc'], ['hdfcbank.com', 'hdfc.com']),
+    B('icici', ['icici'], ['icicibank.com']),
+    B('emiratesnbd', ['emirates nbd'], ['emiratesnbd.com']),
+    B('adcb', ['adcb'], ['adcb.com']),
+    B('fab', ['first abu dhabi bank'], ['bankfab.com', 'fab.ae'], false),
+    B('mashreq', ['mashreq'], ['mashreq.com', 'mashreqbank.com']),
+    B('rakbank', ['rakbank'], ['rakbank.ae']),
+    B('dib', ['dubai islamic bank'], ['dib.ae'], false),
+    B('etisalat', ['etisalat', 'e& uae'], ['etisalat.ae', 'eand.com', 'eandme.ae']),
+    B('du', ['du telecom'], ['du.ae'], false),
+    B('noon', ['noon.com'], ['noon.com'], false),
+    B('aramex', ['aramex'], ['aramex.com']),
+    B('talabat', ['talabat'], ['talabat.com']),
+    B('careem', ['careem'], ['careem.com']),
+    B('adnoc', ['adnoc'], ['adnoc.ae', 'adnocdistribution.ae']),
+    B('dewa', ['dewa'], ['dewa.gov.ae']),
+    B('icp', ['icp uae', 'federal authority for identity'], ['icp.gov.ae'], false),
+    B('mohre', ['mohre'], ['mohre.gov.ae']),
+    B('dubaipolice', ['dubai police'], ['dubaipolice.gov.ae']),
+    B('uaepass', ['uae pass', 'uaepass'], ['uaepass.ae']),
+    B('emirates', ['emirates airline', 'fly emirates'], ['emirates.com'], false),
+    B('etihad', ['etihad'], ['etihad.com']),
+    B('shopee', ['shopee'], ['shopee.sg', 'shopee.com.my', 'shopee.co.id', 'shopee.ph', 'shopee.com']),
+    B('lazada', ['lazada'], ['lazada.sg', 'lazada.com.my', 'lazada.com', 'lazada.co.th']),
+    B('grab', ['grab'], ['grab.com'], false)
   ];
+  const ORIGINAL_19 = ['paypal', 'google', 'apple', 'microsoft', 'amazon', 'facebook', 'instagram', 'netflix',
+    'whatsapp', 'binance', 'coinbase', 'metamask', 'dbs', 'maybank', 'wise', 'revolut', 'linkedin', 'outlook', 'gmail'];
+  // URL lookalike matching (features.js) keeps the original 19 exactly — behaviour floor.
+  const POPULAR_BRANDS = ORIGINAL_19;
+  const NAME_RES = BRANDS.filter((b) => b.nameMatch).map((b) => [b.key,
+    new RegExp('(^|[^a-z0-9])(' + b.names.map((n) => n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/ /g, '[ \\-]?')).join('|') + ')([^a-z0-9]|$)', 'i')]);
+  function brandNameIn(text) {
+    const t = String(text || '');
+    for (const [key, re] of NAME_RES) if (re.test(t)) return key;
+    return null;
+  }
 
   // High-abuse TLDs (no leading dot).
   const SUSPICIOUS_TLDS = [
@@ -129,21 +203,7 @@
 
   // Known legitimate domains per brand (registrable form). If a page *names* a
   // brand but its domain is not in that brand's list, it's likely impersonation.
-  const BRAND_DOMAINS = {
-    paypal: ['paypal.com'], google: ['google.com', 'gmail.com', 'youtube.com'],
-    apple: ['apple.com', 'icloud.com'],
-    microsoft: ['microsoft.com', 'live.com', 'office.com', 'outlook.com',
-      'microsoftonline.com', 'office365.com', 'azure.com', 'sharepoint.com'],
-    amazon: ['amazon.com', 'amazon.ae', 'amazon.co.uk', 'amazon.de', 'amazon.fr',
-      'amazon.it', 'amazon.es', 'amazon.nl', 'amazon.ca', 'amazon.in', 'amazon.sg',
-      'amazon.sa', 'amazon.eg', 'amazon.com.au', 'amazon.com.br', 'amazon.com.mx',
-      'amazon.com.tr', 'amazon.co.jp', 'primevideo.com', 'media-amazon.com'],
-    facebook: ['facebook.com'], instagram: ['instagram.com'],
-    whatsapp: ['whatsapp.com'], netflix: ['netflix.com'], binance: ['binance.com'],
-    coinbase: ['coinbase.com'], metamask: ['metamask.io'], dbs: ['dbs.com.sg'],
-    maybank: ['maybank2u.com.my', 'maybank.com'], wise: ['wise.com'], revolut: ['revolut.com'],
-    linkedin: ['linkedin.com'], outlook: ['outlook.com', 'live.com'], gmail: ['gmail.com', 'google.com']
-  };
+  const BRAND_DOMAINS = Object.fromEntries(BRANDS.map((b) => [b.key, b.domains]));
   // Every registrable domain a known brand legitimately controls (flattened).
   const KNOWN_BRAND_REGISTRABLES = [...new Set(Object.values(BRAND_DOMAINS).flat())];
 
@@ -155,9 +215,9 @@
   const SEED_PHRASE_HINTS = ['recovery phrase', 'seed phrase', 'secret phrase', 'mnemonic', 'private key'];
 
   return {
-    FEATURE_NAMES, THRESHOLDS, POPULAR_BRANDS, SUSPICIOUS_TLDS, SUSPICIOUS_TOKENS,
+    FEATURE_NAMES, THRESHOLDS, BRANDS, POPULAR_BRANDS, SUSPICIOUS_TLDS, SUSPICIOUS_TOKENS,
     SCAM_PHRASES, SAFE_DOMAINS, BRAND_DOMAINS, SEED_PHRASE_HINTS,
     MULTI_LABEL_SUFFIXES, KNOWN_AUTH_PROVIDERS, KNOWN_BRAND_REGISTRABLES,
-    registrableParts, registrableDomain, isSafeHost
+    registrableParts, registrableDomain, isSafeHost, brandNameIn
   };
 });

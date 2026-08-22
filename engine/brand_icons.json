@@ -1,0 +1,358 @@
+{
+ "version": 1,
+ "generated": "2026-08-22",
+ "brands": [
+  {
+   "key": "paypal",
+   "hashes": [
+    "000e1f1f3f3f1c1c",
+    "0e1e171f3f3f1c18",
+    "0e0f1f1f1f3f1c1c"
+   ]
+  },
+  {
+   "key": "apple",
+   "hashes": [
+    "03458e8e8e8e4113",
+    "0586070303038605"
+   ]
+  },
+  {
+   "key": "amazon",
+   "hashes": [
+    "07010686c8700107"
+   ]
+  },
+  {
+   "key": "facebook",
+   "hashes": [
+    "0f39717171713337"
+   ]
+  },
+  {
+   "key": "instagram",
+   "hashes": [
+    "3fe0b6aaaab2e041",
+    "79d4b6aaaab2c461",
+    "3becb6aaaab2c061",
+    "7dccb6aaaab2c061"
+   ]
+  },
+  {
+   "key": "whatsapp",
+   "hashes": [
+    "0f71b8b896c6f1cf"
+   ]
+  },
+  {
+   "key": "metamask",
+   "hashes": [
+    "61713333173b2b69",
+    "f071717117336969",
+    "f07171713333694c",
+    "f07171713333694d"
+   ]
+  },
+  {
+   "key": "dbs",
+   "hashes": [
+    "33174d33334d1733",
+    "6170717171792971"
+   ]
+  },
+  {
+   "key": "maybank",
+   "hashes": [
+    "0747931a9197630f"
+   ]
+  },
+  {
+   "key": "wise",
+   "hashes": [
+    "0307131316060603",
+    "0307131316060c03",
+    "0307131216060c03",
+    "0307131616040d03"
+   ]
+  },
+  {
+   "key": "revolut",
+   "hashes": [
+    "0c0f33232e263333"
+   ]
+  },
+  {
+   "key": "linkedin",
+   "hashes": [
+    "03434b5945454503"
+   ]
+  },
+  {
+   "key": "outlook",
+   "hashes": [
+    "0e0749038fdfb333",
+    "0c0703074f533333",
+    "030fcf8f87cf1800"
+   ]
+  },
+  {
+   "key": "gmail",
+   "hashes": [
+    "41e9b93195736202",
+    "69f9b21111327262"
+   ]
+  },
+  {
+   "key": "steam",
+   "hashes": [
+    "0f1d3c3430c3470f"
+   ]
+  },
+  {
+   "key": "roblox",
+   "hashes": [
+    "0763f0ccccf03907"
+   ]
+  },
+  {
+   "key": "usps",
+   "hashes": [
+    "0301c5c698c30303"
+   ]
+  },
+  {
+   "key": "docusign",
+   "hashes": [
+    "070d0f0f07070706"
+   ]
+  },
+  {
+   "key": "dropbox",
+   "hashes": [
+    "014dcc4dcc713101"
+   ]
+  },
+  {
+   "key": "spotify",
+   "hashes": [
+    "0f0761e27c59070f",
+    "0f0761e0dd59070f"
+   ]
+  },
+  {
+   "key": "chase",
+   "hashes": [
+    "0747616161690d1f",
+    "0000a2a4ac000000"
+   ]
+  },
+  {
+   "key": "bankofamerica",
+   "hashes": [
+    "000e0b37130e0c00",
+    "000c0f35130e0c00",
+    "000c572d530e0c00"
+   ]
+  },
+  {
+   "key": "citi",
+   "hashes": [
+    "060f155795d77300",
+    "0007072747370000"
+   ]
+  },
+  {
+   "key": "hsbc",
+   "hashes": [
+    "00000f4d4d0f0000",
+    "00060f69690f0600",
+    "00060f4d4d0f0600"
+   ]
+  },
+  {
+   "key": "barclays",
+   "hashes": [
+    "0d6d4d032b0d0f0e",
+    "0d0b6b030f0f0f0e",
+    "0f2b6b030f0f0f0e"
+   ]
+  },
+  {
+   "key": "santander",
+   "hashes": [
+    "0c0c161b2b33170f",
+    "0c0c061f2b33170e",
+    "303038e8d4cce800"
+   ]
+  },
+  {
+   "key": "ing",
+   "hashes": [
+    "37737c745a5a5c6f"
+   ]
+  },
+  {
+   "key": "sbi",
+   "hashes": [
+    "0f07033333333317",
+    "6b69a9a9a9a4a1cb"
+   ]
+  },
+  {
+   "key": "hdfc",
+   "hashes": [
+    "3371e8ccccccf033"
+   ]
+  },
+  {
+   "key": "icici",
+   "hashes": [
+    "030b1b3337373c30",
+    "40c0c0c0c0c0c080"
+   ]
+  },
+  {
+   "key": "emiratesnbd",
+   "hashes": [
+    "3b3323232b232737",
+    "00e0e1c2d2d4f460"
+   ]
+  },
+  {
+   "key": "adcb",
+   "hashes": [
+    "7c3e6f4f4f2f7e7c",
+    "303c1e0f0f1e3c30",
+    "783e2f0b331f3e78",
+    "783e2f0f1f3f3e78"
+   ]
+  },
+  {
+   "key": "fab",
+   "hashes": [
+    "944cd5a597c58666",
+    "004c5d55b7272600"
+   ]
+  },
+  {
+   "key": "mashreq",
+   "hashes": [
+    "000f0b1d3d3c1000"
+   ]
+  },
+  {
+   "key": "rakbank",
+   "hashes": [
+    "0000607038180000",
+    "c9c8d1d4d4d4d6ca",
+    "8f03010101010383"
+   ]
+  },
+  {
+   "key": "dib",
+   "hashes": [
+    "175131e9c9010307",
+    "3030303030303030"
+   ]
+  },
+  {
+   "key": "etisalat",
+   "hashes": [
+    "04072b4f595b2500",
+    "0006260b230b2b02",
+    "000763b7dbc92600",
+    "0b2bcf9dd9496458"
+   ]
+  },
+  {
+   "key": "du",
+   "hashes": [
+    "7bf0f2f696d4e87f"
+   ]
+  },
+  {
+   "key": "talabat",
+   "hashes": [
+    "71f0f0f0f0f0f071"
+   ]
+  },
+  {
+   "key": "careem",
+   "hashes": [
+    "0f2b6d4d4f69330f"
+   ]
+  },
+  {
+   "key": "adnoc",
+   "hashes": [
+    "273b317b39193931"
+   ]
+  },
+  {
+   "key": "dewa",
+   "hashes": [
+    "1e6361e16171030f",
+    "040f236131330f04",
+    "0c0e232323330f06"
+   ]
+  },
+  {
+   "key": "icp",
+   "hashes": [
+    "78787a231b6b2939",
+    "6070762b1b6b2928",
+    "607032271b6b6938",
+    "838383a3a3a2a6ac"
+   ]
+  },
+  {
+   "key": "mohre",
+   "hashes": [
+    "0f0f332b172b0f0f",
+    "0f1f33330f2b270f",
+    "0f2f333b17170f0f",
+    "0f2f3333172b170f"
+   ]
+  },
+  {
+   "key": "dubaipolice",
+   "hashes": [
+    "333974644a4d3307"
+   ]
+  },
+  {
+   "key": "uaepass",
+   "hashes": [
+    "0f233355534d0307"
+   ]
+  },
+  {
+   "key": "emirates",
+   "hashes": [
+    "00359899989a1d00"
+   ]
+  },
+  {
+   "key": "shopee",
+   "hashes": [
+    "0e33336323393303",
+    "0e33312921392b33",
+    "0e32332323393307"
+   ]
+  },
+  {
+   "key": "lazada",
+   "hashes": [
+    "f3cdcccccc7171f0",
+    "5155454646464940"
+   ]
+  },
+  {
+   "key": "grab",
+   "hashes": [
+    "0000863a4daa0000",
+    "6373518daa257565"
+   ]
+  }
+ ]
+}
