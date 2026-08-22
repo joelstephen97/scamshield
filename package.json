@@ -11,7 +11,8 @@
     "build": "node scripts/build.js",
     "bundle:models": "node scripts/bundle-models.js",
     "gen:parity": "node scripts/gen-parity.js",
-    "screenshots": "node tools/screenshots.js"
+    "screenshots": "node tools/screenshots.js",
+    "crawl:pages": "node scripts/crawl-pages.js"
   },
   "devDependencies": {
     "@playwright/test": "^1.48.0",

@@ -4,6 +4,7 @@ test-results/
 playwright-report/
 _metadata/
 model/data/full*.csv
+model/data/pages.jsonl
 model/.venv/
 __pycache__/
 
