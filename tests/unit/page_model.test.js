@@ -39,3 +39,18 @@ test('decoded weight length equals 32768 (full model test via edge case)', () =>
   const r2 = PM.scorePageContent({ tokens: { 32767: 1 }, dense: [] }, MODEL2).prob;
   assert.ok(r2 !== r1, 'last weight bucket should affect prob when present');
 });
+
+test('lazy bundle pickup: ScamShield.PAGE_MODEL available on first call', () => {
+  PM._resetForTest();
+  globalThis.ScamShield = Object.assign(globalThis.ScamShield || {}, { PAGE_MODEL: MODEL });
+  const r = PM.scorePageContent({ tokens: {}, dense: [0, 0] });
+  assert.ok(!Number.isNaN(r.prob), 'should pick up lazily-set PAGE_MODEL on first call');
+  delete globalThis.ScamShield.PAGE_MODEL;
+  PM._resetForTest();
+});
+
+test('inline model without w property degrades gracefully to NaN', () => {
+  const modelNoW = { version: 1 };
+  const r = PM.scorePageContent({ tokens: {}, dense: [] }, modelNoW);
+  assert.ok(Number.isNaN(r.prob), 'model without w should return NaN, not throw');
+});

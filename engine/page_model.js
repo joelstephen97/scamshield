@@ -26,8 +26,9 @@
   function isPageModelAvailable() { return !!currentModel(); }
 
   function scorePageContent(features, model) {
-    let m = model, w = W;
-    if (m && m !== MODEL) w = decodeB64(m.w); else m = currentModel();
+    let m, w;
+    if (model && model !== MODEL) { m = model; w = (model && model.w) ? decodeB64(model.w) : null; }
+    else { m = currentModel(); w = W; }
     if (!m || !w) return { prob: NaN, top: [] };
     let z = m.bias || 0;
     const toks = (features && features.tokens) || {};
