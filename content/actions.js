@@ -18,6 +18,7 @@
 
   const SHIELD = (inner) => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l8 3v6c0 5.2-3.4 9.6-8 11-4.6-1.4-8-5.8-8-11V5l8-3z"/>' + inner + '</svg>';
   const ICON = { dangerous: SHIELD('<path d="M9.5 9.5l5 5M14.5 9.5l-5 5"/>'), suspicious: SHIELD('<path d="M12 8v5"/><path d="M12 16h.01"/>') };
+  function iconSpan(kind) { const s = el('span', 'ss-ico'); s.innerHTML = ICON[kind]; return s; }
   function showBanner(verdict, onAllow, extra) {
     if (document.querySelector('.' + NS + '-banner')) return;
     const x = extra || {};
@@ -78,15 +79,15 @@
         for (const r of (reasons || []).slice(0, 3)) { const li = el('li'); li.append(el('span', 'ss-chip', 'Page'), el('span', null, r)); ul.appendChild(li); }
         card.appendChild(ul);
         const actions = el('div', 'ss-actions');
-        const back = el('button', null, 'Cancel (recommended)');
+        const back = el('button', 'ss-primary', 'Cancel (recommended)');
         const close = () => { document.removeEventListener('keydown', onKey, true); ov.remove(); };
         const onKey = (e) => { if (e.key === 'Escape') { e.preventDefault(); close(); } };
         back.addEventListener('click', close);
-        const go = el('button', null, 'Submit anyway');
+        const go = el('button', 'ss-danger-ghost', 'Submit anyway');
         // form.submit() here runs the isolated world's native (unhooked) method,
         // so it really submits without re-triggering this guard.
         go.addEventListener('click', () => { document.removeEventListener('keydown', onKey, true); ov.remove(); form.submit(); });
-        actions.append(back, go);
+        actions.append(go, back);
         const rep = el('button', 'ss-report', 'Report a mistake'); rep.addEventListener('click', () => { rep.textContent = 'Thanks'; rep.disabled = true; onReport && onReport(); }); actions.prepend(rep);
         card.append(actions); ov.append(card);
         document.documentElement.appendChild(ov);
@@ -116,7 +117,7 @@
       // this denial is synthetic, not a user-confirmed threat.
       const t = el('div', NS + '-toast warn');
       t.setAttribute('role', 'alert');
-      t.append(el('span', null, '🛡️ '), el('span', 'ss-msg',
+      t.append(iconSpan('suspicious'), el('span', 'ss-msg',
         'ScamShield blocked a wallet request while another warning was open. Close it and retry.'));
       (document.body || document.documentElement).appendChild(t);
       setTimeout(() => t.remove(), 12000);
@@ -127,12 +128,13 @@
     ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true');
     ov.setAttribute('aria-label', 'Risky wallet request');
     const card = el('div', 'ss-card');
-    card.append(el('h3', null, '⚠️ Risky wallet request'),
+    const h3 = el('h3'); h3.append(iconSpan('suspicious'), el('span', null, 'Risky wallet request'));
+    card.append(h3,
       el('p', null, (detail.reasons && detail.reasons[0]) || 'This site is requesting a sensitive wallet action.'),
       el('p', 'ss-sub', 'If you did not expect this, cancel. Drainers use these requests to steal your crypto.'));
     const actions = el('div', 'ss-actions');
-    const cancel = el('button', null, 'Cancel (recommended)');
-    const proceed = el('button', null, 'Proceed anyway');
+    const cancel = el('button', 'ss-primary', 'Cancel (recommended)');
+    const proceed = el('button', 'ss-danger-ghost', 'Proceed anyway');
     const done = (allow) => { document.removeEventListener('keydown', onKey, true); ov.remove(); onDecision(allow); };
     const onKey = (e) => { if (e.key === 'Escape') { e.preventDefault(); done(false); } };
     cancel.addEventListener('click', () => done(false));
@@ -146,7 +148,7 @@
     const old = document.querySelector('.' + NS + '-toast'); if (old) old.remove();
     const t = el('div', NS + '-toast ' + (detail.level === 'dangerous' ? 'danger' : 'warn'));
     t.setAttribute('role', 'alert');
-    t.append(el('span', null, '📋 '), el('span', 'ss-msg', (detail.reasons && detail.reasons[0]) || 'A site changed your clipboard.'));
+    t.append(iconSpan(detail.level === 'dangerous' ? 'dangerous' : 'suspicious'), el('span', 'ss-msg', (detail.reasons && detail.reasons[0]) || 'A site changed your clipboard.'));
     const x = el('button', null, 'Dismiss'); x.addEventListener('click', () => t.remove());
     t.append(x); (document.body || document.documentElement).appendChild(t);
     setTimeout(() => t.remove(), 12000);
@@ -158,11 +160,12 @@
     ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true');
     ov.setAttribute('aria-label', 'Possible tech-support scam');
     const card = el('div', 'ss-card');
-    card.append(el('h3', null, '⛔ Possible tech-support scam'),
+    const h3 = el('h3'); h3.append(iconSpan('dangerous'), el('span', null, 'Possible tech-support scam'));
+    card.append(h3,
       el('p', null, (verdict.reasons && verdict.reasons[0]) || 'This page is using scare tactics.'),
       el('p', 'ss-sub', 'Real companies never lock your screen or demand you call a number. Do not call, and do not pay.'));
     const actions = el('div', 'ss-actions');
-    const leave = el('button', null, 'Get me out (close this page)');
+    const leave = el('button', 'ss-primary', 'Get me out (close this page)');
     const stay = el('button', null, 'Dismiss');
     const close = () => { document.removeEventListener('keydown', onKey, true); ov.remove(); };
     const onKey = (e) => { if (e.key === 'Escape') { e.preventDefault(); close(); } };

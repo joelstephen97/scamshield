@@ -199,6 +199,8 @@ test('wallet drainer request is intercepted and rejected on cancel', async ({ co
   await page.waitForTimeout(600); // let the MAIN-world hook wrap window.ethereum
   await page.click('#go');
   await expect(page.locator('.scamshield-overlay')).toBeVisible({ timeout: 6000 });
+  await expect(page.locator('.scamshield-overlay .ss-actions button').first()).toHaveClass(/ss-primary/);
+  await expect(page.locator('.scamshield-overlay .ss-actions button').nth(1)).toHaveClass(/ss-danger-ghost/);
   await page.click('.scamshield-overlay .ss-actions button'); // Cancel (first button)
   await expect.poll(() => page.evaluate(() => window.__rejected), { timeout: 5000 }).toBe(4001);
 });
