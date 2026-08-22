@@ -23,6 +23,13 @@
    ]
   },
   {
+   "key": "microsoft",
+   "hashes": [
+    "0e0749038fdfb333",
+    "030fcf8f87cf1800"
+   ]
+  },
+  {
    "key": "amazon",
    "hashes": [
     "07010686c8700107"
@@ -44,16 +51,15 @@
    ]
   },
   {
-   "key": "whatsapp",
+   "key": "netflix",
    "hashes": [
-    "0f71b8b896c6f1cf"
+    "3313131717373733"
    ]
   },
   {
-   "key": "binance",
+   "key": "whatsapp",
    "hashes": [
-    "0c0e33cccc330e0c",
-    "0e0f33cccc330f0e"
+    "0f71b8b896c6f1cf"
    ]
   },
   {
@@ -185,6 +191,12 @@
    ]
   },
   {
+   "key": "sbi",
+   "hashes": [
+    "6b69a9a9a9a4a1cb"
+   ]
+  },
+  {
    "key": "hdfc",
    "hashes": [
     "3371e8ccccccf033"
@@ -253,6 +265,12 @@
    "key": "du",
    "hashes": [
     "7bf0f2f696d4e87f"
+   ]
+  },
+  {
+   "key": "talabat",
+   "hashes": [
+    "71f0f0f0f0f0f071"
    ]
   },
   {

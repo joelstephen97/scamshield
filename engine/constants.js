@@ -23,7 +23,7 @@
     B('paypal', ['paypal'], ['paypal.com']),
     B('google', ['google', 'gmail', 'youtube'], ['google.com', 'gmail.com', 'youtube.com', 'googleapis.com', 'gstatic.com']),
     B('apple', ['apple', 'icloud', 'apple id'], ['apple.com', 'icloud.com']),
-    B('microsoft', ['microsoft', 'office 365', 'onedrive', 'sharepoint', 'azure'], ['microsoft.com', 'live.com', 'office.com', 'outlook.com', 'microsoftonline.com', 'office365.com', 'azure.com', 'sharepoint.com', 'onedrive.com', 'msftauth.net', 'msauth.net']),
+    B('microsoft', ['microsoft', 'office 365', 'onedrive', 'sharepoint', 'azure'], ['microsoft.com', 'live.com', 'office.com', 'outlook.com', 'microsoftonline.com', 'office365.com', 'azure.com', 'sharepoint.com', 'onedrive.com', 'msftauth.net', 'msauth.net', 'hotmail.com']),
     B('amazon', ['amazon', 'prime video'], ['amazon.com', 'amazon.ae', 'amazon.co.uk', 'amazon.de', 'amazon.fr', 'amazon.it', 'amazon.es', 'amazon.nl', 'amazon.ca', 'amazon.in', 'amazon.sg', 'amazon.sa', 'amazon.eg', 'amazon.com.au', 'amazon.com.br', 'amazon.com.mx', 'amazon.com.tr', 'amazon.co.jp', 'primevideo.com', 'media-amazon.com']),
     B('facebook', ['facebook', 'meta'], ['facebook.com', 'fb.com', 'fbcdn.net']),
     B('instagram', ['instagram'], ['instagram.com', 'cdninstagram.com']),

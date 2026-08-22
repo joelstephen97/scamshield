@@ -78,7 +78,7 @@ BRAND_DOMAINS = {
     'apple': ['apple.com','icloud.com'],
     'microsoft': ['microsoft.com','live.com','office.com','outlook.com',
         'microsoftonline.com','office365.com','azure.com','sharepoint.com',
-        'onedrive.com','msftauth.net','msauth.net'],
+        'onedrive.com','msftauth.net','msauth.net','hotmail.com'],
     'amazon': ['amazon.com','amazon.ae','amazon.co.uk','amazon.de','amazon.fr',
         'amazon.it','amazon.es','amazon.nl','amazon.ca','amazon.in','amazon.sg',
         'amazon.sa','amazon.eg','amazon.com.au','amazon.com.br','amazon.com.mx',
