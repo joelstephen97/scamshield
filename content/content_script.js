@@ -160,14 +160,14 @@
     const { signals, foreignForms, scamBlocks } = collectSignals();
     const urlRules = SS.scoreUrl(location.href);
     let domRules = SS.scoreDom(signals);
-    let modelProb = null, contentProb = null, iconMatch = false;
+    let modelProb = null, contentProb = null, iconMatch = false, pf = null;
     const borderline = Math.max(urlRules.score, domRules.score) >= 0.3 || signals.hasPasswordField;
     if (borderline && SS.isAvailable && SS.isAvailable()) modelProb = await SS.predict(SS.extractUrlFeatures(location.href));
     if (settings.pageAnalysis !== false && needsPageAnalysis(signals, urlRules, domRules)) {
       try {
         const iconsP = withTimeout(send('hashIcons', { urls: iconCandidates() }), 1200);
         if (SS.isPageModelAvailable && SS.isPageModelAvailable()) {
-          const pf = SS.extractPageFeatures(document, { host: location.hostname });
+          pf = SS.extractPageFeatures(document, { host: location.hostname });
           const r = SS.scorePageContent(pf); if (!Number.isNaN(r.prob)) contentProb = r.prob;
         }
         const icons = await iconsP;
@@ -179,7 +179,15 @@
     }
     const verdict = SS.fuse({ modelProb, urlRules, domRules, contentProb, iconMatch });
     try { window.__ssLastVerdict = verdict; } catch (_) {}
-    await send('reportVerdict', { verdict });
+    let report = null;
+    try {
+      report = {
+        url: location.href, urlFeatures: Array.from(SS.extractUrlFeatures(location.href)),
+        pageFeatures: (pf ? { tokens: pf.tokens, dense: pf.dense } : null),
+        iconMatches: signals.iconMatches || [], detectors: ['page']
+      };
+    } catch (_) { report = null; }
+    await send('reportVerdict', { verdict, report });
     if (verdict.level === 'dangerous') send('bumpThreats');
 
     if (verdict.level !== 'safe') {
