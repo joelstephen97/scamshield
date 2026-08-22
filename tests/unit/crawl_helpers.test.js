@@ -27,6 +27,48 @@ test('feed parsers', () => {
   assert.deepEqual(H.parseUrlhaus(csv), ['http://c.top/z']);
 });
 
+// --- dedupKey / shouldKeep ---------------------------------------------------
+// The dedup key must be label+hostname+pathname (not label+regDomain), so a
+// site's homepage and its same-regDomain login page both survive, and
+// distinct phishing URLs sharing a free-hosting regDomain each count (up to
+// the per-host cap for positives).
+
+test('shouldKeep: homepage + login page on one host are both kept', () => {
+  const seen = new Set(); const hostCounts = new Map();
+  assert.equal(H.shouldKeep(seen, hostCounts, 0, 'https://shop.com/'), true);
+  assert.equal(H.shouldKeep(seen, hostCounts, 0, 'https://shop.com/login'), true);
+});
+
+test('shouldKeep: the same URL seen twice — second is dropped', () => {
+  const seen = new Set(); const hostCounts = new Map();
+  assert.equal(H.shouldKeep(seen, hostCounts, 1, 'https://evil.tk/x'), true);
+  assert.equal(H.shouldKeep(seen, hostCounts, 1, 'https://evil.tk/x'), false);
+});
+
+test('shouldKeep: 6 positive paths on one host — only 5 kept (default cap)', () => {
+  const seen = new Set(); const hostCounts = new Map();
+  const kept = [];
+  for (let i = 0; i < 6; i++) {
+    kept.push(H.shouldKeep(seen, hostCounts, 1, `https://kit.vercel.app/p${i}`));
+  }
+  assert.deepEqual(kept, [true, true, true, true, true, false]);
+});
+
+test('shouldKeep: negatives are not capped by the positive per-host limit', () => {
+  const seen = new Set(); const hostCounts = new Map();
+  const kept = [];
+  for (let i = 0; i < 6; i++) {
+    kept.push(H.shouldKeep(seen, hostCounts, 0, `https://tranco-site.com/p${i}`));
+  }
+  assert.deepEqual(kept, [true, true, true, true, true, true]);
+});
+
+test('dedupKey: differs by label, hostname, and pathname', () => {
+  assert.notEqual(H.dedupKey(0, 'https://shop.com/'), H.dedupKey(1, 'https://shop.com/'));
+  assert.notEqual(H.dedupKey(0, 'https://shop.com/'), H.dedupKey(0, 'https://shop.com/login'));
+  assert.equal(H.dedupKey(0, 'https://Shop.com/login'), H.dedupKey(0, 'https://shop.com/login'));
+});
+
 // --- readFirstZipEntry: robust minimal zip reader ---------------------------
 // Builds a tiny 1-file zip archive in-process (no external tooling), in two
 // variants: (a) sizes present in the local file header (the common case), and

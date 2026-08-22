@@ -39,8 +39,13 @@ function featuresOf(html, url) {
 }
 
 (async () => {
-  const rows = []; const seen = new Set();
-  const push = (label, url, f) => { const r = H.rowFor(label, url, f); if (seen.has(label + r.regDomain)) return; seen.add(label + r.regDomain); rows.push(r); };
+  const rows = []; const seen = new Set(); const hostCounts = new Map();
+  // seen/hostCounts key on hostname+pathname (dedupKey) so a site's homepage
+  // and its login page (same regDomain, different path) both survive, and so
+  // positives sharing a free-hosting regDomain (e.g. *.vercel.app) are kept
+  // per-URL, capped at 5/hostname — see shouldKeep in crawl_helpers.js. Only
+  // label/regDomain/features (via rowFor) are ever written to disk.
+  const push = (label, url, f) => { if (!H.shouldKeep(seen, hostCounts, label, url)) return; rows.push(H.rowFor(label, url, f)); };
 
   console.log('Positives…');
   const op = await fetchText('https://openphish.com/feed.txt'); const uh = await fetchText('https://urlhaus.abuse.ch/downloads/csv_online/');

@@ -34,6 +34,40 @@ function parseUrlhaus(csv) {
     .map((l) => l.split('","')[2]).filter((u) => u && /^https?:\/\//i.test(u));
 }
 
+// dedupKey(label, url) → string
+// Dedup key is `label + hostname + pathname` (hostname lowercased), NOT
+// `label + regDomain` — a plain regDomain key would collapse every phishing
+// page hosted on a shared free-hosting registrable domain (e.g. *.vercel.app)
+// into a single row, and would also drop a negative site's login page
+// because it shares the homepage's regDomain. hostname/pathname are used
+// only for this in-memory key; the row written to disk (via rowFor) still
+// carries only label/regDomain/features.
+function dedupKey(label, url) {
+  const u = new URL(url);
+  return `${label}|${u.hostname.toLowerCase()}|${u.pathname}`;
+}
+
+// shouldKeep(seenSet, hostCounts, label, url, maxPerHost=5) → boolean
+// Pure decision + mutation helper: returns whether (label, url) should be
+// kept, and — only when it returns true — records it into `seenSet` (so an
+// identical (label, hostname, pathname) is never kept twice) and, for
+// positives only, increments `hostCounts` for that hostname so a single
+// phishing-kit host can contribute at most `maxPerHost` rows. Negatives are
+// never capped by `maxPerHost` — a legitimate site's homepage + login page
+// (2 rows) should always both survive.
+function shouldKeep(seenSet, hostCounts, label, url, maxPerHost = 5) {
+  const key = dedupKey(label, url);
+  if (seenSet.has(key)) return false;
+  const hostname = new URL(url).hostname.toLowerCase();
+  if (label === 1) {
+    const count = hostCounts.get(hostname) || 0;
+    if (count >= maxPerHost) return false;
+  }
+  seenSet.add(key);
+  if (label === 1) hostCounts.set(hostname, (hostCounts.get(hostname) || 0) + 1);
+  return true;
+}
+
 // readFirstZipEntry(buf) → Buffer
 // Minimal, dependency-free reader for the single-entry zip archives used by
 // feed downloads (e.g. the Tranco top-1m.csv.zip). Reads the first (and only)
@@ -85,16 +119,15 @@ function readFirstZipEntry(buf) {
     }
     method = buf.readUInt16LE(cdOffset + 10);
     compSize = buf.readUInt32LE(cdOffset + 20);
-    const cdNameLen = buf.readUInt16LE(cdOffset + 28);
-    const cdExtraLen = buf.readUInt16LE(cdOffset + 30);
     const localHeaderOffset = buf.readUInt32LE(cdOffset + 42);
     if (buf.readUInt32LE(localHeaderOffset) !== SIG_LOCAL) {
       throw new Error('readFirstZipEntry: local header offset from central directory is invalid');
     }
+    // Filename/extra lengths at CD+28/CD+30 aren't needed: we re-read the
+    // authoritative name/extra lengths straight from the local header itself.
     nameLen = buf.readUInt16LE(localHeaderOffset + 26);
     extraLen = buf.readUInt16LE(localHeaderOffset + 28);
     dataStart = localHeaderOffset + 30 + nameLen + extraLen;
-    void cdNameLen; void cdExtraLen; // read for documentation/robustness, not needed further
   } else {
     dataStart = 30 + nameLen + extraLen;
   }
@@ -103,4 +136,4 @@ function readFirstZipEntry(buf) {
   return method === 8 ? zlib.inflateRawSync(data) : Buffer.from(data);
 }
 
-module.exports = { pickLoginLink, rowFor, parseOpenPhish, parseUrlhaus, readFirstZipEntry };
+module.exports = { pickLoginLink, rowFor, parseOpenPhish, parseUrlhaus, readFirstZipEntry, dedupKey, shouldKeep };
