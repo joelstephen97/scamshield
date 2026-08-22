@@ -50,17 +50,17 @@ async function hashIconUrl(url) {
   const hit = iconCache.get(url);
   if (hit && Date.now() - hit.ts < ICON_TTL) return hit.hash;
   let hash = null;
+  let t = null;
   try {
-    const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), ICON_TIMEOUT);
+    const ctl = new AbortController(); t = setTimeout(() => ctl.abort(), ICON_TIMEOUT);
     const res = await fetch(url, { credentials: 'omit', redirect: 'follow', signal: ctl.signal, cache: 'force-cache' });
-    clearTimeout(t);
     const ct = res.headers.get('content-type') || '';
     const len = Number(res.headers.get('content-length') || 0);
     if (res.ok && len <= ICON_MAX_BYTES && (/^image\//i.test(ct) || /\.ico(\?|$)/i.test(url)) && !/svg/i.test(ct)) {
       const blob = await res.blob();
       if (blob.size <= ICON_MAX_BYTES) hash = await globalThis.ScamShield.hashImageBlob(blob);
     }
-  } catch (_) { hash = null; }
+  } catch (_) { hash = null; } finally { clearTimeout(t); }
   iconCache.set(url, { hash, ts: Date.now() });
   if (iconCache.size > 2000) iconCache.delete(iconCache.keys().next().value);
   return hash;

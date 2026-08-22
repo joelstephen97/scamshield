@@ -145,6 +145,42 @@ test('brand icon + password form on a non-brand host → danger banner with resc
   await expect(page.locator('.scamshield-banner.danger')).toBeVisible({ timeout: 8000 });
   await expect(page.locator('.scamshield-banner .ss-rescue')).toBeVisible();
 });
+// Regression for a fix-round-2 defect: an on-brand icon match (a site's own
+// favicon matching its own brand in the table) must NOT corroborate the
+// content model into "dangerous" -- only a genuine visual-impersonation
+// mismatch (brand-impersonation-visual, i.e. the icon belongs to a brand
+// whose real domain this page is NOT on) may do that. www.aramex.com serving
+// its own (test) brand icon is the on-brand case.
+//
+// Note: the fixture filename is deliberately NOT "content-suspicious-icon.html"
+// (as first suggested) -- that exact path text alone drives the URL model to
+// ~0.92 regardless of host (a pre-existing, path-length-sensitive quirk of the
+// trained model, confirmed on plain https://www.google.com/ too), which would
+// corroborate via modelProb >= 0.7 and mask whether the iconMatch fix actually
+// works. "same-brand-icon.html" was empirically verified to score ~0.0005 on
+// the URL model so this test isolates the icon-corroboration path cleanly.
+test('on-brand icon match does not corroborate the content model to dangerous', async ({ context }) => {
+  const sw = context.serviceWorkers()[0];
+  await sw.evaluate((h) => { globalThis.ScamShield.BRAND_ICONS = { version: 1, brands: [{ key: 'aramex', hashes: [h] }] }; globalThis.__iconCache && globalThis.__iconCache.clear(); }, process.env.SS_TEST_ICON_HASH || '1818181818181818');
+  const page = await context.newPage();
+  // Attach CDP before navigating so we capture the extension's isolated-world
+  // execution context (window.__ssLastVerdict lives there, not in the page's
+  // main world that page.evaluate() targets by default).
+  const cdp = await context.newCDPSession(page);
+  const execContexts = [];
+  cdp.on('Runtime.executionContextCreated', (e) => execContexts.push(e.context));
+  await cdp.send('Runtime.enable');
+  await page.goto('https://www.aramex.com:5600/same-brand-icon.html');
+  await expect(page.locator('.scamshield-banner.suspicious')).toBeVisible({ timeout: 8000 });
+  await expect(page.locator('.scamshield-banner.danger')).toHaveCount(0);
+  const extCtx = execContexts.find((c) => c.auxData && c.auxData.type === 'isolated' && /^chrome-extension:\/\//.test(c.origin || ''));
+  expect(extCtx).toBeTruthy();
+  const level = await cdp.send('Runtime.evaluate', {
+    expression: 'window.__ssLastVerdict && window.__ssLastVerdict.level',
+    contextId: extCtx.id, returnByValue: true
+  }).then((r) => r.result.value);
+  expect(level).toBe('suspicious');
+});
 test('wallet drainer request is intercepted and rejected on cancel', async ({ context }) => {
   const page = await context.newPage();
   await page.goto(BASE + '/drainer.html');

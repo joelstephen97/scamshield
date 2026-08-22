@@ -173,7 +173,7 @@
         const icons = await iconsP;
         if (icons && icons.matches && icons.matches.length) {
           signals.iconMatches = icons.matches; domRules = SS.scoreDom(signals);
-          iconMatch = (domRules.flags || []).some((f) => f === 'brand-impersonation-visual') || icons.matches.length > 0;
+          iconMatch = (domRules.flags || []).includes('brand-impersonation-visual');
         }
       } catch (_) { /* page analysis is best-effort */ }
     }
