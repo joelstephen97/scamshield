@@ -11,7 +11,8 @@ Two tiny on-device models, trained here, shipped as JSON bundled into `.js` file
 ## Page-content model (`page-content.json`, logistic regression over hashed tokens + 16 dense features)
 - Data: `npm run crawl:pages` → `model/data/pages.jsonl` (gitignored; feature rows only — no HTML/text/URL paths).
 - Train: `model/.venv/Scripts/python.exe model/train_page.py` → weights + `page_parity.json`.
-- Last run (0.5.0): rows 2917 (pos 375 / neg 2542 / legit-login 269), 1915 distinct registrable domains, grouped-holdout AUC 0.886 (C=0.03, tried grid [0.03, 0.1, 0.3, 1, 3, 10] — best AUC still below the 0.97 gate), threshold 0.54 (login FPR 0 % on 52 holdout legit-login pages, ≤ 0.5 % target met), recall@threshold 0.482 on the holdout.
+- Last run (0.5.0): rows 2917 (pos 375 / neg 2542 / legit-login 269), 1915 distinct registrable domains, grouped-holdout AUC 0.886 (C=0.03, tried grid [0.03, 0.1, 0.3, 1, 3, 10] — best AUC still below the 0.97 gate), threshold 0.80 (min-threshold gate, chosen for precision — see below), recall@threshold 0.107, precision@threshold 1.000, FPR(all legit) 0.00 %, FPR(legit login) 0.00 % on 52 holdout legit-login pages (both ≤ 0.5 % target met).
+- Threshold chosen for precision: the content model alone can only raise a page to "suspicious"; recall will improve as the opt-in reporting relay supplies more positives.
 - Positives are below the ≥3000 target because live scam/phishing feeds are small on any given day; this is expected to improve as the opt-in reporting relay becomes the ongoing data source, and the model should be retrained periodically as `pages.jsonl` grows.
 - Feature extractor is `engine/page_features.js` (shared by browser and crawler) — never reimplement it in Python.
 
