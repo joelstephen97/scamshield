@@ -202,3 +202,13 @@ test('wallet drainer request is intercepted and rejected on cancel', async ({ co
   await page.click('.scamshield-overlay .ss-actions button'); // Cancel (first button)
   await expect.poll(() => page.evaluate(() => window.__rejected), { timeout: 5000 }).toBe(4001);
 });
+
+test('banner has Leave + Report actions and the overlay has evidence rows', async ({ context }) => {
+  const page = await context.newPage(); await page.goto(BASE + '/phishing-login.html');
+  await expect(page.locator('.scamshield-banner.danger .ss-leave')).toBeVisible({ timeout: 8000 });
+  await expect(page.locator('.scamshield-banner .ss-report')).toBeVisible();
+  await page.fill('input[name="pw"]', 'x'); await page.click('button[type="submit"]');
+  await expect(page.locator('.scamshield-overlay .ss-evidence li')).not.toHaveCount(0);
+  await page.click('.scamshield-banner .ss-leave');
+  await expect.poll(() => page.url(), { timeout: 5000 }).not.toContain('phishing-login');
+});

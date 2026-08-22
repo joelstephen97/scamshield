@@ -231,18 +231,19 @@
       // Impersonation verdicts get a rescue link to the brand's real site.
       if (verdict.brand && SS.BRAND_DOMAINS && SS.BRAND_DOMAINS[verdict.brand]) {
         verdict.brandUrl = 'https://' + SS.BRAND_DOMAINS[verdict.brand][0] + '/';
+        verdict.brandLabel = SS.brandDisplayName ? SS.brandDisplayName(verdict.brand) : verdict.brand;
       }
       SS.actions.showBanner(verdict, async () => {
         await send('allowSite', { domain: pageDomain });
         SS.actions.clearAll();
-      });
+      }, { onLeave: () => send('leaveTab'), onReport: () => send('userReport', { label: 'false_positive' }) });
       // One-time-ever support ask, only after ScamShield visibly earned it.
       if (verdict.level === 'dangerous' && !settings.supportAskShown && SS.actions.supportToast) {
         send('setSettings', { patch: { supportAskShown: true } });
         setTimeout(() => SS.actions.supportToast(), 1500);
       }
     }
-    if (foreignForms.length) SS.actions.guardForms(foreignForms);
+    if (foreignForms.length) SS.actions.guardForms(foreignForms, verdict.reasons, () => send('userReport', { label: 'false_positive' }));
     if (settings.hideScamContent && scamBlocks.length) SS.actions.hideScamBlocks(scamBlocks);
   }
 

@@ -16,26 +16,27 @@
     });
   }
 
-  function showBanner(verdict, onAllow) {
+  const SHIELD = (inner) => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l8 3v6c0 5.2-3.4 9.6-8 11-4.6-1.4-8-5.8-8-11V5l8-3z"/>' + inner + '</svg>';
+  const ICON = { dangerous: SHIELD('<path d="M9.5 9.5l5 5M14.5 9.5l-5 5"/>'), suspicious: SHIELD('<path d="M12 8v5"/><path d="M12 16h.01"/>') };
+  function showBanner(verdict, onAllow, extra) {
     if (document.querySelector('.' + NS + '-banner')) return;
-    const bar = el('div', NS + '-banner ' + (verdict.level === 'dangerous' ? 'danger' : 'suspicious'));
+    const x = extra || {};
+    const danger = verdict.level === 'dangerous';
+    const bar = el('div', NS + '-banner ' + (danger ? 'danger' : 'suspicious'));
     bar.setAttribute('role', 'alert');
-    const icon = el('span', null, verdict.level === 'dangerous' ? '⛔' : '⚠️');
-    const msg = el('span', 'ss-msg',
-      (verdict.level === 'dangerous' ? 'Warning: this page looks dangerous. ' : 'Caution: this page looks suspicious. ')
-      + (verdict.reasons[0] || ''));
-    bar.append(icon, msg);
-    if (verdict.brandUrl) {
-      // Turn the warning into a rescue: one click to the brand's real site.
-      const rescue = el('button', 'ss-rescue', 'Take me to the real site');
-      rescue.addEventListener('click', () => { location.href = verdict.brandUrl; });
-      bar.appendChild(rescue);
-    }
-    const trust = el('button', null, 'Trust this site');
-    trust.addEventListener('click', () => { onAllow && onAllow(); bar.remove(); });
-    const close = el('button', null, 'Dismiss');
-    close.addEventListener('click', () => bar.remove());
-    bar.append(trust, close);
+    const ico = el('span', 'ss-ico'); ico.innerHTML = ICON[danger ? 'dangerous' : 'suspicious'];
+    const text = el('div', 'ss-text');
+    const brand = verdict.brandLabel ? ' — looks like ' + verdict.brandLabel + ", but isn't" : '';
+    text.append(el('b', null, (danger ? 'Dangerous page' : 'Suspicious page') + brand), el('span', null, verdict.reasons[0] || (danger ? "Don't enter passwords or card details here." : 'Take care before typing anything here.')));
+    const acts = el('div', 'ss-acts');
+    if (danger) { const leave = el('button', 'ss-leave', 'Leave this page'); leave.addEventListener('click', () => { x.onLeave ? x.onLeave() : history.back(); }); acts.appendChild(leave); }
+    if (verdict.brandUrl) { const rescue = el('button', 'ss-rescue', 'Take me to the real ' + (verdict.brandLabel || 'site')); rescue.addEventListener('click', () => { location.href = verdict.brandUrl; }); acts.appendChild(rescue); }
+    if (!danger) { const why = el('button', 'ss-why', 'Show why'); why.addEventListener('click', () => { text.querySelector('span').textContent = verdict.reasons.slice(0, 3).join(' · '); why.remove(); }); acts.appendChild(why); }
+    const trust = el('button', 'ss-trust', 'Trust this site'); trust.addEventListener('click', () => { onAllow && onAllow(); bar.remove(); });
+    const report = el('button', 'ss-report', 'Report a mistake'); report.addEventListener('click', () => { report.textContent = 'Thanks'; report.disabled = true; x.onReport && x.onReport(); });
+    const close = el('button', 'ss-x', '✕'); close.setAttribute('aria-label', 'Dismiss'); close.addEventListener('click', () => bar.remove());
+    acts.append(trust, report, close);
+    bar.append(ico, text, acts);
     (document.body || document.documentElement).appendChild(bar);
   }
 
@@ -57,7 +58,7 @@
   // requestSubmit) — the path credential phishing relies on. It does NOT catch
   // programmatic HTMLFormElement.submit(), which bypasses event listeners and
   // would require a MAIN-world injected hook (deferred to a later version).
-  function guardForms(foreignForms) {
+  function guardForms(foreignForms, reasons, onReport) {
     foreignForms.forEach((form) => {
       if (form.__scamshieldGuarded) return;
       form.__scamshieldGuarded = true;
@@ -73,6 +74,9 @@
           el('h3', null, 'Stop — possible phishing'),
           el('p', null, 'This form sends your password to a different website than the one you are visiting. This is a common way scammers steal logins.')
         );
+        const ul = el('ul', 'ss-evidence');
+        for (const r of (reasons || []).slice(0, 3)) { const li = el('li'); li.append(el('span', 'ss-chip', 'Page'), el('span', null, r)); ul.appendChild(li); }
+        card.appendChild(ul);
         const actions = el('div', 'ss-actions');
         const back = el('button', null, 'Cancel (recommended)');
         const close = () => { document.removeEventListener('keydown', onKey, true); ov.remove(); };
@@ -82,7 +86,9 @@
         // form.submit() here runs the isolated world's native (unhooked) method,
         // so it really submits without re-triggering this guard.
         go.addEventListener('click', () => { document.removeEventListener('keydown', onKey, true); ov.remove(); form.submit(); });
-        actions.append(back, go); card.append(actions); ov.append(card);
+        actions.append(back, go);
+        const rep = el('button', 'ss-report', 'Report a mistake'); rep.addEventListener('click', () => { rep.textContent = 'Thanks'; rep.disabled = true; onReport && onReport(); }); actions.prepend(rep);
+        card.append(actions); ov.append(card);
         document.documentElement.appendChild(ov);
         document.addEventListener('keydown', onKey, true);
         back.focus();

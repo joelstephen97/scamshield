@@ -1,28 +1,31 @@
-.scamshield-banner{position:fixed;top:0;left:0;right:0;z-index:2147483647;
-  font:14px/1.4 system-ui,sans-serif;padding:10px 14px;display:flex;gap:10px;
-  align-items:center;color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.3)}
-.scamshield-banner.danger{background:#c0392b}
-.scamshield-banner.suspicious{background:#e1a200;color:#222}
-.scamshield-banner .ss-msg{flex:1}
-.scamshield-banner button{font:inherit;border:0;border-radius:6px;padding:4px 10px;
-  cursor:pointer;background:rgba(255,255,255,.9);color:#111}
+.scamshield-banner,.scamshield-overlay,.scamshield-toast{--ss-surface:#fff;--ss-text:#15211B;--ss-muted:#5E6F67;--ss-hair:#DFE7E2;--ss-accent:#0B6E4F;--ss-danger:#B42318;--ss-warn:#9A5B00;--ss-warn-bg:#FFF1D6;--ss-radius:10px;--ss-chip:6px;
+  font:13px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ss-text);box-sizing:border-box}
+.scamshield-banner *,.scamshield-overlay *,.scamshield-toast *{box-sizing:border-box;font:inherit}
+@media (prefers-color-scheme: dark){.scamshield-banner,.scamshield-overlay,.scamshield-toast{--ss-surface:#171F1B;--ss-text:#E7EEEA;--ss-muted:#9AAAA2;--ss-hair:#27342D;--ss-accent:#3FB489;--ss-danger:#F87171;--ss-warn:#FBBF24;--ss-warn-bg:#2A2110}}
+.scamshield-banner{position:fixed;top:8px;left:8px;right:8px;z-index:2147483647;border-radius:var(--ss-radius);padding:10px 12px;display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;box-shadow:0 8px 28px rgba(0,0,0,.25)}
+.scamshield-banner.danger{background:var(--ss-danger);color:#fff}
+.scamshield-banner.suspicious{background:var(--ss-warn-bg);color:var(--ss-text);border:1px solid var(--ss-warn)}
+.scamshield-banner .ss-ico{width:20px;height:20px;flex:none} .scamshield-banner .ss-ico svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.scamshield-banner .ss-text{flex:1 1 320px;min-width:0} .scamshield-banner .ss-text b{display:block;font-weight:600} .scamshield-banner .ss-text span{opacity:.9}
+.scamshield-banner .ss-acts{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.scamshield-banner button{border:1px solid transparent;border-radius:var(--ss-chip);padding:6px 10px;cursor:pointer;line-height:1.2;background:transparent;color:inherit}
+.scamshield-banner.danger .ss-rescue,.scamshield-banner.danger .ss-leave{background:#fff;color:var(--ss-danger);font-weight:600}
+.scamshield-banner.danger .ss-trust,.scamshield-banner.danger .ss-report,.scamshield-banner.danger .ss-x{border-color:rgba(255,255,255,.45);color:#fff}
+.scamshield-banner.suspicious .ss-why{background:var(--ss-warn);color:#fff;font-weight:600} .scamshield-banner.suspicious .ss-trust,.scamshield-banner.suspicious .ss-report,.scamshield-banner.suspicious .ss-x{color:var(--ss-warn)}
+.scamshield-banner button:focus-visible{outline:2px solid #fff;outline-offset:2px}
 .scamshield-hidden-block{position:relative;filter:grayscale(1) blur(2px);opacity:.5}
-.scamshield-hidden-tag{position:absolute;top:4px;left:4px;background:#0b6e4f;color:#fff;
-  font:11px/1 system-ui;padding:3px 6px;border-radius:4px;z-index:2}
-.scamshield-overlay{position:fixed;inset:0;z-index:2147483646;background:rgba(0,0,0,.6);
-  display:flex;align-items:center;justify-content:center}
-.scamshield-overlay .ss-card{background:#fff;color:#111;max-width:360px;padding:20px;
-  border-radius:10px;font:14px/1.5 system-ui,sans-serif}
-.scamshield-overlay h3{margin:0 0 8px;color:#c0392b}
-.scamshield-overlay .ss-actions{display:flex;gap:8px;margin-top:14px;justify-content:flex-end}
-.scamshield-overlay .ss-sub{color:#666;font-size:13px;margin:6px 0 0}
-.scamshield-overlay button{font:inherit;border:0;border-radius:6px;padding:6px 12px;cursor:pointer;background:#eee;color:#111}
-.scamshield-overlay .ss-actions button:last-child{background:#c0392b;color:#fff}
-.scamshield-toast{position:fixed;right:16px;bottom:16px;z-index:2147483647;max-width:360px;
-  background:#fff;color:#222;border-left:5px solid #e1a200;box-shadow:0 6px 24px rgba(0,0,0,.25);
-  border-radius:8px;padding:12px 14px;font:14px/1.4 system-ui,sans-serif;display:flex;gap:8px;align-items:flex-start}
-.scamshield-toast.danger{border-left-color:#c0392b}
-.scamshield-toast .ss-msg{flex:1}
-.scamshield-toast button{font:inherit;margin-left:8px;border:0;background:#f0f0f0;border-radius:6px;padding:4px 8px;cursor:pointer}
-.scamshield-toast a{flex:1;color:#0b6e4f;text-decoration:underline;cursor:pointer}
-.scamshield-banner .ss-rescue{background:#0b6e4f;color:#fff;font-weight:600}
+.scamshield-hidden-tag{position:absolute;top:4px;left:4px;background:#0B6E4F;color:#fff;font:11px/1 system-ui;padding:3px 6px;border-radius:4px;z-index:2}
+.scamshield-overlay{position:fixed;inset:0;z-index:2147483646;background:rgba(10,16,13,.55);display:flex;align-items:center;justify-content:center}
+.scamshield-overlay .ss-card{background:var(--ss-surface);color:var(--ss-text);width:360px;max-width:92vw;padding:16px;border-radius:var(--ss-radius);box-shadow:0 8px 28px rgba(0,0,0,.35)}
+.scamshield-overlay h3{margin:0;font-size:16px;font-weight:600;color:var(--ss-danger);display:flex;align-items:center;gap:8px}
+.scamshield-overlay .ss-sub{color:var(--ss-muted);font-size:13px;margin:6px 0 0}
+.scamshield-overlay .ss-evidence{list-style:none;margin:10px 0 0;padding:0} .scamshield-overlay .ss-evidence li{padding:7px 0;border-top:1px solid var(--ss-hair);display:flex;gap:8px} .scamshield-overlay .ss-evidence li:first-child{border-top:0;padding-top:0}
+.scamshield-overlay .ss-chip{font-size:11px;line-height:1;padding:4px 7px;border-radius:var(--ss-chip);background:#EEF1EF;color:var(--ss-muted);flex:none}
+.scamshield-overlay .ss-actions{display:flex;gap:8px;margin-top:14px;justify-content:flex-end;align-items:center}
+.scamshield-overlay button{border:1px solid var(--ss-hair);border-radius:var(--ss-chip);padding:6px 12px;cursor:pointer;background:var(--ss-surface);color:var(--ss-text)}
+.scamshield-overlay .ss-actions button:last-child{background:var(--ss-accent);color:#fff;border-color:var(--ss-accent);font-weight:600}
+.scamshield-overlay .ss-report{margin-right:auto;border-color:transparent;color:var(--ss-accent)}
+.scamshield-toast{position:fixed;right:16px;bottom:16px;z-index:2147483647;max-width:360px;background:var(--ss-surface);color:var(--ss-text);border-left:4px solid var(--ss-warn);box-shadow:0 8px 28px rgba(0,0,0,.25);border-radius:var(--ss-radius);padding:12px 14px;display:flex;gap:8px;align-items:flex-start}
+.scamshield-toast.danger{border-left-color:var(--ss-danger)} .scamshield-toast .ss-msg{flex:1}
+.scamshield-toast button{margin-left:8px;border:1px solid var(--ss-hair);background:var(--ss-surface);color:var(--ss-text);border-radius:var(--ss-chip);padding:4px 8px;cursor:pointer}
+.scamshield-toast a{flex:1;color:var(--ss-accent);text-decoration:underline;cursor:pointer}
