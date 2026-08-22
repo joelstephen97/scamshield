@@ -1,0 +1,4 @@
+{
+  "functions": { "api/*.js": { "maxDuration": 10 } },
+  "crons": [ { "path": "/api/purge", "schedule": "0 4 * * *" } ]
+}

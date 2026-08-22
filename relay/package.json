@@ -1,0 +1,16 @@
+{
+  "name": "scamshield-relay",
+  "private": true,
+  "type": "commonjs",
+  "version": "0.1.0",
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "dev": "vercel dev"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^0.10.4"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
