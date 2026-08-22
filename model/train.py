@@ -15,12 +15,12 @@ import argparse, math, re
 from urllib.parse import urlparse
 import numpy as np
 import pandas as pd
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.calibration import CalibratedClassifierCV
+from sklearn.ensemble import HistGradientBoostingClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, confusion_matrix, roc_auc_score
 from skl2onnx import to_onnx
 from skl2onnx.common.data_types import FloatTensorType
+import json, pathlib
 
 FEATURE_NAMES = [
     'url_length','host_length','path_length','num_dots_host','num_subdomains',
@@ -163,47 +163,98 @@ def features(url):
     }
     return [f[name] for name in FEATURE_NAMES]
 
-def build_clf(n):
-    """Fresh CalibratedClassifierCV(RandomForest) sized for n training rows."""
-    base=RandomForestClassifier(n_estimators=120,max_depth=8,random_state=42)
-    return CalibratedClassifierCV(base,cv=3 if n>=30 else 2)
+def build_clf():
+    """Gradient-boosted trees: well-calibrated log-loss output, tiny JSON export."""
+    return HistGradientBoostingClassifier(
+        max_iter=300, max_leaf_nodes=15, learning_rate=0.1, early_stopping=True,
+        validation_fraction=0.1, n_iter_no_change=20, random_state=42)
+
+def export_json(clf, out_path):
+    """Walk sklearn's internal predictors into the engine/url_model.js node format:
+    [featureIdx, threshold, left, right, value, missingLeft]; leaf ⇔ left == -1."""
+    trees = []
+    for stage in clf._predictors:            # binary: one predictor per iteration
+        pred = stage[0]
+        nodes = []
+        for n in pred.nodes:
+            if n['is_leaf']:
+                nodes.append([-1, 0.0, -1, -1, float(n['value']), 0])
+            else:
+                nodes.append([int(n['feature_idx']), float(n['num_threshold']),
+                              int(n['left']), int(n['right']), 0.0,
+                              1 if bool(n['missing_go_to_left']) else 0])
+        trees.append({'nodes': nodes})
+    baseline = float(clf._baseline_prediction.ravel()[0])
+    model = {'version': 2, 'features': FEATURE_NAMES, 'baseline': baseline, 'trees': trees}
+    pathlib.Path(out_path).write_text(json.dumps(model, separators=(',', ':')))
+    return model
+
+def _patch_skl2onnx_hgb_bool_bug():
+    """skl2onnx 1.20's HistGradientBoosting tree converter forwards sklearn's
+    numpy.bool_ `missing_go_to_left` straight through as the ONNX
+    `nodes_missing_value_tracks_true` attribute; onnx (INTS field) rejects a
+    literal bool ('Expected an int, got a boolean'). Coerce to int at the
+    single call site (`add_node`, looked up dynamically from the module's
+    globals, so patching the module attribute affects the existing internal
+    caller). Artifact-only export (see main()) — not shipped in the
+    extension, so this only needs to unblock local training."""
+    from skl2onnx.common import tree_ensemble as _te
+    _orig_add_node = _te.add_node
+    def _patched_add_node(*args, **kwargs):
+        if 'nodes_missing_value_tracks_true' in kwargs:
+            kwargs['nodes_missing_value_tracks_true'] = int(bool(kwargs['nodes_missing_value_tracks_true']))
+        return _orig_add_node(*args, **kwargs)
+    _te.add_node = _patched_add_node
 
 def main():
     ap=argparse.ArgumentParser()
-    ap.add_argument('--data',default='model/data/sample.csv')
+    ap.add_argument('--data',default='model/data/real.csv')
     ap.add_argument('--out',default='model/phishing-url.onnx')
+    ap.add_argument('--json',default='model/url-model.json')
+    ap.add_argument('--parity-in',default='model/parity.json')
+    ap.add_argument('--parity-out',default='model/url_parity.json')
+    ap.add_argument('--compare-onnx',default='',help='path to the previous ONNX model for verdict-agreement report')
     a=ap.parse_args()
     df=pd.read_csv(a.data)
     X=np.array([features(u) for u in df['url']],dtype=np.float32)
     y=df['label'].astype(int).values
 
-    # --- Honest holdout evaluation: stratified 75/25 split ---
     X_tr,X_te,y_tr,y_te=train_test_split(X,y,test_size=0.25,stratify=y,random_state=42)
-    eval_clf=build_clf(len(X_tr))
-    eval_clf.fit(X_tr,y_tr)
-    y_pred=eval_clf.predict(X_te)
-    y_proba=eval_clf.predict_proba(X_te)[:,1]
+    eval_clf=build_clf(); eval_clf.fit(X_tr,y_tr)
+    y_pred=eval_clf.predict(X_te); y_proba=eval_clf.predict_proba(X_te)[:,1]
     print(f'Holdout evaluation (test_size=0.25, stratified, n_test={len(y_te)}):')
     print(classification_report(y_te,y_pred,target_names=['legit','phishing'],digits=3))
-    print('Confusion matrix [rows=true 0/1, cols=pred 0/1]:')
     print(confusion_matrix(y_te,y_pred))
-    auc=roc_auc_score(y_te,y_proba)
-    acc=(y_pred==y_te).mean()
+    auc=roc_auc_score(y_te,y_proba); acc=(y_pred==y_te).mean()
     from sklearn.metrics import precision_score,recall_score,f1_score
-    prec=precision_score(y_te,y_pred,zero_division=0)
-    rec=recall_score(y_te,y_pred,zero_division=0)
-    f1=f1_score(y_te,y_pred,zero_division=0)
+    prec=precision_score(y_te,y_pred,zero_division=0); rec=recall_score(y_te,y_pred,zero_division=0)
     print(f'ROC-AUC (holdout): {auc:.3f}')
 
-    # --- Ship a model trained on ALL rows (uses every labelled example) ---
-    clf=build_clf(len(X))
-    clf.fit(X,y)
-    onx=to_onnx(clf,initial_types=[('input',FloatTensorType([None,len(FEATURE_NAMES)]))],
-                options={'zipmap':False})
-    blob=onx.SerializeToString()
-    with open(a.out,'wb') as fh: fh.write(blob)
-    print(f'Wrote {a.out} ({len(blob)} bytes).')
-    print(f'Holdout: acc={acc:.3f} precision={prec:.3f} recall={rec:.3f} '
-          f'f1={f1:.3f} auc={auc:.3f} | shipped model trained on {len(df)} rows.')
+    if a.compare_onnx:
+        import onnxruntime as ort
+        sess=ort.InferenceSession(a.compare_onnx)
+        name=sess.get_inputs()[0].name
+        outs=sess.run(None,{name:X_te})
+        old=outs[1][:,1] if len(outs)>1 else outs[0]
+        lvl=lambda p: np.where(p>=0.8,2,np.where(p>=0.5,1,0))
+        agree=(lvl(np.asarray(old))==lvl(y_proba)).mean()
+        print(f'Verdict-level agreement with {a.compare_onnx} on holdout: {agree:.4f}')
+
+    clf=build_clf(); clf.fit(X,y)
+    _patch_skl2onnx_hgb_bool_bug()
+    onx=to_onnx(clf,initial_types=[('input',FloatTensorType([None,len(FEATURE_NAMES)]))],options={'zipmap':False})
+    blob=onx.SerializeToString(); open(a.out,'wb').write(blob)
+    print(f'Wrote {a.out} ({len(blob)} bytes) [artifact only — not shipped].')
+    model=export_json(clf,a.json)
+    print(f'Wrote {a.json} ({pathlib.Path(a.json).stat().st_size} bytes, {len(model["trees"])} trees).')
+
+    # Parity: Python probabilities for the JS-frozen URL list.
+    cases=json.loads(pathlib.Path(a.parity_in).read_text())
+    Xp=np.array([features(c['url']) for c in cases],dtype=np.float32)
+    probs=clf.predict_proba(Xp)[:,1]
+    pathlib.Path(a.parity_out).write_text(json.dumps(
+        [{'url':c['url'],'prob':float(p)} for c,p in zip(cases,probs)],indent=1)+'\n')
+    print(f'Wrote {a.parity_out} ({len(cases)} cases).')
+    print(f'Holdout: acc={acc:.3f} precision={prec:.3f} recall={rec:.3f} auc={auc:.3f} | trained on {len(df)} rows.')
 
 if __name__=='__main__': main()

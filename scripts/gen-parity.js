@@ -33,7 +33,16 @@ const URLS = [
   'http://free-gift-win.tk/claim'
 ];
 
-const out = URLS.map((url) => ({ url, vector: Array.from(extractUrlFeatures(url)) }));
+// 15 curated semantic cases above + 185 deterministic samples from the real
+// dataset so parity also covers "ordinary" URLs. Seeded LCG → reproducible.
+const csv = fs.readFileSync(path.join(__dirname, '..', 'model', 'data', 'real.csv'), 'utf8')
+  .split('\n').slice(1).filter(Boolean).map((l) => l.slice(0, l.lastIndexOf(',')));
+let seed = 20260822;
+const rnd = () => { seed = (seed * 1103515245 + 12345) % 2147483648; return seed / 2147483648; };
+const picked = new Set();
+while (picked.size < 185 && picked.size < csv.length) picked.add(csv[Math.floor(rnd() * csv.length)]);
+const ALL = [...URLS, ...picked];
+const out = ALL.map((url) => ({ url, vector: Array.from(extractUrlFeatures(url)) }));
 const dest = path.join(__dirname, '..', 'model', 'parity.json');
 fs.writeFileSync(dest, JSON.stringify(out, null, 2) + '\n');
 console.log(`Wrote ${out.length} parity vectors to ${dest}`);

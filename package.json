@@ -9,6 +9,7 @@
     "test:e2e": "playwright test",
     "test": "node --test \"tests/unit/**/*.test.js\" && playwright test",
     "build": "node scripts/build.js",
+    "bundle:models": "node scripts/bundle-models.js",
     "gen:parity": "node scripts/gen-parity.js",
     "screenshots": "node tools/screenshots.js"
   },
