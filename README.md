@@ -56,7 +56,7 @@ declarativeNetRequest ruleset blocks known-bad domains.
 - Chromium (Chrome/Edge/Brave) and Firefox (128+) builds.
 
 ## Size
-About **1 MB unpacked / ~90 KB zipped**, down from 14 MB in earlier versions —
+About **0.6 MB unpacked / ~170 KB zipped**, down from 14 MB in earlier versions —
 removing the ONNX runtime and running both models as plain JS is most of the
 saving.
 

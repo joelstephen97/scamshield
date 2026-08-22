@@ -29,7 +29,7 @@
   action (*Leave this page* / *Show why*), plain-language reasons, *Trust
   this site for 1 hour / until tomorrow / always*, *Report a mistake*, stats
   and recent history, dark mode, and explained toggles throughout Settings.
-- **Smaller and faster** — about 1 MB unpacked / ~90 KB zipped, down from
+- **Smaller and faster** — about 0.6 MB unpacked / ~170 KB zipped, down from
   14 MB: the ONNX runtime is gone. Both models now run as plain JS, with no
   WebAssembly and no web-accessible resources.
 - **Optional community reporting, off by default** — "Help make ScamShield
@@ -46,7 +46,7 @@
 ### Added / Changed / Fixed (detail)
 
 **Engine & models**
-- feat: drop ONNX runtime — URL model runs as pure JS (14 MB -> <1 MB unpacked)
+- feat: drop ONNX runtime — URL model runs as pure JS (14 MB -> ~0.6 MB unpacked)
 - feat(engine): pure-JS gradient-boosted URL model evaluator
 - fix(engine): bounds check and baseline validation for url_model; add malformed tree test
 - feat(model): retrain URL model as gradient-boosted trees; JSON export + 200-URL parity

@@ -30,6 +30,17 @@ test('null model falls back to rules only', () => {
   assert.equal(r.modelUsed, false);
 });
 
+test('fuse returns the dom flags', () => {
+  const r = fuse({ modelProb: null, urlRules: { score: 0, reasons: [] },
+    domRules: { score: 0.6, reasons: ['x'], flags: ['credential-form-foreign-domain', 'brand-impersonation-visual'] } });
+  assert.deepEqual(r.flags, ['credential-form-foreign-domain', 'brand-impersonation-visual']);
+});
+
+test('fuse defaults flags to an empty array when domRules omits them', () => {
+  const r = fuse({ modelProb: null, urlRules: { score: 0.1, reasons: [] }, domRules: { score: 0, reasons: [] } });
+  assert.deepEqual(r.flags, []);
+});
+
 test('reasons are merged and de-duplicated', () => {
   const r = fuse({ modelProb: null, urlRules: { score: 0.6, reasons: ['same'] }, domRules: { score: 0.6, reasons: ['same', 'other'], flags: [] } });
   assert.deepEqual(r.reasons.sort(), ['other', 'same']);

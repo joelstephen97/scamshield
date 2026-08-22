@@ -21,7 +21,7 @@ gets it wrong, *Trust this site* for an hour, until tomorrow, or always — and
 Private by design: nothing you browse, type or check ever leaves your
 device. The only network activity is downloading the public threat-feed
 file, and — only if you opt in — sending an anonymized host name and risk
-signal for a flagged page. About 1 MB, with no heavy runtime bundled in.
+signal for a flagged page. About 0.6 MB, with no heavy runtime bundled in.
 
 Features:
 • Real-time phishing & scam warnings with plain-language reasons
@@ -49,7 +49,7 @@ Features:
 • Hides fake prize/giveaway scam content
 • Protection history and stats, stored only on your device; dark mode
 • Optional community reporting, off by default — never URLs or page text
-• Smaller and faster: ~1 MB unpacked, no heavy runtime
+• Smaller and faster: ~0.6 MB unpacked, no heavy runtime
 • 100% on-device analysis — no tracking, no data collection
 
 **What's new in 0.5.0 (since the 0.3.1 store version):**
@@ -58,7 +58,7 @@ detection by icon (64-brand table, 49 with icon hashes, incl. UAE
 banks/telcos/government), a real threat feed on by default, the scam
 message checker, protection history and
 a "Take me to the real site" rescue button, a redesigned popup and settings
-with dark mode, a ~1 MB package (was 14 MB — the ONNX runtime is gone), and
+with dark mode, a ~0.6 MB package (was 14 MB — the ONNX runtime is gone), and
 optional off-by-default community reporting. No new permissions; your
 settings, trusted sites and history carry over.
 

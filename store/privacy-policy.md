@@ -1,6 +1,6 @@
 # ScamShield Privacy Policy
 
-_Last updated: 2026-08-08_
+_Last updated: 2026-08-23_
 
 ScamShield analyzes web pages **on your device** to warn you about scams and
 phishing. We designed it so your browsing stays private.
