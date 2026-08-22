@@ -9,3 +9,7 @@ __pycache__/
 
 # Internal docs (guides, monetization, publishing, planning) — kept local, not published
 docs/
+
+# local git worktrees
+.worktrees/
+.superpowers/
