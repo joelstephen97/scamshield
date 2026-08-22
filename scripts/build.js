@@ -9,7 +9,7 @@ const DIST = path.join(ROOT, 'dist');
 const SHARED = [
   'background', 'content', 'engine', 'rules', 'model/url-model.js', 'model/page-content.js',
   'assets', 'popup.html', 'popup.css', 'popup.js',
-  'options.html', 'options.css', 'options.js', 'onboarding.html'
+  'options.html', 'options.css', 'options.js', 'onboarding.html', 'ui'
 ];
 
 function copyRecursive(src, dest) {

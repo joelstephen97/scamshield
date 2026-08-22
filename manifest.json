@@ -13,6 +13,7 @@
       "run_at": "document_idle",
       "js": [
         "engine/constants.js",
+        "engine/trust.js",
         "model/url-model.js",
         "engine/features.js",
         "engine/heuristics.js",

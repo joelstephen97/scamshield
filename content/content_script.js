@@ -44,7 +44,9 @@
   // a site the user trusts must never nag them.
   function isTrustedHost(host, settings) {
     if (SS && typeof SS.isSafeHost === 'function' && SS.isSafeHost(host)) return true;
-    return ((settings && settings.allowlist) || []).includes(registrable(host));
+    const reg = registrable(host);
+    if (SS && SS.isPaused && SS.isPaused(settings && settings.pausedSites, reg, Date.now())) return true;
+    return ((settings && settings.allowlist) || []).includes(reg);
   }
 
   // --- MAIN-world detector bridges (registered once; re-injection guard above) ---

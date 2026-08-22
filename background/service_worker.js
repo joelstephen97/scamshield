@@ -1,5 +1,5 @@
 'use strict';
-try { importScripts('../engine/constants.js', '../engine/features.js', '../engine/image_hash.js', '../engine/brand_icons.js', '../engine/report_payload.js'); } catch (_) { /* Firefox background page loads them via manifest */ }
+try { importScripts('../engine/constants.js', '../engine/trust.js', '../engine/features.js', '../engine/image_hash.js', '../engine/brand_icons.js', '../engine/report_payload.js'); } catch (_) { /* Firefox background page loads them via manifest */ }
 const api = globalThis.browser || globalThis.chrome;
 
 // Official ScamShield feed: rebuilt daily by GitHub Actions from OpenPhish +
@@ -26,7 +26,12 @@ const DEFAULTS = {
   threatsBlocked: 0,         // local-only stat, never transmitted
   lastBlocklistVersion: 0,
   supportAskShown: false,    // one-time "you were just protected" support toast
-  pageAnalysis: true         // on-device page-content model + icon brand matching
+  pageAnalysis: true,        // on-device page-content model + icon brand matching
+  theme: 'auto',             // 'auto' | 'light' | 'dark' — extension-page appearance
+  pausedSites: {},           // domain -> until (ms epoch); time-boxed "trust this site"
+  whatsNewSeen: '',          // last extension version whose what's-new was acknowledged
+  lastOtaAt: 0,              // ms epoch of the last blocklist OTA attempt (success or no-op)
+  lastOtaCount: 0            // number of blocklist rules from the last successful OTA
 };
 
 // Local-only protection history: ring buffer of { ts, host, kind, level }.
@@ -171,7 +176,9 @@ const settingsInitPromise = (async () => {
 async function getSettings() {
   await settingsInitPromise;
   const stored = await api.storage.local.get('settings');
-  return Object.assign({}, DEFAULTS, stored.settings || {});
+  const merged = Object.assign({}, DEFAULTS, stored.settings || {});
+  merged.pausedSites = globalThis.ScamShield.prunePaused(merged.pausedSites, Date.now());
+  return merged;
 }
 // All setSettings() callers (onInstalled, runOtaUpdate, message handlers,
 // tests driving the SW directly via sw.evaluate) read-modify-write the same
@@ -299,7 +306,7 @@ async function runOtaUpdate() {
     if (!res.ok) return { ok: false, reason: 'http-' + res.status };
     const data = await res.json();
     if (!data || typeof data.version !== 'number' || !Array.isArray(data.rules)) return { ok: false, reason: 'bad-shape' };
-    if (data.version <= (s.lastBlocklistVersion || 0)) return { ok: true, version: data.version, updated: false };
+    if (data.version <= (s.lastBlocklistVersion || 0)) { await setSettings({ lastOtaAt: Date.now() }); return { ok: true, version: data.version, updated: false }; }
     const rules = data.rules.slice(0, 5000).map((r, i) => ({
       id: 100000 + i, priority: 1, action: { type: 'block' },
       condition: { urlFilter: String(r.urlFilter || r), resourceTypes: ['main_frame', 'sub_frame'] }
@@ -310,7 +317,7 @@ async function runOtaUpdate() {
         removeRuleIds: existing.map((r) => r.id), addRules: s.blockKnownBad ? rules : []
       });
     }
-    await setSettings({ lastBlocklistVersion: data.version });
+    await setSettings({ lastBlocklistVersion: data.version, lastOtaAt: Date.now(), lastOtaCount: rules.length });
     return { ok: true, version: data.version, updated: true, count: rules.length };
   } catch (e) {
     return { ok: false, reason: 'fetch-failed' };
@@ -412,6 +419,27 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         sendResponse(await handleHashIcons(msg.urls)); break;
       case 'userReport':
         sendResponse(await handleUserReport(msg, sender)); break;
+      case 'pauseSite': {
+        const s = await getSettings(); const SS = globalThis.ScamShield;
+        const until = SS.pauseUntil(msg.choice, Date.now());
+        if (until === null) { if (!s.allowlist.includes(msg.domain)) s.allowlist.push(msg.domain); await setSettings({ allowlist: s.allowlist }); sendResponse({ ok: true, until: null }); break; }
+        const ps = Object.assign({}, s.pausedSites, { [msg.domain]: until });
+        await setSettings({ pausedSites: ps }); sendResponse({ ok: true, until }); break;
+      }
+      case 'unpauseSite': {
+        const s = await getSettings(); const ps = Object.assign({}, s.pausedSites); delete ps[msg.domain];
+        await setSettings({ pausedSites: ps, allowlist: s.allowlist.filter((d) => d !== msg.domain) }); sendResponse({ ok: true }); break;
+      }
+      case 'getTabStats': {
+        const cur = await api.storage.local.get('history'); const list = Array.isArray(cur.history) ? cur.history : [];
+        const SS = globalThis.ScamShield;
+        sendResponse({ siteCount: list.filter((e) => SS.registrableDomain(e.host) === msg.domain).length }); break;
+      }
+      case 'leaveTab': {
+        const tabId = msg.tabId != null ? msg.tabId : (sender.tab && sender.tab.id);
+        try { await api.tabs.goBack(tabId); } catch (_) { try { await api.tabs.update(tabId, { url: 'about:blank' }); } catch (_2) {} }
+        sendResponse({ ok: true }); break;
+      }
       default:
         sendResponse({ ok: false, error: 'unknown message' });
     }
