@@ -28,12 +28,13 @@
       if (i.pageFeatures && i.pageFeatures.tokens) {
         pageFeatures = { tokens: capTokens(i.pageFeatures.tokens, TOKEN_CAP), dense: Array.from(i.pageFeatures.dense || []).map(Number) };
       }
+      const s = Number(v.score);
       const p = {
         v: 1, kind: i.kind, label: i.label, host, regDomain: C.registrableDomain(host),
-        level: String(v.level || ''), score: Number(v.score || 0),
+        level: String(v.level || ''), score: Number.isFinite(s) ? s : 0,
         flags: Array.isArray(v.flags) ? v.flags.map(String).slice(0, 20) : [],
         reasonCodes: Array.isArray(v.reasonCodes) ? v.reasonCodes.map(String).slice(0, 20) : (Array.isArray(v.flags) ? v.flags.map(String).slice(0, 20) : []),
-        urlFeatures: i.urlFeatures ? Array.from(i.urlFeatures).map(Number) : null,
+        urlFeatures: i.urlFeatures ? Array.from(i.urlFeatures).map((x) => Number.isFinite(x) ? x : 0) : null,
         pageFeatures,
         iconMatches: (i.iconMatches || []).slice(0, 6).map((m) => ({ brand: String(m.brand), distance: Number(m.distance) })),
         detectors: (i.detectors || []).map(String).slice(0, 6),
@@ -43,6 +44,7 @@
       let cap = TOKEN_CAP;
       while (payloadBytes(p) > REPORT_MAX_BYTES && p.pageFeatures && cap > 100) { cap = Math.floor(cap / 2); p.pageFeatures.tokens = capTokens(p.pageFeatures.tokens, cap); }
       if (payloadBytes(p) > REPORT_MAX_BYTES) p.pageFeatures = null;
+      if (payloadBytes(p) > REPORT_MAX_BYTES) return null;
       return p;
     } catch (_) { return null; }
   }

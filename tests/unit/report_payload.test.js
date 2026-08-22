@@ -38,3 +38,19 @@ test('invalid input → null', () => {
   assert.equal(RP.buildReportPayload({ ...base, url: 'not a url' }), null);
   assert.equal(RP.buildReportPayload({ ...base, label: 'weird' }), null);
 });
+test('invalid kind → null', () => {
+  assert.equal(RP.buildReportPayload({ ...base, kind: 'weird' }), null);
+});
+test('non-numeric score → 0', () => {
+  const p = RP.buildReportPayload({ ...base, verdict: { ...base.verdict, score: 'abc' } });
+  assert.equal(p.score, 0);
+});
+test('Infinity score → 0', () => {
+  const p = RP.buildReportPayload({ ...base, verdict: { ...base.verdict, score: Infinity } });
+  assert.equal(p.score, 0);
+});
+test('huge urlFeatures array → null (final payload size backstop)', () => {
+  const huge = new Array(500000).fill(1);
+  const p = RP.buildReportPayload({ ...base, urlFeatures: huge });
+  assert.equal(p, null);
+});
