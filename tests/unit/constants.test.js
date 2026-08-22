@@ -97,3 +97,17 @@ test('BRAND_DOMAINS carries auth domains for microsoft and uaepass', () => {
   assert.ok(C2.BRAND_DOMAINS.microsoft.includes('microsoftonline.com'));
   assert.ok(C2.BRAND_DOMAINS.uaepass.includes('uaepass.ae'));
 });
+test('brandNameIn does not false-positive on dictionary-word brand names', () => {
+  assert.equal(C2.brandNameIn('Meta Trader login'), null);
+  assert.equal(C2.brandNameIn('Azure DevOps'), null);
+  assert.equal(C2.brandNameIn('Microsoft Azure portal'), 'microsoft');
+});
+test('brandDisplayName returns the canonical mixed-case name', () => {
+  assert.equal(C2.brandDisplayName('paypal'), 'PayPal');
+  assert.equal(C2.brandDisplayName('hsbc'), 'HSBC');
+  assert.equal(C2.brandDisplayName('usps'), 'USPS');
+  assert.equal(C2.brandDisplayName('dbs'), 'DBS Bank');
+  assert.equal(C2.brandDisplayName('uaepass'), 'UAE PASS');
+  assert.equal(C2.brandDisplayName('unknown-brand-xyz'), 'unknown-brand-xyz'); // falls back to key
+  assert.equal(C2.brandDisplayName('mashreq'), 'Mashreq'); // no explicit display: title-cased names[0]
+});

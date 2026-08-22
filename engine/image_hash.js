@@ -30,7 +30,7 @@
     let best = null;
     for (const b of table || []) for (const h of b.hashes || []) {
       const d = hamming(hash, h);
-      if (d <= maxDist && (!best || d < best.distance)) best = { brand: b.key, distance: d };
+      if (d <= maxDist && (!best || d < best.distance)) best = { brand: b.key, distance: d, hash: h };
     }
     return best;
   }

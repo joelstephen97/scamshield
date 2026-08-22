@@ -29,7 +29,11 @@ function resolveCollisions(brands, domainsByKey, minDist = 12) {
   domainsByKey = domainsByKey || {};
   // Snapshot: never mutate the input while iterating. De-dupe + cap at 4
   // per brand (upstream should already cap at 4; re-assert here too).
-  const snapshot = (brands || []).map((b) => ({ key: b.key, hashes: [...new Set(b.hashes || [])].slice(0, 4) }));
+  // `entries` (per-hash provenance: {hash, kind, src}) is optional — carried
+  // through unchanged except for dropping any entry whose hash got dropped.
+  const snapshot = (brands || []).map((b) => ({
+    key: b.key, hashes: [...new Set(b.hashes || [])].slice(0, 4), entries: b.entries || null
+  }));
 
   const dropSet = new Set(); // `${key}\u0000${hash}`
   const dropped = [];
@@ -68,7 +72,14 @@ function resolveCollisions(brands, domainsByKey, minDist = 12) {
   const result = [];
   for (const b of snapshot) {
     const keep = b.hashes.filter((h) => !dropSet.has(b.key + '\u0000' + h)).slice(0, 4);
-    if (keep.length) result.push({ key: b.key, hashes: keep });
+    if (keep.length) {
+      const out = { key: b.key, hashes: keep };
+      if (b.entries) {
+        const keepSet = new Set(keep);
+        out.entries = b.entries.filter((e) => keepSet.has(e.hash));
+      }
+      result.push(out);
+    }
   }
   return { brands: result, dropped };
 }

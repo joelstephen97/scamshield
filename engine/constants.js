@@ -15,70 +15,78 @@
   ];
 
   const THRESHOLDS = { suspicious: 0.5, dangerous: 0.8,
-    contentSuspicious: 0.9, contentCorroborateRule: 0.3, contentCorroborateModel: 0.7, iconHamming: 6 };
+    // contentSuspicious is a default only; the shipped page model's
+    // `thresholds.suspicious` (0.80) takes precedence at runtime.
+    contentSuspicious: 0.9, contentCorroborateRule: 0.3, contentCorroborateModel: 0.7,
+    // iconHamming lowered 6 -> 4 (v0.5.0 fix wave): tools/measure-icon-fp.js
+    // against 88 real Tranco sites measured a 2.74% false-positive rate at
+    // maxDist=6 (> the 1% bar) — see model/README.md / final-fix-report.md
+    // for the measurement. Re-measured at maxDist=4 before shipping.
+    contentCorroborateModelMinRule: 0.15, iconHamming: 4 };
 
-  // key, display names (word-boundary matched when nameMatch), legit registrable domains (incl. auth), nameMatch
-  const B = (key, names, domains, nameMatch = true) => ({ key, names, domains, nameMatch });
+  // key, display names (word-boundary matched when nameMatch), legit registrable domains (incl. auth), nameMatch,
+  // display (canonical mixed-case name for UI; falls back to title-cased names[0], then key)
+  const B = (key, names, domains, nameMatch = true, display) => ({ key, names, domains, nameMatch, display });
   const BRANDS = [
-    B('paypal', ['paypal'], ['paypal.com']),
+    B('paypal', ['paypal'], ['paypal.com'], true, 'PayPal'),
     B('google', ['google', 'gmail', 'youtube'], ['google.com', 'gmail.com', 'youtube.com', 'googleapis.com', 'gstatic.com']),
     B('apple', ['apple', 'icloud', 'apple id'], ['apple.com', 'icloud.com']),
-    B('microsoft', ['microsoft', 'office 365', 'onedrive', 'sharepoint', 'azure'], ['microsoft.com', 'live.com', 'office.com', 'outlook.com', 'microsoftonline.com', 'office365.com', 'azure.com', 'sharepoint.com', 'onedrive.com', 'msftauth.net', 'msauth.net', 'hotmail.com']),
+    B('microsoft', ['microsoft', 'office 365', 'onedrive', 'sharepoint', 'microsoft azure'], ['microsoft.com', 'live.com', 'office.com', 'outlook.com', 'microsoftonline.com', 'office365.com', 'azure.com', 'sharepoint.com', 'onedrive.com', 'msftauth.net', 'msauth.net', 'hotmail.com']),
     B('amazon', ['amazon', 'prime video'], ['amazon.com', 'amazon.ae', 'amazon.co.uk', 'amazon.de', 'amazon.fr', 'amazon.it', 'amazon.es', 'amazon.nl', 'amazon.ca', 'amazon.in', 'amazon.sg', 'amazon.sa', 'amazon.eg', 'amazon.com.au', 'amazon.com.br', 'amazon.com.mx', 'amazon.com.tr', 'amazon.co.jp', 'primevideo.com', 'media-amazon.com']),
-    B('facebook', ['facebook', 'meta'], ['facebook.com', 'fb.com', 'fbcdn.net']),
+    B('facebook', ['facebook', 'meta platforms'], ['facebook.com', 'fb.com', 'fbcdn.net']),
     B('instagram', ['instagram'], ['instagram.com', 'cdninstagram.com']),
     B('netflix', ['netflix'], ['netflix.com', 'nflxext.com']),
-    B('whatsapp', ['whatsapp'], ['whatsapp.com', 'whatsapp.net']),
+    B('whatsapp', ['whatsapp'], ['whatsapp.com', 'whatsapp.net'], true, 'WhatsApp'),
     B('binance', ['binance'], ['binance.com']),
     B('coinbase', ['coinbase'], ['coinbase.com']),
-    B('metamask', ['metamask'], ['metamask.io']),
-    B('dbs', ['dbs bank', 'posb'], ['dbs.com.sg', 'dbs.com', 'posb.com.sg'], false),
+    B('metamask', ['metamask'], ['metamask.io'], true, 'MetaMask'),
+    B('dbs', ['dbs bank', 'posb'], ['dbs.com.sg', 'dbs.com', 'posb.com.sg'], false, 'DBS Bank'),
     B('maybank', ['maybank'], ['maybank2u.com.my', 'maybank.com']),
     B('wise', ['wise'], ['wise.com'], false),
     B('revolut', ['revolut'], ['revolut.com']),
-    B('linkedin', ['linkedin'], ['linkedin.com', 'licdn.com']),
+    B('linkedin', ['linkedin'], ['linkedin.com', 'licdn.com'], true, 'LinkedIn'),
     B('outlook', ['outlook', 'hotmail'], ['outlook.com', 'live.com', 'hotmail.com']),
     B('gmail', ['gmail'], ['gmail.com', 'google.com']),
     B('telegram', ['telegram'], ['telegram.org', 'telegram.me', 't.me']),
     B('steam', ['steam'], ['steampowered.com', 'steamcommunity.com'], false),
     B('roblox', ['roblox'], ['roblox.com', 'rbxcdn.com']),
-    B('dhl', ['dhl'], ['dhl.com', 'dhl.de']),
-    B('fedex', ['fedex'], ['fedex.com']),
-    B('usps', ['usps'], ['usps.com']),
-    B('ups', ['ups'], ['ups.com'], false),
-    B('docusign', ['docusign'], ['docusign.com', 'docusign.net']),
+    B('dhl', ['dhl'], ['dhl.com', 'dhl.de'], true, 'DHL'),
+    B('fedex', ['fedex'], ['fedex.com'], true, 'FedEx'),
+    B('usps', ['usps'], ['usps.com'], true, 'USPS'),
+    B('ups', ['ups'], ['ups.com'], false, 'UPS'),
+    B('docusign', ['docusign'], ['docusign.com', 'docusign.net'], true, 'DocuSign'),
     B('dropbox', ['dropbox'], ['dropbox.com']),
     B('adobe', ['adobe'], ['adobe.com', 'adobelogin.com']),
     B('spotify', ['spotify'], ['spotify.com', 'scdn.co']),
     B('chase', ['chase bank', 'jpmorgan'], ['chase.com', 'jpmorgan.com'], false),
-    B('wellsfargo', ['wells fargo'], ['wellsfargo.com']),
-    B('bankofamerica', ['bank of america'], ['bankofamerica.com', 'bofa.com']),
+    B('wellsfargo', ['wells fargo'], ['wellsfargo.com'], true, 'Wells Fargo'),
+    B('bankofamerica', ['bank of america'], ['bankofamerica.com', 'bofa.com'], true, 'Bank of America'),
     B('citi', ['citibank'], ['citi.com', 'citibank.com', 'citibank.ae']),
-    B('hsbc', ['hsbc'], ['hsbc.com', 'hsbc.ae', 'hsbc.co.uk', 'hsbc.com.sg', 'hsbc.com.hk']),
+    B('hsbc', ['hsbc'], ['hsbc.com', 'hsbc.ae', 'hsbc.co.uk', 'hsbc.com.sg', 'hsbc.com.hk'], true, 'HSBC'),
     B('barclays', ['barclays'], ['barclays.co.uk', 'barclays.com']),
     B('santander', ['santander'], ['santander.com', 'santander.co.uk', 'santander.es']),
     B('ing', ['ing bank'], ['ing.com', 'ing.nl', 'ing.be'], false),
-    B('sbi', ['state bank of india', 'onlinesbi'], ['sbi.co.in', 'onlinesbi.sbi', 'onlinesbi.com']),
-    B('hdfc', ['hdfc'], ['hdfcbank.com', 'hdfc.com']),
-    B('icici', ['icici'], ['icicibank.com']),
-    B('emiratesnbd', ['emirates nbd'], ['emiratesnbd.com']),
-    B('adcb', ['adcb'], ['adcb.com']),
-    B('fab', ['first abu dhabi bank'], ['bankfab.com', 'fab.ae'], false),
+    B('sbi', ['state bank of india', 'onlinesbi'], ['sbi.co.in', 'onlinesbi.sbi', 'onlinesbi.com'], true, 'SBI'),
+    B('hdfc', ['hdfc'], ['hdfcbank.com', 'hdfc.com'], true, 'HDFC Bank'),
+    B('icici', ['icici'], ['icicibank.com'], true, 'ICICI Bank'),
+    B('emiratesnbd', ['emirates nbd'], ['emiratesnbd.com'], true, 'Emirates NBD'),
+    B('adcb', ['adcb'], ['adcb.com'], true, 'ADCB'),
+    B('fab', ['first abu dhabi bank'], ['bankfab.com', 'fab.ae'], false, 'FAB'),
     B('mashreq', ['mashreq'], ['mashreq.com', 'mashreqbank.com']),
-    B('rakbank', ['rakbank'], ['rakbank.ae']),
-    B('dib', ['dubai islamic bank'], ['dib.ae'], false),
+    B('rakbank', ['rakbank'], ['rakbank.ae'], true, 'RAKBANK'),
+    B('dib', ['dubai islamic bank'], ['dib.ae'], false, 'DIB'),
     B('etisalat', ['etisalat', 'e& uae'], ['etisalat.ae', 'eand.com', 'eandme.ae']),
     B('du', ['du telecom'], ['du.ae'], false),
     B('noon', ['noon.com'], ['noon.com'], false),
     B('aramex', ['aramex'], ['aramex.com']),
     B('talabat', ['talabat'], ['talabat.com']),
     B('careem', ['careem'], ['careem.com']),
-    B('adnoc', ['adnoc'], ['adnoc.ae', 'adnocdistribution.ae']),
-    B('dewa', ['dewa'], ['dewa.gov.ae']),
-    B('icp', ['icp uae', 'federal authority for identity'], ['icp.gov.ae'], false),
-    B('mohre', ['mohre'], ['mohre.gov.ae']),
+    B('adnoc', ['adnoc'], ['adnoc.ae', 'adnocdistribution.ae'], true, 'ADNOC'),
+    B('dewa', ['dewa'], ['dewa.gov.ae'], true, 'DEWA'),
+    B('icp', ['icp uae', 'federal authority for identity'], ['icp.gov.ae'], false, 'ICP'),
+    B('mohre', ['mohre'], ['mohre.gov.ae'], true, 'MOHRE'),
     B('dubaipolice', ['dubai police'], ['dubaipolice.gov.ae']),
-    B('uaepass', ['uae pass', 'uaepass'], ['uaepass.ae']),
+    B('uaepass', ['uae pass', 'uaepass'], ['uaepass.ae'], true, 'UAE PASS'),
     B('emirates', ['emirates airline', 'fly emirates'], ['emirates.com'], false),
     B('etihad', ['etihad'], ['etihad.com']),
     B('shopee', ['shopee'], ['shopee.sg', 'shopee.com.my', 'shopee.co.id', 'shopee.ph', 'shopee.com']),
@@ -207,6 +215,18 @@
   // Every registrable domain a known brand legitimately controls (flattened).
   const KNOWN_BRAND_REGISTRABLES = [...new Set(Object.values(BRAND_DOMAINS).flat())];
 
+  const BRANDS_BY_KEY = Object.fromEntries(BRANDS.map((b) => [b.key, b]));
+  function titleCase(s) { return String(s || '').replace(/\b\w/g, (c) => c.toUpperCase()); }
+  // Canonical mixed-case brand name for UI. Explicit `display` wins; falls
+  // back to a title-cased names[0], then the raw key.
+  function brandDisplayName(key) {
+    const b = BRANDS_BY_KEY[key];
+    if (!b) return key;
+    if (b.display) return b.display;
+    if (b.names && b.names[0]) return titleCase(b.names[0]);
+    return b.key;
+  }
+
   function isSafeHost(host) {
     const h = String(host || '').toLowerCase();
     return SAFE_DOMAINS.some((d) => h === d || h.endsWith('.' + d));
@@ -218,6 +238,6 @@
     FEATURE_NAMES, THRESHOLDS, BRANDS, POPULAR_BRANDS, SUSPICIOUS_TLDS, SUSPICIOUS_TOKENS,
     SCAM_PHRASES, SAFE_DOMAINS, BRAND_DOMAINS, SEED_PHRASE_HINTS,
     MULTI_LABEL_SUFFIXES, KNOWN_AUTH_PROVIDERS, KNOWN_BRAND_REGISTRABLES,
-    registrableParts, registrableDomain, isSafeHost, brandNameIn
+    registrableParts, registrableDomain, isSafeHost, brandNameIn, brandDisplayName
   };
 });

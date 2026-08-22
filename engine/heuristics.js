@@ -39,10 +39,7 @@
     let score = 0;
     let brand; // set when impersonation is flagged, so UI can offer the real site
     const pageDomain = registrableDomain(s.pageHost);
-    const displayName = (key) => {
-      const b = (C.BRANDS || []).find((x) => x.key === key);
-      return b ? b.names[0].replace(/\b\w/g, (ch) => ch.toUpperCase()) : key;
-    };
+    const displayName = (key) => C.brandDisplayName ? C.brandDisplayName(key) : key;
 
     if (s.hasPasswordField) {
       const AUTH = C.KNOWN_AUTH_PROVIDERS || [];
@@ -98,11 +95,14 @@
       score = Math.max(score, 0.85); flags.push('brand-impersonation-content'); brand = matchedBrand;
       reasons.push('This page looks like "' + matchedBrand + '" but is not on its real website.');
     }
-    // Visual (icon/logo hash) impersonation — 0.5.0
+    // Visual (icon/logo hash) impersonation — 0.5.0. A 'logo' match (an <img>
+    // logo candidate, more prone to false positives than a favicon/touch-icon)
+    // only ever earns the +0.35 corroboration bump, never the 0.85 visual flag
+    // reserved for icon/favicon-derived (or unknown-kind) matches.
     const icon = (s.iconMatches || []).find((m) => m && m.brand && !isOnBrand(m.brand));
     if (icon) {
       const label = displayName(icon.brand);
-      if (s.hasPasswordField) {
+      if (s.hasPasswordField && icon.kind !== 'logo') {
         score = Math.max(score, 0.85); flags.push('brand-impersonation-visual'); brand = brand || icon.brand;
         reasons.push('This page uses ' + label + "'s icon but is not " + label + "'s website.");
       } else {

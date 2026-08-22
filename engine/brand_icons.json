@@ -1,11 +1,18 @@
 {
- "version": 1,
+ "version": 2,
  "generated": "2026-08-22",
  "brands": [
   {
    "key": "paypal",
    "hashes": [
     "0e0f1f1f1f3f1c1c"
+   ],
+   "entries": [
+    {
+     "hash": "0e0f1f1f1f3f1c1c",
+     "kind": "icon",
+     "src": "https://www.paypalobjects.com/marketing/web/icons/monogram/pp114.png"
+    }
    ]
   },
   {
@@ -13,6 +20,18 @@
    "hashes": [
     "69f9b21111327262",
     "41e9b93195736202"
+   ],
+   "entries": [
+    {
+     "hash": "69f9b21111327262",
+     "kind": "logo",
+     "src": "https://www.google.com/images/branding/google_wordmark/v1/1x/googlelogo_color_white_background_272x92dp.png"
+    },
+    {
+     "hash": "41e9b93195736202",
+     "kind": "logo",
+     "src": "https://ssl.gstatic.com/images/branding/googlelogo/2x/googlelogo_color_74x24dp.png"
+    }
    ]
   },
   {
@@ -20,6 +39,18 @@
    "hashes": [
     "03458e8e8e8e4113",
     "0586070303038605"
+   ],
+   "entries": [
+    {
+     "hash": "03458e8e8e8e4113",
+     "kind": "icon",
+     "src": "https://www.apple.com/favicon.ico"
+    },
+    {
+     "hash": "0586070303038605",
+     "kind": "icon",
+     "src": "https://www.icloud.com/favicon.ico"
+    }
    ]
   },
   {
@@ -27,18 +58,44 @@
    "hashes": [
     "0e0749038fdfb333",
     "030fcf8f87cf1800"
+   ],
+   "entries": [
+    {
+     "hash": "0e0749038fdfb333",
+     "kind": "icon",
+     "src": "https://outlook.live.com/mail/favicon.ico"
+    },
+    {
+     "hash": "030fcf8f87cf1800",
+     "kind": "icon",
+     "src": "https://outlook.live.com/favicon.ico"
+    }
    ]
   },
   {
    "key": "amazon",
    "hashes": [
     "07010686c8700107"
+   ],
+   "entries": [
+    {
+     "hash": "07010686c8700107",
+     "kind": "icon",
+     "src": "https://www.amazon.com/favicon.ico"
+    }
    ]
   },
   {
    "key": "facebook",
    "hashes": [
     "0f39717171713337"
+   ],
+   "entries": [
+    {
+     "hash": "0f39717171713337",
+     "kind": "icon",
+     "src": "https://static.xx.fbcdn.net/rsrc.php/y1/r/ay1hV6OlegS.ico"
+    }
    ]
   },
   {
@@ -48,18 +105,73 @@
     "79d4b6aaaab2c461",
     "3becb6aaaab2c061",
     "7dccb6aaaab2c061"
+   ],
+   "entries": [
+    {
+     "hash": "3fe0b6aaaab2e041",
+     "kind": "icon",
+     "src": "https://static.cdninstagram.com/rsrc.php/yr/r/rzWiSjZRxk5.webp"
+    },
+    {
+     "hash": "79d4b6aaaab2c461",
+     "kind": "icon",
+     "src": "https://static.cdninstagram.com/rsrc.php/yj/r/f01UdNyJjJj.webp"
+    },
+    {
+     "hash": "3becb6aaaab2c061",
+     "kind": "icon",
+     "src": "https://static.cdninstagram.com/rsrc.php/yL/r/mMvhX4currF.webp"
+    },
+    {
+     "hash": "7dccb6aaaab2c061",
+     "kind": "icon",
+     "src": "https://static.cdninstagram.com/rsrc.php/y9/r/MptwNl-B2pS.webp"
+    }
    ]
   },
   {
    "key": "netflix",
    "hashes": [
     "3313131717373733"
+   ],
+   "entries": [
+    {
+     "hash": "3313131717373733",
+     "kind": "icon",
+     "src": "https://www.netflix.com/favicon.ico"
+    }
    ]
   },
   {
    "key": "whatsapp",
    "hashes": [
     "0f71b8b896c6f1cf"
+   ],
+   "entries": [
+    {
+     "hash": "0f71b8b896c6f1cf",
+     "kind": "icon",
+     "src": "https://www.whatsapp.com/favicon.ico"
+    }
+   ]
+  },
+  {
+   "key": "binance",
+   "hashes": [
+    "0c0e33cccc330e0c",
+    "0e0f33cccc330f0e"
+   ],
+   "entries": [
+    {
+     "hash": "0c0e33cccc330e0c",
+     "kind": "icon",
+     "src": "https://bin.bnbstatic.com/static/images/common/favicon.ico"
+    },
+    {
+     "hash": "0e0f33cccc330f0e",
+     "kind": "icon",
+     "src": "https://bin.bnbstatic.com/static/images/bnb-for/brand.png"
+    }
    ]
   },
   {
@@ -69,6 +181,28 @@
     "f071717117336969",
     "f07171713333694c",
     "f07171713333694d"
+   ],
+   "entries": [
+    {
+     "hash": "61713333173b2b69",
+     "kind": "icon",
+     "src": "https://metamask.io/favicons/default/apple-touch-icon.png"
+    },
+    {
+     "hash": "f071717117336969",
+     "kind": "icon",
+     "src": "https://metamask.io/favicons/default/favicon-96x96.png"
+    },
+    {
+     "hash": "f07171713333694c",
+     "kind": "icon",
+     "src": "https://metamask.io/favicons/default/favicon-32x32.png"
+    },
+    {
+     "hash": "f07171713333694d",
+     "kind": "icon",
+     "src": "https://metamask.io/favicons/default/favicon.ico"
+    }
    ]
   },
   {
@@ -76,12 +210,18 @@
    "hashes": [
     "33174d33334d1733",
     "6170717171792971"
-   ]
-  },
-  {
-   "key": "maybank",
-   "hashes": [
-    "0747931a9197630f"
+   ],
+   "entries": [
+    {
+     "hash": "33174d33334d1733",
+     "kind": "icon",
+     "src": "https://www.dbs.com.sg/_next/public/favicon.ico?q=81160799-0679-4975-b640-2cda18dff238"
+    },
+    {
+     "hash": "6170717171792971",
+     "kind": "logo",
+     "src": "https://www.dbs.com/iwov-resources/images/ssl-logo.png"
+    }
    ]
   },
   {
@@ -91,56 +231,119 @@
     "0307131316060c03",
     "0307131216060c03",
     "0307131616040d03"
+   ],
+   "entries": [
+    {
+     "hash": "0307131316060603",
+     "kind": "icon",
+     "src": "https://wise.com/public-resources/assets/icons/wise-personal/favicon.png"
+    },
+    {
+     "hash": "0307131316060c03",
+     "kind": "icon",
+     "src": "https://wise.com/public-resources/assets/icons/wise-personal/apple_touch_icon.png"
+    },
+    {
+     "hash": "0307131216060c03",
+     "kind": "icon",
+     "src": "https://wise.com/public-resources/assets/icons/wise-personal/favicon_32x32.png"
+    },
+    {
+     "hash": "0307131616040d03",
+     "kind": "icon",
+     "src": "https://wise.com/public-resources/assets/icons/wise-personal/android_chrome_192x192.png"
+    }
    ]
   },
   {
    "key": "revolut",
    "hashes": [
     "0c0f33232e263333"
+   ],
+   "entries": [
+    {
+     "hash": "0c0f33232e263333",
+     "kind": "icon",
+     "src": "https://assets.revolut.com/assets/favicons/favicon-32x32.png"
+    }
    ]
   },
   {
    "key": "linkedin",
    "hashes": [
     "03434b5945454503"
+   ],
+   "entries": [
+    {
+     "hash": "03434b5945454503",
+     "kind": "icon",
+     "src": "https://static.licdn.com/aero-v1/sc/h/al2o9zrvru7aqj8e1x2rzsrca"
+    }
    ]
   },
   {
    "key": "steam",
    "hashes": [
     "0f1d3c3430c3470f"
+   ],
+   "entries": [
+    {
+     "hash": "0f1d3c3430c3470f",
+     "kind": "icon",
+     "src": "https://store.steampowered.com/favicon.ico"
+    }
    ]
   },
   {
    "key": "roblox",
    "hashes": [
     "0763f0ccccf03907"
-   ]
-  },
-  {
-   "key": "dhl",
-   "hashes": [
-    "0000002b33000000",
-    "0000002f33000000",
-    "000023172b000000"
+   ],
+   "entries": [
+    {
+     "hash": "0763f0ccccf03907",
+     "kind": "icon",
+     "src": "https://www.roblox.com/favicon.ico"
+    }
    ]
   },
   {
    "key": "usps",
    "hashes": [
     "0301c5c698c30303"
+   ],
+   "entries": [
+    {
+     "hash": "0301c5c698c30303",
+     "kind": "icon",
+     "src": "https://www.usps.com/assets/images/home/favicon.ico"
+    }
    ]
   },
   {
    "key": "docusign",
    "hashes": [
     "070d0f0f07070706"
+   ],
+   "entries": [
+    {
+     "hash": "070d0f0f07070706",
+     "kind": "icon",
+     "src": "https://www.docusign.com/assets/images/apple-touch-icon-72x72.png"
+    }
    ]
   },
   {
    "key": "dropbox",
    "hashes": [
     "014dcc4dcc713101"
+   ],
+   "entries": [
+    {
+     "hash": "014dcc4dcc713101",
+     "kind": "icon",
+     "src": "https://cfl.dropboxstatic.com/static/metaserver/static/images/favicon.ico"
+    }
    ]
   },
   {
@@ -148,33 +351,82 @@
    "hashes": [
     "0f0761e27c59070f",
     "0f0761e0dd59070f"
+   ],
+   "entries": [
+    {
+     "hash": "0f0761e27c59070f",
+     "kind": "icon",
+     "src": "https://open.spotifycdn.com/cdn/images/favicon16.1c487bff.png"
+    },
+    {
+     "hash": "0f0761e0dd59070f",
+     "kind": "icon",
+     "src": "https://open.spotifycdn.com/cdn/images/favicon.0f31d2ea.ico"
+    }
    ]
   },
   {
    "key": "chase",
    "hashes": [
     "0747616161690d1f"
+   ],
+   "entries": [
+    {
+     "hash": "0747616161690d1f",
+     "kind": "icon",
+     "src": "https://www.chase.com/etc/designs/chase-ux/favicon.ico"
+    }
    ]
   },
   {
    "key": "bankofamerica",
    "hashes": [
     "000e0b37130e0c00",
-    "000c0f25130e0c00",
     "000c0f35130e0c00",
     "000c572d530e0c00"
+   ],
+   "entries": [
+    {
+     "hash": "000e0b37130e0c00",
+     "kind": "icon",
+     "src": "https://www.bankofamerica.com/homepage/spa-assets/images/assets-images-global-favicon-apple-touch-icon-CSX889b28c.png"
+    },
+    {
+     "hash": "000c0f35130e0c00",
+     "kind": "icon",
+     "src": "https://www.bankofamerica.com/homepage/spa-assets/images/assets-images-global-favicon-favicon-16x16-CSXaaa5ca4e.png"
+    },
+    {
+     "hash": "000c572d530e0c00",
+     "kind": "icon",
+     "src": "https://www.bankofamerica.com/homepage/spa-assets/images/assets-images-global-favicon-android-chrome-192x192-CSXafb7d716.png"
+    }
    ]
   },
   {
    "key": "citi",
    "hashes": [
     "060f155795d77300"
+   ],
+   "entries": [
+    {
+     "hash": "060f155795d77300",
+     "kind": "icon",
+     "src": "https://www.citi.com/cbol-hp-static-assets/assets/favicon.ico"
+    }
    ]
   },
   {
    "key": "barclays",
    "hashes": [
     "0d6d4d032b0d0f0e"
+   ],
+   "entries": [
+    {
+     "hash": "0d6d4d032b0d0f0e",
+     "kind": "icon",
+     "src": "https://www.barclays.co.uk/content/dam/icons/favicons/barclays/favicon.ico"
+    }
    ]
   },
   {
@@ -182,24 +434,57 @@
    "hashes": [
     "0c0c161b2b33170f",
     "0c0c061f2b33170e"
+   ],
+   "entries": [
+    {
+     "hash": "0c0c161b2b33170f",
+     "kind": "icon",
+     "src": "https://www.santander.com/content/dam/santander-com/resources/favicon/apple-touch-icon.png"
+    },
+    {
+     "hash": "0c0c061f2b33170e",
+     "kind": "icon",
+     "src": "https://www.santander.com/content/dam/santander-com/resources/favicon/favicon-32x32.png"
+    }
    ]
   },
   {
    "key": "ing",
    "hashes": [
     "37737c745a5a5c6f"
+   ],
+   "entries": [
+    {
+     "hash": "37737c745a5a5c6f",
+     "kind": "icon",
+     "src": "https://ing.com/webfiles/1787152405916/images/favicon.ico"
+    }
    ]
   },
   {
    "key": "sbi",
    "hashes": [
     "6b69a9a9a9a4a1cb"
+   ],
+   "entries": [
+    {
+     "hash": "6b69a9a9a9a4a1cb",
+     "kind": "logo",
+     "src": "https://sbi.bank.in/o/SBI-Theme/images/custom/logo.png"
+    }
    ]
   },
   {
    "key": "hdfc",
    "hashes": [
     "3371e8ccccccf033"
+   ],
+   "entries": [
+    {
+     "hash": "3371e8ccccccf033",
+     "kind": "icon",
+     "src": "https://www.hdfc.bank.in/favicon.ico"
+    }
    ]
   },
   {
@@ -207,6 +492,18 @@
    "hashes": [
     "030b1b3337373c30",
     "40c0c0c0c0c0c080"
+   ],
+   "entries": [
+    {
+     "hash": "030b1b3337373c30",
+     "kind": "icon",
+     "src": "https://www.icici.bank.in/favicon.ico"
+    },
+    {
+     "hash": "40c0c0c0c0c0c080",
+     "kind": "logo",
+     "src": "https://www.icici.bank.in/content/dam/icicibank-revamp/images/icici-logo/icici-header-logo.png"
+    }
    ]
   },
   {
@@ -214,6 +511,18 @@
    "hashes": [
     "3b3323232b232737",
     "00e0e1c2d2d4f460"
+   ],
+   "entries": [
+    {
+     "hash": "3b3323232b232737",
+     "kind": "icon",
+     "src": "https://www.emiratesnbd.com/-/media/enbd/images/logos/favicon.png"
+    },
+    {
+     "hash": "00e0e1c2d2d4f460",
+     "kind": "logo",
+     "src": "https://www.emiratesnbd.com/-/media/enbd/images/siteflags/livlogo-enbd.png"
+    }
    ]
   },
   {
@@ -223,19 +532,60 @@
     "303c1e0f0f1e3c30",
     "783e2f0b331f3e78",
     "783e2f0f1f3f3e78"
+   ],
+   "entries": [
+    {
+     "hash": "7c3e6f4f4f2f7e7c",
+     "kind": "icon",
+     "src": "https://www.adcb.com/en/system/assets/toolkit/favicon-assets/personal/favicon.ico"
+    },
+    {
+     "hash": "303c1e0f0f1e3c30",
+     "kind": "icon",
+     "src": "https://www.adcb.com/en/system/assets/toolkit/favicon-assets/personal/apple-touch-icon.png"
+    },
+    {
+     "hash": "783e2f0b331f3e78",
+     "kind": "icon",
+     "src": "https://www.adcb.com/en/system/assets/toolkit/favicon-assets/personal/favicon-32x32.png"
+    },
+    {
+     "hash": "783e2f0f1f3f3e78",
+     "kind": "icon",
+     "src": "https://www.adcb.com/en/system/assets/toolkit/favicon-assets/personal/favicon-16x16.png"
+    }
    ]
   },
   {
    "key": "fab",
    "hashes": [
-    "944cd5a597c58666",
+    "c05cd5a597c5a662",
     "004c5d55b7272600"
+   ],
+   "entries": [
+    {
+     "hash": "c05cd5a597c5a662",
+     "kind": "icon",
+     "src": "https://www.bankfab.com/-/media/fab-uds/common-images/icons/favicon.png"
+    },
+    {
+     "hash": "004c5d55b7272600",
+     "kind": "icon",
+     "src": "https://www.bankfab.com/favicon.ico"
+    }
    ]
   },
   {
    "key": "mashreq",
    "hashes": [
     "000f0b1d3d3c1000"
+   ],
+   "entries": [
+    {
+     "hash": "000f0b1d3d3c1000",
+     "kind": "icon",
+     "src": "https://www.mashreq.com/dist/mashreq-reactjs/favicon.ico"
+    }
    ]
   },
   {
@@ -244,12 +594,36 @@
     "0000607038180000",
     "c9c8d1d4d4d4d6ca",
     "8f03010101010383"
+   ],
+   "entries": [
+    {
+     "hash": "0000607038180000",
+     "kind": "icon",
+     "src": "https://www.rakbank.ae/favicon.ico"
+    },
+    {
+     "hash": "c9c8d1d4d4d4d6ca",
+     "kind": "logo",
+     "src": "https://www.rakbank.ae/globalassets/rakbank/header/brand-refresh-logos/rak-logo-light-conventional.png"
+    },
+    {
+     "hash": "8f03010101010383",
+     "kind": "logo",
+     "src": "https://www.rakbank.ae/globalassets/rakbank/header/brand-refresh-logos/rak-logo-short-conv.png"
+    }
    ]
   },
   {
    "key": "dib",
    "hashes": [
     "175131e9c9010307"
+   ],
+   "entries": [
+    {
+     "hash": "175131e9c9010307",
+     "kind": "icon",
+     "src": "https://dib.ae/Assets/images/favicon.ico"
+    }
    ]
   },
   {
@@ -259,36 +633,80 @@
     "0006260b230b2b02",
     "000763b7dbc92600",
     "0b2bcf9dd9496458"
+   ],
+   "entries": [
+    {
+     "hash": "04072b4f595b2500",
+     "kind": "icon",
+     "src": "https://www.etisalat.ae/content/dam/etisalat/favicon/favicon.ico"
+    },
+    {
+     "hash": "0006260b230b2b02",
+     "kind": "logo",
+     "src": "https://www.etisalat.ae/content/dam/etisalat/rmp-2025/resources/img/svg-icons/logo-vertical.png"
+    },
+    {
+     "hash": "000763b7dbc92600",
+     "kind": "icon",
+     "src": "https://www.eand.com/content/dam/eand/favicon/favicon.ico"
+    },
+    {
+     "hash": "0b2bcf9dd9496458",
+     "kind": "logo",
+     "src": "https://www.eand.com/content/dam/eand/assets/img/etand-icons/new-brand/eand-m-menu-en-red-logo.png"
+    }
    ]
   },
   {
    "key": "du",
    "hashes": [
     "7bf0f2f696d4e87f"
+   ],
+   "entries": [
+    {
+     "hash": "7bf0f2f696d4e87f",
+     "kind": "icon",
+     "src": "https://www.du.ae/sites/duaediscovery/smenext/favicon.ico"
+    }
    ]
   },
   {
    "key": "talabat",
    "hashes": [
     "71f0f0f0f0f0f071"
+   ],
+   "entries": [
+    {
+     "hash": "71f0f0f0f0f0f071",
+     "kind": "icon",
+     "src": "https://www.talabat.com/favicon.ico"
+    }
    ]
   },
   {
    "key": "careem",
    "hashes": [
     "0f2b6d4d4f69330f"
-   ]
-  },
-  {
-   "key": "adnoc",
-   "hashes": [
-    "273b317b39193931"
+   ],
+   "entries": [
+    {
+     "hash": "0f2b6d4d4f69330f",
+     "kind": "icon",
+     "src": "https://www.careem.com/favicon.ico"
+    }
    ]
   },
   {
    "key": "dewa",
    "hashes": [
     "1e6361e16171030f"
+   ],
+   "entries": [
+    {
+     "hash": "1e6361e16171030f",
+     "kind": "icon",
+     "src": "https://dewa.gov.ae/images/favicon.ico"
+    }
    ]
   },
   {
@@ -298,6 +716,28 @@
     "6070762b1b6b2928",
     "607032271b6b6938",
     "838383a3a3a2a6ac"
+   ],
+   "entries": [
+    {
+     "hash": "78787a231b6b2939",
+     "kind": "icon",
+     "src": "https://icp.gov.ae/wp-content/uploads/2020/07/cropped-favicon-32x32.jpg"
+    },
+    {
+     "hash": "6070762b1b6b2928",
+     "kind": "icon",
+     "src": "https://icp.gov.ae/wp-content/uploads/2020/07/cropped-favicon-192x192.jpg"
+    },
+    {
+     "hash": "607032271b6b6938",
+     "kind": "icon",
+     "src": "https://icp.gov.ae/wp-content/uploads/2020/07/cropped-favicon-180x180.jpg"
+    },
+    {
+     "hash": "838383a3a3a2a6ac",
+     "kind": "logo",
+     "src": "https://icp.gov.ae/wp-content/uploads/2026/05/cropped-logo-2021-1x.webp"
+    }
    ]
   },
   {
@@ -305,24 +745,57 @@
    "hashes": [
     "0f1f33330f2b270f",
     "0f2f333b17170f0f"
+   ],
+   "entries": [
+    {
+     "hash": "0f1f33330f2b270f",
+     "kind": "icon",
+     "src": "https://mohre.gov.ae/apple-icon-152x152.png"
+    },
+    {
+     "hash": "0f2f333b17170f0f",
+     "kind": "icon",
+     "src": "https://mohre.gov.ae/apple-icon-144x144.png"
+    }
    ]
   },
   {
    "key": "dubaipolice",
    "hashes": [
     "333974644a4d3307"
+   ],
+   "entries": [
+    {
+     "hash": "333974644a4d3307",
+     "kind": "icon",
+     "src": "https://www.dubaipolice.gov.ae/app/favicon.ico"
+    }
    ]
   },
   {
    "key": "uaepass",
    "hashes": [
     "0f233355534d0307"
+   ],
+   "entries": [
+    {
+     "hash": "0f233355534d0307",
+     "kind": "icon",
+     "src": "https://uaepass.ae/favicon.ico"
+    }
    ]
   },
   {
    "key": "emirates",
    "hashes": [
     "00359899989a1d00"
+   ],
+   "entries": [
+    {
+     "hash": "00359899989a1d00",
+     "kind": "icon",
+     "src": "https://www.emirates.com/favicon.ico"
+    }
    ]
   },
   {
@@ -331,6 +804,23 @@
     "0e33336323393303",
     "0e33312921392b33",
     "0e32332323393307"
+   ],
+   "entries": [
+    {
+     "hash": "0e33336323393303",
+     "kind": "icon",
+     "src": "https://deo.shopeemobile.com/shopee/shopee-pcmall-live-sg/assets/icon_favicon_1_32.9cd61b2e90c0f104.png"
+    },
+    {
+     "hash": "0e33312921392b33",
+     "kind": "icon",
+     "src": "https://deo.shopeemobile.com/shopee/shopee-pcmall-live-sg/assets/icon_favicon_1_96.1ce0e05fc18a86e5.png"
+    },
+    {
+     "hash": "0e32332323393307",
+     "kind": "icon",
+     "src": "https://shopee.sg/favicon.ico"
+    }
    ]
   },
   {
@@ -338,13 +828,31 @@
    "hashes": [
     "f3cdcccccc7171f0",
     "5155454646464940"
+   ],
+   "entries": [
+    {
+     "hash": "f3cdcccccc7171f0",
+     "kind": "icon",
+     "src": "https://www.lazada.sg/favicon.ico"
+    },
+    {
+     "hash": "5155454646464940",
+     "kind": "logo",
+     "src": "https://img.lazcdn.com/g/tps/images/ims-web/TB12_ByawFY.1VjSZFnXXcFHXXa.png"
+    }
    ]
   },
   {
    "key": "grab",
    "hashes": [
-    "0000863a4daa0000",
     "6373518daa257565"
+   ],
+   "entries": [
+    {
+     "hash": "6373518daa257565",
+     "kind": "logo",
+     "src": "https://cdn-apac.onetrust.com/logos/c039f7fe-1e11-4137-9d03-2d647d9fbcee/e3624dba-1bdb-4ebe-aed9-6f7a43567603/c8c500bb-5cbd-4aa6-be53-81b47a9e534f/Grab_Logo_PNG2.png"
+    }
    ]
   }
  ]

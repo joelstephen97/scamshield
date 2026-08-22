@@ -17,7 +17,7 @@ test('hamming distance counts differing bits', () => {
 });
 test('matchBrand returns the closest brand within maxDist, else null', () => {
   const table = [{ key: 'paypal', hashes: ['ffffffffffffffff'] }, { key: 'apple', hashes: ['0000000000000000'] }];
-  assert.deepEqual(IH.matchBrand('fffffffffffffff0', table, 6), { brand: 'paypal', distance: 4 });
+  assert.deepEqual(IH.matchBrand('fffffffffffffff0', table, 6), { brand: 'paypal', distance: 4, hash: 'ffffffffffffffff' });
   assert.equal(IH.matchBrand('ffffffff00000000', table, 6), null);
 });
 test('grayFromRGBA uses luma weights', () => {

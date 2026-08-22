@@ -24,6 +24,10 @@ const OUT = path.join(__dirname, '..', 'engine', 'brand_icons.json');
   const brands = [];
   for (const b of C.BRANDS) {
     const hashes = new Set();
+    // Per-hash provenance: kind = 'icon' for link[rel~=icon]/apple-touch-icon/
+    // favicon.ico, 'logo' for <img> logo candidates (more FP-prone, so
+    // engine/heuristics.js scoreDom treats a 'logo' match more conservatively).
+    const entriesByHash = new Map(); // hash -> { hash, kind, src }
     for (const d of b.domains.slice(0, 2)) {
       const page = await context.newPage();
       try {
@@ -32,24 +36,29 @@ const OUT = path.join(__dirname, '..', 'engine', 'brand_icons.json');
         const cands = await page.evaluate(() => {
           const u = (h) => { try { return new URL(h, location.href).href; } catch (_) { return null; } };
           const out = [];
-          document.querySelectorAll('link[rel~="icon"],link[rel="apple-touch-icon"]').forEach((l) => out.push(u(l.getAttribute('href'))));
-          out.push(u('/favicon.ico'));
-          [...document.querySelectorAll('img')].filter((i) => /logo/i.test(i.src + ' ' + i.alt + ' ' + i.className + ' ' + i.id) && i.naturalWidth >= 40).slice(0, 2).forEach((i) => out.push(i.src));
-          return [...new Set(out.filter(Boolean))].slice(0, 6);
+          document.querySelectorAll('link[rel~="icon"],link[rel="apple-touch-icon"]').forEach((l) => out.push({ url: u(l.getAttribute('href')), kind: 'icon' }));
+          out.push({ url: u('/favicon.ico'), kind: 'icon' });
+          [...document.querySelectorAll('img')].filter((i) => /logo/i.test(i.src + ' ' + i.alt + ' ' + i.className + ' ' + i.id) && i.naturalWidth >= 40).slice(0, 2).forEach((i) => out.push({ url: i.src, kind: 'logo' }));
+          const seen = new Set();
+          return out.filter((c) => c.url && !seen.has(c.url) && seen.add(c.url)).slice(0, 6);
         });
-        for (const url of cands) {
+        for (const cand of cands) {
+          const url = cand.url;
           const h = await page.evaluate(async (url) => {
             try { const r = await fetch(url, { credentials: 'omit' }); if (!r.ok) return null;
               const blob = await r.blob(); if (!/^image\//.test(blob.type) && !/\.ico$/i.test(url)) return null;
               return await ScamShield.hashImageBlob(blob); } catch (_) { return null; }
           }, url);
-          if (h && h !== '0000000000000000' && h !== 'ffffffffffffffff') hashes.add(h);
+          if (h && h !== '0000000000000000' && h !== 'ffffffffffffffff') {
+            hashes.add(h);
+            if (!entriesByHash.has(h)) entriesByHash.set(h, { hash: h, kind: cand.kind, src: url });
+          }
           if (hashes.size >= 4) break;
         }
       } catch (e) { console.log('  ! ' + d + ': ' + e.message.split('\n')[0]); }
       finally { await page.close().catch(() => {}); }
     }
-    if (hashes.size) brands.push({ key: b.key, hashes: [...hashes] });
+    if (hashes.size) brands.push({ key: b.key, hashes: [...hashes], entries: [...entriesByHash.values()] });
     console.log(`  ${b.key}: ${hashes.size} hash(es)`);
   }
   await browser.close();
@@ -62,6 +71,6 @@ const OUT = path.join(__dirname, '..', 'engine', 'brand_icons.json');
   const domainsByKey = Object.fromEntries(C.BRANDS.map((b) => [b.key, b.domains]));
   const { brands: kept, dropped } = resolveCollisions(brands, domainsByKey, 12);
   for (const d of dropped) console.log(`  ✗ dropping ${d.brand} ${d.hash} (${d.reason} vs ${d.other})`);
-  fs.writeFileSync(OUT, JSON.stringify({ version: 1, generated: new Date().toISOString().slice(0, 10), brands: kept }, null, 1) + '\n');
+  fs.writeFileSync(OUT, JSON.stringify({ version: 2, generated: new Date().toISOString().slice(0, 10), brands: kept }, null, 1) + '\n');
   console.log(`Wrote ${kept.length} brands → ${OUT}`);
 })().catch((e) => { console.error(e); process.exit(1); });

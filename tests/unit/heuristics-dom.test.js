@@ -73,3 +73,13 @@ test('short icon-only brand names are not matched by text ("du" in "products")',
   const r = scoreDom({ ...clean, pageHost: 'shop.example', hasPasswordField: true, passwordFormActions: ['https://shop.example/login'], titleBrand: 'our products - sign in' });
   assert.ok(!r.flags.includes('brand-impersonation-content'));
 });
+test('logo-kind icon match + password → no visual flag, only the +0.35 corroboration bump', () => {
+  const r = scoreDom({ ...clean, pageHost: 'secure-login.example', hasPasswordField: true, passwordFormActions: ['https://secure-login.example/post'], iconMatches: [{ brand: 'paypal', distance: 3, kind: 'logo' }] });
+  assert.ok(!r.flags.includes('brand-impersonation-visual'), JSON.stringify(r.flags));
+  assert.ok(r.score >= 0.35, String(r.score));
+});
+test('icon-kind (favicon-derived) match + password → visual impersonation flag', () => {
+  const r = scoreDom({ ...clean, pageHost: 'secure-login.example', hasPasswordField: true, passwordFormActions: ['https://secure-login.example/post'], iconMatches: [{ brand: 'paypal', distance: 3, kind: 'icon' }] });
+  assert.ok(r.flags.includes('brand-impersonation-visual'), JSON.stringify(r.flags));
+  assert.ok(r.score >= 0.85);
+});

@@ -11,6 +11,7 @@
     "build": "node scripts/build.js",
     "bundle:models": "node scripts/bundle-models.js",
     "build:brands": "node tools/build-brand-hashes.js",
+    "measure:icon-fp": "node tools/measure-icon-fp.js",
     "gen:parity": "node scripts/gen-parity.js",
     "screenshots": "node tools/screenshots.js",
     "crawl:pages": "node scripts/crawl-pages.js"

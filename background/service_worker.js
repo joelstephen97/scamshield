@@ -47,13 +47,59 @@ function hostOfSender(sender) {
   try { return new URL(sender.tab && sender.tab.url).hostname; } catch (_) { return ''; }
 }
 
-// Icon hashing for visual brand matching. Fetches the page's own icons only;
-// results cached 24h (memory + storage.session when available). Never stores URLs elsewhere.
+// Icon hashing for visual brand matching. Fetches the page's own icons only.
+// L1 cache is an in-memory Map (per SW lifetime); L2 is api.storage.session
+// when available (Chrome ≥102 / Firefox ≥115 — both above our minimums, so
+// this is guarded rather than assumed), which survives SW eviction/restarts
+// without persisting to disk. Both layers share the 24h TTL and a 2000-entry
+// FIFO cap; storage.session additionally tracks its own key index
+// (iconCacheIndex) since storage.session has no native enumeration. Never
+// stores page URLs, only icon URLs/hashes, and nothing crosses into
+// storage.local. Falls back silently to fetch-only when storage.session is
+// unavailable (older browsers, or the API missing entirely).
 const iconCache = new Map(); globalThis.__iconCache = iconCache;
 const ICON_TTL = 24 * 3600 * 1000, ICON_MAX_BYTES = 200 * 1024, ICON_TIMEOUT = 3000;
+const ICON_SESSION_CAP = 2000;
+const hasSessionStorage = !!(api.storage && api.storage.session);
+
+function sessionIconKey(url) { return 'icon:' + url; }
+
+async function sessionCacheGet(url) {
+  if (!hasSessionStorage) return undefined;
+  try {
+    const key = sessionIconKey(url);
+    const stored = await api.storage.session.get(key);
+    const entry = stored[key];
+    if (entry && Date.now() - entry.ts < ICON_TTL) return entry.hash;
+  } catch (_) { /* best-effort */ }
+  return undefined;
+}
+
+async function sessionCacheSet(url, hash) {
+  if (!hasSessionStorage) return;
+  try {
+    const key = sessionIconKey(url);
+    await api.storage.session.set({ [key]: { hash, ts: Date.now() } });
+    const idx = await api.storage.session.get('iconCacheIndex');
+    let list = Array.isArray(idx.iconCacheIndex) ? idx.iconCacheIndex : [];
+    list = list.filter((k) => k !== key);
+    list.push(key);
+    if (list.length > ICON_SESSION_CAP) {
+      const evict = list.splice(0, list.length - ICON_SESSION_CAP);
+      await api.storage.session.remove(evict);
+    }
+    await api.storage.session.set({ iconCacheIndex: list });
+  } catch (_) { /* best-effort */ }
+}
+
 async function hashIconUrl(url) {
   const hit = iconCache.get(url);
   if (hit && Date.now() - hit.ts < ICON_TTL) return hit.hash;
+  const sessionHit = await sessionCacheGet(url);
+  if (sessionHit !== undefined) {
+    iconCache.set(url, { hash: sessionHit, ts: Date.now() });
+    return sessionHit;
+  }
   let hash = null;
   let t = null;
   try {
@@ -68,19 +114,27 @@ async function hashIconUrl(url) {
   } catch (_) { hash = null; } finally { clearTimeout(t); }
   iconCache.set(url, { hash, ts: Date.now() });
   if (iconCache.size > 2000) iconCache.delete(iconCache.keys().next().value);
+  sessionCacheSet(url, hash);
   return hash;
 }
 async function handleHashIcons(urls) {
   const SS = globalThis.ScamShield;
   const table = (SS.BRAND_ICONS && SS.BRAND_ICONS.brands) || [];
   const maxDist = (SS.THRESHOLDS && SS.THRESHOLDS.iconHamming) || 6;
+  const entryByHash = new Map();
+  for (const b of table) for (const e of (b.entries || [])) if (!entryByHash.has(e.hash)) entryByHash.set(e.hash, e);
+  const targets = (urls || []).slice(0, 6).map(String);
+  const results = await Promise.all(targets.map((url) => hashIconUrl(url)));
   const hashes = [], matches = [];
-  for (const url of (urls || []).slice(0, 6)) {
-    const hash = await hashIconUrl(String(url));
+  for (let i = 0; i < targets.length; i++) {
+    const url = targets[i], hash = results[i];
     if (!hash) continue;
     hashes.push({ url, hash });
     const m = SS.matchBrand(hash, table, maxDist);
-    if (m) matches.push({ brand: m.brand, distance: m.distance, url });
+    if (m) {
+      const e = entryByHash.get(m.hash);
+      matches.push({ brand: m.brand, distance: m.distance, url, kind: e ? e.kind : undefined });
+    }
   }
   return { hashes, matches };
 }
@@ -138,12 +192,13 @@ async function setSettings(patch) {
 // ---- Opt-in community reporting (spec §6). Nothing runs unless reportingOptIn. ----
 const QUEUE_CAP = 50, REPORT_RETRIES = 3, AUTO_REPORT_TTL = 24 * 3600 * 1000;
 async function queueReport(payload) {
-  if (!payload) return;
+  if (!payload) return false;
   const cur = await api.storage.local.get('reportQueue');
   const q = Array.isArray(cur.reportQueue) ? cur.reportQueue : [];
   q.push(Object.assign({ _tries: 0 }, payload));
   await api.storage.local.set({ reportQueue: q.slice(-QUEUE_CAP) });
   flushReports();
+  return true;
 }
 // `flushPending` avoids a lost-update: if queueReport() fires while a flush is
 // already in-flight, the naive "if (flushing) return" would silently drop the
@@ -195,7 +250,9 @@ async function maybeAutoReport(tabUrl, verdict, report, detectors) {
 }
 function githubIssueUrl(host, verdict) {
   const title = encodeURIComponent(`[${(verdict && verdict.level) || 'report'}] ${host}`);
-  const body = encodeURIComponent(`Site: ${host}\nVerdict: ${(verdict && verdict.level) || 'n/a'} (score ${(verdict && verdict.score) || 0})\nReasons:\n- ${((verdict && verdict.reasons) || []).join('\n- ')}\n\nWhat happened:\n`);
+  const reasons = (verdict && verdict.reasons) || [];
+  const reasonsBlock = reasons.length ? `Reasons:\n- ${reasons.join('\n- ')}\n\n` : '';
+  const body = encodeURIComponent(`Site: ${host}\nVerdict: ${(verdict && verdict.level) || 'n/a'} (score ${(verdict && verdict.score) || 0})\n${reasonsBlock}What happened:\n`);
   return `https://github.com/joelstephen97/scamshield/issues/new?title=${title}&body=${body}`;
 }
 const lastReportInput = new Map(); // tabId → report input (from content script)
@@ -205,7 +262,7 @@ async function handleUserReport(msg, sender) {
   let tab = null; try { tab = tabId != null ? await api.tabs.get(tabId) : null; } catch (_) {}
   const url = tab && tab.url; if (!url || !/^https?:/.test(url)) return { ok: false, via: 'off' };
   const verdict = lastVerdict.get(tabId) || { level: 'safe', score: 0, reasons: [] };
-  const host = new URL(url).hostname;
+  let host; try { host = new URL(url).hostname; } catch (_) { return { ok: false, via: 'off' }; }
   if (!s.reportingOptIn || !s.reportUrl) {
     const issueUrl = githubIssueUrl(host, verdict);
     try { await api.tabs.create({ url: issueUrl }); } catch (_) {}
@@ -213,7 +270,9 @@ async function handleUserReport(msg, sender) {
   }
   const SS = globalThis.ScamShield;
   const input = Object.assign({ url, verdict, detectors: ['page'], urlFeatures: SS.extractUrlFeatures(url) }, lastReportInput.get(tabId) || {});
-  await queueReport(SS.buildReportPayload(Object.assign({ kind: 'user', label: msg.label === 'scam' ? 'scam' : 'false_positive', extVersion: manifestVersion(), now: Date.now() }, input)));
+  const payload = SS.buildReportPayload(Object.assign({ kind: 'user', label: msg.label === 'scam' ? 'scam' : 'false_positive', extVersion: manifestVersion(), now: Date.now() }, input));
+  const queued = await queueReport(payload);
+  if (!queued) return { ok: false, via: 'off' };
   return { ok: true, via: 'relay' };
 }
 
