@@ -1,4 +1,5 @@
-body{width:340px;min-height:420px;max-height:600px;overflow:auto;display:flex;flex-direction:column}
+html{width:340px;max-height:600px;overflow-y:auto;overflow-x:hidden;scrollbar-gutter:stable}
+body{width:100%;min-height:420px;overflow:visible;display:flex;flex-direction:column}
 .hdr{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--surface);border-bottom:1px solid var(--hair)}
 .hdr .brand{display:flex;align-items:center;gap:7px;font-weight:600;font-size:14px}
 .hdr .brand svg{color:var(--accent)}

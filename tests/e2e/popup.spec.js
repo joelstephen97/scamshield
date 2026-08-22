@@ -15,16 +15,17 @@ test('dangerous brand page: red card, Leave + real-site actions, evidence rows',
   await expect(popup.locator('#leave')).toBeVisible(); await expect(popup.locator('#rescue')).toBeVisible();
   await expect(popup.locator('#reasons li')).not.toHaveCount(0);
   await expect(popup.locator('#trustmenu')).toBeHidden();
-  await expect(popup.locator('#reportbtn')).toHaveText(/This is safe/);
+  await expect(popup.locator('#reportbtn')).toHaveText(/this is safe/i);
 });
 test('safe page: quiet card, stats tiles, report label says scam', async ({ context, extensionId }) => {
   const page = await context.newPage(); await page.goto(BASE + '/clean.html'); await page.waitForTimeout(500);
   const popup = await openPopup(context, extensionId, page);
   await expect(popup.locator('#status')).toHaveClass(/safe/);
   await expect(popup.locator('#level')).toHaveText('Nothing suspicious here');
+  await expect(popup.locator('#level')).not.toHaveText('Checking…');
   await expect(popup.locator('#leave')).toBeHidden();
   await expect(popup.locator('#tile-all b')).toHaveText(/^\d+$/);
-  await expect(popup.locator('#reportbtn')).toHaveText(/This is a scam/);
+  await expect(popup.locator('#reportbtn')).toHaveText(/this is a scam/i);
 });
 test('Trust this site → For 1 hour suppresses the banner and shows until-time', async ({ context, extensionId }) => {
   const page = await context.newPage(); await page.goto(BASE + '/phishing-login.html');

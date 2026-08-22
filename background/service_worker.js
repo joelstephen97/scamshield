@@ -20,7 +20,7 @@ const DEFAULTS = {
   reportingOptIn: false,     // anonymized reporting, OFF by default
   allowlist: [],             // array of registrable domains the user trusts
   blocklistVersion: 1,
-  modelVersion: 1,
+  modelVersion: 2,
   otaUrl: DEFAULT_FEED_URL,  // static JSON URL for blocklist updates; '' = disabled
   reportUrl: DEFAULT_RELAY_URL, // community-reporting relay endpoint; '' = disabled
   threatsBlocked: 0,         // local-only stat, never transmitted
@@ -360,7 +360,30 @@ api.runtime.onInstalled.addListener(async (details) => {
 });
 
 // Per-tab last verdict, kept in memory but re-derivable; popup reads via message.
+// L2 mirror in storage.session (same best-effort pattern as the icon cache
+// above) survives SW eviction between the content script's reportVerdict and
+// the popup's getVerdict — without it, a popup opened right after the SW was
+// evicted would see an empty in-memory Map and wrongly report "safe".
 const lastVerdict = new Map();
+function sessionVerdictKey(tabId) { return 'verdict:' + tabId; }
+async function persistVerdict(tabId, verdict) {
+  if (!hasSessionStorage) return;
+  try { await api.storage.session.set({ [sessionVerdictKey(tabId)]: verdict }); } catch (_) { /* best-effort */ }
+}
+async function readPersistedVerdict(tabId) {
+  if (!hasSessionStorage) return null;
+  try { const key = sessionVerdictKey(tabId); const stored = await api.storage.session.get(key); return stored[key] != null ? stored[key] : null; } catch (_) { return null; }
+}
+async function clearPersistedVerdict(tabId) {
+  if (!hasSessionStorage) return;
+  try { await api.storage.session.remove(sessionVerdictKey(tabId)); } catch (_) { /* best-effort */ }
+}
+if (api.tabs && api.tabs.onRemoved) {
+  api.tabs.onRemoved.addListener((tabId) => {
+    lastVerdict.delete(tabId);
+    clearPersistedVerdict(tabId);
+  });
+}
 
 api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   (async () => {
@@ -384,6 +407,7 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         const tabId = sender.tab && sender.tab.id;
         if (tabId != null) {
           lastVerdict.set(tabId, msg.verdict);
+          persistVerdict(tabId, msg.verdict);
           if (msg.report) lastReportInput.set(tabId, msg.report);
           maybeAutoReport(sender.tab && sender.tab.url, msg.verdict, msg.report, ['page']);
           const level = msg.verdict && msg.verdict.level;
@@ -398,7 +422,9 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         sendResponse({ ok: true }); break;
       }
       case 'getVerdict': {
-        sendResponse(lastVerdict.get(msg.tabId) || null); break;
+        let v = lastVerdict.get(msg.tabId);
+        if (v == null) v = await readPersistedVerdict(msg.tabId);
+        sendResponse(v || null); break;
       }
       case 'bumpThreats': {
         const s = await getSettings();

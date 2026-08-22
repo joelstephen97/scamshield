@@ -4,24 +4,52 @@ const $ = (id) => document.getElementById(id);
 const SS = globalThis.ScamShield, F = globalThis.SSFormat, I = globalThis.SSIcons;
 const send = (type, extra) => new Promise((res) => { try { api.runtime.sendMessage(Object.assign({ type }, extra || {}), (r) => res(r)); } catch (_) { res(null); } });
 const registrable = (h) => (SS && SS.registrableDomain) ? SS.registrableDomain(h) : String(h || '').split('.').slice(-2).join('.');
-const brandName = (key) => { const b = (SS.BRANDS || []).find((x) => x.key === key); return b ? b.names[0].replace(/\b\w/g, (c) => c.toUpperCase()) : key; };
+const brandName = (key) => SS.brandDisplayName ? SS.brandDisplayName(key) : key;
 function toast(t) { const el = $('toast'); el.textContent = t; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 1400); }
 
-let tab = null, domain = null, settings = null, verdict = null;
+let tab = null, domain = null, settings = null, verdict = null, level = 'unknown';
 
-function renderStatus(level, host, summary) {
+function renderStatus(level, host, summary, levelTextOverride) {
   $('status').className = 'card status ' + level;
-  $('statusicon').innerHTML = I.shield(level); $('level').textContent = F.levelText(level); $('host').textContent = host || '';
+  $('statusicon').innerHTML = I.shield(level); $('level').textContent = levelTextOverride || F.levelText(level); $('host').textContent = host || '';
   $('summary').hidden = !summary; $('summary').textContent = summary || '';
 }
 function renderEvidence(reasons, open) {
   const ul = $('reasons'); ul.replaceChildren();
   for (const r of (reasons || []).slice(0, 5)) {
     const li = document.createElement('li'); const chip = document.createElement('span'); chip.className = 'chip' + (/brand|icon|looks like/i.test(r) ? ' brand' : '');
-    chip.textContent = /icon|looks like|impersonat/i.test(r) ? 'Brand' : /wallet|approval|signature/i.test(r) ? 'Wallet' : /clipboard/i.test(r) ? 'Clipboard' : /pop-up|infected|support/i.test(r) ? 'Scare page' : /link|address|domain|punycode|tld/i.test(r) ? 'Link' : 'Page';
+    chip.textContent = /icon|looks like|impersonat/i.test(r) ? 'Brand' : /wallet|approval|signature/i.test(r) ? 'Wallet' : /clipboard/i.test(r) ? 'Clipboard' : /pop-up|infected|support/i.test(r) ? 'Scare page' : /link|address|domain|punycode|tld|not secure|https/i.test(r) ? 'Link' : 'Page';
     const span = document.createElement('span'); span.textContent = r; li.append(chip, span); ul.appendChild(li);
   }
   $('evidence').hidden = !(open && reasons && reasons.length);
+}
+// Renders the status card / evidence / leave-rescue-report controls from the
+// current module-scope `verdict`. Called once with the popup's first
+// getVerdict() answer, then again by pollVerdict() if that first answer was
+// null (the SW hadn't scanned the page yet, or was evicted and lost it).
+function renderVerdictUI(host) {
+  const checking = !!settings.enabled && verdict == null;
+  level = !settings.enabled ? 'unknown' : (verdict ? (verdict.level || 'safe') : 'unknown');
+  const brand = verdict && verdict.brand ? brandName(verdict.brand) : null;
+  renderStatus(level, host,
+    !settings.enabled ? 'Protection is paused — turn it on to resume.' :
+    checking ? '' :
+    level === 'dangerous' ? (brand ? `Looks like ${brand}, but isn't. Don't enter your password here.` : 'Don\'t enter passwords or card details here.') :
+    level === 'suspicious' ? 'Take care before typing anything here.' : '',
+    checking ? 'Checking…' : undefined);
+  renderEvidence(verdict && verdict.reasons, level === 'dangerous');
+  $('leave').hidden = level !== 'dangerous'; $('showwhy').hidden = level !== 'suspicious';
+  const rescueUrl = verdict && verdict.brand && SS.BRAND_DOMAINS[verdict.brand] ? 'https://' + SS.BRAND_DOMAINS[verdict.brand][0] + '/' : null;
+  $('rescue').hidden = !(level === 'dangerous' && rescueUrl); if (rescueUrl) $('rescue').textContent = 'Take me to the real ' + brand;
+  $('reportbtn').hidden = checking;
+  if (!checking) $('reportbtn').textContent = level === 'safe' || level === 'unknown' ? 'Report: this is a scam' : 'Report: this is safe';
+}
+async function pollVerdict(host) {
+  for (let i = 0; i < 10; i++) {
+    await new Promise((res) => setTimeout(res, 300));
+    const v = await send('getVerdict', { tabId: tab.id });
+    if (v != null) { verdict = v; renderVerdictUI(host); return; }
+  }
 }
 function renderTrust() {
   const paused = settings.pausedSites && settings.pausedSites[domain];
@@ -65,15 +93,13 @@ async function init() {
   if (!http) { renderStatus('unknown', tab && tab.url ? new URL(tab.url).protocol.replace(':', '') + ' page' : '', "Browser pages and the web store aren't scanned."); renderHistory(); return; }
   const host = new URL(tab.url).hostname; domain = registrable(host);
   verdict = await send('getVerdict', { tabId: tab.id });
-  const level = !settings.enabled ? 'unknown' : (verdict && verdict.level) || 'safe';
-  const brand = verdict && verdict.brand ? brandName(verdict.brand) : null;
-  renderStatus(level, host, !settings.enabled ? 'Protection is paused — turn it on to resume.' : level === 'dangerous' ? (brand ? `Looks like ${brand}, but isn't. Don't enter your password here.` : 'Don\'t enter passwords or card details here.') : level === 'suspicious' ? 'Take care before typing anything here.' : '');
-  renderEvidence(verdict && verdict.reasons, level === 'dangerous');
-  $('leave').hidden = level !== 'dangerous'; $('showwhy').hidden = level !== 'suspicious';
-  const rescueUrl = verdict && verdict.brand && SS.BRAND_DOMAINS[verdict.brand] ? 'https://' + SS.BRAND_DOMAINS[verdict.brand][0] + '/' : null;
-  $('rescue').hidden = !(level === 'dangerous' && rescueUrl); if (rescueUrl) $('rescue').textContent = 'Take me to the real ' + brand;
+  renderVerdictUI(host);
+  if (settings.enabled && verdict == null) pollVerdict(host); // fire-and-forget; re-renders when the SW's scan lands
   $('leave').addEventListener('click', async () => { await send('leaveTab', { tabId: tab.id }); window.close(); });
-  $('rescue').addEventListener('click', () => { api.tabs.update(tab.id, { url: rescueUrl }); window.close(); });
+  $('rescue').addEventListener('click', () => {
+    const rescueUrl = verdict && verdict.brand && SS.BRAND_DOMAINS[verdict.brand] ? 'https://' + SS.BRAND_DOMAINS[verdict.brand][0] + '/' : null;
+    if (rescueUrl) { api.tabs.update(tab.id, { url: rescueUrl }); window.close(); }
+  });
   $('showwhy').addEventListener('click', () => { $('evidence').hidden = false; $('showwhy').hidden = true; });
 
   $('trust').hidden = false; renderTrust();
@@ -86,7 +112,6 @@ async function init() {
   });
   $('untrust').addEventListener('click', async () => { await send('unpauseSite', { domain }); settings = await send('getSettings'); renderTrust(); toast('Untrusted'); });
 
-  $('reportbtn').hidden = false; $('reportbtn').textContent = level === 'safe' || level === 'unknown' ? 'This is a scam — report it' : 'This is safe — report a mistake';
   $('reportbtn').addEventListener('click', async () => {
     const r = await send('userReport', { label: level === 'safe' || level === 'unknown' ? 'scam' : 'false_positive', tabId: tab.id });
     $('reportbtn').hidden = true; $('reportdone').hidden = false; $('reportdone').textContent = r && r.via === 'relay' ? 'Thanks — sent' : 'Thanks — noted';

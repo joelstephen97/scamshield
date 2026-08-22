@@ -26,6 +26,7 @@ function bindSwitch(id, key) {
 function setSwitch(id, on) { $(id).checked = !!on; $(id).closest('.switch').classList.toggle('on', !!on); }
 async function load() {
   const s = await send('getSettings');
+  if (!s) { flash('Extension error — try reopening.'); return; }
   setSwitch('enabled', s.enabled); setSwitch('block', s.blockKnownBad); setSwitch('hide', s.hideScamContent); setSwitch('pageanalysis', s.pageAnalysis !== false); setSwitch('report', s.reportingOptIn);
   $('otaurl').value = s.otaUrl || ''; $('theme').value = s.theme || 'auto';
   $('feedstatus').textContent = s.lastOtaAt ? `Updated ${F.relTime(s.lastOtaAt)} · ${Number(s.lastOtaCount || 0).toLocaleString()} rules` : 'Never updated';
