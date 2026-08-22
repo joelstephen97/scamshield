@@ -6,7 +6,7 @@
 const { chromium } = require('@playwright/test');
 const fs = require('node:fs'); const path = require('node:path');
 const C = require('../engine/constants');
-const { hamming } = require('../engine/image_hash');
+const { resolveCollisions } = require('./lib/brand_hash_guard');
 const IH_SRC = fs.readFileSync(path.join(__dirname, '..', 'engine', 'image_hash.js'), 'utf8');
 const OUT = path.join(__dirname, '..', 'engine', 'brand_icons.json');
 
@@ -54,9 +54,14 @@ const OUT = path.join(__dirname, '..', 'engine', 'brand_icons.json');
   }
   await browser.close();
   // Ambiguity guard: drop hashes that sit < 12 bits from another brand's hash.
-  for (let i = 0; i < brands.length; i++) for (let j = 0; j < brands.length; j++) if (i !== j)
-    brands[i].hashes = brands[i].hashes.filter((a) => brands[j].hashes.every((b) => hamming(a, b) >= 12) || (console.log(`  ✗ dropping ambiguous ${brands[i].key} hash (close to ${brands[j].key})`), false));
-  const kept = brands.filter((b) => b.hashes.length);
+  // Order-independent (tools/lib/brand_hash_guard.js): a hash shared with a
+  // sub-brand (e.g. gmail's icon colliding with google's) is kept on the
+  // brand whose known domains are the superset and dropped from the
+  // narrower one; a collision between two unrelated brands drops the hash
+  // from both sides.
+  const domainsByKey = Object.fromEntries(C.BRANDS.map((b) => [b.key, b.domains]));
+  const { brands: kept, dropped } = resolveCollisions(brands, domainsByKey, 12);
+  for (const d of dropped) console.log(`  ✗ dropping ${d.brand} ${d.hash} (${d.reason} vs ${d.other})`);
   fs.writeFileSync(OUT, JSON.stringify({ version: 1, generated: new Date().toISOString().slice(0, 10), brands: kept }, null, 1) + '\n');
   console.log(`Wrote ${kept.length} brands → ${OUT}`);
 })().catch((e) => { console.error(e); process.exit(1); });
