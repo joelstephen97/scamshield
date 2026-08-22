@@ -43,3 +43,31 @@ test('high model with near-zero rules cannot reach dangerous (rules anchor model
   assert.notEqual(r.level, 'dangerous');
   assert.ok(r.score < 0.8);
 });
+
+test('content alone caps at suspicious', () => {
+  const r = fuse({ modelProb: 0.1, urlRules: { score: 0, reasons: [] }, domRules: { score: 0, reasons: [], flags: [] }, contentProb: 0.99 });
+  assert.equal(r.level, 'suspicious');
+  assert.ok(r.reasons.some((x) => /resemble known phishing/i.test(x)));
+  assert.equal(r.contentUsed, true);
+});
+test('content below threshold changes nothing', () => {
+  const r = fuse({ modelProb: 0.1, urlRules: { score: 0, reasons: [] }, domRules: { score: 0, reasons: [], flags: [] }, contentProb: 0.6 });
+  assert.equal(r.level, 'safe');
+});
+test('content + rule corroboration → dangerous', () => {
+  const r = fuse({ modelProb: null, urlRules: { score: 0.35, reasons: ['tld'] }, domRules: { score: 0, reasons: [], flags: [] }, contentProb: 0.95 });
+  assert.equal(r.level, 'dangerous');
+});
+test('content + URL model corroboration → dangerous', () => {
+  const r = fuse({ modelProb: 0.75, urlRules: { score: 0, reasons: [] }, domRules: { score: 0, reasons: [], flags: [] }, contentProb: 0.95 });
+  assert.equal(r.level, 'dangerous');
+});
+test('content + icon match → dangerous', () => {
+  const r = fuse({ modelProb: 0.1, urlRules: { score: 0, reasons: [] }, domRules: { score: 0, reasons: [], flags: [] }, contentProb: 0.95, iconMatch: true });
+  assert.equal(r.level, 'dangerous');
+});
+test('existing behaviour unchanged when contentProb is null', () => {
+  const r = fuse({ modelProb: 0.95, urlRules: { score: 0.4, reasons: ['a'] }, domRules: { score: 0, reasons: [], flags: [] }, contentProb: null });
+  assert.equal(r.contentUsed, false);
+  assert.ok(r.score > 0.4 && r.level !== 'dangerous');
+});

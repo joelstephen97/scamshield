@@ -14,7 +14,8 @@
     'host_entropy', 'brand_lookalike'
   ];
 
-  const THRESHOLDS = { suspicious: 0.5, dangerous: 0.8 };
+  const THRESHOLDS = { suspicious: 0.5, dangerous: 0.8,
+    contentSuspicious: 0.9, contentCorroborateRule: 0.3, contentCorroborateModel: 0.7, iconHamming: 6 };
 
   const POPULAR_BRANDS = [
     'paypal', 'google', 'apple', 'microsoft', 'amazon', 'facebook',
