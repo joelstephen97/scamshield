@@ -23,3 +23,17 @@ test('onboarding renders', async ({ context, extensionId }) => {
   await page.goto(`chrome-extension://${extensionId}/onboarding.html`);
   await expect(page.locator('h1')).toContainText('protecting');
 });
+test('options: history "Mark as mistake" opens a GitHub issue when reporting is opted out', async ({ context, extensionId }) => {
+  const sw = context.serviceWorkers()[0];
+  await sw.evaluate(() => chrome.storage.local.set({ history: [{ ts: Date.now(), host: 'old-scam.example', kind: 'page', level: 'dangerous' }] }));
+  const page = await context.newPage(); await page.goto(`chrome-extension://${extensionId}/options.html#history`);
+  const [issuePage] = await Promise.all([
+    context.waitForEvent('page'),
+    page.locator('#history li button').first().click()
+  ]);
+  await expect(page.locator('#status')).toHaveText(/Opened a report/);
+  await issuePage.waitForLoadState('domcontentloaded').catch(() => {});
+  const url = decodeURIComponent(issuePage.url());
+  expect(url).toContain('joelstephen97/scamshield/issues/new');
+  expect(url).toContain('old-scam.example');
+});

@@ -6,6 +6,7 @@ nav a{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var
 nav a.cur{background:var(--accent-soft);color:var(--accent);font-weight:600}
 nav .sp{flex:1} nav .ver{font-size:11px;color:var(--muted);padding:0 10px}
 main{padding:24px 28px;max-width:760px}
+main a{color:var(--accent)} main a:visited{color:var(--accent)}
 main h2{font-size:18px;font-weight:600;margin:0 0 4px} main h3{font-size:13px;color:var(--muted);margin:16px 0 6px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
 .lead{color:var(--muted);font-size:13px;margin:0 0 16px;max-width:62ch}
 .setrow{display:flex;align-items:flex-start;gap:16px;padding:12px 14px;background:var(--surface);border:1px solid var(--hair);border-radius:var(--radius);margin-bottom:8px}

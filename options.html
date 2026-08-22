@@ -2,18 +2,18 @@
 <link rel="stylesheet" href="ui/tokens.css"><link rel="stylesheet" href="options.css"></head>
 <body class="ui">
 <div class="shell">
-<nav aria-label="Settings sections">
+<nav aria-label="Settings sections" role="tablist">
   <div class="brand" id="brandmark">ScamShield</div>
-  <a href="#protection" data-tab="protection" class="cur">Protection</a>
-  <a href="#trusted" data-tab="trusted">Trusted sites</a>
-  <a href="#history" data-tab="history">History</a>
-  <a href="#feed" data-tab="feed">Threat feed</a>
-  <a href="#about" data-tab="about">About</a>
+  <a href="#protection" data-tab="protection" class="cur" role="tab" aria-selected="true" aria-controls="tab-protection">Protection</a>
+  <a href="#trusted" data-tab="trusted" role="tab" aria-selected="false" aria-controls="tab-trusted">Trusted sites</a>
+  <a href="#history" data-tab="history" role="tab" aria-selected="false" aria-controls="tab-history">History</a>
+  <a href="#feed" data-tab="feed" role="tab" aria-selected="false" aria-controls="tab-feed">Threat feed</a>
+  <a href="#about" data-tab="about" role="tab" aria-selected="false" aria-controls="tab-about">About</a>
   <span class="sp"></span><span class="ver" id="ver"></span>
 </nav>
 <main>
-<section id="tab-protection" class="tab">
-  <h2>Protection</h2><p class="lead">Everything here runs on your device. Nothing is sent anywhere unless you turn on the last option.</p>
+<section id="tab-protection" class="tab" role="tabpanel" aria-labelledby="h-protection">
+  <h2 id="h-protection" tabindex="-1">Protection</h2><p class="lead">Everything here runs on your device. Nothing is sent anywhere unless you turn on the last option.</p>
   <div class="setrow"><div class="t"><b>Protection on</b><span>Scans pages for scams and warns you. Turn off to pause everything.</span></div><label class="switch" for="enabled"><input type="checkbox" id="enabled" class="sr"><i></i></label></div>
   <div class="setrow"><div class="t"><b>Block known scam sites</b><span>Stops pages on the daily-updated threat list before they load.</span></div><label class="switch" for="block"><input type="checkbox" id="block" class="sr"><i></i></label></div>
   <div class="setrow"><div class="t"><b>Hide scam content</b><span>Greys out "you've won a prize" blocks inside otherwise normal pages.</span></div><label class="switch" for="hide"><input type="checkbox" id="hide" class="sr"><i></i></label></div>
@@ -22,24 +22,24 @@
     <div id="whatsentbody" class="hint" hidden>A report contains only: the site name (hostname), the verdict and internal reason codes, numeric risk signals derived from the address and page layout (hashed word counts and counts of forms, inputs and links — never the text itself), matched brand names, the extension version, and the hour. Never the full address (path or query), page text, anything you typed, cookies, or any identifier of you or your device. Reports are deleted after 180 days. <a href="https://joelstephen97.github.io/scamshield/privacy.html" target="_blank" rel="noopener">Privacy policy</a></div></div>
     <label class="switch" for="report"><input type="checkbox" id="report" class="sr"><i></i></label></div>
 </section>
-<section id="tab-trusted" class="tab" hidden>
-  <h2>Trusted sites</h2><p class="lead">ScamShield stays quiet on these sites. Remove one to protect it again.</p>
+<section id="tab-trusted" class="tab" hidden role="tabpanel" aria-labelledby="h-trusted">
+  <h2 id="h-trusted" tabindex="-1">Trusted sites</h2><p class="lead">ScamShield stays quiet on these sites. Remove one to protect it again.</p>
   <h3>Always</h3><ul id="allowlist" class="list"></ul>
   <h3>For a while</h3><ul id="pausedlist" class="list"></ul>
 </section>
-<section id="tab-history" class="tab" hidden>
-  <h2>Protection history</h2><p class="lead">Stored only on this device (site names, never full addresses).</p>
+<section id="tab-history" class="tab" hidden role="tabpanel" aria-labelledby="h-history">
+  <h2 id="h-history" tabindex="-1">Protection history</h2><p class="lead">Stored only on this device (site names, never full addresses).</p>
   <ul id="history" class="list"></ul><button id="clearhist" class="btn">Clear history</button>
 </section>
-<section id="tab-feed" class="tab" hidden>
-  <h2>Threat feed</h2><p class="lead">A daily-rebuilt list of known scam sites (OpenPhish + URLhaus, heavily filtered). ScamShield only downloads it.</p>
+<section id="tab-feed" class="tab" hidden role="tabpanel" aria-labelledby="h-feed">
+  <h2 id="h-feed" tabindex="-1">Threat feed</h2><p class="lead">A daily-rebuilt list of known scam sites (OpenPhish + URLhaus, heavily filtered). ScamShield only downloads it.</p>
   <div class="feedline"><span class="dot" id="feeddot"></span><span id="feedstatus">Never updated</span><button id="checkupd" class="btn ghost">Check now</button></div>
   <details class="adv"><summary>Advanced: feed URL</summary>
     <label class="row"><span>Feed URL</span><input type="url" id="otaurl" placeholder="https://…/blocklist.json"></label>
     <button id="resetfeed" class="btn">Reset to official feed</button><p class="hint">Point this at your own JSON to self-host, or leave blank to disable updates.</p></details>
 </section>
-<section id="tab-about" class="tab" hidden>
-  <h2>About</h2>
+<section id="tab-about" class="tab" hidden role="tabpanel" aria-labelledby="h-about">
+  <h2 id="h-about" tabindex="-1">About</h2>
   <div class="setrow"><div class="t"><b>Version</b><span id="aboutver"></span></div></div>
   <div class="setrow"><div class="t"><b>Appearance</b><span>Follow your system, or pick one.</span></div><select id="theme"><option value="auto">Auto</option><option value="light">Light</option><option value="dark">Dark</option></select></div>
   <div class="setrow"><div class="t"><b>Links</b><span><a href="https://joelstephen97.github.io/scamshield/privacy.html" target="_blank" rel="noopener">Privacy policy</a> · <a href="https://github.com/joelstephen97/scamshield" target="_blank" rel="noopener">GitHub</a> · <a href="https://github.com/joelstephen97/scamshield/issues/new" target="_blank" rel="noopener">Report an issue</a> · <a href="https://github.com/joelstephen97/scamshield/blob/main/CHANGELOG.md" target="_blank" rel="noopener">What's new</a></span></div></div>

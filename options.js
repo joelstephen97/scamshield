@@ -4,12 +4,16 @@ const $ = (id) => document.getElementById(id);
 const F = globalThis.SSFormat, I = globalThis.SSIcons;
 const send = (type, extra) => new Promise((res) => { try { api.runtime.sendMessage(Object.assign({ type }, extra || {}), (r) => res(r)); } catch (_) { res(null); } });
 function flash(t) { $('status').textContent = t; $('status').classList.add('show'); setTimeout(() => $('status').classList.remove('show'), 1200); }
-function showTab(name) {
+function showTab(name, userInitiated) {
   for (const s of document.querySelectorAll('.tab')) s.hidden = s.id !== 'tab-' + name;
-  for (const a of document.querySelectorAll('nav a')) a.classList.toggle('cur', a.dataset.tab === name);
+  for (const a of document.querySelectorAll('nav a')) {
+    const cur = a.dataset.tab === name;
+    a.classList.toggle('cur', cur); a.setAttribute('aria-selected', String(cur));
+  }
   try { history.replaceState(null, '', '#' + name); } catch (_) {}
+  if (userInitiated) { const h = $('tab-' + name).querySelector('h2'); if (h) h.focus(); }
 }
-for (const a of document.querySelectorAll('nav a')) a.addEventListener('click', (e) => { e.preventDefault(); showTab(a.dataset.tab); });
+for (const a of document.querySelectorAll('nav a')) a.addEventListener('click', (e) => { e.preventDefault(); showTab(a.dataset.tab, true); });
 showTab((location.hash || '#protection').slice(1).replace(/[^a-z]/g, '') || 'protection');
 $('brandmark').insertAdjacentHTML('afterbegin', I.shield('safe'));
 try { const v = api.runtime.getManifest().version; $('ver').textContent = 'Version ' + v; $('aboutver').textContent = v; } catch (_) {}
