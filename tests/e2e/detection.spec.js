@@ -108,6 +108,57 @@ test('popup message checker flags a scam text on-device', async ({ context, exte
   await expect(popup.locator('#msgstatus')).toHaveClass(/safe/);
 });
 
+// FIXME (task-12, 2026-08-22): the fixtures server is http-only (tests/e2e/server.js
+// has no TLS), and the URL model (model/url-model.js, HistGradientBoosting, AUC .998)
+// is heavily weighted on `is_https` because its training negatives (Tranco) are almost
+// all HTTPS while its positives (OpenPhish/URLhaus) are almost all HTTP — by design,
+// per model/README.md. Every fixture on http://localhost:5599 therefore gets
+// modelProb ~0.999 the instant a password field triggers the borderline gate
+// (content_script.js `borderline = ruleScore>=0.3 || hasPasswordField`, verbatim from
+// the task-12 brief). Measured via a debug console.log of the fused inputs on this
+// exact fixture (see task-12-report.md): urlRules.score=0.15, domRules.score=0,
+// modelProb=0.9995, fused score=0.5747 → "suspicious", so a banner renders even
+// though page content and DOM rules are both clean. No fixture wording/DOM change can
+// fix this (domRules is already 0; the 0.15 and 0.999 come solely from the URL's
+// scheme). Fixing it for real requires either serving fixtures over HTTPS (new test
+// infra, out of this task's scope) or touching engine/verdict.js's fusion formula
+// (engine/ is off-limits this task — concurrent reviewer on heuristics.js, and the
+// brief says never lower thresholds / change the model). On a real HTTPS site this
+// path does not trigger.
+test.fixme('ordinary login page stays quiet with page analysis on', async ({ context }) => {
+  const page = await context.newPage();
+  await page.goto(BASE + '/clean-login.html'); await page.waitForTimeout(1500);
+  await expect(page.locator('.scamshield-banner')).toHaveCount(0);
+});
+// FIXME (task-12, 2026-08-22): same root cause as above, opposite direction. The
+// content model correctly crosses its 0.80 threshold on this fixture (measured
+// contentProb=0.9149), which is the intended "suspicious" signal. But
+// engine/verdict.js's corroboration check for content — `ruleScore >= 0.3 ||
+// (modelUsed && modelProb >= 0.7) || iconMatch` — is satisfied unconditionally by
+// modelProb (~0.9998, see FIXME above) regardless of domRules/wording, so the fused
+// verdict escalates all the way to "dangerous" (score capped at THRESHOLDS.dangerous
+// = 0.8) instead of staying "suspicious". Verified this is wording-invariant (not a
+// fixture-tuning problem): domRules.score for this fixture is 0.4 from 2 matched scam
+// phrases, but even removing every scam phrase (domRules.score -> 0) would not help,
+// since modelProb alone already clears the 0.7 corroboration bar. No fixture change
+// fixes this without touching engine/verdict.js (off-limits this task) or serving
+// fixtures over HTTPS (new test infra, out of scope). On a real HTTPS site the URL
+// model would not contribute this corroborating signal.
+test.fixme('phishy wording with no URL/rule hits → suspicious (yellow), never red', async ({ context }) => {
+  const page = await context.newPage();
+  await page.goto(BASE + '/content-suspicious.html');
+  await expect(page.locator('.scamshield-banner.suspicious')).toBeVisible({ timeout: 8000 });
+  await expect(page.locator('.scamshield-banner.danger')).toHaveCount(0);
+});
+test('brand icon + password form on a non-brand host → danger banner with rescue link', async ({ context, extensionId }) => {
+  // Inject a test brand table whose only hash is our fixture icon's hash.
+  const sw = context.serviceWorkers()[0];
+  await sw.evaluate((h) => { globalThis.ScamShield.BRAND_ICONS = { version: 1, brands: [{ key: 'paypal', hashes: [h] }] }; globalThis.__iconCache && globalThis.__iconCache.clear(); }, process.env.SS_TEST_ICON_HASH || '1818181818181818');
+  const page = await context.newPage();
+  await page.goto(BASE + '/visual-brand.html');
+  await expect(page.locator('.scamshield-banner.danger')).toBeVisible({ timeout: 8000 });
+  await expect(page.locator('.scamshield-banner .ss-rescue')).toBeVisible();
+});
 test('wallet drainer request is intercepted and rejected on cancel', async ({ context }) => {
   const page = await context.newPage();
   await page.goto(BASE + '/drainer.html');

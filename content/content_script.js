@@ -12,6 +12,22 @@
     });
   }
 
+  function needsPageAnalysis(signals, urlRules, domRules) {
+    if (signals.hasPasswordField) return true;
+    if (Math.max(urlRules.score, domRules.score) >= 0.3) return true;
+    return [...document.querySelectorAll('form')].some((f) =>
+      f.querySelectorAll('input:not([type]),input[type="text"],input[type="email"],input[type="tel"],input[type="number"],input[type="password"]').length >= 2);
+  }
+  function iconCandidates() {
+    const out = [];
+    const add = (h) => { try { const u = new URL(h, location.href); if (/^https?:$/.test(u.protocol)) out.push(u.href); } catch (_) {} };
+    document.querySelectorAll('link[rel~="icon"],link[rel="apple-touch-icon"]').forEach((l) => add(l.getAttribute('href') || ''));
+    add('/favicon.ico');
+    [...document.querySelectorAll('img')].filter((i) => /logo/i.test((i.getAttribute('src') || '') + ' ' + (i.getAttribute('alt') || '') + ' ' + i.className + ' ' + i.id) && (i.naturalWidth >= 40 || i.width >= 40)).slice(0, 2).forEach((i) => add(i.getAttribute('src') || ''));
+    return [...new Set(out)].slice(0, 6);
+  }
+  const withTimeout = (p, ms) => Promise.race([p, new Promise((r) => setTimeout(() => r(null), ms))]);
+
   function registrable(host) {
     if (SS && typeof SS.registrableDomain === 'function') return SS.registrableDomain(host);
     return String(host || '').toLowerCase().split('.').filter(Boolean).slice(-2).join('.');
@@ -143,16 +159,26 @@
 
     const { signals, foreignForms, scamBlocks } = collectSignals();
     const urlRules = SS.scoreUrl(location.href);
-    const domRules = SS.scoreDom(signals);
-
-    // Model: only invoke when borderline or credentials present, to limit overhead.
-    let modelProb = null;
+    let domRules = SS.scoreDom(signals);
+    let modelProb = null, contentProb = null, iconMatch = false;
     const borderline = Math.max(urlRules.score, domRules.score) >= 0.3 || signals.hasPasswordField;
-    if (borderline && SS.isAvailable && SS.isAvailable()) {
-      modelProb = await SS.predict(SS.extractUrlFeatures(location.href));
+    if (borderline && SS.isAvailable && SS.isAvailable()) modelProb = await SS.predict(SS.extractUrlFeatures(location.href));
+    if (settings.pageAnalysis !== false && needsPageAnalysis(signals, urlRules, domRules)) {
+      try {
+        const iconsP = withTimeout(send('hashIcons', { urls: iconCandidates() }), 1200);
+        if (SS.isPageModelAvailable && SS.isPageModelAvailable()) {
+          const pf = SS.extractPageFeatures(document, { host: location.hostname });
+          const r = SS.scorePageContent(pf); if (!Number.isNaN(r.prob)) contentProb = r.prob;
+        }
+        const icons = await iconsP;
+        if (icons && icons.matches && icons.matches.length) {
+          signals.iconMatches = icons.matches; domRules = SS.scoreDom(signals);
+          iconMatch = (domRules.flags || []).some((f) => f === 'brand-impersonation-visual') || icons.matches.length > 0;
+        }
+      } catch (_) { /* page analysis is best-effort */ }
     }
-
-    const verdict = SS.fuse({ modelProb, urlRules, domRules });
+    const verdict = SS.fuse({ modelProb, urlRules, domRules, contentProb, iconMatch });
+    try { window.__ssLastVerdict = verdict; } catch (_) {}
     await send('reportVerdict', { verdict });
     if (verdict.level === 'dangerous') send('bumpThreats');
 

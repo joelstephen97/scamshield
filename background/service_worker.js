@@ -1,4 +1,5 @@
 'use strict';
+try { importScripts('../engine/constants.js', '../engine/image_hash.js', '../engine/brand_icons.js'); } catch (_) { /* Firefox background page loads them via manifest */ }
 const api = globalThis.browser || globalThis.chrome;
 
 // Official ScamShield feed: rebuilt daily by GitHub Actions from OpenPhish +
@@ -18,7 +19,8 @@ const DEFAULTS = {
   otaUrl: DEFAULT_FEED_URL,  // static JSON URL for blocklist updates; '' = disabled
   threatsBlocked: 0,         // local-only stat, never transmitted
   lastBlocklistVersion: 0,
-  supportAskShown: false     // one-time "you were just protected" support toast
+  supportAskShown: false,    // one-time "you were just protected" support toast
+  pageAnalysis: true         // on-device page-content model + icon brand matching
 };
 
 // Local-only protection history: ring buffer of { ts, host, kind, level }.
@@ -38,6 +40,44 @@ async function recordEvent(evt) {
 }
 function hostOfSender(sender) {
   try { return new URL(sender.tab && sender.tab.url).hostname; } catch (_) { return ''; }
+}
+
+// Icon hashing for visual brand matching. Fetches the page's own icons only;
+// results cached 24h (memory + storage.session when available). Never stores URLs elsewhere.
+const iconCache = new Map(); globalThis.__iconCache = iconCache;
+const ICON_TTL = 24 * 3600 * 1000, ICON_MAX_BYTES = 200 * 1024, ICON_TIMEOUT = 3000;
+async function hashIconUrl(url) {
+  const hit = iconCache.get(url);
+  if (hit && Date.now() - hit.ts < ICON_TTL) return hit.hash;
+  let hash = null;
+  try {
+    const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), ICON_TIMEOUT);
+    const res = await fetch(url, { credentials: 'omit', redirect: 'follow', signal: ctl.signal, cache: 'force-cache' });
+    clearTimeout(t);
+    const ct = res.headers.get('content-type') || '';
+    const len = Number(res.headers.get('content-length') || 0);
+    if (res.ok && len <= ICON_MAX_BYTES && (/^image\//i.test(ct) || /\.ico(\?|$)/i.test(url)) && !/svg/i.test(ct)) {
+      const blob = await res.blob();
+      if (blob.size <= ICON_MAX_BYTES) hash = await globalThis.ScamShield.hashImageBlob(blob);
+    }
+  } catch (_) { hash = null; }
+  iconCache.set(url, { hash, ts: Date.now() });
+  if (iconCache.size > 2000) iconCache.delete(iconCache.keys().next().value);
+  return hash;
+}
+async function handleHashIcons(urls) {
+  const SS = globalThis.ScamShield;
+  const table = (SS.BRAND_ICONS && SS.BRAND_ICONS.brands) || [];
+  const maxDist = (SS.THRESHOLDS && SS.THRESHOLDS.iconHamming) || 6;
+  const hashes = [], matches = [];
+  for (const url of (urls || []).slice(0, 6)) {
+    const hash = await hashIconUrl(String(url));
+    if (!hash) continue;
+    hashes.push({ url, hash });
+    const m = SS.matchBrand(hash, table, maxDist);
+    if (m) matches.push({ brand: m.brand, distance: m.distance, url });
+  }
+  return { hashes, matches };
 }
 
 async function getSettings() {
@@ -165,6 +205,8 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         sendResponse(await runOtaUpdate()); break;
       case 'getDefaultFeedUrl':
         sendResponse({ url: DEFAULT_FEED_URL }); break;
+      case 'hashIcons':
+        sendResponse(await handleHashIcons(msg.urls)); break;
       default:
         sendResponse({ ok: false, error: 'unknown message' });
     }
