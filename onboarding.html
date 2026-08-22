@@ -1,16 +1,21 @@
-<!doctype html><html><head><meta charset="utf-8"><title>Welcome to ScamShield</title>
-<style>body{font:16px/1.6 system-ui,sans-serif;max-width:680px;margin:40px auto;padding:0 20px;color:#1a1a1a}
-h1{color:#1e7d34}.card{border:1px solid #e3e3e3;border-radius:10px;padding:16px 18px;margin:14px 0}
-.tag{color:#1e7d34;font-weight:600}a.btn{display:inline-block;background:#1e7d34;color:#fff;padding:10px 16px;border-radius:8px;text-decoration:none;margin-top:10px}
-.note{color:#666;font-size:14px}</style></head>
-<body>
-<h1>🛡️ ScamShield is protecting you</h1>
-<p>ScamShield watches the pages you visit and warns you about scams — <strong>entirely on your device</strong>. Your browsing never leaves your computer.</p>
-<div class="card"><span class="tag">Phishing &amp; fake logins</span><p>Warns when a page imitates a real brand or sends your password to the wrong site.</p></div>
-<div class="card"><span class="tag">Crypto-wallet protection</span><p>Pops a warning before a site can trick your wallet into approving a drain, and blocks recovery-phrase theft.</p></div>
-<div class="card"><span class="tag">Clipboard &amp; "paste this" scams</span><p>Alerts you if a site secretly copies a command to your clipboard.</p></div>
-<div class="card"><span class="tag">Fake virus / tech-support pages</span><p>Breaks the scary pop-up loop and helps you escape.</p></div>
-<p>Pin ScamShield (click the puzzle-piece icon in your toolbar, then the pin) to see its status on every page.</p>
-<a class="btn" href="options.html">Open settings</a>
-<p class="note">ScamShield is free. If it helps you, you can support development from the Settings page.</p>
-</body></html>
+<!doctype html><html><head><meta charset="utf-8"><title>Welcome to ScamShield</title><link rel="stylesheet" href="ui/tokens.css">
+<style>main{max-width:680px;margin:40px auto;padding:0 20px}h1{font-size:24px;font-weight:600;margin:0 0 6px}.lead{color:var(--muted);font-size:15px;margin:0 0 20px;max-width:60ch}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.card h3{font-size:14px;font-weight:600;margin:0 0 4px;display:flex;align-items:center;gap:8px;color:var(--accent)}.card p{margin:0;font-size:13px;color:var(--muted)}
+.pin{display:flex;gap:14px;align-items:center;margin-top:16px}.pin .art{width:150px;height:90px;border-radius:var(--radius);background:var(--surface);border:1px solid var(--hair);position:relative;flex:none}
+.pin .art i{position:absolute;top:10px;right:12px;width:18px;height:18px;border-radius:4px;background:var(--accent-soft)}.pin .art b{position:absolute;top:36px;right:10px;left:10px;height:10px;border-radius:5px;background:var(--hair)}.pin .art em{position:absolute;top:52px;right:10px;left:10px;height:10px;border-radius:5px;background:var(--accent);opacity:.55}
+.actions{display:flex;gap:10px;margin-top:20px}.note{color:var(--muted);font-size:12px;margin-top:16px}@media(max-width:560px){.grid{grid-template-columns:1fr}}</style></head>
+<body class="ui"><main>
+<h1 id="h">ScamShield is protecting you</h1>
+<p class="lead">It watches the pages you visit and warns you about scams — entirely on your device. Your browsing never leaves your computer.</p>
+<div class="grid">
+  <div class="card"><h3>Phishing &amp; fake logins</h3><p>Warns when a page sends your password to the wrong site.</p></div>
+  <div class="card"><h3>Brand look-alikes</h3><p>Recognises a copied PayPal, bank or telco icon on a site that isn't theirs — 60+ brands, including UAE banks and government services.</p></div>
+  <div class="card"><h3>Page analysis</h3><p>Reads the wording and layout of login pages on your device to catch scams not yet on any list.</p></div>
+  <div class="card"><h3>Crypto wallet guard</h3><p>Stops drainer approvals and recovery-phrase theft before your wallet sees them.</p></div>
+  <div class="card"><h3>Clipboard &amp; "paste this" scams</h3><p>Alerts you when a site secretly copies a command to your clipboard.</p></div>
+  <div class="card"><h3>Fake virus pop-ups</h3><p>Breaks the scary pop-up loop and helps you leave.</p></div>
+</div>
+<div class="pin"><div class="art" aria-hidden="true"><i></i><b></b><em></em></div><div><b>Pin ScamShield</b><p class="note" style="margin-top:4px">Click the puzzle-piece icon in your toolbar, then the pin next to ScamShield, so you can see each page's status at a glance.</p></div></div>
+<div class="actions"><a class="btn primary" href="options.html">Open settings</a></div>
+<p class="note">ScamShield is free. Optional: in Settings you can help make it smarter by sharing anonymous reports of scams it catches — it's off unless you turn it on. If it helps you, you can support development from the Settings page.</p>
+</main><script src="ui/icons.js"></script><script src="ui/theme.js"></script><script>document.getElementById('h').insertAdjacentHTML('afterbegin', SSIcons.shield('safe'));</script></body></html>

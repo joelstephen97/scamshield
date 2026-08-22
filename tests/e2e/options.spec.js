@@ -18,3 +18,8 @@ test('options: report toggle shows the disclosure and the "what is sent" expande
   await page.click('#whatsent'); await expect(page.locator('#whatsentbody')).toBeVisible();
   await expect(page.locator('#whatsentbody')).toContainText(/never the full address/i);
 });
+test('onboarding renders', async ({ context, extensionId }) => {
+  const page = await context.newPage();
+  await page.goto(`chrome-extension://${extensionId}/onboarding.html`);
+  await expect(page.locator('h1')).toContainText('protecting');
+});
