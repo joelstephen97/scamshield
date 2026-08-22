@@ -77,7 +77,11 @@
       let same = true;
       const action = attr(f, 'action');
       if (action && /^https?:\/\//i.test(action)) {
-        try { same = C.registrableDomain(new URL(action).hostname.toLowerCase()) === pageDomain; } catch (_) { same = true; }
+        try { same = C.registrableDomain(new URL(action).hostname.toLowerCase()) === pageDomain; }
+        // An absolute-looking form action that fails to parse as a URL is the more
+        // suspicious case (a broken/obfuscated submission target) -- treat as FOREIGN,
+        // unlike anchor hrefs where parse failure also counts as external (kept consistent).
+        catch (_) { same = false; }
       }
       add('f:', [same ? 'same' : 'foreign', (attr(f, 'method') || 'get').toLowerCase()], 2, false);
     }

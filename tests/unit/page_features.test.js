@@ -63,3 +63,12 @@ test('every dense value is within 0..1 and deterministic across calls', () => {
   assert.deepEqual(a, b);
   for (const v of a.dense) assert.ok(v >= 0 && v <= 1, String(v));
 });
+
+test('unparseable absolute form action is treated as foreign, not same-host', () => {
+  const { document } = parseHTML('<form action="https://exa mple.com/p" method="post"><input type="password" name="p"></form>');
+  const f = PF.extractPageFeatures(document, { host: 'shop.contoso.com' });
+  const foreignBucket = PF.fnv1a('f:foreign') & (PF.PAGE_BUCKETS - 1);
+  assert.ok(f.tokens[foreignBucket] >= 1, 'unparseable form action treated as foreign');
+  assert.equal(f.dense[idx('n_password')], 1 / 3);
+  for (const v of f.dense) assert.ok(v >= 0 && v <= 1, String(v));
+});
