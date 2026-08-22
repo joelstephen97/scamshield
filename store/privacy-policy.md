@@ -24,13 +24,11 @@ history (site names and event types only — never full addresses) in your
 browser's local extension storage. This never leaves your device, can be
 cleared in Settings, and is removed when you uninstall the extension.
 
-## Optional anonymous reporting
-Settings includes an opt-in "Send anonymous threat reports" toggle (off by
-default). In this version it is a stored preference only — no reports are
-transmitted. If a future version activates it, reports would contain only
-anonymized, non-identifying risk features about a flagged page, never full URLs,
-page content, your IP-based identity, cookies, or anything that identifies you
-or the specific page.
+## Optional community reporting (off by default)
+If you turn on "Help make ScamShield smarter" in Settings, ScamShield sends a small report to our relay (https://<relay>/api/report) in two cases: (1) when it rates a page *dangerous*, at most once per site per day; (2) when you press "Report a mistake" / "Report this site as a scam". A report contains only: the site name (hostname), the verdict and its internal reason codes, numeric risk signals derived from the address and page layout (hashed word counts and counts of forms/inputs/links — never the text itself), matched brand names, the extension version, and the hour. It never contains the full address (path or query), page text, anything you typed, cookies, or any identifier of you or your device. Reports are kept for 180 days and used only to improve detection. Turn the option off at any time; queued reports are discarded.
+
+## Icon check
+To recognise brand look-alikes, ScamShield fetches the icon files (favicon / logo) that the page references — usually from the same site, sometimes from a CDN the site uses. These requests contain no cookies or credentials, and no third party learns anything about you or your browsing.
 
 ## Permissions
 See the permissions justification in the listing. We request the minimum needed

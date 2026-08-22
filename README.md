@@ -69,5 +69,4 @@ PhishTank/OpenPhish + Tranco mix. Then re-run the parity check
 (tests/unit/parity.test.js).
 
 ## Privacy
-No browsing data is transmitted. Optional anonymous reporting is off by default.
-Read the [privacy policy](https://joelstephen97.github.io/scamshield/privacy.html).
+All analysis runs on your device. Optionally (off by default), you can help ScamShield improve by turning on "Help make ScamShield smarter" to send anonymized reports — only when a page is flagged *dangerous* or when you report a mistake. Icon fetches (favicon/logo) are from the same site you visit, with no cookies or credentials; no third party learns about your browsing. No new permissions were added in v0.5.0, and the ONNX runtime and web-accessible resources were removed. Read the full [privacy policy](https://joelstephen97.github.io/scamshield/privacy.html).
