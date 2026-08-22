@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "ScamShield — Scam & Phishing Protection",
   "short_name": "ScamShield",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "On-device scam & phishing protection: warns you, spots brand look-alikes, checks messages. Nothing leaves your device.",
   "permissions": ["storage", "declarativeNetRequest", "alarms"],
   "host_permissions": ["http://*/*", "https://*/*"],

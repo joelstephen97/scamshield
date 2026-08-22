@@ -65,6 +65,18 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   // (green "Looks safe" banner sitting above a scam-wording reason bullet).
   await pp.click('#msgcheck summary'); await pp.fill('#msgtext', 'Your account will be blocked today. Share your OTP to verify: http://verify-bank-login.tk/otp'); await pp.click('#msgbtn'); await sleep(300);
   const h3 = await pp.evaluate(() => document.body.scrollHeight); await pp.setViewportSize({ width: 340, height: Math.min(600, h3) });
+  // The message-check result renders below the fold, and Playwright's
+  // click()/fill() auto-scroll their target into view — not the result that
+  // appears afterwards — so without an explicit scroll here the capture
+  // lands mid-page (header cut off, result cut off). Despite popup.css's
+  // `body{...max-height:600px;overflow:auto}`, body's own internal overflow
+  // never actually engages here (a flex-container/min-height:auto quirk lets
+  // it grow taller than its max-height instead of clipping), so it's the
+  // page itself — document.documentElement — that scrolls; scroll that to
+  // the bottom so the full result (the last content before the footer)
+  // renders in frame.
+  await pp.evaluate(() => { document.documentElement.scrollTop = document.documentElement.scrollHeight; window.scrollTo(0, document.documentElement.scrollHeight); });
+  await sleep(50);
   await compose('03-message-checker.png', 'Check any SMS or WhatsApp message, privately', await pp.screenshot(), 340, Math.min(600, h3)); await pp.close(); await page.close();
   // 4 options dark
   await sw.evaluate(() => setSettings({ theme: 'dark' }));

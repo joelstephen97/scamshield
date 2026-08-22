@@ -27,9 +27,10 @@ Features:
 • Real-time phishing & scam warnings with plain-language reasons
 • Page analysis: an on-device model reads the page itself — wording, layout,
   login forms — to catch brand-new phishing pages, not just known-bad URLs
-• Brand look-alike detection: icons and logos hash-matched against 60+
-  brands, including UAE banks, telcos and government services (Emirates
-  NBD, ADCB, FAB, Mashreq, e&, du, Noon, UAE PASS, MOHRE, Dubai Police…)
+• Brand look-alike detection: icons and logos hash-matched against a
+  64-brand table (49 with icon hashes), including UAE banks, telcos and
+  government services (Emirates NBD, ADCB, FAB, Mashreq, e&, du, Noon,
+  UAE PASS, MOHRE, Dubai Police…)
 • Scam message checker: paste any SMS/WhatsApp/email text for an instant,
   fully-private verdict
 • Detects fake login forms that send your password to another site
@@ -53,8 +54,9 @@ Features:
 
 **What's new in 0.5.0 (since the 0.3.1 store version):**
 Page analysis (an on-device model reads the page itself), brand look-alike
-detection by icon (60+ brands incl. UAE banks/telcos/government), a real
-threat feed on by default, the scam message checker, protection history and
+detection by icon (64-brand table, 49 with icon hashes, incl. UAE
+banks/telcos/government), a real threat feed on by default, the scam
+message checker, protection history and
 a "Take me to the real site" rescue button, a redesigned popup and settings
 with dark mode, a ~1 MB package (was 14 MB — the ONNX runtime is gone), and
 optional off-by-default community reporting. No new permissions; your

@@ -10,7 +10,7 @@
   analysis only ever raises a yellow "suspicious" banner — it takes a second,
   corroborating signal to turn a page red.
 - **Brand look-alike detection by icon** — favicons/logos are hash-matched
-  against a 64-brand table (51 with hashes), including UAE banks, telcos and
+  against a 64-brand table (49 with icon hashes), including UAE banks, telcos and
   government services: Emirates NBD, ADCB, FAB, Mashreq, RAKBANK, e&, du,
   Noon, Aramex, Talabat, Careem, ADNOC, DEWA, ICP, MOHRE, Dubai Police, UAE
   PASS, Emirates, Etihad — plus PayPal, Microsoft, Google, Apple, DHL and
@@ -37,9 +37,9 @@
   only for pages flagged dangerous or that you report as a mistake. Never
   URLs, page text, or anything that identifies you. Not sold, and not used
   for anything other than improving detection accuracy.
-- **URL model retrained** as gradient-boosted trees running as pure JS
-  (accuracy 0.993, ROC-AUC 0.998; 99.5% verdict agreement with the 0.4.0
-  model on the same holdout).
+- **URL model retrained** as gradient-boosted trees running as pure JS,
+  with deep-link negatives added to fix a path-length bias (accuracy 0.988,
+  ROC-AUC 0.998).
 - **No new permissions.** Settings, trusted sites and history from 0.3.1
   carry over unchanged; the update is a drop-in.
 
@@ -81,7 +81,23 @@
 **Docs**
 - docs: disclose opt-in reporting and same-site icon fetch
 
-<!-- Part 3 (UI, store, release) entries are appended by the release task -->
+**UI, store & release**
+- feat(ui): design tokens, theme, time-boxed trust, tab stats & leave-tab messages
+- feat(ui): redesigned popup - status card, evidence, time-boxed trust, report, stats
+- feat(ui): redesigned options - sidebar sections, explained toggles, feed status, appearance
+- fix(ui): popup hidden-attr override, trust menu a11y, faster init
+- feat(ui): in-page warning card, leave/report actions, overlay evidence rows
+- feat(ui): onboarding - detector cards, pin step, reporting note
+- feat: point reporting at the live relay; privacy docs; alt/aria carve-out hardening; relay gitignore
+- fix(content): alt/aria SSO false positive, timer leak; popup drops unused URL model
+- perf(engine): iterative body-text walk with a node/char budget
+- fix(engine): brand icon provenance + logo-vs-icon gating, dictionary-word names, session-cached parallel icon hashing
+- fix(model): retrain URL model with deep-link negatives + a regression gate; verdict fallback
+- docs(model): document --compare-onnx target and updated retrain numbers
+- fix(build): package model/page-content.js; guard against missing manifest files
+- feat(store): composed 1280x800 screenshots tooling and refreshed promo tiles
+- test(e2e): popup report test tolerant of GitHub login redirect
+- test(e2e): 0.3.1 → 0.5.0 storage upgrade; options tab a11y + mark-as-mistake test
 
 ## 0.4.0 — 2026-08-08
 

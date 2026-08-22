@@ -21,10 +21,10 @@ declarativeNetRequest ruleset blocks known-bad domains.
   only ever raise a yellow "suspicious" warning; a second, corroborating
   signal is needed to turn a page red.
 - **Brand look-alike detection by icon**: favicons/logos are hash-matched
-  against a 60+ brand table, including UAE banks, telcos and government
-  services (Emirates NBD, ADCB, FAB, Mashreq, e&, du, Noon, UAE PASS, MOHRE,
-  Dubai Police…), so a page using a brand's icon on the wrong domain is
-  flagged even if the brand's name never appears.
+  against a 64-brand table (49 with icon hashes), including UAE banks,
+  telcos and government services (Emirates NBD, ADCB, FAB, Mashreq, e&, du,
+  Noon, UAE PASS, MOHRE, Dubai Police…), so a page using a brand's icon on
+  the wrong domain is flagged even if the brand's name never appears.
 - Warning banner for suspicious/dangerous pages (with plain-language reasons)
   and a one-click *Take me to the real site* rescue link on brand
   impersonation.

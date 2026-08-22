@@ -17,12 +17,6 @@ Do not hand-edit the PNGs below — re-run the script instead.
 5. `05-wallet-guard.png` — wallet-drainer overlay blocking a fake "Connect &
    Claim" flow.
 
-**Known-stale note (as of the v0.5.0 Part 3 store-tooling task):** these five
-PNGs were captured against the *old* pre-redesign popup/options UI (Part 3
-Tasks 1–3, the popup/options visual redesign, had not landed yet when this
-set was generated). The tooling itself (`tools/screenshots.js`,
-`tools/frame.html`) is what matters and does not depend on new-UI element
-ids — it drives the real popup/options/content-script surfaces through
-selectors that exist in both the old and redesigned UI. Once the redesign
-lands, re-run `npm run screenshots` and commit the refreshed PNGs as part of
-the release task; the composition tooling should not need to change.
+Captured against the redesigned popup/options UI (v0.5.0). Re-run
+`npm run screenshots` after any visual change to popup/options/in-page UI
+and commit the refreshed PNGs.
