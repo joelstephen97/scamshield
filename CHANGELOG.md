@@ -1,5 +1,88 @@
 # Changelog
 
+## 0.5.0 — 2026-08-22
+
+### Since 0.3.1 (what users updating from the store version get)
+- **Page analysis** — an on-device model now reads the page's wording, layout
+  and form structure (not just the address) to catch brand-new phishing pages
+  a URL-only check would miss. Trained on a 375-positive / 2,542-negative live
+  crawl (holdout AUC 0.886). Conservative by design: on its own, content
+  analysis only ever raises a yellow "suspicious" banner — it takes a second,
+  corroborating signal to turn a page red.
+- **Brand look-alike detection by icon** — favicons/logos are hash-matched
+  against a 64-brand table (51 with hashes), including UAE banks, telcos and
+  government services: Emirates NBD, ADCB, FAB, Mashreq, RAKBANK, e&, du,
+  Noon, Aramex, Talabat, Careem, ADNOC, DEWA, ICP, MOHRE, Dubai Police, UAE
+  PASS, Emirates, Etihad — plus PayPal, Microsoft, Google, Apple, DHL and
+  more. A page using a brand's icon with a password form on the wrong domain
+  is flagged, even if the brand's name never appears anywhere on the page.
+  The favicon-hotlink loophole (serving the real brand's icon file directly)
+  is closed.
+- **Real threat feed, on by default** — a daily-rebuilt list (OpenPhish +
+  URLhaus, false-positive filtered) with a bundled snapshot; Settings show
+  last-updated time and rule count.
+- **Scam message checker** — paste any SMS/WhatsApp/email text or link into
+  the popup for an instant on-device verdict.
+- **Protection history** and a one-click **"Take me to the real site"**
+  rescue button on brand-impersonation warnings.
+- **Redesigned popup and settings** — a single status card with one clear
+  action (*Leave this page* / *Show why*), plain-language reasons, *Trust
+  this site for 1 hour / until tomorrow / always*, *Report a mistake*, stats
+  and recent history, dark mode, and explained toggles throughout Settings.
+- **Smaller and faster** — about 1 MB unpacked / ~90 KB zipped, down from
+  14 MB: the ONNX runtime is gone. Both models now run as plain JS, with no
+  WebAssembly and no web-accessible resources.
+- **Optional community reporting, off by default** — "Help make ScamShield
+  smarter" sends only the site's host name and anonymous risk signals, and
+  only for pages flagged dangerous or that you report as a mistake. Never
+  URLs, page text, or anything that identifies you. Not sold, and not used
+  for anything other than improving detection accuracy.
+- **URL model retrained** as gradient-boosted trees running as pure JS
+  (accuracy 0.993, ROC-AUC 0.998; 99.5% verdict agreement with the 0.4.0
+  model on the same holdout).
+- **No new permissions.** Settings, trusted sites and history from 0.3.1
+  carry over unchanged; the update is a drop-in.
+
+### Added / Changed / Fixed (detail)
+
+**Engine & models**
+- feat: drop ONNX runtime — URL model runs as pure JS (14 MB -> <1 MB unpacked)
+- feat(engine): pure-JS gradient-boosted URL model evaluator
+- fix(engine): bounds check and baseline validation for url_model; add malformed tree test
+- feat(model): retrain URL model as gradient-boosted trees; JSON export + 200-URL parity
+- feat(engine): shared page-content feature extractor (browser + linkedom)
+- fix(engine): unparseable form action is FOREIGN, not same-host (page_features)
+- feat(engine): pure-JS page-content logistic model evaluator
+- fix(engine): page_model lazy-load and inline-model edge cases
+- feat(model): page-content training crawler (feature rows only, no HTML stored)
+- fix(model): dedup crawl rows by hostname+path, cap positives per host
+- feat(model): crawler — Phishing.Database positives source, --conc and --shuffle flags
+- fix(model): crawler feed downloads get their own timeout/size budget
+- fix(model): crawler uses today's Phishing.Database files; source-ordered positives
+- feat(engine): conservative fusion of page-content and icon signals
+- feat(engine): dHash primitives for icon/logo brand matching
+- feat(engine): 60-brand table with auth domains, icon hashes, word-boundary name matching
+- feat(model): page-content classifier trained on live crawl; int8 export + parity
+- fix(model): page-model threshold chosen for <=0.5% FPR on all legit pages (min 0.80)
+- fix(tools): order-independent brand icon ambiguity guard (sub-brand keeps the hash)
+- fix(engine): hotmail.com under microsoft so the icon guard keeps Microsoft's hash
+- feat(engine): visual brand-impersonation rules; drop favicon-host exemption
+- feat: page analysis — content model + icon brand matching wired into scan (gated, fail-open, no new permissions)
+- fix(content): icon corroboration only from the visual-impersonation flag; timer cleanup
+- test(e2e): HTTPS fixture server; page-analysis e2e un-fixme'd
+
+**Reporting**
+- feat(engine): pure report payload builder (host-level, no URL path/text)
+- fix(engine): report payload size backstop and numeric guards
+- feat: opt-in community reporting — queued host-level reports, user reports, GitHub fallback
+- feat(relay): scamshield report relay - validate, rate-limit, store, export, purge
+- fix(relay): strict numeric validation, input validation, constant-time tokens, trusted client IP, cron header
+
+**Docs**
+- docs: disclose opt-in reporting and same-site icon fetch
+
+<!-- Part 3 (UI, store, release) entries are appended by the release task -->
+
 ## 0.4.0 — 2026-08-08
 
 ### Added

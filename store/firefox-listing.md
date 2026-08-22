@@ -1,16 +1,27 @@
 # Firefox AMO Listing
 
 **Name:** ScamShield — Scam & Phishing Protection
-**Summary:** On-device scam & phishing protection. Warns about fake login forms and scam pages. No data leaves your device.
+**Summary:** On-device scam & phishing protection: warns you, spots brand look-alikes, checks messages. Nothing leaves your device.
 **Categories:** Privacy & Security
 **License:** (choose, e.g., MPL-2.0 or proprietary)
 
 **Description:** (reuse the Chrome description text above)
 
+**What's new in 0.5.0 (since the 0.3.1 store version):** (reuse the Chrome "What's new" text above)
+
 **Notes for AMO reviewers:**
-- No remote code. onnxruntime-web (WASM) and the ONNX model are bundled in the
-  package under vendor/ and model/.
-- All analysis is on-device; optional anonymous reporting is off by default.
-- Source of the model: trained offline via model/train.py (included in the repo).
+- No remote code. All detection logic is unminified vanilla JS, bundled
+  directly in the package under `engine/` and `model/`.
+- The ONNX runtime and its WebAssembly binary were removed in 0.5.0; both the
+  URL model and the new page-content model run as plain JS with no wasm and
+  no web-accessible resources.
+- All analysis is on-device. Optional anonymous reporting (host name +
+  anonymized risk signals only, never URLs or page text) is off by default
+  and only fires for pages flagged dangerous or reported as a mistake.
+- Icon/logo fetches for brand look-alike matching are same-site requests to
+  the page you're already on (no cookies/credentials sent, nothing shared
+  with a third party).
+- Source of the models: trained offline via `model/train.py` and
+  `model/train_page.py` (both included in the repo).
 
 **Privacy policy URL:** https://joelstephen97.github.io/scamshield/privacy.html

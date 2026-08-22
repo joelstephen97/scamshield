@@ -3,7 +3,7 @@
   "name": "ScamShield — Scam & Phishing Protection",
   "short_name": "ScamShield",
   "version": "0.4.0",
-  "description": "Detects scam and phishing pages on-device and warns you before you get tricked. No browsing data leaves your device.",
+  "description": "On-device scam & phishing protection: warns you, spots brand look-alikes, checks messages. Nothing leaves your device.",
   "permissions": ["storage", "declarativeNetRequest", "alarms"],
   "host_permissions": ["http://*/*", "https://*/*"],
   "browser_specific_settings": { "gecko": { "id": "scamshield@joel.dev", "strict_min_version": "128.0" } },

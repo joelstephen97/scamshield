@@ -4,15 +4,30 @@ On-device scam & phishing detection for Chromium (Chrome/Edge/Brave) and Firefox
 All classification runs locally — no browsing data leaves your device.
 
 ## How it works
-A pure engine (engine/) extracts URL + DOM features, runs heuristics and a small
-ONNX model (onnxruntime-web, on-device), and fuses them into a verdict
-(safe / suspicious / dangerous). A content script warns you, guards fake login
-forms, and hides scam content. A declarativeNetRequest ruleset blocks known-bad
-domains.
+A pure engine (engine/) extracts URL + DOM features, runs heuristics, and two
+small on-device models — a gradient-boosted URL classifier and a page-content
+classifier that reads the page's wording, layout and login form — and fuses
+them into a verdict (safe / suspicious / dangerous). Both models run as plain
+JS: no WebAssembly runtime, no web-accessible resources. A content script
+warns you, guards fake login forms, and hides scam content. A
+declarativeNetRequest ruleset blocks known-bad domains.
 
 ## Features
-- On-device heuristics + ONNX URL classifier (no data leaves the device).
-- Warning banner for suspicious/dangerous pages (with reasons).
+- On-device heuristics + a pure-JS gradient-boosted URL classifier (no data
+  leaves the device, no bundled runtime).
+- **Page analysis**: an on-device model reads the page itself — wording,
+  layout, login-form structure — to catch brand-new phishing pages a
+  URL-only check would miss. Conservative by design: content signals alone
+  only ever raise a yellow "suspicious" warning; a second, corroborating
+  signal is needed to turn a page red.
+- **Brand look-alike detection by icon**: favicons/logos are hash-matched
+  against a 60+ brand table, including UAE banks, telcos and government
+  services (Emirates NBD, ADCB, FAB, Mashreq, e&, du, Noon, UAE PASS, MOHRE,
+  Dubai Police…), so a page using a brand's icon on the wrong domain is
+  flagged even if the brand's name never appears.
+- Warning banner for suspicious/dangerous pages (with plain-language reasons)
+  and a one-click *Take me to the real site* rescue link on brand
+  impersonation.
 - Fake-login-form guard: intercepts submits to a foreign domain — including
   programmatic `form.submit()` via a MAIN-world hook — and confirms before send.
 - **Crypto-wallet guard**: warns before risky `window.ethereum` requests
@@ -22,15 +37,35 @@ domains.
   crypto address onto your clipboard ("paste this to verify" / ClickFix scams).
 - **Tech-support scare-page guard**: throttles alert/`beforeunload` loops, detects
   fake-virus scare text + "call this number", and offers a one-click escape.
-- **Brand-visual phishing**: catches pages that impersonate a brand by name/logo
-  on an off-brand domain with a login form.
 - Hides "you won a prize" / giveaway scam content.
+- **Scam message checker**: paste any SMS/WhatsApp/email text into the popup
+  for an instant, fully-private verdict.
 - Re-scans on SPA route changes (history pushState/replaceState/popstate).
-- Built-in safe-domain allowlist for top sites to minimize false positives.
-- `declarativeNetRequest` blocklist + optional download-only OTA blocklist updates.
-- Local-only "threats blocked" counter (never transmitted) and first-run onboarding.
-- Accessible warnings (role=alert / role=dialog, Escape-to-cancel, focus mgmt).
+- Built-in safe-domain allowlist for top sites to minimize false positives;
+  trust a site for 1 hour, until tomorrow, or always.
+- Real threat feed on by default — a daily-rebuilt open-source blocklist
+  (OpenPhish + URLhaus), plus optional download-only OTA blocklist updates.
+- Local-only protection history and "threats blocked" counter (never
+  transmitted), and first-run onboarding.
+- **Optional community reporting, off by default** — "Help make ScamShield
+  smarter" sends only the site's host name and anonymized risk signals for
+  dangerous verdicts or reported mistakes; never URLs, page text, or anything
+  identifying.
+- Accessible warnings (role=alert / role=dialog, Escape-to-cancel, focus mgmt),
+  dark mode, and a redesigned popup and settings.
 - Chromium (Chrome/Edge/Brave) and Firefox (128+) builds.
+
+## Size
+About **1 MB unpacked / ~90 KB zipped**, down from 14 MB in earlier versions —
+removing the ONNX runtime and running both models as plain JS is most of the
+saving.
+
+## Screenshots
+See `store/screenshots/` for the current set: the popup on a dangerous
+look-alike page, the in-page rescue banner, the popup's safe state with the
+message checker open, the redesigned Options (dark mode), and the
+wallet/scare-page overlay. The same set is used for the Chrome Web Store and
+Firefox AMO listings.
 
 ## Support
 ScamShield is free and on-device. If it helped you, please consider supporting
