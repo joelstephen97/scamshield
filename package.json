@@ -14,6 +14,7 @@
     "measure:icon-fp": "node tools/measure-icon-fp.js",
     "gen:parity": "node scripts/gen-parity.js",
     "screenshots": "node tools/screenshots.js",
+    "promo": "node tools/promo.js",
     "crawl:pages": "node scripts/crawl-pages.js"
   },
   "devDependencies": {

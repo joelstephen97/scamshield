@@ -1,0 +1,14 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+html,body{margin:0;width:1280px;height:800px;overflow:hidden;font:16px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body{background:#0B6E4F;position:relative} body.dark{background:#0F1513}
+.grain{position:absolute;inset:0;background:radial-gradient(120% 80% at 100% 100%,rgba(255,255,255,.10),transparent 60%)}
+.cap{position:absolute;left:56px;top:52px;color:#fff;font-size:40px;font-weight:600;letter-spacing:-.01em;max-width:560px;line-height:1.15;text-wrap:balance}
+.cap small{display:block;font-size:16px;font-weight:500;opacity:.8;margin-top:12px;letter-spacing:.08em;text-transform:uppercase}
+.shot{position:absolute;right:56px;bottom:56px;box-shadow:0 24px 64px rgba(0,0,0,.35);border-radius:16px;overflow:hidden}
+.shot img{display:block}
+</style></head><body><div class="grain"></div><div class="cap" id="cap"></div><div class="shot" id="shot"></div>
+<script>
+const q=new URLSearchParams(location.search);document.getElementById('cap').innerHTML=(q.get('caption')||'')+'<small>'+(q.get('sub')||'On-device · private by design')+'</small>';
+if(q.get('theme')==='dark')document.body.classList.add('dark');
+window.__setShot=(d,w,h)=>{const s=document.getElementById('shot');const maxW=700,maxH=660;const k=Math.min(1,maxW/w,maxH/h);s.innerHTML='<img src="'+d+'" width="'+Math.round(w*k)+'" height="'+Math.round(h*k)+'">';};
+</script></body></html>
