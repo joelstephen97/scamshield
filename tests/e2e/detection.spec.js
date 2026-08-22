@@ -1,4 +1,4 @@
-const { test, EXTENSION_PATH } = require('./fixtures');
+const { test, EXTENSION_PATH, BASE_HTTPS } = require('./fixtures');
 const { expect } = require('@playwright/test');
 const BASE = 'http://localhost:5599';
 
@@ -108,45 +108,31 @@ test('popup message checker flags a scam text on-device', async ({ context, exte
   await expect(popup.locator('#msgstatus')).toHaveClass(/safe/);
 });
 
-// FIXME (task-12, 2026-08-22): the fixtures server is http-only (tests/e2e/server.js
-// has no TLS), and the URL model (model/url-model.js, HistGradientBoosting, AUC .998)
-// is heavily weighted on `is_https` because its training negatives (Tranco) are almost
-// all HTTPS while its positives (OpenPhish/URLhaus) are almost all HTTP — by design,
-// per model/README.md. Every fixture on http://localhost:5599 therefore gets
-// modelProb ~0.999 the instant a password field triggers the borderline gate
-// (content_script.js `borderline = ruleScore>=0.3 || hasPasswordField`, verbatim from
-// the task-12 brief). Measured via a debug console.log of the fused inputs on this
-// exact fixture (see task-12-report.md): urlRules.score=0.15, domRules.score=0,
-// modelProb=0.9995, fused score=0.5747 → "suspicious", so a banner renders even
-// though page content and DOM rules are both clean. No fixture wording/DOM change can
-// fix this (domRules is already 0; the 0.15 and 0.999 come solely from the URL's
-// scheme). Fixing it for real requires either serving fixtures over HTTPS (new test
-// infra, out of this task's scope) or touching engine/verdict.js's fusion formula
-// (engine/ is off-limits this task — concurrent reviewer on heuristics.js, and the
-// brief says never lower thresholds / change the model). On a real HTTPS site this
-// path does not trigger.
-test.fixme('ordinary login page stays quiet with page analysis on', async ({ context }) => {
+// Served over HTTPS (tests/e2e/server.js :5600, self-signed test-only cert in
+// tests/e2e/certs) on a realistic-looking hostname — the URL model is heavily
+// weighted on `is_https` (its training negatives are ~all HTTPS, positives ~all
+// HTTP), so http://localhost fixtures score ~0.999 "phishing" regardless of
+// content, which previously made this un-testable over plain HTTP (see task-12
+// fix-round-1 report). Measured for this exact URL: urlRules.score=0.10 (host
+// entropy heuristic), URL model prob=0.03, content-model prob=0.38 — all well
+// under their thresholds, so the fused verdict stays "safe".
+test('ordinary login page stays quiet with page analysis on', async ({ context }) => {
   const page = await context.newPage();
-  await page.goto(BASE + '/clean-login.html'); await page.waitForTimeout(1500);
+  await page.goto('https://shop.contoso-fixture.com:5600/clean-login.html');
+  await page.waitForTimeout(1500);
   await expect(page.locator('.scamshield-banner')).toHaveCount(0);
 });
-// FIXME (task-12, 2026-08-22): same root cause as above, opposite direction. The
-// content model correctly crosses its 0.80 threshold on this fixture (measured
-// contentProb=0.9149), which is the intended "suspicious" signal. But
-// engine/verdict.js's corroboration check for content — `ruleScore >= 0.3 ||
-// (modelUsed && modelProb >= 0.7) || iconMatch` — is satisfied unconditionally by
-// modelProb (~0.9998, see FIXME above) regardless of domRules/wording, so the fused
-// verdict escalates all the way to "dangerous" (score capped at THRESHOLDS.dangerous
-// = 0.8) instead of staying "suspicious". Verified this is wording-invariant (not a
-// fixture-tuning problem): domRules.score for this fixture is 0.4 from 2 matched scam
-// phrases, but even removing every scam phrase (domRules.score -> 0) would not help,
-// since modelProb alone already clears the 0.7 corroboration bar. No fixture change
-// fixes this without touching engine/verdict.js (off-limits this task) or serving
-// fixtures over HTTPS (new test infra, out of scope). On a real HTTPS site the URL
-// model would not contribute this corroborating signal.
-test.fixme('phishy wording with no URL/rule hits → suspicious (yellow), never red', async ({ context }) => {
+// Same HTTPS fix, on plain https://localhost:5600 this time (no need for a
+// realistic hostname here — the point is the content model's own signal, not
+// the URL heuristics). Measured: urlRules.score=0, URL model prob=0.20 (well
+// under the 0.7 corroboration bar), domRules.score=0 (no scam-phrase/brand/
+// foreign-form hits), content-model prob=0.976 (fixture wording tuned per the
+// task-12 fix-round-1 report — well above the 0.80 gate). With no corroboration
+// available, engine/verdict.js caps the content signal at THRESHOLDS.suspicious,
+// so the fused verdict is "suspicious", never "dangerous".
+test('phishy wording with no URL/rule hits → suspicious (yellow), never red', async ({ context }) => {
   const page = await context.newPage();
-  await page.goto(BASE + '/content-suspicious.html');
+  await page.goto(BASE_HTTPS + '/content-suspicious.html');
   await expect(page.locator('.scamshield-banner.suspicious')).toBeVisible({ timeout: 8000 });
   await expect(page.locator('.scamshield-banner.danger')).toHaveCount(0);
 });

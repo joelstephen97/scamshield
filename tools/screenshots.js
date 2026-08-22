@@ -27,7 +27,12 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
       `--disable-extensions-except=${EXT}`,
       `--load-extension=${EXT}`,
       '--no-first-run', '--disable-gpu', '--disable-dev-shm-usage',
-      '--window-size=1280,800'
+      '--window-size=1280,800',
+      // Trust the self-signed test-only cert used by the HTTPS fixtures twin
+      // (tests/e2e/server.js :5600, tests/e2e/certs) and resolve the synthetic
+      // HTTPS-fixture hosts locally, in case a future screenshot needs them.
+      '--ignore-certificate-errors',
+      '--host-resolver-rules=MAP amazon.ae 127.0.0.1, MAP accounts.google.com 127.0.0.1, MAP shop.contoso-fixture.com 127.0.0.1, MAP portal-hr-benefits.fixture 127.0.0.1'
     ]
   });
   for (let i = 0; i < 30 && !ctx.serviceWorkers()[0]; i++) await sleep(100);
