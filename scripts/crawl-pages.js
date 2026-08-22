@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 // scripts/crawl-pages.js — builds model/data/pages.jsonl for model/train_page.py.
-// Positives: live OpenPhish + URLhaus pages. Negatives: Tranco homepages + one
-// same-domain login page each + brand/auth login URLs. Stores ONLY feature rows.
+// Positives: live OpenPhish + Phishing.Database (today/new) + URLhaus pages.
+// Negatives: Tranco homepages + one same-domain login page each + brand/auth
+// login URLs. Stores ONLY feature rows.
 'use strict';
 const fs = require('node:fs'); const path = require('node:path');
 const { parseHTML } = require('linkedom');
@@ -88,13 +89,25 @@ function featuresOf(html, url) {
 
   console.log('Positives… (concurrency=' + CONC + (SHUFFLE ? ', shuffle=on' : '') + ')');
   const op = await fetchFeed('https://openphish.com/feed.txt');
+  // Phishing.Database: use the small daily "today" lists (ACTIVE-today +
+  // NEW-today), not the giant historical ACTIVE.txt (~789K URLs, mostly
+  // dead — ~6% live yield, too slow to reach POS_MAX). parsePhishingDatabase
+  // (crawl_helpers.js) is unchanged and used for both files.
+  const pdToday = await fetchFeed('https://raw.githubusercontent.com/mitchellkrogza/Phishing.Database/master/phishing-links-ACTIVE-today.txt');
+  if (!pdToday) console.log('  note: phishdb_today fetch failed/404 — continuing without it');
+  const pdNew = await fetchFeed('https://raw.githubusercontent.com/mitchellkrogza/Phishing.Database/master/phishing-links-NEW-today.txt');
+  if (!pdNew) console.log('  note: phishdb_new fetch failed/404 — continuing without it');
   const uh = await fetchFeed('https://urlhaus.abuse.ch/downloads/csv_online/');
-  const pd = await fetchFeed('https://raw.githubusercontent.com/mitchellkrogza/Phishing.Database/master/phishing-links-ACTIVE.txt');
   const opUrls = op ? H.parseOpenPhish(op.buf.toString('utf8')) : [];
+  const pdTodayUrls = pdToday ? H.parsePhishingDatabase(pdToday.buf.toString('utf8')) : [];
+  const pdNewUrls = pdNew ? H.parsePhishingDatabase(pdNew.buf.toString('utf8')) : [];
   const uhUrls = uh ? H.parseUrlhaus(uh.buf.toString('utf8')) : [];
-  const pdUrls = pd ? H.parsePhishingDatabase(pd.buf.toString('utf8')) : [];
-  let posUrls = [...new Set([...opUrls, ...uhUrls, ...pdUrls])];
-  console.log(`  sources: openphish=${opUrls.length} urlhaus=${uhUrls.length} phishdb=${pdUrls.length} → unique=${posUrls.length}`);
+  // Default order (no --shuffle): OpenPhish first, then Phishing.Database
+  // (today+new), then URLhaus last (URLhaus is mostly non-HTML payload
+  // URLs, so it should be the last resort once the crawl is POS_MAX-capped).
+  // With --shuffle this base order is shuffled below.
+  let posUrls = [...new Set([...opUrls, ...pdTodayUrls, ...pdNewUrls, ...uhUrls])];
+  console.log(`  sources: openphish=${opUrls.length} urlhaus=${uhUrls.length} phishdb_today=${pdTodayUrls.length} phishdb_new=${pdNewUrls.length} → unique=${posUrls.length}`);
   if (SHUFFLE) posUrls = seededShuffle(posUrls, 20260822);
   posUrls = posUrls.slice(0, POS_MAX);
   await pool(posUrls, async (u) => { const r = await fetchText(u, { html: true }); if (!r) return; push(1, r.url, featuresOf(r.text, r.url).f); });
