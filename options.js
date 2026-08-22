@@ -1,73 +1,58 @@
 'use strict';
 const api = globalThis.browser || globalThis.chrome;
 const $ = (id) => document.getElementById(id);
-
-async function load() {
-  const s = await api.runtime.sendMessage({ type: 'getSettings' });
-  $('enabled').checked = !!s.enabled;
-  $('block').checked = !!s.blockKnownBad;
-  $('hide').checked = !!s.hideScamContent;
-  $('report').checked = !!s.reportingOptIn;
-  $('otaurl').value = s.otaUrl || '';
-  renderAllow(s.allowlist || []);
-  const h = await api.runtime.sendMessage({ type: 'getHistory' });
-  renderHistory((h && h.history) || []);
+const F = globalThis.SSFormat, I = globalThis.SSIcons;
+const send = (type, extra) => new Promise((res) => { try { api.runtime.sendMessage(Object.assign({ type }, extra || {}), (r) => res(r)); } catch (_) { res(null); } });
+function flash(t) { $('status').textContent = t; $('status').classList.add('show'); setTimeout(() => $('status').classList.remove('show'), 1200); }
+function showTab(name) {
+  for (const s of document.querySelectorAll('.tab')) s.hidden = s.id !== 'tab-' + name;
+  for (const a of document.querySelectorAll('nav a')) a.classList.toggle('cur', a.dataset.tab === name);
+  try { history.replaceState(null, '', '#' + name); } catch (_) {}
 }
-const KIND_LABELS = {
-  page: 'Scam page warning', wallet: 'Wallet request blocked',
-  clipboard: 'Clipboard hijack caught', techscam: 'Scare page blocked'
-};
+for (const a of document.querySelectorAll('nav a')) a.addEventListener('click', (e) => { e.preventDefault(); showTab(a.dataset.tab); });
+showTab((location.hash || '#protection').slice(1).replace(/[^a-z]/g, '') || 'protection');
+$('brandmark').insertAdjacentHTML('afterbegin', I.shield('safe'));
+try { const v = api.runtime.getManifest().version; $('ver').textContent = 'Version ' + v; $('aboutver').textContent = v; } catch (_) {}
+
+const KIND = (k) => F.detectorLabel(k);
+function bindSwitch(id, key) {
+  const el = $(id); const wrap = el.closest('.switch');
+  el.addEventListener('change', async () => { await send('setSettings', { patch: { [key]: el.checked } }); wrap.classList.toggle('on', el.checked); flash('Saved'); });
+}
+function setSwitch(id, on) { $(id).checked = !!on; $(id).closest('.switch').classList.toggle('on', !!on); }
+async function load() {
+  const s = await send('getSettings');
+  setSwitch('enabled', s.enabled); setSwitch('block', s.blockKnownBad); setSwitch('hide', s.hideScamContent); setSwitch('pageanalysis', s.pageAnalysis !== false); setSwitch('report', s.reportingOptIn);
+  $('otaurl').value = s.otaUrl || ''; $('theme').value = s.theme || 'auto';
+  $('feedstatus').textContent = s.lastOtaAt ? `Updated ${F.relTime(s.lastOtaAt)} · ${Number(s.lastOtaCount || 0).toLocaleString()} rules` : 'Never updated';
+  $('feeddot').classList.toggle('ok', !!s.lastOtaAt);
+  renderAllow(s.allowlist || [], s.pausedSites || {});
+  const h = await send('getHistory'); renderHistory((h && h.history) || []);
+}
+function li(text, meta, btnText, onClick) {
+  const el = document.createElement('li'); const t = document.createElement('span'); t.textContent = text; el.appendChild(t);
+  if (meta) { const m = document.createElement('span'); m.className = 'meta'; m.textContent = meta; el.appendChild(m); }
+  if (btnText) { const b = document.createElement('button'); b.className = 'btn'; b.textContent = btnText; b.addEventListener('click', onClick); el.appendChild(b); }
+  return el;
+}
+function renderAllow(list, paused) {
+  $('allowlist').replaceChildren(); $('pausedlist').replaceChildren();
+  if (!list.length) $('allowlist').appendChild(li('None yet'));
+  for (const d of list) $('allowlist').appendChild(li(d, '', 'Remove', async () => { await send('removeAllow', { domain: d }); load(); }));
+  const entries = Object.entries(paused);
+  if (!entries.length) $('pausedlist').appendChild(li('None right now'));
+  for (const [d, until] of entries) $('pausedlist').appendChild(li(d, 'until ' + new Date(until).toLocaleString([], { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' }), 'Untrust', async () => { await send('unpauseSite', { domain: d }); load(); }));
+}
 function renderHistory(list) {
   $('history').replaceChildren();
-  if (!list.length) { const li = document.createElement('li'); li.textContent = 'Nothing yet — that’s a good thing.'; $('history').appendChild(li); return; }
-  for (const e of list.slice(0, 50)) {
-    const li = document.createElement('li');
-    const when = new Date(e.ts).toLocaleString();
-    li.textContent = `${when} — ${KIND_LABELS[e.kind] || e.kind} (${e.level}) — ${e.host || 'unknown site'}`;
-    li.className = 'hist-' + e.level;
-    $('history').appendChild(li);
-  }
+  if (!list.length) { $('history').appendChild(li('Nothing yet — that’s a good thing.')); return; }
+  for (const e of list.slice(0, 200)) $('history').appendChild(li(`${KIND(e.kind)} · ${e.host || 'unknown site'}`, `${e.level} · ${new Date(e.ts).toLocaleString()}`, 'Mark as mistake', async () => { const r = await send('userReport', { host: e.host, level: e.level }); flash(r && r.via === 'relay' ? 'Thanks — sent' : 'Opened a report'); }));
 }
-function renderAllow(list) {
-  $('allowlist').innerHTML = '';
-  if (!list.length) { const li = document.createElement('li'); li.textContent = 'None yet'; $('allowlist').appendChild(li); return; }
-  for (const d of list) {
-    const li = document.createElement('li');
-    li.textContent = d;
-    const b = document.createElement('button'); b.textContent = 'Remove';
-    b.addEventListener('click', async () => { await api.runtime.sendMessage({ type: 'removeAllow', domain: d }); load(); });
-    li.appendChild(b); $('allowlist').appendChild(li);
-  }
-}
-function flash(t){ $('status').textContent = t; setTimeout(() => ($('status').textContent = ''), 1200); }
-function bind(id, key) {
-  $(id).addEventListener('change', async () => {
-    await api.runtime.sendMessage({ type: 'setSettings', patch: { [key]: $(id).checked } });
-    flash('Saved');
-  });
-}
-bind('enabled', 'enabled'); bind('block', 'blockKnownBad');
-bind('hide', 'hideScamContent'); bind('report', 'reportingOptIn');
-
-$('otaurl').addEventListener('change', async () => {
-  await api.runtime.sendMessage({ type: 'setSettings', patch: { otaUrl: $('otaurl').value.trim() } });
-  flash('Saved');
-});
-$('checkupd').addEventListener('click', async () => {
-  flash('Checking…');
-  const r = await api.runtime.sendMessage({ type: 'checkForUpdates' });
-  flash(r && r.ok ? (r.updated ? ('Updated to v' + r.version) : 'Already up to date') : 'Update failed');
-});
-$('clearhist').addEventListener('click', async () => {
-  await api.runtime.sendMessage({ type: 'clearHistory' });
-  renderHistory([]);
-  flash('History cleared');
-});
-$('resetfeed').addEventListener('click', async () => {
-  const d = await api.runtime.sendMessage({ type: 'getDefaultFeedUrl' });
-  if (!d || !d.url) return;
-  $('otaurl').value = d.url;
-  await api.runtime.sendMessage({ type: 'setSettings', patch: { otaUrl: d.url } });
-  flash('Reset to official feed');
-});
+bindSwitch('enabled', 'enabled'); bindSwitch('block', 'blockKnownBad'); bindSwitch('hide', 'hideScamContent'); bindSwitch('pageanalysis', 'pageAnalysis'); bindSwitch('report', 'reportingOptIn');
+$('whatsent').addEventListener('click', () => { $('whatsentbody').hidden = !$('whatsentbody').hidden; });
+$('theme').addEventListener('change', async () => { await send('setSettings', { patch: { theme: $('theme').value } }); globalThis.SSTheme.applyTheme($('theme').value); flash('Saved'); });
+$('otaurl').addEventListener('change', async () => { await send('setSettings', { patch: { otaUrl: $('otaurl').value.trim() } }); flash('Saved'); });
+$('checkupd').addEventListener('click', async () => { flash('Checking…'); const r = await send('checkForUpdates'); flash(r && r.ok ? (r.updated ? ('Updated to v' + r.version) : 'Already up to date') : 'Update failed'); load(); });
+$('clearhist').addEventListener('click', async () => { await send('clearHistory'); renderHistory([]); flash('History cleared'); });
+$('resetfeed').addEventListener('click', async () => { const d = await send('getDefaultFeedUrl'); if (!d || !d.url) return; $('otaurl').value = d.url; await send('setSettings', { patch: { otaUrl: d.url } }); flash('Reset to official feed'); });
 load();

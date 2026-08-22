@@ -280,8 +280,15 @@ async function handleUserReport(msg, sender) {
   const s = await getSettings();
   let tabId = msg.tabId != null ? msg.tabId : (sender.tab && sender.tab.id);
   let tab = null; try { tab = tabId != null ? await api.tabs.get(tabId) : null; } catch (_) {}
-  const url = tab && tab.url; if (!url || !/^https?:/.test(url)) return { ok: false, via: 'off' };
-  const verdict = lastVerdict.get(tabId) || { level: 'safe', score: 0, reasons: [] };
+  let url = tab && tab.url;
+  let verdict = lastVerdict.get(tabId) || { level: 'safe', score: 0, reasons: [] };
+  // Options-page "Mark as mistake" has no scanned tab of its own — accept an
+  // explicit host/level override from a history row instead.
+  if (typeof msg.host === 'string' && msg.host && (!url || !/^https?:/.test(url))) {
+    url = 'https://' + msg.host + '/';
+    verdict = { level: msg.level || 'dangerous', score: 0, reasons: [] };
+  }
+  if (!url || !/^https?:/.test(url)) return { ok: false, via: 'off' };
   let host; try { host = new URL(url).hostname; } catch (_) { return { ok: false, via: 'off' }; }
   if (!s.reportingOptIn || !s.reportUrl) {
     const issueUrl = githubIssueUrl(host, verdict);
