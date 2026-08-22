@@ -5,7 +5,12 @@ const rl = require('../lib/ratelimit');
 const MAX = 32768;
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') { res.status(405).end(); return; }
-  const ip = String(req.headers['x-forwarded-for'] || '').split(',')[0].trim() || 'unknown';
+  // Vercel's platform body parser runs before this handler and has already buffered
+  // req.body by the time we get here — this content-length check is a pre-parse
+  // guard against oversized requests, not a substitute for the post-parse size check
+  // below (a client could lie about content-length, or omit it entirely).
+  if (Number(req.headers['content-length'] || 0) > MAX) { res.status(413).end(); return; }
+  const ip = rl.clientIp(req.headers);
   if (!rl.allow(ip)) { res.status(429).end(); return; }
   const body = typeof req.body === 'string' ? safeJson(req.body) : req.body;
   if (!body) { res.status(400).json({ error: 'bad json' }); return; }

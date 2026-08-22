@@ -11,7 +11,15 @@ This service lives in the `relay/` folder of the `scamshield` repo (this is not 
 4. `vercel deploy --prod` → note the URL; put `https://<project>.vercel.app/api/report` into the extension's `DEFAULT_RELAY_URL`.
 
 ## Endpoints
-POST /api/report · GET /api/health · GET /api/export?since=&limit= (Bearer EXPORT_TOKEN) · GET /api/purge (cron, Bearer CRON_SECRET)
+POST /api/report · GET /api/health · GET /api/export?since=&limit= (Bearer EXPORT_TOKEN) · GET /api/purge (cron, Bearer CRON_SECRET + `x-vercel-cron` header)
+
+## Security notes
+- **Bearer tokens** (`EXPORT_TOKEN`, `CRON_SECRET`) are compared in constant time via `lib/auth.js` (`crypto.timingSafeEqual`), not `===`.
+- **`/api/purge`** requires both a valid `Authorization: Bearer $CRON_SECRET` *and* the `x-vercel-cron` header, which Vercel Cron sets on scheduled invocations. A leaked `CRON_SECRET` alone cannot trigger a purge from outside Vercel's cron system; to trigger it manually (e.g. via curl) you must send both.
+- **`/api/report`** rejects oversized requests twice: a pre-parse check on the `content-length` header (fast-fail before the body is touched) and a post-parse check on the parsed JSON size, since `content-length` can be absent or wrong.
+- **Rate-limit IP** is derived from `x-real-ip` when present, otherwise the *last* comma-separated entry of `x-forwarded-for` (the hop appended by the platform, not attacker-controlled), capped to 64 chars. This IP is used only as an in-memory bucket key and is never stored in the database.
+- **`score`, `ts`, `pageFeatures.tokens` values, and `iconMatches[].distance`** must all be finite numbers (`Number.isFinite`) — `NaN`/`Infinity` are rejected.
+- **`/api/export`** validates `since` (must parse to a valid date) and `limit` (integer, 1–20000) and returns `400` on bad input; DB failures on both `/api/export` and `/api/purge` return `500` instead of throwing.
 
 ## Tests
 `npm test` (run inside `relay/`)

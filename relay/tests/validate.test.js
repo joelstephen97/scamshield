@@ -10,3 +10,9 @@ test('rejects wrong version, label, host, oversized arrays, extra string blobs',
   assert.equal(validatePayload({ ...ok, urlFeatures: new Array(18).fill(0) }).ok, false);
   assert.equal(validatePayload({ ...ok, url: 'https://a.example/secret' }).ok, false, 'unknown keys rejected');
 });
+test('rejects non-finite score, ts, token values, and icon distances', () => {
+  assert.equal(validatePayload({ ...ok, score: NaN }).ok, false);
+  assert.equal(validatePayload({ ...ok, ts: Infinity }).ok, false);
+  assert.equal(validatePayload({ ...ok, pageFeatures: { tokens: { '5': NaN }, dense: new Array(16).fill(0) } }).ok, false);
+  assert.equal(validatePayload({ ...ok, iconMatches: [{ brand: 'x', distance: NaN }] }).ok, false);
+});

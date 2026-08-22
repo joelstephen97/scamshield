@@ -17,3 +17,10 @@ test('invalid → 400; GET → 405; too many from one IP → 429', async () => {
   for (let i = 0; i < 60; i++) { [req, res] = mock('POST', valid, '9.9.9.9'); await handler(req, res); }
   [req, res] = mock('POST', valid, '9.9.9.9'); await handler(req, res); assert.equal(res.code, 429);
 });
+test('oversized content-length header → 413 before parsing body, no sql call', async () => {
+  const inserted = []; handler._setSql(async (strings, ...vals) => { inserted.push(vals); return []; }); handler._resetLimiter();
+  const [req, res] = mock('POST', valid, '4.4.4.4');
+  req.headers['content-length'] = '40000';
+  await handler(req, res);
+  assert.equal(res.code, 413); assert.equal(inserted.length, 0);
+});

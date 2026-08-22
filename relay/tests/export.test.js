@@ -10,3 +10,28 @@ test('streams NDJSON rows', async () => {
   const [req, res] = mock('Bearer t', { since: '2026-01-01' }); await handler(req, res);
   assert.equal(res.code, 200); assert.equal(res.chunks.join('').trim().split('\n').length, 1);
 });
+test('invalid since → 400', async () => {
+  process.env.EXPORT_TOKEN = 't';
+  const [req, res] = mock('Bearer t', { since: 'not-a-date' });
+  await handler(req, res);
+  assert.equal(res.code, 400);
+});
+test('invalid limit → 400', async () => {
+  process.env.EXPORT_TOKEN = 't';
+  const [req, res] = mock('Bearer t', { limit: 'abc' });
+  await handler(req, res);
+  assert.equal(res.code, 400);
+});
+test('out-of-range limit → 400', async () => {
+  process.env.EXPORT_TOKEN = 't';
+  const [req, res] = mock('Bearer t', { limit: '20001' });
+  await handler(req, res);
+  assert.equal(res.code, 400);
+});
+test('db error → 500', async () => {
+  process.env.EXPORT_TOKEN = 't';
+  handler._setSql(async () => { throw new Error('boom'); });
+  const [req, res] = mock('Bearer t', { since: '2026-01-01' });
+  await handler(req, res);
+  assert.equal(res.code, 500);
+});
