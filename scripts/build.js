@@ -7,8 +7,8 @@ const ROOT = path.resolve(__dirname, '..');
 const DIST = path.join(ROOT, 'dist');
 
 const SHARED = [
-  'background', 'content', 'engine', 'rules', 'model/phishing-url.onnx',
-  'vendor', 'assets', 'popup.html', 'popup.css', 'popup.js',
+  'background', 'content', 'engine', 'rules', 'model/url-model.js',
+  'assets', 'popup.html', 'popup.css', 'popup.js',
   'options.html', 'options.css', 'options.js', 'onboarding.html'
 ];
 
@@ -46,6 +46,8 @@ function build(target, manifestFile, zipName) {
   zipDir(staging, zipPath);
   fs.rmSync(staging, { recursive: true });
   console.log('✅', zipName, '(' + (fs.statSync(zipPath).size / 1024).toFixed(1) + ' KB)');
+  const mb = fs.statSync(zipPath).size / (1024 * 1024);
+  if (mb > 2.5) { console.error(`✗ ${zipName} is ${mb.toFixed(2)} MB (> 2.5 MB budget)`); process.exit(1); }
 }
 
 fs.mkdirSync(DIST, { recursive: true });

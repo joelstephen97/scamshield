@@ -14,8 +14,7 @@
     "screenshots": "node tools/screenshots.js"
   },
   "devDependencies": {
-    "@playwright/test": "^1.48.0",
-    "onnxruntime-web": "^1.19.0"
+    "@playwright/test": "^1.48.0"
   },
   "engines": { "node": ">=18" }
 }

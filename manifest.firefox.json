@@ -12,7 +12,7 @@
     {
       "matches": ["http://*/*", "https://*/*"],
       "run_at": "document_idle",
-      "js": ["vendor/ort.wasm.min.js","engine/constants.js","engine/features.js","engine/heuristics.js","engine/techscam_rules.js","engine/verdict.js","engine/onnx_runner.js","content/actions.js","content/content_script.js"],
+      "js": ["engine/constants.js","model/url-model.js","engine/features.js","engine/heuristics.js","engine/techscam_rules.js","engine/verdict.js","engine/url_model.js","content/actions.js","content/content_script.js"],
       "css": ["content/content.css"]
     },
     {
@@ -23,8 +23,6 @@
     }
   ],
   "declarative_net_request": { "rule_resources": [ { "id": "blocklist", "enabled": true, "path": "rules/blocklist.json" } ] },
-  "web_accessible_resources": [ { "resources": ["model/phishing-url.onnx","vendor/ort-wasm-simd-threaded.mjs","vendor/ort-wasm-simd-threaded.wasm"], "matches": ["http://*/*","https://*/*"] } ],
-  "content_security_policy": { "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'" },
   "icons": { "16": "assets/icons/icon16.png","32":"assets/icons/icon32.png","48": "assets/icons/icon48.png", "128": "assets/icons/icon128.png" },
   "action": { "default_title": "ScamShield", "default_popup": "popup.html", "default_icon": { "16": "assets/icons/icon16.png","32":"assets/icons/icon32.png","48": "assets/icons/icon48.png", "128": "assets/icons/icon128.png" } },
   "options_ui": { "page": "options.html", "open_in_tab": true }
