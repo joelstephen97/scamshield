@@ -20,7 +20,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
       // the fixture pages (brand-visual.html etc.) resolve and render as they
       // do under the real e2e suite.
       '--ignore-certificate-errors',
-      '--host-resolver-rules=MAP amazon.ae 127.0.0.1, MAP accounts.google.com 127.0.0.1, MAP shop.contoso-fixture.com 127.0.0.1, MAP portal-hr-benefits.fixture 127.0.0.1, MAP www.aramex.com 127.0.0.1'
+      '--host-resolver-rules=MAP amazon.ae 127.0.0.1, MAP accounts.google.com 127.0.0.1, MAP shop.contoso-fixture.com 127.0.0.1, MAP portal-hr-benefits.fixture 127.0.0.1, MAP www.aramex.com 127.0.0.1, MAP secure-paypa1-login.com 127.0.0.1'
     ]
   });
   for (let i = 0; i < 30 && !ctx.serviceWorkers()[0]; i++) await sleep(100);
@@ -49,12 +49,19 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
     const png = await p.screenshot(); await p.close(); if (theme) await sw.evaluate(() => setSettings({ theme: 'auto' })); return { png, w: 340, h: Math.min(600, h) };
   }
   console.log('Capturing…');
-  // 1 popup on a dangerous look-alike page
-  let page = await ctx.newPage(); await page.goto(BASE + '/brand-visual.html'); await sleep(900);
+  // 1 popup on a dangerous look-alike page — served from the mapped
+  // secure-paypa1-login.com:5600 HTTPS fixture (not localhost:5599) so the
+  // popup's host line reads like a real phishing domain. brand-visual.html
+  // already carries "PayPal" in its title/og tags, which trips the NAME rule
+  // on this host and produces the brand = paypal rescue button.
+  let page = await ctx.newPage(); await page.goto('https://secure-paypa1-login.com:5600/brand-visual.html'); await sleep(900);
   let s = await popupShot(page); await compose('01-popup-dangerous.png', 'Spots fake login pages before you type', s.png, s.w, s.h); await page.close();
-  // 2 in-page banner with rescue
-  page = await ctx.newPage(); await page.setViewportSize({ width: 1100, height: 640 }); await page.goto(BASE + '/brand-visual.html'); await page.locator('.scamshield-banner').waitFor({ timeout: 8000 });
-  await compose('02-banner-rescue.png', 'One click back to the real site', await page.screenshot(), 1100, 640); await page.close();
+  // 2 in-page banner with rescue — a shorter, narrower viewport so the
+  // banner (a thin bar pinned to the top of the page) occupies much more of
+  // the frame's cropped area instead of sitting atop a tall slab of empty
+  // page background.
+  page = await ctx.newPage(); await page.setViewportSize({ width: 900, height: 360 }); await page.goto(BASE + '/brand-visual.html'); await page.locator('.scamshield-banner').waitFor({ timeout: 8000 });
+  await compose('02-banner-rescue.png', 'One click back to the real site', await page.screenshot(), 900, 360); await page.close();
   // 3 popup safe + message checker open with a verdict
   page = await ctx.newPage(); await page.goto(BASE + '/clean.html'); await sleep(500);
   const pp = await ctx.newPage(); await pp.setViewportSize({ width: 340, height: 600 }); await pp.goto(`chrome-extension://${id}/popup.html`); await page.bringToFront(); await pp.reload(); await sleep(500);
