@@ -26,7 +26,13 @@
     [...document.querySelectorAll('img')].filter((i) => /logo/i.test((i.getAttribute('src') || '') + ' ' + (i.getAttribute('alt') || '') + ' ' + i.className + ' ' + i.id) && (i.naturalWidth >= 40 || i.width >= 40)).slice(0, 2).forEach((i) => add(i.getAttribute('src') || ''));
     return [...new Set(out)].slice(0, 6);
   }
-  const withTimeout = (p, ms) => Promise.race([p, new Promise((r) => setTimeout(() => r(null), ms))]);
+  // Clears the timeout however the race settles, so a fast-resolving `p`
+  // doesn't leave a dangling setTimeout alive for the full `ms` (timer leak).
+  const withTimeout = (p, ms) => {
+    let t;
+    const timeout = new Promise((r) => { t = setTimeout(() => r(null), ms); });
+    return Promise.race([p, timeout]).finally(() => clearTimeout(t));
+  };
 
   function registrable(host) {
     if (SS && typeof SS.registrableDomain === 'function') return SS.registrableDomain(host);
@@ -128,8 +134,26 @@
     const iconEl = document.querySelector('link[rel~="icon"]');
     let faviconHost = '';
     try { faviconHost = iconEl ? new URL(iconEl.getAttribute('href'), location.href).hostname : ''; } catch (_) {}
-    const logoAltBrands = [...document.querySelectorAll('img[alt],[aria-label]')]
-      .slice(0, 40).map((n) => (n.getAttribute('alt') || n.getAttribute('aria-label') || '').toLowerCase());
+    // Brand-name surface from alt/aria text. Two carve-outs against false
+    // positives from legitimate third-party SSO buttons ("Continue with
+    // Google", "Sign in with Facebook" on a non-Google/Facebook site):
+    //  - img[alt] only counts when the image itself is icon/logo-sized
+    //    (rendered or natural width >= 40px), not tiny inline glyphs;
+    //  - [aria-label] is skipped entirely when it sits inside a button/link/
+    //    role=button whose own text is an SSO CTA — that's the button's own
+    //    "Sign in with X" label, not a claim the page IS brand X.
+    const SSO_CTA_RE = /sign in with|continue with|log in with|login with/i;
+    const insideSsoButton = (n) => {
+      const btn = n.closest && n.closest('button,a,[role="button"]');
+      return !!(btn && SSO_CTA_RE.test(btn.textContent || ''));
+    };
+    const altImgs = [...document.querySelectorAll('img[alt]')]
+      .filter((n) => (n.naturalWidth || 0) >= 40 || (n.width || 0) >= 40)
+      .map((n) => n.getAttribute('alt') || '');
+    const ariaEls = [...document.querySelectorAll('[aria-label]')]
+      .filter((n) => !insideSsoButton(n))
+      .map((n) => n.getAttribute('aria-label') || '');
+    const logoAltBrands = altImgs.concat(ariaEls).slice(0, 40).map((t) => t.toLowerCase());
 
     // Seed-phrase harvesting: recovery-phrase wording + many word inputs / a textarea.
     const bodyText = (document.body ? document.body.innerText : '').toLowerCase();

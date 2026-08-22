@@ -1,0 +1,16 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>Sign in – Northwind Traders</title><link rel="icon" href="/favicon.ico">
+<header><nav><a href="/">Home</a><a href="/products">Products</a><a href="/help">Help</a><a href="/about">About</a></nav></header>
+<main>
+<h1>Sign in to Northwind Traders</h1>
+<div class="sso">
+  <button type="button" aria-label="Continue with Google"><img src="/favicon.ico" alt="g" width="16" height="16"> Continue with Google</button>
+  <button type="button" aria-label="Sign in with Facebook"><img src="/favicon.ico" alt="f" width="16" height="16"> Sign in with Facebook</button>
+</div>
+<form action="/account/login" method="post">
+  <label>Email <input type="email" name="email" autocomplete="username"></label>
+  <label>Password <input type="password" name="password" autocomplete="current-password"></label>
+  <button type="submit">Sign in</button>
+</form>
+<p><a href="/account/register">Create an account</a> · <a href="/account/forgot">Forgot password?</a></p>
+</main>
+<footer><a href="/privacy">Privacy</a><a href="/terms">Terms</a></footer></html>

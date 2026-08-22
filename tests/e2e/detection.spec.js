@@ -96,6 +96,18 @@ test('SSO form posting to a known auth provider shows no banner and no submit mo
   await page.waitForURL(/accounts\.google\.com:5599\/clean\.html/, { timeout: 5000 });
 });
 
+// task #16 fix: "Continue with Google" / "Sign in with Facebook" SSO buttons
+// carry the brand's name in their own aria-label — that used to feed
+// logoAltBrands and get read by scoreDom as the PAGE claiming to *be* Google/
+// Facebook, tripping brand-impersonation-content (0.85, danger) purely off a
+// third-party SSO affordance on an unrelated site with its own password form.
+test('SSO button alt/aria brand text does not trigger brand-impersonation on a non-brand site', async ({ context }) => {
+  const page = await context.newPage();
+  await page.goto('https://shop.contoso-fixture.com:5600/sso-buttons.html');
+  await page.waitForTimeout(1500);
+  await expect(page.locator('.scamshield-banner.danger')).toHaveCount(0);
+});
+
 test('popup message checker flags a scam text on-device', async ({ context, extensionId }) => {
   const popup = await context.newPage();
   await popup.goto(`chrome-extension://${extensionId}/popup.html`);
