@@ -52,15 +52,25 @@
     const body = doc.body || doc.documentElement;
     let bodyText = '';
     if (body) {
-      // textContent minus script/style/noscript/template content
+      // textContent minus script/style/noscript/template content. Iterative
+      // (explicit stack) rather than recursive to avoid a call-stack blowout
+      // on pathologically deep DOMs, with a budget (chars/nodes) as a second
+      // backstop; children are pushed in reverse so the stack still pops them
+      // in original document order, matching the old recursive traversal.
+      const BODY_TEXT_BUDGET = 60000, BODY_NODE_BUDGET = 20000;
       const skip = new Set(q('script,style,noscript,template'));
-      const walk = (el) => {
-        for (const n of el.childNodes || []) {
+      const stack = [body];
+      let visited = 0;
+      while (stack.length && bodyText.length <= BODY_TEXT_BUDGET && visited < BODY_NODE_BUDGET) {
+        const el = stack.pop();
+        visited++;
+        const children = el.childNodes || [];
+        for (let i = children.length - 1; i >= 0; i--) {
+          const n = children[i];
           if (n.nodeType === 3) bodyText += n.nodeValue + ' ';
-          else if (n.nodeType === 1 && !skip.has(n)) walk(n);
+          else if (n.nodeType === 1 && !skip.has(n)) stack.push(n);
         }
-      };
-      walk(body);
+      }
     }
     const bodyToks = tokenize(bodyText);
     add('b:', bodyToks, 1500, false);
