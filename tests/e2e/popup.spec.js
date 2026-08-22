@@ -14,6 +14,7 @@ test('dangerous brand page: red card, Leave + real-site actions, evidence rows',
   await expect(popup.locator('#level')).toHaveText('Dangerous page');
   await expect(popup.locator('#leave')).toBeVisible(); await expect(popup.locator('#rescue')).toBeVisible();
   await expect(popup.locator('#reasons li')).not.toHaveCount(0);
+  await expect(popup.locator('#trustmenu')).toBeHidden();
   await expect(popup.locator('#reportbtn')).toHaveText(/This is safe/);
 });
 test('safe page: quiet card, stats tiles, report label says scam', async ({ context, extensionId }) => {
@@ -55,4 +56,17 @@ test('non-http tab shows the grey not-checked card', async ({ context, extension
   const page = await context.newPage(); await page.goto('about:blank');
   const popup = await openPopup(context, extensionId, page);
   await expect(popup.locator('#status')).toHaveClass(/unknown/);
+});
+test("What's new dismisses and stays dismissed after reload; Escape closes the trust menu", async ({ context, extensionId }) => {
+  const page = await context.newPage(); await page.goto(BASE + '/clean.html'); await page.waitForTimeout(500);
+  const popup = await openPopup(context, extensionId, page);
+  await expect(popup.locator('#whatsnew')).toBeVisible();
+  await popup.click('#whatsnewx');
+  await expect(popup.locator('#whatsnew')).toBeHidden();
+  await popup.reload();
+  await expect(popup.locator('#whatsnew')).toBeHidden();
+  await popup.click('#trust');
+  await expect(popup.locator('#trustmenu')).toBeVisible();
+  await popup.keyboard.press('Escape');
+  await expect(popup.locator('#trustmenu')).toBeHidden();
 });

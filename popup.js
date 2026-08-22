@@ -29,6 +29,10 @@ function renderTrust() {
   $('trust').hidden = !!paused || always; $('trusted').hidden = !(paused || always);
   $('trustedtext').textContent = always ? 'Trusted' : paused ? ('Trusted until ' + new Date(paused).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })) : '';
 }
+function setTrustMenu(open) {
+  $('trustmenu').hidden = !open; $('trust').setAttribute('aria-expanded', String(open));
+  if (open) { const first = $('trustmenu').querySelector('.dditem'); if (first) first.focus(); }
+}
 // The real extension popup is a separate window, so tabs.query({active,
 // currentWindow}) reliably returns the page the popup was opened over.
 // tabs.getCurrent() only resolves when this script is itself running inside
@@ -67,15 +71,17 @@ async function init() {
   renderEvidence(verdict && verdict.reasons, level === 'dangerous');
   $('leave').hidden = level !== 'dangerous'; $('showwhy').hidden = level !== 'suspicious';
   const rescueUrl = verdict && verdict.brand && SS.BRAND_DOMAINS[verdict.brand] ? 'https://' + SS.BRAND_DOMAINS[verdict.brand][0] + '/' : null;
-  $('rescue').hidden = !(level !== 'safe' && rescueUrl); if (rescueUrl) $('rescue').textContent = 'Take me to the real ' + brand;
+  $('rescue').hidden = !(level === 'dangerous' && rescueUrl); if (rescueUrl) $('rescue').textContent = 'Take me to the real ' + brand;
   $('leave').addEventListener('click', async () => { await send('leaveTab', { tabId: tab.id }); window.close(); });
   $('rescue').addEventListener('click', () => { api.tabs.update(tab.id, { url: rescueUrl }); window.close(); });
   $('showwhy').addEventListener('click', () => { $('evidence').hidden = false; $('showwhy').hidden = true; });
 
   $('trust').hidden = false; renderTrust();
-  $('trust').addEventListener('click', () => { $('trustmenu').hidden = !$('trustmenu').hidden; });
+  $('trust').addEventListener('click', (e) => { e.stopPropagation(); setTrustMenu($('trustmenu').hidden); });
+  document.addEventListener('click', (e) => { if (!$('trustmenu').hidden && !$('trustmenu').contains(e.target) && e.target !== $('trust')) setTrustMenu(false); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('trustmenu').hidden) { setTrustMenu(false); $('trust').focus(); } });
   for (const b of document.querySelectorAll('.dditem')) b.addEventListener('click', async () => {
-    const r = await send('pauseSite', { domain, choice: b.dataset.choice }); $('trustmenu').hidden = true;
+    const r = await send('pauseSite', { domain, choice: b.dataset.choice }); setTrustMenu(false);
     settings = await send('getSettings'); renderTrust(); toast(r && r.until ? 'Trusted for now' : 'Trusted');
   });
   $('untrust').addEventListener('click', async () => { await send('unpauseSite', { domain }); settings = await send('getSettings'); renderTrust(); toast('Untrusted'); });
@@ -86,17 +92,20 @@ async function init() {
     $('reportbtn').hidden = true; $('reportdone').hidden = false; $('reportdone').textContent = r && r.via === 'relay' ? 'Thanks — sent' : 'Thanks — noted';
   });
 
-  const st = await send('getTabStats', { domain }); $('tile-site').querySelector('b').textContent = String((st && st.siteCount) || 0);
-  renderHistory();
+  const [st, h] = await Promise.all([send('getTabStats', { domain }), send('getHistory')]);
+  $('tile-site').querySelector('b').textContent = String((st && st.siteCount) || 0);
+  renderHistoryList((h && h.history) || []);
 }
-async function renderHistory() {
-  const h = await send('getHistory'); const list = (h && h.history) || [];
+function renderHistoryList(list) {
   if (!list.length) return; $('recent').hidden = false; const ul = $('hist'); ul.replaceChildren();
   for (const e of list.slice(0, 3)) {
     const li = document.createElement('li'); const chip = document.createElement('span'); chip.className = 'chip' + (e.kind === 'page' ? '' : ' brand'); chip.textContent = F.detectorLabel(e.kind);
     const hs = document.createElement('span'); hs.className = 'h'; hs.textContent = e.host || 'unknown site'; const t = document.createElement('time'); t.textContent = F.relTime(e.ts);
     li.append(chip, hs, t); ul.appendChild(li);
   }
+}
+async function renderHistory() {
+  const h = await send('getHistory'); renderHistoryList((h && h.history) || []);
 }
 function wireMessageChecker() {
   if (!SS || typeof SS.scoreMessage !== 'function') { $('msgcheck').hidden = true; return; }
