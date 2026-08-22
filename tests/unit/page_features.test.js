@@ -64,6 +64,12 @@ test('every dense value is within 0..1 and deterministic across calls', () => {
   for (const v of a.dense) assert.ok(v >= 0 && v <= 1, String(v));
 });
 
+test('_bodyText walks the DOM as a true pre-order DFS, in original document order', () => {
+  const { document } = parseHTML('<html><body>t1<a>ta</a>t2<b>tb</b>t3</body></html>');
+  const collected = PF._bodyText(document);
+  assert.equal(collected.replace(/\s+/g, ' ').trim(), 't1 ta t2 tb t3');
+});
+
 test('unparseable absolute form action is treated as foreign, not same-host', () => {
   const { document } = parseHTML('<form action="https://exa mple.com/p" method="post"><input type="password" name="p"></form>');
   const f = PF.extractPageFeatures(document, { host: 'shop.contoso.com' });

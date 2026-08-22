@@ -138,17 +138,28 @@
     // positives from legitimate third-party SSO buttons ("Continue with
     // Google", "Sign in with Facebook" on a non-Google/Facebook site):
     //  - img[alt] only counts when the image itself is icon/logo-sized
-    //    (rendered or natural width >= 40px), not tiny inline glyphs;
-    //  - [aria-label] is skipped entirely when it sits inside a button/link/
-    //    role=button whose own text is an SSO CTA — that's the button's own
-    //    "Sign in with X" label, not a claim the page IS brand X.
-    const SSO_CTA_RE = /sign in with|continue with|log in with|login with/i;
+    //    (rendered or natural width >= 24px) or its src/class/id names it a
+    //    logo, not tiny inline glyphs;
+    //  - an img[alt]/[aria-label] element is skipped when it (or its direct
+    //    ancestor chain) sits inside a button/link/role=button whose own
+    //    VISIBLE text is an SSO CTA — that's the button's own "Sign in with
+    //    X" label, not a claim the page IS brand X. Hidden/aria-hidden
+    //    children (e.g. a visually-hidden duplicate label) are stripped
+    //    before reading the button's text so they can't hide or fake a match.
+    const SSO_CTA_RE = /\b(?:sign in|sign-in|log in|log-in|login|continue) with\b/i;
     const insideSsoButton = (n) => {
       const btn = n.closest && n.closest('button,a,[role="button"]');
-      return !!(btn && SSO_CTA_RE.test(btn.textContent || ''));
+      if (!btn) return false;
+      const clone = btn.cloneNode(true);
+      clone.querySelectorAll('[hidden],[aria-hidden="true"]').forEach((el) => el.remove());
+      return SSO_CTA_RE.test(clone.textContent || '');
     };
     const altImgs = [...document.querySelectorAll('img[alt]')]
-      .filter((n) => (n.naturalWidth || 0) >= 40 || (n.width || 0) >= 40)
+      .filter((n) => {
+        const bigEnough = (n.naturalWidth || 0) >= 24 || (n.width || 0) >= 24;
+        const looksLikeLogo = /logo/i.test((n.getAttribute('src') || '') + ' ' + n.className + ' ' + n.id);
+        return (bigEnough || looksLikeLogo) && !insideSsoButton(n);
+      })
       .map((n) => n.getAttribute('alt') || '');
     const ariaEls = [...document.querySelectorAll('[aria-label]')]
       .filter((n) => !insideSsoButton(n))

@@ -24,3 +24,15 @@ Two tiny on-device models, trained here, shipped as JSON bundled into `.js` file
 - Feature extractor is `engine/page_features.js` (shared by browser and crawler) — never reimplement it in Python.
 
 The ONNX file is kept as the canonical artifact of the URL model but is not shipped.
+
+## Pulling opt-in reports
+Pull labelled rows from the live relay's export endpoint into the local training data:
+
+```
+model/.venv/Scripts/python.exe model/pull_reports.py --url https://scamshield-relay-seven.vercel.app/api/export --token $EXPORT_TOKEN
+```
+
+`EXPORT_TOKEN` is stored in the Vercel project's environment variables (and in Joel's local notes) — never commit it. The script resumes from `model/data/reports_cursor.txt` (or `--since <ISO timestamp>` on first run) and appends to:
+- `model/data/pages.jsonl` — user-reported `scam`/`false_positive` rows, trusted labels, ready for `train_page.py`.
+- `model/data/report_urls.csv` — the same reports as host-level URL rows for the URL model.
+- `model/data/reports_review.jsonl` — auto-generated "dangerous" verdict rows. These are model output, not ground truth, and need manual review before they're promoted into `pages.jsonl`/training data.

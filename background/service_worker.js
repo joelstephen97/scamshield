@@ -10,7 +10,8 @@ const DEFAULT_FEED_URL = 'https://raw.githubusercontent.com/joelstephen97/scamsh
 // Community reporting relay: opt-in only, off by default. Placeholder host
 // until Task 6 deploys the real relay; users can point this at their own or
 // clear it to disable even when opted in.
-const DEFAULT_RELAY_URL = 'https://scamshield-relay.vercel.app/api/report';
+const DEFAULT_RELAY_URL = 'https://scamshield-relay-seven.vercel.app/api/report';
+const PLACEHOLDER_RELAY_URL = 'https://scamshield-relay.vercel.app/api/report';
 
 const DEFAULTS = {
   enabled: true,
@@ -75,20 +76,32 @@ async function sessionCacheGet(url) {
   return undefined;
 }
 
+// iconCacheIndex is a single shared key with no atomic RMW/increment
+// primitive in storage.session, so concurrent read-modify-writes (e.g. the
+// Promise.all in handleHashIcons hashing several icons at once) could each
+// read the same stale index and clobber one another's appended key.
+// iconIndexChain serializes just the index update; the per-key
+// storage.session.set() below (the icon hash entry itself) stays concurrent.
+let iconIndexChain = Promise.resolve();
+async function updateIconIndex(key) {
+  const idx = await api.storage.session.get('iconCacheIndex');
+  let list = Array.isArray(idx.iconCacheIndex) ? idx.iconCacheIndex : [];
+  list = list.filter((k) => k !== key);
+  list.push(key);
+  if (list.length > ICON_SESSION_CAP) {
+    const evict = list.splice(0, list.length - ICON_SESSION_CAP);
+    await api.storage.session.remove(evict);
+  }
+  await api.storage.session.set({ iconCacheIndex: list });
+}
+
 async function sessionCacheSet(url, hash) {
   if (!hasSessionStorage) return;
   try {
     const key = sessionIconKey(url);
     await api.storage.session.set({ [key]: { hash, ts: Date.now() } });
-    const idx = await api.storage.session.get('iconCacheIndex');
-    let list = Array.isArray(idx.iconCacheIndex) ? idx.iconCacheIndex : [];
-    list = list.filter((k) => k !== key);
-    list.push(key);
-    if (list.length > ICON_SESSION_CAP) {
-      const evict = list.splice(0, list.length - ICON_SESSION_CAP);
-      await api.storage.session.remove(evict);
-    }
-    await api.storage.session.set({ iconCacheIndex: list });
+    iconIndexChain = iconIndexChain.then(() => updateIconIndex(key)).catch(() => {});
+    await iconIndexChain;
   } catch (_) { /* best-effort */ }
 }
 
@@ -318,6 +331,12 @@ api.runtime.onInstalled.addListener(async (details) => {
   if (details && details.reason === 'update') {
     const cur = await getSettings();
     if (cur.otaUrl === '') await setSettings({ otaUrl: DEFAULT_FEED_URL });
+    // Migration: point pre-existing installs at the live relay. Only touches
+    // the old placeholder value (or a missing/undefined field, which reads as
+    // the placeholder via DEFAULTS); a user-customised reportUrl is untouched.
+    if (cur.reportUrl === PLACEHOLDER_RELAY_URL || cur.reportUrl == null) {
+      await setSettings({ reportUrl: DEFAULT_RELAY_URL });
+    }
   }
   if (details && details.reason === 'install' && api.tabs) {
     try { api.tabs.create({ url: api.runtime.getURL('onboarding.html') }); } catch (_) {}

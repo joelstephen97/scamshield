@@ -29,6 +29,36 @@
   const clamp01 = (x) => Math.max(0, Math.min(1, x));
   const text = (el) => (el && el.textContent ? el.textContent : '').replace(/\s+/g, ' ').trim();
 
+  // body textContent minus script/style/noscript/template content. Iterative
+  // pre-order DFS (explicit stack) rather than recursive, to avoid a
+  // call-stack blowout on pathologically deep DOMs, with a budget
+  // (chars/nodes) as a second backstop. A node's text is appended only when
+  // it is POPPED off the stack (not while its parent is being iterated) and
+  // an element's children are pushed in reverse order at that same pop, so
+  // the next pops walk them left-to-right — this is what keeps the collected
+  // text in original document order (the shipped model was trained on
+  // document-order text). Exported as `_bodyText` for unit testing only.
+  function _bodyText(doc) {
+    const body = doc.body || doc.documentElement;
+    let bodyText = '';
+    if (!body) return bodyText;
+    const BODY_TEXT_BUDGET = 60000, BODY_NODE_BUDGET = 20000;
+    const skip = new Set(Array.from(doc.querySelectorAll('script,style,noscript,template')));
+    const stack = [body];
+    let visited = 0;
+    while (stack.length && bodyText.length <= BODY_TEXT_BUDGET && visited < BODY_NODE_BUDGET) {
+      const n = stack.pop();
+      visited++;
+      if (n.nodeType === 3) {
+        bodyText += n.nodeValue + ' ';
+      } else if (n.nodeType === 1 && !skip.has(n)) {
+        const children = n.childNodes || [];
+        for (let i = children.length - 1; i >= 0; i--) stack.push(children[i]);
+      }
+    }
+    return bodyText;
+  }
+
   function extractPageFeatures(doc, opts) {
     const host = String((opts && opts.host) || '').toLowerCase();
     const pageDomain = C.registrableDomain(host);
@@ -49,29 +79,7 @@
     add('t:', tokenize((doc.title || '') + ' ' + ogTitle), 40, true);
     add('m:', tokenize(q('meta[name="description"]').map((m) => attr(m, 'content')).join(' ')), 40, false);
     add('h:', tokenize(q('h1,h2,h3').map(text).join(' ')), 60, false);
-    const body = doc.body || doc.documentElement;
-    let bodyText = '';
-    if (body) {
-      // textContent minus script/style/noscript/template content. Iterative
-      // (explicit stack) rather than recursive to avoid a call-stack blowout
-      // on pathologically deep DOMs, with a budget (chars/nodes) as a second
-      // backstop; children are pushed in reverse so the stack still pops them
-      // in original document order, matching the old recursive traversal.
-      const BODY_TEXT_BUDGET = 60000, BODY_NODE_BUDGET = 20000;
-      const skip = new Set(q('script,style,noscript,template'));
-      const stack = [body];
-      let visited = 0;
-      while (stack.length && bodyText.length <= BODY_TEXT_BUDGET && visited < BODY_NODE_BUDGET) {
-        const el = stack.pop();
-        visited++;
-        const children = el.childNodes || [];
-        for (let i = children.length - 1; i >= 0; i--) {
-          const n = children[i];
-          if (n.nodeType === 3) bodyText += n.nodeValue + ' ';
-          else if (n.nodeType === 1 && !skip.has(n)) stack.push(n);
-        }
-      }
-    }
+    const bodyText = _bodyText(doc);
     const bodyToks = tokenize(bodyText);
     add('b:', bodyToks, 1500, false);
     const inputs = q('input,textarea,select');
@@ -125,5 +133,5 @@
     return { tokens, dense, meta: { nTokens } };
   }
 
-  return { extractPageFeatures, fnv1a, tokenize, PAGE_BUCKETS, PAGE_DENSE_NAMES };
+  return { extractPageFeatures, fnv1a, tokenize, PAGE_BUCKETS, PAGE_DENSE_NAMES, _bodyText };
 });
