@@ -39,6 +39,10 @@
     let score = 0;
     let brand; // set when impersonation is flagged, so UI can offer the real site
     const pageDomain = registrableDomain(s.pageHost);
+    const displayName = (key) => {
+      const b = (C.BRANDS || []).find((x) => x.key === key);
+      return b ? b.names[0].replace(/\b\w/g, (ch) => ch.toUpperCase()) : key;
+    };
 
     if (s.hasPasswordField) {
       const AUTH = C.KNOWN_AUTH_PROVIDERS || [];
@@ -79,32 +83,30 @@
 
     // Content-based brand impersonation: page *names* a brand but is not on that
     // brand's real domain, and collects a password.
-    const named = [];
-    if (s.titleBrand) named.push(String(s.titleBrand).toLowerCase());
-    if (s.ogSiteName) named.push(String(s.ogSiteName).toLowerCase());
-    for (const b of (s.logoAltBrands || [])) named.push(String(b).toLowerCase());
-    const BRANDS = C.POPULAR_BRANDS || [];
     const BRAND_DOMAINS = C.BRAND_DOMAINS || {};
-    const matchedBrand = BRANDS.find((b) => named.some((n) => n && n.includes(b)));
-    if (matchedBrand && s.hasPasswordField) {
-      const legit = BRAND_DOMAINS[matchedBrand] || [];
+    const matchedBrand = C.brandNameIn([s.titleBrand, s.ogSiteName, ...(s.logoAltBrands || [])].join(' | '));
+    function isOnBrand(brandKey) {
+      const legit = BRAND_DOMAINS[brandKey] || [];
       const host = String(s.pageHost || '').toLowerCase();
-      // Also treat exact-brand SLD on a ccTLD-shaped suffix as on-brand
-      // (amazon.ae, amazon.co.uk — brands defend their name on real ccTLDs),
-      // but never on a high-abuse TLD (amazon.tk) or generic gTLD (amazon.pizza).
       const parts = C.registrableParts(host);
       const tld = parts.suffix.split('.').pop();
       const ccShaped = (C.MULTI_LABEL_SUFFIXES || []).includes(parts.suffix) || tld.length === 2;
-      const exactBrandCc = parts.sld === matchedBrand && ccShaped &&
-        !(C.SUSPICIOUS_TLDS || []).includes(tld);
-      const onBrand = exactBrandCc
-        || legit.some((d) => pageDomain === d || host.endsWith('.' + d))
-        || (s.faviconHost && legit.some((d) => String(s.faviconHost).toLowerCase().endsWith(d)));
-      if (!onBrand) {
-        score = Math.max(score, 0.85);
-        flags.push('brand-impersonation-content');
-        brand = matchedBrand;
-        reasons.push('This page looks like "' + matchedBrand + '" but is not on its real website.');
+      const exactBrandCc = parts.sld === brandKey && ccShaped && !(C.SUSPICIOUS_TLDS || []).includes(tld);
+      return exactBrandCc || legit.some((d) => pageDomain === d || host.endsWith('.' + d));
+    }
+    if (matchedBrand && s.hasPasswordField && !isOnBrand(matchedBrand)) {
+      score = Math.max(score, 0.85); flags.push('brand-impersonation-content'); brand = matchedBrand;
+      reasons.push('This page looks like "' + matchedBrand + '" but is not on its real website.');
+    }
+    // Visual (icon/logo hash) impersonation — 0.5.0
+    const icon = (s.iconMatches || []).find((m) => m && m.brand && !isOnBrand(m.brand));
+    if (icon) {
+      const label = displayName(icon.brand);
+      if (s.hasPasswordField) {
+        score = Math.max(score, 0.85); flags.push('brand-impersonation-visual'); brand = brand || icon.brand;
+        reasons.push('This page uses ' + label + "'s icon but is not " + label + "'s website.");
+      } else {
+        score += 0.35; reasons.push('This page uses ' + label + "'s icon but is not " + label + "'s website.");
       }
     }
 

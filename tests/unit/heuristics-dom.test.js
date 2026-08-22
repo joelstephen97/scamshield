@@ -51,3 +51,25 @@ test('scam phrases add score and reasons', () => {
   assert.ok(r.score > 0);
   assert.ok(r.reasons.some((x) => /prize|won|giveaway/i.test(x)));
 });
+
+test('icon match + password + off-brand → dangerous visual impersonation with brand', () => {
+  const r = scoreDom({ ...clean, pageHost: 'secure-login.example', hasPasswordField: true, passwordFormActions: ['https://secure-login.example/post'], iconMatches: [{ brand: 'paypal', distance: 3 }] });
+  assert.ok(r.score >= 0.85); assert.ok(r.flags.includes('brand-impersonation-visual')); assert.equal(r.brand, 'paypal');
+  assert.ok(r.reasons.some((x) => /PayPal.*icon/i.test(x)));
+});
+test('icon match without password → suspicious bump only', () => {
+  const r = scoreDom({ ...clean, pageHost: 'fan-site.example', iconMatches: [{ brand: 'paypal', distance: 2 }] });
+  assert.ok(r.score >= 0.35 && r.score < 0.5); assert.ok(!r.flags.includes('brand-impersonation-visual'));
+});
+test('icon match on the brand’s own domain is ignored', () => {
+  const r = scoreDom({ ...clean, pageHost: 'www.paypal.com', hasPasswordField: true, passwordFormActions: ['https://www.paypal.com/signin'], iconMatches: [{ brand: 'paypal', distance: 0 }] });
+  assert.equal(r.score, 0);
+});
+test('hotlinked brand favicon no longer exempts a named impersonation', () => {
+  const r = scoreDom({ ...clean, pageHost: 'paypal-help.example', hasPasswordField: true, passwordFormActions: ['https://paypal-help.example/x'], titleBrand: 'paypal login', faviconHost: 'www.paypal.com' });
+  assert.ok(r.flags.includes('brand-impersonation-content'));
+});
+test('short icon-only brand names are not matched by text ("du" in "products")', () => {
+  const r = scoreDom({ ...clean, pageHost: 'shop.example', hasPasswordField: true, passwordFormActions: ['https://shop.example/login'], titleBrand: 'our products - sign in' });
+  assert.ok(!r.flags.includes('brand-impersonation-content'));
+});
