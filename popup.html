@@ -1,28 +1,47 @@
-<!doctype html><html><head><meta charset="utf-8">
-<link rel="stylesheet" href="popup.css"></head>
-<body>
-  <header><img src="assets/icons/icon32.png" width="24" height="24" alt=""><h1>ScamShield</h1></header>
-  <section id="status" class="status safe"><span id="level">Checking…</span></section>
-  <ul id="reasons"></ul>
-  <label class="row"><span>Protection enabled</span><input type="checkbox" id="enabled"></label>
-  <label class="row"><span>Hide scam content</span><input type="checkbox" id="hide"></label>
-  <button id="trust" hidden>Trust this site</button>
-  <p id="stat" class="stat"></p>
-  <details id="msgcheck">
-    <summary>📩 Check a message</summary>
-    <p class="hint">Paste a suspicious SMS, WhatsApp, or email text. Checked entirely on your device — nothing is sent anywhere.</p>
-    <textarea id="msgtext" rows="4" placeholder="Paste the message here…"></textarea>
-    <button id="msgbtn">Check message</button>
-    <div id="msgresult" hidden>
-      <div id="msgstatus" class="status safe"><span id="msglevel"></span></div>
-      <ul id="msgreasons"></ul>
+<!doctype html><html><head><meta charset="utf-8"><title>ScamShield</title>
+<link rel="stylesheet" href="ui/tokens.css"><link rel="stylesheet" href="popup.css"></head>
+<body class="ui">
+<header class="hdr">
+  <span class="brand" id="brandmark">ScamShield</span><span class="ver num" id="ver"></span><span class="sp"></span>
+  <label class="switch" id="enabledwrap" title="Protection"><input type="checkbox" id="enabled" class="sr"><i></i><span id="enabledlbl">On</span></label>
+  <a id="opts" href="#" class="gear" title="Settings" aria-label="Settings"></a>
+</header>
+<main class="body">
+  <section id="status" class="card status unknown" aria-live="polite">
+    <div class="ico" id="statusicon"></div>
+    <div><h3 id="level">Checking…</h3><div class="host" id="host"></div><p id="summary" hidden></p></div>
+    <div class="acts" id="acts">
+      <button id="leave" class="btn danger" hidden>Leave this page</button>
+      <button id="rescue" class="btn" hidden>Take me to the real site</button>
+      <button id="showwhy" class="btn primary" hidden>Show why</button>
     </div>
+  </section>
+  <section id="evidence" class="card" hidden><ul id="reasons" class="evidence"></ul></section>
+  <section class="siteacts" id="siteacts">
+    <span class="menu"><button id="trust" class="btn" hidden>Trust this site ▾</button>
+      <div class="dd" id="trustmenu" role="menu" hidden>
+        <button role="menuitem" class="dditem" data-choice="1h">For 1 hour</button>
+        <button role="menuitem" class="dditem" data-choice="today">Until tomorrow</button>
+        <button role="menuitem" class="dditem" data-choice="always">Always</button>
+      </div>
+      <span id="trusted" hidden><span id="trustedtext"></span> · <button id="untrust" class="btn ghost">Untrust</button></span>
+    </span>
+    <button id="reportbtn" class="btn ghost" hidden>Report a mistake</button>
+    <span id="reportdone" class="toast-inline" hidden>Thanks — noted</span>
+  </section>
+  <section class="tiles"><div class="tile" id="tile-site"><b class="num">—</b><span>Blocked on this site</span></div><div class="tile" id="tile-all"><b class="num">0</b><span>Blocked all-time</span></div></section>
+  <section class="card" id="recent" hidden><ul id="hist" class="hist"></ul><div class="morewrap"><a class="more" id="viewall" href="#">View all history →</a></div></section>
+  <details id="msgcheck" class="card"><summary class="disc">Check a message or link</summary>
+    <p class="hint">Paste a suspicious SMS, WhatsApp or email text, or a link. Checked entirely on your device.</p>
+    <textarea id="msgtext" rows="3" placeholder="Paste the message or link here…"></textarea>
+    <div class="msgrow"><button id="msgbtn" class="btn primary">Check</button><span class="hint">Checked on your device only</span></div>
+    <div id="msgresult" hidden><div id="msgstatus" class="status safe mini"><div class="ico" id="msgicon"></div><div><h3 id="msglevel"></h3><p id="msgwhy"></p></div></div></div>
   </details>
-  <a id="support" href="#" class="support">❤ Support ScamShield</a>
-  <a id="opts" href="#">Settings</a>
-  <script src="engine/constants.js"></script>
-  <script src="engine/features.js"></script>
-  <script src="engine/heuristics.js"></script>
-  <script src="engine/message_rules.js"></script>
-  <script src="popup.js"></script>
+  <section id="whatsnew" class="card whatsnew" hidden><span>New in 0.5: page analysis, brand look-alike detection, redesigned settings.</span><a id="whatsnewlink" href="#">What's new</a><button id="whatsnewx" class="btn ghost" aria-label="Dismiss">✕</button></section>
+</main>
+<footer class="foot"><span class="lock" id="lockline">Runs on your device · nothing leaves your browser</span><a id="support" href="#">Support</a></footer>
+<div class="toast" id="toast" role="status"></div>
+<script src="engine/constants.js"></script><script src="engine/features.js"></script>
+<script src="engine/heuristics.js"></script><script src="engine/message_rules.js"></script>
+<script src="engine/trust.js"></script><script src="ui/format.js"></script><script src="ui/icons.js"></script><script src="ui/theme.js"></script><script src="popup.js"></script>
 </body></html>
