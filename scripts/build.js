@@ -7,7 +7,7 @@ const ROOT = path.resolve(__dirname, '..');
 const DIST = path.join(ROOT, 'dist');
 
 const SHARED = [
-  'background', 'content', 'engine', 'rules', 'model/url-model.js',
+  'background', 'content', 'engine', 'rules', 'model/url-model.js', 'model/page-content.js',
   'assets', 'popup.html', 'popup.css', 'popup.js',
   'options.html', 'options.css', 'options.js', 'onboarding.html'
 ];
@@ -30,6 +30,46 @@ function zipDir(sourceDir, zipPath) {
   }
 }
 
+/**
+ * Collect every file path a manifest references (background, content scripts,
+ * popup/options/icons, declarative_net_request rules). Returns a flat array
+ * of repo-relative paths (forward-slash, no leading './').
+ */
+function manifestReferencedFiles(manifest) {
+  const files = [];
+  const push = (p) => { if (typeof p === 'string' && p) files.push(p.replace(/^\.?\//, '')); };
+
+  for (const cs of manifest.content_scripts || []) {
+    for (const p of cs.js || []) push(p);
+    for (const p of cs.css || []) push(p);
+  }
+  if (manifest.background) {
+    push(manifest.background.service_worker);
+    for (const p of manifest.background.scripts || []) push(p);
+  }
+  if (manifest.action) {
+    push(manifest.action.default_popup);
+    for (const p of Object.values(manifest.action.default_icon || {})) push(p);
+  }
+  for (const p of Object.values(manifest.icons || {})) push(p);
+  push(manifest.options_page);
+  if (manifest.options_ui) push(manifest.options_ui.page);
+  for (const r of (manifest.declarative_net_request || {}).rule_resources || []) push(r.path);
+
+  return files;
+}
+
+/** Fail the build if any file the staged manifest references is missing from staging. */
+function assertManifestFilesExist(staging) {
+  const manifest = JSON.parse(fs.readFileSync(path.join(staging, 'manifest.json'), 'utf8'));
+  const missing = manifestReferencedFiles(manifest).filter((p) => !fs.existsSync(path.join(staging, p)));
+  if (missing.length) {
+    console.error('✗ manifest references files missing from the staged package:');
+    for (const m of missing) console.error('    -', m);
+    process.exit(1);
+  }
+}
+
 function build(target, manifestFile, zipName) {
   const staging = path.join(DIST, 'staging-' + target);
   if (fs.existsSync(staging)) fs.rmSync(staging, { recursive: true });
@@ -41,6 +81,7 @@ function build(target, manifestFile, zipName) {
   }
   // manifest always lands as manifest.json in the package
   fs.copyFileSync(path.join(ROOT, manifestFile), path.join(staging, 'manifest.json'));
+  assertManifestFilesExist(staging);
   const zipPath = path.join(DIST, zipName);
   if (fs.existsSync(zipPath)) fs.unlinkSync(zipPath);
   zipDir(staging, zipPath);
@@ -50,7 +91,13 @@ function build(target, manifestFile, zipName) {
   if (mb > 2.5) { console.error(`✗ ${zipName} is ${mb.toFixed(2)} MB (> 2.5 MB budget)`); process.exit(1); }
 }
 
-fs.mkdirSync(DIST, { recursive: true });
-build('chrome', 'manifest.json', 'scamshield-chrome.zip');
-build('firefox', 'manifest.firefox.json', 'scamshield-firefox.zip');
-console.log('Done.');
+function main() {
+  fs.mkdirSync(DIST, { recursive: true });
+  build('chrome', 'manifest.json', 'scamshield-chrome.zip');
+  build('firefox', 'manifest.firefox.json', 'scamshield-firefox.zip');
+  console.log('Done.');
+}
+
+if (require.main === module) main();
+
+module.exports = { SHARED, manifestReferencedFiles, assertManifestFilesExist, build };
