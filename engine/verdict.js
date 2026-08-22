@@ -31,8 +31,21 @@
       const pm = (typeof root !== 'undefined' && root.ScamShield && root.ScamShield.PAGE_MODEL) || null;
       const t = (pm && pm.thresholds && pm.thresholds.suspicious) || THRESHOLDS.contentSuspicious;
       if (contentProb >= t) {
+        // The URL model alone only counts as corroboration when at least one
+        // URL rule also fired (urlRules.score >= contentCorroborateModelMinRule).
+        // v0.5.0 fix-wave note: the URL model, trained on syntactic features
+        // only (length/host/path/query shape — no domain reputation), cannot
+        // reliably tell a legitimate deep link (long docs/wiki/support paths)
+        // from a phishing URL of similar shape; a regression gate against
+        // curated real-world deep URLs (model/data/legit_deep_urls.txt) still
+        // fails on some of them even after enriching the training negatives
+        // (see model/README.md). Requiring a rule hit too keeps a lone
+        // "the URL model is nervous" reading from single-handedly escalating
+        // a suspicious content verdict to dangerous.
+        const urlModelCorroborates = modelUsed && modelProb >= THRESHOLDS.contentCorroborateModel &&
+          (u.score || 0) >= THRESHOLDS.contentCorroborateModelMinRule;
         const corroborated = ruleScore >= THRESHOLDS.contentCorroborateRule ||
-          (modelUsed && modelProb >= THRESHOLDS.contentCorroborateModel) || iconMatch === true;
+          urlModelCorroborates || iconMatch === true;
         score = Math.max(score, corroborated ? THRESHOLDS.dangerous : THRESHOLDS.suspicious);
         contentReasons.push('Page wording and layout resemble known phishing pages.');
       }

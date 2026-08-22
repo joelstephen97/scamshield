@@ -58,9 +58,17 @@ test('content + rule corroboration → dangerous', () => {
   const r = fuse({ modelProb: null, urlRules: { score: 0.35, reasons: ['tld'] }, domRules: { score: 0, reasons: [], flags: [] }, contentProb: 0.95 });
   assert.equal(r.level, 'dangerous');
 });
-test('content + URL model corroboration → dangerous', () => {
-  const r = fuse({ modelProb: 0.75, urlRules: { score: 0, reasons: [] }, domRules: { score: 0, reasons: [], flags: [] }, contentProb: 0.95 });
+test('content + URL model corroboration → dangerous (requires a URL rule hit too)', () => {
+  // v0.5.0 fix-wave: the URL model alone (urlRules.score below
+  // contentCorroborateModelMinRule) is no longer enough to corroborate —
+  // some rule must also have fired, since the URL model's syntactic
+  // features can't reliably separate legit deep links from phishing shape.
+  const r = fuse({ modelProb: 0.75, urlRules: { score: 0.2, reasons: ['x'] }, domRules: { score: 0, reasons: [], flags: [] }, contentProb: 0.95 });
   assert.equal(r.level, 'dangerous');
+});
+test('content + URL model alone (no URL rule hit) does not corroborate → stays suspicious', () => {
+  const r = fuse({ modelProb: 0.75, urlRules: { score: 0, reasons: [] }, domRules: { score: 0, reasons: [], flags: [] }, contentProb: 0.95 });
+  assert.equal(r.level, 'suspicious');
 });
 test('content + icon match → dangerous', () => {
   const r = fuse({ modelProb: 0.1, urlRules: { score: 0, reasons: [] }, domRules: { score: 0, reasons: [], flags: [] }, contentProb: 0.95, iconMatch: true });

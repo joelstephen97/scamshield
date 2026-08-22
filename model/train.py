@@ -266,6 +266,10 @@ def main():
     ap.add_argument('--parity-in',default='model/parity.json')
     ap.add_argument('--parity-out',default='model/url_parity.json')
     ap.add_argument('--compare-onnx',default='',help='path to the previous ONNX model for verdict-agreement report')
+    ap.add_argument('--deep-gate-urls',default='model/data/legit_deep_urls.txt',
+        help='curated legitimate deep-URL regression list (path/query-heavy, https) checked after training')
+    ap.add_argument('--skip-deep-gate',action='store_true',
+        help='skip the legit-deep-URL regression gate (experiments only — never for a shipped model)')
     a=ap.parse_args()
     df=pd.read_csv(a.data)
     X=np.array([features(u) for u in df['url']],dtype=np.float32)
@@ -308,5 +312,27 @@ def main():
         [{'url':c['url'],'prob':float(p)} for c,p in zip(cases,probs)],indent=1)+'\n')
     print(f'Wrote {a.parity_out} ({len(cases)} cases).')
     print(f'Holdout: acc={acc:.3f} precision={prec:.3f} recall={rec:.3f} auc={auc:.3f} | trained on {len(df)} rows.')
+
+    # Regression gate: a curated list of realistic legitimate deep URLs
+    # (long/multi-segment paths, query strings) the model must NOT flag as
+    # phishing purely for having a path — see model/README.md and the
+    # v0.5.0 review that found the URL model had become a path-length
+    # detector. Skippable only for experiments; never for a shipped model.
+    if a.skip_deep_gate:
+        print('Deep-URL regression gate: SKIPPED (--skip-deep-gate).')
+    else:
+        deep_path=pathlib.Path(a.deep_gate_urls)
+        deep_urls=[u.strip() for u in deep_path.read_text(encoding='utf-8').splitlines() if u.strip()]
+        Xd=np.array([features(u) for u in deep_urls],dtype=np.float32)
+        deep_probs=clf.predict_proba(Xd)[:,1]
+        print(f'Deep-URL regression gate ({deep_path}, {len(deep_urls)} URLs):')
+        for u,p in zip(deep_urls,deep_probs):
+            print(f'  {p:.3f}  {u}')
+        deep_mean=float(np.mean(deep_probs)); deep_max=float(np.max(deep_probs))
+        print(f'  mean={deep_mean:.4f} max={deep_max:.4f} (gate: max<=0.5, mean<=0.2)')
+        if deep_max > 0.5 or deep_mean > 0.2:
+            print(f'FAIL: deep-URL regression gate failed (max={deep_max:.4f} > 0.5 or mean={deep_mean:.4f} > 0.2).')
+            raise SystemExit(1)
+        print('Deep-URL regression gate: PASS.')
 
 if __name__=='__main__': main()
