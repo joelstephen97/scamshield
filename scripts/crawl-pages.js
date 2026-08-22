@@ -12,6 +12,11 @@ const C = require('../engine/constants');
 const OUT = path.join(__dirname, '..', 'model', 'data', 'pages.jsonl');
 const UA = 'ScamShieldCrawler/0.5 (+https://github.com/joelstephen97/scamshield)';
 const TIMEOUT = 8000, CAP = 1.5 * 1024 * 1024;
+// Feed downloads (OpenPhish/URLhaus/Phishing.Database lists, Tranco zip) are
+// bulk files, not individual pages — they need a much larger time/size
+// budget than a single phishing page fetch (TIMEOUT/CAP above), which is why
+// they get their own constants and their own fetch helper (fetchFeed).
+const FEED_TIMEOUT = 120000, FEED_CAP = 256 * 1024 * 1024;
 const args = Object.fromEntries(process.argv.slice(2).map((a) => a.replace(/^--/, '').split('=')));
 const NEG_SITES = Number(args.negatives || 6000), POS_MAX = Number(args.positives || 6000);
 const CONC = Number(args.conc || 8);
@@ -45,6 +50,21 @@ async function fetchText(url, init) {
     return buf.length > CAP ? null : { text: buf.toString('utf8'), url: r.url };
   } catch (_) { return null; } finally { clearTimeout(t); }
 }
+// fetchFeed(url) → { buf, url } | null — for bulk feed/list downloads
+// (OpenPhish, URLhaus CSV, Phishing.Database, Tranco zip). 120s timeout, up
+// to 256MB, fail-open (returns null on any error, same as fetchText). Returns
+// the raw Buffer (not decoded to a string) so binary payloads like the
+// Tranco zip aren't corrupted by a lossy toString('utf8'); text feeds decode
+// via `.buf.toString('utf8')` at the call site.
+async function fetchFeed(url) {
+  const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), FEED_TIMEOUT);
+  try {
+    const r = await fetch(url, { headers: { 'user-agent': UA, accept: '*/*' }, redirect: 'follow', signal: ctl.signal });
+    if (!r.ok) return null;
+    const buf = Buffer.from(await r.arrayBuffer());
+    return buf.length > FEED_CAP ? null : { buf, url: r.url };
+  } catch (_) { return null; } finally { clearTimeout(t); }
+}
 async function pool(items, fn) {
   let i = 0; const out = [];
   await Promise.all(Array.from({ length: CONC }, async () => {
@@ -67,12 +87,12 @@ function featuresOf(html, url) {
   const push = (label, url, f) => { if (!H.shouldKeep(seen, hostCounts, label, url)) return; rows.push(H.rowFor(label, url, f)); };
 
   console.log('Positives… (concurrency=' + CONC + (SHUFFLE ? ', shuffle=on' : '') + ')');
-  const op = await fetchText('https://openphish.com/feed.txt');
-  const uh = await fetchText('https://urlhaus.abuse.ch/downloads/csv_online/');
-  const pd = await fetchText('https://raw.githubusercontent.com/mitchellkrogza/Phishing.Database/master/phishing-links-ACTIVE.txt');
-  const opUrls = op ? H.parseOpenPhish(op.text) : [];
-  const uhUrls = uh ? H.parseUrlhaus(uh.text) : [];
-  const pdUrls = pd ? H.parsePhishingDatabase(pd.text) : [];
+  const op = await fetchFeed('https://openphish.com/feed.txt');
+  const uh = await fetchFeed('https://urlhaus.abuse.ch/downloads/csv_online/');
+  const pd = await fetchFeed('https://raw.githubusercontent.com/mitchellkrogza/Phishing.Database/master/phishing-links-ACTIVE.txt');
+  const opUrls = op ? H.parseOpenPhish(op.buf.toString('utf8')) : [];
+  const uhUrls = uh ? H.parseUrlhaus(uh.buf.toString('utf8')) : [];
+  const pdUrls = pd ? H.parsePhishingDatabase(pd.buf.toString('utf8')) : [];
   let posUrls = [...new Set([...opUrls, ...uhUrls, ...pdUrls])];
   console.log(`  sources: openphish=${opUrls.length} urlhaus=${uhUrls.length} phishdb=${pdUrls.length} → unique=${posUrls.length}`);
   if (SHUFFLE) posUrls = seededShuffle(posUrls, 20260822);
@@ -81,9 +101,9 @@ function featuresOf(html, url) {
   console.log('  positives:', rows.length);
 
   console.log('Negatives…');
-  const tz = await fetch('https://tranco-list.eu/top-1m.csv.zip', { headers: { 'user-agent': UA } }).then((r) => r.arrayBuffer());
-  const zbuf = Buffer.from(tz);
-  const csv = H.readFirstZipEntry(zbuf).toString('utf8');
+  const tz = await fetchFeed('https://tranco-list.eu/top-1m.csv.zip');
+  if (!tz) throw new Error('Tranco feed fetch failed (needed for negatives)');
+  const csv = H.readFirstZipEntry(tz.buf).toString('utf8');
   const domains = csv.split('\n').slice(0, NEG_SITES).map((l) => l.split(',')[1]).filter(Boolean).map((d) => d.trim());
   const authSeeds = [...C.KNOWN_AUTH_PROVIDERS, ...C.KNOWN_BRAND_REGISTRABLES].map((d) => 'https://' + d + '/');
   const negStart = rows.length;
