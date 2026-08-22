@@ -5,6 +5,9 @@ playwright-report/
 _metadata/
 model/data/full*.csv
 model/data/pages.jsonl
+model/data/reports*.jsonl
+model/data/report_urls.csv
+model/data/reports_cursor.txt
 model/.venv/
 __pycache__/
 
