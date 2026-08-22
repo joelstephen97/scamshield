@@ -29,3 +29,8 @@ test('predict() API: null without a model, probability with one', async () => {
   assert.equal(um.isAvailable(), true);
   assert.ok(Math.abs((await um.predict([9, 0])) - sigmoid(1.5)) < 1e-9);
 });
+
+test('malformed tree (out-of-range index) contributes 0 without throwing', () => {
+  const bad = { ...TINY, trees: [{ nodes: [[0, 5, 99, 99, 0, 1]] }, TINY.trees[1]] };
+  assert.ok(Math.abs(um.predictUrlProb([3, 0], bad) - sigmoid(0.5)) < 1e-9);
+});

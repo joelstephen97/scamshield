@@ -22,6 +22,7 @@
     let i = 0;
     for (let guard = 0; guard < 64; guard++) {
       const n = nodes[i];
+      if (!n) return 0;                          // malformed tree: out-of-range index
       if (n[2] === -1) return n[4];              // leaf
       const v = x[n[0]];
       const goLeft = Number.isNaN(v) ? n[5] === 1 : v <= n[1];
@@ -33,7 +34,7 @@
   function predictUrlProb(vector, model) {
     const m = model || currentModel();
     if (!m) return NaN;
-    let z = m.baseline || 0;
+    let z = typeof m.baseline === 'number' && !Number.isNaN(m.baseline) ? m.baseline : 0;
     for (const t of m.trees) z += evalTree(t.nodes, vector);
     const p = 1 / (1 + Math.exp(-z));
     return Math.max(0, Math.min(1, p));
