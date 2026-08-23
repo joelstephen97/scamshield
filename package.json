@@ -3,6 +3,28 @@
   "version": "0.5.0",
   "description": "On-device scam & phishing detection for Chromium and Firefox.",
   "private": true,
+  "license": "GPL-3.0-or-later",
+  "author": "Joel Stephen <jojostev@gmail.com> (https://github.com/joelstephen97)",
+  "homepage": "https://joelstephen97.github.io/scamshield/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joelstephen97/scamshield.git"
+  },
+  "bugs": {
+    "url": "https://github.com/joelstephen97/scamshield/issues"
+  },
+  "keywords": [
+    "browser-extension",
+    "chrome-extension",
+    "firefox-addon",
+    "phishing",
+    "scam",
+    "anti-phishing",
+    "security",
+    "privacy",
+    "on-device",
+    "manifest-v3"
+  ],
   "type": "commonjs",
   "scripts": {
     "test:unit": "node --test \"tests/unit/**/*.test.js\"",

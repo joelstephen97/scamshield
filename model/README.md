@@ -1,5 +1,7 @@
 # ScamShield models
 
+Part of [ScamShield](../README.md). Both models run on-device as plain JS (no ONNX/WASM); this folder holds the training code, the committed model JSON and the JS↔Python parity fixtures. Large or crawl/report-derived data files under `model/data/` are gitignored (see `.gitignore`). Retraining is optional — working models are committed.
+
 Two tiny on-device models, trained here, shipped as JSON bundled into `.js` files (`npm run bundle:models`).
 
 ## URL model (`url-model.json`, HistGradientBoosting)

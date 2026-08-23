@@ -1,5 +1,7 @@
 # Changelog
 
+All notable changes to ScamShield. Versions are git tags (`vX.Y.Z`); the version on the [Chrome Web Store](https://chromewebstore.google.com/detail/fojjjofjimbfoddafoampojopijnlihl) may lag a tag by a few days while Google reviews it. Privacy-relevant changes are also reflected in the [privacy policy](https://joelstephen97.github.io/scamshield/privacy.html).
+
 ## 0.5.0 — 2026-08-22
 
 ### Since 0.3.1 (what users updating from the store version get)

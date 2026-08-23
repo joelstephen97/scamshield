@@ -39,3 +39,19 @@ for (const htmlFile of ['popup.html', 'options.html', 'onboarding.html']) {
     }
   });
 }
+
+// Upgrade-safety guard: adding a permission disables the extension for every
+// existing store user until they re-approve it. Both manifests must keep the
+// exact permission set that 0.3.1 shipped with (see README "Upgrade safety").
+const FROZEN_PERMISSIONS = ['storage', 'declarativeNetRequest', 'alarms'];
+const FROZEN_HOSTS = ['http://*/*', 'https://*/*'];
+for (const manifestFile of ['manifest.json', 'manifest.firefox.json']) {
+  test(`${manifestFile}: permission set is frozen (no new permissions since 0.3.1)`, () => {
+    const manifest = JSON.parse(fs.readFileSync(path.join(ROOT, manifestFile), 'utf8'));
+    assert.deepStrictEqual([...manifest.permissions].sort(), [...FROZEN_PERMISSIONS].sort());
+    assert.deepStrictEqual([...manifest.host_permissions].sort(), [...FROZEN_HOSTS].sort());
+    assert.strictEqual(manifest.optional_permissions, undefined, 'no optional permissions');
+    assert.strictEqual(manifest.optional_host_permissions, undefined, 'no optional host permissions');
+    assert.strictEqual(manifest.web_accessible_resources, undefined, 'no web_accessible_resources (removed in 0.5.0)');
+  });
+}

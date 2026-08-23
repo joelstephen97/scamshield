@@ -1,5 +1,9 @@
 # Chrome Web Store Listing
 
+**Live listing:** https://chromewebstore.google.com/detail/fojjjofjimbfoddafoampojopijnlihl (item ID `fojjjofjimbfoddafoampojopijnlihl`)
+**Homepage URL:** https://joelstephen97.github.io/scamshield/
+**Support URL:** https://github.com/joelstephen97/scamshield/issues
+
 **Name:** ScamShield — Scam & Phishing Protection
 **Summary (132 chars max):** On-device scam & phishing protection: warns you, spots brand look-alikes, checks messages. Nothing leaves your device.
 **Category:** Productivity (or Privacy & Security)

@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ScamShield — on-device scam &amp; phishing protection</title>
+<meta name="description" content="ScamShield warns you before a scam or phishing page tricks you — entirely on your device. Free, open source, for Chrome, Edge, Brave, Opera and Firefox.">
+<link rel="icon" href="assets/icons/icon32.png">
+<style>
+  :root{color-scheme:light dark;--fg:#1a1a1a;--muted:#666;--accent:#1e7d34;--bg:#fff;--card:#f6f8f6;--line:#e5e7eb}
+  @media (prefers-color-scheme:dark){:root{--fg:#e7e7e7;--muted:#a3a3a3;--accent:#5cc36f;--bg:#111;--card:#1a1d1a;--line:#2a2a2a}}
+  body{font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;max-width:860px;margin:40px auto;padding:0 20px;color:var(--fg);background:var(--bg)}
+  header{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+  header img{width:72px;height:72px}
+  h1{margin:0;color:var(--accent)}
+  .tag{color:var(--muted);margin:2px 0 0}
+  .cta{display:inline-block;background:var(--accent);color:#fff;text-decoration:none;font-weight:600;padding:10px 18px;border-radius:8px;margin:18px 12px 0 0}
+  .cta.secondary{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+  h2{margin-top:36px;font-size:1.25rem}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:12px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+  .card b{display:block;margin-bottom:4px}
+  .shots{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-top:12px}
+  .shots img{width:100%;height:auto;border:1px solid var(--line);border-radius:8px}
+  a{color:var(--accent)}
+  ul.links{columns:2;padding-left:18px}
+  footer{margin-top:40px;color:var(--muted);font-size:14px;border-top:1px solid var(--line);padding-top:14px}
+  code{font-size:.9em}
+</style></head>
+<body>
+<header>
+  <img src="assets/icons/icon128.png" alt="">
+  <div>
+    <h1>ScamShield</h1>
+    <p class="tag">On-device scam &amp; phishing protection for Chrome, Edge, Brave, Opera and Firefox. Free and open source.</p>
+  </div>
+</header>
+
+<p>
+  <a class="cta" href="https://chromewebstore.google.com/detail/fojjjofjimbfoddafoampojopijnlihl">Add to Chrome — it's free</a>
+  <a class="cta secondary" href="https://github.com/joelstephen97/scamshield">View source on GitHub</a>
+</p>
+<p class="tag">Works in any Chromium browser (Chrome, Edge, Brave, Opera, Vivaldi). Firefox build: see the <a href="https://github.com/joelstephen97/scamshield#install">install notes</a>.</p>
+
+<h2>What it does</h2>
+<div class="grid">
+  <div class="card"><b>Warns before you're tricked</b>A clear banner with plain-language reasons on suspicious and dangerous pages, and one click back to safety — <em>Leave this page</em> or <em>Take me to the real site</em>.</div>
+  <div class="card"><b>Reads the page, not just the address</b>An on-device model looks at wording, layout and login forms, and a favicon/logo check spots brand look-alikes (64 brands incl. UAE banks, telcos and government services).</div>
+  <div class="card"><b>Guards the risky moments</b>Fake login forms posting to another site, crypto-wallet drainers, clipboard hijacks ("paste this to verify"), and "your PC is infected, call now" scare pages.</div>
+  <div class="card"><b>Checks a message for you</b>Paste any SMS, WhatsApp or email text into the popup for an instant, fully private verdict.</div>
+  <div class="card"><b>Blocks known scam domains</b>A daily-rebuilt open-source blocklist (OpenPhish + URLhaus, heavily false-positive filtered) from the <a href="https://github.com/joelstephen97/scamshield-feed">scamshield-feed</a>.</div>
+  <div class="card"><b>Private by design</b>Nothing you browse, type or check leaves your device. No accounts, analytics, ads or trackers. About 0.6 MB. <a href="privacy.html">Read the privacy policy</a>.</div>
+</div>
+
+<h2>Screenshots</h2>
+<div class="shots">
+  <img src="store/screenshots/01-popup-dangerous.png" alt="ScamShield popup warning on a fake login page" loading="lazy">
+  <img src="store/screenshots/02-banner-rescue.png" alt="In-page warning banner with a rescue link to the real site" loading="lazy">
+  <img src="store/screenshots/03-message-checker.png" alt="Scam message checker showing a verdict on a pasted SMS" loading="lazy">
+  <img src="store/screenshots/04-settings-dark.png" alt="ScamShield settings page in dark mode" loading="lazy">
+</div>
+
+<h2>Links</h2>
+<ul class="links">
+  <li><a href="https://chromewebstore.google.com/detail/fojjjofjimbfoddafoampojopijnlihl">Chrome Web Store listing</a></li>
+  <li><a href="privacy.html">Privacy policy</a></li>
+  <li><a href="https://github.com/joelstephen97/scamshield/blob/main/CHANGELOG.md">Changelog / what's new</a></li>
+  <li><a href="https://github.com/joelstephen97/scamshield">Source code (GPL-3.0-or-later)</a></li>
+  <li><a href="https://github.com/joelstephen97/scamshield-feed">Threat feed (blocklist)</a></li>
+  <li><a href="https://github.com/joelstephen97/scamshield/issues/new">Report a problem or false positive</a></li>
+  <li><a href="https://github.com/joelstephen97/scamshield/blob/main/SECURITY.md">Security policy</a></li>
+  <li><a href="https://github.com/sponsors/joelstephen97">Support the project</a> · <a href="https://www.paypal.me/joelstephen1">PayPal</a></li>
+</ul>
+
+<footer>Made by <a href="https://github.com/joelstephen97">Joel Stephen</a> · <a href="mailto:jojostev@gmail.com">jojostev@gmail.com</a> · Brand names and icons referenced by ScamShield belong to their owners and are used only to protect users from impersonation.</footer>
+</body></html>
