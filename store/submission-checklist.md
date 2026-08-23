@@ -13,7 +13,7 @@ Listing copy lives in `chrome-listing.md` / `firefox-listing.md`; permissions + 
 - [ ] **Permissions unchanged** (`storage`, `declarativeNetRequest`, `alarms`, http/https hosts) — `tests/unit/build_manifest.test.js` enforces this. A new permission would disable the extension for existing users.
 - [ ] UI changed? `npm run screenshots && npm run promo`, commit the PNGs.
 - [ ] Network behaviour changed? Update `privacy-policy.md` + `/privacy.html` (date!), `permissions-justification.md`, and the CWS data-use answers below.
-- [ ] `git tag vX.Y.Z && git push origin refs/tags/vX.Y.Z`.
+- [ ] `git tag vX.Y.Z && git push origin refs/tags/vX.Y.Z`, then `gh release create vX.Y.Z dist/scamshield-chrome.zip dist/scamshield-firefox.zip --title "ScamShield X.Y.Z" --notes-file <notes>` (v0.5.0: https://github.com/joelstephen97/scamshield/releases/tag/v0.5.0).
 
 ## Chrome Web Store (dashboard → item → Package / Store listing / Privacy)
 - [ ] **Package:** upload `dist/scamshield-chrome.zip` (replaces the current draft; 0.4.0 was never uploaded and is superseded).

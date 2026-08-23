@@ -14,7 +14,7 @@
   <a href="https://chromewebstore.google.com/detail/fojjjofjimbfoddafoampojopijnlihl"><img alt="Chrome Web Store users" src="https://img.shields.io/chrome-web-store/users/fojjjofjimbfoddafoampojopijnlihl?color=1e7d34"></a>
   <a href="https://chromewebstore.google.com/detail/fojjjofjimbfoddafoampojopijnlihl"><img alt="Chrome Web Store rating" src="https://img.shields.io/chrome-web-store/rating/fojjjofjimbfoddafoampojopijnlihl?color=1e7d34"></a>
   <a href="LICENSE"><img alt="License: GPL-3.0-or-later" src="https://img.shields.io/badge/license-GPL--3.0--or--later-blue"></a>
-  <a href="CHANGELOG.md"><img alt="Latest release" src="https://img.shields.io/github/v/tag/joelstephen97/scamshield?label=release&sort=semver"></a>
+  <a href="https://github.com/joelstephen97/scamshield/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/joelstephen97/scamshield?label=release&sort=semver"></a>
 </p>
 
 <p align="center">
@@ -54,7 +54,7 @@
 | Browser | How |
 |---|---|
 | **Chrome, Edge, Brave, Opera, Vivaldi** (any Chromium browser) | Install from the **[Chrome Web Store](https://chromewebstore.google.com/detail/fojjjofjimbfoddafoampojopijnlihl)** (extension ID `fojjjofjimbfoddafoampojopijnlihl`). |
-| **Firefox 128+** | The Firefox build is produced by `npm run build` (`dist/scamshield-firefox.zip`) and is being submitted to [addons.mozilla.org](https://addons.mozilla.org/). Until the AMO listing is live, load it temporarily via `about:debugging#/runtime/this-firefox → Load Temporary Add-on → manifest.firefox.json` (temporary add-ons are removed on restart). |
+| **Firefox 128+** | Download `scamshield-firefox.zip` from the **[latest GitHub Release](https://github.com/joelstephen97/scamshield/releases/latest)**, unzip it, and load it via `about:debugging#/runtime/this-firefox → Load Temporary Add-on → manifest.json` (temporary add-ons are removed on restart). An [addons.mozilla.org](https://addons.mozilla.org/) listing is pending; this row will link to it once live. |
 | **From source** | `chrome://extensions → Developer mode → Load unpacked → select this folder`. See [Development](#development). |
 
 Current release: **0.5.0** (submitted to the Chrome Web Store and awaiting review; the store serves 0.3.1 until it clears) — see the [changelog](CHANGELOG.md) for everything that changed since the 0.3.1 store version. The package is about **0.6 MB unpacked / ~170 KB zipped**.
@@ -248,7 +248,7 @@ Known limits (honest): the page model is data-limited (few live positives on any
 1. Bump the version in **three** places: `manifest.json`, `manifest.firefox.json`, `package.json`; update `CHANGELOG.md` and, if user-visible, the `whatsNewSeen` version in `popup.js`.
 2. `npm test && npm run build` — the build asserts the zip stays small (≤ 2.5 MB) and that the staged manifest matches the source.
 3. Regenerate store assets if the UI changed: `npm run screenshots && npm run promo`.
-4. Commit, tag (`git tag vX.Y.Z && git push origin refs/tags/vX.Y.Z`).
+4. Commit, tag (`git tag vX.Y.Z && git push origin refs/tags/vX.Y.Z`), then publish a GitHub Release with both zips attached: `gh release create vX.Y.Z dist/scamshield-chrome.zip dist/scamshield-firefox.zip --title "ScamShield X.Y.Z" --notes-file <notes>` (the Firefox install instructions link to the latest release).
 5. Upload `dist/scamshield-chrome.zip` to the [Chrome Web Store developer dashboard](https://chrome.google.com/webstore/devconsole) and `dist/scamshield-firefox.zip` to AMO, using the copy in [`store/chrome-listing.md`](store/chrome-listing.md) / [`store/firefox-listing.md`](store/firefox-listing.md) and the checklist in [`store/submission-checklist.md`](store/submission-checklist.md).
 
 ## Upgrade safety
