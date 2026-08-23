@@ -57,7 +57,7 @@
 | **Firefox 128+** | The Firefox build is produced by `npm run build` (`dist/scamshield-firefox.zip`) and is being submitted to [addons.mozilla.org](https://addons.mozilla.org/). Until the AMO listing is live, load it temporarily via `about:debugging#/runtime/this-firefox → Load Temporary Add-on → manifest.firefox.json` (temporary add-ons are removed on restart). |
 | **From source** | `chrome://extensions → Developer mode → Load unpacked → select this folder`. See [Development](#development). |
 
-Current release: **0.5.0** — see the [changelog](CHANGELOG.md) for everything that changed since the 0.3.1 store version. The package is about **0.6 MB unpacked / ~170 KB zipped**.
+Current release: **0.5.0** (submitted to the Chrome Web Store and awaiting review; the store serves 0.3.1 until it clears) — see the [changelog](CHANGELOG.md) for everything that changed since the 0.3.1 store version. The package is about **0.6 MB unpacked / ~170 KB zipped**.
 
 ## What it does
 
