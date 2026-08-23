@@ -33,4 +33,4 @@ Reviewer note to include with the draft:
 
 ## Post-publish
 - [ ] Tag the release in git: `git tag v0.1.0 && git push --tags`.
-- [ ] Save store URLs in README.
+- [x] Save store URLs in README (Chrome Web Store: https://chromewebstore.google.com/detail/fojjjofjimbfoddafoampojopijnlihl; AMO: pending).
