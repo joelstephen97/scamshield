@@ -2,6 +2,77 @@
 
 All notable changes to ScamShield. Versions are git tags (`vX.Y.Z`); the version on the [Chrome Web Store](https://chromewebstore.google.com/detail/fojjjofjimbfoddafoampojopijnlihl) may lag a tag by a few days while Google reviews it. Privacy-relevant changes are also reflected in the [privacy policy](https://joelstephen97.github.io/scamshield/privacy.html).
 
+## 0.6.0 — 2026-08-25
+
+The "real problems only" release — every feature is driven by validated
+real-world scam and privacy data, and none of it adds a permission. Nothing
+still leaves your device by default.
+
+### New protection
+- **ClickFix / fake-CAPTCHA blocker** — the fastest-growing malware delivery
+  trick of 2025 (fake "verify you're human" pages that get you to paste a
+  command into Windows Run). ScamShield now overwrites the malicious clipboard
+  payload and blocks the page full-screen.
+- **Fake browser-update blocker** — a browser "update" prompt rendered *by a
+  web page* is always fake. Blocked full-screen when the download doesn't go to
+  the real browser vendor.
+- **Tech-support scare pages** — a decisive new signal (a phone number inside a
+  fake security alert that name-drops Microsoft/Apple) plus alarm-audio
+  detection, and the escape button now dismantles the page's screen-lock and
+  Back-button traps before it leaves.
+- **Delivery-fee phishing** — fake DHL/FedEx/Aramex/Royal Mail/Evri/Emirates
+  Post/DPD "pay a small redelivery fee" card pages are blocked.
+- **Wallet drainer upgrades** — EIP-6963 multi-wallet support, EIP-7702
+  account-delegation detection, and clearer plain-language explanations of what
+  a "Permit" signature actually authorises.
+- **IDN homograph detection** — domains that spell a brand with look-alike
+  foreign characters (e.g. Cyrillic "аррӏе") are now caught and named.
+
+### New privacy tools (all on-device)
+- **Leaky-form warning** — tells you when a site sends the email or phone you
+  typed to a tracker *before* you press submit (plain or hashed).
+- **Fingerprinting detection** — names the script building a device fingerprint
+  to track you across sites.
+- **Notification-trap warning** — flags the "click Allow to continue" pop-up
+  spam trick.
+- **Fake-shop checks** — fake countdowns that reset, fake "only 2 left"
+  pressure, hotlinked trust badges, off-platform payment (Zelle/wire/crypto)
+  and missing contact details, surfaced in a popup shopping card.
+- **Sponsored-result check** — on Google/Bing/DuckDuckGo, flags a sponsored
+  result whose ad goes somewhere other than the site it shows.
+
+### Warnings that actually work
+- A new **full-screen interstitial tier** for the near-certain scams, with an
+  enforced few-second delay before "Continue anyway" and a real vs. fake domain
+  comparison — reserved for near-zero-false-positive detections so it never
+  cries wolf.
+- **Site-engagement gating** quietly suppresses low-confidence warnings on
+  sites you visit often (fewer false alarms).
+- **Strict mode** — one toggle that blocks even "suspicious" pages full-screen
+  with simpler wording, for helping a less-confident relative stay safe.
+
+### Control, privacy & reach
+- Settings reorganised into clear categories, with every new feature
+  individually toggleable.
+- **20-language support** (English, Chinese, Hindi, Spanish, Arabic, French,
+  Bengali, Portuguese, Russian, Urdu, Indonesian, German, Japanese, Marathi,
+  Telugu, Turkish, Tamil, Vietnamese, Korean, Italian). Non-English
+  translations are AI-generated and pending native review.
+- **Settings export/import** and optional **cross-device sync** (your browser's
+  own sync; still no ScamShield account or server).
+- A **"what leaves your device" receipt** in Settings listing the only three
+  requests ScamShield can make, so you can verify zero-telemetry yourself.
+
+### Platform
+- Now scans inside **iframes** (`all_frames`) — iframe-hosted phishing forms
+  were invisible before.
+- Blocklist capacity raised from 5,000 to **30,000** rules on Chrome (reads the
+  runtime limit; Firefox stays at its 5,000 cap).
+- ES-module service worker; `minimum_chrome_version` 121.
+
+**No new permissions.** Still `storage`, `declarativeNetRequest`, `alarms` and
+http/https access, exactly as 0.3.1.
+
 ## 0.5.0 — 2026-08-22
 
 ### Since 0.3.1 (what users updating from the store version get)

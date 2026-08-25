@@ -91,7 +91,7 @@ async function init() {
   $('support').addEventListener('click', (e) => { e.preventDefault(); api.tabs.create({ url: 'https://github.com/sponsors/joelstephen97' }); });
   $('viewall').addEventListener('click', (e) => { e.preventDefault(); api.runtime.openOptionsPage(); });
   $('tile-all').querySelector('b').textContent = String(settings.threatsBlocked || 0);
-  if (settings.whatsNewSeen !== '0.5.0') { $('whatsnew').hidden = false; $('whatsnewlink').addEventListener('click', (e) => { e.preventDefault(); api.tabs.create({ url: 'https://github.com/joelstephen97/scamshield/blob/main/CHANGELOG.md' }); }); $('whatsnewx').addEventListener('click', async () => { $('whatsnew').hidden = true; await send('setSettings', { patch: { whatsNewSeen: '0.5.0' } }); }); }
+  if (settings.whatsNewSeen !== '0.6.0') { $('whatsnew').hidden = false; $('whatsnewlink').addEventListener('click', (e) => { e.preventDefault(); api.tabs.create({ url: 'https://github.com/joelstephen97/scamshield/blob/main/CHANGELOG.md' }); }); $('whatsnewx').addEventListener('click', async () => { $('whatsnew').hidden = true; await send('setSettings', { patch: { whatsNewSeen: '0.6.0' } }); }); }
 
   tab = await currentTab();
   const http = tab && tab.url && /^https?:/.test(tab.url);

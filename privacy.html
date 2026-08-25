@@ -24,7 +24,9 @@
 <body>
 <nav><a href="index.html">ScamShield</a> · <a href="https://chromewebstore.google.com/detail/fojjjofjimbfoddafoampojopijnlihl">Chrome Web Store</a> · <a href="https://github.com/joelstephen97/scamshield">Source</a> · <a href="https://github.com/joelstephen97/scamshield/blob/main/CHANGELOG.md">Changelog</a></nav>
 <h1>ScamShield Privacy Policy</h1>
-<p class="updated">Last updated: 2026-08-23 · applies to ScamShield 0.5.0 and later (Chrome Web Store listing <code>fojjjofjimbfoddafoampojopijnlihl</code>, the Firefox build, and source builds from <a href="https://github.com/joelstephen97/scamshield">github.com/joelstephen97/scamshield</a>). Source of this page: <a href="https://github.com/joelstephen97/scamshield/blob/main/store/privacy-policy.md">store/privacy-policy.md</a>.</p>
+<p class="updated">Last updated: 2026-08-25 · applies to ScamShield 0.6.0 and later (Chrome Web Store listing <code>fojjjofjimbfoddafoampojopijnlihl</code>, the Firefox build, and source builds from <a href="https://github.com/joelstephen97/scamshield">github.com/joelstephen97/scamshield</a>). Source of this page: <a href="https://github.com/joelstephen97/scamshield/blob/main/store/privacy-policy.md">store/privacy-policy.md</a>.</p>
+
+<p><strong>What changed in 0.6.0:</strong> several new on-device checks (fake-CAPTCHA/ClickFix, fake browser-update, leaky-form and fingerprinting detection, fake-shop and sponsored-result checks) and 20-language support. <strong>None of them add a network request or a permission</strong> — they all run inside the extension. Community reporting is still off by default, and the payload it sends when you opt in is unchanged. New items are stored <strong>only on your device</strong> (see section 2), plus an optional settings sync you can turn on.</p>
 
 <p>ScamShield analyses web pages <strong>on your device</strong> to warn you about scams and phishing. It was designed so that your browsing stays private: by default it collects nothing, has no accounts, no analytics, no advertising and no trackers.</p>
 
@@ -49,8 +51,11 @@
 <li>protection history and stats: the last 200 events as <em>hostname + event type + time</em> — never full addresses, page content or anything you typed;</li>
 <li>a per-site marker so that an automatic report (if you opted in) is sent at most once per site per day;</li>
 <li>the queue of reports waiting to be sent (only while reporting is on; discarded the moment you turn it off);</li>
-<li>short-lived per-tab state (current verdict, cached icon hashes) in <em>session</em> storage, which the browser clears when it closes.</li>
+<li>a small count of how often you visit each site (registrable domain only), used to quieten low-confidence warnings on sites you use a lot — capped, pruned, and never transmitted;</li>
+<li>a per-site record of a shop countdown timer's starting value, used only to notice a "sale ends" timer that fakes urgency by resetting on every visit;</li>
+<li>short-lived per-tab state (current verdict, any privacy findings, cached icon hashes) in <em>session</em> storage, which the browser clears when it closes.</li>
 </ul>
+<p>If you turn on <strong>Sync across my devices</strong> (off by default, in Settings → About), your settings and trusted-sites list — never your history, stats or reports — are stored in your browser's own account sync so they match across your signed-in browsers. That data travels through your browser vendor's sync (e.g. Google or Mozilla), not through any ScamShield server; ScamShield still has no account and no server that stores your data.</p>
 
 <h2>3. Threat-list download</h2>
 <p>ScamShield periodically <strong>downloads</strong> an updated blocklist of known scam domains — a static JSON file, by default from ScamShield's public open-source feed at <code>https://raw.githubusercontent.com/joelstephen97/scamshield-feed/main/blocklist.json</code> (built daily from the OpenPhish and URLhaus community feeds; source: <a href="https://github.com/joelstephen97/scamshield-feed" rel="noopener">github.com/joelstephen97/scamshield-feed</a>). It is the same file for every user, fetched on install and then every 12 hours. Nothing about you or your browsing is sent with the request beyond what any file download implies (your IP address reaching GitHub's servers; see <a href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement" rel="noopener">GitHub's privacy statement</a>). In <em>Settings</em> you can point the URL at your own feed or clear it to disable downloads entirely. The download never uploads anything.</p>

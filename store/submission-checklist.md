@@ -23,7 +23,7 @@ Listing copy lives in `chrome-listing.md` / `firefox-listing.md`; permissions + 
 - [ ] **Privacy tab — permission justifications:** paste from `permissions-justification.md` (storage / declarativeNetRequest / alarms / host permissions / content scripts). **Remote code:** No.
 - [ ] **Privacy tab — data usage:** tick only **Website content** and **Web history**, both described as "only when the user opts in to community reporting (off by default); hostname + derived numeric features, never URLs or page text". Certify all three statements (not sold, not used for unrelated purposes, not used for creditworthiness).
 - [ ] **Privacy policy URL:** `https://joelstephen97.github.io/scamshield/privacy.html`.
-- [ ] **Reviewer notes (0.5.0):** "No new permissions since 0.3.1. The ONNX runtime, its WebAssembly binary and all `web_accessible_resources` were removed; both models now run as plain JS bundled in the package. Community reporting is off by default and sends only hostnames + numeric features (see privacy policy §5). Source: github.com/joelstephen97/scamshield."
+- [ ] **Reviewer notes (0.6.0):** "No new permissions since 0.3.1 (still storage, declarativeNetRequest, alarms + http/https). 0.6.0 adds on-device-only detectors (ClickFix/fake-CAPTCHA, fake browser-update, leaky-form and fingerprinting DETECTION, fake-shop and sponsored-result checks) — none add a network request. Content scripts now use all_frames to scan iframe-hosted phishing forms. The Chrome background is an ES-module service worker (background/sw.js). Added chrome.i18n localization (20 locales) and an opt-in chrome.storage.sync for user settings (no new permission). Community reporting is still off by default and its payload is unchanged (hostnames + numeric features, see privacy policy §5). Source: github.com/joelstephen97/scamshield."
 - [ ] Submit for review. Typical turnaround: 1–3 days; updates usually faster than first review.
 
 ## Firefox AMO (addons.mozilla.org/developers)
@@ -43,3 +43,7 @@ Listing copy lives in `chrome-listing.md` / `firefox-listing.md`; permissions + 
 - **0.3.1** — published (current store version before 0.5.0).
 - **0.4.0** — built and tagged, never uploaded; superseded by 0.5.0.
 - **0.5.0** — page analysis, icon look-alike detection, ORT removed (14 MB → ~0.6 MB), redesigned UI, opt-in reporting relay. No new permissions.
+- **0.6.0** — ClickFix/fake-update/tech-scam/delivery-fee guards, privacy pack (leaky-form, fingerprinting, notification-lure), fake-shop + sponsored-result checks, tiered interstitial warnings + strict mode, all_frames iframe scanning, ES-module SW, 30k dynamic-rule budget, settings export/import + opt-in sync, 20-language i18n. No new permissions. Zip ~237 KB.
+
+### 0.6.0 data-use note
+Nothing changed on the CWS data-use form: still tick only **Website content** and **Web history**, both described as opt-in community reporting only. The new detectors are on-device and send nothing. i18n and settings sync add no data collection (sync uses the browser's own account sync). Update the localized store listings (ar, es, hi, fr, pt_BR at minimum) from the translated `_locales`, noting they are AI-generated pending native review.

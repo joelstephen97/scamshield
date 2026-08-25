@@ -259,6 +259,16 @@ Active users are on the store version, so every release must be a drop-in upgrad
 - **Storage is additive** — new settings get defaults on update; existing settings, trusted sites and history are never rewritten. `tests/e2e/upgrade.spec.js` boots the extension on a 0.3.1 storage fixture and checks nothing breaks.
 - Old placeholder URLs (feed `''`, relay placeholder) are migrated to the current defaults; a user-customised URL is left alone.
 
+## Our promises
+
+Security extensions live or die on trust, and several well-known ones lost it — some sold browsing history, some quietly changed hands and turned malicious after an update. ScamShield is built so you don't have to take that on faith:
+
+- **No telemetry, verifiable by you.** In normal use ScamShield makes at most three network requests, all listed in Settings → About: the public threat-list download, opt-in community reports (off by default), and same-page favicon fetches for brand matching. Open your browser's DevTools → Network tab and check — you'll see nothing else.
+- **Permissions are frozen.** `storage`, `declarativeNetRequest`, `alarms` and http/https access — the same set since 0.3.1. A unit test fails the build if that ever changes, and a new permission would disable the extension for existing users until they re-approve it.
+- **Everything is auditable.** The whole extension is open source (GPL-3.0-or-later) and releases are tagged and published with the exact zips; you can diff any version against the last.
+- **It will not be sold or quietly re-owned.** The extension will not be transferred to a new owner without a clear, public heads-up in this repository and the changelog. No ads, no data resale, no account, ever.
+- **On-device by default.** New detection features run inside the extension; nothing about your browsing leaves your device unless you explicitly opt in to community reporting.
+
 ## Contributing
 
 Bug reports, false positives and missed scams are the most useful contributions — the easiest way is the in-extension **Report a mistake** button (opens a pre-filled issue when reporting is off) or [open an issue](https://github.com/joelstephen97/scamshield/issues/new). Pull requests welcome; please read [CONTRIBUTING.md](CONTRIBUTING.md) first (tests, the no-new-permissions rule, how to add a brand or a safe domain).
