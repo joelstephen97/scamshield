@@ -19,6 +19,35 @@
   const SHIELD = (inner) => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l8 3v6c0 5.2-3.4 9.6-8 11-4.6-1.4-8-5.8-8-11V5l8-3z"/>' + inner + '</svg>';
   const ICON = { dangerous: SHIELD('<path d="M9.5 9.5l5 5M14.5 9.5l-5 5"/>'), suspicious: SHIELD('<path d="M12 8v5"/><path d="M12 16h.01"/>') };
   function iconSpan(kind) { const s = el('span', 'ss-ico'); s.innerHTML = ICON[kind]; return s; }
+
+  // Evidence-backed friction (0.6.0): a short enforced delay before the risky
+  // choice becomes clickable measurably improves warning adherence. Used on
+  // every "proceed anyway" style button.
+  function armDelayed(btn, seconds) {
+    const label = btn.textContent;
+    let left = seconds == null ? 3 : seconds;
+    btn.disabled = true;
+    btn.textContent = label + ' (' + left + ')';
+    const tick = setInterval(() => {
+      left -= 1;
+      if (left <= 0) { clearInterval(tick); btn.disabled = false; btn.textContent = label; }
+      else btn.textContent = label + ' (' + left + ')';
+    }, 1000);
+    return () => clearInterval(tick);
+  }
+
+  // Side-by-side domain comparison for impersonation warnings — research says
+  // showing the real vs. fake domain is what actually changes behaviour.
+  function compareRow(brandLabel, brandUrl) {
+    let realHost = '';
+    try { realHost = new URL(brandUrl).hostname.replace(/^www\./, ''); } catch (_) {}
+    if (!realHost) return null;
+    const row = el('div', 'ss-compare');
+    const fake = el('span', 'ss-cmp-fake'); fake.append(el('small', null, 'This site'), el('b', null, location.hostname));
+    const real = el('span', 'ss-cmp-real'); real.append(el('small', null, 'Real ' + brandLabel), el('b', null, realHost));
+    row.append(fake, el('span', 'ss-cmp-vs', '≠'), real);
+    return row;
+  }
   function showBanner(verdict, onAllow, extra) {
     if (document.querySelector('.' + NS + '-banner')) return;
     const x = extra || {};
@@ -29,6 +58,10 @@
     const text = el('div', 'ss-text');
     const brand = verdict.brandLabel ? ' — looks like ' + verdict.brandLabel + ", but isn't" : '';
     text.append(el('b', null, (danger ? 'Dangerous page' : 'Suspicious page') + brand), el('span', null, verdict.reasons[0] || (danger ? "Don't enter passwords or card details here." : 'Take care before typing anything here.')));
+    if (verdict.brandLabel && verdict.brandUrl) {
+      const cmp = compareRow(verdict.brandLabel, verdict.brandUrl);
+      if (cmp) text.appendChild(cmp);
+    }
     const acts = el('div', 'ss-acts');
     if (danger) { const leave = el('button', 'ss-leave', 'Leave this page'); leave.addEventListener('click', () => { x.onLeave ? x.onLeave() : history.back(); }); acts.appendChild(leave); }
     if (verdict.brandUrl) { const rescue = el('button', 'ss-rescue', 'Take me to the real ' + (verdict.brandLabel || 'site')); rescue.addEventListener('click', () => { location.href = verdict.brandUrl; }); acts.appendChild(rescue); }
@@ -39,6 +72,61 @@
     acts.append(trust, report, close);
     bar.append(ico, text, acts);
     (document.body || document.documentElement).appendChild(bar);
+  }
+
+  // Full-page interstitial (0.6.0) — the interaction-blocking tier, reserved
+  // for near-zero-false-positive detections (decisive flags and the guard
+  // detectors). Research: active warnings are heeded by ~79% vs ~20-30% for
+  // passive banners, but false positives burn trust — so this only ever fires
+  // on signals with an essentially zero legitimate base rate. The headline
+  // varies mildly between showings (polymorphism resists habituation) and the
+  // escape hatch is delayed a few seconds.
+  function dangerInterstitial(verdict, x) {
+    if (document.querySelector('.' + NS + '-interstitial')) return;
+    x = x || {};
+    const HEADS = [
+      'Stop — this page is trying to scam you',
+      'Hold on — this looks like a scam page',
+      "Don't go further — scam warning"
+    ];
+    const ov = el('div', NS + '-overlay ' + NS + '-interstitial');
+    ov.setAttribute('role', 'alertdialog');
+    ov.setAttribute('aria-modal', 'true');
+    ov.setAttribute('aria-label', 'Scam warning');
+    const card = el('div', 'ss-card');
+    const h3 = el('h3');
+    h3.append(iconSpan('dangerous'), el('span', null, HEADS[Math.floor(Math.random() * HEADS.length)]));
+    card.append(h3);
+    const why = el('p', null, verdict.reasons[0] || 'This page matches the pattern of a known scam.');
+    card.append(why);
+    if (verdict.brandLabel && verdict.brandUrl) {
+      const cmp = compareRow(verdict.brandLabel, verdict.brandUrl);
+      if (cmp) card.appendChild(cmp);
+    }
+    const ul = el('ul', 'ss-evidence');
+    for (const r of (verdict.reasons || []).slice(1, 4)) { const li = el('li'); li.append(el('span', 'ss-chip', 'Why'), el('span', null, r)); ul.appendChild(li); }
+    if (ul.children.length) card.appendChild(ul);
+    card.append(el('p', 'ss-sub', 'Nothing you typed has been sent yet. Leaving now is safe.'));
+    const actions = el('div', 'ss-actions');
+    const leave = el('button', 'ss-primary', 'Leave this page');
+    leave.addEventListener('click', () => { x.onLeave ? x.onLeave() : history.back(); });
+    actions.append(leave);
+    if (verdict.brandUrl) {
+      const rescue = el('button', 'ss-rescue-ghost', 'Go to the real ' + (verdict.brandLabel || 'site'));
+      rescue.addEventListener('click', () => { location.href = verdict.brandUrl; });
+      actions.append(rescue);
+    }
+    const stay = el('button', 'ss-danger-ghost', 'Continue anyway');
+    armDelayed(stay, 3);
+    stay.addEventListener('click', () => { ov.remove(); if (x.onDismiss) x.onDismiss(); });
+    actions.append(stay);
+    const rep = el('button', 'ss-report', 'Report a mistake');
+    rep.addEventListener('click', () => { rep.textContent = 'Thanks'; rep.disabled = true; x.onReport && x.onReport(); });
+    actions.prepend(rep);
+    card.append(actions);
+    ov.append(card);
+    document.documentElement.appendChild(ov);
+    leave.focus();
   }
 
   // One-time-ever, shown only right after a dangerous page was blocked.
@@ -71,9 +159,13 @@
         ov.setAttribute('aria-modal', 'true');
         ov.setAttribute('aria-label', 'Possible phishing warning');
         const card = el('div', 'ss-card');
+        let dest = '';
+        try { dest = new URL(form.getAttribute('action') || location.href, location.href).hostname; } catch (_) {}
         card.append(
           el('h3', null, 'Stop — possible phishing'),
-          el('p', null, 'This form sends your password to a different website than the one you are visiting. This is a common way scammers steal logins.')
+          el('p', null, dest
+            ? 'This form sends your password to ' + dest + ', not to ' + location.hostname + '. Sending a password to a different website is how scammers steal logins.'
+            : 'This form sends your password to a different website than the one you are visiting. This is a common way scammers steal logins.')
         );
         const ul = el('ul', 'ss-evidence');
         for (const r of (reasons || []).slice(0, 3)) { const li = el('li'); li.append(el('span', 'ss-chip', 'Page'), el('span', null, r)); ul.appendChild(li); }
@@ -84,6 +176,7 @@
         const onKey = (e) => { if (e.key === 'Escape') { e.preventDefault(); close(); } };
         back.addEventListener('click', close);
         const go = el('button', 'ss-danger-ghost', 'Submit anyway');
+        armDelayed(go, 3);
         // form.submit() here runs the isolated world's native (unhooked) method,
         // so it really submits without re-triggering this guard.
         go.addEventListener('click', () => { document.removeEventListener('keydown', onKey, true); ov.remove(); form.submit(); });
@@ -135,6 +228,7 @@
     const actions = el('div', 'ss-actions');
     const cancel = el('button', 'ss-primary', 'Cancel (recommended)');
     const proceed = el('button', 'ss-danger-ghost', 'Proceed anyway');
+    armDelayed(proceed, 3);
     const done = (allow) => { document.removeEventListener('keydown', onKey, true); ov.remove(); onDecision(allow); };
     const onKey = (e) => { if (e.key === 'Escape') { e.preventDefault(); done(false); } };
     cancel.addEventListener('click', () => done(false));
@@ -177,5 +271,5 @@
   }
 
   root.ScamShield = root.ScamShield || {};
-  root.ScamShield.actions = { showBanner, guardForms, hideScamBlocks, clearAll, walletConfirmOverlay, clipboardToast, techScamEscapeOverlay, supportToast };
+  root.ScamShield.actions = { showBanner, guardForms, hideScamBlocks, clearAll, walletConfirmOverlay, clipboardToast, techScamEscapeOverlay, supportToast, dangerInterstitial, armDelayed };
 })(typeof globalThis !== 'undefined' ? globalThis : self);

@@ -18,6 +18,14 @@
     if (get('has_ip_host')) { score += 0.45; reasons.push('Uses a raw IP address instead of a domain name.'); }
     if (get('has_at_symbol')) { score += 0.35; reasons.push('URL contains an "@" that can hide the real destination.'); }
     if (get('has_punycode')) { score += 0.30; reasons.push('Domain uses punycode, often used to mimic real brands.'); }
+    // IDN homograph of a known brand (0.6.0): the domain, decoded and mapped
+    // through the Unicode confusables skeleton, reads as a brand name. No
+    // legitimate site writes a brand with look-alike foreign characters, so
+    // together with the punycode rule above this reaches "dangerous" (0.80).
+    if (get('has_punycode') && F.idnHomographBrand) {
+      const hb = F.idnHomographBrand(F.parseHost(urlString).host);
+      if (hb) { score += 0.50; reasons.push('This domain imitates "' + hb + '" using look-alike foreign characters.'); }
+    }
     if (get('brand_lookalike')) { score += 0.45; reasons.push('Domain looks like it impersonates a well-known brand.'); }
     if (get('suspicious_tld')) { score += 0.20; reasons.push('Domain uses a top-level domain frequently abused by scams.'); }
     if (!get('is_https')) { score += 0.15; reasons.push('Connection is not secure (no HTTPS).'); }

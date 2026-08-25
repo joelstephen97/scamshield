@@ -4,7 +4,7 @@
 // a classic-worker context (tests driving this file directly) falls back to
 // importScripts here. In the module SW `importScripts` is undefined — the
 // ReferenceError lands in the catch and the imports from sw.js already won.
-try { importScripts('../engine/constants.js', '../engine/trust.js', '../engine/features.js', '../engine/image_hash.js', '../engine/brand_icons.js', '../engine/report_payload.js'); } catch (_) { /* deps already loaded by sw.js (Chrome) or the manifest (Firefox) */ }
+try { importScripts('../engine/constants.js', '../engine/trust.js', '../engine/features.js', '../engine/image_hash.js', '../engine/brand_icons.js', '../engine/report_payload.js', '../engine/engagement.js'); } catch (_) { /* deps already loaded by sw.js (Chrome) or the manifest (Firefox) */ }
 const api = globalThis.browser || globalThis.chrome;
 
 // Official ScamShield feed: rebuilt daily by GitHub Actions from OpenPhish +
@@ -56,6 +56,25 @@ async function recordEvent(evt) {
 }
 function hostOfSender(sender) {
   try { return new URL(sender.tab && sender.tab.url).hostname; } catch (_) { return ''; }
+}
+
+// Site-engagement counter (0.6.0): clean top-frame visits only, so a flagged
+// page can never build enough engagement to mute its own warnings. Local-only,
+// capped + pruned in engine/engagement.js, never transmitted.
+let engagementChain = Promise.resolve();
+function recordEngagement(tabUrl) {
+  engagementChain = engagementChain.then(async () => {
+    try {
+      const u = new URL(tabUrl);
+      if (!/^https?:$/.test(u.protocol)) return;
+      const SS = globalThis.ScamShield;
+      const reg = SS.registrableDomain(u.hostname);
+      const cur = await api.storage.local.get('engagement');
+      const next = SS.engagement.recordVisit(cur.engagement || {}, reg, Date.now());
+      await api.storage.local.set({ engagement: next });
+    } catch (_) { /* best-effort */ }
+  }).catch(() => {});
+  return engagementChain;
 }
 
 // Icon hashing for visual brand matching. Fetches the page's own icons only.
@@ -456,8 +475,16 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
           if (incomingLevel && incomingLevel !== 'safe') {
             recordEvent({ host: hostOfSender(sender), kind: 'page', level: incomingLevel });
           }
+          // Engagement only accrues from clean top-frame visits.
+          if (!fromSubframe && incomingLevel === 'safe') recordEngagement(tabUrl);
         }
         sendResponse({ ok: true }); break;
+      }
+      case 'getEngagement': {
+        const cur = await api.storage.local.get('engagement');
+        const SS = globalThis.ScamShield;
+        sendResponse({ engaged: SS.engagement.isEngaged(cur.engagement || {}, msg.domain, Date.now()) });
+        break;
       }
       case 'getVerdict': {
         let v = lastVerdict.get(msg.tabId);

@@ -227,7 +227,17 @@
         }
       } catch (_) { /* page analysis is best-effort */ }
     }
-    const verdict = SS.fuse({ modelProb, urlRules, domRules, contentProb, iconMatch });
+    let verdict = SS.fuse({ modelProb, urlRules, domRules, contentProb, iconMatch });
+    // Engagement gating (0.6.0, mirrors Chrome's lookalike personalisation):
+    // a flag-less "suspicious" — pure heuristic/model probability, no decisive
+    // signal — is suppressed on sites this user visits often. Dangerous
+    // verdicts and decisive flags are never gated.
+    if (verdict.level === 'suspicious' && !(verdict.flags || []).length) {
+      const eng = await send('getEngagement', { domain: pageDomain });
+      if (eng && eng.engaged) {
+        verdict = Object.assign({}, verdict, { level: 'safe', reasons: [], suppressed: 'engagement' });
+      }
+    }
     try { window.__ssLastVerdict = verdict; } catch (_) {}
     let report = null;
     try {
@@ -246,10 +256,20 @@
         verdict.brandUrl = 'https://' + SS.BRAND_DOMAINS[verdict.brand][0] + '/';
         verdict.brandLabel = SS.brandDisplayName ? SS.brandDisplayName(verdict.brand) : verdict.brand;
       }
-      SS.actions.showBanner(verdict, async () => {
-        await send('allowSite', { domain: pageDomain });
-        SS.actions.clearAll();
-      }, { onLeave: () => send('leaveTab'), onReport: () => send('userReport', { label: 'false_positive' }) });
+      // Interstitial tier (0.6.0): decisive, near-zero-FP flags block the
+      // interaction outright; everything else keeps the banner. The
+      // credential-form case stays a banner because its ACTIVE moment is the
+      // submit guard — the interstitial is for scams with no submit moment.
+      const DECISIVE_INTERSTITIAL = ['seed-phrase-harvest'];
+      const handlers = { onLeave: () => send('leaveTab'), onReport: () => send('userReport', { label: 'false_positive' }) };
+      if (verdict.level === 'dangerous' && (verdict.flags || []).some((f) => DECISIVE_INTERSTITIAL.includes(f)) && SS.actions.dangerInterstitial) {
+        SS.actions.dangerInterstitial(verdict, handlers);
+      } else {
+        SS.actions.showBanner(verdict, async () => {
+          await send('allowSite', { domain: pageDomain });
+          SS.actions.clearAll();
+        }, handlers);
+      }
       // One-time-ever support ask, only after ScamShield visibly earned it.
       if (verdict.level === 'dangerous' && !settings.supportAskShown && SS.actions.supportToast) {
         send('setSettings', { patch: { supportAskShown: true } });

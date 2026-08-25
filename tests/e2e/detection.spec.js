@@ -37,6 +37,18 @@ test('phishing form inside an iframe is guarded and escalates the tab verdict (a
   await expect(popup.locator('#status')).toHaveClass(/dangerous|suspicious/, { timeout: 5000 });
 });
 
+test('seed-phrase harvesting page gets the blocking interstitial with a delayed escape', async ({ context }) => {
+  const page = await context.newPage();
+  await page.goto(BASE + '/seed-phrase.html');
+  const inter = page.locator('.scamshield-interstitial');
+  await expect(inter).toBeVisible({ timeout: 8000 });
+  await expect(inter.locator('.ss-card h3')).toContainText(/scam/i);
+  // The risky choice starts disabled (enforced delay), the safe one is focused.
+  const cont = inter.locator('.ss-danger-ghost');
+  await expect(cont).toBeDisabled();
+  await expect(cont).toBeEnabled({ timeout: 6000 });
+});
+
 test('scam giveaway content is hidden', async ({ context }) => {
   const page = await context.newPage();
   await page.goto(BASE + '/scam-giveaway.html');

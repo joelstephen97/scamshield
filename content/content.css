@@ -33,3 +33,15 @@
 .scamshield-toast.danger{border-left-color:var(--ss-danger)} .scamshield-toast .ss-msg{flex:1}
 .scamshield-toast button{margin-left:8px;border:1px solid var(--ss-hair);background:var(--ss-surface);color:var(--ss-text);border-radius:var(--ss-chip);padding:4px 8px;cursor:pointer}
 .scamshield-toast a{flex:1;color:var(--ss-accent);text-decoration:underline;cursor:pointer}
+.scamshield-interstitial{background:rgba(10,16,13,.78);z-index:2147483647}
+.scamshield-interstitial .ss-card{width:420px;border-top:4px solid var(--ss-danger)}
+.scamshield-interstitial .ss-actions{flex-wrap:wrap}
+.scamshield-overlay button:disabled{opacity:.55;cursor:not-allowed}
+.scamshield-overlay .ss-rescue-ghost{background:transparent;color:var(--ss-accent);border-color:var(--ss-accent);font-weight:600}
+.ss-compare{display:flex;gap:8px;align-items:center;margin-top:8px;padding:8px 10px;border:1px solid var(--ss-hair);border-radius:var(--ss-chip);background:var(--ss-surface);color:var(--ss-text);max-width:100%;overflow:hidden}
+.ss-compare small{display:block;font-size:11px;color:var(--ss-muted)}
+.ss-compare b{font-weight:600;word-break:break-all}
+.ss-compare .ss-cmp-fake b{color:var(--ss-danger);text-decoration:line-through}
+.ss-compare .ss-cmp-real b{color:var(--ss-accent)}
+.ss-compare .ss-cmp-vs{color:var(--ss-muted);flex:none;font-weight:700}
+.scamshield-banner.danger .ss-compare{background:rgba(255,255,255,.95)}
