@@ -2,6 +2,9 @@
 const api = globalThis.browser || globalThis.chrome;
 const $ = (id) => document.getElementById(id);
 const SS = globalThis.ScamShield, F = globalThis.SSFormat, I = globalThis.SSIcons;
+const T = (k, subs, fb) => (globalThis.SSi18n ? globalThis.SSi18n.t(k, subs) : (fb || k));
+const LEVELTXT = { safe: 'popupSafe', suspicious: 'popupSuspicious', dangerous: 'popupDangerous', unknown: 'popupUnknown' };
+const levelLabel = (lvl) => T(LEVELTXT[lvl] || 'popupUnknown', null, F.levelText(lvl));
 const send = (type, extra) => new Promise((res) => { try { api.runtime.sendMessage(Object.assign({ type }, extra || {}), (r) => res(r)); } catch (_) { res(null); } });
 const registrable = (h) => (SS && SS.registrableDomain) ? SS.registrableDomain(h) : String(h || '').split('.').slice(-2).join('.');
 const brandName = (key) => SS.brandDisplayName ? SS.brandDisplayName(key) : key;
@@ -11,7 +14,7 @@ let tab = null, domain = null, settings = null, verdict = null, level = 'unknown
 
 function renderStatus(level, host, summary, levelTextOverride) {
   $('status').className = 'card status ' + level;
-  $('statusicon').innerHTML = I.shield(level); $('level').textContent = levelTextOverride || F.levelText(level); $('host').textContent = host || '';
+  $('statusicon').innerHTML = I.shield(level); $('level').textContent = levelTextOverride || levelLabel(level); $('host').textContent = host || '';
   $('summary').hidden = !summary; $('summary').textContent = summary || '';
 }
 function renderEvidence(reasons, open) {
@@ -32,17 +35,18 @@ function renderVerdictUI(host) {
   level = !settings.enabled ? 'unknown' : (verdict ? (verdict.level || 'safe') : 'unknown');
   const brand = verdict && verdict.brand ? brandName(verdict.brand) : null;
   renderStatus(level, host,
-    !settings.enabled ? 'Protection is paused — turn it on to resume.' :
+    !settings.enabled ? T('popupPausedSummary', null, 'Protection is paused — turn it on to resume.') :
     checking ? '' :
-    level === 'dangerous' ? (brand ? `Looks like ${brand}, but isn't. Don't enter your password here.` : 'Don\'t enter passwords or card details here.') :
-    level === 'suspicious' ? 'Take care before typing anything here.' : '',
-    checking ? 'Checking…' : undefined);
+    level === 'dangerous' ? (brand ? `Looks like ${brand}, but isn't. Don't enter your password here.` : T('popupDangerSummary', null, "Don't enter passwords or card details here.")) :
+    level === 'suspicious' ? T('popupSuspiciousSummary', null, 'Take care before typing anything here.') : '',
+    checking ? T('popupChecking', null, 'Checking…') : undefined);
   renderEvidence(verdict && verdict.reasons, level === 'dangerous');
   $('leave').hidden = level !== 'dangerous'; $('showwhy').hidden = level !== 'suspicious';
+  $('leave').textContent = T('leaveThisPage', null, 'Leave this page'); $('showwhy').textContent = T('showWhy', null, 'Show why');
   const rescueUrl = verdict && verdict.brand && SS.BRAND_DOMAINS[verdict.brand] ? 'https://' + SS.BRAND_DOMAINS[verdict.brand][0] + '/' : null;
-  $('rescue').hidden = !(level === 'dangerous' && rescueUrl); if (rescueUrl) $('rescue').textContent = 'Take me to the real ' + brand;
+  $('rescue').hidden = !(level === 'dangerous' && rescueUrl); if (rescueUrl) $('rescue').textContent = T('takeMeToReal', [brand], 'Take me to the real ' + brand);
   $('reportbtn').hidden = checking;
-  if (!checking) $('reportbtn').textContent = level === 'safe' || level === 'unknown' ? 'Report: this is a scam' : 'Report: this is safe';
+  if (!checking) $('reportbtn').textContent = level === 'safe' || level === 'unknown' ? T('reportScam', null, 'Report: this is a scam') : T('reportSafe', null, 'Report: this is safe');
 }
 async function pollVerdict(host) {
   for (let i = 0; i < 10; i++) {
@@ -76,12 +80,13 @@ async function currentTab() {
   return others.find((t) => t.active) || others[others.length - 1] || null;
 }
 async function init() {
+  $('lockline').textContent = T('runsOnDevice', null, 'Runs on your device · nothing leaves your browser');
   $('brandmark').insertAdjacentHTML('afterbegin', I.shield('safe')); $('opts').innerHTML = I.gear(); $('lockline').insertAdjacentHTML('afterbegin', I.lock());
   try { $('ver').textContent = api.runtime.getManifest().version; } catch (_) {}
   settings = await send('getSettings');
   if (!settings) { renderStatus('unknown', '', 'Extension error — try reopening.'); return; }
-  $('enabled').checked = !!settings.enabled; $('enabledwrap').classList.toggle('on', !!settings.enabled); $('enabledlbl').textContent = settings.enabled ? 'On' : 'Paused';
-  $('enabled').addEventListener('change', async () => { settings = await send('setSettings', { patch: { enabled: $('enabled').checked } }); $('enabledwrap').classList.toggle('on', !!settings.enabled); $('enabledlbl').textContent = settings.enabled ? 'On' : 'Paused'; });
+  $('enabled').checked = !!settings.enabled; $('enabledwrap').classList.toggle('on', !!settings.enabled); $('enabledlbl').textContent = settings.enabled ? T('on', null, 'On') : T('paused', null, 'Paused');
+  $('enabled').addEventListener('change', async () => { settings = await send('setSettings', { patch: { enabled: $('enabled').checked } }); $('enabledwrap').classList.toggle('on', !!settings.enabled); $('enabledlbl').textContent = settings.enabled ? T('on', null, 'On') : T('paused', null, 'Paused'); });
   $('opts').addEventListener('click', (e) => { e.preventDefault(); api.runtime.openOptionsPage(); });
   $('support').addEventListener('click', (e) => { e.preventDefault(); api.tabs.create({ url: 'https://github.com/sponsors/joelstephen97' }); });
   $('viewall').addEventListener('click', (e) => { e.preventDefault(); api.runtime.openOptionsPage(); });
@@ -102,6 +107,7 @@ async function init() {
   });
   $('showwhy').addEventListener('click', () => { $('evidence').hidden = false; $('showwhy').hidden = true; });
 
+  $('trust').textContent = T('trustThisSite', null, 'Trust this site') + ' ▾';
   $('trust').hidden = false; renderTrust();
   $('trust').addEventListener('click', (e) => { e.stopPropagation(); setTrustMenu($('trustmenu').hidden); });
   document.addEventListener('click', (e) => { if (!$('trustmenu').hidden && !$('trustmenu').contains(e.target) && e.target !== $('trust')) setTrustMenu(false); });
@@ -168,7 +174,7 @@ function wireMessageChecker() {
   $('msgbtn').addEventListener('click', () => {
     const r = SS.scoreMessage($('msgtext').value); $('msgresult').hidden = false;
     $('msgstatus').className = 'status mini ' + r.level; $('msgicon').innerHTML = I.shield(r.level);
-    $('msglevel').textContent = r.level === 'safe' ? 'Looks safe — no scam signals found' : r.level === 'suspicious' ? 'Suspicious — treat with caution' : 'Almost certainly a scam';
+    $('msglevel').textContent = r.level === 'safe' ? T('msgSafe', null, 'Looks safe — no scam signals found') : r.level === 'suspicious' ? T('msgSuspicious', null, 'Suspicious — treat with caution') : T('msgDangerous', null, 'Almost certainly a scam');
     $('msgwhy').textContent = r.reasons.slice(0, 3).join(' · ');
   });
 }

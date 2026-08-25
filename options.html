@@ -4,75 +4,75 @@
 <div class="shell">
 <nav aria-label="Settings sections" role="tablist">
   <div class="brand" id="brandmark">ScamShield</div>
-  <a href="#protection" data-tab="protection" class="cur" role="tab" aria-selected="true" aria-controls="tab-protection">Protection</a>
-  <a href="#trusted" data-tab="trusted" role="tab" aria-selected="false" aria-controls="tab-trusted">Trusted sites</a>
-  <a href="#history" data-tab="history" role="tab" aria-selected="false" aria-controls="tab-history">History</a>
-  <a href="#feed" data-tab="feed" role="tab" aria-selected="false" aria-controls="tab-feed">Threat feed</a>
-  <a href="#about" data-tab="about" role="tab" aria-selected="false" aria-controls="tab-about">About</a>
+  <a href="#protection" data-tab="protection" class="cur" role="tab" aria-selected="true" aria-controls="tab-protection" data-i18n="tabProtection">Protection</a>
+  <a href="#trusted" data-tab="trusted" role="tab" aria-selected="false" aria-controls="tab-trusted" data-i18n="tabTrusted">Trusted sites</a>
+  <a href="#history" data-tab="history" role="tab" aria-selected="false" aria-controls="tab-history" data-i18n="tabHistory">History</a>
+  <a href="#feed" data-tab="feed" role="tab" aria-selected="false" aria-controls="tab-feed" data-i18n="tabFeed">Threat feed</a>
+  <a href="#about" data-tab="about" role="tab" aria-selected="false" aria-controls="tab-about" data-i18n="tabAbout">About</a>
   <span class="sp"></span><span class="ver" id="ver"></span>
 </nav>
 <main>
 <section id="tab-protection" class="tab" role="tabpanel" aria-labelledby="h-protection">
-  <h2 id="h-protection" tabindex="-1">Protection</h2><p class="lead">Everything here runs on your device. Nothing is sent anywhere unless you turn on community reporting at the bottom.</p>
-  <div class="setrow"><div class="t"><b>Protection on</b><span>Scans pages for scams and warns you. Turn off to pause everything.</span></div><label class="switch" for="enabled"><input type="checkbox" id="enabled" class="sr"><i></i></label></div>
+  <h2 id="h-protection" tabindex="-1" data-i18n="tabProtection">Protection</h2><p class="lead" data-i18n="protectionLead">Everything here runs on your device. Nothing is sent anywhere unless you turn on community reporting at the bottom.</p>
+  <div class="setrow"><div class="t"><b data-i18n="protectionOn">Protection on</b><span data-i18n="protectionOnHint">Scans pages for scams and warns you. Turn off to pause everything.</span></div><label class="switch" for="enabled"><input type="checkbox" id="enabled" class="sr"><i></i></label></div>
 
-  <details class="grp" open><summary><b>Scams &amp; phishing</b><span>Blocking known-bad sites and catching new phishing on your device.</span></summary>
-    <div class="setrow"><div class="t"><b>Block known scam sites</b><span>Stops pages on the daily-updated threat list before they load.</span></div><label class="switch" for="block"><input type="checkbox" id="block" class="sr"><i></i></label></div>
-    <div class="setrow"><div class="t"><b>Page analysis</b><span>Reads the page's wording, layout and icons on your device to catch scams that aren't on any list yet.</span></div><label class="switch" for="pageanalysis"><input type="checkbox" id="pageanalysis" class="sr"><i></i></label></div>
-    <div class="setrow"><div class="t"><b>Fake-CAPTCHA / "paste this" blocker</b><span>Stops pages that tell you to press Win+R and paste a command (ClickFix malware).</span></div><label class="switch" for="clickfix"><input type="checkbox" id="clickfix" class="sr"><i></i></label></div>
-    <div class="setrow"><div class="t"><b>Fake browser-update blocker</b><span>Blocks pages pretending your browser needs an update so you download malware.</span></div><label class="switch" for="fakeupdate"><input type="checkbox" id="fakeupdate" class="sr"><i></i></label></div>
-    <div class="setrow"><div class="t"><b>Hide scam content</b><span>Greys out "you've won a prize" blocks inside otherwise normal pages.</span></div><label class="switch" for="hide"><input type="checkbox" id="hide" class="sr"><i></i></label></div>
+  <details class="grp" open><summary><b data-i18n="grpScams">Scams &amp; phishing</b><span data-i18n="grpScamsHint">Blocking known-bad sites and catching new phishing on your device.</span></summary>
+    <div class="setrow"><div class="t"><b data-i18n="optBlockKnown">Block known scam sites</b><span data-i18n="optBlockKnownHint">Stops pages on the daily-updated threat list before they load.</span></div><label class="switch" for="block"><input type="checkbox" id="block" class="sr"><i></i></label></div>
+    <div class="setrow"><div class="t"><b data-i18n="optPageAnalysis">Page analysis</b><span data-i18n="optPageAnalysisHint">Reads the page's wording, layout and icons on your device to catch scams that aren't on any list yet.</span></div><label class="switch" for="pageanalysis"><input type="checkbox" id="pageanalysis" class="sr"><i></i></label></div>
+    <div class="setrow"><div class="t"><b data-i18n="optClickfix">Fake-CAPTCHA / "paste this" blocker</b><span data-i18n="optClickfixHint">Stops pages that tell you to press Win+R and paste a command (ClickFix malware).</span></div><label class="switch" for="clickfix"><input type="checkbox" id="clickfix" class="sr"><i></i></label></div>
+    <div class="setrow"><div class="t"><b data-i18n="optFakeupdate">Fake browser-update blocker</b><span data-i18n="optFakeupdateHint">Blocks pages pretending your browser needs an update so you download malware.</span></div><label class="switch" for="fakeupdate"><input type="checkbox" id="fakeupdate" class="sr"><i></i></label></div>
+    <div class="setrow"><div class="t"><b data-i18n="optHide">Hide scam content</b><span data-i18n="optHideHint">Greys out "you've won a prize" blocks inside otherwise normal pages.</span></div><label class="switch" for="hide"><input type="checkbox" id="hide" class="sr"><i></i></label></div>
   </details>
 
-  <details class="grp"><summary><b>Pop-ups &amp; system scares</b><span>Fake virus alerts, screen-lockers and clipboard hijacks.</span></summary>
-    <div class="setrow"><div class="t"><b>Tech-support scam escape</b><span>Detects fake "your PC is infected, call this number" pages and gives you a way out.</span></div><label class="switch" for="techscam"><input type="checkbox" id="techscam" class="sr"><i></i></label></div>
-    <div class="setrow"><div class="t"><b>Clipboard-hijack warning</b><span>Warns when a site secretly puts a command or crypto address on your clipboard.</span></div><label class="switch" for="clipboard"><input type="checkbox" id="clipboard" class="sr"><i></i></label></div>
+  <details class="grp"><summary><b data-i18n="grpPopups">Pop-ups &amp; system scares</b><span data-i18n="grpPopupsHint">Fake virus alerts, screen-lockers and clipboard hijacks.</span></summary>
+    <div class="setrow"><div class="t"><b data-i18n="optTechscam">Tech-support scam escape</b><span data-i18n="optTechscamHint">Detects fake "your PC is infected, call this number" pages and gives you a way out.</span></div><label class="switch" for="techscam"><input type="checkbox" id="techscam" class="sr"><i></i></label></div>
+    <div class="setrow"><div class="t"><b data-i18n="optClipboard">Clipboard-hijack warning</b><span data-i18n="optClipboardHint">Warns when a site secretly puts a command or crypto address on your clipboard.</span></div><label class="switch" for="clipboard"><input type="checkbox" id="clipboard" class="sr"><i></i></label></div>
   </details>
 
-  <details class="grp"><summary><b>Shopping</b><span>Spots fake online shops and where search ads really go.</span></summary>
-    <div class="setrow"><div class="t"><b>Fake-shop checks</b><span>Looks for fake countdowns, fake "only 2 left" pressure, missing contact details and off-platform payment (Zelle/wire/crypto), and shows them in the popup.</span></div><label class="switch" for="shop"><input type="checkbox" id="shop" class="sr"><i></i></label></div>
-    <div class="setrow"><div class="t"><b>Sponsored-result check</b><span>On Google/Bing/DuckDuckGo, flags a sponsored result whose ad goes somewhere other than the site it shows.</span></div><label class="switch" for="serp"><input type="checkbox" id="serp" class="sr"><i></i></label></div>
+  <details class="grp"><summary><b data-i18n="grpShopping">Shopping</b><span data-i18n="grpShoppingHint">Spots fake online shops and where search ads really go.</span></summary>
+    <div class="setrow"><div class="t"><b data-i18n="optShop">Fake-shop checks</b><span data-i18n="optShopHint">Looks for fake countdowns, fake "only 2 left" pressure, missing contact details and off-platform payment (Zelle/wire/crypto), and shows them in the popup.</span></div><label class="switch" for="shop"><input type="checkbox" id="shop" class="sr"><i></i></label></div>
+    <div class="setrow"><div class="t"><b data-i18n="optSerp">Sponsored-result check</b><span data-i18n="optSerpHint">On Google/Bing/DuckDuckGo, flags a sponsored result whose ad goes somewhere other than the site it shows.</span></div><label class="switch" for="serp"><input type="checkbox" id="serp" class="sr"><i></i></label></div>
   </details>
 
-  <details class="grp"><summary><b>Crypto &amp; wallets</b><span>Warnings before risky wallet signatures.</span></summary>
-    <div class="setrow"><div class="t"><b>Wallet drainer protection</b><span>Warns before you approve token spends, "Permit" signatures or account delegations that drainers abuse.</span></div><label class="switch" for="wallet"><input type="checkbox" id="wallet" class="sr"><i></i></label></div>
+  <details class="grp"><summary><b data-i18n="grpCrypto">Crypto &amp; wallets</b><span data-i18n="grpCryptoHint">Warnings before risky wallet signatures.</span></summary>
+    <div class="setrow"><div class="t"><b data-i18n="optWallet">Wallet drainer protection</b><span data-i18n="optWalletHint">Warns before you approve token spends, "Permit" signatures or account delegations that drainers abuse.</span></div><label class="switch" for="wallet"><input type="checkbox" id="wallet" class="sr"><i></i></label></div>
   </details>
 
-  <details class="grp"><summary><b>Privacy</b><span>Catches sites that leak your details or track your device — all on your device.</span></summary>
-    <div class="setrow"><div class="t"><b>Leaky-form warning</b><span>Warns when a site sends the email or phone you typed to a tracker <b>before</b> you press submit.</span></div><label class="switch" for="leakyform"><input type="checkbox" id="leakyform" class="sr"><i></i></label></div>
-    <div class="setrow"><div class="t"><b>Fingerprinting detection</b><span>Tells you which script is fingerprinting your device to track you across sites.</span></div><label class="switch" for="fingerprint"><input type="checkbox" id="fingerprint" class="sr"><i></i></label></div>
-    <div class="setrow"><div class="t"><b>Notification-trap warning</b><span>Flags the "click Allow to continue" trick sites use to spam you with pop-ups.</span></div><label class="switch" for="notifyguard"><input type="checkbox" id="notifyguard" class="sr"><i></i></label></div>
+  <details class="grp"><summary><b data-i18n="grpPrivacy">Privacy</b><span data-i18n="grpPrivacyHint">Catches sites that leak your details or track your device — all on your device.</span></summary>
+    <div class="setrow"><div class="t"><b data-i18n="optLeakyForm">Leaky-form warning</b><span data-i18n="optLeakyFormHint">Warns when a site sends the email or phone you typed to a tracker before you press submit.</span></div><label class="switch" for="leakyform"><input type="checkbox" id="leakyform" class="sr"><i></i></label></div>
+    <div class="setrow"><div class="t"><b data-i18n="optFingerprint">Fingerprinting detection</b><span data-i18n="optFingerprintHint">Tells you which script is fingerprinting your device to track you across sites.</span></div><label class="switch" for="fingerprint"><input type="checkbox" id="fingerprint" class="sr"><i></i></label></div>
+    <div class="setrow"><div class="t"><b data-i18n="optNotify">Notification-trap warning</b><span data-i18n="optNotifyHint">Flags the "click Allow to continue" trick sites use to spam you with pop-ups.</span></div><label class="switch" for="notifyguard"><input type="checkbox" id="notifyguard" class="sr"><i></i></label></div>
   </details>
 
-  <div class="setrow"><div class="t"><b>Strict mode</b><span>For anyone who wants maximum caution: even "suspicious" pages are blocked with a full-screen warning and simpler wording. Best for helping a less confident family member stay safe.</span></div><label class="switch" for="strict"><input type="checkbox" id="strict" class="sr"><i></i></label></div>
+  <div class="setrow"><div class="t"><b data-i18n="optStrict">Strict mode</b><span data-i18n="optStrictHint">For anyone who wants maximum caution: even "suspicious" pages are blocked with a full-screen warning and simpler wording. Best for helping a less confident family member stay safe.</span></div><label class="switch" for="strict"><input type="checkbox" id="strict" class="sr"><i></i></label></div>
 
-  <div class="setrow"><div class="t"><b>Help make ScamShield smarter</b><span>Sends the <b>site name</b> (never the full address or page text) and anonymous risk signals of pages flagged dangerous, and of sites you report. Off by default.</span><button id="whatsent" class="exp">What exactly is sent ▾</button>
+  <div class="setrow"><div class="t"><b data-i18n="optReporting">Help make ScamShield smarter</b><span data-i18n="optReportingHint">Sends the site name (never the full address or page text) and anonymous risk signals of pages flagged dangerous, and of sites you report. Off by default.</span><button id="whatsent" class="exp">What exactly is sent ▾</button>
     <div id="whatsentbody" class="hint" hidden>A report contains only: the site name (hostname), the verdict and internal reason codes, numeric risk signals derived from the address and page layout (hashed word counts and counts of forms, inputs and links — never the text itself), matched brand names, the extension version, and the hour. Never the full address (path or query), page text, anything you typed, cookies, or any identifier of you or your device. Reports are deleted after 180 days. <a href="https://joelstephen97.github.io/scamshield/privacy.html" target="_blank" rel="noopener">Privacy policy</a></div></div>
     <label class="switch" for="report"><input type="checkbox" id="report" class="sr"><i></i></label></div>
 </section>
 <section id="tab-trusted" class="tab" hidden role="tabpanel" aria-labelledby="h-trusted">
-  <h2 id="h-trusted" tabindex="-1">Trusted sites</h2><p class="lead">ScamShield stays quiet on these sites. Remove one to protect it again.</p>
-  <h3>Always</h3><ul id="allowlist" class="list"></ul>
-  <h3>For a while</h3><ul id="pausedlist" class="list"></ul>
+  <h2 id="h-trusted" tabindex="-1" data-i18n="tabTrusted">Trusted sites</h2><p class="lead" data-i18n="trustedLead">ScamShield stays quiet on these sites. Remove one to protect it again.</p>
+  <h3 data-i18n="trustedAlways">Always</h3><ul id="allowlist" class="list"></ul>
+  <h3 data-i18n="trustedForAWhile">For a while</h3><ul id="pausedlist" class="list"></ul>
 </section>
 <section id="tab-history" class="tab" hidden role="tabpanel" aria-labelledby="h-history">
-  <h2 id="h-history" tabindex="-1">Protection history</h2><p class="lead">Stored only on this device (site names, never full addresses).</p>
-  <ul id="history" class="list"></ul><button id="clearhist" class="btn">Clear history</button>
+  <h2 id="h-history" tabindex="-1" data-i18n="historyTitle">Protection history</h2><p class="lead" data-i18n="historyLead">Stored only on this device (site names, never full addresses).</p>
+  <ul id="history" class="list"></ul><button id="clearhist" class="btn" data-i18n="clearHistory">Clear history</button>
 </section>
 <section id="tab-feed" class="tab" hidden role="tabpanel" aria-labelledby="h-feed">
-  <h2 id="h-feed" tabindex="-1">Threat feed</h2><p class="lead">A daily-rebuilt list of known scam sites (OpenPhish + URLhaus, heavily filtered). ScamShield only downloads it.</p>
-  <div class="feedline"><span class="dot" id="feeddot"></span><span id="feedstatus">Never updated</span><button id="checkupd" class="btn ghost">Check now</button></div>
+  <h2 id="h-feed" tabindex="-1" data-i18n="feedTitle">Threat feed</h2><p class="lead" data-i18n="feedLead">A daily-rebuilt list of known scam sites (OpenPhish + URLhaus, heavily filtered). ScamShield only downloads it.</p>
+  <div class="feedline"><span class="dot" id="feeddot"></span><span id="feedstatus">Never updated</span><button id="checkupd" class="btn ghost" data-i18n="checkNow">Check now</button></div>
   <details class="adv"><summary>Advanced: feed URL</summary>
     <label class="row"><span>Feed URL</span><input type="url" id="otaurl" placeholder="https://…/blocklist.json"></label>
     <button id="resetfeed" class="btn">Reset to official feed</button><p class="hint">Point this at your own JSON to self-host, or leave blank to disable updates.</p></details>
 </section>
 <section id="tab-about" class="tab" hidden role="tabpanel" aria-labelledby="h-about">
-  <h2 id="h-about" tabindex="-1">About</h2>
-  <div class="setrow"><div class="t"><b>Version</b><span id="aboutver"></span></div></div>
-  <div class="setrow"><div class="t"><b>Appearance</b><span>Follow your system, or pick one.</span></div><select id="theme"><option value="auto">Auto</option><option value="light">Light</option><option value="dark">Dark</option></select></div>
+  <h2 id="h-about" tabindex="-1" data-i18n="tabAbout">About</h2>
+  <div class="setrow"><div class="t"><b data-i18n="aboutVersion">Version</b><span id="aboutver"></span></div></div>
+  <div class="setrow"><div class="t"><b data-i18n="appearance">Appearance</b><span>Follow your system, or pick one.</span></div><select id="theme"><option value="auto">Auto</option><option value="light">Light</option><option value="dark">Dark</option></select></div>
   <div class="setrow"><div class="t"><b>Links</b><span><a href="https://joelstephen97.github.io/scamshield/privacy.html" target="_blank" rel="noopener">Privacy policy</a> · <a href="https://github.com/joelstephen97/scamshield" target="_blank" rel="noopener">GitHub</a> · <a href="https://github.com/joelstephen97/scamshield/issues/new" target="_blank" rel="noopener">Report an issue</a> · <a href="https://github.com/joelstephen97/scamshield/blob/main/CHANGELOG.md" target="_blank" rel="noopener">What's new</a></span></div></div>
   <div class="setrow"><div class="t"><b>Support</b><span>ScamShield is free and runs entirely on your device. <a id="support" href="https://github.com/sponsors/joelstephen97" target="_blank" rel="noopener">Sponsor on GitHub</a> · <a href="https://www.paypal.me/joelstephen1" target="_blank" rel="noopener">Donate via PayPal</a></span></div></div>
-  <h3>What leaves your device</h3>
+  <h3 data-i18n="whatLeaves">What leaves your device</h3>
   <p class="lead">ScamShield makes no analytics, telemetry or tracking requests — ever. The only requests it can make are these three, and you can verify it yourself: open your browser's <b>DevTools → Network</b> tab, use ScamShield normally, and you will see nothing beyond them.</p>
   <ul id="netreceipt" class="list">
     <li><span><b>Threat-list download</b><br><span class="meta">The public blocklist file — the same for everyone, nothing about you is sent.</span></span><span class="meta" id="net-feed">—</span></li>
@@ -80,10 +80,10 @@
     <li><span><b>Page icon check</b><br><span class="meta">Fetches a page's own favicon to spot brand look-alikes. No third party, no cookies.</span></span><span class="meta">per page</span></li>
   </ul>
   <p class="hint">Settings can be exported/imported below and (optionally) synced across your own devices.</p>
-  <div class="setrow"><div class="t"><b>Back up settings</b><span>Save your settings and trusted sites to a file, or load them on another computer.</span></div><span><button id="exportbtn" class="btn">Export</button> <button id="importbtn" class="btn">Import</button><input type="file" id="importfile" accept="application/json" hidden></span></div>
-  <div class="setrow"><div class="t"><b>Sync across my devices</b><span>Keep your settings and trusted sites in step on every browser where you're signed in. Uses your browser's own sync — ScamShield still has no account or server. Off by default.</span></div><label class="switch" for="sync"><input type="checkbox" id="sync" class="sr"><i></i></label></div>
+  <div class="setrow"><div class="t"><b data-i18n="backupSettings">Back up settings</b><span data-i18n="backupHint">Save your settings and trusted sites to a file, or load them on another computer.</span></div><span><button id="exportbtn" class="btn" data-i18n="exportBtn">Export</button> <button id="importbtn" class="btn" data-i18n="importBtn">Import</button><input type="file" id="importfile" accept="application/json" hidden></span></div>
+  <div class="setrow"><div class="t"><b data-i18n="syncTitle">Sync across my devices</b><span data-i18n="syncHint">Keep your settings and trusted sites in step on every browser where you're signed in. Uses your browser's own sync — ScamShield still has no account or server. Off by default.</span></div><label class="switch" for="sync"><input type="checkbox" id="sync" class="sr"><i></i></label></div>
 </section>
 <p id="status" class="toast" role="status"></p>
 </main></div>
-<script src="engine/constants.js"></script><script src="ui/format.js"></script><script src="ui/icons.js"></script><script src="ui/theme.js"></script><script src="options.js"></script>
+<script src="engine/constants.js"></script><script src="ui/format.js"></script><script src="ui/icons.js"></script><script src="ui/theme.js"></script><script src="ui/i18n.js"></script><script src="options.js"></script>
 </body></html>

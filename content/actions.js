@@ -1,6 +1,13 @@
 (function (root) {
   'use strict';
   const NS = 'scamshield';
+  const api = root.browser || root.chrome;
+  // Localised string with English fallback. Content scripts can call
+  // chrome.i18n.getMessage; getMessage itself falls back to en per-key.
+  function t(key, subs, fallback) {
+    try { const m = api && api.i18n && api.i18n.getMessage(key, subs); if (m) return m; } catch (_) {}
+    return fallback != null ? fallback : key;
+  }
   function el(tag, cls, text) {
     const e = document.createElement(tag);
     if (cls) e.className = cls;
@@ -43,8 +50,8 @@
     try { realHost = new URL(brandUrl).hostname.replace(/^www\./, ''); } catch (_) {}
     if (!realHost) return null;
     const row = el('div', 'ss-compare');
-    const fake = el('span', 'ss-cmp-fake'); fake.append(el('small', null, 'This site'), el('b', null, location.hostname));
-    const real = el('span', 'ss-cmp-real'); real.append(el('small', null, 'Real ' + brandLabel), el('b', null, realHost));
+    const fake = el('span', 'ss-cmp-fake'); fake.append(el('small', null, t('compareThisSite', null, 'This site')), el('b', null, location.hostname));
+    const real = el('span', 'ss-cmp-real'); real.append(el('small', null, t('compareRealSite', [brandLabel], 'Real ' + brandLabel)), el('b', null, realHost));
     row.append(fake, el('span', 'ss-cmp-vs', '≠'), real);
     return row;
   }
@@ -56,18 +63,20 @@
     bar.setAttribute('role', 'alert');
     const ico = el('span', 'ss-ico'); ico.innerHTML = ICON[danger ? 'dangerous' : 'suspicious'];
     const text = el('div', 'ss-text');
-    const brand = verdict.brandLabel ? ' — looks like ' + verdict.brandLabel + ", but isn't" : '';
-    text.append(el('b', null, (danger ? 'Dangerous page' : 'Suspicious page') + brand), el('span', null, verdict.reasons[0] || (danger ? "Don't enter passwords or card details here." : 'Take care before typing anything here.')));
+    const head = verdict.brandLabel
+      ? (danger ? t('bannerDangerBrand', [verdict.brandLabel], 'Dangerous page — looks like ' + verdict.brandLabel + ", but isn't") : t('bannerSuspicious', null, 'Suspicious page'))
+      : (danger ? t('bannerDanger', null, 'Dangerous page') : t('bannerSuspicious', null, 'Suspicious page'));
+    text.append(el('b', null, head), el('span', null, verdict.reasons[0] || (danger ? t('popupDangerSummary', null, "Don't enter passwords or card details here.") : t('popupSuspiciousSummary', null, 'Take care before typing anything here.'))));
     if (verdict.brandLabel && verdict.brandUrl) {
       const cmp = compareRow(verdict.brandLabel, verdict.brandUrl);
       if (cmp) text.appendChild(cmp);
     }
     const acts = el('div', 'ss-acts');
-    if (danger) { const leave = el('button', 'ss-leave', 'Leave this page'); leave.addEventListener('click', () => { x.onLeave ? x.onLeave() : history.back(); }); acts.appendChild(leave); }
-    if (verdict.brandUrl) { const rescue = el('button', 'ss-rescue', 'Take me to the real ' + (verdict.brandLabel || 'site')); rescue.addEventListener('click', () => { location.href = verdict.brandUrl; }); acts.appendChild(rescue); }
-    if (!danger) { const why = el('button', 'ss-why', 'Show why'); why.addEventListener('click', () => { text.querySelector('span').textContent = verdict.reasons.slice(0, 3).join(' · '); why.remove(); }); acts.appendChild(why); }
-    const trust = el('button', 'ss-trust', 'Trust this site'); trust.addEventListener('click', () => { onAllow && onAllow(); bar.remove(); });
-    const report = el('button', 'ss-report', 'Report a mistake'); report.addEventListener('click', () => { report.textContent = 'Thanks'; report.disabled = true; x.onReport && x.onReport(); });
+    if (danger) { const leave = el('button', 'ss-leave', t('leaveThisPage', null, 'Leave this page')); leave.addEventListener('click', () => { x.onLeave ? x.onLeave() : history.back(); }); acts.appendChild(leave); }
+    if (verdict.brandUrl) { const rescue = el('button', 'ss-rescue', t('takeMeToReal', [verdict.brandLabel || 'site'], 'Take me to the real ' + (verdict.brandLabel || 'site'))); rescue.addEventListener('click', () => { location.href = verdict.brandUrl; }); acts.appendChild(rescue); }
+    if (!danger) { const why = el('button', 'ss-why', t('showWhy', null, 'Show why')); why.addEventListener('click', () => { text.querySelector('span').textContent = verdict.reasons.slice(0, 3).join(' · '); why.remove(); }); acts.appendChild(why); }
+    const trust = el('button', 'ss-trust', t('trustThisSite', null, 'Trust this site')); trust.addEventListener('click', () => { onAllow && onAllow(); bar.remove(); });
+    const report = el('button', 'ss-report', t('reportMistake', null, 'Report a mistake')); report.addEventListener('click', () => { report.textContent = t('thanks', null, 'Thanks'); report.disabled = true; x.onReport && x.onReport(); });
     const close = el('button', 'ss-x', '✕'); close.setAttribute('aria-label', 'Dismiss'); close.addEventListener('click', () => bar.remove());
     acts.append(trust, report, close);
     bar.append(ico, text, acts);
@@ -85,9 +94,9 @@
     if (document.querySelector('.' + NS + '-interstitial')) return;
     x = x || {};
     const HEADS = [
-      'Stop — this page is trying to scam you',
-      'Hold on — this looks like a scam page',
-      "Don't go further — scam warning"
+      t('interstitialHead1', null, 'Stop — this page is trying to scam you'),
+      t('interstitialHead2', null, 'Hold on — this looks like a scam page'),
+      t('interstitialHead3', null, "Don't go further — scam warning")
     ];
     const ov = el('div', NS + '-overlay ' + NS + '-interstitial');
     ov.setAttribute('role', 'alertdialog');
@@ -106,21 +115,21 @@
     const ul = el('ul', 'ss-evidence');
     for (const r of (verdict.reasons || []).slice(1, 4)) { const li = el('li'); li.append(el('span', 'ss-chip', 'Why'), el('span', null, r)); ul.appendChild(li); }
     if (ul.children.length) card.appendChild(ul);
-    card.append(el('p', 'ss-sub', 'Nothing you typed has been sent yet. Leaving now is safe.'));
+    card.append(el('p', 'ss-sub', t('interstitialReassure', null, 'Nothing you typed has been sent yet. Leaving now is safe.')));
     const actions = el('div', 'ss-actions');
-    const leave = el('button', 'ss-primary', 'Leave this page');
+    const leave = el('button', 'ss-primary', t('leaveThisPage', null, 'Leave this page'));
     leave.addEventListener('click', () => { x.onLeave ? x.onLeave() : history.back(); });
     actions.append(leave);
     if (verdict.brandUrl) {
-      const rescue = el('button', 'ss-rescue-ghost', 'Go to the real ' + (verdict.brandLabel || 'site'));
+      const rescue = el('button', 'ss-rescue-ghost', t('takeMeToReal', [verdict.brandLabel || 'site'], 'Go to the real ' + (verdict.brandLabel || 'site')));
       rescue.addEventListener('click', () => { location.href = verdict.brandUrl; });
       actions.append(rescue);
     }
-    const stay = el('button', 'ss-danger-ghost', 'Continue anyway');
+    const stay = el('button', 'ss-danger-ghost', t('continueAnyway', null, 'Continue anyway'));
     armDelayed(stay, 3);
     stay.addEventListener('click', () => { ov.remove(); if (x.onDismiss) x.onDismiss(); });
     actions.append(stay);
-    const rep = el('button', 'ss-report', 'Report a mistake');
+    const rep = el('button', 'ss-report', t('reportMistake', null, 'Report a mistake'));
     rep.addEventListener('click', () => { rep.textContent = 'Thanks'; rep.disabled = true; x.onReport && x.onReport(); });
     actions.prepend(rep);
     card.append(actions);
@@ -162,7 +171,7 @@
         let dest = '';
         try { dest = new URL(form.getAttribute('action') || location.href, location.href).hostname; } catch (_) {}
         card.append(
-          el('h3', null, 'Stop — possible phishing'),
+          el('h3', null, t('phishingStop', null, 'Stop — possible phishing')),
           el('p', null, dest
             ? 'This form sends your password to ' + dest + ', not to ' + location.hostname + '. Sending a password to a different website is how scammers steal logins.'
             : 'This form sends your password to a different website than the one you are visiting. This is a common way scammers steal logins.')
@@ -171,17 +180,17 @@
         for (const r of (reasons || []).slice(0, 3)) { const li = el('li'); li.append(el('span', 'ss-chip', 'Page'), el('span', null, r)); ul.appendChild(li); }
         card.appendChild(ul);
         const actions = el('div', 'ss-actions');
-        const back = el('button', 'ss-primary', 'Cancel (recommended)');
+        const back = el('button', 'ss-primary', t('cancelRecommended', null, 'Cancel (recommended)'));
         const close = () => { document.removeEventListener('keydown', onKey, true); ov.remove(); };
         const onKey = (e) => { if (e.key === 'Escape') { e.preventDefault(); close(); } };
         back.addEventListener('click', close);
-        const go = el('button', 'ss-danger-ghost', 'Submit anyway');
+        const go = el('button', 'ss-danger-ghost', t('submitAnyway', null, 'Submit anyway'));
         armDelayed(go, 3);
         // form.submit() here runs the isolated world's native (unhooked) method,
         // so it really submits without re-triggering this guard.
         go.addEventListener('click', () => { document.removeEventListener('keydown', onKey, true); ov.remove(); form.submit(); });
         actions.append(go, back);
-        const rep = el('button', 'ss-report', 'Report a mistake'); rep.addEventListener('click', () => { rep.textContent = 'Thanks'; rep.disabled = true; onReport && onReport(); }); actions.prepend(rep);
+        const rep = el('button', 'ss-report', t('reportMistake', null, 'Report a mistake')); rep.addEventListener('click', () => { rep.textContent = t('thanks', null, 'Thanks'); rep.disabled = true; onReport && onReport(); }); actions.prepend(rep);
         card.append(actions); ov.append(card);
         document.documentElement.appendChild(ov);
         document.addEventListener('keydown', onKey, true);
@@ -221,13 +230,13 @@
     ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true');
     ov.setAttribute('aria-label', 'Risky wallet request');
     const card = el('div', 'ss-card');
-    const h3 = el('h3'); h3.append(iconSpan('suspicious'), el('span', null, 'Risky wallet request'));
+    const h3 = el('h3'); h3.append(iconSpan('suspicious'), el('span', null, t('walletRiskyTitle', null, 'Risky wallet request')));
     card.append(h3,
       el('p', null, (detail.reasons && detail.reasons[0]) || 'This site is requesting a sensitive wallet action.'),
-      el('p', 'ss-sub', 'If you did not expect this, cancel. Drainers use these requests to steal your crypto.'));
+      el('p', 'ss-sub', t('walletRiskyBody', null, 'If you did not expect this, cancel. Drainers use these requests to steal your crypto.')));
     const actions = el('div', 'ss-actions');
-    const cancel = el('button', 'ss-primary', 'Cancel (recommended)');
-    const proceed = el('button', 'ss-danger-ghost', 'Proceed anyway');
+    const cancel = el('button', 'ss-primary', t('cancelRecommended', null, 'Cancel (recommended)'));
+    const proceed = el('button', 'ss-danger-ghost', t('proceedAnyway', null, 'Proceed anyway'));
     armDelayed(proceed, 3);
     const done = (allow) => { document.removeEventListener('keydown', onKey, true); ov.remove(); onDecision(allow); };
     const onKey = (e) => { if (e.key === 'Escape') { e.preventDefault(); done(false); } };
@@ -264,13 +273,13 @@
     ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true');
     ov.setAttribute('aria-label', 'Possible tech-support scam');
     const card = el('div', 'ss-card');
-    const h3 = el('h3'); h3.append(iconSpan('dangerous'), el('span', null, 'Possible tech-support scam'));
+    const h3 = el('h3'); h3.append(iconSpan('dangerous'), el('span', null, t('techScamTitle', null, 'Possible tech-support scam')));
     card.append(h3,
       el('p', null, (verdict.reasons && verdict.reasons[0]) || 'This page is using scare tactics.'),
-      el('p', 'ss-sub', 'This is a web page, not your computer — your computer is fine. Real security warnings never lock your screen or show a phone number. Do not call, and do not pay.'));
+      el('p', 'ss-sub', t('techScamBody', null, 'This is a web page, not your computer — your computer is fine. Real security warnings never lock your screen or show a phone number. Do not call, and do not pay.')));
     const actions = el('div', 'ss-actions');
-    const leave = el('button', 'ss-primary', 'Get me out (close this page)');
-    const stay = el('button', null, 'Dismiss');
+    const leave = el('button', 'ss-primary', t('getMeOut', null, 'Get me out (close this page)'));
+    const stay = el('button', null, t('dismiss', null, 'Dismiss'));
     const close = () => { document.removeEventListener('keydown', onKey, true); ov.remove(); };
     const onKey = (e) => { if (e.key === 'Escape') { e.preventDefault(); close(); } };
     leave.addEventListener('click', () => { close(); onLeave && onLeave(); });

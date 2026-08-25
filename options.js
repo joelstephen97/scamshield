@@ -2,6 +2,7 @@
 const api = globalThis.browser || globalThis.chrome;
 const $ = (id) => document.getElementById(id);
 const F = globalThis.SSFormat, I = globalThis.SSIcons;
+const T = (k, subs, fb) => (globalThis.SSi18n ? globalThis.SSi18n.t(k, subs) : (fb || k));
 const send = (type, extra) => new Promise((res) => { try { api.runtime.sendMessage(Object.assign({ type }, extra || {}), (r) => res(r)); } catch (_) { res(null); } });
 function flash(t) { $('status').textContent = t; $('status').classList.add('show'); setTimeout(() => $('status').classList.remove('show'), 1200); }
 function showTab(name, userInitiated) {
@@ -21,7 +22,7 @@ try { const v = api.runtime.getManifest().version; $('ver').textContent = 'Versi
 const KIND = (k) => F.detectorLabel(k);
 function bindSwitch(id, key) {
   const el = $(id); const wrap = el.closest('.switch');
-  el.addEventListener('change', async () => { await send('setSettings', { patch: { [key]: el.checked } }); wrap.classList.toggle('on', el.checked); flash('Saved'); });
+  el.addEventListener('change', async () => { await send('setSettings', { patch: { [key]: el.checked } }); wrap.classList.toggle('on', el.checked); flash(T('saved', null, 'Saved')); });
 }
 function setSwitch(id, on) { $(id).checked = !!on; $(id).closest('.switch').classList.toggle('on', !!on); }
 async function load() {
@@ -51,15 +52,15 @@ function li(text, meta, btnText, onClick) {
 function renderAllow(list, paused) {
   $('allowlist').replaceChildren(); $('pausedlist').replaceChildren();
   if (!list.length) $('allowlist').appendChild(li('None yet'));
-  for (const d of list) $('allowlist').appendChild(li(d, '', 'Remove', async () => { await send('removeAllow', { domain: d }); load(); }));
+  for (const d of list) $('allowlist').appendChild(li(d, '', T('remove', null, 'Remove'), async () => { await send('removeAllow', { domain: d }); load(); }));
   const entries = Object.entries(paused);
   if (!entries.length) $('pausedlist').appendChild(li('None right now'));
-  for (const [d, until] of entries) $('pausedlist').appendChild(li(d, 'until ' + new Date(until).toLocaleString([], { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' }), 'Untrust', async () => { await send('unpauseSite', { domain: d }); load(); }));
+  for (const [d, until] of entries) $('pausedlist').appendChild(li(d, 'until ' + new Date(until).toLocaleString([], { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' }), T('untrust', null, 'Untrust'), async () => { await send('unpauseSite', { domain: d }); load(); }));
 }
 function renderHistory(list) {
   $('history').replaceChildren();
   if (!list.length) { $('history').appendChild(li('Nothing yet — that’s a good thing.')); return; }
-  for (const e of list.slice(0, 200)) $('history').appendChild(li(`${KIND(e.kind)} · ${e.host || 'unknown site'}`, `${e.level} · ${new Date(e.ts).toLocaleString()}`, 'Mark as mistake', async () => { const r = await send('userReport', { host: e.host, level: e.level }); flash(r && r.via === 'relay' ? 'Thanks — sent' : 'Opened a report'); }));
+  for (const e of list.slice(0, 200)) $('history').appendChild(li(`${KIND(e.kind)} · ${e.host || 'unknown site'}`, `${e.level} · ${new Date(e.ts).toLocaleString()}`, T('markMistake', null, 'Mark as mistake'), async () => { const r = await send('userReport', { host: e.host, level: e.level }); flash(r && r.via === 'relay' ? 'Thanks — sent' : 'Opened a report'); }));
 }
 bindSwitch('enabled', 'enabled'); bindSwitch('block', 'blockKnownBad'); bindSwitch('hide', 'hideScamContent'); bindSwitch('pageanalysis', 'pageAnalysis'); bindSwitch('report', 'reportingOptIn');
 bindSwitch('clickfix', 'clickFixGuard'); bindSwitch('fakeupdate', 'fakeUpdateGuard'); bindSwitch('techscam', 'techScamGuard'); bindSwitch('clipboard', 'clipboardGuard'); bindSwitch('wallet', 'walletGuard'); bindSwitch('strict', 'strictMode');
@@ -80,8 +81,8 @@ $('importfile').addEventListener('change', async () => {
   $('importfile').value = '';
 });
 $('whatsent').addEventListener('click', () => { $('whatsentbody').hidden = !$('whatsentbody').hidden; });
-$('theme').addEventListener('change', async () => { await send('setSettings', { patch: { theme: $('theme').value } }); globalThis.SSTheme.applyTheme($('theme').value); flash('Saved'); });
-$('otaurl').addEventListener('change', async () => { await send('setSettings', { patch: { otaUrl: $('otaurl').value.trim() } }); flash('Saved'); });
+$('theme').addEventListener('change', async () => { await send('setSettings', { patch: { theme: $('theme').value } }); globalThis.SSTheme.applyTheme($('theme').value); flash(T('saved', null, 'Saved')); });
+$('otaurl').addEventListener('change', async () => { await send('setSettings', { patch: { otaUrl: $('otaurl').value.trim() } }); flash(T('saved', null, 'Saved')); });
 $('checkupd').addEventListener('click', async () => { flash('Checking…'); const r = await send('checkForUpdates'); flash(r && r.ok ? (r.updated ? ('Updated to v' + r.version) : 'Already up to date') : 'Update failed'); load(); });
 $('clearhist').addEventListener('click', async () => { await send('clearHistory'); renderHistory([]); flash('History cleared'); });
 $('resetfeed').addEventListener('click', async () => { const d = await send('getDefaultFeedUrl'); if (!d || !d.url) return; $('otaurl').value = d.url; await send('setSettings', { patch: { otaUrl: d.url } }); flash('Reset to official feed'); });
