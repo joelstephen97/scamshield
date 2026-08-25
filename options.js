@@ -32,6 +32,7 @@ async function load() {
   setSwitch('techscam', s.techScamGuard !== false); setSwitch('clipboard', s.clipboardGuard !== false);
   setSwitch('wallet', s.walletGuard !== false); setSwitch('strict', s.strictMode === true);
   setSwitch('leakyform', s.leakyFormGuard !== false); setSwitch('fingerprint', s.fingerprintDetect !== false); setSwitch('notifyguard', s.notificationGuard !== false);
+  setSwitch('shop', s.shopGuard !== false); setSwitch('serp', s.serpCheck !== false);
   setSwitch('sync', s.syncEnabled === true);
   $('net-feed').textContent = s.otaUrl ? (s.lastOtaAt ? F.relTime(s.lastOtaAt) : 'on install + every 12h') : 'disabled';
   $('net-report').textContent = s.reportingOptIn ? (s.lastReportAt ? F.relTime(s.lastReportAt) : 'when flagged') : 'off (default)';
@@ -63,6 +64,7 @@ function renderHistory(list) {
 bindSwitch('enabled', 'enabled'); bindSwitch('block', 'blockKnownBad'); bindSwitch('hide', 'hideScamContent'); bindSwitch('pageanalysis', 'pageAnalysis'); bindSwitch('report', 'reportingOptIn');
 bindSwitch('clickfix', 'clickFixGuard'); bindSwitch('fakeupdate', 'fakeUpdateGuard'); bindSwitch('techscam', 'techScamGuard'); bindSwitch('clipboard', 'clipboardGuard'); bindSwitch('wallet', 'walletGuard'); bindSwitch('strict', 'strictMode');
 bindSwitch('leakyform', 'leakyFormGuard'); bindSwitch('fingerprint', 'fingerprintDetect'); bindSwitch('notifyguard', 'notificationGuard');
+bindSwitch('shop', 'shopGuard'); bindSwitch('serp', 'serpCheck');
 $('sync').addEventListener('change', async () => { const r = await send('setSync', { on: $('sync').checked }); $('sync').closest('.switch').classList.toggle('on', $('sync').checked); flash($('sync').checked ? (r && r.ok ? 'Sync on' : 'Sync unavailable') : 'Sync off'); });
 $('exportbtn').addEventListener('click', async () => {
   const data = await send('exportSettings');

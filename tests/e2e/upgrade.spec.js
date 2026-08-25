@@ -16,6 +16,8 @@ test('0.3.1 settings + history load, migrate additively, and the UI works', asyn
   // 0.6.0 keys arrive with safe defaults on an upgraded profile, old keys intact.
   expect(s.clickFixGuard).toBe(true); expect(s.fakeUpdateGuard).toBe(true); expect(s.walletGuard).toBe(true);
   expect(s.techScamGuard).toBe(true); expect(s.clipboardGuard).toBe(true); expect(s.strictMode).toBe(false);
+  expect(s.leakyFormGuard).toBe(true); expect(s.fingerprintDetect).toBe(true); expect(s.notificationGuard).toBe(true);
+  expect(s.shopGuard).toBe(true); expect(s.serpCheck).toBe(true); expect(s.syncEnabled).toBe(false);
   const popup = await context.newPage(); await popup.goto(`chrome-extension://${extensionId}/popup.html`);
   await expect(popup.locator('#tile-all b')).toHaveText('7'); await expect(popup.locator('#hist li')).toHaveCount(1);
   const opts = await context.newPage(); await opts.goto(`chrome-extension://${extensionId}/options.html#trusted`);

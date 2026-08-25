@@ -282,6 +282,88 @@
     };
   }
 
+  // --- Fake-shop signal collection (0.6.0), badge/popup tier only ---
+  function parseCountdownSeconds() {
+    // Find a MM:SS / HH:MM:SS countdown; return the largest total seconds seen.
+    let best = 0, scanned = 0;
+    for (const el of document.querySelectorAll('[class*="countdown" i],[class*="timer" i],[id*="countdown" i],time,span,div,b')) {
+      if (++scanned > 400) break;
+      const t = (el.textContent || '').trim();
+      const m = t.match(/\b(\d{1,2}):(\d{2})(?::(\d{2}))?\b/);
+      if (!m) continue;
+      const secs = m[3] ? (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) : (+m[1]) * 60 + (+m[2]);
+      if (secs > best && secs <= 48 * 3600) best = secs;
+    }
+    return best;
+  }
+  async function collectShop(bodyText, pageHost) {
+    const looksLikeShop = /add to (cart|bag|basket)|proceed to checkout|checkout|shopping cart|order summary|free shipping|buy now/i.test(bodyText) ||
+      !!document.querySelector('[class*="add-to-cart" i],[id*="add-to-cart" i],[class*="addtocart" i],[name*="checkout" i]');
+    if (!looksLikeShop) return { isStorefront: false };
+    const fakeScarcity = (bodyText.match(/only\s+\d+\s+left|selling fast|\d+\s+(people|others)\s+(are\s+)?(viewing|watching|looking)|in\s+\d+\s+carts/gi) || []).length;
+    const offPlatformPay = /\b(zelle|venmo|cash\s?app|western union|moneygram|wire transfer|bank transfer|pay(?:ing)? (?:by|with) (?:crypto|bitcoin|usdt))\b/i.test(bodyText);
+    const badgeHotlink = [...document.querySelectorAll('img')].some((im) => {
+      const s = ((im.getAttribute('src') || '') + ' ' + (im.getAttribute('alt') || '')).toLowerCase();
+      if (!/secure|verified|trust|guarante|ssl|norton|mcafee/.test(s)) return false;
+      let host = ''; try { host = new URL(im.src, location.href).hostname; } catch (_) { return false; }
+      const crossOrigin = registrable(host) !== registrable(pageHost);
+      const linked = !!im.closest('a[href]');
+      return crossOrigin && !linked;
+    });
+    const hasContact = !!document.querySelector('a[href*="contact" i],a[href*="about" i],a[href*="imprint" i],a[href^="tel:"],a[href^="mailto:"]') ||
+      /\b(contact us|customer service|our address|registered office|company (number|registration))\b/i.test(bodyText);
+    const missingContact = !hasContact;
+    let countdownReset = false;
+    const secs = parseCountdownSeconds();
+    if (secs > 0) { try { const r = await send('shopCountdown', { domain: registrable(pageHost), seconds: secs }); countdownReset = !!(r && r.reset); } catch (_) {} }
+    return { isStorefront: true, fakeScarcity, offPlatformPay, badgeHotlink, missingContact, countdownReset };
+  }
+
+  // Sponsored-search destination check (0.6.0). Search engines are trusted
+  // hosts (run() returns early), so this runs separately. It flags a sponsored
+  // result whose displayed domain differs from where the link actually goes —
+  // the malvertising seam (fake download/bank sites). Conservative: requires an
+  // explicit "Sponsored/Ad" marker AND a real domain mismatch, so it can't
+  // false-positive on organic results.
+  const SEARCH_HOSTS = /(^|\.)(google\.[a-z.]+|bing\.com|duckduckgo\.com|search\.brave\.com|ecosia\.org)$/i;
+  function checkSerp() {
+    let flagged = 0;
+    const anchors = document.querySelectorAll('a[href^="http"]');
+    let scanned = 0;
+    for (const a of anchors) {
+      if (++scanned > 600 || flagged >= 8) break;
+      if (a.__ssSerp) continue;
+      // Is this anchor inside a labelled sponsored/ad block?
+      let n = a, sponsored = false, hops = 0;
+      while (n && hops++ < 6) {
+        const lbl = ((n.getAttribute && (n.getAttribute('aria-label') || n.getAttribute('data-text-ad') || '')) || '') + ' ' + (n.className || '');
+        if (/sponsored|\bads?\b|data-text-ad/i.test(String(lbl))) { sponsored = true; break; }
+        n = n.parentElement;
+      }
+      if (!sponsored) {
+        // Also accept a sibling "Sponsored" caption near the result.
+        const cite = a.closest('div,li,article');
+        if (cite && /\bsponsored\b|\bad\b·|·\s*ad\b/i.test((cite.innerText || '').slice(0, 60))) sponsored = true;
+      }
+      if (!sponsored) continue;
+      let destHost = ''; try { destHost = new URL(a.href).hostname; } catch (_) { continue; }
+      const destReg = registrable(destHost);
+      // Displayed domain: a cite element or a domain-looking text token.
+      const cite = a.querySelector('cite') || a.closest('div,li,article') && (a.closest('div,li,article').querySelector('cite'));
+      let shownReg = '';
+      if (cite) { const m = (cite.textContent || '').match(/([a-z0-9-]+\.)+[a-z]{2,}/i); if (m) shownReg = registrable(m[0].replace(/^https?:\/\//, '')); }
+      if (!shownReg || shownReg === destReg) continue;
+      // Mismatch on a sponsored result → mark it.
+      a.__ssSerp = true;
+      const chip = document.createElement('span');
+      chip.className = 'scamshield-serp';
+      chip.textContent = '⚠ ScamShield: this ad goes to ' + destReg + ', not ' + shownReg;
+      (a.closest('div,li,article') || a).appendChild(chip);
+      flagged++;
+    }
+    return flagged;
+  }
+
   async function run() {
     if (!SS || typeof SS.scoreUrl !== 'function') return; // engine not loaded
     // Sub-frame gate: only frames a user can actually interact with, and only
@@ -294,6 +376,10 @@
     const settings = await send('getSettings');
     if (!settings || !settings.enabled) return;
     const pageDomain = registrable(location.hostname);
+    // Sponsored-search check runs even on (trusted) search-engine hosts.
+    if (IS_TOP && settings.serpCheck !== false && SEARCH_HOSTS.test(location.hostname)) {
+      try { checkSerp(); } catch (_) {}
+    }
     // Trusted (built-in safe list or user allowlist): report safe, do nothing else.
     if (isTrustedHost(location.hostname, settings)) {
       if (IS_TOP) await send('reportVerdict', { verdict: { level: 'safe', score: 0, reasons: [], modelUsed: false } });
@@ -323,6 +409,23 @@
       } catch (_) { /* page analysis is best-effort */ }
     }
     let verdict = SS.fuse({ modelProb, urlRules, domRules, contentProb, iconMatch });
+
+    // Fake-shop check (0.6.0) — top frame, storefront pages only. Reported to
+    // the popup's shopping card; a strong result nudges the verdict to at most
+    // suspicious (never a full-screen block — these signals are probabilistic).
+    if (IS_TOP && settings.shopGuard !== false && SS.scoreShop) {
+      try {
+        const shop = await collectShop((document.body ? document.body.innerText : ''), location.hostname);
+        const sr = SS.scoreShop(shop);
+        if (sr.flags.length) {
+          send('shopFindings', { flags: sr.flags, level: sr.level });
+          if (sr.level === 'suspicious' && verdict.level === 'safe') {
+            verdict = Object.assign({}, verdict, { level: 'suspicious', score: Math.max(verdict.score, 0.55),
+              reasons: [(sr.flags[0] && sr.flags[0].detail) || 'This shop shows several scam warning signs.'].concat(verdict.reasons || []) });
+          }
+        }
+      } catch (_) { /* shop check is best-effort */ }
+    }
     // Engagement gating (0.6.0, mirrors Chrome's lookalike personalisation):
     // a flag-less "suspicious" — pure heuristic/model probability, no decisive
     // signal — is suppressed on sites this user visits often. Dangerous

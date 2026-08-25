@@ -41,6 +41,8 @@ const DEFAULTS = {
   leakyFormGuard: true,      // warn when a site sends your email before submit
   fingerprintDetect: true,   // detect + name device-fingerprinting scripts
   notificationGuard: true,   // guard the "click Allow to verify" push lure
+  shopGuard: true,           // fake-shop red-flag checks (popup card, note tier)
+  serpCheck: true,           // sponsored-search destination mismatch check
   strictMode: false,         // treat "suspicious" as blocking, simpler wording
   theme: 'auto',             // 'auto' | 'light' | 'dark' — extension-page appearance
   pausedSites: {},           // domain -> until (ms epoch); time-boxed "trust this site"
@@ -473,6 +475,8 @@ const frameVerdicts = new Map();
 // Per-tab privacy findings (0.6.0): leaky forms, fingerprinting, notify lures.
 // Session-mirrored so the popup survives SW eviction; never leaves the device.
 const privacyFindings = new Map();
+// Per-tab fake-shop findings (0.6.0), in-memory only (cheap to recompute).
+const shopFindings = new Map();
 function sessionPrivacyKey(tabId) { return 'privacy:' + tabId; }
 async function persistPrivacy(tabId, list) {
   if (!hasSessionStorage) return;
@@ -500,6 +504,7 @@ if (api.tabs && api.tabs.onRemoved) {
     lastVerdict.delete(tabId);
     frameVerdicts.delete(tabId);
     privacyFindings.delete(tabId);
+    shopFindings.delete(tabId);
     if (hasSessionStorage) { try { api.storage.session.remove(sessionPrivacyKey(tabId)); } catch (_) {} }
     clearPersistedVerdict(tabId);
   });
@@ -541,6 +546,7 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
             // Fresh top-level URL — clear stale privacy findings for the tab.
             if (fv && fv.url !== tabUrl && !fromSubframe) {
               privacyFindings.delete(tabId);
+              shopFindings.delete(tabId);
               if (hasSessionStorage) { try { api.storage.session.remove(sessionPrivacyKey(tabId)); } catch (_) {} }
             }
             fv = { url: tabUrl, top: null, sub: null };
@@ -592,6 +598,13 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         if (list == null) list = await readPersistedPrivacy(msg.tabId);
         sendResponse({ findings: list || [] }); break;
       }
+      case 'shopFindings': {
+        const tabId = sender.tab && sender.tab.id;
+        if (tabId != null && Array.isArray(msg.flags)) shopFindings.set(tabId, { level: msg.level, flags: msg.flags.slice(0, 6) });
+        sendResponse({ ok: true }); break;
+      }
+      case 'getShopFindings':
+        sendResponse(shopFindings.get(msg.tabId) || { level: 'none', flags: [] }); break;
       case 'setSync': {
         await setSettings({ syncEnabled: !!msg.on });
         if (msg.on) { await pushSync(); sendResponse({ ok: !!(api.storage && api.storage.sync) }); }
@@ -611,6 +624,27 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         const SS = globalThis.ScamShield;
         sendResponse({ engaged: SS.engagement.isEngaged(cur.engagement || {}, msg.domain, Date.now()) });
         break;
+      }
+      case 'shopCountdown': {
+        // Fake-countdown detection: a real "sale ends" timer only ever counts
+        // down. If we saw this origin's timer at N seconds a while ago and it
+        // is now back near (or above) N, the urgency is fake. Stored per
+        // registrable domain, capped, pruned.
+        let reset = false;
+        try {
+          const cur = await api.storage.local.get('shopTimers');
+          const map = cur.shopTimers || {};
+          const prev = map[msg.domain];
+          const now = Date.now();
+          const secs = Number(msg.seconds) || 0;
+          if (prev && now - prev.ts > 45000 && secs >= prev.seconds - 5) reset = true;
+          // keep the max-ish baseline for this origin
+          if (!prev || secs > prev.seconds || now - prev.ts > 6 * 3600 * 1000) map[msg.domain] = { seconds: secs, ts: now };
+          const keys = Object.keys(map);
+          if (keys.length > 300) { keys.sort((a, b) => map[a].ts - map[b].ts); for (const k of keys.slice(0, keys.length - 300)) delete map[k]; }
+          await api.storage.local.set({ shopTimers: map });
+        } catch (_) {}
+        sendResponse({ reset }); break;
       }
       case 'getVerdict': {
         let v = lastVerdict.get(msg.tabId);

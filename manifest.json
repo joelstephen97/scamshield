@@ -23,6 +23,7 @@
         "engine/techscam_rules.js",
         "engine/clickfix_rules.js",
         "engine/fakeupdate_rules.js",
+        "engine/shop_rules.js",
         "engine/verdict.js",
         "engine/url_model.js",
         "engine/page_features.js",

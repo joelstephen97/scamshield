@@ -117,10 +117,23 @@ async function init() {
     $('reportbtn').hidden = true; $('reportdone').hidden = false; $('reportdone').textContent = r && r.via === 'relay' ? 'Thanks — sent' : 'Thanks — noted';
   });
 
-  const [st, h, pf] = await Promise.all([send('getTabStats', { domain }), send('getHistory'), send('getPrivacyFindings', { tabId: tab.id })]);
+  const [st, h, pf, shop] = await Promise.all([send('getTabStats', { domain }), send('getHistory'), send('getPrivacyFindings', { tabId: tab.id }), send('getShopFindings', { tabId: tab.id })]);
   $('tile-site').querySelector('b').textContent = String((st && st.siteCount) || 0);
   renderHistoryList((h && h.history) || []);
   renderPrivacy((pf && pf.findings) || []);
+  renderShop(shop || { flags: [] });
+}
+function renderShop(shop) {
+  const flags = (shop && shop.flags) || [];
+  if (!flags.length) return;
+  $('shopcard').hidden = false;
+  const ul = $('shoplist'); ul.replaceChildren();
+  for (const f of flags.slice(0, 6)) {
+    const li = document.createElement('li');
+    const chip = document.createElement('span'); chip.className = 'chip' + (shop.level === 'suspicious' ? ' brand' : ''); chip.textContent = f.label || 'Flag';
+    const span = document.createElement('span'); span.textContent = f.detail || '';
+    li.append(chip, span); ul.appendChild(li);
+  }
 }
 function renderPrivacy(findings) {
   if (!findings.length) return;
