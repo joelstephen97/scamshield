@@ -31,6 +31,10 @@ async function load() {
   setSwitch('clickfix', s.clickFixGuard !== false); setSwitch('fakeupdate', s.fakeUpdateGuard !== false);
   setSwitch('techscam', s.techScamGuard !== false); setSwitch('clipboard', s.clipboardGuard !== false);
   setSwitch('wallet', s.walletGuard !== false); setSwitch('strict', s.strictMode === true);
+  setSwitch('leakyform', s.leakyFormGuard !== false); setSwitch('fingerprint', s.fingerprintDetect !== false); setSwitch('notifyguard', s.notificationGuard !== false);
+  setSwitch('sync', s.syncEnabled === true);
+  $('net-feed').textContent = s.otaUrl ? (s.lastOtaAt ? F.relTime(s.lastOtaAt) : 'on install + every 12h') : 'disabled';
+  $('net-report').textContent = s.reportingOptIn ? (s.lastReportAt ? F.relTime(s.lastReportAt) : 'when flagged') : 'off (default)';
   $('otaurl').value = s.otaUrl || ''; $('theme').value = s.theme || 'auto';
   $('feedstatus').textContent = s.lastOtaAt ? `Updated ${F.relTime(s.lastOtaAt)} · ${Number(s.lastOtaCount || 0).toLocaleString()} rules` : 'Never updated';
   $('feeddot').classList.toggle('ok', !!s.lastOtaAt);
@@ -58,6 +62,21 @@ function renderHistory(list) {
 }
 bindSwitch('enabled', 'enabled'); bindSwitch('block', 'blockKnownBad'); bindSwitch('hide', 'hideScamContent'); bindSwitch('pageanalysis', 'pageAnalysis'); bindSwitch('report', 'reportingOptIn');
 bindSwitch('clickfix', 'clickFixGuard'); bindSwitch('fakeupdate', 'fakeUpdateGuard'); bindSwitch('techscam', 'techScamGuard'); bindSwitch('clipboard', 'clipboardGuard'); bindSwitch('wallet', 'walletGuard'); bindSwitch('strict', 'strictMode');
+bindSwitch('leakyform', 'leakyFormGuard'); bindSwitch('fingerprint', 'fingerprintDetect'); bindSwitch('notifyguard', 'notificationGuard');
+$('sync').addEventListener('change', async () => { const r = await send('setSync', { on: $('sync').checked }); $('sync').closest('.switch').classList.toggle('on', $('sync').checked); flash($('sync').checked ? (r && r.ok ? 'Sync on' : 'Sync unavailable') : 'Sync off'); });
+$('exportbtn').addEventListener('click', async () => {
+  const data = await send('exportSettings');
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'scamshield-settings.json'; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000); flash('Exported');
+});
+$('importbtn').addEventListener('click', () => $('importfile').click());
+$('importfile').addEventListener('change', async () => {
+  const f = $('importfile').files[0]; if (!f) return;
+  try { const obj = JSON.parse(await f.text()); const r = await send('importSettings', { data: obj }); flash(r && r.ok ? 'Imported' : 'Invalid file'); load(); }
+  catch (_) { flash('Invalid file'); }
+  $('importfile').value = '';
+});
 $('whatsent').addEventListener('click', () => { $('whatsentbody').hidden = !$('whatsentbody').hidden; });
 $('theme').addEventListener('change', async () => { await send('setSettings', { patch: { theme: $('theme').value } }); globalThis.SSTheme.applyTheme($('theme').value); flash('Saved'); });
 $('otaurl').addEventListener('change', async () => { await send('setSettings', { patch: { otaUrl: $('otaurl').value.trim() } }); flash('Saved'); });

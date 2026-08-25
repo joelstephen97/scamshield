@@ -46,6 +46,27 @@ test('options: strict mode blocks a merely-suspicious page with the interstitial
   await sw.evaluate(() => setSettings({ strictMode: false }));
 });
 
+test('options: export produces a settings file and import applies it', async ({ context }) => {
+  const sw = context.serviceWorkers()[0];
+  await sw.evaluate(() => setSettings({ walletGuard: false, allowlist: ['exported-trust.example'] }));
+  const data = await sw.evaluate(async () => exportSettings(await getSettings()));
+  expect(data.app).toBe('scamshield');
+  expect(data.settings.walletGuard).toBe(false);
+  expect(data.settings.allowlist).toContain('exported-trust.example');
+  await sw.evaluate(() => setSettings({ walletGuard: true, allowlist: [] }));
+  await sw.evaluate((d) => setSettings(sanitizeImport(d)), data);
+  const after = await sw.evaluate(() => getSettings());
+  expect(after.walletGuard).toBe(false);
+  expect(after.allowlist).toContain('exported-trust.example');
+  await sw.evaluate(() => setSettings({ walletGuard: true, allowlist: [] }));
+});
+
+test('options: import rejects a malformed file', async ({ context }) => {
+  const sw = context.serviceWorkers()[0];
+  const patch = await sw.evaluate(() => sanitizeImport({ nonsense: true }));
+  expect(patch).toBe(null);
+});
+
 test('onboarding renders', async ({ context, extensionId }) => {
   const page = await context.newPage();
   await page.goto(`chrome-extension://${extensionId}/onboarding.html`);

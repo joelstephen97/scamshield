@@ -121,6 +121,46 @@
     }
   });
 
+  // --- Privacy pack bridges (0.6.0) — detection-only, gated by settings ---
+  const privacySeen = new Set();
+  window.addEventListener('scamshield:leaky-form', async (e) => {
+    const d = (e && e.detail) || {};
+    const settings = await send('getSettings');
+    if (!settings || !settings.enabled || settings.leakyFormGuard === false) return;
+    if (isTrustedHost(location.hostname, settings)) return;
+    const key = 'leak|' + d.destHost + '|' + d.kind;
+    if (privacySeen.has(key)) return; privacySeen.add(key);
+    const how = d.kind === 'plain' ? 'in plain text' : 'as a hashed (' + d.kind.toUpperCase() + ') identifier';
+    if (SS.actions && SS.actions.privacyToast) {
+      SS.actions.privacyToast({ text: 'This site sent your email/phone to ' + d.destHost + ' ' + how + ' — before you pressed submit.' });
+    }
+    send('privacyFinding', { finding: { kind: 'leaky-form', host: d.destHost, detail: d.kind } });
+  });
+  window.addEventListener('scamshield:fingerprint', async (e) => {
+    const d = (e && e.detail) || {};
+    const settings = await send('getSettings');
+    if (!settings || !settings.enabled || settings.fingerprintDetect === false) return;
+    if (isTrustedHost(location.hostname, settings)) return;
+    let host = d.origin; try { host = new URL(d.origin).hostname; } catch (_) {}
+    const key = 'fp|' + host;
+    if (privacySeen.has(key)) return; privacySeen.add(key);
+    send('privacyFinding', { finding: { kind: 'fingerprint', host, detail: (d.surfaces || []).join(',') } });
+  });
+  window.addEventListener('scamshield:notify-request', async () => {
+    const settings = await send('getSettings');
+    if (!settings || !settings.enabled || settings.notificationGuard === false) return;
+    if (isTrustedHost(location.hostname, settings)) return;
+    // Lure heuristic: a permission prompt on a page that also shows "allow to
+    // continue / prove you are human" copy is the classic push-scam trick.
+    const bt = (document.body ? document.body.innerText : '').toLowerCase();
+    if (/allow.{0,20}(to (continue|proceed|verify|watch|download)|if you are not a robot|to confirm you are human)|click\s+allow/i.test(bt)) {
+      if (SS.actions && SS.actions.privacyToast) {
+        SS.actions.privacyToast({ level: 'warn', text: 'This site is trying to get notification permission using a "click Allow to continue" trick. You can safely Block it.' });
+      }
+      send('privacyFinding', { finding: { kind: 'notify-lure', host: location.hostname, detail: '' } });
+    }
+  });
+
   function collectSignals(settings) {
     settings = settings || {};
     const pageHost = location.hostname;

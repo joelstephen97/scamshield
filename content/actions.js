@@ -238,6 +238,16 @@
     document.addEventListener('keydown', onKey, true); cancel.focus();
   }
 
+  // Privacy findings are informational (badge/popup tier), never blocking.
+  function privacyToast(detail) {
+    const t = el('div', NS + '-toast ' + (detail.level === 'warn' ? 'warn' : ''));
+    t.setAttribute('role', 'status');
+    t.append(iconSpan('suspicious'), el('span', 'ss-msg', detail.text || 'A privacy issue was detected on this page.'));
+    const x = el('button', null, 'Dismiss'); x.addEventListener('click', () => t.remove());
+    t.append(x); (document.body || document.documentElement).appendChild(t);
+    setTimeout(() => t.remove(), 14000);
+  }
+
   function clipboardToast(detail) {
     const old = document.querySelector('.' + NS + '-toast'); if (old) old.remove();
     const t = el('div', NS + '-toast ' + (detail.level === 'dangerous' ? 'danger' : 'warn'));
@@ -271,5 +281,5 @@
   }
 
   root.ScamShield = root.ScamShield || {};
-  root.ScamShield.actions = { showBanner, guardForms, hideScamBlocks, clearAll, walletConfirmOverlay, clipboardToast, techScamEscapeOverlay, supportToast, dangerInterstitial, armDelayed };
+  root.ScamShield.actions = { showBanner, guardForms, hideScamBlocks, clearAll, walletConfirmOverlay, clipboardToast, techScamEscapeOverlay, supportToast, dangerInterstitial, armDelayed, privacyToast };
 })(typeof globalThis !== 'undefined' ? globalThis : self);

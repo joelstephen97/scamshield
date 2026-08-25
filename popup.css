@@ -27,3 +27,5 @@ body{width:100%;min-height:420px;overflow:visible;display:flex;flex-direction:co
 .foot .lock{display:flex;align-items:center;gap:5px;flex:1}
 .foot a{color:var(--accent);text-decoration:none}
 .toast-inline{font-size:12px;color:var(--safe)}
+
+.cardh{font-size:12px;font-weight:600;color:var(--muted);margin:0 0 8px;text-transform:uppercase;letter-spacing:.04em}

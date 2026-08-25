@@ -1,0 +1,22 @@
+<!doctype html><meta charset="utf-8"><title>Home</title>
+<h1>Welcome</h1>
+<canvas id="c" width="200" height="50"></canvas>
+<script>
+  // Touches canvas readback + WebGL params + audio — the classic device
+  // fingerprinting signature.
+  try {
+    var cv = document.getElementById('c');
+    var ctx = cv.getContext('2d');
+    ctx.textBaseline = 'top'; ctx.font = '14px Arial'; ctx.fillText('ScamShield fp test', 2, 2);
+    cv.toDataURL();
+    ctx.getImageData(0, 0, 200, 50);
+  } catch (_) {}
+  try {
+    var gl = document.createElement('canvas').getContext('webgl');
+    for (var i = 0; i < 6; i++) gl.getParameter(gl.VERSION);
+  } catch (_) {}
+  try {
+    var oac = new OfflineAudioContext(1, 44100, 44100);
+    oac.startRendering();
+  } catch (_) {}
+</script>

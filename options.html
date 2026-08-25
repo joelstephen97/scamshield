@@ -33,6 +33,12 @@
     <div class="setrow"><div class="t"><b>Wallet drainer protection</b><span>Warns before you approve token spends, "Permit" signatures or account delegations that drainers abuse.</span></div><label class="switch" for="wallet"><input type="checkbox" id="wallet" class="sr"><i></i></label></div>
   </details>
 
+  <details class="grp"><summary><b>Privacy</b><span>Catches sites that leak your details or track your device — all on your device.</span></summary>
+    <div class="setrow"><div class="t"><b>Leaky-form warning</b><span>Warns when a site sends the email or phone you typed to a tracker <b>before</b> you press submit.</span></div><label class="switch" for="leakyform"><input type="checkbox" id="leakyform" class="sr"><i></i></label></div>
+    <div class="setrow"><div class="t"><b>Fingerprinting detection</b><span>Tells you which script is fingerprinting your device to track you across sites.</span></div><label class="switch" for="fingerprint"><input type="checkbox" id="fingerprint" class="sr"><i></i></label></div>
+    <div class="setrow"><div class="t"><b>Notification-trap warning</b><span>Flags the "click Allow to continue" trick sites use to spam you with pop-ups.</span></div><label class="switch" for="notifyguard"><input type="checkbox" id="notifyguard" class="sr"><i></i></label></div>
+  </details>
+
   <div class="setrow"><div class="t"><b>Strict mode</b><span>For anyone who wants maximum caution: even "suspicious" pages are blocked with a full-screen warning and simpler wording. Best for helping a less confident family member stay safe.</span></div><label class="switch" for="strict"><input type="checkbox" id="strict" class="sr"><i></i></label></div>
 
   <div class="setrow"><div class="t"><b>Help make ScamShield smarter</b><span>Sends the <b>site name</b> (never the full address or page text) and anonymous risk signals of pages flagged dangerous, and of sites you report. Off by default.</span><button id="whatsent" class="exp">What exactly is sent ▾</button>
@@ -61,6 +67,16 @@
   <div class="setrow"><div class="t"><b>Appearance</b><span>Follow your system, or pick one.</span></div><select id="theme"><option value="auto">Auto</option><option value="light">Light</option><option value="dark">Dark</option></select></div>
   <div class="setrow"><div class="t"><b>Links</b><span><a href="https://joelstephen97.github.io/scamshield/privacy.html" target="_blank" rel="noopener">Privacy policy</a> · <a href="https://github.com/joelstephen97/scamshield" target="_blank" rel="noopener">GitHub</a> · <a href="https://github.com/joelstephen97/scamshield/issues/new" target="_blank" rel="noopener">Report an issue</a> · <a href="https://github.com/joelstephen97/scamshield/blob/main/CHANGELOG.md" target="_blank" rel="noopener">What's new</a></span></div></div>
   <div class="setrow"><div class="t"><b>Support</b><span>ScamShield is free and runs entirely on your device. <a id="support" href="https://github.com/sponsors/joelstephen97" target="_blank" rel="noopener">Sponsor on GitHub</a> · <a href="https://www.paypal.me/joelstephen1" target="_blank" rel="noopener">Donate via PayPal</a></span></div></div>
+  <h3>What leaves your device</h3>
+  <p class="lead">ScamShield makes no analytics, telemetry or tracking requests — ever. The only requests it can make are these three, and you can verify it yourself: open your browser's <b>DevTools → Network</b> tab, use ScamShield normally, and you will see nothing beyond them.</p>
+  <ul id="netreceipt" class="list">
+    <li><span><b>Threat-list download</b><br><span class="meta">The public blocklist file — the same for everyone, nothing about you is sent.</span></span><span class="meta" id="net-feed">—</span></li>
+    <li><span><b>Community reports</b><br><span class="meta">Only if you turned reporting on. Site name + numeric signals, never URLs or page text.</span></span><span class="meta" id="net-report">—</span></li>
+    <li><span><b>Page icon check</b><br><span class="meta">Fetches a page's own favicon to spot brand look-alikes. No third party, no cookies.</span></span><span class="meta">per page</span></li>
+  </ul>
+  <p class="hint">Settings can be exported/imported below and (optionally) synced across your own devices.</p>
+  <div class="setrow"><div class="t"><b>Back up settings</b><span>Save your settings and trusted sites to a file, or load them on another computer.</span></div><span><button id="exportbtn" class="btn">Export</button> <button id="importbtn" class="btn">Import</button><input type="file" id="importfile" accept="application/json" hidden></span></div>
+  <div class="setrow"><div class="t"><b>Sync across my devices</b><span>Keep your settings and trusted sites in step on every browser where you're signed in. Uses your browser's own sync — ScamShield still has no account or server. Off by default.</span></div><label class="switch" for="sync"><input type="checkbox" id="sync" class="sr"><i></i></label></div>
 </section>
 <p id="status" class="toast" role="status"></p>
 </main></div>

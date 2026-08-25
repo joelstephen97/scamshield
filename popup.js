@@ -117,9 +117,27 @@ async function init() {
     $('reportbtn').hidden = true; $('reportdone').hidden = false; $('reportdone').textContent = r && r.via === 'relay' ? 'Thanks — sent' : 'Thanks — noted';
   });
 
-  const [st, h] = await Promise.all([send('getTabStats', { domain }), send('getHistory')]);
+  const [st, h, pf] = await Promise.all([send('getTabStats', { domain }), send('getHistory'), send('getPrivacyFindings', { tabId: tab.id })]);
   $('tile-site').querySelector('b').textContent = String((st && st.siteCount) || 0);
   renderHistoryList((h && h.history) || []);
+  renderPrivacy((pf && pf.findings) || []);
+}
+function renderPrivacy(findings) {
+  if (!findings.length) return;
+  $('privacycard').hidden = false;
+  const ul = $('privacylist'); ul.replaceChildren();
+  const label = { 'leaky-form': 'Data leak', fingerprint: 'Tracking', 'notify-lure': 'Pop-ups' };
+  const text = (f) =>
+    f.kind === 'leaky-form' ? ('Sent your email/phone to ' + f.host + (f.detail && f.detail !== 'plain' ? ' (hashed)' : '') + ' before you submitted.') :
+    f.kind === 'fingerprint' ? (f.host + ' is fingerprinting your device to track you.') :
+    f.kind === 'notify-lure' ? ('This site tried a "click Allow" notification trick.') :
+    'Privacy issue detected.';
+  for (const f of findings.slice(0, 5)) {
+    const li = document.createElement('li');
+    const chip = document.createElement('span'); chip.className = 'chip brand'; chip.textContent = label[f.kind] || 'Privacy';
+    const span = document.createElement('span'); span.textContent = text(f);
+    li.append(chip, span); ul.appendChild(li);
+  }
 }
 function renderHistoryList(list) {
   if (!list.length) return; $('recent').hidden = false; const ul = $('hist'); ul.replaceChildren();

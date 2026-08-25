@@ -38,13 +38,26 @@ const DEFAULTS = {
   walletGuard: true,         // risky wallet-request interstitial
   clipboardGuard: true,      // clipboard-hijack toast
   techScamGuard: true,       // tech-support scare-page escape
+  leakyFormGuard: true,      // warn when a site sends your email before submit
+  fingerprintDetect: true,   // detect + name device-fingerprinting scripts
+  notificationGuard: true,   // guard the "click Allow to verify" push lure
   strictMode: false,         // treat "suspicious" as blocking, simpler wording
   theme: 'auto',             // 'auto' | 'light' | 'dark' — extension-page appearance
   pausedSites: {},           // domain -> until (ms epoch); time-boxed "trust this site"
   whatsNewSeen: '',          // last extension version whose what's-new was acknowledged
   lastOtaAt: 0,              // ms epoch of the last blocklist OTA attempt (success or no-op)
-  lastOtaCount: 0            // number of blocklist rules from the last successful OTA
+  lastOtaCount: 0,           // number of blocklist rules from the last successful OTA
+  lastReportAt: 0,           // ms epoch of the last community report actually sent
+  syncEnabled: false         // mirror settings to chrome.storage.sync (opt-in)
 };
+
+// Settings mirrored to chrome.storage.sync when syncEnabled (0.6.0). Only
+// user preferences + trusted sites — never stats, feed cursors or queues, and
+// never anything that could identify the user. Kept well under sync's 8KB/item.
+const SYNCED_KEYS = ['enabled', 'hideScamContent', 'blockKnownBad', 'pageAnalysis',
+  'clickFixGuard', 'fakeUpdateGuard', 'walletGuard', 'clipboardGuard', 'techScamGuard',
+  'leakyFormGuard', 'fingerprintDetect', 'notificationGuard', 'strictMode',
+  'reportingOptIn', 'allowlist', 'theme', 'otaUrl'];
 
 // Local-only protection history: ring buffer of { ts, host, kind, level }.
 // Hostnames only, never full URLs; capped; user-clearable. Never transmitted.
@@ -233,11 +246,61 @@ async function setSettings(patch) {
       } catch (e) { /* ruleset toggle is best-effort */ }
     }
     if ('reportingOptIn' in patch && !patch.reportingOptIn) await api.storage.local.set({ reportQueue: [] });
+    // Mirror preference changes to sync when enabled (best-effort).
+    if (next.syncEnabled && Object.keys(patch).some((k) => SYNCED_KEYS.includes(k))) pushSync(next);
     return next;
   };
   const result = settingsChain.then(run, run);
   settingsChain = result.then(() => {}, () => {});
   return result;
+}
+
+// ---- Settings sync + export/import (0.6.0) ----
+async function pushSync(settings) {
+  if (!api.storage || !api.storage.sync) return;
+  try {
+    const s = settings || await getSettings();
+    const out = {};
+    for (const k of SYNCED_KEYS) out[k] = s[k];
+    await api.storage.sync.set({ ssSettings: out });
+  } catch (_) { /* sync is best-effort (quota, disabled) */ }
+}
+async function pullSync() {
+  if (!api.storage || !api.storage.sync) return { ok: false };
+  try {
+    const got = await api.storage.sync.get('ssSettings');
+    if (got && got.ssSettings) { await setSettings(got.ssSettings); return { ok: true }; }
+    return { ok: true, empty: true };
+  } catch (_) { return { ok: false }; }
+}
+// Live-apply changes made on another device.
+if (api.storage && api.storage.onChanged) {
+  api.storage.onChanged.addListener(async (changes, area) => {
+    if (area !== 'sync' || !changes.ssSettings) return;
+    const s = await getSettings();
+    if (!s.syncEnabled) return;
+    const incoming = changes.ssSettings.newValue;
+    if (incoming) { const filtered = {}; for (const k of SYNCED_KEYS) if (k in incoming) filtered[k] = incoming[k]; await setSettings(filtered); }
+  });
+}
+function exportSettings(s) {
+  const out = { app: 'scamshield', schema: 1, exportedAt: Date.now(), settings: {} };
+  for (const k of SYNCED_KEYS) out.settings[k] = s[k];
+  return out;
+}
+function sanitizeImport(obj) {
+  const src = obj && obj.settings ? obj.settings : obj;
+  if (!src || typeof src !== 'object') return null;
+  const patch = {};
+  for (const k of SYNCED_KEYS) {
+    if (!(k in src)) continue;
+    const v = src[k];
+    if (k === 'allowlist') { if (Array.isArray(v)) patch[k] = v.filter((d) => typeof d === 'string').slice(0, 2000); }
+    else if (k === 'theme') { if (['auto', 'light', 'dark'].includes(v)) patch[k] = v; }
+    else if (k === 'otaUrl') { if (typeof v === 'string' && (v === '' || /^https:\/\//i.test(v))) patch[k] = v; }
+    else if (typeof v === 'boolean') patch[k] = v;
+  }
+  return Object.keys(patch).length ? patch : null;
 }
 
 // ---- Opt-in community reporting (spec §6). Nothing runs unless reportingOptIn. ----
@@ -268,6 +331,7 @@ async function flushReports() {
       const cur = await api.storage.local.get('reportQueue');
       const q = Array.isArray(cur.reportQueue) ? cur.reportQueue : [];
       const keep = [];
+      let sentAny = false;
       for (const item of q) {
         const { _tries, ...body } = item;
         let ok = false, drop = false;
@@ -275,9 +339,11 @@ async function flushReports() {
           const res = await fetch(s.reportUrl, { method: 'POST', credentials: 'omit', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
           ok = res.ok; drop = res.status >= 400 && res.status < 500;
         } catch (_) { ok = false; }
+        if (ok) sentAny = true;
         if (!ok && !drop && _tries + 1 < REPORT_RETRIES) keep.push(Object.assign({}, item, { _tries: _tries + 1 }));
       }
       await api.storage.local.set({ reportQueue: keep });
+      if (sentAny) await setSettings({ lastReportAt: Date.now() });
     } while (flushPending);
   } finally { flushing = false; }
 }
@@ -404,6 +470,18 @@ const lastVerdict = new Map();
 // Per-tab frame verdict split (all_frames since 0.6.0): { url, top, sub } so
 // racy frame reports merge instead of clobbering; see reportVerdict below.
 const frameVerdicts = new Map();
+// Per-tab privacy findings (0.6.0): leaky forms, fingerprinting, notify lures.
+// Session-mirrored so the popup survives SW eviction; never leaves the device.
+const privacyFindings = new Map();
+function sessionPrivacyKey(tabId) { return 'privacy:' + tabId; }
+async function persistPrivacy(tabId, list) {
+  if (!hasSessionStorage) return;
+  try { await api.storage.session.set({ [sessionPrivacyKey(tabId)]: list }); } catch (_) {}
+}
+async function readPersistedPrivacy(tabId) {
+  if (!hasSessionStorage) return null;
+  try { const k = sessionPrivacyKey(tabId); const s = await api.storage.session.get(k); return s[k] != null ? s[k] : null; } catch (_) { return null; }
+}
 function sessionVerdictKey(tabId) { return 'verdict:' + tabId; }
 async function persistVerdict(tabId, verdict) {
   if (!hasSessionStorage) return;
@@ -421,6 +499,8 @@ if (api.tabs && api.tabs.onRemoved) {
   api.tabs.onRemoved.addListener((tabId) => {
     lastVerdict.delete(tabId);
     frameVerdicts.delete(tabId);
+    privacyFindings.delete(tabId);
+    if (hasSessionStorage) { try { api.storage.session.remove(sessionPrivacyKey(tabId)); } catch (_) {} }
     clearPersistedVerdict(tabId);
   });
 }
@@ -457,7 +537,14 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
           const fromSubframe = msg.subframe === true || (typeof sender.frameId === 'number' && sender.frameId !== 0);
           const tabUrl = (sender.tab && sender.tab.url) || '';
           let fv = frameVerdicts.get(tabId);
-          if (!fv || fv.url !== tabUrl) fv = { url: tabUrl, top: null, sub: null };
+          if (!fv || fv.url !== tabUrl) {
+            // Fresh top-level URL — clear stale privacy findings for the tab.
+            if (fv && fv.url !== tabUrl && !fromSubframe) {
+              privacyFindings.delete(tabId);
+              if (hasSessionStorage) { try { api.storage.session.remove(sessionPrivacyKey(tabId)); } catch (_) {} }
+            }
+            fv = { url: tabUrl, top: null, sub: null };
+          }
           if (fromSubframe) {
             if (rankOf(msg.verdict) > rankOf(fv.sub)) fv.sub = Object.assign({}, msg.verdict, { subframe: true });
           } else {
@@ -485,6 +572,38 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
           // Engagement only accrues from clean top-frame visits.
           if (!fromSubframe && incomingLevel === 'safe') recordEngagement(tabUrl);
         }
+        sendResponse({ ok: true }); break;
+      }
+      case 'privacyFinding': {
+        const tabId = sender.tab && sender.tab.id;
+        if (tabId != null && msg.finding) {
+          const list = privacyFindings.get(tabId) || [];
+          const f = msg.finding;
+          if (!list.some((x) => x.kind === f.kind && x.host === f.host)) {
+            list.push({ kind: f.kind, host: f.host, detail: f.detail || '', ts: Date.now() });
+            privacyFindings.set(tabId, list.slice(-20));
+            persistPrivacy(tabId, privacyFindings.get(tabId));
+          }
+        }
+        sendResponse({ ok: true }); break;
+      }
+      case 'getPrivacyFindings': {
+        let list = privacyFindings.get(msg.tabId);
+        if (list == null) list = await readPersistedPrivacy(msg.tabId);
+        sendResponse({ findings: list || [] }); break;
+      }
+      case 'setSync': {
+        await setSettings({ syncEnabled: !!msg.on });
+        if (msg.on) { await pushSync(); sendResponse({ ok: !!(api.storage && api.storage.sync) }); }
+        else { try { if (api.storage && api.storage.sync) await api.storage.sync.remove('ssSettings'); } catch (_) {} sendResponse({ ok: true }); }
+        break;
+      }
+      case 'exportSettings':
+        sendResponse(exportSettings(await getSettings())); break;
+      case 'importSettings': {
+        const patch = sanitizeImport(msg.data);
+        if (!patch) { sendResponse({ ok: false }); break; }
+        await setSettings(patch);
         sendResponse({ ok: true }); break;
       }
       case 'getEngagement': {
@@ -556,4 +675,4 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 // module-scoped. Re-attach the debug/test surface that used to live on the
 // classic worker's global scope — the e2e suite drives these via
 // worker.evaluate, and they're handy in the SW console.
-Object.assign(globalThis, { DEFAULT_FEED_URL, getSettings, setSettings, handleUserReport, runOtaUpdate, flushReports, queueReport });
+Object.assign(globalThis, { DEFAULT_FEED_URL, getSettings, setSettings, handleUserReport, runOtaUpdate, flushReports, queueReport, exportSettings, sanitizeImport, pushSync, pullSync });
