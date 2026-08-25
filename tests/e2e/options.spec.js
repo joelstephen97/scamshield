@@ -18,6 +18,34 @@ test('options: report toggle shows the disclosure and the "what is sent" expande
   await page.click('#whatsent'); await expect(page.locator('#whatsentbody')).toBeVisible();
   await expect(page.locator('#whatsentbody')).toContainText(/never the full address/i);
 });
+test('options: grouped feature toggles persist and gate a guard', async ({ context, extensionId }) => {
+  const page = await context.newPage(); await page.goto(`chrome-extension://${extensionId}/options.html`);
+  // New per-feature toggles are present and default on.
+  for (const id of ['clickfix', 'fakeupdate', 'techscam', 'clipboard', 'wallet']) {
+    await expect(page.locator('#' + id)).toBeChecked();
+  }
+  await expect(page.locator('#strict')).not.toBeChecked();
+  // Turning off the ClickFix guard stops the interstitial on the fixture page.
+  await page.click('label[for="clickfix"]'); await expect(page.locator('#status')).toHaveText(/Saved/);
+  const victim = await context.newPage();
+  await victim.goto('http://localhost:5599/clickfix.html');
+  await victim.waitForTimeout(1200);
+  await expect(victim.locator('.scamshield-interstitial')).toHaveCount(0);
+  // Re-enable so later tests are unaffected.
+  await page.bringToFront(); await page.click('label[for="clickfix"]');
+});
+
+test('options: strict mode blocks a merely-suspicious page with the interstitial', async ({ context, extensionId }) => {
+  const sw = context.serviceWorkers()[0];
+  await sw.evaluate(() => setSettings({ strictMode: true }));
+  const page = await context.newPage();
+  await page.goto('http://localhost:5599/content-suspicious.html');
+  // A page that would normally get a suspicious banner is upgraded to a
+  // full-screen blocking interstitial in strict mode.
+  await expect(page.locator('.scamshield-interstitial')).toBeVisible({ timeout: 8000 });
+  await sw.evaluate(() => setSettings({ strictMode: false }));
+});
+
 test('onboarding renders', async ({ context, extensionId }) => {
   const page = await context.newPage();
   await page.goto(`chrome-extension://${extensionId}/onboarding.html`);

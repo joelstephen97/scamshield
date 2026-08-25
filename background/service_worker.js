@@ -32,6 +32,13 @@ const DEFAULTS = {
   lastBlocklistVersion: 0,
   supportAskShown: false,    // one-time "you were just protected" support toast
   pageAnalysis: true,        // on-device page-content model + icon brand matching
+  // Per-feature guards (0.6.0) — all on by default; individually toggleable.
+  clickFixGuard: true,       // ClickFix / fake-CAPTCHA paste-and-run blocker
+  fakeUpdateGuard: true,     // fake browser-update overlay blocker
+  walletGuard: true,         // risky wallet-request interstitial
+  clipboardGuard: true,      // clipboard-hijack toast
+  techScamGuard: true,       // tech-support scare-page escape
+  strictMode: false,         // treat "suspicious" as blocking, simpler wording
   theme: 'auto',             // 'auto' | 'light' | 'dark' — extension-page appearance
   pausedSites: {},           // domain -> until (ms epoch); time-boxed "trust this site"
   whatsNewSeen: '',          // last extension version whose what's-new was acknowledged

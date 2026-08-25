@@ -60,7 +60,7 @@
   window.addEventListener('scamshield:wallet-confirm', async (e) => {
     const detail = (e && e.detail) || {};
     const settings = await send('getSettings');
-    if (!settings || !settings.enabled) { reply(detail.id, true); return; }
+    if (!settings || !settings.enabled || settings.walletGuard === false) { reply(detail.id, true); return; }
     if (isTrustedHost(location.hostname, settings)) { reply(detail.id, true); return; }
     if (!SS || !SS.actions) { reply(detail.id, true); return; }
     SS.actions.walletConfirmOverlay(detail, (allow, meta) => {
@@ -71,12 +71,13 @@
   window.addEventListener('scamshield:clipboard-alert', async (e) => {
     const settings = await send('getSettings');
     if (!settings || !settings.enabled || !SS || !SS.actions) return;
+    if (settings.clipboardGuard === false && settings.clickFixGuard === false) return;
     if (isTrustedHost(location.hostname, settings)) return;
     const detail = (e && e.detail) || {};
     // ClickFix escalation (0.6.0): a dangerous clipboard payload PLUS
     // paste-and-run instructions in the page text = the fake-CAPTCHA malware
     // pattern. Neutralise the clipboard and block the interaction outright.
-    if (detail.level === 'dangerous' && SS.scoreClickFix && SS.actions.dangerInterstitial) {
+    if (detail.level === 'dangerous' && settings.clickFixGuard !== false && SS.scoreClickFix && SS.actions.dangerInterstitial) {
       const text = (document.body ? document.body.innerText : '').slice(0, 20000);
       const cf = SS.scoreClickFix({ text, clipboardLevel: 'dangerous' });
       if (cf.level === 'dangerous') {
@@ -90,6 +91,7 @@
         return;
       }
     }
+    if (settings.clipboardGuard === false) return;
     SS.actions.clipboardToast(detail);
     send('bumpThreats', { kind: 'clipboard' });
   });
@@ -99,7 +101,7 @@
     techSignal = Object.assign(techSignal, (e && e.detail) || {});
     if (techShown || !SS || typeof SS.scoreTechScam !== 'function' || !SS.actions) return;
     const settings = await send('getSettings');
-    if (!settings || !settings.enabled) return;
+    if (!settings || !settings.enabled || settings.techScamGuard === false) return;
     if (isTrustedHost(location.hostname, settings)) return;
     const text = (document.body ? document.body.innerText : '').slice(0, 20000);
     const r = SS.scoreTechScam({
@@ -119,7 +121,8 @@
     }
   });
 
-  function collectSignals() {
+  function collectSignals(settings) {
+    settings = settings || {};
     const pageHost = location.hostname;
     const passwordForms = [...document.querySelectorAll('form')]
       .filter((f) => f.querySelector('input[type="password"]'));
@@ -200,12 +203,12 @@
     const seedPhraseForm = mentionsSeed && (manyWordInputs || document.querySelector('textarea') != null);
 
     // ClickFix instruction cluster (0.6.0) — engine/clickfix_rules.js.
-    const clickfix = SS.scoreClickFix ? SS.scoreClickFix({ text: bodyText }) : null;
+    const clickfix = (SS.scoreClickFix && settings.clickFixGuard !== false) ? SS.scoreClickFix({ text: bodyText }) : null;
 
     // Fake browser-update prompt (0.6.0) — only pay for the anchor walk when
     // the page even talks about updating.
     let fakeUpdate = null;
-    if (SS.scoreFakeUpdate && /update|out.of.date|outdated/i.test(bodyText)) {
+    if (SS.scoreFakeUpdate && settings.fakeUpdateGuard !== false && /update|out.of.date|outdated/i.test(bodyText)) {
       const updateAnchorHosts = [];
       let hasBlobDownload = false;
       let walked = 0;
@@ -257,7 +260,7 @@
       return;
     }
 
-    const { signals, foreignForms, scamBlocks } = collectSignals();
+    const { signals, foreignForms, scamBlocks } = collectSignals(settings);
     const urlRules = SS.scoreUrl(location.href);
     let domRules = SS.scoreDom(signals);
     let modelProb = null, contentProb = null, iconMatch = false, pf = null;
@@ -314,8 +317,16 @@
       // submit guard — the interstitial is for scams with no submit moment.
       const DECISIVE_INTERSTITIAL = ['seed-phrase-harvest', 'clickfix', 'fake-browser-update', 'delivery-fee-scam'];
       const handlers = { onLeave: () => send('leaveTab'), onReport: () => send('userReport', { label: 'false_positive' }) };
-      if (verdict.level === 'dangerous' && (verdict.flags || []).some((f) => DECISIVE_INTERSTITIAL.includes(f)) && SS.actions.dangerInterstitial) {
-        SS.actions.dangerInterstitial(verdict, handlers);
+      // Strict mode (0.6.0): for a less-confident user, ANY non-safe verdict
+      // gets the blocking interstitial, not just decisive flags.
+      const decisive = verdict.level === 'dangerous' && (verdict.flags || []).some((f) => DECISIVE_INTERSTITIAL.includes(f));
+      if ((decisive || settings.strictMode === true) && SS.actions.dangerInterstitial) {
+        // "Continue anyway" on a decisive scam just dismisses (no trust granted —
+        // one click must never permanently trust a seed-phrase harvester). In
+        // strict mode on a merely-suspicious page it trusts, so the user isn't
+        // re-blocked every load.
+        const extra = decisive ? handlers : Object.assign({}, handlers, { onDismiss: () => send('allowSite', { domain: pageDomain }) });
+        SS.actions.dangerInterstitial(verdict, extra);
       } else {
         SS.actions.showBanner(verdict, async () => {
           await send('allowSite', { domain: pageDomain });

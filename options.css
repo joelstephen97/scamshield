@@ -18,4 +18,13 @@ main h2{font-size:18px;font-weight:600;margin:0 0 4px} main h3{font-size:13px;co
 .feedline{display:flex;align-items:center;gap:8px;font-size:13px;margin:0 0 12px} .feedline .dot{width:8px;height:8px;border-radius:50%;background:var(--unknown)} .feedline .dot.ok{background:var(--safe)}
 .adv summary{cursor:pointer;color:var(--accent);font-size:13px} .row{display:flex;gap:8px;align-items:center;margin:10px 0} .row input{flex:1;font:inherit;border:1px solid var(--hair);border-radius:var(--chip);background:var(--surface);color:var(--text);padding:6px 8px}
 select{font:inherit;border:1px solid var(--hair);border-radius:var(--chip);background:var(--surface);color:var(--text);padding:5px 8px}
+.grp{border:1px solid var(--hair);border-radius:var(--radius);margin-bottom:8px;background:var(--surface);overflow:hidden}
+.grp>summary{cursor:pointer;list-style:none;padding:12px 14px;display:flex;flex-direction:column;gap:2px}
+.grp>summary::-webkit-details-marker{display:none}
+.grp>summary::after{content:"▸";position:absolute;right:16px;color:var(--muted);transition:transform .12s}
+.grp[open]>summary::after{transform:rotate(90deg)}
+.grp>summary{position:relative}
+.grp>summary>b{font-weight:600;font-size:13px} .grp>summary>span{color:var(--muted);font-size:12px;max-width:56ch}
+.grp .setrow{margin:0 12px 8px;background:var(--bg,transparent)}
+.grp[open]>summary{border-bottom:1px solid var(--hair);margin-bottom:8px}
 @media (max-width:720px){.shell{grid-template-columns:1fr}nav{position:static;height:auto;flex-direction:row;flex-wrap:wrap;border-right:0;border-bottom:1px solid var(--hair)}nav .brand{width:100%}nav .sp,nav .ver{display:none}}

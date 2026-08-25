@@ -28,6 +28,9 @@ async function load() {
   const s = await send('getSettings');
   if (!s) { flash('Extension error — try reopening.'); return; }
   setSwitch('enabled', s.enabled); setSwitch('block', s.blockKnownBad); setSwitch('hide', s.hideScamContent); setSwitch('pageanalysis', s.pageAnalysis !== false); setSwitch('report', s.reportingOptIn);
+  setSwitch('clickfix', s.clickFixGuard !== false); setSwitch('fakeupdate', s.fakeUpdateGuard !== false);
+  setSwitch('techscam', s.techScamGuard !== false); setSwitch('clipboard', s.clipboardGuard !== false);
+  setSwitch('wallet', s.walletGuard !== false); setSwitch('strict', s.strictMode === true);
   $('otaurl').value = s.otaUrl || ''; $('theme').value = s.theme || 'auto';
   $('feedstatus').textContent = s.lastOtaAt ? `Updated ${F.relTime(s.lastOtaAt)} · ${Number(s.lastOtaCount || 0).toLocaleString()} rules` : 'Never updated';
   $('feeddot').classList.toggle('ok', !!s.lastOtaAt);
@@ -54,6 +57,7 @@ function renderHistory(list) {
   for (const e of list.slice(0, 200)) $('history').appendChild(li(`${KIND(e.kind)} · ${e.host || 'unknown site'}`, `${e.level} · ${new Date(e.ts).toLocaleString()}`, 'Mark as mistake', async () => { const r = await send('userReport', { host: e.host, level: e.level }); flash(r && r.via === 'relay' ? 'Thanks — sent' : 'Opened a report'); }));
 }
 bindSwitch('enabled', 'enabled'); bindSwitch('block', 'blockKnownBad'); bindSwitch('hide', 'hideScamContent'); bindSwitch('pageanalysis', 'pageAnalysis'); bindSwitch('report', 'reportingOptIn');
+bindSwitch('clickfix', 'clickFixGuard'); bindSwitch('fakeupdate', 'fakeUpdateGuard'); bindSwitch('techscam', 'techScamGuard'); bindSwitch('clipboard', 'clipboardGuard'); bindSwitch('wallet', 'walletGuard'); bindSwitch('strict', 'strictMode');
 $('whatsent').addEventListener('click', () => { $('whatsentbody').hidden = !$('whatsentbody').hidden; });
 $('theme').addEventListener('change', async () => { await send('setSettings', { patch: { theme: $('theme').value } }); globalThis.SSTheme.applyTheme($('theme').value); flash('Saved'); });
 $('otaurl').addEventListener('change', async () => { await send('setSettings', { patch: { otaUrl: $('otaurl').value.trim() } }); flash('Saved'); });

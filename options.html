@@ -13,11 +13,28 @@
 </nav>
 <main>
 <section id="tab-protection" class="tab" role="tabpanel" aria-labelledby="h-protection">
-  <h2 id="h-protection" tabindex="-1">Protection</h2><p class="lead">Everything here runs on your device. Nothing is sent anywhere unless you turn on the last option.</p>
+  <h2 id="h-protection" tabindex="-1">Protection</h2><p class="lead">Everything here runs on your device. Nothing is sent anywhere unless you turn on community reporting at the bottom.</p>
   <div class="setrow"><div class="t"><b>Protection on</b><span>Scans pages for scams and warns you. Turn off to pause everything.</span></div><label class="switch" for="enabled"><input type="checkbox" id="enabled" class="sr"><i></i></label></div>
-  <div class="setrow"><div class="t"><b>Block known scam sites</b><span>Stops pages on the daily-updated threat list before they load.</span></div><label class="switch" for="block"><input type="checkbox" id="block" class="sr"><i></i></label></div>
-  <div class="setrow"><div class="t"><b>Hide scam content</b><span>Greys out "you've won a prize" blocks inside otherwise normal pages.</span></div><label class="switch" for="hide"><input type="checkbox" id="hide" class="sr"><i></i></label></div>
-  <div class="setrow"><div class="t"><b>Page analysis</b><span>Reads the page's wording, layout and icons on your device to catch scams that aren't on any list yet.</span></div><label class="switch" for="pageanalysis"><input type="checkbox" id="pageanalysis" class="sr"><i></i></label></div>
+
+  <details class="grp" open><summary><b>Scams &amp; phishing</b><span>Blocking known-bad sites and catching new phishing on your device.</span></summary>
+    <div class="setrow"><div class="t"><b>Block known scam sites</b><span>Stops pages on the daily-updated threat list before they load.</span></div><label class="switch" for="block"><input type="checkbox" id="block" class="sr"><i></i></label></div>
+    <div class="setrow"><div class="t"><b>Page analysis</b><span>Reads the page's wording, layout and icons on your device to catch scams that aren't on any list yet.</span></div><label class="switch" for="pageanalysis"><input type="checkbox" id="pageanalysis" class="sr"><i></i></label></div>
+    <div class="setrow"><div class="t"><b>Fake-CAPTCHA / "paste this" blocker</b><span>Stops pages that tell you to press Win+R and paste a command (ClickFix malware).</span></div><label class="switch" for="clickfix"><input type="checkbox" id="clickfix" class="sr"><i></i></label></div>
+    <div class="setrow"><div class="t"><b>Fake browser-update blocker</b><span>Blocks pages pretending your browser needs an update so you download malware.</span></div><label class="switch" for="fakeupdate"><input type="checkbox" id="fakeupdate" class="sr"><i></i></label></div>
+    <div class="setrow"><div class="t"><b>Hide scam content</b><span>Greys out "you've won a prize" blocks inside otherwise normal pages.</span></div><label class="switch" for="hide"><input type="checkbox" id="hide" class="sr"><i></i></label></div>
+  </details>
+
+  <details class="grp"><summary><b>Pop-ups &amp; system scares</b><span>Fake virus alerts, screen-lockers and clipboard hijacks.</span></summary>
+    <div class="setrow"><div class="t"><b>Tech-support scam escape</b><span>Detects fake "your PC is infected, call this number" pages and gives you a way out.</span></div><label class="switch" for="techscam"><input type="checkbox" id="techscam" class="sr"><i></i></label></div>
+    <div class="setrow"><div class="t"><b>Clipboard-hijack warning</b><span>Warns when a site secretly puts a command or crypto address on your clipboard.</span></div><label class="switch" for="clipboard"><input type="checkbox" id="clipboard" class="sr"><i></i></label></div>
+  </details>
+
+  <details class="grp"><summary><b>Crypto &amp; wallets</b><span>Warnings before risky wallet signatures.</span></summary>
+    <div class="setrow"><div class="t"><b>Wallet drainer protection</b><span>Warns before you approve token spends, "Permit" signatures or account delegations that drainers abuse.</span></div><label class="switch" for="wallet"><input type="checkbox" id="wallet" class="sr"><i></i></label></div>
+  </details>
+
+  <div class="setrow"><div class="t"><b>Strict mode</b><span>For anyone who wants maximum caution: even "suspicious" pages are blocked with a full-screen warning and simpler wording. Best for helping a less confident family member stay safe.</span></div><label class="switch" for="strict"><input type="checkbox" id="strict" class="sr"><i></i></label></div>
+
   <div class="setrow"><div class="t"><b>Help make ScamShield smarter</b><span>Sends the <b>site name</b> (never the full address or page text) and anonymous risk signals of pages flagged dangerous, and of sites you report. Off by default.</span><button id="whatsent" class="exp">What exactly is sent ▾</button>
     <div id="whatsentbody" class="hint" hidden>A report contains only: the site name (hostname), the verdict and internal reason codes, numeric risk signals derived from the address and page layout (hashed word counts and counts of forms, inputs and links — never the text itself), matched brand names, the extension version, and the hour. Never the full address (path or query), page text, anything you typed, cookies, or any identifier of you or your device. Reports are deleted after 180 days. <a href="https://joelstephen97.github.io/scamshield/privacy.html" target="_blank" rel="noopener">Privacy policy</a></div></div>
     <label class="switch" for="report"><input type="checkbox" id="report" class="sr"><i></i></label></div>
