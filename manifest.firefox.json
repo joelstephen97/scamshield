@@ -12,6 +12,8 @@
     {
       "matches": ["http://*/*", "https://*/*"],
       "run_at": "document_idle",
+      "all_frames": true,
+      "match_about_blank": true,
       "js": ["engine/constants.js","engine/trust.js","model/url-model.js","engine/features.js","engine/heuristics.js","engine/techscam_rules.js","engine/verdict.js","engine/url_model.js","engine/page_features.js","model/page-content.js","engine/page_model.js","engine/image_hash.js","content/actions.js","content/content_script.js"],
       "css": ["content/content.css"]
     },

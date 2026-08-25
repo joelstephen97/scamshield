@@ -43,6 +43,30 @@ for (const htmlFile of ['popup.html', 'options.html', 'onboarding.html']) {
 // Upgrade-safety guard: adding a permission disables the extension for every
 // existing store user until they re-approve it. Both manifests must keep the
 // exact permission set that 0.3.1 shipped with (see README "Upgrade safety").
+// 0.6.0 platform base: isolated content scripts must reach sub-frames
+// (iframe-hosted phishing forms were invisible to 0.5.0), while the MAIN-world
+// hooks stay top-frame only to keep ad-iframe cost at zero. Chrome runs the
+// ES-module service worker and declares its version floor.
+test('manifest.json: platform base (all_frames, module SW, minimum_chrome_version)', () => {
+  const m = JSON.parse(fs.readFileSync(path.join(ROOT, 'manifest.json'), 'utf8'));
+  assert.strictEqual(m.minimum_chrome_version, '121');
+  assert.strictEqual(m.background.type, 'module');
+  assert.strictEqual(m.background.service_worker, 'background/sw.js');
+  const iso = m.content_scripts.find((c) => c.world !== 'MAIN');
+  assert.strictEqual(iso.all_frames, true);
+  assert.strictEqual(iso.match_origin_as_fallback, true);
+  const main = m.content_scripts.find((c) => c.world === 'MAIN');
+  assert.notStrictEqual(main.all_frames, true, 'MAIN world stays top-frame only');
+});
+test('manifest.firefox.json: platform base (all_frames on isolated scripts)', () => {
+  const m = JSON.parse(fs.readFileSync(path.join(ROOT, 'manifest.firefox.json'), 'utf8'));
+  const iso = m.content_scripts.find((c) => c.world !== 'MAIN');
+  assert.strictEqual(iso.all_frames, true);
+  assert.strictEqual(iso.match_about_blank, true);
+  const main = m.content_scripts.find((c) => c.world === 'MAIN');
+  assert.notStrictEqual(main.all_frames, true, 'MAIN world stays top-frame only');
+});
+
 const FROZEN_PERMISSIONS = ['storage', 'declarativeNetRequest', 'alarms'];
 const FROZEN_HOSTS = ['http://*/*', 'https://*/*'];
 for (const manifestFile of ['manifest.json', 'manifest.firefox.json']) {

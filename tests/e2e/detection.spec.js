@@ -19,6 +19,24 @@ test('phishing login form triggers banner and submit overlay', async ({ context 
   await expect(page.locator('.scamshield-overlay h3')).toContainText('phishing');
 });
 
+test('phishing form inside an iframe is guarded and escalates the tab verdict (all_frames)', async ({ context, extensionId }) => {
+  const page = await context.newPage();
+  await page.goto(BASE + '/iframe-phish.html');
+  // The clean top frame shows no banner of its own — sub-frame UI stays in-frame.
+  await page.waitForTimeout(1000);
+  await expect(page.locator('.scamshield-banner')).toHaveCount(0);
+  const frame = page.frameLocator('#fr');
+  await frame.locator('input[name="pw"]').fill('secret');
+  await frame.locator('button[type="submit"]').click();
+  await expect(frame.locator('.scamshield-overlay')).toBeVisible({ timeout: 8000 });
+  // The sub-frame's dangerous verdict must win over the top frame's safe one.
+  const popup = await context.newPage();
+  await popup.goto(`chrome-extension://${extensionId}/popup.html`);
+  await page.bringToFront();
+  await popup.reload();
+  await expect(popup.locator('#status')).toHaveClass(/dangerous|suspicious/, { timeout: 5000 });
+});
+
 test('scam giveaway content is hidden', async ({ context }) => {
   const page = await context.newPage();
   await page.goto(BASE + '/scam-giveaway.html');

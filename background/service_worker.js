@@ -1,5 +1,10 @@
 'use strict';
-try { importScripts('../engine/constants.js', '../engine/trust.js', '../engine/features.js', '../engine/image_hash.js', '../engine/brand_icons.js', '../engine/report_payload.js'); } catch (_) { /* Firefox background page loads them via manifest */ }
+// Engine deps arrive three ways: Chrome's module SW imports them in
+// background/sw.js; Firefox's event page loads them via manifest scripts; and
+// a classic-worker context (tests driving this file directly) falls back to
+// importScripts here. In the module SW `importScripts` is undefined — the
+// ReferenceError lands in the catch and the imports from sw.js already won.
+try { importScripts('../engine/constants.js', '../engine/trust.js', '../engine/features.js', '../engine/image_hash.js', '../engine/brand_icons.js', '../engine/report_payload.js'); } catch (_) { /* deps already loaded by sw.js (Chrome) or the manifest (Firefox) */ }
 const api = globalThis.browser || globalThis.chrome;
 
 // Official ScamShield feed: rebuilt daily by GitHub Actions from OpenPhish +
@@ -314,7 +319,12 @@ async function runOtaUpdate() {
     const data = await res.json();
     if (!data || typeof data.version !== 'number' || !Array.isArray(data.rules)) return { ok: false, reason: 'bad-shape' };
     if (data.version <= (s.lastBlocklistVersion || 0)) { await setSettings({ lastOtaAt: Date.now() }); return { ok: true, version: data.version, updated: false }; }
-    const rules = data.rules.slice(0, 5000).map((r, i) => ({
+    // Dynamic-rule budget: block rules are "safe" actions, so Chrome ≥121
+    // allows 30,000 of them while Firefox caps at a flat 5,000. Reading the
+    // runtime constant sizes the feed correctly on both without hardcoding.
+    const dnrCap = (api.declarativeNetRequest && typeof api.declarativeNetRequest.MAX_NUMBER_OF_DYNAMIC_RULES === 'number')
+      ? api.declarativeNetRequest.MAX_NUMBER_OF_DYNAMIC_RULES : 5000;
+    const rules = data.rules.slice(0, dnrCap).map((r, i) => ({
       id: 100000 + i, priority: 1, action: { type: 'block' },
       condition: { urlFilter: String(r.urlFilter || r), resourceTypes: ['main_frame', 'sub_frame'] }
     }));
@@ -365,6 +375,9 @@ api.runtime.onInstalled.addListener(async (details) => {
 // the popup's getVerdict — without it, a popup opened right after the SW was
 // evicted would see an empty in-memory Map and wrongly report "safe".
 const lastVerdict = new Map();
+// Per-tab frame verdict split (all_frames since 0.6.0): { url, top, sub } so
+// racy frame reports merge instead of clobbering; see reportVerdict below.
+const frameVerdicts = new Map();
 function sessionVerdictKey(tabId) { return 'verdict:' + tabId; }
 async function persistVerdict(tabId, verdict) {
   if (!hasSessionStorage) return;
@@ -381,6 +394,7 @@ async function clearPersistedVerdict(tabId) {
 if (api.tabs && api.tabs.onRemoved) {
   api.tabs.onRemoved.addListener((tabId) => {
     lastVerdict.delete(tabId);
+    frameVerdicts.delete(tabId);
     clearPersistedVerdict(tabId);
   });
 }
@@ -406,17 +420,41 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       case 'reportVerdict': {
         const tabId = sender.tab && sender.tab.id;
         if (tabId != null) {
-          lastVerdict.set(tabId, msg.verdict);
-          persistVerdict(tabId, msg.verdict);
-          if (msg.report) lastReportInput.set(tabId, msg.report);
-          maybeAutoReport(sender.tab && sender.tab.url, msg.verdict, msg.report, ['page']);
-          const level = msg.verdict && msg.verdict.level;
+          // all_frames (0.6.0): every frame reports its own verdict, and frame
+          // order is racy — a top frame's "safe" must not clobber an earlier
+          // dangerous credential iframe, nor vice versa. Verdicts are kept per
+          // tab AND per top-level URL (a report carrying a new tab URL is the
+          // navigation reset), and the tab's effective verdict is the more
+          // severe of {top frame, worst sub-frame}.
+          const RANK = { unknown: 0, safe: 1, suspicious: 2, dangerous: 3 };
+          const rankOf = (v) => (v ? (RANK[v.level] || 0) : -1);
+          const fromSubframe = msg.subframe === true || (typeof sender.frameId === 'number' && sender.frameId !== 0);
+          const tabUrl = (sender.tab && sender.tab.url) || '';
+          let fv = frameVerdicts.get(tabId);
+          if (!fv || fv.url !== tabUrl) fv = { url: tabUrl, top: null, sub: null };
+          if (fromSubframe) {
+            if (rankOf(msg.verdict) > rankOf(fv.sub)) fv.sub = Object.assign({}, msg.verdict, { subframe: true });
+          } else {
+            fv.top = msg.verdict;
+          }
+          frameVerdicts.set(tabId, fv);
+          const effective = rankOf(fv.sub) > rankOf(fv.top) ? fv.sub : fv.top;
+          lastVerdict.set(tabId, effective);
+          persistVerdict(tabId, effective);
+          if (msg.report && !fromSubframe) lastReportInput.set(tabId, msg.report);
+          // Auto-reports describe the frame that detected the scam (sender.url
+          // is the frame's own URL; for the top frame it equals the tab URL).
+          maybeAutoReport(sender.url || tabUrl, msg.verdict, msg.report, ['page']);
+          const level = effective && effective.level;
           if (level === 'dangerous') api.action.setBadgeText({ tabId, text: '!' });
           else if (level === 'suspicious') api.action.setBadgeText({ tabId, text: '?' });
           else api.action.setBadgeText({ tabId, text: '' });
           if (level !== 'safe') {
             api.action.setBadgeBackgroundColor({ tabId, color: level === 'dangerous' ? '#c0392b' : '#e1a200' });
-            recordEvent({ host: hostOfSender(sender), kind: 'page', level });
+          }
+          const incomingLevel = msg.verdict && msg.verdict.level;
+          if (incomingLevel && incomingLevel !== 'safe') {
+            recordEvent({ host: hostOfSender(sender), kind: 'page', level: incomingLevel });
           }
         }
         sendResponse({ ok: true }); break;
@@ -479,3 +517,9 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   })();
   return true; // async response
 });
+
+// Since the Chrome SW became an ES module (0.6.0), top-level bindings are
+// module-scoped. Re-attach the debug/test surface that used to live on the
+// classic worker's global scope — the e2e suite drives these via
+// worker.evaluate, and they're handy in the SW console.
+Object.assign(globalThis, { DEFAULT_FEED_URL, getSettings, setSettings, handleUserReport, runOtaUpdate, flushReports, queueReport });

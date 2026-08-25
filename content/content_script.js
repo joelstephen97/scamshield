@@ -4,6 +4,10 @@
   root.__scamshieldIsolatedGuard = true;
   const api = root.browser || root.chrome;
   const SS = root.ScamShield;
+  // all_frames (0.6.0): the isolated script now runs in every frame so
+  // iframe-hosted phishing forms are no longer invisible. Sub-frames run a
+  // lean pass (URL + DOM rules + form guard); page-level UI stays top-frame.
+  const IS_TOP = (() => { try { return window === window.top; } catch (_) { return false; } })();
 
   function send(type, extra) {
     return new Promise((res) => {
@@ -185,12 +189,19 @@
 
   async function run() {
     if (!SS || typeof SS.scoreUrl !== 'function') return; // engine not loaded
+    // Sub-frame gate: only frames a user can actually interact with, and only
+    // when they hold something phishable — keeps all_frames near-free on
+    // ad-heavy pages (dozens of tiny/empty iframes early-exit here).
+    if (!IS_TOP) {
+      if (window.innerWidth < 80 || window.innerHeight < 80) return;
+      if (!document.querySelector('form, input[type="password"]')) return;
+    }
     const settings = await send('getSettings');
     if (!settings || !settings.enabled) return;
     const pageDomain = registrable(location.hostname);
     // Trusted (built-in safe list or user allowlist): report safe, do nothing else.
     if (isTrustedHost(location.hostname, settings)) {
-      await send('reportVerdict', { verdict: { level: 'safe', score: 0, reasons: [], modelUsed: false } });
+      if (IS_TOP) await send('reportVerdict', { verdict: { level: 'safe', score: 0, reasons: [], modelUsed: false } });
       return;
     }
 
@@ -200,7 +211,9 @@
     let modelProb = null, contentProb = null, iconMatch = false, pf = null;
     const borderline = Math.max(urlRules.score, domRules.score) >= 0.3 || signals.hasPasswordField;
     if (borderline && SS.isAvailable && SS.isAvailable()) modelProb = await SS.predict(SS.extractUrlFeatures(location.href));
-    if (settings.pageAnalysis !== false && needsPageAnalysis(signals, urlRules, domRules)) {
+    // Icon hashing + the page-content model are top-frame only: favicons are a
+    // document-level concept and the page model was trained on full pages.
+    if (IS_TOP && settings.pageAnalysis !== false && needsPageAnalysis(signals, urlRules, domRules)) {
       try {
         const iconsP = withTimeout(send('hashIcons', { urls: iconCandidates() }), 1200);
         if (SS.isPageModelAvailable && SS.isPageModelAvailable()) {
@@ -224,10 +237,10 @@
         iconMatches: signals.iconMatches || [], detectors: ['page']
       };
     } catch (_) { report = null; }
-    await send('reportVerdict', { verdict, report });
+    await send('reportVerdict', { verdict, report, subframe: !IS_TOP });
     if (verdict.level === 'dangerous') send('bumpThreats');
 
-    if (verdict.level !== 'safe') {
+    if (verdict.level !== 'safe' && IS_TOP) {
       // Impersonation verdicts get a rescue link to the brand's real site.
       if (verdict.brand && SS.BRAND_DOMAINS && SS.BRAND_DOMAINS[verdict.brand]) {
         verdict.brandUrl = 'https://' + SS.BRAND_DOMAINS[verdict.brand][0] + '/';
@@ -243,8 +256,11 @@
         setTimeout(() => SS.actions.supportToast(), 1500);
       }
     }
+    // The form guard runs in every frame — blocking a submit inside a
+    // credential iframe is exactly the all_frames win. Content hiding stays
+    // top-frame (frames are too small for the overlay tag to make sense).
     if (foreignForms.length) SS.actions.guardForms(foreignForms, verdict.reasons, () => send('userReport', { label: 'false_positive' }));
-    if (settings.hideScamContent && scamBlocks.length) SS.actions.hideScamBlocks(scamBlocks);
+    if (settings.hideScamContent && scamBlocks.length && IS_TOP) SS.actions.hideScamBlocks(scamBlocks);
   }
 
   let lastUrl = location.href;

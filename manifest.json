@@ -4,13 +4,16 @@
   "short_name": "ScamShield",
   "version": "0.5.0",
   "description": "On-device scam & phishing protection: warns you, spots brand look-alikes, checks messages. Nothing leaves your device.",
+  "minimum_chrome_version": "121",
   "permissions": ["storage", "declarativeNetRequest", "alarms"],
   "host_permissions": ["http://*/*", "https://*/*"],
-  "background": { "service_worker": "background/service_worker.js" },
+  "background": { "service_worker": "background/sw.js", "type": "module" },
   "content_scripts": [
     {
       "matches": ["http://*/*", "https://*/*"],
       "run_at": "document_idle",
+      "all_frames": true,
+      "match_origin_as_fallback": true,
       "js": [
         "engine/constants.js",
         "engine/trust.js",
