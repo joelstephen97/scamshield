@@ -50,3 +50,15 @@ test('malformed input fails safe (no throw)', () => {
   assert.strictEqual(analyzeWalletRequest(null).level, 'safe');
   assert.strictEqual(analyzeWalletRequest({ method: 'eth_sendTransaction', params: [{}] }).level, 'safe');
 });
+
+// --- 0.6.0: EIP-7702 delegation ---
+test('EIP-7702 authorizationList transaction is dangerous', () => {
+  const r = analyzeWalletRequest({ method: 'eth_sendTransaction', params: [{ to: '0x1', data: '0x', authorizationList: [{ chainId: '0x1' }] }] });
+  assert.equal(r.level, 'dangerous');
+  assert.ok(r.flags.includes('eip7702-delegation'));
+});
+
+test('ordinary transaction without authorizationList is untouched', () => {
+  const r = analyzeWalletRequest({ method: 'eth_sendTransaction', params: [{ to: '0x1', value: '0x100', data: '0x' }] });
+  assert.equal(r.level, 'safe');
+});

@@ -55,6 +55,13 @@
   if (window.ethereum) wrap(window.ethereum);
   // Provider may be injected after us.
   window.addEventListener('ethereum#initialized', () => wrap(window.ethereum), { once: true });
+  // EIP-6963 multi-provider discovery (0.6.0): modern wallets announce
+  // themselves via events instead of (only) window.ethereum — wrap each
+  // announced provider and re-request announcements in case we loaded late.
+  window.addEventListener('eip6963:announceProvider', (e) => {
+    try { wrap(e && e.detail && e.detail.provider); } catch (_) {}
+  });
+  try { window.dispatchEvent(new Event('eip6963:requestProvider')); } catch (_) {}
   let tries = 0;
   const iv = setInterval(() => { if (window.ethereum) wrap(window.ethereum); if (++tries > 20) clearInterval(iv); }, 250);
 })();

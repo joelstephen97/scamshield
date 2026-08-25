@@ -98,6 +98,31 @@ test('clipboard hijack shows a warning toast', async ({ context }) => {
   await expect(page.locator('.scamshield-toast')).toBeVisible({ timeout: 6000 });
 });
 
+test('ClickFix fake-CAPTCHA page is blocked by the interstitial', async ({ context }) => {
+  const page = await context.newPage();
+  await page.goto(BASE + '/clickfix.html');
+  const inter = page.locator('.scamshield-interstitial');
+  await expect(inter).toBeVisible({ timeout: 8000 });
+  await expect(inter.locator('.ss-card')).toContainText(/CAPTCHA|verification|paste/i);
+});
+
+test('fake browser-update overlay page is blocked by the interstitial', async ({ context }) => {
+  const page = await context.newPage();
+  await page.goto(BASE + '/fake-update.html');
+  const inter = page.locator('.scamshield-interstitial');
+  await expect(inter).toBeVisible({ timeout: 8000 });
+  await expect(inter.locator('.ss-card')).toContainText(/update prompts come from the browser itself/i);
+});
+
+test('carrier delivery-fee card page is blocked by the interstitial', async ({ context }) => {
+  const page = await context.newPage();
+  await page.goto(BASE + '/delivery-fee.html');
+  const inter = page.locator('.scamshield-interstitial');
+  await expect(inter).toBeVisible({ timeout: 8000 });
+  await expect(inter.locator('.ss-card')).toContainText(/DHL/);
+  await expect(inter.locator('.ss-card')).toContainText(/card details/i);
+});
+
 test('tech-support scare page shows escape overlay', async ({ context }) => {
   const page = await context.newPage();
   await page.goto(BASE + '/techscam.html');

@@ -83,3 +83,60 @@ test('icon-kind (favicon-derived) match + password → visual impersonation flag
   assert.ok(r.flags.includes('brand-impersonation-visual'), JSON.stringify(r.flags));
   assert.ok(r.score >= 0.85);
 });
+
+// --- 0.6.0 signals ---
+test('clickfix dangerous signal escalates with the clickfix flag', () => {
+  const r = scoreDom(Object.assign({}, clean, { clickfix: { level: 'dangerous', reasons: ['paste-and-run instructions'], flags: ['clickfix'] } }));
+  assert.ok(r.score >= 0.9);
+  assert.ok(r.flags.includes('clickfix'));
+  assert.ok(r.reasons.includes('paste-and-run instructions'));
+});
+
+test('clickfix suspicious signal only bumps the score', () => {
+  const r = scoreDom(Object.assign({}, clean, { clickfix: { level: 'suspicious', reasons: ['run-box instructions'], flags: [] } }));
+  assert.ok(r.score > 0 && r.score < 0.5);
+  assert.ok(!r.flags.includes('clickfix'));
+});
+
+test('fake browser-update signal escalates with its flag', () => {
+  const r = scoreDom(Object.assign({}, clean, { fakeUpdate: { level: 'dangerous', reasons: ['fake update prompt'], flags: ['fake-browser-update'] } }));
+  assert.ok(r.score >= 0.9);
+  assert.ok(r.flags.includes('fake-browser-update'));
+});
+
+test('delivery-fee scam: carrier brand + card input + fee text off-domain', () => {
+  const r = scoreDom(Object.assign({}, clean, {
+    pageHost: 'dhl-redelivery.example',
+    titleBrand: 'dhl — schedule your redelivery',
+    hasCardInput: true, deliveryFeeText: true
+  }));
+  assert.ok(r.score >= 0.9, 'got ' + r.score);
+  assert.ok(r.flags.includes('delivery-fee-scam'));
+  assert.equal(r.brand, 'dhl');
+  assert.ok(r.reasons.some((x) => /DHL/.test(x) && /card details/.test(x)));
+});
+
+test('delivery-fee rule stays quiet on the real carrier domain', () => {
+  const r = scoreDom(Object.assign({}, clean, {
+    pageHost: 'www.dhl.com',
+    titleBrand: 'dhl — schedule your redelivery',
+    hasCardInput: true, deliveryFeeText: true
+  }));
+  assert.ok(!r.flags.includes('delivery-fee-scam'));
+});
+
+test('delivery-fee rule needs BOTH card input and fee wording', () => {
+  const noCard = scoreDom(Object.assign({}, clean, { pageHost: 'dhl-track.example', titleBrand: 'dhl tracking', hasCardInput: false, deliveryFeeText: true }));
+  assert.ok(!noCard.flags.includes('delivery-fee-scam'));
+  const noFee = scoreDom(Object.assign({}, clean, { pageHost: 'dhl-track.example', titleBrand: 'dhl tracking', hasCardInput: true, deliveryFeeText: false }));
+  assert.ok(!noFee.flags.includes('delivery-fee-scam'));
+});
+
+test('new carriers exist in BRANDS with display names', () => {
+  const C = require('../../engine/constants');
+  for (const k of ['royalmail', 'evri', 'emiratespost', 'dpd']) {
+    assert.ok(C.CARRIER_BRANDS.includes(k), k + ' missing from CARRIER_BRANDS');
+    assert.ok(C.BRAND_DOMAINS[k] && C.BRAND_DOMAINS[k].length, k + ' missing domains');
+  }
+  assert.equal(C.brandDisplayName('royalmail'), 'Royal Mail');
+});

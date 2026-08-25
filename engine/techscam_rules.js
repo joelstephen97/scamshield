@@ -17,10 +17,14 @@
   const PHONE_RE = /(\+?\d[\d\-\s().]{7,}\d)/;
   const TOLLFREE_RE = /\b(1[-\s]?)?(800|888|877|866|855|844|833)[-\s]?\d{3}[-\s]?\d{4}\b/;
 
+  // OS / security vendor brand tokens for the decisive discriminator below.
+  const OS_BRAND_RE = /\b(microsoft|windows(\s+defender)?|apple|mac\s?os|icloud|mcafee|norton|google\s+(chrome|security))\b/i;
+
   function scoreTechScam(input) {
     const s = input || {};
     const text = String(s.text || '').toLowerCase();
     const reasons = [];
+    const flags = [];
     let score = 0;
 
     const hits = SCARE_PHRASES.filter((p) => text.includes(p));
@@ -29,20 +33,34 @@
       reasons.push('Page uses fake security-alert language ("' + hits[0] + '").');
     }
     const hasTollFree = s.hasTollFree != null ? !!s.hasTollFree : TOLLFREE_RE.test(text);
-    if (hasTollFree || (hits.length && PHONE_RE.test(text))) {
+    const hasPhone = hasTollFree || (hits.length && PHONE_RE.test(text));
+    if (hasPhone) {
       score += 0.3;
       reasons.push('Page urges you to call a phone number for "support" — a hallmark of tech-support scams.');
+    }
+    // Decisive discriminator (0.6.0): a phone number inside a security-alert
+    // page that name-drops an OS/security vendor. Microsoft, Apple and Google
+    // never put phone numbers in browser warnings, and vendor-owned domains
+    // are excluded upstream by the trusted-host gate — near-zero FP.
+    if (hasPhone && hits.length && OS_BRAND_RE.test(text)) {
+      score = Math.max(score, 0.85);
+      flags.push('fake-alert-phone');
+      reasons.push('This is a web page pretending to be a system alert — your computer is fine. Real Microsoft/Apple warnings never show phone numbers.');
     }
     if (s.fullscreenOnLoad) {
       score += 0.2;
       reasons.push('Page forced fullscreen to make itself hard to close.');
+    }
+    if (s.alarmAudio) {
+      score += 0.2;
+      reasons.push('Page plays alarm audio to panic you.');
     }
     const flood = s.dialogFloodCount || 0;
     if (flood >= 5) { score += 0.25; reasons.push('Page spammed pop-up dialogs to trap you.'); }
     else if (flood >= 2) { score += 0.1; }
     if (s.historyTrap) { score += 0.15; reasons.push('Page is hijacking your Back button.'); }
 
-    return { score: Math.max(0, Math.min(1, score)), reasons };
+    return { score: Math.max(0, Math.min(1, score)), reasons, flags };
   }
 
   return { scoreTechScam };

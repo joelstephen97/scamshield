@@ -86,6 +86,23 @@
       reasons.push('This page asks for your wallet recovery phrase — never enter it; this steals your funds.');
     }
 
+    // ClickFix / fake-CAPTCHA instructions (0.6.0, engine/clickfix_rules.js).
+    if (s.clickfix && s.clickfix.level === 'dangerous') {
+      score = Math.max(score, 0.9);
+      flags.push('clickfix');
+      for (const r of s.clickfix.reasons) reasons.push(r);
+    } else if (s.clickfix && s.clickfix.level === 'suspicious') {
+      score += 0.25;
+      if (s.clickfix.reasons[0]) reasons.push(s.clickfix.reasons[0]);
+    }
+
+    // Fake browser-update prompt (0.6.0, engine/fakeupdate_rules.js).
+    if (s.fakeUpdate && s.fakeUpdate.level === 'dangerous') {
+      score = Math.max(score, 0.9);
+      flags.push('fake-browser-update');
+      for (const r of s.fakeUpdate.reasons) reasons.push(r);
+    }
+
     // Content-based brand impersonation: page *names* a brand but is not on that
     // brand's real domain, and collects a password.
     const BRAND_DOMAINS = C.BRAND_DOMAINS || {};
@@ -102,6 +119,17 @@
     if (matchedBrand && s.hasPasswordField && !isOnBrand(matchedBrand)) {
       score = Math.max(score, 0.85); flags.push('brand-impersonation-content'); brand = matchedBrand;
       reasons.push('This page looks like "' + matchedBrand + '" but is not on its real website.');
+    }
+
+    // Delivery-fee scam (0.6.0): carrier brand + card-number form + small-fee
+    // wording on a non-carrier domain — the classic package-phishing landing
+    // page (49% of UK-reported scams in 2025). No password field involved, so
+    // the content-impersonation branch above never catches it.
+    if (matchedBrand && (C.CARRIER_BRANDS || []).includes(matchedBrand) &&
+        !isOnBrand(matchedBrand) && s.hasCardInput && s.deliveryFeeText) {
+      score = Math.max(score, 0.9); flags.push('delivery-fee-scam'); brand = brand || matchedBrand;
+      reasons.push('This page pretends to be ' + displayName(matchedBrand) +
+        ' and asks for card details to release a package. Carriers never collect fees through pages like this.');
     }
     // Visual (icon/logo hash) impersonation — 0.5.0. A 'logo' match (an <img>
     // logo candidate, more prone to false positives than a favicon/touch-icon)

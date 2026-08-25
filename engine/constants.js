@@ -79,6 +79,10 @@
     B('du', ['du telecom'], ['du.ae'], false),
     B('noon', ['noon.com'], ['noon.com'], false),
     B('aramex', ['aramex'], ['aramex.com']),
+    B('royalmail', ['royal mail'], ['royalmail.com'], true, 'Royal Mail'),
+    B('evri', ['evri'], ['evri.com'], true, 'Evri'),
+    B('emiratespost', ['emirates post'], ['emiratespost.ae', 'epg.gov.ae'], true, 'Emirates Post'),
+    B('dpd', ['dpd'], ['dpd.com', 'dpd.co.uk', 'dpd.de'], true, 'DPD'),
     B('talabat', ['talabat'], ['talabat.com']),
     B('careem', ['careem'], ['careem.com']),
     B('adnoc', ['adnoc'], ['adnoc.ae', 'adnocdistribution.ae'], true, 'ADNOC'),
@@ -234,9 +238,13 @@
   // Phrases that indicate a wallet recovery-phrase harvesting attempt.
   const SEED_PHRASE_HINTS = ['recovery phrase', 'seed phrase', 'secret phrase', 'mnemonic', 'private key'];
 
+  // Parcel carriers (0.6.0): brands whose impersonation pattern is a card-fee
+  // form rather than a password form — drives the delivery-fee-scam rule.
+  const CARRIER_BRANDS = ['dhl', 'fedex', 'usps', 'ups', 'aramex', 'royalmail', 'evri', 'emiratespost', 'dpd'];
+
   return {
     FEATURE_NAMES, THRESHOLDS, BRANDS, POPULAR_BRANDS, SUSPICIOUS_TLDS, SUSPICIOUS_TOKENS,
-    SCAM_PHRASES, SAFE_DOMAINS, BRAND_DOMAINS, SEED_PHRASE_HINTS,
+    SCAM_PHRASES, SAFE_DOMAINS, BRAND_DOMAINS, SEED_PHRASE_HINTS, CARRIER_BRANDS,
     MULTI_LABEL_SUFFIXES, KNOWN_AUTH_PROVIDERS, KNOWN_BRAND_REGISTRABLES,
     registrableParts, registrableDomain, isSafeHost, brandNameIn, brandDisplayName
   };

@@ -72,10 +72,28 @@
     const settings = await send('getSettings');
     if (!settings || !settings.enabled || !SS || !SS.actions) return;
     if (isTrustedHost(location.hostname, settings)) return;
-    SS.actions.clipboardToast((e && e.detail) || {});
+    const detail = (e && e.detail) || {};
+    // ClickFix escalation (0.6.0): a dangerous clipboard payload PLUS
+    // paste-and-run instructions in the page text = the fake-CAPTCHA malware
+    // pattern. Neutralise the clipboard and block the interaction outright.
+    if (detail.level === 'dangerous' && SS.scoreClickFix && SS.actions.dangerInterstitial) {
+      const text = (document.body ? document.body.innerText : '').slice(0, 20000);
+      const cf = SS.scoreClickFix({ text, clipboardLevel: 'dangerous' });
+      if (cf.level === 'dangerous') {
+        try { await navigator.clipboard.writeText('Blocked by ScamShield — this site put a dangerous command on your clipboard. Do not paste it anywhere.'); } catch (_) { /* overwrite is best-effort */ }
+        SS.actions.dangerInterstitial(
+          { level: 'dangerous', reasons: cf.reasons, flags: cf.flags },
+          { onLeave: () => send('leaveTab'), onReport: () => send('userReport', { label: 'false_positive' }) }
+        );
+        send('reportVerdict', { verdict: { level: 'dangerous', score: 0.95, reasons: cf.reasons, flags: cf.flags, modelUsed: false }, subframe: !IS_TOP });
+        send('bumpThreats', { kind: 'clipboard' });
+        return;
+      }
+    }
+    SS.actions.clipboardToast(detail);
     send('bumpThreats', { kind: 'clipboard' });
   });
-  let techSignal = { dialogFloodCount: 0, fullscreenOnLoad: false, beforeUnloadCount: 0 };
+  let techSignal = { dialogFloodCount: 0, fullscreenOnLoad: false, beforeUnloadCount: 0, alarmAudio: false };
   let techShown = false;
   window.addEventListener('scamshield:techscam-signal', async (e) => {
     techSignal = Object.assign(techSignal, (e && e.detail) || {});
@@ -85,15 +103,18 @@
     if (isTrustedHost(location.hostname, settings)) return;
     const text = (document.body ? document.body.innerText : '').slice(0, 20000);
     const r = SS.scoreTechScam({
-      text, fullscreenOnLoad: techSignal.fullscreenOnLoad,
+      text, fullscreenOnLoad: techSignal.fullscreenOnLoad, alarmAudio: techSignal.alarmAudio,
       dialogFloodCount: techSignal.dialogFloodCount, historyTrap: techSignal.beforeUnloadCount >= 2
     });
     if (r.score >= (SS.THRESHOLDS ? SS.THRESHOLDS.dangerous : 0.8)) {
       techShown = true;
       SS.actions.techScamEscapeOverlay({ level: 'dangerous', reasons: r.reasons }, () => {
+        // Dismantle the page's traps (fullscreen, beforeunload, alarm audio)
+        // in the MAIN world, then actually leave via the service worker.
         try { window.dispatchEvent(new CustomEvent('scamshield:techscam-escape')); } catch (_) {}
+        send('leaveTab');
       });
-      send('reportVerdict', { verdict: { level: 'dangerous', score: r.score, reasons: r.reasons, modelUsed: false } });
+      send('reportVerdict', { verdict: { level: 'dangerous', score: r.score, reasons: r.reasons, flags: r.flags || [], modelUsed: false }, subframe: !IS_TOP });
       send('bumpThreats', { kind: 'techscam' });
     }
   });
@@ -178,10 +199,41 @@
     const manyWordInputs = document.querySelectorAll('input[type="text"],input:not([type]),textarea').length >= 12;
     const seedPhraseForm = mentionsSeed && (manyWordInputs || document.querySelector('textarea') != null);
 
+    // ClickFix instruction cluster (0.6.0) — engine/clickfix_rules.js.
+    const clickfix = SS.scoreClickFix ? SS.scoreClickFix({ text: bodyText }) : null;
+
+    // Fake browser-update prompt (0.6.0) — only pay for the anchor walk when
+    // the page even talks about updating.
+    let fakeUpdate = null;
+    if (SS.scoreFakeUpdate && /update|out.of.date|outdated/i.test(bodyText)) {
+      const updateAnchorHosts = [];
+      let hasBlobDownload = false;
+      let walked = 0;
+      for (const a of document.querySelectorAll('a[href], a[download], button')) {
+        if (++walked > 300) break;
+        const t = ((a.textContent || '') + ' ' + (a.getAttribute('aria-label') || '')).toLowerCase();
+        if (!/update|download|install/.test(t)) continue;
+        if (a.hasAttribute('download')) hasBlobDownload = true;
+        const href = a.getAttribute('href');
+        if (!href) continue;
+        if (/^(blob|data):/i.test(href)) { hasBlobDownload = true; continue; }
+        try {
+          const u = new URL(href, location.href);
+          if (/^https?:$/.test(u.protocol)) updateAnchorHosts.push(registrable(u.hostname));
+        } catch (_) {}
+      }
+      fakeUpdate = SS.scoreFakeUpdate({ text: bodyText, updateAnchorHosts, hasBlobDownload });
+    }
+
+    // Delivery-fee scam signals (0.6.0): card-number input + small-fee wording.
+    const hasCardInput = !!document.querySelector('input[autocomplete="cc-number"], input[name*="card" i], input[id*="card" i], input[placeholder*="card" i]');
+    const deliveryFeeText = /(redeliver|redelivery|customs|clearance|delivery|shipping|postage)\s+fee|unpaid\s+(postage|customs|fee)|pay\s+(a\s+)?(small\s+)?fee|schedule.{0,24}redelivery/i.test(bodyText);
+
     return {
       signals: {
         pageHost, hasPasswordField: passwordForms.length > 0, passwordFormActions, hiddenIframeCount, scamPhrases,
-        titleBrand, ogSiteName, faviconHost, logoAltBrands, seedPhraseForm
+        titleBrand, ogSiteName, faviconHost, logoAltBrands, seedPhraseForm,
+        clickfix, fakeUpdate, hasCardInput, deliveryFeeText
       },
       foreignForms, scamBlocks
     };
@@ -260,7 +312,7 @@
       // interaction outright; everything else keeps the banner. The
       // credential-form case stays a banner because its ACTIVE moment is the
       // submit guard — the interstitial is for scams with no submit moment.
-      const DECISIVE_INTERSTITIAL = ['seed-phrase-harvest'];
+      const DECISIVE_INTERSTITIAL = ['seed-phrase-harvest', 'clickfix', 'fake-browser-update', 'delivery-fee-scam'];
       const handlers = { onLeave: () => send('leaveTab'), onReport: () => send('userReport', { label: 'false_positive' }) };
       if (verdict.level === 'dangerous' && (verdict.flags || []).some((f) => DECISIVE_INTERSTITIAL.includes(f)) && SS.actions.dangerInterstitial) {
         SS.actions.dangerInterstitial(verdict, handlers);

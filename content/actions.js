@@ -257,7 +257,7 @@
     const h3 = el('h3'); h3.append(iconSpan('dangerous'), el('span', null, 'Possible tech-support scam'));
     card.append(h3,
       el('p', null, (verdict.reasons && verdict.reasons[0]) || 'This page is using scare tactics.'),
-      el('p', 'ss-sub', 'Real companies never lock your screen or demand you call a number. Do not call, and do not pay.'));
+      el('p', 'ss-sub', 'This is a web page, not your computer — your computer is fine. Real security warnings never lock your screen or show a phone number. Do not call, and do not pay.'));
     const actions = el('div', 'ss-actions');
     const leave = el('button', 'ss-primary', 'Get me out (close this page)');
     const stay = el('button', null, 'Dismiss');

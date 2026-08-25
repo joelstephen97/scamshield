@@ -53,7 +53,7 @@
         if (grants) {
           out.level = 'dangerous';
           out.flags.push('permit-grant');
-          out.reasons.push('This signature would let a site move your tokens or NFTs (token-approval signature).');
+          out.reasons.push('This signature is a token approval ("Permit"). Signing it lets this site move your tokens or NFTs later, without asking you again — the most common wallet-drainer signature.');
         }
         return out;
       }
@@ -61,6 +61,15 @@
       if (method === 'eth_sendTransaction') {
         const tx = params[0] || {};
         const data = typeof tx.data === 'string' ? tx.data.toLowerCase() : '';
+        // EIP-7702 (0.6.0): a type-4 transaction carrying an authorizationList
+        // delegates the account's control to contract code — the post-Pectra
+        // drainer technique. dApps have no everyday reason to request this.
+        if (tx.authorizationList != null) {
+          out.level = 'dangerous';
+          out.flags.push('eip7702-delegation');
+          out.reasons.push('This transaction would hand control of your account to a contract (EIP-7702 delegation) — a technique drainers use to empty wallets.');
+          return out;
+        }
         if (data.startsWith(SELECTOR_SET_APPROVAL_ALL)) {
           // last 32-byte word: bool approved
           const approved = data.length >= 10 + 128 ? hexToBigInt(data.slice(-64)) !== 0n : false;
