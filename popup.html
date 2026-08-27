@@ -1,24 +1,24 @@
-<!doctype html><html><head><meta charset="utf-8"><title>ScamShield</title>
+<!doctype html><html data-i18n-doctitle="extShortName"><head><meta charset="utf-8"><title>ScamShield</title>
 <link rel="stylesheet" href="ui/tokens.css"><link rel="stylesheet" href="popup.css"></head>
 <body class="ui">
 <header class="hdr">
   <span class="brand" id="brandmark">ScamShield</span><span class="ver num" id="ver"></span><span class="sp"></span>
-  <label class="switch" id="enabledwrap" title="Protection"><input type="checkbox" id="enabled" class="sr"><i></i><span id="enabledlbl">On</span></label>
-  <a id="opts" href="#" class="gear" title="Settings" aria-label="Settings"></a>
+  <label class="switch" id="enabledwrap" title="Protection" data-i18n-title="tabProtection"><input type="checkbox" id="enabled" class="sr"><i></i><span id="enabledlbl" data-i18n="on">On</span></label>
+  <a id="opts" href="#" class="gear" title="Settings" aria-label="Settings" data-i18n-title="settings" data-i18n-aria="settings"></a>
 </header>
 <main class="body">
   <section id="status" class="card status unknown" aria-live="polite">
     <div class="ico" id="statusicon"></div>
-    <div><h3 id="level">Checking…</h3><div class="host" id="host"></div><p id="summary" hidden></p></div>
+    <div><h3 id="level" data-i18n="popupChecking">Checking…</h3><div class="host" id="host"></div><p id="summary" hidden></p></div>
     <div class="acts" id="acts">
-      <button id="leave" class="btn danger" hidden>Leave this page</button>
-      <button id="rescue" class="btn" hidden>Take me to the real site</button>
-      <button id="showwhy" class="btn primary" hidden>Show why</button>
+      <button id="leave" class="btn danger" hidden data-i18n="leaveThisPage">Leave this page</button>
+      <button id="rescue" class="btn" hidden data-i18n="takeMeToRealSite">Take me to the real site</button>
+      <button id="showwhy" class="btn primary" hidden data-i18n="showWhy">Show why</button>
     </div>
   </section>
   <section id="evidence" class="card" hidden><ul id="reasons" class="evidence"></ul></section>
   <section class="siteacts" id="siteacts">
-    <span class="menu"><button id="trust" class="btn" hidden aria-haspopup="menu" aria-expanded="false">Trust this site ▾</button>
+    <span class="menu"><button id="trust" class="btn" hidden aria-haspopup="menu" aria-expanded="false" data-i18n="trustThisSite">Trust this site ▾</button>
       <div class="dd" id="trustmenu" role="menu" hidden>
         <button role="menuitem" class="dditem" data-choice="1h" data-i18n="trustFor1h">For 1 hour</button>
         <button role="menuitem" class="dditem" data-choice="today" data-i18n="trustToday">Until tomorrow</button>
@@ -26,8 +26,8 @@
       </div>
       <span id="trusted" hidden><span id="trustedtext"></span> · <button id="untrust" class="btn ghost" data-i18n="untrust">Untrust</button></span>
     </span>
-    <button id="reportbtn" class="btn ghost" hidden>Report a mistake</button>
-    <span id="reportdone" class="toast-inline" hidden>Thanks — noted</span>
+    <button id="reportbtn" class="btn ghost" hidden data-i18n="reportMistake">Report a mistake</button>
+    <span id="reportdone" class="toast-inline" hidden data-i18n="toastThanksNoted">Thanks — noted</span>
   </section>
   <section class="card" id="shopcard" hidden><h3 class="cardh" data-i18n="shoppingCheck">Shopping check</h3><ul id="shoplist" class="evidence"></ul></section>
   <section class="card" id="privacycard" hidden><h3 class="cardh" data-i18n="privacyOnPage">Privacy on this page</h3><ul id="privacylist" class="evidence"></ul></section>
@@ -39,9 +39,9 @@
     <div class="msgrow"><button id="msgbtn" class="btn primary" data-i18n="check">Check</button><span class="hint" data-i18n="checkedOnDevice">Checked on your device only</span></div>
     <div id="msgresult" hidden><div id="msgstatus" class="status safe mini"><div class="ico" id="msgicon"></div><div><h3 id="msglevel"></h3><p id="msgwhy"></p></div></div></div>
   </details>
-  <section id="whatsnew" class="card whatsnew" hidden><span>New in 0.6: ClickFix &amp; fake-update blocking, privacy tools, fake-shop checks, 20 languages.</span><a id="whatsnewlink" href="#">What's new</a><button id="whatsnewx" class="btn ghost" aria-label="Dismiss">✕</button></section>
+  <section id="whatsnew" class="card whatsnew" hidden><span data-i18n="whatsNewBanner">New in 0.6: ClickFix &amp; fake-update blocking, privacy tools, fake-shop checks, 20 languages.</span><a id="whatsnewlink" href="#" data-i18n="whatsNewLink">What's new</a><button id="whatsnewx" class="btn ghost" aria-label="Dismiss" data-i18n-aria="ariaDismiss">✕</button></section>
 </main>
-<footer class="foot"><span class="lock" id="lockline">Runs on your device · nothing leaves your browser</span><a id="support" href="#" data-i18n="support">Support</a></footer>
+<footer class="foot"><span class="lock" id="lockline" data-i18n="runsOnDevice">Runs on your device · nothing leaves your browser</span><a id="support" href="#" data-i18n="support">Support</a></footer>
 <div class="toast" id="toast" role="status"></div>
 <script src="engine/constants.js"></script><script src="engine/features.js"></script>
 <script src="engine/heuristics.js"></script><script src="engine/message_rules.js"></script>

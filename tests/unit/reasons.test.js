@@ -54,8 +54,11 @@ test('resolveReason prefers chrome.i18n when it is available', () => {
   const calls = [];
   globalThis.chrome = { i18n: { getMessage: (key, subs) => { calls.push([key, subs]); return 'localizado: ' + subs[0]; } } };
   try {
-    assert.equal(R.resolveReason({ code: 'idnHomograph', kind: 'brand', params: ['paypal.com'] }), 'localizado: paypal.com');
-    assert.deepEqual(calls, [['reason_idnHomograph', ['paypal.com']]]);
+    // Params passed to chrome.i18n.getMessage are bidi-isolated (RTL safety)
+    // before substitution, so a right-to-left translation never gets its
+    // punctuation order scrambled by an embedded LTR hostname/brand/URL.
+    assert.equal(R.resolveReason({ code: 'idnHomograph', kind: 'brand', params: ['paypal.com'] }), 'localizado: ' + R.bidiWrap('paypal.com'));
+    assert.deepEqual(calls, [['reason_idnHomograph', [R.bidiWrap('paypal.com')]]]);
     // An empty getMessage (missing key) still falls back to English.
     globalThis.chrome.i18n.getMessage = () => '';
     assert.equal(R.resolveReason({ code: 'ipHost', kind: 'link' }), R.EN.ipHost);
@@ -65,13 +68,20 @@ test('resolveReason prefers chrome.i18n when it is available', () => {
   } finally { delete globalThis.chrome; }
 });
 
-test('params are substituted positionally, repeats included', () => {
+test('params are substituted positionally and bidi-isolated, repeats included', () => {
   assert.equal(R.resolveReason({ code: 'idnHomograph', kind: 'brand', params: ['paypal.com'] }),
-    'This domain imitates "paypal.com" using look-alike foreign characters.');
+    `This domain imitates "${R.bidiWrap('paypal.com')}" using look-alike foreign characters.`);
   assert.equal(R.resolveReason({ code: 'brandIconMismatch', kind: 'brand', params: ['PayPal'] }),
-    "This page uses PayPal's icon but is not PayPal's website.");
+    `This page uses ${R.bidiWrap('PayPal')}'s icon but is not ${R.bidiWrap('PayPal')}'s website.`);
   // A missing param resolves to an empty string rather than a literal "$1".
   assert.equal(R.resolveReason({ code: 'scamPhrase', kind: 'page' }), 'Page shows classic scam/giveaway language ("").');
+});
+
+test('bidiWrap isolates a value with LRI/PDI marks and passes through nullish input', () => {
+  assert.equal(R.bidiWrap('example.com'), '⁦example.com⁩');
+  assert.equal(R.bidiWrap(''), '⁦⁩');
+  assert.equal(R.bidiWrap(null), '');
+  assert.equal(R.bidiWrap(undefined), '');
 });
 
 test('legacy string reasons pass through unchanged', () => {

@@ -1,8 +1,8 @@
-<!doctype html><html><head><meta charset="utf-8"><title>ScamShield Settings</title>
+<!doctype html><html data-i18n-doctitle="optDocTitle"><head><meta charset="utf-8"><title>ScamShield Settings</title>
 <link rel="stylesheet" href="ui/tokens.css"><link rel="stylesheet" href="options.css"></head>
 <body class="ui">
 <div class="shell">
-<nav aria-label="Settings sections" role="tablist">
+<nav aria-label="Settings sections" data-i18n-aria="ariaSettingsSections" role="tablist">
   <div class="brand" id="brandmark">ScamShield</div>
   <a href="#protection" data-tab="protection" class="cur" role="tab" aria-selected="true" aria-controls="tab-protection" data-i18n="tabProtection">Protection</a>
   <a href="#trusted" data-tab="trusted" role="tab" aria-selected="false" aria-controls="tab-trusted" data-i18n="tabTrusted">Trusted sites</a>
@@ -46,8 +46,8 @@
 
   <div class="setrow"><div class="t"><b data-i18n="optStrict">Strict mode</b><span data-i18n="optStrictHint">For anyone who wants maximum caution: even "suspicious" pages are blocked with a full-screen warning and simpler wording. Best for helping a less confident family member stay safe.</span></div><label class="switch" for="strict"><input type="checkbox" id="strict" class="sr"><i></i></label></div>
 
-  <div class="setrow"><div class="t"><b data-i18n="optReporting">Help make ScamShield smarter</b><span data-i18n="optReportingHint">Sends the site name (never the full address or page text) and anonymous risk signals of pages flagged dangerous, and of sites you report. Off by default.</span><button id="whatsent" class="exp">What exactly is sent ▾</button>
-    <div id="whatsentbody" class="hint" hidden>A report contains only: the site name (hostname), the verdict and internal reason codes, numeric risk signals derived from the address and page layout (hashed word counts and counts of forms, inputs and links — never the text itself), matched brand names, the extension version, and the hour. Never the full address (path or query), page text, anything you typed, cookies, or any identifier of you or your device. Reports are deleted after 180 days. <a href="https://joelstephen97.github.io/scamshield/privacy.html" target="_blank" rel="noopener">Privacy policy</a></div></div>
+  <div class="setrow"><div class="t"><b data-i18n="optReporting">Help make ScamShield smarter</b><span data-i18n="optReportingHint">Sends the site name (never the full address or page text) and anonymous risk signals of pages flagged dangerous, and of sites you report. Off by default.</span><button id="whatsent" class="exp" data-i18n="optWhatSentToggle">What exactly is sent ▾</button>
+    <div id="whatsentbody" class="hint" hidden><span data-i18n="optWhatSentBody">A report contains only: the site name (hostname), the verdict and internal reason codes, numeric risk signals derived from the address and page layout (hashed word counts and counts of forms, inputs and links — never the text itself), matched brand names, the extension version, and the hour. Never the full address (path or query), page text, anything you typed, cookies, or any identifier of you or your device. Reports are deleted after 180 days. </span><a href="https://joelstephen97.github.io/scamshield/privacy.html" target="_blank" rel="noopener" data-i18n="privacyPolicyLink">Privacy policy</a></div></div>
     <label class="switch" for="report"><input type="checkbox" id="report" class="sr"><i></i></label></div>
 </section>
 <section id="tab-trusted" class="tab" hidden role="tabpanel" aria-labelledby="h-trusted">
@@ -61,25 +61,25 @@
 </section>
 <section id="tab-feed" class="tab" hidden role="tabpanel" aria-labelledby="h-feed">
   <h2 id="h-feed" tabindex="-1" data-i18n="feedTitle">Threat feed</h2><p class="lead" data-i18n="feedLead">A daily-rebuilt list of known scam sites (OpenPhish + URLhaus, heavily filtered). ScamShield only downloads it.</p>
-  <div class="feedline"><span class="dot" id="feeddot"></span><span id="feedstatus">Never updated</span><button id="checkupd" class="btn ghost" data-i18n="checkNow">Check now</button></div>
-  <details class="adv"><summary>Advanced: feed URL</summary>
-    <label class="row"><span>Feed URL</span><input type="url" id="otaurl" placeholder="https://…/blocklist.json"></label>
-    <button id="resetfeed" class="btn">Reset to official feed</button><p class="hint">Point this at your own JSON to self-host, or leave blank to disable updates.</p></details>
+  <div class="feedline"><span class="dot" id="feeddot"></span><span id="feedstatus" data-i18n="feedNeverUpdated">Never updated</span><button id="checkupd" class="btn ghost" data-i18n="checkNow">Check now</button></div>
+  <details class="adv"><summary data-i18n="optAdvancedFeedUrl">Advanced: feed URL</summary>
+    <label class="row"><span data-i18n="optFeedUrlLabel">Feed URL</span><input type="url" id="otaurl" placeholder="https://…/blocklist.json" data-i18n-ph="optFeedUrlPlaceholder"></label>
+    <button id="resetfeed" class="btn" data-i18n="resetToOfficialFeed">Reset to official feed</button><p class="hint" data-i18n="optFeedUrlHint">Point this at your own JSON to self-host, or leave blank to disable updates.</p></details>
 </section>
 <section id="tab-about" class="tab" hidden role="tabpanel" aria-labelledby="h-about">
   <h2 id="h-about" tabindex="-1" data-i18n="tabAbout">About</h2>
   <div class="setrow"><div class="t"><b data-i18n="aboutVersion">Version</b><span id="aboutver"></span></div></div>
-  <div class="setrow"><div class="t"><b data-i18n="appearance">Appearance</b><span>Follow your system, or pick one.</span></div><select id="theme"><option value="auto">Auto</option><option value="light">Light</option><option value="dark">Dark</option></select></div>
-  <div class="setrow"><div class="t"><b>Links</b><span><a href="https://joelstephen97.github.io/scamshield/privacy.html" target="_blank" rel="noopener">Privacy policy</a> · <a href="https://github.com/joelstephen97/scamshield" target="_blank" rel="noopener">GitHub</a> · <a href="https://github.com/joelstephen97/scamshield/issues/new" target="_blank" rel="noopener">Report an issue</a> · <a href="https://github.com/joelstephen97/scamshield/blob/main/CHANGELOG.md" target="_blank" rel="noopener">What's new</a></span></div></div>
-  <div class="setrow"><div class="t"><b>Support</b><span>ScamShield is free and runs entirely on your device. <a id="support" href="https://github.com/sponsors/joelstephen97" target="_blank" rel="noopener">Sponsor on GitHub</a> · <a href="https://www.paypal.me/joelstephen1" target="_blank" rel="noopener">Donate via PayPal</a></span></div></div>
+  <div class="setrow"><div class="t"><b data-i18n="appearance">Appearance</b><span data-i18n="optThemeHint">Follow your system, or pick one.</span></div><select id="theme"><option value="auto" data-i18n="optThemeAuto">Auto</option><option value="light" data-i18n="optThemeLight">Light</option><option value="dark" data-i18n="optThemeDark">Dark</option></select></div>
+  <div class="setrow"><div class="t"><b data-i18n="optLinksTitle">Links</b><span><a href="https://joelstephen97.github.io/scamshield/privacy.html" target="_blank" rel="noopener" data-i18n="privacyPolicyLink">Privacy policy</a> · <a href="https://github.com/joelstephen97/scamshield" target="_blank" rel="noopener" data-i18n="optLinkGithub">GitHub</a> · <a href="https://github.com/joelstephen97/scamshield/issues/new" target="_blank" rel="noopener" data-i18n="optLinkReportIssue">Report an issue</a> · <a href="https://github.com/joelstephen97/scamshield/blob/main/CHANGELOG.md" target="_blank" rel="noopener" data-i18n="whatsNewLink">What's new</a></span></div></div>
+  <div class="setrow"><div class="t"><b data-i18n="support">Support</b><span><span data-i18n="supportFreeOnDevice">ScamShield is free and runs entirely on your device.</span> <a id="support" href="https://github.com/sponsors/joelstephen97" target="_blank" rel="noopener" data-i18n="supportSponsorGithub">Sponsor on GitHub</a> · <a href="https://www.paypal.me/joelstephen1" target="_blank" rel="noopener" data-i18n="supportDonatePaypal">Donate via PayPal</a></span></div></div>
   <h3 data-i18n="whatLeaves">What leaves your device</h3>
-  <p class="lead">ScamShield makes no analytics, telemetry or tracking requests — ever. The only requests it can make are these three, and you can verify it yourself: open your browser's <b>DevTools → Network</b> tab, use ScamShield normally, and you will see nothing beyond them.</p>
+  <p class="lead" data-i18n="netNoTelemetry">ScamShield makes no analytics, telemetry or tracking requests — ever. The only requests it can make are these three, and you can verify it yourself: open your browser's DevTools → Network tab, use ScamShield normally, and you will see nothing beyond them.</p>
   <ul id="netreceipt" class="list">
-    <li><span><b>Threat-list download</b><br><span class="meta">The public blocklist file — the same for everyone, nothing about you is sent.</span></span><span class="meta" id="net-feed">—</span></li>
-    <li><span><b>Community reports</b><br><span class="meta">Only if you turned reporting on. Site name + numeric signals, never URLs or page text.</span></span><span class="meta" id="net-report">—</span></li>
-    <li><span><b>Page icon check</b><br><span class="meta">Fetches a page's own favicon to spot brand look-alikes. No third party, no cookies.</span></span><span class="meta">per page</span></li>
+    <li><span><b data-i18n="receiptFeedLabel">Threat-list download</b><br><span class="meta" data-i18n="receiptFeedDetail">The public blocklist file — the same for everyone, nothing about you is sent.</span></span><span class="meta" id="net-feed">—</span></li>
+    <li><span><b data-i18n="receiptReportLabel">Community reports</b><br><span class="meta" data-i18n="receiptReportDetail">Only if you turned reporting on. Site name + numeric signals, never URLs or page text.</span></span><span class="meta" id="net-report">—</span></li>
+    <li><span><b data-i18n="receiptIconLabel">Page icon check</b><br><span class="meta" data-i18n="receiptIconDetail">Fetches a page's own favicon to spot brand look-alikes. No third party, no cookies.</span></span><span class="meta" data-i18n="receiptPerPage">per page</span></li>
   </ul>
-  <p class="hint">Settings can be exported/imported below and (optionally) synced across your own devices.</p>
+  <p class="hint" data-i18n="optExportSyncHint">Settings can be exported/imported below and (optionally) synced across your own devices.</p>
   <div class="setrow"><div class="t"><b data-i18n="backupSettings">Back up settings</b><span data-i18n="backupHint">Save your settings and trusted sites to a file, or load them on another computer.</span></div><span><button id="exportbtn" class="btn" data-i18n="exportBtn">Export</button> <button id="importbtn" class="btn" data-i18n="importBtn">Import</button><input type="file" id="importfile" accept="application/json" hidden></span></div>
   <div class="setrow"><div class="t"><b data-i18n="syncTitle">Sync across my devices</b><span data-i18n="syncHint">Keep your settings and trusted sites in step on every browser where you're signed in. Uses your browser's own sync — ScamShield still has no account or server. Off by default.</span></div><label class="switch" for="sync"><input type="checkbox" id="sync" class="sr"><i></i></label></div>
 </section>

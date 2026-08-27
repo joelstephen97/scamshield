@@ -4,6 +4,14 @@
   root.__scamshieldIsolatedGuard = true;
   const api = root.browser || root.chrome;
   const SS = root.ScamShield;
+  // Localised string with English fallback, same pattern as content/actions.js
+  // (no shared module between the two content scripts, so this stays a tiny
+  // local copy rather than a new file).
+  function t(key, subs, fallback) {
+    try { const m = api && api.i18n && api.i18n.getMessage(key, subs); if (m) return m; } catch (_) {}
+    return fallback != null ? fallback : key;
+  }
+  const bidi = (s) => (root.SSReasons && root.SSReasons.bidiWrap) ? root.SSReasons.bidiWrap(s) : (s == null ? '' : String(s));
   // all_frames (0.6.0): the isolated script now runs in every frame so
   // iframe-hosted phishing forms are no longer invisible. Sub-frames run a
   // lean pass (URL + DOM rules + form guard); page-level UI stays top-frame.
@@ -81,7 +89,7 @@
       const text = (document.body ? document.body.innerText : '').slice(0, 20000);
       const cf = SS.scoreClickFix({ text, clipboardLevel: 'dangerous' });
       if (cf.level === 'dangerous') {
-        try { await navigator.clipboard.writeText('Blocked by ScamShield — this site put a dangerous command on your clipboard. Do not paste it anywhere.'); } catch (_) { /* overwrite is best-effort */ }
+        try { await navigator.clipboard.writeText(t('guardClipboardBlockedPayload', null, 'Blocked by ScamShield — this site put a dangerous command on your clipboard. Do not paste it anywhere.')); } catch (_) { /* overwrite is best-effort */ }
         SS.actions.dangerInterstitial(
           { level: 'dangerous', reasons: cf.reasons, flags: cf.flags },
           { onLeave: () => send('leaveTab'), onReport: () => send('userReport', { label: 'false_positive' }) }
@@ -130,9 +138,11 @@
     if (isTrustedHost(location.hostname, settings)) return;
     const key = 'leak|' + d.destHost + '|' + d.kind;
     if (privacySeen.has(key)) return; privacySeen.add(key);
-    const how = d.kind === 'plain' ? 'in plain text' : 'as a hashed (' + d.kind.toUpperCase() + ') identifier';
+    const text = d.kind === 'plain'
+      ? t('guardLeakyFormPlain', [bidi(d.destHost)], 'This site sent your email/phone to ' + d.destHost + ' in plain text — before you pressed submit.')
+      : t('guardLeakyFormHashed', [bidi(d.destHost)], 'This site sent your email/phone to ' + d.destHost + ' as a hashed (MD5) identifier — before you pressed submit.');
     if (SS.actions && SS.actions.privacyToast) {
-      SS.actions.privacyToast({ text: 'This site sent your email/phone to ' + d.destHost + ' ' + how + ' — before you pressed submit.' });
+      SS.actions.privacyToast({ text });
     }
     send('privacyFinding', { finding: { kind: 'leaky-form', host: d.destHost, detail: d.kind } });
   });
@@ -155,7 +165,7 @@
     const bt = (document.body ? document.body.innerText : '').toLowerCase();
     if (/allow.{0,20}(to (continue|proceed|verify|watch|download)|if you are not a robot|to confirm you are human)|click\s+allow/i.test(bt)) {
       if (SS.actions && SS.actions.privacyToast) {
-        SS.actions.privacyToast({ level: 'warn', text: 'This site is trying to get notification permission using a "click Allow to continue" trick. You can safely Block it.' });
+        SS.actions.privacyToast({ level: 'warn', text: t('guardNotifyLure', null, 'This site is trying to get notification permission using a "click Allow to continue" trick. You can safely Block it.') });
       }
       send('privacyFinding', { finding: { kind: 'notify-lure', host: location.hostname, detail: '' } });
     }
@@ -357,7 +367,8 @@
       a.__ssSerp = true;
       const chip = document.createElement('span');
       chip.className = 'scamshield-serp';
-      chip.textContent = '⚠ ScamShield: this ad goes to ' + destReg + ', not ' + shownReg;
+      try { chip.setAttribute('dir', root.SSReasons && root.SSReasons.isRTL() ? 'rtl' : 'ltr'); } catch (_) {}
+      chip.textContent = t('serpAdMismatch', [bidi(destReg), bidi(shownReg)], '⚠ ScamShield: this ad goes to ' + destReg + ', not ' + shownReg);
       (a.closest('div,li,article') || a).appendChild(chip);
       flagged++;
     }

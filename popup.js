@@ -2,7 +2,11 @@
 const api = globalThis.browser || globalThis.chrome;
 const $ = (id) => document.getElementById(id);
 const SS = globalThis.ScamShield, F = globalThis.SSFormat, I = globalThis.SSIcons, R = globalThis.SSReasons;
-const T = (k, subs, fb) => (globalThis.SSi18n ? globalThis.SSi18n.t(k, subs) : (fb || k));
+const UI_LANG = (() => { try { return api.i18n.getUILanguage(); } catch (_) { return 'en'; } })();
+// SSi18n.t returns '' (never key-echo) on a genuine miss, so the fallback
+// argument here actually gets used instead of being dead code.
+const T = (k, subs, fb) => { const v = globalThis.SSi18n && globalThis.SSi18n.t(k, subs); return v || fb || k; };
+const bidi = (s) => (R && R.bidiWrap ? R.bidiWrap(s) : (s == null ? '' : String(s)));
 const LEVELTXT = { safe: 'popupSafe', suspicious: 'popupSuspicious', dangerous: 'popupDangerous', unknown: 'popupUnknown' };
 const levelLabel = (lvl) => T(LEVELTXT[lvl] || 'popupUnknown', null, F.levelText(lvl));
 const send = (type, extra) => new Promise((res) => { try { api.runtime.sendMessage(Object.assign({ type }, extra || {}), (r) => res(r)); } catch (_) { res(null); } });
@@ -41,7 +45,7 @@ function renderVerdictUI(host) {
   renderStatus(level, host,
     !settings.enabled ? T('popupPausedSummary', null, 'Protection is paused — turn it on to resume.') :
     checking ? '' :
-    level === 'dangerous' ? (brand ? `Looks like ${brand}, but isn't. Don't enter your password here.` : T('popupDangerSummary', null, "Don't enter passwords or card details here.")) :
+    level === 'dangerous' ? (brand ? T('popupBrandDangerSummary', [bidi(brand)], `Looks like ${brand}, but isn't. Don't enter your password here.`) : T('popupDangerSummary', null, "Don't enter passwords or card details here.")) :
     level === 'suspicious' ? T('popupSuspiciousSummary', null, 'Take care before typing anything here.') : '',
     checking ? T('popupChecking', null, 'Checking…') : undefined);
   renderEvidence(verdict && verdict.reasons, level === 'dangerous');
@@ -63,7 +67,8 @@ function renderTrust() {
   const paused = settings.pausedSites && settings.pausedSites[domain];
   const always = (settings.allowlist || []).includes(domain);
   $('trust').hidden = !!paused || always; $('trusted').hidden = !(paused || always);
-  $('trustedtext').textContent = always ? 'Trusted' : paused ? ('Trusted until ' + new Date(paused).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })) : '';
+  const until = paused ? new Date(paused).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+  $('trustedtext').textContent = always ? T('trusted', null, 'Trusted') : paused ? T('fmtTrustedUntil', [bidi(until)], 'Trusted until ' + until) : '';
 }
 function setTrustMenu(open) {
   $('trustmenu').hidden = !open; $('trust').setAttribute('aria-expanded', String(open));
@@ -88,7 +93,7 @@ async function init() {
   $('brandmark').insertAdjacentHTML('afterbegin', I.shield('safe')); $('opts').innerHTML = I.gear(); $('lockline').insertAdjacentHTML('afterbegin', I.lock());
   try { $('ver').textContent = api.runtime.getManifest().version; } catch (_) {}
   settings = await send('getSettings');
-  if (!settings) { renderStatus('unknown', '', 'Extension error — try reopening.'); return; }
+  if (!settings) { renderStatus('unknown', '', T('toastExtensionError', null, 'Extension error — try reopening.')); return; }
   $('enabled').checked = !!settings.enabled; $('enabledwrap').classList.toggle('on', !!settings.enabled); $('enabledlbl').textContent = settings.enabled ? T('on', null, 'On') : T('paused', null, 'Paused');
   $('enabled').addEventListener('change', async () => { settings = await send('setSettings', { patch: { enabled: $('enabled').checked } }); $('enabledwrap').classList.toggle('on', !!settings.enabled); $('enabledlbl').textContent = settings.enabled ? T('on', null, 'On') : T('paused', null, 'Paused'); });
   $('opts').addEventListener('click', (e) => { e.preventDefault(); api.runtime.openOptionsPage(); });
@@ -99,7 +104,11 @@ async function init() {
 
   tab = await currentTab();
   const http = tab && tab.url && /^https?:/.test(tab.url);
-  if (!http) { renderStatus('unknown', tab && tab.url ? new URL(tab.url).protocol.replace(':', '') + ' page' : '', "Browser pages and the web store aren't scanned."); renderHistory(); return; }
+  if (!http) {
+    const protocol = tab && tab.url ? new URL(tab.url).protocol.replace(':', '') : '';
+    renderStatus('unknown', protocol ? T('fmtProtocolPage', [protocol], protocol + ' page') : '', T('popupNotHttp', null, "Browser pages and the web store aren't scanned."));
+    renderHistory(); return;
+  }
   const host = new URL(tab.url).hostname; domain = registrable(host);
   verdict = await send('getVerdict', { tabId: tab.id });
   renderVerdictUI(host);
@@ -118,13 +127,13 @@ async function init() {
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('trustmenu').hidden) { setTrustMenu(false); $('trust').focus(); } });
   for (const b of document.querySelectorAll('.dditem')) b.addEventListener('click', async () => {
     const r = await send('pauseSite', { domain, choice: b.dataset.choice }); setTrustMenu(false);
-    settings = await send('getSettings'); renderTrust(); toast(r && r.until ? 'Trusted for now' : 'Trusted');
+    settings = await send('getSettings'); renderTrust(); toast(r && r.until ? T('toastTrustedForNow', null, 'Trusted for now') : T('trusted', null, 'Trusted'));
   });
-  $('untrust').addEventListener('click', async () => { await send('unpauseSite', { domain }); settings = await send('getSettings'); renderTrust(); toast('Untrusted'); });
+  $('untrust').addEventListener('click', async () => { await send('unpauseSite', { domain }); settings = await send('getSettings'); renderTrust(); toast(T('toastUntrusted', null, 'Untrusted')); });
 
   $('reportbtn').addEventListener('click', async () => {
     const r = await send('userReport', { label: level === 'safe' || level === 'unknown' ? 'scam' : 'false_positive', tabId: tab.id });
-    $('reportbtn').hidden = true; $('reportdone').hidden = false; $('reportdone').textContent = r && r.via === 'relay' ? 'Thanks — sent' : 'Thanks — noted';
+    $('reportbtn').hidden = true; $('reportdone').hidden = false; $('reportdone').textContent = r && r.via === 'relay' ? T('toastThanksSent', null, 'Thanks — sent') : T('toastThanksNoted', null, 'Thanks — noted');
   });
 
   const [st, h, pf, shop] = await Promise.all([send('getTabStats', { domain }), send('getHistory'), send('getPrivacyFindings', { tabId: tab.id }), send('getShopFindings', { tabId: tab.id })]);
@@ -140,7 +149,7 @@ function renderShop(shop) {
   const ul = $('shoplist'); ul.replaceChildren();
   for (const f of flags.slice(0, 6)) {
     const li = document.createElement('li');
-    const chip = document.createElement('span'); chip.className = 'chip' + (shop.level === 'suspicious' ? ' brand' : ''); chip.textContent = R.resolveReason({ code: 'shop_' + f.code }) || 'Flag';
+    const chip = document.createElement('span'); chip.className = 'chip' + (shop.level === 'suspicious' ? ' brand' : ''); chip.textContent = R.resolveReason({ code: 'shop_' + f.code }) || T('popupShopFlagFallback', null, 'Flag');
     const span = document.createElement('span'); span.textContent = R.resolveReason({ code: 'shop_' + f.code + '_detail' });
     li.append(chip, span); ul.appendChild(li);
   }
@@ -149,15 +158,17 @@ function renderPrivacy(findings) {
   if (!findings.length) return;
   $('privacycard').hidden = false;
   const ul = $('privacylist'); ul.replaceChildren();
-  const label = { 'leaky-form': 'Data leak', fingerprint: 'Tracking', 'notify-lure': 'Pop-ups' };
+  const label = { 'leaky-form': () => T('chipDataLeak', null, 'Data leak'), fingerprint: () => T('chipTracking', null, 'Tracking'), 'notify-lure': () => T('chipPopups', null, 'Pop-ups') };
   const text = (f) =>
-    f.kind === 'leaky-form' ? ('Sent your email/phone to ' + f.host + (f.detail && f.detail !== 'plain' ? ' (hashed)' : '') + ' before you submitted.') :
-    f.kind === 'fingerprint' ? (f.host + ' is fingerprinting your device to track you.') :
-    f.kind === 'notify-lure' ? ('This site tried a "click Allow" notification trick.') :
-    'Privacy issue detected.';
+    f.kind === 'leaky-form' ? (f.detail && f.detail !== 'plain'
+      ? T('popupPrivacyLeakHashed', [bidi(f.host)], 'Sent your email/phone to ' + f.host + ' (hashed) before you submitted.')
+      : T('popupPrivacyLeakPlain', [bidi(f.host)], 'Sent your email/phone to ' + f.host + ' before you submitted.')) :
+    f.kind === 'fingerprint' ? T('popupPrivacyFingerprint', [bidi(f.host)], f.host + ' is fingerprinting your device to track you.') :
+    f.kind === 'notify-lure' ? T('popupPrivacyNotifyLure', null, 'This site tried a "click Allow" notification trick.') :
+    T('popupPrivacyDefaultText', null, 'Privacy issue detected.');
   for (const f of findings.slice(0, 5)) {
     const li = document.createElement('li');
-    const chip = document.createElement('span'); chip.className = 'chip brand'; chip.textContent = label[f.kind] || 'Privacy';
+    const chip = document.createElement('span'); chip.className = 'chip brand'; chip.textContent = label[f.kind] ? label[f.kind]() : T('chipPrivacy', null, 'Privacy');
     const span = document.createElement('span'); span.textContent = text(f);
     li.append(chip, span); ul.appendChild(li);
   }
@@ -165,8 +176,8 @@ function renderPrivacy(findings) {
 function renderHistoryList(list) {
   if (!list.length) return; $('recent').hidden = false; const ul = $('hist'); ul.replaceChildren();
   for (const e of list.slice(0, 3)) {
-    const li = document.createElement('li'); const chip = document.createElement('span'); chip.className = 'chip' + (e.kind === 'page' ? '' : ' brand'); chip.textContent = F.detectorLabel(e.kind);
-    const hs = document.createElement('span'); hs.className = 'h'; hs.textContent = e.host || 'unknown site'; const t = document.createElement('time'); t.textContent = F.relTime(e.ts);
+    const li = document.createElement('li'); const chip = document.createElement('span'); chip.className = 'chip' + (e.kind === 'page' ? '' : ' brand'); chip.textContent = chipLabel(e.kind);
+    const hs = document.createElement('span'); hs.className = 'h'; hs.textContent = e.host || T('unknownSite', null, 'unknown site'); const t = document.createElement('time'); t.textContent = F.relTime(e.ts, undefined, UI_LANG);
     li.append(chip, hs, t); ul.appendChild(li);
   }
 }
@@ -183,4 +194,4 @@ function wireMessageChecker() {
   });
 }
 wireMessageChecker();
-init().catch((err) => { renderStatus('unknown', '', 'Extension error — try reopening.'); console.error('[ScamShield] popup init failed:', err); });
+init().catch((err) => { renderStatus('unknown', '', T('toastExtensionError', null, 'Extension error — try reopening.')); console.error('[ScamShield] popup init failed:', err); });

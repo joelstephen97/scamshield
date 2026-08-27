@@ -17,9 +17,11 @@ test('sponsored-result mismatch is flagged on a search page', async ({ context }
   const page = await context.newPage();
   await page.goto(BASE_HTTPS.replace('localhost', 'www.google.com') + '/serp.html');
   // The sponsored result whose ad goes to a different domain gets a warning chip;
-  // the organic Wikipedia result does not.
+  // the organic Wikipedia result does not. The hostname is wrapped in bidi
+  // isolate marks (U+2066/U+2069) for RTL safety, so allow for those between
+  // "goes to" and the hostname rather than requiring a contiguous match.
   await expect(page.locator('.scamshield-serp')).toBeVisible({ timeout: 8000 });
-  await expect(page.locator('.scamshield-serp')).toHaveText(/goes to notepad-plus-plus-download\.tk/i);
+  await expect(page.locator('.scamshield-serp')).toHaveText(/goes to.{0,2}notepad-plus-plus-download\.tk/i);
   await expect(page.locator('.scamshield-serp')).toHaveCount(1);
 });
 

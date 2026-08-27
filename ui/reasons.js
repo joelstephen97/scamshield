@@ -93,24 +93,36 @@
     return null;
   }
 
-  function subst(tmpl, params) {
+  // Left-to-right isolate: wraps a hostname/URL/number so it renders correctly
+  // when embedded in a right-to-left sentence (Arabic, Hebrew, Persian, Urdu)
+  // without disturbing the surrounding punctuation's bidi order. Unicode
+  // Isolate marks are invisible and harmless in LTR text too, so this is safe
+  // to apply unconditionally to every interpolated run.
+  const LRI = '⁦', PDI = '⁩';
+  function bidiWrap(s) { return s == null ? '' : LRI + String(s) + PDI; }
+
+  function subst(tmpl, params, isolate) {
     return String(tmpl).replace(/\$(\d)/g, (m, i) => {
       const v = params && params[i - 1];
-      return v != null ? String(v) : '';
+      if (v == null) return '';
+      return isolate ? bidiWrap(v) : String(v);
     });
   }
 
   // Localised text for one reason. Legacy plain-string reasons (verdicts cached
-  // by an older version) pass straight through.
+  // by an older version) pass straight through. Params (hostnames, brand
+  // names, phrases, URLs) are wrapped in bidi isolates so they read correctly
+  // in right-to-left locales.
   function resolveReason(r) {
     if (typeof r === 'string') return r;
     if (!r || !r.code) return '';
     const params = (r.params || []).map(String);
+    const isolated = params.map(bidiWrap);
     const api = i18n();
     if (api) {
-      try { const m = api.getMessage('reason_' + r.code, params); if (m) return m; } catch (_) {}
+      try { const m = api.getMessage('reason_' + r.code, isolated); if (m) return m; } catch (_) {}
     }
-    return subst(EN[r.code] || r.code, params);
+    return subst(EN[r.code] || r.code, params, true);
   }
 
   // English regardless of UI locale — for GitHub issue bodies.
@@ -133,5 +145,5 @@
     return /^(ar|he|fa|ur)\b/i.test(String(l || ''));
   }
 
-  return { resolveReason, reasonToEnglish, reasonKind, EN, isRTL };
+  return { resolveReason, reasonToEnglish, reasonKind, EN, isRTL, bidiWrap };
 });

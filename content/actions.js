@@ -16,6 +16,18 @@
     if (r == null) return '';
     return R ? R.resolveReason(r) : (typeof r === 'string' ? r : '');
   }
+  // Isolates an LTR run (hostname, URL, count) so it reads correctly when
+  // substituted into a right-to-left sentence. A no-op when ui/reasons.js
+  // isn't loaded (defensive only; it always is in both manifests).
+  function bidi(s) {
+    const R = root.SSReasons;
+    return R && R.bidiWrap ? R.bidiWrap(s) : (s == null ? '' : String(s));
+  }
+  // Every injected root (banner/overlay/toast) gets an explicit dir so RTL
+  // locales lay it out correctly regardless of the host page's own direction.
+  function setDir(node) {
+    try { node.setAttribute('dir', root.SSReasons && root.SSReasons.isRTL() ? 'rtl' : 'ltr'); } catch (_) {}
+  }
   function el(tag, cls, text) {
     const e = document.createElement(tag);
     if (cls) e.className = cls;
@@ -42,11 +54,12 @@
     const label = btn.textContent;
     let left = seconds == null ? 3 : seconds;
     btn.disabled = true;
-    btn.textContent = label + ' (' + left + ')';
+    const countdown = () => t('guardCountdown', [label, bidi(left)], label + ' (' + left + ')');
+    btn.textContent = countdown();
     const tick = setInterval(() => {
       left -= 1;
       if (left <= 0) { clearInterval(tick); btn.disabled = false; btn.textContent = label; }
-      else btn.textContent = label + ' (' + left + ')';
+      else btn.textContent = countdown();
     }, 1000);
     return () => clearInterval(tick);
   }
@@ -69,6 +82,7 @@
     const danger = verdict.level === 'dangerous';
     const bar = el('div', NS + '-banner ' + (danger ? 'danger' : 'suspicious'));
     bar.setAttribute('role', 'alert');
+    setDir(bar);
     const ico = el('span', 'ss-ico'); ico.innerHTML = ICON[danger ? 'dangerous' : 'suspicious'];
     const text = el('div', 'ss-text');
     const head = verdict.brandLabel
@@ -85,7 +99,7 @@
     if (!danger) { const why = el('button', 'ss-why', t('showWhy', null, 'Show why')); why.addEventListener('click', () => { text.querySelector('span').textContent = verdict.reasons.slice(0, 3).map(reasonText).join(' · '); why.remove(); }); acts.appendChild(why); }
     const trust = el('button', 'ss-trust', t('trustThisSite', null, 'Trust this site')); trust.addEventListener('click', () => { onAllow && onAllow(); bar.remove(); });
     const report = el('button', 'ss-report', t('reportMistake', null, 'Report a mistake')); report.addEventListener('click', () => { report.textContent = t('thanks', null, 'Thanks'); report.disabled = true; x.onReport && x.onReport(); });
-    const close = el('button', 'ss-x', '✕'); close.setAttribute('aria-label', 'Dismiss'); close.addEventListener('click', () => bar.remove());
+    const close = el('button', 'ss-x', '✕'); close.setAttribute('aria-label', t('ariaDismiss', null, 'Dismiss')); close.addEventListener('click', () => bar.remove());
     acts.append(trust, report, close);
     bar.append(ico, text, acts);
     (document.body || document.documentElement).appendChild(bar);
@@ -109,19 +123,20 @@
     const ov = el('div', NS + '-overlay ' + NS + '-interstitial');
     ov.setAttribute('role', 'alertdialog');
     ov.setAttribute('aria-modal', 'true');
-    ov.setAttribute('aria-label', 'Scam warning');
+    ov.setAttribute('aria-label', t('ariaScamWarning', null, 'Scam warning'));
+    setDir(ov);
     const card = el('div', 'ss-card');
     const h3 = el('h3');
     h3.append(iconSpan('dangerous'), el('span', null, HEADS[Math.floor(Math.random() * HEADS.length)]));
     card.append(h3);
-    const why = el('p', null, reasonText(verdict.reasons[0]) || 'This page matches the pattern of a known scam.');
+    const why = el('p', null, reasonText(verdict.reasons[0]) || t('interstitialFallback', null, 'This page matches the pattern of a known scam.'));
     card.append(why);
     if (verdict.brandLabel && verdict.brandUrl) {
       const cmp = compareRow(verdict.brandLabel, verdict.brandUrl);
       if (cmp) card.appendChild(cmp);
     }
     const ul = el('ul', 'ss-evidence');
-    for (const r of (verdict.reasons || []).slice(1, 4)) { const li = el('li'); li.append(el('span', 'ss-chip', 'Why'), el('span', null, reasonText(r))); ul.appendChild(li); }
+    for (const r of (verdict.reasons || []).slice(1, 4)) { const li = el('li'); li.append(el('span', 'ss-chip', t('chipWhy', null, 'Why')), el('span', null, reasonText(r))); ul.appendChild(li); }
     if (ul.children.length) card.appendChild(ul);
     card.append(el('p', 'ss-sub', t('interstitialReassure', null, 'Nothing you typed has been sent yet. Leaving now is safe.')));
     const actions = el('div', 'ss-actions');
@@ -138,7 +153,7 @@
     stay.addEventListener('click', () => { ov.remove(); if (x.onDismiss) x.onDismiss(); });
     actions.append(stay);
     const rep = el('button', 'ss-report', t('reportMistake', null, 'Report a mistake'));
-    rep.addEventListener('click', () => { rep.textContent = 'Thanks'; rep.disabled = true; x.onReport && x.onReport(); });
+    rep.addEventListener('click', () => { rep.textContent = t('thanks', null, 'Thanks'); rep.disabled = true; x.onReport && x.onReport(); });
     actions.prepend(rep);
     card.append(actions);
     ov.append(card);
@@ -149,14 +164,15 @@
   // One-time-ever, shown only right after a dangerous page was blocked.
   function supportToast() {
     if (document.querySelector('.' + NS + '-toast')) return;
-    const t = el('div', NS + '-toast warn');
-    t.setAttribute('role', 'status');
-    const a = el('a', null, 'ScamShield just protected you — it’s free and runs on your device. Chip in? ❤');
+    const toast = el('div', NS + '-toast warn');
+    toast.setAttribute('role', 'status');
+    setDir(toast);
+    const a = el('a', null, t('toastSupportAsk', null, 'ScamShield just protected you — it’s free and runs on your device. Chip in? ❤'));
     a.href = 'https://github.com/sponsors/joelstephen97';
     a.target = '_blank'; a.rel = 'noopener';
-    const x = el('button', null, 'Dismiss'); x.addEventListener('click', () => t.remove());
-    t.append(a, x); (document.body || document.documentElement).appendChild(t);
-    setTimeout(() => t.remove(), 20000);
+    const x = el('button', null, t('dismiss', null, 'Dismiss')); x.addEventListener('click', () => toast.remove());
+    toast.append(a, x); (document.body || document.documentElement).appendChild(toast);
+    setTimeout(() => toast.remove(), 20000);
   }
 
   // Intercept submit on password forms that post off-domain.
@@ -174,18 +190,19 @@
         const ov = el('div', NS + '-overlay');
         ov.setAttribute('role', 'dialog');
         ov.setAttribute('aria-modal', 'true');
-        ov.setAttribute('aria-label', 'Possible phishing warning');
+        ov.setAttribute('aria-label', t('ariaPhishingWarning', null, 'Possible phishing warning'));
+        setDir(ov);
         const card = el('div', 'ss-card');
         let dest = '';
         try { dest = new URL(form.getAttribute('action') || location.href, location.href).hostname; } catch (_) {}
         card.append(
           el('h3', null, t('phishingStop', null, 'Stop — possible phishing')),
           el('p', null, dest
-            ? 'This form sends your password to ' + dest + ', not to ' + location.hostname + '. Sending a password to a different website is how scammers steal logins.'
-            : 'This form sends your password to a different website than the one you are visiting. This is a common way scammers steal logins.')
+            ? t('guardFormDestKnown', [bidi(dest), bidi(location.hostname)], 'This form sends your password to ' + dest + ', not to ' + location.hostname + '. Sending a password to a different website is how scammers steal logins.')
+            : t('guardFormDestUnknown', null, 'This form sends your password to a different website than the one you are visiting. This is a common way scammers steal logins.'))
         );
         const ul = el('ul', 'ss-evidence');
-        for (const r of (reasons || []).slice(0, 3)) { const li = el('li'); li.append(el('span', 'ss-chip', 'Page'), el('span', null, reasonText(r))); ul.appendChild(li); }
+        for (const r of (reasons || []).slice(0, 3)) { const li = el('li'); li.append(el('span', 'ss-chip', t('chipPage', null, 'Page')), el('span', null, reasonText(r))); ul.appendChild(li); }
         card.appendChild(ul);
         const actions = el('div', 'ss-actions');
         const back = el('button', 'ss-primary', t('cancelRecommended', null, 'Cancel (recommended)'));
@@ -213,7 +230,7 @@
     blocks.forEach((node) => {
       if (node.classList.contains(NS + '-hidden-block')) return;
       node.classList.add(NS + '-hidden-block');
-      const tag = el('div', NS + '-hidden-tag', 'Hidden by ScamShield');
+      const tag = el('div', NS + '-hidden-tag', t('guardHiddenTag', null, 'Hidden by ScamShield'));
       node.appendChild(tag);
     });
   }
@@ -225,22 +242,24 @@
       // through the collision path. The dApp receives a standard user-rejected
       // error (4001) and can simply retry. collision:true tells the bridge
       // this denial is synthetic, not a user-confirmed threat.
-      const t = el('div', NS + '-toast warn');
-      t.setAttribute('role', 'alert');
-      t.append(iconSpan('suspicious'), el('span', 'ss-msg',
-        'ScamShield blocked a wallet request while another warning was open. Close it and retry.'));
-      (document.body || document.documentElement).appendChild(t);
-      setTimeout(() => t.remove(), 12000);
+      const toast = el('div', NS + '-toast warn');
+      toast.setAttribute('role', 'alert');
+      setDir(toast);
+      toast.append(iconSpan('suspicious'), el('span', 'ss-msg',
+        t('guardWalletCollision', null, 'ScamShield blocked a wallet request while another warning was open. Close it and retry.')));
+      (document.body || document.documentElement).appendChild(toast);
+      setTimeout(() => toast.remove(), 12000);
       onDecision(false, { collision: true });
       return;
     }
     const ov = el('div', NS + '-overlay');
     ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true');
-    ov.setAttribute('aria-label', 'Risky wallet request');
+    ov.setAttribute('aria-label', t('walletRiskyTitle', null, 'Risky wallet request'));
+    setDir(ov);
     const card = el('div', 'ss-card');
     const h3 = el('h3'); h3.append(iconSpan('suspicious'), el('span', null, t('walletRiskyTitle', null, 'Risky wallet request')));
     card.append(h3,
-      el('p', null, reasonText(detail.reasons && detail.reasons[0]) || 'This site is requesting a sensitive wallet action.'),
+      el('p', null, reasonText(detail.reasons && detail.reasons[0]) || t('guardWalletFallback', null, 'This site is requesting a sensitive wallet action.')),
       el('p', 'ss-sub', t('walletRiskyBody', null, 'If you did not expect this, cancel. Drainers use these requests to steal your crypto.')));
     const actions = el('div', 'ss-actions');
     const cancel = el('button', 'ss-primary', t('cancelRecommended', null, 'Cancel (recommended)'));
@@ -257,33 +276,36 @@
 
   // Privacy findings are informational (badge/popup tier), never blocking.
   function privacyToast(detail) {
-    const t = el('div', NS + '-toast ' + (detail.level === 'warn' ? 'warn' : ''));
-    t.setAttribute('role', 'status');
-    t.append(iconSpan('suspicious'), el('span', 'ss-msg', detail.text || 'A privacy issue was detected on this page.'));
-    const x = el('button', null, 'Dismiss'); x.addEventListener('click', () => t.remove());
-    t.append(x); (document.body || document.documentElement).appendChild(t);
-    setTimeout(() => t.remove(), 14000);
+    const toast = el('div', NS + '-toast ' + (detail.level === 'warn' ? 'warn' : ''));
+    toast.setAttribute('role', 'status');
+    setDir(toast);
+    toast.append(iconSpan('suspicious'), el('span', 'ss-msg', detail.text || t('guardPrivacyFallback', null, 'A privacy issue was detected on this page.')));
+    const x = el('button', null, t('dismiss', null, 'Dismiss')); x.addEventListener('click', () => toast.remove());
+    toast.append(x); (document.body || document.documentElement).appendChild(toast);
+    setTimeout(() => toast.remove(), 14000);
   }
 
   function clipboardToast(detail) {
     const old = document.querySelector('.' + NS + '-toast'); if (old) old.remove();
-    const t = el('div', NS + '-toast ' + (detail.level === 'dangerous' ? 'danger' : 'warn'));
-    t.setAttribute('role', 'alert');
-    t.append(iconSpan(detail.level === 'dangerous' ? 'dangerous' : 'suspicious'), el('span', 'ss-msg', reasonText(detail.reasons && detail.reasons[0]) || 'A site changed your clipboard.'));
-    const x = el('button', null, 'Dismiss'); x.addEventListener('click', () => t.remove());
-    t.append(x); (document.body || document.documentElement).appendChild(t);
-    setTimeout(() => t.remove(), 12000);
+    const toast = el('div', NS + '-toast ' + (detail.level === 'dangerous' ? 'danger' : 'warn'));
+    toast.setAttribute('role', 'alert');
+    setDir(toast);
+    toast.append(iconSpan(detail.level === 'dangerous' ? 'dangerous' : 'suspicious'), el('span', 'ss-msg', reasonText(detail.reasons && detail.reasons[0]) || t('guardClipboardFallback', null, 'A site changed your clipboard.')));
+    const x = el('button', null, t('dismiss', null, 'Dismiss')); x.addEventListener('click', () => toast.remove());
+    toast.append(x); (document.body || document.documentElement).appendChild(toast);
+    setTimeout(() => toast.remove(), 12000);
   }
 
   function techScamEscapeOverlay(verdict, onLeave) {
     if (document.querySelector('.' + NS + '-overlay')) return;
     const ov = el('div', NS + '-overlay');
     ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true');
-    ov.setAttribute('aria-label', 'Possible tech-support scam');
+    ov.setAttribute('aria-label', t('techScamTitle', null, 'Possible tech-support scam'));
+    setDir(ov);
     const card = el('div', 'ss-card');
     const h3 = el('h3'); h3.append(iconSpan('dangerous'), el('span', null, t('techScamTitle', null, 'Possible tech-support scam')));
     card.append(h3,
-      el('p', null, reasonText(verdict.reasons && verdict.reasons[0]) || 'This page is using scare tactics.'),
+      el('p', null, reasonText(verdict.reasons && verdict.reasons[0]) || t('guardTechScamFallback', null, 'This page is using scare tactics.')),
       el('p', 'ss-sub', t('techScamBody', null, 'This is a web page, not your computer — your computer is fine. Real security warnings never lock your screen or show a phone number. Do not call, and do not pay.')));
     const actions = el('div', 'ss-actions');
     const leave = el('button', 'ss-primary', t('getMeOut', null, 'Get me out (close this page)'));
