@@ -61,7 +61,7 @@
     // 1. Credential harvesting ask — decisive on its own.
     if (CRED_ASK_RE.test(t) && !CRED_NEG_RE.test(t)) {
       score = Math.max(score, 0.85);
-      reasons.push('Asks you to share an OTP, PIN, or password — no legitimate service ever does this.');
+      reasons.push({ code: 'msgOtpAsk', kind: 'message' });
     }
 
     // 2. Scam phrase groups (message-specific + the page-level classics).
@@ -79,8 +79,8 @@
     const amplifiers = groupsHit.length - substantive.length;
     if (substantive.length) {
       score += Math.min(0.6, 0.3 * substantive.length + 0.1 * extraPhrases + 0.15 * amplifiers);
-      reasons.push('Uses known scam wording ("' + substantive[0].hit + '").');
-      if (amplifiers) reasons.push('Adds pressure with an artificial deadline — a classic scam tactic.');
+      reasons.push({ code: 'msgScamWording', kind: 'message', params: [substantive[0].hit] });
+      if (amplifiers) reasons.push({ code: 'msgUrgencyDeadline', kind: 'message' });
     }
 
     // 3. Links, judged by the same URL engine that scans pages.
@@ -97,7 +97,7 @@
     if (worst >= THRESHOLDS.suspicious) {
       score = Math.max(score, worst);
       const bad = links.find((l) => l.score === worst);
-      reasons.push('Contains a dangerous-looking link (' + bad.url + ').');
+      reasons.push({ code: 'msgDangerousLink', kind: 'message', params: [bad.url] });
     } else if (worst > 0 && substantive.length) {
       score += 0.1; // scammy wording + a slightly-off link beats either alone
     }

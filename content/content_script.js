@@ -420,8 +420,12 @@
         if (sr.flags.length) {
           send('shopFindings', { flags: sr.flags, level: sr.level });
           if (sr.level === 'suspicious' && verdict.level === 'safe') {
+            // The shop detail sentence leads the evidence list; keep reasonCodes
+            // (used by the report payload) in step with reasons.
+            const shopReason = { code: 'shop_' + sr.flags[0].code + '_detail', kind: 'shop' };
             verdict = Object.assign({}, verdict, { level: 'suspicious', score: Math.max(verdict.score, 0.55),
-              reasons: [(sr.flags[0] && sr.flags[0].detail) || 'This shop shows several scam warning signs.'].concat(verdict.reasons || []) });
+              reasons: [shopReason].concat(verdict.reasons || []),
+              reasonCodes: [shopReason.code].concat(verdict.reasonCodes || []) });
           }
         }
       } catch (_) { /* shop check is best-effort */ }
@@ -433,7 +437,7 @@
     if (verdict.level === 'suspicious' && !(verdict.flags || []).length) {
       const eng = await send('getEngagement', { domain: pageDomain });
       if (eng && eng.engaged) {
-        verdict = Object.assign({}, verdict, { level: 'safe', reasons: [], suppressed: 'engagement' });
+        verdict = Object.assign({}, verdict, { level: 'safe', reasons: [], reasonCodes: [], suppressed: 'engagement' });
       }
     }
     try { window.__ssLastVerdict = verdict; } catch (_) {}

@@ -26,6 +26,7 @@
         "engine/fakeupdate_rules.js",
         "engine/shop_rules.js",
         "engine/verdict.js",
+        "ui/reasons.js",
         "engine/url_model.js",
         "engine/page_features.js",
         "model/page-content.js",

@@ -30,13 +30,13 @@
     const hits = SCARE_PHRASES.filter((p) => text.includes(p));
     if (hits.length) {
       score += Math.min(0.6, 0.25 * hits.length);
-      reasons.push('Page uses fake security-alert language ("' + hits[0] + '").');
+      reasons.push({ code: 'techScamScareText', kind: 'techscam', params: [hits[0]] });
     }
     const hasTollFree = s.hasTollFree != null ? !!s.hasTollFree : TOLLFREE_RE.test(text);
     const hasPhone = hasTollFree || (hits.length && PHONE_RE.test(text));
     if (hasPhone) {
       score += 0.3;
-      reasons.push('Page urges you to call a phone number for "support" — a hallmark of tech-support scams.');
+      reasons.push({ code: 'techScamPhoneAsk', kind: 'techscam' });
     }
     // Decisive discriminator (0.6.0): a phone number inside a security-alert
     // page that name-drops an OS/security vendor. Microsoft, Apple and Google
@@ -45,20 +45,20 @@
     if (hasPhone && hits.length && OS_BRAND_RE.test(text)) {
       score = Math.max(score, 0.85);
       flags.push('fake-alert-phone');
-      reasons.push('This is a web page pretending to be a system alert — your computer is fine. Real Microsoft/Apple warnings never show phone numbers.');
+      reasons.push({ code: 'techScamFakeAlert', kind: 'techscam' });
     }
     if (s.fullscreenOnLoad) {
       score += 0.2;
-      reasons.push('Page forced fullscreen to make itself hard to close.');
+      reasons.push({ code: 'techScamFullscreen', kind: 'techscam' });
     }
     if (s.alarmAudio) {
       score += 0.2;
-      reasons.push('Page plays alarm audio to panic you.');
+      reasons.push({ code: 'techScamAlarmAudio', kind: 'techscam' });
     }
     const flood = s.dialogFloodCount || 0;
-    if (flood >= 5) { score += 0.25; reasons.push('Page spammed pop-up dialogs to trap you.'); }
+    if (flood >= 5) { score += 0.25; reasons.push({ code: 'techScamDialogFlood', kind: 'techscam' }); }
     else if (flood >= 2) { score += 0.1; }
-    if (s.historyTrap) { score += 0.15; reasons.push('Page is hijacking your Back button.'); }
+    if (s.historyTrap) { score += 0.15; reasons.push({ code: 'techScamHistoryTrap', kind: 'techscam' }); }
 
     return { score: Math.max(0, Math.min(1, score)), reasons, flags };
   }

@@ -16,7 +16,7 @@ test('password form posting to foreign domain is dangerous', () => {
   const r = scoreDom({ ...clean, hasPasswordField: true,
     passwordFormActions: ['https://evil-collector.tk/grab'] });
   assert.ok(r.score >= 0.9);
-  assert.ok(r.reasons.some((x) => /different (site|domain)/i.test(x)));
+  assert.ok(r.reasons.some((x) => x.code === 'credentialFormForeignDomain'));
   assert.ok(r.flags.includes('credential-form-foreign-domain'));
 });
 
@@ -49,13 +49,15 @@ test('multi-label-suffix page posting to a different same-suffix domain IS forei
 test('scam phrases add score and reasons', () => {
   const r = scoreDom({ ...clean, scamPhrases: ['you won', 'claim your prize'] });
   assert.ok(r.score > 0);
-  assert.ok(r.reasons.some((x) => /prize|won|giveaway/i.test(x)));
+  const phrase = r.reasons.find((x) => x.code === 'scamPhrase');
+  assert.ok(phrase); assert.equal(phrase.params[0], 'you won');
 });
 
 test('icon match + password + off-brand → dangerous visual impersonation with brand', () => {
   const r = scoreDom({ ...clean, pageHost: 'secure-login.example', hasPasswordField: true, passwordFormActions: ['https://secure-login.example/post'], iconMatches: [{ brand: 'paypal', distance: 3 }] });
   assert.ok(r.score >= 0.85); assert.ok(r.flags.includes('brand-impersonation-visual')); assert.equal(r.brand, 'paypal');
-  assert.ok(r.reasons.some((x) => /PayPal.*icon/i.test(x)));
+  const icon = r.reasons.find((x) => x.code === 'brandIconMismatch');
+  assert.ok(icon); assert.equal(icon.params[0], 'PayPal'); assert.equal(icon.kind, 'brand');
 });
 test('icon match without password → suspicious bump only', () => {
   const r = scoreDom({ ...clean, pageHost: 'fan-site.example', iconMatches: [{ brand: 'paypal', distance: 2 }] });
@@ -86,20 +88,20 @@ test('icon-kind (favicon-derived) match + password → visual impersonation flag
 
 // --- 0.6.0 signals ---
 test('clickfix dangerous signal escalates with the clickfix flag', () => {
-  const r = scoreDom(Object.assign({}, clean, { clickfix: { level: 'dangerous', reasons: ['paste-and-run instructions'], flags: ['clickfix'] } }));
+  const r = scoreDom(Object.assign({}, clean, { clickfix: { level: 'dangerous', reasons: [{ code: 'clickfixPasteRun', kind: 'clipboard' }], flags: ['clickfix'] } }));
   assert.ok(r.score >= 0.9);
   assert.ok(r.flags.includes('clickfix'));
-  assert.ok(r.reasons.includes('paste-and-run instructions'));
+  assert.ok(r.reasons.some((x) => x.code === 'clickfixPasteRun'));
 });
 
 test('clickfix suspicious signal only bumps the score', () => {
-  const r = scoreDom(Object.assign({}, clean, { clickfix: { level: 'suspicious', reasons: ['run-box instructions'], flags: [] } }));
+  const r = scoreDom(Object.assign({}, clean, { clickfix: { level: 'suspicious', reasons: [{ code: 'clickfixWinR', kind: 'clipboard' }], flags: [] } }));
   assert.ok(r.score > 0 && r.score < 0.5);
   assert.ok(!r.flags.includes('clickfix'));
 });
 
 test('fake browser-update signal escalates with its flag', () => {
-  const r = scoreDom(Object.assign({}, clean, { fakeUpdate: { level: 'dangerous', reasons: ['fake update prompt'], flags: ['fake-browser-update'] } }));
+  const r = scoreDom(Object.assign({}, clean, { fakeUpdate: { level: 'dangerous', reasons: [{ code: 'fakeUpdatePrompt', kind: 'page' }], flags: ['fake-browser-update'] } }));
   assert.ok(r.score >= 0.9);
   assert.ok(r.flags.includes('fake-browser-update'));
 });
@@ -113,7 +115,8 @@ test('delivery-fee scam: carrier brand + card input + fee text off-domain', () =
   assert.ok(r.score >= 0.9, 'got ' + r.score);
   assert.ok(r.flags.includes('delivery-fee-scam'));
   assert.equal(r.brand, 'dhl');
-  assert.ok(r.reasons.some((x) => /DHL/.test(x) && /card details/.test(x)));
+  const fee = r.reasons.find((x) => x.code === 'deliveryFeeScam');
+  assert.ok(fee); assert.equal(fee.params[0], 'DHL');
 });
 
 test('delivery-fee rule stays quiet on the real carrier domain', () => {

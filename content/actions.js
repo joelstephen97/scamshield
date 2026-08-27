@@ -8,6 +8,14 @@
     try { const m = api && api.i18n && api.i18n.getMessage(key, subs); if (m) return m; } catch (_) {}
     return fallback != null ? fallback : key;
   }
+  // Engine reasons are structured ({ code, kind, params }); ui/reasons.js turns
+  // one into localized text. It is loaded before this file in both manifests,
+  // but stay defensive so a missing resolver degrades instead of throwing.
+  function reasonText(r) {
+    const R = root.SSReasons;
+    if (r == null) return '';
+    return R ? R.resolveReason(r) : (typeof r === 'string' ? r : '');
+  }
   function el(tag, cls, text) {
     const e = document.createElement(tag);
     if (cls) e.className = cls;
@@ -66,7 +74,7 @@
     const head = verdict.brandLabel
       ? (danger ? t('bannerDangerBrand', [verdict.brandLabel], 'Dangerous page — looks like ' + verdict.brandLabel + ", but isn't") : t('bannerSuspicious', null, 'Suspicious page'))
       : (danger ? t('bannerDanger', null, 'Dangerous page') : t('bannerSuspicious', null, 'Suspicious page'));
-    text.append(el('b', null, head), el('span', null, verdict.reasons[0] || (danger ? t('popupDangerSummary', null, "Don't enter passwords or card details here.") : t('popupSuspiciousSummary', null, 'Take care before typing anything here.'))));
+    text.append(el('b', null, head), el('span', null, reasonText(verdict.reasons[0]) || (danger ? t('popupDangerSummary', null, "Don't enter passwords or card details here.") : t('popupSuspiciousSummary', null, 'Take care before typing anything here.'))));
     if (verdict.brandLabel && verdict.brandUrl) {
       const cmp = compareRow(verdict.brandLabel, verdict.brandUrl);
       if (cmp) text.appendChild(cmp);
@@ -74,7 +82,7 @@
     const acts = el('div', 'ss-acts');
     if (danger) { const leave = el('button', 'ss-leave', t('leaveThisPage', null, 'Leave this page')); leave.addEventListener('click', () => { x.onLeave ? x.onLeave() : history.back(); }); acts.appendChild(leave); }
     if (verdict.brandUrl) { const rescue = el('button', 'ss-rescue', t('takeMeToReal', [verdict.brandLabel || 'site'], 'Take me to the real ' + (verdict.brandLabel || 'site'))); rescue.addEventListener('click', () => { location.href = verdict.brandUrl; }); acts.appendChild(rescue); }
-    if (!danger) { const why = el('button', 'ss-why', t('showWhy', null, 'Show why')); why.addEventListener('click', () => { text.querySelector('span').textContent = verdict.reasons.slice(0, 3).join(' · '); why.remove(); }); acts.appendChild(why); }
+    if (!danger) { const why = el('button', 'ss-why', t('showWhy', null, 'Show why')); why.addEventListener('click', () => { text.querySelector('span').textContent = verdict.reasons.slice(0, 3).map(reasonText).join(' · '); why.remove(); }); acts.appendChild(why); }
     const trust = el('button', 'ss-trust', t('trustThisSite', null, 'Trust this site')); trust.addEventListener('click', () => { onAllow && onAllow(); bar.remove(); });
     const report = el('button', 'ss-report', t('reportMistake', null, 'Report a mistake')); report.addEventListener('click', () => { report.textContent = t('thanks', null, 'Thanks'); report.disabled = true; x.onReport && x.onReport(); });
     const close = el('button', 'ss-x', '✕'); close.setAttribute('aria-label', 'Dismiss'); close.addEventListener('click', () => bar.remove());
@@ -106,14 +114,14 @@
     const h3 = el('h3');
     h3.append(iconSpan('dangerous'), el('span', null, HEADS[Math.floor(Math.random() * HEADS.length)]));
     card.append(h3);
-    const why = el('p', null, verdict.reasons[0] || 'This page matches the pattern of a known scam.');
+    const why = el('p', null, reasonText(verdict.reasons[0]) || 'This page matches the pattern of a known scam.');
     card.append(why);
     if (verdict.brandLabel && verdict.brandUrl) {
       const cmp = compareRow(verdict.brandLabel, verdict.brandUrl);
       if (cmp) card.appendChild(cmp);
     }
     const ul = el('ul', 'ss-evidence');
-    for (const r of (verdict.reasons || []).slice(1, 4)) { const li = el('li'); li.append(el('span', 'ss-chip', 'Why'), el('span', null, r)); ul.appendChild(li); }
+    for (const r of (verdict.reasons || []).slice(1, 4)) { const li = el('li'); li.append(el('span', 'ss-chip', 'Why'), el('span', null, reasonText(r))); ul.appendChild(li); }
     if (ul.children.length) card.appendChild(ul);
     card.append(el('p', 'ss-sub', t('interstitialReassure', null, 'Nothing you typed has been sent yet. Leaving now is safe.')));
     const actions = el('div', 'ss-actions');
@@ -177,7 +185,7 @@
             : 'This form sends your password to a different website than the one you are visiting. This is a common way scammers steal logins.')
         );
         const ul = el('ul', 'ss-evidence');
-        for (const r of (reasons || []).slice(0, 3)) { const li = el('li'); li.append(el('span', 'ss-chip', 'Page'), el('span', null, r)); ul.appendChild(li); }
+        for (const r of (reasons || []).slice(0, 3)) { const li = el('li'); li.append(el('span', 'ss-chip', 'Page'), el('span', null, reasonText(r))); ul.appendChild(li); }
         card.appendChild(ul);
         const actions = el('div', 'ss-actions');
         const back = el('button', 'ss-primary', t('cancelRecommended', null, 'Cancel (recommended)'));
@@ -232,7 +240,7 @@
     const card = el('div', 'ss-card');
     const h3 = el('h3'); h3.append(iconSpan('suspicious'), el('span', null, t('walletRiskyTitle', null, 'Risky wallet request')));
     card.append(h3,
-      el('p', null, (detail.reasons && detail.reasons[0]) || 'This site is requesting a sensitive wallet action.'),
+      el('p', null, reasonText(detail.reasons && detail.reasons[0]) || 'This site is requesting a sensitive wallet action.'),
       el('p', 'ss-sub', t('walletRiskyBody', null, 'If you did not expect this, cancel. Drainers use these requests to steal your crypto.')));
     const actions = el('div', 'ss-actions');
     const cancel = el('button', 'ss-primary', t('cancelRecommended', null, 'Cancel (recommended)'));
@@ -261,7 +269,7 @@
     const old = document.querySelector('.' + NS + '-toast'); if (old) old.remove();
     const t = el('div', NS + '-toast ' + (detail.level === 'dangerous' ? 'danger' : 'warn'));
     t.setAttribute('role', 'alert');
-    t.append(iconSpan(detail.level === 'dangerous' ? 'dangerous' : 'suspicious'), el('span', 'ss-msg', (detail.reasons && detail.reasons[0]) || 'A site changed your clipboard.'));
+    t.append(iconSpan(detail.level === 'dangerous' ? 'dangerous' : 'suspicious'), el('span', 'ss-msg', reasonText(detail.reasons && detail.reasons[0]) || 'A site changed your clipboard.'));
     const x = el('button', null, 'Dismiss'); x.addEventListener('click', () => t.remove());
     t.append(x); (document.body || document.documentElement).appendChild(t);
     setTimeout(() => t.remove(), 12000);
@@ -275,7 +283,7 @@
     const card = el('div', 'ss-card');
     const h3 = el('h3'); h3.append(iconSpan('dangerous'), el('span', null, t('techScamTitle', null, 'Possible tech-support scam')));
     card.append(h3,
-      el('p', null, (verdict.reasons && verdict.reasons[0]) || 'This page is using scare tactics.'),
+      el('p', null, reasonText(verdict.reasons && verdict.reasons[0]) || 'This page is using scare tactics.'),
       el('p', 'ss-sub', t('techScamBody', null, 'This is a web page, not your computer — your computer is fine. Real security warnings never lock your screen or show a phone number. Do not call, and do not pay.')));
     const actions = el('div', 'ss-actions');
     const leave = el('button', 'ss-primary', t('getMeOut', null, 'Get me out (close this page)'));

@@ -132,7 +132,8 @@ test('scoreUrl escalates an IDN brand homograph to dangerous', () => {
   const { scoreUrl } = require('../../engine/heuristics');
   const r = scoreUrl('https://xn--80ak6aa92e.com/login');
   assert.ok(r.score >= 0.8, 'homograph + punycode should reach dangerous, got ' + r.score);
-  assert.ok(r.reasons.some((x) => /look-alike foreign characters/.test(x)));
+  const idn = r.reasons.find((x) => x.code === 'idnHomograph');
+  assert.ok(idn, 'expected an idnHomograph reason'); assert.equal(idn.kind, 'brand'); assert.ok(idn.params[0]);
   const clean = scoreUrl('https://xn--mnchen-3ya.de/');
   assert.ok(clean.score < 0.5, 'legit IDN must stay below suspicious, got ' + clean.score);
 });

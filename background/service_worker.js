@@ -367,11 +367,19 @@ async function maybeAutoReport(tabUrl, verdict, report, detectors) {
   if (!input.urlFeatures) input.urlFeatures = SS.extractUrlFeatures(tabUrl);
   await queueReport(SS.buildReportPayload(Object.assign({ kind: 'auto', label: 'dangerous', extVersion: manifestVersion(), now: Date.now() }, input)));
 }
+// Issue bodies stay English whatever the UI locale: reasons are rendered from
+// the resolver's EN table, and their codes are appended so a report is
+// searchable without reading the prose.
 function githubIssueUrl(host, verdict) {
+  const R = globalThis.SSReasons;
+  const english = (r) => (R ? R.reasonToEnglish(r) : (typeof r === 'string' ? r : String((r && r.code) || '')));
   const title = encodeURIComponent(`[${(verdict && verdict.level) || 'report'}] ${host}`);
   const reasons = (verdict && verdict.reasons) || [];
-  const reasonsBlock = reasons.length ? `Reasons:\n- ${reasons.join('\n- ')}\n\n` : '';
-  const body = encodeURIComponent(`Site: ${host}\nVerdict: ${(verdict && verdict.level) || 'n/a'} (score ${(verdict && verdict.score) || 0})\n${reasonsBlock}What happened:\n`);
+  const reasonsBlock = reasons.length ? `Reasons:\n- ${reasons.map(english).join('\n- ')}\n\n` : '';
+  const codes = reasons.filter((r) => r && r.code)
+    .map((r) => r.code + ((r.params || []).length ? `(${r.params.join(', ')})` : ''));
+  const codesBlock = codes.length ? `Codes: ${codes.join(', ')}\n\n` : '';
+  const body = encodeURIComponent(`Site: ${host}\nVerdict: ${(verdict && verdict.level) || 'n/a'} (score ${(verdict && verdict.score) || 0})\n${reasonsBlock}${codesBlock}What happened:\n`);
   return `https://github.com/joelstephen97/scamshield/issues/new?title=${title}&body=${body}`;
 }
 const lastReportInput = new Map(); // tabId → report input (from content script)

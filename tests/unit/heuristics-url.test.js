@@ -12,13 +12,13 @@ test('clean URL scores low with no reasons', () => {
 test('IP + @ + http scores high with reasons', () => {
   const r = scoreUrl('http://good.com@192.168.1.5/login');
   assert.ok(r.score >= 0.8);
-  assert.ok(r.reasons.some((x) => /IP address/i.test(x)));
-  assert.ok(r.reasons.some((x) => /@/.test(x)));
+  assert.ok(r.reasons.some((x) => x.code === 'ipHost'));
+  assert.ok(r.reasons.some((x) => x.code === 'atSymbol'));
 });
 
 test('brand lookalike is reported', () => {
   const r = scoreUrl('https://paypa1-login.tk/');
-  assert.ok(r.reasons.some((x) => /looks like|impersonat/i.test(x)));
+  assert.ok(r.reasons.some((x) => x.code === 'brandLookalike'));
   assert.ok(r.score >= 0.5);
 });
 

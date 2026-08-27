@@ -8,12 +8,14 @@ const { scoreMessage } = require('../../engine/message_rules');
 test('OTP-sharing request is dangerous', () => {
   const r = scoreMessage('Dear customer, your bank account will be blocked today. Share your OTP to verify your identity.');
   assert.equal(r.level, 'dangerous', JSON.stringify(r));
-  assert.ok(r.reasons.some((x) => /OTP|PIN|password/i.test(x)));
+  assert.ok(r.reasons.some((x) => x.code === 'msgOtpAsk' && x.kind === 'message'));
 });
 
 test('customs-fee parcel scam with bad link is flagged', () => {
   const r = scoreMessage('Your parcel is held at customs. Pay the delivery fee within 24 hours: http://track-parcel-secure.tk/pay');
   assert.notEqual(r.level, 'safe', JSON.stringify(r));
+  const wording = r.reasons.find((x) => x.code === 'msgScamWording');
+  assert.ok(wording); assert.equal(wording.params[0], 'held at customs');
   assert.equal(r.links.length, 1);
   assert.ok(r.links[0].score >= 0.2);
 });

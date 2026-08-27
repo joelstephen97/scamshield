@@ -17,7 +17,9 @@
     if (d < 7 * 86400000) return DAYS[dt.getDay()];
     return dt.getDate() + ' ' + MONTHS[dt.getMonth()];
   }
-  const LABELS = { page: 'Page', brand: 'Brand', wallet: 'Wallet', clipboard: 'Clipboard', techscam: 'Scare page', link: 'Link' };
+  // Detector kinds (history rows) and reason kinds (evidence chips) share this
+  // English fallback table; the localized labels live under the chip* keys.
+  const LABELS = { page: 'Page', brand: 'Brand', wallet: 'Wallet', clipboard: 'Clipboard', techscam: 'Scare page', link: 'Link', shop: 'Shop', message: 'Message' };
   function detectorLabel(kind) { return LABELS[kind] || 'Page'; }
   function levelText(level) {
     return level === 'dangerous' ? 'Dangerous page' : level === 'suspicious' ? 'Suspicious page' : level === 'safe' ? 'Nothing suspicious here' : "Can't check this page";

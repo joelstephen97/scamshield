@@ -6,6 +6,7 @@ const { analyzeClipboardWrite } = require('../../engine/clipboard_rules');
 test('PowerShell payload is dangerous', () => {
   const r = analyzeClipboardWrite('powershell -enc SQBFAFgA...');
   assert.strictEqual(r.level, 'dangerous');
+  assert.ok(r.reasons.some((x) => x.code === 'clipboardCommand' && x.kind === 'clipboard'));
 });
 
 test('curl pipe bash is dangerous', () => {
@@ -20,6 +21,7 @@ test('mshta / Invoke-Expression is dangerous', () => {
 test('bare ETH address is suspicious (address-swap)', () => {
   const r = analyzeClipboardWrite('0x' + 'a'.repeat(40));
   assert.strictEqual(r.level, 'suspicious');
+  assert.ok(r.reasons.some((x) => x.code === 'clipboardCryptoAddress'));
 });
 
 test('normal text is safe', () => {

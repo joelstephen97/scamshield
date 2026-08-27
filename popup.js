@@ -1,7 +1,7 @@
 'use strict';
 const api = globalThis.browser || globalThis.chrome;
 const $ = (id) => document.getElementById(id);
-const SS = globalThis.ScamShield, F = globalThis.SSFormat, I = globalThis.SSIcons;
+const SS = globalThis.ScamShield, F = globalThis.SSFormat, I = globalThis.SSIcons, R = globalThis.SSReasons;
 const T = (k, subs, fb) => (globalThis.SSi18n ? globalThis.SSi18n.t(k, subs) : (fb || k));
 const LEVELTXT = { safe: 'popupSafe', suspicious: 'popupSuspicious', dangerous: 'popupDangerous', unknown: 'popupUnknown' };
 const levelLabel = (lvl) => T(LEVELTXT[lvl] || 'popupUnknown', null, F.levelText(lvl));
@@ -17,12 +17,16 @@ function renderStatus(level, host, summary, levelTextOverride) {
   $('statusicon').innerHTML = I.shield(level); $('level').textContent = levelTextOverride || levelLabel(level); $('host').textContent = host || '';
   $('summary').hidden = !summary; $('summary').textContent = summary || '';
 }
+// Evidence chips are driven by the reason's own `kind` (link|brand|page|wallet|
+// clipboard|techscam|shop|message) — no more guessing from the English text.
+const chipLabel = (kind) => T('chip' + kind.charAt(0).toUpperCase() + kind.slice(1), null, F.detectorLabel(kind));
 function renderEvidence(reasons, open) {
   const ul = $('reasons'); ul.replaceChildren();
   for (const r of (reasons || []).slice(0, 5)) {
-    const li = document.createElement('li'); const chip = document.createElement('span'); chip.className = 'chip' + (/brand|icon|looks like/i.test(r) ? ' brand' : '');
-    chip.textContent = /icon|looks like|impersonat/i.test(r) ? 'Brand' : /wallet|approval|signature/i.test(r) ? 'Wallet' : /clipboard/i.test(r) ? 'Clipboard' : /pop-up|infected|support/i.test(r) ? 'Scare page' : /link|address|domain|punycode|tld|not secure|https/i.test(r) ? 'Link' : 'Page';
-    const span = document.createElement('span'); span.textContent = r; li.append(chip, span); ul.appendChild(li);
+    const kind = R.reasonKind(r);
+    const li = document.createElement('li'); const chip = document.createElement('span'); chip.className = 'chip' + (kind === 'brand' ? ' brand' : '');
+    chip.textContent = chipLabel(kind);
+    const span = document.createElement('span'); span.textContent = R.resolveReason(r); li.append(chip, span); ul.appendChild(li);
   }
   $('evidence').hidden = !(open && reasons && reasons.length);
 }
@@ -136,8 +140,8 @@ function renderShop(shop) {
   const ul = $('shoplist'); ul.replaceChildren();
   for (const f of flags.slice(0, 6)) {
     const li = document.createElement('li');
-    const chip = document.createElement('span'); chip.className = 'chip' + (shop.level === 'suspicious' ? ' brand' : ''); chip.textContent = f.label || 'Flag';
-    const span = document.createElement('span'); span.textContent = f.detail || '';
+    const chip = document.createElement('span'); chip.className = 'chip' + (shop.level === 'suspicious' ? ' brand' : ''); chip.textContent = R.resolveReason({ code: 'shop_' + f.code }) || 'Flag';
+    const span = document.createElement('span'); span.textContent = R.resolveReason({ code: 'shop_' + f.code + '_detail' });
     li.append(chip, span); ul.appendChild(li);
   }
 }
@@ -175,7 +179,7 @@ function wireMessageChecker() {
     const r = SS.scoreMessage($('msgtext').value); $('msgresult').hidden = false;
     $('msgstatus').className = 'status mini ' + r.level; $('msgicon').innerHTML = I.shield(r.level);
     $('msglevel').textContent = r.level === 'safe' ? T('msgSafe', null, 'Looks safe — no scam signals found') : r.level === 'suspicious' ? T('msgSuspicious', null, 'Suspicious — treat with caution') : T('msgDangerous', null, 'Almost certainly a scam');
-    $('msgwhy').textContent = r.reasons.slice(0, 3).join(' · ');
+    $('msgwhy').textContent = r.reasons.slice(0, 3).map((x) => R.resolveReason(x)).join(' · ');
   });
 }
 wireMessageChecker();

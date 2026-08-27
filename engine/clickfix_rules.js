@@ -35,19 +35,19 @@
       // paste-it-somewhere instructions in the page. Essentially zero
       // legitimate base rate.
       level = 'dangerous';
-      reasons.push('This page put a system command on your clipboard and is telling you to paste and run it. Real websites never do this — running it would infect your computer.');
+      reasons.push({ code: 'clickfixPasteRun', kind: 'clipboard' });
     } else if (winRun && paste && captcha) {
       // Full instruction cluster dressed as a CAPTCHA, even before any copy.
       level = 'dangerous';
-      reasons.push('This "verification" asks you to press Win+R and paste a command. Real CAPTCHAs never ask you to run anything — this installs malware.');
+      reasons.push({ code: 'clickfixFakeCaptcha', kind: 'clipboard' });
     } else if (winRun && (paste || runTarget)) {
       level = 'suspicious';
-      reasons.push('This page instructs you to open the Windows Run box and paste something — a pattern used to trick people into running malware.');
+      reasons.push({ code: 'clickfixWinR', kind: 'clipboard' });
     } else if (payload) {
       level = 'suspicious';
     }
     if (level === 'dangerous') flags.push('clickfix');
-    if (captcha && level !== 'none') reasons.push('The instructions are disguised as a human-verification step.');
+    if (captcha && level !== 'none') reasons.push({ code: 'clickfixCaptchaDisguise', kind: 'clipboard' });
     return { level, reasons, flags };
   }
 

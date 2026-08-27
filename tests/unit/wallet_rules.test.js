@@ -6,7 +6,7 @@ const { analyzeWalletRequest } = require('../../engine/wallet_rules');
 test('eth_sign is dangerous (blind signing)', () => {
   const r = analyzeWalletRequest({ method: 'eth_sign', params: ['0xabc', '0xdeadbeef'] });
   assert.strictEqual(r.level, 'dangerous');
-  assert.ok(r.reasons.length);
+  assert.ok(r.reasons.some((x) => x.code === 'walletBlindSign' && x.kind === 'wallet'));
 });
 
 test('setApprovalForAll calldata is dangerous', () => {
@@ -37,6 +37,7 @@ test('Permit2/typed-data with token permissions is dangerous', () => {
   const typed = JSON.stringify({ primaryType: 'PermitSingle', types: { PermitSingle: [] }, message: { spender: '0x1' } });
   const r = analyzeWalletRequest({ method: 'eth_signTypedData_v4', params: ['0xaddr', typed] });
   assert.strictEqual(r.level, 'dangerous');
+  assert.ok(r.reasons.some((x) => x.code === 'walletPermitApproval'));
 });
 
 test('plain typed-data login is safe', () => {

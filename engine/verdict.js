@@ -47,7 +47,7 @@
         const corroborated = ruleScore >= THRESHOLDS.contentCorroborateRule ||
           urlModelCorroborates || iconMatch === true;
         score = Math.max(score, corroborated ? THRESHOLDS.dangerous : THRESHOLDS.suspicious);
-        contentReasons.push('Page wording and layout resemble known phishing pages.');
+        contentReasons.push({ code: 'contentPhishingPattern', kind: 'page' });
       }
     }
     score = Math.max(0, Math.min(1, score));
@@ -56,8 +56,18 @@
     if (score >= THRESHOLDS.dangerous) level = 'dangerous';
     else if (score >= THRESHOLDS.suspicious) level = 'suspicious';
 
-    const reasons = [...new Set([...(u.reasons || []), ...(d.reasons || []), ...contentReasons])];
-    return { level, score: Number(score.toFixed(4)), reasons, modelUsed, contentUsed, brand: d.brand, flags: d.flags || [] };
+    // Reasons are objects, so de-duplicate by identity (code + params) rather
+    // than by reference; order of first appearance is preserved.
+    const reasons = [];
+    const seen = new Set();
+    for (const r of [...(u.reasons || []), ...(d.reasons || []), ...contentReasons]) {
+      const key = (r && typeof r === 'object') ? (r.code + '|' + JSON.stringify(r.params || [])) : String(r);
+      if (seen.has(key)) continue;
+      seen.add(key);
+      reasons.push(r);
+    }
+    const reasonCodes = reasons.filter((r) => r && r.code).map((r) => r.code);
+    return { level, score: Number(score.toFixed(4)), reasons, reasonCodes, modelUsed, contentUsed, brand: d.brand, flags: d.flags || [] };
   }
 
   return { fuse };

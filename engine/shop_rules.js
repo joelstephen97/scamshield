@@ -21,13 +21,9 @@
   //                    CDN with no link to a live profile
   //   offPlatformPay : checkout steers to Zelle/Venmo/CashApp/wire/crypto
   //   missingContact : no contact / imprint / company info anywhere
-  const LABELS = {
-    countdownReset: ['Fake countdown', 'A "hurry, offer ends" timer resets every visit — the urgency is fake.'],
-    offPlatformPay: ['Risky payment', 'Checkout pushes you to Zelle/Venmo/CashApp/wire/crypto — you cannot get this money back if it is a scam.'],
-    fakeScarcity: ['Fake scarcity', 'Injected "only a few left / N people viewing" pressure widgets.'],
-    badgeHotlink: ['Fake trust badge', 'A "secure"/"verified" badge that is just an image, linking nowhere.'],
-    missingContact: ['No contact info', 'No real address, phone or company details — normal for a throwaway scam shop.']
-  };
+  //
+  // Flags are code-only — the UI resolves reason_shop_<code> (short label) and
+  // reason_shop_<code>_detail (sentence) through ui/reasons.js.
   // Weights toward the single "shopping risk" score.
   // Off-platform payment (Zelle/wire/crypto on a shop) is close to decisive on
   // its own; a resetting countdown is strong but needs one corroborator.
@@ -38,7 +34,7 @@
     if (!s.isStorefront) return { level: 'none', flags: [], score: 0 };
     const flags = [];
     let score = 0;
-    const add = (code) => { flags.push({ code, label: LABELS[code][0], detail: LABELS[code][1] }); score += WEIGHT[code]; };
+    const add = (code) => { flags.push({ code }); score += WEIGHT[code]; };
     if (s.countdownReset) add('countdownReset');
     if (s.offPlatformPay) add('offPlatformPay');
     if ((s.fakeScarcity || 0) > 0) add('fakeScarcity');

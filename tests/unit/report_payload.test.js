@@ -24,9 +24,17 @@ test('urlFeatures become a plain number array; pageFeatures pass through', () =>
   assert.ok(Array.isArray(p.urlFeatures) && p.urlFeatures.length === 17);
   assert.deepEqual(p.pageFeatures.tokens, { 5: 2, 9: 1 });
 });
-test('reasonCodes derived from flags + level, never free text', () => {
+test('reasonCodes fall back to flags when the verdict carries none (older cached verdicts)', () => {
   const p = RP.buildReportPayload(base);
   assert.deepEqual(p.reasonCodes, ['brand-impersonation-visual']);
+});
+test('reasonCodes come from the verdict when present, never free text', () => {
+  const verdict = { ...base.verdict, reasons: [{ code: 'brandIconMismatch', kind: 'brand', params: ['PayPal'] }], reasonCodes: ['brandIconMismatch'] };
+  const p = RP.buildReportPayload({ ...base, verdict });
+  assert.deepEqual(p.reasonCodes, ['brandIconMismatch']);
+  const s = JSON.stringify(p);
+  assert.ok(!s.includes('PayPal'), 'no reason params in the payload');
+  assert.ok(!s.includes('icon but is not'), 'no reason text in the payload');
 });
 test('oversized token maps are truncated to the 2000 highest counts and payload ≤ 32 KB', () => {
   const tokens = {}; for (let i = 0; i < 30000; i++) tokens[i] = (i % 7) + 1;

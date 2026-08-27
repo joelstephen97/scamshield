@@ -10,7 +10,8 @@ test('clipboard payload + paste instructions is dangerous with the clickfix flag
   });
   assert.equal(r.level, 'dangerous');
   assert.ok(r.flags.includes('clickfix'));
-  assert.ok(r.reasons[0].length > 20);
+  assert.equal(r.reasons[0].code, 'clickfixPasteRun');
+  assert.equal(r.reasons[0].kind, 'clipboard');
 });
 
 test('full instruction cluster dressed as a CAPTCHA is dangerous even without a copy', () => {
@@ -19,12 +20,15 @@ test('full instruction cluster dressed as a CAPTCHA is dangerous even without a 
   });
   assert.equal(r.level, 'dangerous');
   assert.ok(r.flags.includes('clickfix'));
+  assert.ok(r.reasons.some((x) => x.code === 'clickfixFakeCaptcha'));
+  assert.ok(r.reasons.some((x) => x.code === 'clickfixCaptchaDisguise'));
 });
 
 test('run-box instructions without captcha framing are only suspicious', () => {
   const r = scoreClickFix({ text: 'Open the run dialog with Win+R and paste the command.' });
   assert.equal(r.level, 'suspicious');
   assert.ok(!r.flags.includes('clickfix'));
+  assert.equal(r.reasons[0].code, 'clickfixWinR');
 });
 
 test('a plain CAPTCHA page is not flagged', () => {

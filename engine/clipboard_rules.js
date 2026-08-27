@@ -25,13 +25,13 @@
       if (!t.trim()) return out;
       if (SHELL_PATTERNS.some((re) => re.test(t))) {
         out.level = 'dangerous';
-        out.reasons.push('A site copied a system command to your clipboard. Do NOT paste it into a terminal or the Run box.');
+        out.reasons.push({ code: 'clipboardCommand', kind: 'clipboard' });
         return out;
       }
       const trimmed = t.trim();
       if (trimmed.length < 80 && CRYPTO_ADDR.some((re) => re.test(trimmed))) {
         out.level = 'suspicious';
-        out.reasons.push('A site put a cryptocurrency address on your clipboard — verify it before pasting.');
+        out.reasons.push({ code: 'clipboardCryptoAddress', kind: 'clipboard' });
       }
       return out;
     } catch (_) {

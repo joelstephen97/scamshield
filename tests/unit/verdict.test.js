@@ -41,9 +41,23 @@ test('fuse defaults flags to an empty array when domRules omits them', () => {
   assert.deepEqual(r.flags, []);
 });
 
-test('reasons are merged and de-duplicated', () => {
-  const r = fuse({ modelProb: null, urlRules: { score: 0.6, reasons: ['same'] }, domRules: { score: 0.6, reasons: ['same', 'other'], flags: [] } });
-  assert.deepEqual(r.reasons.sort(), ['other', 'same']);
+test('reasons are merged and de-duplicated by code + params, in order', () => {
+  const same = { code: 'ipHost', kind: 'link' };
+  const r = fuse({ modelProb: null, urlRules: { score: 0.6, reasons: [same] },
+    domRules: { score: 0.6, reasons: [{ code: 'ipHost', kind: 'link' }, { code: 'hiddenIframes', kind: 'page' }], flags: [] } });
+  assert.deepEqual(r.reasons.map((x) => x.code), ['ipHost', 'hiddenIframes']);
+});
+
+test('same code with different params is kept as two reasons', () => {
+  const r = fuse({ modelProb: null, urlRules: { score: 0.6, reasons: [{ code: 'scamPhrase', kind: 'page', params: ['you won'] }] },
+    domRules: { score: 0.6, reasons: [{ code: 'scamPhrase', kind: 'page', params: ['you won'] }, { code: 'scamPhrase', kind: 'page', params: ['claim your prize'] }], flags: [] } });
+  assert.deepEqual(r.reasons.map((x) => x.params[0]), ['you won', 'claim your prize']);
+});
+
+test('reasonCodes mirror the de-duplicated reasons', () => {
+  const r = fuse({ modelProb: null, urlRules: { score: 0.6, reasons: [{ code: 'ipHost', kind: 'link' }] },
+    domRules: { score: 0.6, reasons: [{ code: 'hiddenIframes', kind: 'page' }, { code: 'ipHost', kind: 'link' }], flags: [] } });
+  assert.deepEqual(r.reasonCodes, ['ipHost', 'hiddenIframes']);
 });
 
 test('high model with near-zero rules cannot reach dangerous (rules anchor model)', () => {
@@ -58,7 +72,7 @@ test('high model with near-zero rules cannot reach dangerous (rules anchor model
 test('content alone caps at suspicious', () => {
   const r = fuse({ modelProb: 0.1, urlRules: { score: 0, reasons: [] }, domRules: { score: 0, reasons: [], flags: [] }, contentProb: 0.99 });
   assert.equal(r.level, 'suspicious');
-  assert.ok(r.reasons.some((x) => /resemble known phishing/i.test(x)));
+  assert.ok(r.reasons.some((x) => x.code === 'contentPhishingPattern' && x.kind === 'page'));
   assert.equal(r.contentUsed, true);
 });
 test('content below threshold changes nothing', () => {

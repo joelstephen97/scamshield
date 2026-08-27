@@ -11,7 +11,7 @@ test('browser-update wording + non-vendor download is dangerous', () => {
   });
   assert.equal(r.level, 'dangerous');
   assert.ok(r.flags.includes('fake-browser-update'));
-  assert.ok(/never from a web page/i.test(r.reasons[0]));
+  assert.equal(r.reasons[0].code, 'fakeUpdatePrompt');
 });
 
 test('blob/data download attribute counts as a bad download', () => {

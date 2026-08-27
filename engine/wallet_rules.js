@@ -33,7 +33,7 @@
       if (method === 'eth_sign') {
         out.level = 'dangerous';
         out.flags.push('blind-sign');
-        out.reasons.push('A site asked your wallet to blind-sign arbitrary data — a common drainer trick.');
+        out.reasons.push({ code: 'walletBlindSign', kind: 'wallet' });
         return out;
       }
 
@@ -53,7 +53,7 @@
         if (grants) {
           out.level = 'dangerous';
           out.flags.push('permit-grant');
-          out.reasons.push('This signature is a token approval ("Permit"). Signing it lets this site move your tokens or NFTs later, without asking you again — the most common wallet-drainer signature.');
+          out.reasons.push({ code: 'walletPermitApproval', kind: 'wallet' });
         }
         return out;
       }
@@ -67,7 +67,7 @@
         if (tx.authorizationList != null) {
           out.level = 'dangerous';
           out.flags.push('eip7702-delegation');
-          out.reasons.push('This transaction would hand control of your account to a contract (EIP-7702 delegation) — a technique drainers use to empty wallets.');
+          out.reasons.push({ code: 'walletDelegation7702', kind: 'wallet' });
           return out;
         }
         if (data.startsWith(SELECTOR_SET_APPROVAL_ALL)) {
@@ -76,7 +76,7 @@
           if (approved) {
             out.level = 'dangerous';
             out.flags.push('set-approval-all');
-            out.reasons.push('This transaction grants a site control over ALL your NFTs in a collection.');
+            out.reasons.push({ code: 'walletSetApprovalAll', kind: 'wallet' });
           }
           return out;
         }
@@ -86,11 +86,11 @@
           if (amount >= UNLIMITED_THRESHOLD) {
             out.level = 'dangerous';
             out.flags.push('unlimited-approve');
-            out.reasons.push('This transaction gives a site UNLIMITED permission to spend your tokens.');
+            out.reasons.push({ code: 'walletUnlimitedApprove', kind: 'wallet' });
           } else if (amount > 0n) {
             out.level = 'suspicious';
             out.flags.push('token-approve');
-            out.reasons.push('This transaction lets a site spend some of your tokens.');
+            out.reasons.push({ code: 'walletTokenApprove', kind: 'wallet' });
           }
           return out;
         }

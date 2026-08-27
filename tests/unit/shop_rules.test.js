@@ -34,7 +34,11 @@ test('a fake resetting countdown is a strong flag', () => {
   assert.equal(r2.level, 'suspicious');
 });
 
-test('every flag carries a human label and detail', () => {
+// Flags are code-only: the English text lives in ui/reasons.js + _locales, so
+// the engine never carries a user-visible sentence.
+test('flags carry a code and nothing else — no English in the engine', () => {
   const r = scoreShop({ isStorefront: true, offPlatformPay: true, fakeScarcity: 1, badgeHotlink: true, missingContact: true, countdownReset: true });
-  for (const f of r.flags) { assert.ok(f.label && f.label.length); assert.ok(f.detail && f.detail.length > 10); }
+  assert.deepEqual(r.flags.map((f) => f.code).sort(),
+    ['badgeHotlink', 'countdownReset', 'fakeScarcity', 'missingContact', 'offPlatformPay']);
+  for (const f of r.flags) assert.deepEqual(Object.keys(f), ['code']);
 });

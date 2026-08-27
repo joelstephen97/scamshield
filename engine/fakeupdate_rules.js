@@ -40,7 +40,7 @@
     const hasBadDownload = nonVendor.length > 0 || s.hasBlobDownload === true;
     if (hasBadDownload) {
       flags.push('fake-browser-update');
-      reasons.push('This page pretends your browser needs an update and offers a download. Real update prompts come from the browser itself — never from a web page. The download is very likely malware.');
+      reasons.push({ code: 'fakeUpdatePrompt', kind: 'page' });
       return { level: 'dangerous', reasons, flags };
     }
     // Update wording without a download we can attribute — note it, stay quiet.

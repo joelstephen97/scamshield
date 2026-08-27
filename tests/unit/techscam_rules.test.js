@@ -32,7 +32,7 @@ test('phone + OS brand inside a scare page is decisive (fake-alert-phone)', () =
   const r = scoreTechScam({ text: 'WINDOWS DEFENDER ALERT: your computer has been blocked. Call Microsoft support now at 1-888-555-0100.' });
   assert.ok(r.score >= 0.8, 'expected dangerous, got ' + r.score);
   assert.ok((r.flags || []).includes('fake-alert-phone'));
-  assert.ok(r.reasons.some((x) => /web page pretending to be a system alert/i.test(x)));
+  assert.ok(r.reasons.some((x) => x.code === 'techScamFakeAlert' && x.kind === 'techscam'));
 });
 
 test('scare language with a phone but no OS brand is not decisive on its own', () => {
@@ -44,5 +44,5 @@ test('alarm audio adds signal', () => {
   const quiet = scoreTechScam({ text: 'virus detected on your device' });
   const loud = scoreTechScam({ text: 'virus detected on your device', alarmAudio: true });
   assert.ok(loud.score > quiet.score);
-  assert.ok(loud.reasons.some((x) => /alarm audio/i.test(x)));
+  assert.ok(loud.reasons.some((x) => x.code === 'techScamAlarmAudio'));
 });
