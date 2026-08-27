@@ -12,6 +12,11 @@
     return fallback != null ? fallback : key;
   }
   const bidi = (s) => (root.SSReasons && root.SSReasons.bidiWrap) ? root.SSReasons.bidiWrap(s) : (s == null ? '' : String(s));
+  // Same shared pattern as content/actions.js: every element carrying
+  // localized text gets an explicit dir so RTL locales lay it out correctly.
+  function setDir(node) {
+    try { node.setAttribute('dir', root.SSReasons && root.SSReasons.isRTL() ? 'rtl' : 'ltr'); } catch (_) {}
+  }
   // all_frames (0.6.0): the isolated script now runs in every frame so
   // iframe-hosted phishing forms are no longer invisible. Sub-frames run a
   // lean pass (URL + DOM rules + form guard); page-level UI stays top-frame.
@@ -140,7 +145,7 @@
     if (privacySeen.has(key)) return; privacySeen.add(key);
     const text = d.kind === 'plain'
       ? t('guardLeakyFormPlain', [bidi(d.destHost)], 'This site sent your email/phone to ' + d.destHost + ' in plain text — before you pressed submit.')
-      : t('guardLeakyFormHashed', [bidi(d.destHost)], 'This site sent your email/phone to ' + d.destHost + ' as a hashed (MD5) identifier — before you pressed submit.');
+      : t('guardLeakyFormHashed', [bidi(d.destHost), bidi(d.kind.toUpperCase())], 'This site sent your email/phone to ' + d.destHost + ' as a hashed (' + d.kind.toUpperCase() + ') identifier — before you pressed submit.');
     if (SS.actions && SS.actions.privacyToast) {
       SS.actions.privacyToast({ text });
     }
@@ -367,7 +372,7 @@
       a.__ssSerp = true;
       const chip = document.createElement('span');
       chip.className = 'scamshield-serp';
-      try { chip.setAttribute('dir', root.SSReasons && root.SSReasons.isRTL() ? 'rtl' : 'ltr'); } catch (_) {}
+      setDir(chip);
       chip.textContent = t('serpAdMismatch', [bidi(destReg), bidi(shownReg)], '⚠ ScamShield: this ad goes to ' + destReg + ', not ' + shownReg);
       (a.closest('div,li,article') || a).appendChild(chip);
       flagged++;

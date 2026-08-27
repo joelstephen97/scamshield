@@ -46,9 +46,13 @@ async function load() {
   $('net-feed').textContent = s.otaUrl ? (s.lastOtaAt ? F.relTime(s.lastOtaAt, undefined, UI_LANG) : T('receiptOnInstall12h', null, 'on install + every 12h')) : T('receiptDisabled', null, 'disabled');
   $('net-report').textContent = s.reportingOptIn ? (s.lastReportAt ? F.relTime(s.lastReportAt, undefined, UI_LANG) : T('receiptWhenFlagged', null, 'when flagged')) : T('receiptOffDefault', null, 'off (default)');
   $('otaurl').value = s.otaUrl || ''; $('theme').value = s.theme || 'auto';
-  $('feedstatus').textContent = s.lastOtaAt
-    ? T('fmtUpdatedRules', [bidi(F.relTime(s.lastOtaAt, undefined, UI_LANG)), bidi(Number(s.lastOtaCount || 0).toLocaleString())], `Updated ${F.relTime(s.lastOtaAt)} · ${Number(s.lastOtaCount || 0).toLocaleString()} rules`)
-    : T('feedNeverUpdated', null, 'Never updated');
+  if (s.lastOtaAt) {
+    const relStr = F.relTime(s.lastOtaAt, undefined, UI_LANG);
+    const countStr = Number(s.lastOtaCount || 0).toLocaleString();
+    $('feedstatus').textContent = T('fmtUpdatedRules', [bidi(relStr), bidi(countStr)], `Updated ${relStr} · ${countStr} rules`);
+  } else {
+    $('feedstatus').textContent = T('feedNeverUpdated', null, 'Never updated');
+  }
   $('feeddot').classList.toggle('ok', !!s.lastOtaAt);
   renderAllow(s.allowlist || [], s.pausedSites || {});
   const h = await send('getHistory'); renderHistory((h && h.history) || []);

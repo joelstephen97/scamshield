@@ -52,7 +52,7 @@ function renderVerdictUI(host) {
   $('leave').hidden = level !== 'dangerous'; $('showwhy').hidden = level !== 'suspicious';
   $('leave').textContent = T('leaveThisPage', null, 'Leave this page'); $('showwhy').textContent = T('showWhy', null, 'Show why');
   const rescueUrl = verdict && verdict.brand && SS.BRAND_DOMAINS[verdict.brand] ? 'https://' + SS.BRAND_DOMAINS[verdict.brand][0] + '/' : null;
-  $('rescue').hidden = !(level === 'dangerous' && rescueUrl); if (rescueUrl) $('rescue').textContent = T('takeMeToReal', [brand], 'Take me to the real ' + brand);
+  $('rescue').hidden = !(level === 'dangerous' && rescueUrl); if (rescueUrl) $('rescue').textContent = T('takeMeToReal', [bidi(brand)], 'Take me to the real ' + brand);
   $('reportbtn').hidden = checking;
   if (!checking) $('reportbtn').textContent = level === 'safe' || level === 'unknown' ? T('reportScam', null, 'Report: this is a scam') : T('reportSafe', null, 'Report: this is safe');
 }
@@ -106,7 +106,7 @@ async function init() {
   const http = tab && tab.url && /^https?:/.test(tab.url);
   if (!http) {
     const protocol = tab && tab.url ? new URL(tab.url).protocol.replace(':', '') : '';
-    renderStatus('unknown', protocol ? T('fmtProtocolPage', [protocol], protocol + ' page') : '', T('popupNotHttp', null, "Browser pages and the web store aren't scanned."));
+    renderStatus('unknown', protocol ? T('fmtProtocolPage', [bidi(protocol)], protocol + ' page') : '', T('popupNotHttp', null, "Browser pages and the web store aren't scanned."));
     renderHistory(); return;
   }
   const host = new URL(tab.url).hostname; domain = registrable(host);
@@ -120,7 +120,7 @@ async function init() {
   });
   $('showwhy').addEventListener('click', () => { $('evidence').hidden = false; $('showwhy').hidden = true; });
 
-  $('trust').textContent = T('trustThisSite', null, 'Trust this site') + ' ▾';
+  $('trust').textContent = T('popupTrustMenu', null, 'Trust this site ▾');
   $('trust').hidden = false; renderTrust();
   $('trust').addEventListener('click', (e) => { e.stopPropagation(); setTrustMenu($('trustmenu').hidden); });
   document.addEventListener('click', (e) => { if (!$('trustmenu').hidden && !$('trustmenu').contains(e.target) && e.target !== $('trust')) setTrustMenu(false); });

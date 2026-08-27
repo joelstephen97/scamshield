@@ -72,7 +72,7 @@
     if (!realHost) return null;
     const row = el('div', 'ss-compare');
     const fake = el('span', 'ss-cmp-fake'); fake.append(el('small', null, t('compareThisSite', null, 'This site')), el('b', null, location.hostname));
-    const real = el('span', 'ss-cmp-real'); real.append(el('small', null, t('compareRealSite', [brandLabel], 'Real ' + brandLabel)), el('b', null, realHost));
+    const real = el('span', 'ss-cmp-real'); real.append(el('small', null, t('compareRealSite', [bidi(brandLabel)], 'Real ' + brandLabel)), el('b', null, realHost));
     row.append(fake, el('span', 'ss-cmp-vs', '≠'), real);
     return row;
   }
@@ -86,7 +86,7 @@
     const ico = el('span', 'ss-ico'); ico.innerHTML = ICON[danger ? 'dangerous' : 'suspicious'];
     const text = el('div', 'ss-text');
     const head = verdict.brandLabel
-      ? (danger ? t('bannerDangerBrand', [verdict.brandLabel], 'Dangerous page — looks like ' + verdict.brandLabel + ", but isn't") : t('bannerSuspicious', null, 'Suspicious page'))
+      ? (danger ? t('bannerDangerBrand', [bidi(verdict.brandLabel)], 'Dangerous page — looks like ' + verdict.brandLabel + ", but isn't") : t('bannerSuspicious', null, 'Suspicious page'))
       : (danger ? t('bannerDanger', null, 'Dangerous page') : t('bannerSuspicious', null, 'Suspicious page'));
     text.append(el('b', null, head), el('span', null, reasonText(verdict.reasons[0]) || (danger ? t('popupDangerSummary', null, "Don't enter passwords or card details here.") : t('popupSuspiciousSummary', null, 'Take care before typing anything here.'))));
     if (verdict.brandLabel && verdict.brandUrl) {
@@ -95,7 +95,7 @@
     }
     const acts = el('div', 'ss-acts');
     if (danger) { const leave = el('button', 'ss-leave', t('leaveThisPage', null, 'Leave this page')); leave.addEventListener('click', () => { x.onLeave ? x.onLeave() : history.back(); }); acts.appendChild(leave); }
-    if (verdict.brandUrl) { const rescue = el('button', 'ss-rescue', t('takeMeToReal', [verdict.brandLabel || 'site'], 'Take me to the real ' + (verdict.brandLabel || 'site'))); rescue.addEventListener('click', () => { location.href = verdict.brandUrl; }); acts.appendChild(rescue); }
+    if (verdict.brandUrl) { const rescue = el('button', 'ss-rescue', t('takeMeToReal', [bidi(verdict.brandLabel || 'site')], 'Take me to the real ' + (verdict.brandLabel || 'site'))); rescue.addEventListener('click', () => { location.href = verdict.brandUrl; }); acts.appendChild(rescue); }
     if (!danger) { const why = el('button', 'ss-why', t('showWhy', null, 'Show why')); why.addEventListener('click', () => { text.querySelector('span').textContent = verdict.reasons.slice(0, 3).map(reasonText).join(' · '); why.remove(); }); acts.appendChild(why); }
     const trust = el('button', 'ss-trust', t('trustThisSite', null, 'Trust this site')); trust.addEventListener('click', () => { onAllow && onAllow(); bar.remove(); });
     const report = el('button', 'ss-report', t('reportMistake', null, 'Report a mistake')); report.addEventListener('click', () => { report.textContent = t('thanks', null, 'Thanks'); report.disabled = true; x.onReport && x.onReport(); });
@@ -144,7 +144,7 @@
     leave.addEventListener('click', () => { x.onLeave ? x.onLeave() : history.back(); });
     actions.append(leave);
     if (verdict.brandUrl) {
-      const rescue = el('button', 'ss-rescue-ghost', t('takeMeToReal', [verdict.brandLabel || 'site'], 'Go to the real ' + (verdict.brandLabel || 'site')));
+      const rescue = el('button', 'ss-rescue-ghost', t('takeMeToReal', [bidi(verdict.brandLabel || 'site')], 'Go to the real ' + (verdict.brandLabel || 'site')));
       rescue.addEventListener('click', () => { location.href = verdict.brandUrl; });
       actions.append(rescue);
     }
@@ -231,6 +231,7 @@
       if (node.classList.contains(NS + '-hidden-block')) return;
       node.classList.add(NS + '-hidden-block');
       const tag = el('div', NS + '-hidden-tag', t('guardHiddenTag', null, 'Hidden by ScamShield'));
+      setDir(tag);
       node.appendChild(tag);
     });
   }
