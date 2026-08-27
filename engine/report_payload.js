@@ -33,7 +33,10 @@
         v: 1, kind: i.kind, label: i.label, host, regDomain: C.registrableDomain(host),
         level: String(v.level || ''), score: Number.isFinite(s) ? s : 0,
         flags: Array.isArray(v.flags) ? v.flags.map(String).slice(0, 20) : [],
-        reasonCodes: Array.isArray(v.reasonCodes) ? v.reasonCodes.map(String).slice(0, 20) : (Array.isArray(v.flags) ? v.flags.map(String).slice(0, 20) : []),
+        // Coded reasons when the verdict has any; otherwise the flag names, so a
+        // verdict that fired a flag without a coded reason still says why.
+        reasonCodes: (Array.isArray(v.reasonCodes) && v.reasonCodes.length) ? v.reasonCodes.map(String).slice(0, 20)
+          : (Array.isArray(v.flags) ? v.flags.map(String).slice(0, 20) : []),
         urlFeatures: i.urlFeatures ? Array.from(i.urlFeatures).map((x) => Number.isFinite(x) ? x : 0) : null,
         pageFeatures,
         iconMatches: (i.iconMatches || []).slice(0, 6).map((m) => ({ brand: String(m.brand), distance: Number(m.distance) })),

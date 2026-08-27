@@ -86,7 +86,7 @@
           { level: 'dangerous', reasons: cf.reasons, flags: cf.flags },
           { onLeave: () => send('leaveTab'), onReport: () => send('userReport', { label: 'false_positive' }) }
         );
-        send('reportVerdict', { verdict: { level: 'dangerous', score: 0.95, reasons: cf.reasons, flags: cf.flags, modelUsed: false }, subframe: !IS_TOP });
+        send('reportVerdict', { verdict: { level: 'dangerous', score: 0.95, reasons: cf.reasons, reasonCodes: cf.reasons.map((x) => x.code), flags: cf.flags, modelUsed: false }, subframe: !IS_TOP });
         send('bumpThreats', { kind: 'clipboard' });
         return;
       }
@@ -116,7 +116,7 @@
         try { window.dispatchEvent(new CustomEvent('scamshield:techscam-escape')); } catch (_) {}
         send('leaveTab');
       });
-      send('reportVerdict', { verdict: { level: 'dangerous', score: r.score, reasons: r.reasons, flags: r.flags || [], modelUsed: false }, subframe: !IS_TOP });
+      send('reportVerdict', { verdict: { level: 'dangerous', score: r.score, reasons: r.reasons, reasonCodes: r.reasons.map((x) => x.code), flags: r.flags || [], modelUsed: false }, subframe: !IS_TOP });
       send('bumpThreats', { kind: 'techscam' });
     }
   });

@@ -36,6 +36,11 @@ test('reasonCodes come from the verdict when present, never free text', () => {
   assert.ok(!s.includes('PayPal'), 'no reason params in the payload');
   assert.ok(!s.includes('icon but is not'), 'no reason text in the payload');
 });
+test('an empty reasonCodes list still falls back to the flags', () => {
+  const verdict = { ...base.verdict, reasons: [], reasonCodes: [] };
+  const p = RP.buildReportPayload({ ...base, verdict });
+  assert.deepEqual(p.reasonCodes, ['brand-impersonation-visual']);
+});
 test('oversized token maps are truncated to the 2000 highest counts and payload ≤ 32 KB', () => {
   const tokens = {}; for (let i = 0; i < 30000; i++) tokens[i] = (i % 7) + 1;
   const p = RP.buildReportPayload({ ...base, pageFeatures: { tokens, dense: [] } });

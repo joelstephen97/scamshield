@@ -120,6 +120,20 @@ test('no engine module touches chrome.i18n', () => {
   }
 });
 
+// The reported reasonCodes field must stay single-vocabulary (engine codes), so
+// any hand-built verdict the content script reports has to carry its own codes
+// instead of falling through to report_payload's flag-name fallback. There is no
+// DOM harness for content_script.js, so this is a source-level guard.
+test('every content-script verdict with reasons also reports reasonCodes', () => {
+  const src = fs.readFileSync(path.join(ROOT, 'content/content_script.js'), 'utf8');
+  const calls = src.split('\n').filter((l) => l.includes("send('reportVerdict'"));
+  assert.ok(calls.length >= 3, 'expected the content script to report verdicts');
+  for (const line of calls) {
+    if (!/reasons:/.test(line) || /reasons: \[\]/.test(line)) continue;
+    assert.ok(/reasonCodes:/.test(line), 'reportVerdict without reasonCodes: ' + line.trim());
+  }
+});
+
 test('every reason code emitted by the engine is in the EN table with a valid kind', () => {
   let found = 0;
   for (const { name, src } of engineFiles) {
