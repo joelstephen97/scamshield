@@ -77,6 +77,7 @@ Features:
   (including EIP-7702 account-delegation and multi-wallet EIP-6963 support);
   blocks recovery-phrase theft
 • Clipboard-hijack guard: warns when a site copies a command to your clipboard
+• Hides fake prize/giveaway scam content
 • Settings export/import and optional cross-device sync (your browser's own
   sync — still no ScamShield account or server)
 • Protection history and stats, stored only on your device; dark mode

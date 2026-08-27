@@ -89,55 +89,70 @@ for (const loc of NON_EN_LOCALES) {
   });
 }
 
-test('every non-en locale declares identical placeholders and preserves all $TOKEN$s', () => {
-  for (const loc of NON_EN_LOCALES) {
+// Per-locale generated tests (same rationale as the key-parity block above):
+// a single test looping over all 19 locales would throw and abort at the
+// first offending locale/key, hiding the rest. Each locale gets its own
+// test() that walks every en key, *accumulates* every issue it finds for
+// that locale, and asserts once at the end — so one failing test names
+// every bad key for that locale in a single readable message, and every
+// other locale still gets its own independent pass/fail.
+for (const loc of NON_EN_LOCALES) {
+  test(`locale parity (placeholders/tokens): ${loc} matches en declarations exactly`, () => {
     const p = path.join(LOCALES_DIR, loc, 'messages.json');
-    if (!fs.existsSync(p)) continue; // key-parity test above already fails this locale
+    if (!fs.existsSync(p)) return; // "all 20 target locales are present" test above already fails this
     const data = JSON.parse(fs.readFileSync(p, 'utf8'));
 
+    const issues = [];
     for (const [k, enEntry] of Object.entries(EN)) {
       const locEntry = data[k];
-      if (!locEntry) continue; // key-parity test above already reports this
+      if (!locEntry) continue; // key-parity test above already reports missing keys
 
-      // 1. The `placeholders` object (names + content mapping) must match en exactly.
+      // 1. The `placeholders` name set must match en's exactly, in BOTH
+      //    directions: the locale can't be missing an en-declared name, and
+      //    it can't invent extra names en doesn't have. Content must match
+      //    en's `content` mapping (e.g. "$1") verbatim for every shared name.
       const enPlaceholders = enEntry.placeholders || {};
       const locPlaceholders = locEntry.placeholders || {};
-      const enPhNames = Object.keys(enPlaceholders);
-      if (enPhNames.length) {
-        assert.ok(
-          locEntry.placeholders,
-          `${loc}: ${k} is missing the placeholders object declared in en (${truncateList(enPhNames)})`
-        );
+      const enPhNames = new Set(Object.keys(enPlaceholders));
+      const locPhNames = new Set(Object.keys(locPlaceholders));
+
+      if (enPhNames.size || locPhNames.size) {
+        const missingPh = [...enPhNames].filter((n) => !locPhNames.has(n));
+        const extraPh = [...locPhNames].filter((n) => !enPhNames.has(n));
+        if (missingPh.length) issues.push(`${k}: missing placeholder(s) declared in en: ${missingPh.join(', ')}`);
+        if (extraPh.length) issues.push(`${k}: has extra placeholder(s) not in en: ${extraPh.join(', ')}`);
         for (const name of enPhNames) {
-          assert.ok(
-            locPlaceholders[name],
-            `${loc}: ${k} is missing placeholder "${name}" declared in en`
-          );
-          assert.strictEqual(
-            locPlaceholders[name] && locPlaceholders[name].content,
-            enPlaceholders[name].content,
-            `${loc}: ${k} placeholder "${name}" has content "${locPlaceholders[name] && locPlaceholders[name].content}", expected "${enPlaceholders[name].content}" (must match en exactly)`
-          );
+          if (!locPhNames.has(name)) continue; // already reported as missing above
+          const enContent = enPlaceholders[name].content;
+          const locContent = locPlaceholders[name] && locPlaceholders[name].content;
+          if (locContent !== enContent) {
+            issues.push(`${k}: placeholder "${name}" content is "${locContent}", expected "${enContent}" (must match en exactly)`);
+          }
         }
       }
 
-      // 2. Every $TOKEN$ that appears in the en message must appear exactly
-      //    once in the locale message too (order may differ; count must match).
+      // 2. Every $TOKEN$ that appears in the en message must appear the same
+      //    number of times in the locale message too (order may differ).
       const enTokenCounts = {};
       for (const t of tokensOf(enEntry.message)) enTokenCounts[t] = (enTokenCounts[t] || 0) + 1;
       const locTokenCounts = {};
       for (const t of tokensOf(locEntry.message)) locTokenCounts[t] = (locTokenCounts[t] || 0) + 1;
 
       for (const [token, count] of Object.entries(enTokenCounts)) {
-        assert.strictEqual(
-          locTokenCounts[token] || 0,
-          count,
-          `${loc}: ${k} message must contain ${token} exactly ${count} time(s) (as in en), found ${locTokenCounts[token] || 0}`
-        );
+        const locCount = locTokenCounts[token] || 0;
+        if (locCount !== count) {
+          issues.push(`${k}: expected ${token} to appear ${count} time(s) (as in en), found ${locCount}`);
+        }
       }
     }
-  }
-});
+
+    assert.strictEqual(
+      issues.length,
+      0,
+      `${loc}: ${issues.length} placeholder/token issue(s): ${truncateList(issues)}`
+    );
+  });
+}
 
 test('no locale message contains HTML angle brackets', () => {
   for (const loc of EXPECTED) {
@@ -150,23 +165,26 @@ test('no locale message contains HTML angle brackets', () => {
   }
 });
 
-test('no locale message contains a stray $TOKEN$ not declared by en for that key', () => {
-  for (const loc of NON_EN_LOCALES) {
+for (const loc of NON_EN_LOCALES) {
+  test(`locale parity (stray tokens): ${loc} has no undeclared $TOKEN$s`, () => {
     const p = path.join(LOCALES_DIR, loc, 'messages.json');
-    if (!fs.existsSync(p)) continue;
+    if (!fs.existsSync(p)) return; // "all 20 target locales are present" test above already fails this
     const data = JSON.parse(fs.readFileSync(p, 'utf8'));
 
+    const issues = [];
     for (const [k, locEntry] of Object.entries(data)) {
       const enEntry = EN[k];
       if (!enEntry) continue; // key-parity test above already reports orphan keys
       const enTokens = new Set(tokensOf(enEntry.message));
       const locTokens = new Set(tokensOf(locEntry.message));
       const stray = [...locTokens].filter((t) => !enTokens.has(t));
-      assert.strictEqual(
-        stray.length,
-        0,
-        `${loc}: ${k} message has stray token(s) not declared by en: ${truncateList(stray)}`
-      );
+      if (stray.length) issues.push(`${k}: ${stray.join(', ')}`);
     }
-  }
-});
+
+    assert.strictEqual(
+      issues.length,
+      0,
+      `${loc}: stray token(s) not declared by en in ${issues.length} key(s): ${truncateList(issues)}`
+    );
+  });
+}
