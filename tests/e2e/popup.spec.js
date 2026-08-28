@@ -71,3 +71,33 @@ test("What's new dismisses and stays dismissed after reload; Escape closes the t
   await popup.keyboard.press('Escape');
   await expect(popup.locator('#trustmenu')).toBeHidden();
 });
+
+test('popup layout: body is the scroll container, so a classic scrollbar can never clip the right edge', async ({ context, extensionId }) => {
+  const page = await context.newPage(); await page.goto(BASE + '/safe.html');
+  const popup = await openPopup(context, extensionId, page);
+  await popup.waitForTimeout(400);
+  // Force content taller than the 600px popup cap, as real settings/history growth does.
+  const m = await popup.evaluate(() => {
+    const filler = document.createElement('div');
+    filler.style.height = '1200px';
+    document.body.insertBefore(filler, document.querySelector('footer'));
+    const de = document.documentElement, b = document.body;
+    return {
+      bodyScrolls: b.scrollHeight > b.clientHeight + 1,
+      viewportScrolls: de.scrollHeight > de.clientHeight + 1,
+      docHeight: de.getBoundingClientRect().height,
+      htmlBoxWidth: de.getBoundingClientRect().width,
+      bodyHorizontalOverflow: b.scrollWidth - b.clientWidth,
+      supportRight: document.getElementById('support').getBoundingClientRect().right,
+      bodyClientWidth: b.clientWidth
+    };
+  });
+  // The scrollbar must live INSIDE the 340px body box (content reflows), never on
+  // the viewport (fixed 340px html would be clipped by the scrollbar/gutter).
+  expect(m.bodyScrolls).toBe(true);
+  expect(m.viewportScrolls).toBe(false);
+  expect(m.docHeight).toBeLessThanOrEqual(601);
+  expect(m.htmlBoxWidth).toBe(340);
+  expect(m.bodyHorizontalOverflow).toBeLessThanOrEqual(0);
+  expect(m.supportRight).toBeLessThanOrEqual(m.bodyClientWidth + 1);
+});

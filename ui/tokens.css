@@ -41,19 +41,19 @@ svg.ic{width:20px;height:20px;flex:none;stroke:currentColor;fill:none;stroke-wid
 svg.ic.sm{width:16px;height:16px}
 
 .card{background:var(--surface);border:1px solid var(--hair);border-radius:var(--radius);padding:12px}
-.status{display:grid;grid-template-columns:auto 1fr;gap:10px 12px;align-items:start;border-left:4px solid transparent}
+.status{display:grid;grid-template-columns:auto 1fr;gap:10px 12px;align-items:start}
 .status .ico{width:36px;height:36px;border-radius:var(--radius);display:grid;place-items:center}
 .status .ico svg{width:22px;height:22px}
 .status h3{font-size:20px;line-height:1.15;font-weight:600;letter-spacing:-.01em}
 .status .host{font-size:12px;color:var(--muted);margin-top:2px;word-break:break-all}
 .status p{margin:6px 0 0;font-size:13px}
 .status .acts{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
-.status.safe{border-left-color:var(--safe)} .status.safe .ico{background:var(--safe-bg);color:var(--safe)}
-.status.warn{border-left-color:var(--warn)} .status.warn .ico{background:var(--warn-bg);color:var(--warn)}
-.status.danger{border-left-color:var(--danger)} .status.danger .ico{background:var(--danger-bg);color:var(--danger)}
-.status.unknown{border-left-color:var(--unknown)} .status.unknown .ico{background:var(--unknown-bg);color:var(--unknown)}
-.status.dangerous{border-left-color:var(--danger)} .status.dangerous .ico{background:var(--danger-bg);color:var(--danger)}
-.status.suspicious{border-left-color:var(--warn)} .status.suspicious .ico{background:var(--warn-bg);color:var(--warn)}
+.status.safe .ico{background:var(--safe-bg);color:var(--safe)}
+.status.warn .ico{background:var(--warn-bg);color:var(--warn)}
+.status.danger .ico{background:var(--danger-bg);color:var(--danger)}
+.status.unknown .ico{background:var(--unknown-bg);color:var(--unknown)}
+.status.dangerous .ico{background:var(--danger-bg);color:var(--danger)}
+.status.suspicious .ico{background:var(--warn-bg);color:var(--warn)}
 .evidence{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
 .evidence li{display:flex;gap:8px;align-items:flex-start;padding:7px 0;border-top:1px solid var(--hair);font-size:13px}
 .evidence li:first-child{border-top:0;padding-top:0}

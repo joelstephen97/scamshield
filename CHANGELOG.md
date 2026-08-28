@@ -2,6 +2,18 @@
 
 All notable changes to ScamShield. Versions are git tags (`vX.Y.Z`); the version on the [Chrome Web Store](https://chromewebstore.google.com/detail/fojjjofjimbfoddafoampojopijnlihl) may lag a tag by a few days while Google reviews it. Privacy-relevant changes are also reflected in the [privacy policy](https://joelstephen97.github.io/scamshield/privacy.html).
 
+## 0.6.1 — 2026-08-28
+
+### Fixed
+- **Popup right edge no longer clipped on Windows.** With classic (non-overlay)
+  scrollbars, the scrollbar/reserved gutter shrank the popup viewport while the
+  page stayed a fixed 340px wide, silently cutting off the right edge (the
+  Support link, card padding). Scrolling now happens inside the popup body, so a
+  scrollbar takes its width from the content — which reflows — instead of
+  clipping it.
+- Status card no longer draws a colored left accent line; the state color lives
+  in the icon alone.
+
 ## 0.6.0 — 2026-08-25
 
 The "real problems only" release — every feature is driven by validated

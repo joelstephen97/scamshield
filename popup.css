@@ -1,5 +1,9 @@
-html{width:340px;max-height:600px;overflow-y:auto;overflow-x:hidden;scrollbar-gutter:stable}
-body{width:100%;min-height:420px;overflow:visible;display:flex;flex-direction:column}
+/* html fixes the popup window's width; body does the scrolling so a classic
+   scrollbar takes its ~15px from INSIDE the 340px box (content reflows) instead
+   of shrinking the viewport and clipping the fixed-width page at the right. */
+html{width:340px;overflow:hidden}
+body{width:100%;min-height:420px;max-height:600px;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column}
+body>*{flex-shrink:0} /* children keep natural height; body scrolls instead of squishing them */
 .hdr{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--surface);border-bottom:1px solid var(--hair)}
 .hdr .brand{display:flex;align-items:center;gap:7px;font-weight:600;font-size:14px}
 .hdr .brand svg{color:var(--accent)}
