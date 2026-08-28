@@ -29,6 +29,14 @@ function showTab(name, userInitiated) {
 for (const a of document.querySelectorAll('nav a')) a.addEventListener('click', (e) => { e.preventDefault(); showTab(a.dataset.tab, true); });
 $('brandmark').insertAdjacentHTML('afterbegin', I.shield('safe'));
 try { const v = api.runtime.getManifest().version; $('ver').textContent = T('fmtVersion', [bidi(v)], 'Version ' + v); $('aboutver').textContent = v; } catch (_) {}
+// Earned review ask (0.7.0): the always-available "leave a review" link is
+// Chrome only (no AMO listing to deep-link to). Sets nothing — this is a
+// separate, zero-pressure channel from the popup's earned ask-card.
+// Not `typeof browser === 'undefined'`: modern Chrome (Chromium 148, 2026)
+// now ships its own native `browser.*` alias, so that check is no longer a
+// reliable Chrome/Firefox signal (see popup.js's isChromeBuild() for the same
+// fix). Only the Firefox build's manifest carries `browser_specific_settings`.
+try { if (!api.runtime.getManifest().browser_specific_settings) $('reviewaboutrow').hidden = false; } catch (_) { $('reviewaboutrow').hidden = false; }
 
 const CHIPKEY = (k) => 'chip' + k.charAt(0).toUpperCase() + k.slice(1);
 const KIND = (k) => T(CHIPKEY(k), null, F.detectorLabel(k));

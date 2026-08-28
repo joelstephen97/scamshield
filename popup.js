@@ -1,7 +1,7 @@
 'use strict';
 const api = globalThis.browser || globalThis.chrome;
 const $ = (id) => document.getElementById(id);
-const SS = globalThis.ScamShield, F = globalThis.SSFormat, I = globalThis.SSIcons, R = globalThis.SSReasons;
+const SS = globalThis.ScamShield, F = globalThis.SSFormat, I = globalThis.SSIcons, R = globalThis.SSReasons, REVIEW = globalThis.SSReview;
 const UI_LANG = (() => { try { return api.i18n.getUILanguage(); } catch (_) { return 'en'; } })();
 // SSi18n.t returns '' (never key-echo) on a genuine miss, so the fallback
 // argument here actually gets used instead of being dead code.
@@ -56,6 +56,45 @@ function renderVerdictUI(host) {
   $('reportbtn').hidden = checking;
   if (!checking) $('reportbtn').textContent = level === 'safe' || level === 'unknown' ? T('reportScam', null, 'Report: this is a scam') : T('reportSafe', null, 'Report: this is safe');
 }
+// Earned review ask (0.7.0): a quiet card below the status card, shown only
+// after ui/review.js's pure predicate says it's earned (2nd real block, 7+
+// day-old install, Chrome only — no AMO listing to ask for on Firefox, state
+// pending/eligible-snooze). The three buttons each report an action to the SW
+// (which owns the reviewAsk storage.local state) and hide the card; "Rate" is
+// a real <a target="_blank"> (zero new API surface) that also records the
+// state change so the card never returns.
+//
+// Chrome/Firefox detection: NOT `typeof browser === 'undefined'`. Modern
+// Chrome (verified: Chromium 148, 2026) now ships its own native `browser.*`
+// promise-API alias for cross-browser compatibility, so `browser` is defined
+// on real Chrome too — that check would make isChrome false everywhere and
+// the ask would never show. Instead this reads our OWN packaged manifest:
+// only the Firefox build (manifest.firefox.json) carries
+// `browser_specific_settings` (the Gecko extension ID) — Chrome's manifest.json
+// never has it, regardless of what globals the browser injects.
+function isChromeBuild() {
+  try { return !api.runtime.getManifest().browser_specific_settings; } catch (_) { return true; }
+}
+async function initReviewAsk() {
+  if (!REVIEW) return;
+  if (!isChromeBuild()) return;
+  const ctx = await send('getReviewAsk');
+  if (!ctx) return;
+  const ra = ctx.reviewAsk || {};
+  const count = settings.threatsBlocked || 0;
+  const ok = REVIEW.eligible({
+    isChrome: true, threatsBlocked: count, installedAt: ctx.installedAt, now: Date.now(),
+    state: ra.state, snoozeUntil: ra.snoozeUntil, asks: ra.asks
+  });
+  if (!ok) return;
+  $('askbody').textContent = T('reviewAskBody', [bidi(String(count))],
+    `ScamShield has now stopped ${count} scams for you. If it's earned it, a short review helps other people find it — it's free and always will be.`);
+  $('askcard').hidden = false;
+  const hide = () => { $('askcard').hidden = true; };
+  $('askrate').addEventListener('click', () => { send('reviewAskAction', { action: 'rate' }); hide(); });
+  $('asklater').addEventListener('click', async () => { await send('reviewAskAction', { action: 'later' }); hide(); });
+  $('askno').addEventListener('click', async () => { await send('reviewAskAction', { action: 'no' }); hide(); });
+}
 async function pollVerdict(host) {
   for (let i = 0; i < 10; i++) {
     await new Promise((res) => setTimeout(res, 300));
@@ -103,6 +142,7 @@ async function init() {
   // tab already) and lets the tab router pick the section up from the hash.
   $('viewall').addEventListener('click', (e) => { e.preventDefault(); api.tabs.create({ url: api.runtime.getURL('options.html#stats') }); window.close(); });
   $('tile-all').querySelector('b').textContent = String(settings.threatsBlocked || 0);
+  await initReviewAsk();
   if (settings.whatsNewSeen !== '0.6.0') { $('whatsnew').hidden = false; $('whatsnewlink').addEventListener('click', (e) => { e.preventDefault(); api.tabs.create({ url: 'https://github.com/joelstephen97/scamshield/blob/main/CHANGELOG.md' }); }); $('whatsnewx').addEventListener('click', async () => { $('whatsnew').hidden = true; await send('setSettings', { patch: { whatsNewSeen: '0.6.0' } }); }); }
 
   tab = await currentTab();

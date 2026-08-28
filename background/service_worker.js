@@ -172,6 +172,73 @@ function ensurePrivacyTotal() {
 const installedAtPromise = ensureInstalledAt();
 const privacyTotalPromise = ensurePrivacyTotal();
 
+// ---- Earned review ask (0.7.0) ----
+// One storage.local key, OUTSIDE `settings` and therefore outside SYNCED_KEYS —
+// like installedAt/statsDaily above, this never syncs and never enters a
+// report payload. The eligibility predicate itself is pure (ui/review.js,
+// loaded by popup.html/options.html) — this file only owns reading, lazily
+// creating, and writing the { state, snoozeUntil, asks } object.
+const REVIEW_ASK_DEFAULT = { state: 'pending', snoozeUntil: 0, asks: 0 };
+function ensureReviewAsk() {
+  return queueStats(async () => {
+    try {
+      const cur = await api.storage.local.get('reviewAsk');
+      if (!cur.reviewAsk || typeof cur.reviewAsk !== 'object') {
+        await api.storage.local.set({ reviewAsk: REVIEW_ASK_DEFAULT });
+      }
+    } catch (_) { /* best-effort */ }
+  });
+}
+const reviewAskPromise = ensureReviewAsk();
+async function getReviewAsk() {
+  await reviewAskPromise;
+  const cur = await api.storage.local.get('reviewAsk');
+  return (cur.reviewAsk && typeof cur.reviewAsk === 'object') ? cur.reviewAsk : Object.assign({}, REVIEW_ASK_DEFAULT);
+}
+// installedAt is already lazily created above (ensureInstalledAt/installedAtPromise);
+// bundled with reviewAsk here since the popup needs both in one round trip to
+// evaluate ui/review.js's eligible() predicate.
+async function getReviewAskContext() {
+  await installedAtPromise;
+  const ra = await getReviewAsk();
+  const cur = await api.storage.local.get('installedAt');
+  const installedAt = (typeof cur.installedAt === 'number' && cur.installedAt > 0) ? cur.installedAt : Date.now();
+  return { reviewAsk: ra, installedAt };
+}
+// Serializes the three user actions (rate/later/no) against each other and
+// against the lazy-create above, the same way settingsChain/statsChain do for
+// their own keys.
+let reviewAskChain = Promise.resolve();
+function setReviewAsk(action) {
+  const run = async () => {
+    await reviewAskPromise;
+    const cur = await getReviewAsk();
+    let next;
+    if (action === 'rate') next = Object.assign({}, cur, { state: 'rated' });
+    else if (action === 'later') next = Object.assign({}, cur, { state: 'snoozed', snoozeUntil: Date.now() + 90 * 24 * 3600 * 1000, asks: (Number(cur.asks) || 0) + 1 });
+    else if (action === 'no') next = Object.assign({}, cur, { state: 'declined' });
+    else return cur;
+    await api.storage.local.set({ reviewAsk: next });
+    return next;
+  };
+  const result = reviewAskChain.then(run, run);
+  reviewAskChain = result.then(() => {}, () => {});
+  return result;
+}
+// Validates an imported reviewAsk object (see sanitizeImport below) the same
+// defensive way sanitizeImport validates settings: unknown/garbage in, null out.
+function sanitizeReviewAsk(v) {
+  if (!v || typeof v !== 'object') return null;
+  if (!['pending', 'snoozed', 'rated', 'declined'].includes(v.state)) return null;
+  const snoozeUntil = Number(v.snoozeUntil);
+  const asks = Number(v.asks);
+  return {
+    state: v.state,
+    snoozeUntil: Number.isFinite(snoozeUntil) && snoozeUntil >= 0 ? snoozeUntil : 0,
+    asks: Number.isFinite(asks) && asks >= 0 ? Math.floor(asks) : 0
+  };
+}
+
 // Feed size for the stats card: the OTA count the options page shows, falling
 // back to the rule count of the blocklist bundled with the extension (what is
 // actually enforced before the first successful update). Cached after the first
@@ -392,9 +459,13 @@ if (api.storage && api.storage.onChanged) {
     if (incoming) { const filtered = {}; for (const k of SYNCED_KEYS) if (k in incoming) filtered[k] = incoming[k]; await setSettings(filtered); }
   });
 }
-function exportSettings(s) {
+async function exportSettings(s) {
   const out = { app: 'scamshield', schema: 1, exportedAt: Date.now(), settings: {} };
   for (const k of SYNCED_KEYS) out.settings[k] = s[k];
+  // reviewAsk lives outside `settings`/SYNCED_KEYS (like installedAt/statsDaily),
+  // but the brief calls for it to round-trip through export/import too so a
+  // restored profile does not get re-asked for a review it already answered.
+  out.reviewAsk = await getReviewAsk();
   return out;
 }
 function sanitizeImport(obj) {
@@ -744,13 +815,19 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         break;
       }
       case 'exportSettings':
-        sendResponse(exportSettings(await getSettings())); break;
+        sendResponse(await exportSettings(await getSettings())); break;
       case 'importSettings': {
         const patch = sanitizeImport(msg.data);
-        if (!patch) { sendResponse({ ok: false }); break; }
-        await setSettings(patch);
+        const reviewPatch = sanitizeReviewAsk(msg.data && msg.data.reviewAsk);
+        if (!patch && !reviewPatch) { sendResponse({ ok: false }); break; }
+        if (patch) await setSettings(patch);
+        if (reviewPatch) await api.storage.local.set({ reviewAsk: reviewPatch });
         sendResponse({ ok: true }); break;
       }
+      case 'getReviewAsk':
+        sendResponse(await getReviewAskContext()); break;
+      case 'reviewAskAction':
+        sendResponse(await setReviewAsk(msg.action)); break;
       case 'getEngagement': {
         const cur = await api.storage.local.get('engagement');
         const SS = globalThis.ScamShield;
@@ -848,4 +925,4 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 // module-scoped. Re-attach the debug/test surface that used to live on the
 // classic worker's global scope — the e2e suite drives these via
 // worker.evaluate, and they're handy in the SW console.
-Object.assign(globalThis, { DEFAULT_FEED_URL, getSettings, setSettings, handleUserReport, runOtaUpdate, flushReports, queueReport, exportSettings, sanitizeImport, pushSync, pullSync, getStats, bumpStat, ensurePrivacyTotal });
+Object.assign(globalThis, { DEFAULT_FEED_URL, getSettings, setSettings, handleUserReport, runOtaUpdate, flushReports, queueReport, exportSettings, sanitizeImport, pushSync, pullSync, getStats, bumpStat, ensurePrivacyTotal, ensureInstalledAt, getReviewAsk, getReviewAskContext, setReviewAsk, sanitizeReviewAsk, ensureReviewAsk });

@@ -237,6 +237,12 @@
   "statsPillWarned": { "message": "Warned" },
   "statsFooter": { "message": "Every number is counted on your device. Nothing on this page is sent anywhere." },
 
+  "reviewAskBody": { "message": "ScamShield has now stopped $COUNT$ scams for you. If it's earned it, a short review helps other people find it — it's free and always will be.", "placeholders": { "count": { "content": "$1", "example": "2" } } },
+  "reviewRate": { "message": "Rate ScamShield" },
+  "reviewLater": { "message": "Maybe later" },
+  "reviewNo": { "message": "No thanks" },
+  "reviewAboutLink": { "message": "Enjoying ScamShield? Leave a review" },
+
   "bannerDangerBrand": { "message": "Dangerous page — looks like $BRAND$, but isn't", "placeholders": { "brand": { "content": "$1" } } },
   "bannerDanger": { "message": "Dangerous page" },
   "bannerSuspicious": { "message": "Suspicious page" },
