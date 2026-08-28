@@ -54,10 +54,15 @@ still leaves your device by default.
 ### Control, privacy & reach
 - Settings reorganised into clear categories, with every new feature
   individually toggleable.
-- **20-language support** (English, Chinese, Hindi, Spanish, Arabic, French,
-  Bengali, Portuguese, Russian, Urdu, Indonesian, German, Japanese, Marathi,
-  Telugu, Turkish, Tamil, Vietnamese, Korean, Italian). Non-English
-  translations are AI-generated and pending native review.
+- **Full 20-language localization** (English, Chinese, Hindi, Spanish, Arabic,
+  French, Bengali, Portuguese, Russian, Urdu, Indonesian, German, Japanese,
+  Marathi, Telugu, Turkish, Tamil, Vietnamese, Korean, Italian) — every
+  user-visible string, not just the core UI: engine reason codes (via the new
+  `ui/reasons.js` resolver), options hints and aria-labels, popup, in-page
+  warnings, onboarding, and the Chrome Web Store listing copy itself
+  (`store/listings/`). RTL layout (`ar`, `ur`) and locale-aware date/time
+  formatting via `Intl`. Non-English translations are AI-generated and
+  pending native-speaker review (`ur`, `mr`, `te` highest priority).
 - **Settings export/import** and optional **cross-device sync** (your browser's
   own sync; still no ScamShield account or server).
 - A **"what leaves your device" receipt** in Settings listing the only three
