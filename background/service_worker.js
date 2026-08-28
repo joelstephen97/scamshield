@@ -4,7 +4,7 @@
 // a classic-worker context (tests driving this file directly) falls back to
 // importScripts here. In the module SW `importScripts` is undefined — the
 // ReferenceError lands in the catch and the imports from sw.js already won.
-try { importScripts('../engine/constants.js', '../engine/trust.js', '../engine/features.js', '../engine/image_hash.js', '../engine/brand_icons.js', '../engine/report_payload.js', '../engine/engagement.js'); } catch (_) { /* deps already loaded by sw.js (Chrome) or the manifest (Firefox) */ }
+try { importScripts('../engine/constants.js', '../engine/trust.js', '../engine/features.js', '../engine/image_hash.js', '../engine/brand_icons.js', '../engine/report_payload.js', '../engine/engagement.js', './stats.js'); } catch (_) { /* deps already loaded by sw.js (Chrome) or the manifest (Firefox) */ }
 const api = globalThis.browser || globalThis.chrome;
 
 // Official ScamShield feed: rebuilt daily by GitHub Actions from OpenPhish +
@@ -97,6 +97,86 @@ function recordEngagement(tabUrl) {
     } catch (_) { /* best-effort */ }
   }).catch(() => {});
   return engagementChain;
+}
+
+// ---- Local-only usage statistics (0.7.0) ----
+// Four storage.local keys, all OUTSIDE the `settings` object and therefore
+// outside SYNCED_KEYS: statsDaily (90-day ring from background/stats.js),
+// pagesCheckedTotal, threatsByType, installedAt. Counters never sync, never
+// enter a report payload, and never leave the device. Every bump is a
+// read-modify-write of the same keys, so they are serialized through
+// statsChain the same way settings writes go through settingsChain — without
+// it two bumps landing in the same tick would each read the pre-bump ring and
+// the second write would silently drop the first count.
+let statsChain = Promise.resolve();
+function queueStats(run) {
+  const result = statsChain.then(run, run);
+  statsChain = result.then(() => {}, () => {});
+  return result;
+}
+// field: 'checked' | 'threats' | 'privacy'. `event` is only read for threats
+// (see SSStats.categoryOf for the taxonomy).
+function bumpStat(field, event) {
+  return queueStats(async () => {
+    try {
+      const S = globalThis.SSStats;
+      const cur = await api.storage.local.get(['statsDaily', 'pagesCheckedTotal', 'threatsByType']);
+      const patch = { statsDaily: S.bump(cur.statsDaily, field, Date.now()) };
+      if (field === 'checked') patch.pagesCheckedTotal = (Number(cur.pagesCheckedTotal) || 0) + 1;
+      if (field === 'threats') {
+        const byType = Object.assign({}, cur.threatsByType);
+        const cat = S.categoryOf(event);
+        byType[cat] = (Number(byType[cat]) || 0) + 1;
+        patch.threatsByType = byType;
+      }
+      await api.storage.local.set(patch);
+    } catch (_) { /* stats are best-effort — never break a scan */ }
+  });
+}
+// "Protecting you since" needs a first-seen timestamp. onInstalled only ever
+// fires once, and it already fired for everyone running 0.6.x, so this also
+// runs on every SW boot — set-if-absent both times, never overwriting the real
+// install date with a later one.
+function ensureInstalledAt() {
+  return queueStats(async () => {
+    try {
+      const cur = await api.storage.local.get('installedAt');
+      if (!(typeof cur.installedAt === 'number' && cur.installedAt > 0)) {
+        await api.storage.local.set({ installedAt: Date.now() });
+      }
+    } catch (_) { /* best-effort */ }
+  });
+}
+// Started at script-evaluation time so a getStats() arriving on the very first
+// wake-up already sees the value (same pattern as settingsInitPromise).
+const installedAtPromise = ensureInstalledAt();
+
+// Feed size for the stats card: the OTA count the options page shows, falling
+// back to the rule count of the blocklist bundled with the extension (what is
+// actually enforced before the first successful update). Read once per SW life.
+let staticRuleCount = null;
+async function countStaticRules() {
+  if (staticRuleCount !== null) return staticRuleCount;
+  try {
+    const res = await fetch(api.runtime.getURL('rules/blocklist.json'));
+    const rules = await res.json();
+    staticRuleCount = Array.isArray(rules) ? rules.length : 0;
+  } catch (_) { staticRuleCount = 0; }
+  return staticRuleCount;
+}
+async function getStats() {
+  await installedAtPromise;
+  const cur = await api.storage.local.get(['statsDaily', 'pagesCheckedTotal', 'threatsByType', 'installedAt']);
+  const s = await getSettings();
+  const byType = (cur.threatsByType && typeof cur.threatsByType === 'object') ? cur.threatsByType : {};
+  return {
+    installedAt: (typeof cur.installedAt === 'number' && cur.installedAt > 0) ? cur.installedAt : Date.now(),
+    pagesCheckedTotal: Number(cur.pagesCheckedTotal) || 0,
+    threatsBlocked: Number(s.threatsBlocked) || 0,
+    threatsByType: byType,
+    statsDaily: globalThis.SSStats.normalize(cur.statsDaily),
+    feedRuleCount: Number(s.lastOtaCount) || await countStaticRules()
+  };
 }
 
 // Icon hashing for visual brand matching. Fetches the page's own icons only.
@@ -450,6 +530,7 @@ if (api.alarms) {
 
 api.runtime.onInstalled.addListener(async (details) => {
   await settingsInitPromise; // base defaults are guaranteed to exist once this resolves
+  await ensureInstalledAt(); // first-seen stamp for "protecting you since" (never overwritten)
   // Migration: pre-0.4.0 installs stored otaUrl '' (feature existed but had no
   // default). '' means "never configured", so it is safe to adopt the official
   // feed; users who intentionally clear the field afterwards stay cleared
@@ -559,12 +640,18 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
             }
             fv = { url: tabUrl, top: null, sub: null };
           }
+          // Stats: one "page checked" per top-frame page view. fv.top is null
+          // exactly once per (tab, top-level URL) — after that the report is a
+          // detector's second opinion on a page already counted, and sub-frame
+          // merges are never counted at all.
+          const firstTopReport = !fromSubframe && fv.top == null;
           if (fromSubframe) {
             if (rankOf(msg.verdict) > rankOf(fv.sub)) fv.sub = Object.assign({}, msg.verdict, { subframe: true });
           } else {
             fv.top = msg.verdict;
           }
           frameVerdicts.set(tabId, fv);
+          if (firstTopReport) bumpStat('checked');
           const effective = rankOf(fv.sub) > rankOf(fv.top) ? fv.sub : fv.top;
           lastVerdict.set(tabId, effective);
           persistVerdict(tabId, effective);
@@ -593,10 +680,14 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         if (tabId != null && msg.finding) {
           const list = privacyFindings.get(tabId) || [];
           const f = msg.finding;
+          // Stats count findings-pages, not raw findings: only the first one
+          // for this page load counts (the list is cleared on navigation).
+          const firstForPage = list.length === 0;
           if (!list.some((x) => x.kind === f.kind && x.host === f.host)) {
             list.push({ kind: f.kind, host: f.host, detail: f.detail || '', ts: Date.now() });
             privacyFindings.set(tabId, list.slice(-20));
             persistPrivacy(tabId, privacyFindings.get(tabId));
+            if (firstForPage) bumpStat('privacy');
           }
         }
         sendResponse({ ok: true }); break;
@@ -662,6 +753,11 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       case 'bumpThreats': {
         const s = await getSettings();
         await setSettings({ threatsBlocked: (s.threatsBlocked || 0) + 1 });
+        // Same event, split by category for the stats breakdown: detector kinds
+        // carry msg.kind, a whole-page block carries none and is classified
+        // from the verdict this tab just reported.
+        const threatTab = sender.tab && sender.tab.id;
+        bumpStat('threats', { kind: msg.kind || 'page', verdict: threatTab != null ? lastVerdict.get(threatTab) : null });
         // 'page' threats are already logged by reportVerdict; detector kinds
         // (wallet/clipboard/techscam) log here with their own label.
         if (msg.kind) {
@@ -670,6 +766,8 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         }
         sendResponse({ ok: true }); break;
       }
+      case 'getStats':
+        sendResponse(await getStats()); break;
       case 'getHistory': {
         const cur = await api.storage.local.get('history');
         sendResponse({ history: Array.isArray(cur.history) ? cur.history : [] }); break;
@@ -717,4 +815,4 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 // module-scoped. Re-attach the debug/test surface that used to live on the
 // classic worker's global scope — the e2e suite drives these via
 // worker.evaluate, and they're handy in the SW console.
-Object.assign(globalThis, { DEFAULT_FEED_URL, getSettings, setSettings, handleUserReport, runOtaUpdate, flushReports, queueReport, exportSettings, sanitizeImport, pushSync, pullSync });
+Object.assign(globalThis, { DEFAULT_FEED_URL, getSettings, setSettings, handleUserReport, runOtaUpdate, flushReports, queueReport, exportSettings, sanitizeImport, pushSync, pullSync, getStats, bumpStat });

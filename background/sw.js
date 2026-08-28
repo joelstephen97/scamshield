@@ -11,4 +11,5 @@ import '../engine/brand_icons.js';
 import '../engine/report_payload.js';
 import '../engine/engagement.js';
 import '../ui/reasons.js';
+import './stats.js';
 import './service_worker.js';
