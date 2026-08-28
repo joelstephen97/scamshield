@@ -1,69 +1,1108 @@
 {
-  "extName": { "message": "ScamShield — Perlindungan Penipuan & Phishing" },
-  "extShortName": { "message": "ScamShield" },
-  "extDescription": { "message": "Perlindungan penipuan & phishing di perangkat Anda: memperingatkan Anda, mengenali tiruan merek, dan memeriksa pesan. Tidak ada yang keluar dari perangkat Anda." },
-  "on": { "message": "Aktif" },
-  "paused": { "message": "Dijeda" },
-  "settings": { "message": "Pengaturan" },
-  "reportMistake": { "message": "Laporkan kesalahan" },
-  "thanks": { "message": "Terima kasih" },
-  "trustThisSite": { "message": "Percayai situs ini" },
-  "popupChecking": { "message": "Memeriksa…" },
-  "popupSafe": { "message": "Tidak ada yang mencurigakan di sini" },
-  "popupSuspicious": { "message": "Halaman mencurigakan" },
-  "popupDangerous": { "message": "Halaman berbahaya" },
-  "popupUnknown": { "message": "Belum dipindai" },
-  "popupDangerSummary": { "message": "Jangan masukkan kata sandi atau data kartu di sini." },
-  "popupSuspiciousSummary": { "message": "Berhati-hatilah sebelum mengetik apa pun di sini." },
-  "popupNotHttp": { "message": "Halaman browser dan toko web tidak dipindai." },
-  "leaveThisPage": { "message": "Tinggalkan halaman ini" },
-  "showWhy": { "message": "Lihat alasannya" },
-  "takeMeToReal": { "message": "Bawa saya ke situs $BRAND$ asli", "placeholders": { "brand": { "content": "$1" } } },
-  "reportScam": { "message": "Laporkan: ini penipuan" },
-  "reportSafe": { "message": "Laporkan: ini aman" },
-  "trustFor1h": { "message": "Selama 1 jam" },
-  "trustToday": { "message": "Sampai besok" },
-  "trustAlways": { "message": "Selalu" },
-  "untrust": { "message": "Hentikan kepercayaan" },
-  "trusted": { "message": "Tepercaya" },
-  "blockedOnSite": { "message": "Diblokir di situs ini" },
-  "blockedAllTime": { "message": "Total diblokir" },
-  "privacyOnPage": { "message": "Privasi di halaman ini" },
-  "shoppingCheck": { "message": "Pemeriksaan belanja" },
-  "checkMessageTitle": { "message": "Periksa pesan atau tautan" },
-  "check": { "message": "Periksa" },
-  "msgSafe": { "message": "Tampak aman: tidak ada tanda penipuan" },
-  "msgSuspicious": { "message": "Mencurigakan: perlakukan dengan hati-hati" },
-  "msgDangerous": { "message": "Hampir pasti penipuan" },
-  "runsOnDevice": { "message": "Berjalan di perangkat Anda · tidak ada yang keluar dari browser" },
-  "support": { "message": "Dukung" },
-  "tabProtection": { "message": "Perlindungan" },
-  "tabTrusted": { "message": "Situs tepercaya" },
-  "tabHistory": { "message": "Riwayat" },
-  "tabFeed": { "message": "Daftar ancaman" },
-  "tabAbout": { "message": "Tentang" },
-  "saved": { "message": "Tersimpan" },
-  "clearHistory": { "message": "Hapus riwayat" },
-  "checkNow": { "message": "Periksa sekarang" },
-  "bannerDanger": { "message": "Halaman berbahaya" },
-  "bannerSuspicious": { "message": "Halaman mencurigakan" },
-  "bannerDangerBrand": { "message": "Halaman berbahaya — tampak seperti $BRAND$, tetapi bukan", "placeholders": { "brand": { "content": "$1" } } },
-  "interstitialHead1": { "message": "Berhenti — halaman ini mencoba menipu Anda" },
-  "interstitialHead2": { "message": "Tunggu — ini tampak seperti halaman penipuan" },
-  "interstitialHead3": { "message": "Jangan lanjutkan — peringatan penipuan" },
-  "interstitialReassure": { "message": "Apa yang Anda ketik belum dikirim. Meninggalkan sekarang aman." },
-  "continueAnyway": { "message": "Tetap lanjutkan" },
-  "submitAnyway": { "message": "Tetap kirim" },
-  "proceedAnyway": { "message": "Tetap lanjutkan" },
-  "cancelRecommended": { "message": "Batalkan (disarankan)" },
-  "phishingStop": { "message": "Berhenti — kemungkinan phishing" },
-  "techScamTitle": { "message": "Kemungkinan penipuan dukungan teknis" },
-  "techScamBody": { "message": "Ini halaman web, bukan komputer Anda — komputer Anda baik-baik saja. Peringatan keamanan asli tidak pernah mengunci layar atau menampilkan nomor telepon. Jangan menelepon dan jangan membayar." },
-  "getMeOut": { "message": "Keluarkan saya dari sini (tutup halaman ini)" },
-  "walletRiskyTitle": { "message": "Permintaan dompet berisiko" },
-  "walletRiskyBody": { "message": "Jika Anda tidak mengharapkannya, batalkan. Pencuri memakai permintaan ini untuk mencuri kripto Anda." },
-  "compareThisSite": { "message": "Situs ini" },
-  "compareRealSite": { "message": "$BRAND$ asli", "placeholders": { "brand": { "content": "$1" } } },
-  "obTitle": { "message": "ScamShield sedang melindungi Anda" },
-  "obOpenSettings": { "message": "Buka pengaturan" }
+  "extName": {
+    "message": "ScamShield — Perlindungan Penipuan & Phishing"
+  },
+  "extShortName": {
+    "message": "ScamShield"
+  },
+  "extDescription": {
+    "message": "Perlindungan penipuan & phishing di perangkat Anda: memperingatkan Anda, mengenali tiruan merek, dan memeriksa pesan. Tidak ada yang keluar dari perangkat Anda."
+  },
+  "on": {
+    "message": "Aktif"
+  },
+  "paused": {
+    "message": "Dijeda"
+  },
+  "settings": {
+    "message": "Pengaturan"
+  },
+  "dismiss": {
+    "message": "Tutup"
+  },
+  "ariaDismiss": {
+    "message": "Tutup"
+  },
+  "cancel": {
+    "message": "Batal"
+  },
+  "reportMistake": {
+    "message": "Laporkan kesalahan"
+  },
+  "thanks": {
+    "message": "Terima kasih"
+  },
+  "trustThisSite": {
+    "message": "Percayai situs ini"
+  },
+  "popupTrustMenu": {
+    "message": "Percayai situs ini ▾"
+  },
+  "privacyPolicyLink": {
+    "message": "Kebijakan privasi"
+  },
+  "whatsNewLink": {
+    "message": "Yang baru"
+  },
+  "unknownSite": {
+    "message": "situs tidak dikenal"
+  },
+  "popupChecking": {
+    "message": "Memeriksa…"
+  },
+  "popupSafe": {
+    "message": "Tidak ada yang mencurigakan di sini"
+  },
+  "popupSuspicious": {
+    "message": "Halaman mencurigakan"
+  },
+  "popupDangerous": {
+    "message": "Halaman berbahaya"
+  },
+  "popupUnknown": {
+    "message": "Belum dipindai"
+  },
+  "popupPausedSummary": {
+    "message": "Perlindungan sedang dijeda — aktifkan untuk melanjutkan."
+  },
+  "popupNotHttp": {
+    "message": "Halaman browser dan toko web tidak dipindai."
+  },
+  "popupDangerSummary": {
+    "message": "Jangan masukkan kata sandi atau data kartu di sini."
+  },
+  "popupSuspiciousSummary": {
+    "message": "Berhati-hatilah sebelum mengetik apa pun di sini."
+  },
+  "leaveThisPage": {
+    "message": "Tinggalkan halaman ini"
+  },
+  "showWhy": {
+    "message": "Lihat alasannya"
+  },
+  "takeMeToReal": {
+    "message": "Bawa saya ke situs $BRAND$ asli",
+    "placeholders": {
+      "brand": {
+        "content": "$1"
+      }
+    }
+  },
+  "reportScam": {
+    "message": "Laporkan: ini penipuan"
+  },
+  "reportSafe": {
+    "message": "Laporkan: ini aman"
+  },
+  "trustFor1h": {
+    "message": "Selama 1 jam"
+  },
+  "trustToday": {
+    "message": "Sampai besok"
+  },
+  "trustAlways": {
+    "message": "Selalu"
+  },
+  "untrust": {
+    "message": "Hentikan kepercayaan"
+  },
+  "trusted": {
+    "message": "Tepercaya"
+  },
+  "blockedOnSite": {
+    "message": "Diblokir di situs ini"
+  },
+  "blockedAllTime": {
+    "message": "Total diblokir"
+  },
+  "viewAllHistory": {
+    "message": "Lihat semua riwayat →"
+  },
+  "privacyOnPage": {
+    "message": "Privasi di halaman ini"
+  },
+  "shoppingCheck": {
+    "message": "Pemeriksaan belanja"
+  },
+  "checkMessageTitle": {
+    "message": "Periksa pesan atau tautan"
+  },
+  "checkMessageHint": {
+    "message": "Tempel SMS, WhatsApp, atau teks email yang mencurigakan, atau tautan. Diperiksa sepenuhnya di perangkat Anda."
+  },
+  "checkMessagePlaceholder": {
+    "message": "Tempel pesan atau tautan di sini…"
+  },
+  "check": {
+    "message": "Periksa"
+  },
+  "checkedOnDevice": {
+    "message": "Diperiksa hanya di perangkat Anda"
+  },
+  "msgSafe": {
+    "message": "Tampak aman: tidak ada tanda penipuan"
+  },
+  "msgSuspicious": {
+    "message": "Mencurigakan: perlakukan dengan hati-hati"
+  },
+  "msgDangerous": {
+    "message": "Hampir pasti penipuan"
+  },
+  "runsOnDevice": {
+    "message": "Berjalan di perangkat Anda · tidak ada yang keluar dari browser"
+  },
+  "support": {
+    "message": "Dukung"
+  },
+  "takeMeToRealSite": {
+    "message": "Bawa saya ke situs asli"
+  },
+  "toastThanksNoted": {
+    "message": "Terima kasih — dicatat"
+  },
+  "toastThanksSent": {
+    "message": "Terima kasih — terkirim"
+  },
+  "toastTrustedForNow": {
+    "message": "Dipercaya untuk saat ini"
+  },
+  "toastUntrusted": {
+    "message": "Kepercayaan dihapus"
+  },
+  "toastExtensionError": {
+    "message": "Terjadi kesalahan ekstensi — coba buka kembali."
+  },
+  "whatsNewBanner": {
+    "message": "Baru di 0.6: pemblokiran ClickFix & pembaruan palsu, alat privasi, pemeriksaan toko palsu, 20 bahasa."
+  },
+  "popupBrandDangerSummary": {
+    "message": "Tampak seperti $BRAND$, tetapi bukan. Jangan masukkan kata sandi Anda di sini.",
+    "placeholders": {
+      "brand": {
+        "content": "$1",
+        "example": "PayPal"
+      }
+    }
+  },
+  "fmtTrustedUntil": {
+    "message": "Dipercaya sampai $TIME$",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "3:45 PM"
+      }
+    }
+  },
+  "fmtProtocolPage": {
+    "message": "Halaman $PROTOCOL$",
+    "placeholders": {
+      "protocol": {
+        "content": "$1",
+        "example": "chrome"
+      }
+    }
+  },
+  "popupShopFlagFallback": {
+    "message": "Tandai"
+  },
+  "chipWhy": {
+    "message": "Alasan"
+  },
+  "chipDataLeak": {
+    "message": "Kebocoran data"
+  },
+  "chipTracking": {
+    "message": "Pelacakan"
+  },
+  "chipPopups": {
+    "message": "Pop-up"
+  },
+  "chipPrivacy": {
+    "message": "Privasi"
+  },
+  "popupPrivacyLeakPlain": {
+    "message": "Mengirim email/nomor telepon Anda ke $HOST$ sebelum Anda mengirim formulir.",
+    "placeholders": {
+      "host": {
+        "content": "$1",
+        "example": "tracker.example"
+      }
+    }
+  },
+  "popupPrivacyLeakHashed": {
+    "message": "Mengirim email/nomor telepon Anda (di-hash) ke $HOST$ sebelum Anda mengirim formulir.",
+    "placeholders": {
+      "host": {
+        "content": "$1",
+        "example": "tracker.example"
+      }
+    }
+  },
+  "popupPrivacyFingerprint": {
+    "message": "$HOST$ mengambil sidik jari perangkat Anda untuk melacak Anda.",
+    "placeholders": {
+      "host": {
+        "content": "$1",
+        "example": "tracker.example"
+      }
+    }
+  },
+  "popupPrivacyNotifyLure": {
+    "message": "Situs ini mencoba trik notifikasi \"klik Izinkan\"."
+  },
+  "popupPrivacyDefaultText": {
+    "message": "Masalah privasi terdeteksi."
+  },
+  "levelDangerous": {
+    "message": "Halaman berbahaya"
+  },
+  "levelSuspicious": {
+    "message": "Halaman mencurigakan"
+  },
+  "levelSafe": {
+    "message": "Tidak ada yang mencurigakan di sini"
+  },
+  "levelUnknown": {
+    "message": "Halaman ini tidak dapat diperiksa"
+  },
+  "tabProtection": {
+    "message": "Perlindungan"
+  },
+  "tabTrusted": {
+    "message": "Situs tepercaya"
+  },
+  "tabHistory": {
+    "message": "Riwayat"
+  },
+  "tabFeed": {
+    "message": "Daftar ancaman"
+  },
+  "tabAbout": {
+    "message": "Tentang"
+  },
+  "protectionLead": {
+    "message": "Semua di sini berjalan di perangkat Anda. Tidak ada yang dikirim ke mana pun kecuali Anda mengaktifkan pelaporan komunitas di bawah."
+  },
+  "protectionOn": {
+    "message": "Perlindungan aktif"
+  },
+  "protectionOnHint": {
+    "message": "Memindai halaman untuk penipuan dan memperingatkan Anda. Matikan untuk menjeda semuanya."
+  },
+  "grpScams": {
+    "message": "Penipuan & phishing"
+  },
+  "grpScamsHint": {
+    "message": "Memblokir situs berbahaya yang sudah dikenal dan mendeteksi phishing baru di perangkat Anda."
+  },
+  "grpPopups": {
+    "message": "Pop-up & peringatan sistem palsu"
+  },
+  "grpPopupsHint": {
+    "message": "Peringatan virus palsu, pengunci layar, dan pembajakan clipboard."
+  },
+  "grpShopping": {
+    "message": "Belanja"
+  },
+  "grpShoppingHint": {
+    "message": "Mendeteksi toko online palsu dan ke mana iklan pencarian sebenarnya mengarah."
+  },
+  "grpCrypto": {
+    "message": "Kripto & dompet"
+  },
+  "grpCryptoHint": {
+    "message": "Peringatan sebelum tanda tangan dompet yang berisiko."
+  },
+  "grpPrivacy": {
+    "message": "Privasi"
+  },
+  "grpPrivacyHint": {
+    "message": "Mendeteksi situs yang membocorkan data Anda atau melacak perangkat Anda — semua di perangkat Anda."
+  },
+  "optBlockKnown": {
+    "message": "Blokir situs penipuan yang dikenal"
+  },
+  "optBlockKnownHint": {
+    "message": "Menghentikan halaman dari daftar ancaman yang diperbarui setiap hari sebelum dimuat."
+  },
+  "optPageAnalysis": {
+    "message": "Analisis halaman"
+  },
+  "optPageAnalysisHint": {
+    "message": "Membaca teks, tata letak, dan ikon halaman di perangkat Anda untuk mendeteksi penipuan yang belum ada di daftar mana pun."
+  },
+  "optClickfix": {
+    "message": "Pemblokir CAPTCHA palsu / \"tempel ini\""
+  },
+  "optClickfixHint": {
+    "message": "Menghentikan halaman yang meminta Anda menekan Win+R dan menempel perintah (malware ClickFix)."
+  },
+  "optFakeupdate": {
+    "message": "Pemblokir pembaruan browser palsu"
+  },
+  "optFakeupdateHint": {
+    "message": "Memblokir halaman yang berpura-pura browser Anda perlu diperbarui agar Anda mengunduh malware."
+  },
+  "optHide": {
+    "message": "Sembunyikan konten penipuan"
+  },
+  "optHideHint": {
+    "message": "Meredupkan blok \"Anda memenangkan hadiah\" di dalam halaman yang tampak normal."
+  },
+  "optTechscam": {
+    "message": "Jalan keluar dari penipuan dukungan teknis"
+  },
+  "optTechscamHint": {
+    "message": "Mendeteksi halaman palsu \"PC Anda terinfeksi, hubungi nomor ini\" dan memberi Anda jalan keluar."
+  },
+  "optClipboard": {
+    "message": "Peringatan pembajakan clipboard"
+  },
+  "optClipboardHint": {
+    "message": "Memperingatkan saat situs diam-diam menaruh perintah atau alamat kripto di clipboard Anda."
+  },
+  "optShop": {
+    "message": "Pemeriksaan toko palsu"
+  },
+  "optShopHint": {
+    "message": "Mencari hitung mundur palsu, tekanan palsu \"tinggal 2 lagi\", detail kontak yang hilang, dan pembayaran di luar platform (Zelle/transfer/kripto), lalu menampilkannya di popup."
+  },
+  "optSerp": {
+    "message": "Pemeriksaan hasil bersponsor"
+  },
+  "optSerpHint": {
+    "message": "Di Google/Bing/DuckDuckGo, menandai hasil bersponsor yang iklannya menuju ke tempat lain selain situs yang ditampilkan."
+  },
+  "optWallet": {
+    "message": "Perlindungan pengurasan dompet"
+  },
+  "optWalletHint": {
+    "message": "Memperingatkan sebelum Anda menyetujui pengeluaran token, tanda tangan \"Permit\", atau delegasi akun yang disalahgunakan pencuri kripto."
+  },
+  "optLeakyForm": {
+    "message": "Peringatan formulir bocor"
+  },
+  "optLeakyFormHint": {
+    "message": "Memperingatkan saat situs mengirim email atau nomor telepon yang Anda ketik ke pelacak sebelum Anda menekan kirim."
+  },
+  "optFingerprint": {
+    "message": "Deteksi sidik jari perangkat"
+  },
+  "optFingerprintHint": {
+    "message": "Memberi tahu skrip mana yang mengambil sidik jari perangkat Anda untuk melacak Anda di berbagai situs."
+  },
+  "optNotify": {
+    "message": "Peringatan jebakan notifikasi"
+  },
+  "optNotifyHint": {
+    "message": "Menandai trik \"klik Izinkan untuk melanjutkan\" yang digunakan situs untuk membanjiri Anda dengan pop-up."
+  },
+  "optStrict": {
+    "message": "Mode ketat"
+  },
+  "optStrictHint": {
+    "message": "Untuk siapa pun yang menginginkan kehati-hatian maksimal: bahkan halaman \"mencurigakan\" diblokir dengan peringatan layar penuh dan kata-kata yang lebih sederhana. Paling baik untuk membantu anggota keluarga yang kurang paham teknologi tetap aman."
+  },
+  "optReporting": {
+    "message": "Bantu membuat ScamShield lebih pintar"
+  },
+  "optReportingHint": {
+    "message": "Mengirim nama situs (bukan alamat lengkap atau teks halaman) dan sinyal risiko anonim dari halaman yang ditandai berbahaya, serta situs yang Anda laporkan. Nonaktif secara default."
+  },
+  "saved": {
+    "message": "Tersimpan"
+  },
+  "trustedLead": {
+    "message": "ScamShield tetap diam di situs-situs ini. Hapus salah satu untuk melindunginya lagi."
+  },
+  "trustedAlways": {
+    "message": "Selalu"
+  },
+  "trustedForAWhile": {
+    "message": "Untuk sementara"
+  },
+  "remove": {
+    "message": "Hapus"
+  },
+  "historyTitle": {
+    "message": "Riwayat perlindungan"
+  },
+  "historyLead": {
+    "message": "Disimpan hanya di perangkat ini (nama situs, bukan alamat lengkap)."
+  },
+  "clearHistory": {
+    "message": "Hapus riwayat"
+  },
+  "markMistake": {
+    "message": "Tandai sebagai kesalahan"
+  },
+  "feedTitle": {
+    "message": "Daftar ancaman"
+  },
+  "feedLead": {
+    "message": "Daftar situs penipuan yang dikenal, dibangun ulang setiap hari (OpenPhish + URLhaus, disaring ketat). ScamShield hanya mengunduhnya."
+  },
+  "checkNow": {
+    "message": "Periksa sekarang"
+  },
+  "aboutVersion": {
+    "message": "Versi"
+  },
+  "appearance": {
+    "message": "Tampilan"
+  },
+  "whatLeaves": {
+    "message": "Apa yang keluar dari perangkat Anda"
+  },
+  "backupSettings": {
+    "message": "Cadangkan pengaturan"
+  },
+  "backupHint": {
+    "message": "Simpan pengaturan dan situs tepercaya Anda ke sebuah file, atau muat di komputer lain."
+  },
+  "exportBtn": {
+    "message": "Ekspor"
+  },
+  "importBtn": {
+    "message": "Impor"
+  },
+  "syncTitle": {
+    "message": "Sinkronkan di semua perangkat saya"
+  },
+  "syncHint": {
+    "message": "Jaga pengaturan dan situs tepercaya Anda tetap sinkron di setiap browser tempat Anda masuk. Menggunakan sinkronisasi bawaan browser Anda — ScamShield tetap tidak memiliki akun atau server. Nonaktif secara default."
+  },
+  "optDocTitle": {
+    "message": "Pengaturan ScamShield"
+  },
+  "ariaSettingsSections": {
+    "message": "Bagian pengaturan"
+  },
+  "optWhatSentToggle": {
+    "message": "Apa saja yang dikirim ▾"
+  },
+  "optWhatSentBody": {
+    "message": "Laporan hanya berisi: nama situs (hostname), putusan dan kode alasan internal, sinyal risiko numerik yang berasal dari alamat dan tata letak halaman (jumlah kata yang di-hash serta jumlah formulir, kolom input, dan tautan — bukan teksnya sendiri), nama merek yang cocok, versi ekstensi, dan jam. Tidak pernah alamat lengkap (jalur atau query), teks halaman, apa pun yang Anda ketik, cookie, atau identitas Anda maupun perangkat Anda. Laporan dihapus setelah 180 hari."
+  },
+  "feedNeverUpdated": {
+    "message": "Belum pernah diperbarui"
+  },
+  "optAdvancedFeedUrl": {
+    "message": "Lanjutan: URL daftar"
+  },
+  "optFeedUrlLabel": {
+    "message": "URL daftar"
+  },
+  "optFeedUrlPlaceholder": {
+    "message": "https://…/blocklist.json"
+  },
+  "resetToOfficialFeed": {
+    "message": "Atur ulang ke daftar resmi"
+  },
+  "optFeedUrlHint": {
+    "message": "Arahkan ini ke JSON Anda sendiri untuk self-host, atau biarkan kosong untuk menonaktifkan pembaruan."
+  },
+  "optThemeHint": {
+    "message": "Ikuti sistem Anda, atau pilih salah satu."
+  },
+  "optThemeAuto": {
+    "message": "Otomatis"
+  },
+  "optThemeLight": {
+    "message": "Terang"
+  },
+  "optThemeDark": {
+    "message": "Gelap"
+  },
+  "optLinksTitle": {
+    "message": "Tautan"
+  },
+  "optLinkGithub": {
+    "message": "GitHub"
+  },
+  "optLinkReportIssue": {
+    "message": "Laporkan masalah"
+  },
+  "supportFreeOnDevice": {
+    "message": "ScamShield gratis dan berjalan sepenuhnya di perangkat Anda."
+  },
+  "supportSponsorGithub": {
+    "message": "Sponsori di GitHub"
+  },
+  "supportDonatePaypal": {
+    "message": "Donasi via PayPal"
+  },
+  "netNoTelemetry": {
+    "message": "ScamShield tidak pernah membuat permintaan analitik, telemetri, atau pelacakan. Satu-satunya permintaan yang bisa dibuatnya adalah tiga ini, dan Anda dapat memverifikasinya sendiri: buka DevTools browser Anda → tab Network, gunakan ScamShield seperti biasa, dan Anda tidak akan melihat apa pun selain ketiganya."
+  },
+  "receiptFeedLabel": {
+    "message": "Unduhan daftar ancaman"
+  },
+  "receiptFeedDetail": {
+    "message": "File daftar blokir publik — sama untuk semua orang, tidak ada informasi tentang Anda yang dikirim."
+  },
+  "receiptReportLabel": {
+    "message": "Laporan komunitas"
+  },
+  "receiptReportDetail": {
+    "message": "Hanya jika Anda mengaktifkan pelaporan. Nama situs + sinyal numerik, tidak pernah URL atau teks halaman."
+  },
+  "receiptIconLabel": {
+    "message": "Pemeriksaan ikon halaman"
+  },
+  "receiptIconDetail": {
+    "message": "Mengambil favicon halaman itu sendiri untuk mendeteksi tiruan merek. Tanpa pihak ketiga, tanpa cookie."
+  },
+  "receiptPerPage": {
+    "message": "per halaman"
+  },
+  "receiptOnInstall12h": {
+    "message": "saat pemasangan + setiap 12 jam"
+  },
+  "receiptDisabled": {
+    "message": "nonaktif"
+  },
+  "receiptWhenFlagged": {
+    "message": "saat ditandai"
+  },
+  "receiptOffDefault": {
+    "message": "nonaktif (default)"
+  },
+  "optExportSyncHint": {
+    "message": "Pengaturan dapat diekspor/diimpor di bawah dan (opsional) disinkronkan di semua perangkat Anda sendiri."
+  },
+  "toastSyncOn": {
+    "message": "Sinkronisasi aktif"
+  },
+  "toastSyncUnavailable": {
+    "message": "Sinkronisasi tidak tersedia"
+  },
+  "toastSyncOff": {
+    "message": "Sinkronisasi nonaktif"
+  },
+  "toastExported": {
+    "message": "Diekspor"
+  },
+  "toastImported": {
+    "message": "Diimpor"
+  },
+  "toastInvalidFile": {
+    "message": "File tidak valid"
+  },
+  "toastCheckingUpdates": {
+    "message": "Memeriksa…"
+  },
+  "fmtUpdatedToVersion": {
+    "message": "Diperbarui ke v$VERSION$",
+    "placeholders": {
+      "version": {
+        "content": "$1",
+        "example": "0.6.1"
+      }
+    }
+  },
+  "toastAlreadyUpToDate": {
+    "message": "Sudah versi terbaru"
+  },
+  "toastUpdateFailed": {
+    "message": "Pembaruan gagal"
+  },
+  "toastHistoryCleared": {
+    "message": "Riwayat dihapus"
+  },
+  "toastOpenedReport": {
+    "message": "Laporan dibuka"
+  },
+  "optNoneYet": {
+    "message": "Belum ada"
+  },
+  "optNoneRightNow": {
+    "message": "Tidak ada saat ini"
+  },
+  "optNothingYetGood": {
+    "message": "Belum ada apa-apa — itu pertanda baik."
+  },
+  "fmtVersion": {
+    "message": "Versi $VERSION$",
+    "placeholders": {
+      "version": {
+        "content": "$1",
+        "example": "0.6.0"
+      }
+    }
+  },
+  "fmtUntilTime": {
+    "message": "sampai $TIME$",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "22 Aug, 3:45 PM"
+      }
+    }
+  },
+  "fmtUpdatedRules": {
+    "message": "Diperbarui $TIME$ · $COUNT$ aturan",
+    "placeholders": {
+      "time": {
+        "content": "$1",
+        "example": "2 h ago"
+      },
+      "count": {
+        "content": "$2",
+        "example": "12,345"
+      }
+    }
+  },
+  "bannerDangerBrand": {
+    "message": "Halaman berbahaya — tampak seperti $BRAND$, tetapi bukan",
+    "placeholders": {
+      "brand": {
+        "content": "$1"
+      }
+    }
+  },
+  "bannerDanger": {
+    "message": "Halaman berbahaya"
+  },
+  "bannerSuspicious": {
+    "message": "Halaman mencurigakan"
+  },
+  "interstitialHead1": {
+    "message": "Berhenti — halaman ini mencoba menipu Anda"
+  },
+  "interstitialHead2": {
+    "message": "Tunggu — ini tampak seperti halaman penipuan"
+  },
+  "interstitialHead3": {
+    "message": "Jangan lanjutkan — peringatan penipuan"
+  },
+  "interstitialReassure": {
+    "message": "Apa yang Anda ketik belum dikirim. Meninggalkan sekarang aman."
+  },
+  "continueAnyway": {
+    "message": "Tetap lanjutkan"
+  },
+  "submitAnyway": {
+    "message": "Tetap kirim"
+  },
+  "proceedAnyway": {
+    "message": "Tetap lanjutkan"
+  },
+  "cancelRecommended": {
+    "message": "Batalkan (disarankan)"
+  },
+  "phishingStop": {
+    "message": "Berhenti — kemungkinan phishing"
+  },
+  "techScamTitle": {
+    "message": "Kemungkinan penipuan dukungan teknis"
+  },
+  "techScamBody": {
+    "message": "Ini halaman web, bukan komputer Anda — komputer Anda baik-baik saja. Peringatan keamanan asli tidak pernah mengunci layar atau menampilkan nomor telepon. Jangan menelepon dan jangan membayar."
+  },
+  "getMeOut": {
+    "message": "Keluarkan saya dari sini (tutup halaman ini)"
+  },
+  "walletRiskyTitle": {
+    "message": "Permintaan dompet berisiko"
+  },
+  "walletRiskyBody": {
+    "message": "Jika Anda tidak mengharapkannya, batalkan. Pencuri memakai permintaan ini untuk mencuri kripto Anda."
+  },
+  "compareThisSite": {
+    "message": "Situs ini"
+  },
+  "compareRealSite": {
+    "message": "$BRAND$ asli",
+    "placeholders": {
+      "brand": {
+        "content": "$1"
+      }
+    }
+  },
+  "guardCountdown": {
+    "message": "$LABEL$ ($COUNT$)",
+    "placeholders": {
+      "label": {
+        "content": "$1",
+        "example": "Continue anyway"
+      },
+      "count": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
+  "ariaScamWarning": {
+    "message": "Peringatan penipuan"
+  },
+  "ariaPhishingWarning": {
+    "message": "Peringatan kemungkinan phishing"
+  },
+  "interstitialFallback": {
+    "message": "Halaman ini cocok dengan pola penipuan yang dikenal."
+  },
+  "toastSupportAsk": {
+    "message": "ScamShield baru saja melindungi Anda — gratis dan berjalan di perangkat Anda. Mau berkontribusi? ❤"
+  },
+  "guardFormDestKnown": {
+    "message": "Formulir ini mengirim kata sandi Anda ke $DEST$, bukan ke $HOST$. Mengirim kata sandi ke situs web yang berbeda adalah cara penipu mencuri akun.",
+    "placeholders": {
+      "dest": {
+        "content": "$1",
+        "example": "evil.example"
+      },
+      "host": {
+        "content": "$2",
+        "example": "your-bank.example"
+      }
+    }
+  },
+  "guardFormDestUnknown": {
+    "message": "Formulir ini mengirim kata sandi Anda ke situs web yang berbeda dari yang sedang Anda kunjungi. Ini adalah cara umum penipu mencuri akun."
+  },
+  "guardHiddenTag": {
+    "message": "Disembunyikan oleh ScamShield"
+  },
+  "guardWalletCollision": {
+    "message": "ScamShield memblokir permintaan dompet saat peringatan lain sedang terbuka. Tutup dan coba lagi."
+  },
+  "guardWalletFallback": {
+    "message": "Situs ini meminta tindakan dompet yang sensitif."
+  },
+  "guardPrivacyFallback": {
+    "message": "Masalah privasi terdeteksi di halaman ini."
+  },
+  "guardClipboardFallback": {
+    "message": "Sebuah situs mengubah clipboard Anda."
+  },
+  "guardTechScamFallback": {
+    "message": "Halaman ini menggunakan taktik menakut-nakuti."
+  },
+  "guardClipboardBlockedPayload": {
+    "message": "Diblokir oleh ScamShield — situs ini menaruh perintah berbahaya di clipboard Anda. Jangan menempelkannya di mana pun."
+  },
+  "guardLeakyFormPlain": {
+    "message": "Situs ini mengirim email/nomor telepon Anda ke $HOST$ dalam teks biasa — sebelum Anda menekan kirim.",
+    "placeholders": {
+      "host": {
+        "content": "$1",
+        "example": "tracker.example"
+      }
+    }
+  },
+  "guardLeakyFormHashed": {
+    "message": "Situs ini mengirim email/nomor telepon Anda ke $HOST$ sebagai pengidentifikasi yang di-hash ($ALGO$) — sebelum Anda menekan kirim.",
+    "placeholders": {
+      "host": {
+        "content": "$1",
+        "example": "tracker.example"
+      },
+      "algo": {
+        "content": "$2",
+        "example": "MD5"
+      }
+    }
+  },
+  "guardNotifyLure": {
+    "message": "Situs ini mencoba mendapatkan izin notifikasi menggunakan trik \"klik Izinkan untuk melanjutkan\". Anda dapat dengan aman memilih Blokir."
+  },
+  "serpAdMismatch": {
+    "message": "⚠ ScamShield: iklan ini menuju ke $ACTUAL$, bukan $SHOWN$",
+    "placeholders": {
+      "actual": {
+        "content": "$1",
+        "example": "malicious-download.example"
+      },
+      "shown": {
+        "content": "$2",
+        "example": "trusted-brand.example"
+      }
+    }
+  },
+  "chipLink": {
+    "message": "Tautan"
+  },
+  "chipBrand": {
+    "message": "Merek"
+  },
+  "chipPage": {
+    "message": "Halaman"
+  },
+  "chipWallet": {
+    "message": "Dompet"
+  },
+  "chipClipboard": {
+    "message": "Clipboard"
+  },
+  "chipTechscam": {
+    "message": "Halaman menakut-nakuti"
+  },
+  "chipShop": {
+    "message": "Toko"
+  },
+  "chipMessage": {
+    "message": "Pesan"
+  },
+  "reason_ipHost": {
+    "message": "Menggunakan alamat IP mentah, bukan nama domain."
+  },
+  "reason_atSymbol": {
+    "message": "URL berisi tanda \"@\" yang bisa menyembunyikan tujuan sebenarnya."
+  },
+  "reason_punycodeHost": {
+    "message": "Domain menggunakan punycode, sering dipakai untuk meniru merek asli."
+  },
+  "reason_idnHomograph": {
+    "message": "Domain ini meniru \"$BRAND$\" menggunakan karakter asing yang mirip.",
+    "placeholders": {
+      "brand": {
+        "content": "$1",
+        "example": "paypal"
+      }
+    }
+  },
+  "reason_brandLookalike": {
+    "message": "Domain tampak meniru merek terkenal."
+  },
+  "reason_suspiciousTld": {
+    "message": "Domain menggunakan TLD yang sering disalahgunakan untuk penipuan."
+  },
+  "reason_noHttps": {
+    "message": "Koneksi tidak aman (tanpa HTTPS)."
+  },
+  "reason_manySubdomains": {
+    "message": "Jumlah subdomain yang tidak biasa banyaknya."
+  },
+  "reason_urgencyKeywords": {
+    "message": "URL berisi beberapa kata kunci urgensi/keamanan."
+  },
+  "reason_randomHost": {
+    "message": "Nama domain tampak dibuat secara acak."
+  },
+  "reason_credentialFormForeignDomain": {
+    "message": "Formulir kata sandi di halaman ini mengirim kredensial Anda ke situs yang berbeda."
+  },
+  "reason_hiddenIframes": {
+    "message": "Halaman berisi frame tersembunyi yang mungkin menangkap input Anda."
+  },
+  "reason_scamPhrase": {
+    "message": "Halaman menampilkan bahasa penipuan/hadiah klasik (\"$PHRASE$\").",
+    "placeholders": {
+      "phrase": {
+        "content": "$1",
+        "example": "you won"
+      }
+    }
+  },
+  "reason_seedPhraseAsk": {
+    "message": "Halaman ini meminta frasa pemulihan dompet Anda — jangan pernah memasukkannya; ini akan mencuri dana Anda."
+  },
+  "reason_brandImpersonationContent": {
+    "message": "Halaman ini terlihat seperti \"$BRAND$\" tetapi bukan berada di situs web aslinya.",
+    "placeholders": {
+      "brand": {
+        "content": "$1",
+        "example": "paypal"
+      }
+    }
+  },
+  "reason_deliveryFeeScam": {
+    "message": "Halaman ini berpura-pura menjadi $BRAND$ dan meminta detail kartu untuk melepaskan paket. Kurir tidak pernah mengumpulkan biaya melalui halaman seperti ini.",
+    "placeholders": {
+      "brand": {
+        "content": "$1",
+        "example": "DHL"
+      }
+    }
+  },
+  "reason_brandIconMismatch": {
+    "message": "Halaman ini menggunakan ikon $BRAND$ tetapi bukan situs web $BRAND$.",
+    "placeholders": {
+      "brand": {
+        "content": "$1",
+        "example": "PayPal"
+      }
+    }
+  },
+  "reason_contentPhishingPattern": {
+    "message": "Teks dan tata letak halaman menyerupai halaman phishing yang dikenal."
+  },
+  "reason_techScamScareText": {
+    "message": "Halaman menggunakan bahasa peringatan keamanan palsu (\"$PHRASE$\").",
+    "placeholders": {
+      "phrase": {
+        "content": "$1",
+        "example": "virus detected"
+      }
+    }
+  },
+  "reason_techScamPhoneAsk": {
+    "message": "Halaman mendesak Anda untuk menelepon nomor \"dukungan\" — ciri khas penipuan dukungan teknis."
+  },
+  "reason_techScamFakeAlert": {
+    "message": "Ini adalah halaman web yang berpura-pura menjadi peringatan sistem — komputer Anda baik-baik saja. Peringatan asli dari Microsoft/Apple tidak pernah menampilkan nomor telepon."
+  },
+  "reason_techScamFullscreen": {
+    "message": "Halaman memaksa mode layar penuh agar sulit ditutup."
+  },
+  "reason_techScamAlarmAudio": {
+    "message": "Halaman memutar suara alarm untuk membuat Anda panik."
+  },
+  "reason_techScamDialogFlood": {
+    "message": "Halaman membanjiri layar dengan dialog pop-up untuk menjebak Anda."
+  },
+  "reason_techScamHistoryTrap": {
+    "message": "Halaman membajak tombol Kembali Anda."
+  },
+  "reason_walletBlindSign": {
+    "message": "Sebuah situs meminta dompet Anda menandatangani data sembarangan secara buta — trik umum pencuri kripto."
+  },
+  "reason_walletPermitApproval": {
+    "message": "Tanda tangan ini adalah persetujuan token (\"Permit\"). Menandatanganinya memungkinkan situs ini memindahkan token atau NFT Anda nanti, tanpa bertanya lagi — tanda tangan pencuri dompet yang paling umum."
+  },
+  "reason_walletDelegation7702": {
+    "message": "Transaksi ini akan menyerahkan kendali akun Anda ke sebuah kontrak (delegasi EIP-7702) — teknik yang digunakan pencuri kripto untuk mengosongkan dompet."
+  },
+  "reason_walletSetApprovalAll": {
+    "message": "Transaksi ini memberikan situs kendali atas SEMUA NFT Anda dalam sebuah koleksi."
+  },
+  "reason_walletUnlimitedApprove": {
+    "message": "Transaksi ini memberi situs izin TANPA BATAS untuk membelanjakan token Anda."
+  },
+  "reason_walletTokenApprove": {
+    "message": "Transaksi ini memungkinkan situs membelanjakan sebagian token Anda."
+  },
+  "reason_clickfixPasteRun": {
+    "message": "Halaman ini menaruh perintah sistem di clipboard Anda dan meminta Anda menempel serta menjalankannya. Situs web asli tidak pernah melakukan ini — menjalankannya akan menginfeksi komputer Anda."
+  },
+  "reason_clickfixFakeCaptcha": {
+    "message": "\"Verifikasi\" ini meminta Anda menekan Win+R dan menempel perintah. CAPTCHA asli tidak pernah meminta Anda menjalankan apa pun — ini menginstal malware."
+  },
+  "reason_clickfixWinR": {
+    "message": "Halaman ini menginstruksikan Anda membuka kotak Run Windows dan menempel sesuatu — pola yang digunakan untuk menipu orang agar menjalankan malware."
+  },
+  "reason_clickfixCaptchaDisguise": {
+    "message": "Instruksi disamarkan sebagai langkah verifikasi manusia."
+  },
+  "reason_clipboardCommand": {
+    "message": "Sebuah situs menyalin perintah sistem ke clipboard Anda. JANGAN tempelkan ke terminal atau kotak Run."
+  },
+  "reason_clipboardCryptoAddress": {
+    "message": "Sebuah situs menaruh alamat mata uang kripto di clipboard Anda — verifikasi sebelum menempelkannya."
+  },
+  "reason_fakeUpdatePrompt": {
+    "message": "Halaman ini berpura-pura browser Anda perlu pembaruan dan menawarkan unduhan. Prompt pembaruan asli berasal dari browser itu sendiri — tidak pernah dari halaman web. Unduhan ini sangat mungkin malware."
+  },
+  "reason_msgOtpAsk": {
+    "message": "Meminta Anda membagikan OTP, PIN, atau kata sandi — tidak ada layanan resmi yang pernah melakukan ini."
+  },
+  "reason_msgScamWording": {
+    "message": "Menggunakan kata-kata penipuan yang dikenal (\"$PHRASE$\").",
+    "placeholders": {
+      "phrase": {
+        "content": "$1",
+        "example": "delivery fee"
+      }
+    }
+  },
+  "reason_msgUrgencyDeadline": {
+    "message": "Menambahkan tekanan dengan tenggat waktu buatan — taktik penipuan klasik."
+  },
+  "reason_msgDangerousLink": {
+    "message": "Berisi tautan yang terlihat berbahaya ($URL$).",
+    "placeholders": {
+      "url": {
+        "content": "$1",
+        "example": "http://verify-bank.tk/otp"
+      }
+    }
+  },
+  "reason_shop_countdownReset": {
+    "message": "Hitung mundur palsu"
+  },
+  "reason_shop_countdownReset_detail": {
+    "message": "Timer \"buruan, penawaran berakhir\" direset setiap kunjungan — urgensinya palsu."
+  },
+  "reason_shop_offPlatformPay": {
+    "message": "Pembayaran berisiko"
+  },
+  "reason_shop_offPlatformPay_detail": {
+    "message": "Checkout mendorong Anda ke Zelle/Venmo/CashApp/transfer/kripto — Anda tidak bisa mendapatkan uang ini kembali jika ini penipuan."
+  },
+  "reason_shop_fakeScarcity": {
+    "message": "Kelangkaan palsu"
+  },
+  "reason_shop_fakeScarcity_detail": {
+    "message": "Widget tekanan yang disisipkan seperti \"tersisa sedikit / N orang sedang melihat\"."
+  },
+  "reason_shop_badgeHotlink": {
+    "message": "Lencana kepercayaan palsu"
+  },
+  "reason_shop_badgeHotlink_detail": {
+    "message": "Lencana \"aman\"/\"terverifikasi\" yang hanyalah gambar dan tidak menautkan ke mana pun."
+  },
+  "reason_shop_missingContact": {
+    "message": "Tidak ada info kontak"
+  },
+  "reason_shop_missingContact_detail": {
+    "message": "Tidak ada alamat asli, telepon, atau detail perusahaan — normal untuk toko penipuan sekali pakai."
+  },
+  "obDocTitle": {
+    "message": "Selamat Datang di ScamShield"
+  },
+  "obTitle": {
+    "message": "ScamShield sedang melindungi Anda"
+  },
+  "obLead": {
+    "message": "Ini memantau halaman yang Anda kunjungi dan memperingatkan Anda tentang penipuan — sepenuhnya di perangkat Anda. Aktivitas menjelajah Anda tidak pernah keluar dari komputer Anda."
+  },
+  "obPhishing": {
+    "message": "Phishing & login palsu"
+  },
+  "obPhishingBody": {
+    "message": "Memperingatkan saat halaman mengirim kata sandi Anda ke situs yang salah."
+  },
+  "obBrand": {
+    "message": "Tiruan merek"
+  },
+  "obBrandBody": {
+    "message": "Mengenali ikon PayPal, bank, atau operator telekomunikasi yang disalin di situs yang bukan milik mereka — lebih dari 60 merek, termasuk bank dan layanan pemerintah UEA."
+  },
+  "obPage": {
+    "message": "Analisis halaman"
+  },
+  "obPageBody": {
+    "message": "Membaca teks dan tata letak halaman login di perangkat Anda untuk mendeteksi penipuan yang belum ada di daftar mana pun."
+  },
+  "obWallet": {
+    "message": "Penjaga dompet kripto"
+  },
+  "obWalletBody": {
+    "message": "Menghentikan persetujuan pencuri kripto dan pencurian frasa pemulihan sebelum dompet Anda melihatnya."
+  },
+  "obClipboard": {
+    "message": "Penipuan clipboard & \"tempel ini\""
+  },
+  "obClipboardBody": {
+    "message": "Memperingatkan Anda saat situs diam-diam menyalin perintah ke clipboard Anda."
+  },
+  "obPopups": {
+    "message": "Pop-up virus palsu"
+  },
+  "obPopupsBody": {
+    "message": "Menghentikan siklus pop-up yang menakutkan dan membantu Anda keluar."
+  },
+  "obPin": {
+    "message": "Sematkan ScamShield"
+  },
+  "obPinBody": {
+    "message": "Klik ikon puzzle di toolbar Anda, lalu klik pin di sebelah ScamShield, agar Anda bisa melihat status setiap halaman sekilas."
+  },
+  "obOpenSettings": {
+    "message": "Buka pengaturan"
+  },
+  "obNote": {
+    "message": "ScamShield gratis. Opsional: di Pengaturan Anda dapat membantu membuatnya lebih pintar dengan membagikan laporan anonim tentang penipuan yang terdeteksi — ini nonaktif kecuali Anda mengaktifkannya. Jika ini membantu Anda, Anda dapat mendukung pengembangannya dari halaman Pengaturan."
+  }
 }
