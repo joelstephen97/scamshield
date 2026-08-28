@@ -175,6 +175,53 @@ test('messagesToDict passes plain messages through and survives junk input', () 
   assert.deepEqual(R.messagesToDict('not json'), {});
 });
 
+test('$$ is unescaped to a literal $ at substitution time, like chrome.i18n', () => {
+  // No shipped locale uses the escape today, so this is a latent-bug guard.
+  // messagesToDict leaves "$$" in the template on purpose: unescaping there
+  // would turn "$$1" into "$1" and subst would then eat it as an argument.
+  const dict = R.messagesToDict({
+    price: { message: 'Costs $$5 per month' },
+    literalArg: { message: 'Not an argument: $$1' },
+    both: { message: '$$ then $HOST$', placeholders: { host: { content: '$1' } } }
+  });
+  assert.equal(dict.price, 'Costs $$5 per month');
+  assert.equal(dict.both, '$$ then $1');
+  try {
+    R.setOverride('de', dict);
+    assert.equal(R.tOverride('price'), 'Costs $5 per month');
+    assert.equal(R.tOverride('literalArg', ['swallowed']), 'Not an argument: $1');
+    assert.equal(R.tOverride('both', ['example.com']), '$ then example.com');
+  } finally { clearOverride(); }
+});
+
+test('intlTag turns a locale directory into a tag Intl accepts', () => {
+  // Intl throws RangeError on the underscore form the _locales/ dirs use.
+  assert.equal(R.intlTag('pt_BR'), 'pt-BR');
+  assert.equal(R.intlTag('zh_CN'), 'zh-CN');
+  assert.equal(R.intlTag('de'), 'de');
+  assert.equal(R.intlTag(''), '');
+  assert.equal(R.intlTag(null), '');
+  for (const loc of R.LOCALES) {
+    assert.doesNotThrow(() => new Intl.DateTimeFormat(R.intlTag(loc)), loc + ' produces a tag Intl rejects');
+    assert.doesNotThrow(() => new Intl.RelativeTimeFormat(R.intlTag(loc)), loc + ' produces a tag Intl rejects');
+  }
+});
+
+test('the pages format numbers and dates in the overridden locale, not the browser one', () => {
+  // UI_LANG feeds every Intl formatter on both pages, so it has to be
+  // reassignable and actually reassigned once the override lands — otherwise
+  // the text is German and the month names stay English.
+  for (const f of ['options.js', 'popup.js']) {
+    const src = fs.readFileSync(path.join(ROOT, f), 'utf8');
+    assert.ok(/^let UI_LANG =/m.test(src), f + ': UI_LANG is not reassignable');
+    assert.ok(/UI_LANG = R\.intlTag\(lang\)/.test(src), f + ': UI_LANG is never re-derived from the override');
+    // No bare toLocaleString/toLocaleTimeString: those silently use the
+    // browser's locale and ignore the override entirely.
+    assert.ok(!/toLocale(String|TimeString|DateString)\(\s*(\)|\[\])/.test(src),
+      f + ' still has a locale-less toLocaleString call');
+  }
+});
+
 test('every shipped locale transforms with no named tokens left behind', () => {
   for (const loc of R.LOCALES) {
     const p = path.join(ROOT, '_locales', loc, 'messages.json');

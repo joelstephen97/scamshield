@@ -2,7 +2,11 @@
 const api = globalThis.browser || globalThis.chrome;
 const $ = (id) => document.getElementById(id);
 const F = globalThis.SSFormat, I = globalThis.SSIcons, REVIEW = globalThis.SSReview;
-const UI_LANG = (() => { try { return api.i18n.getUILanguage(); } catch (_) { return 'en'; } })();
+// The locale every Intl formatter on this page uses. `let`, not `const`: when
+// the user has overridden the UI language, dates, numbers and relative times
+// must follow it too — otherwise the page reads German with English month
+// names. Reassigned once, from the SSi18n.ready block at the bottom.
+let UI_LANG = (() => { try { return api.i18n.getUILanguage(); } catch (_) { return 'en'; } })();
 // SSi18n.t returns '' (never key-echo) on a genuine miss, so the fallback
 // argument here actually gets used instead of being dead code.
 const T = (k, subs, fb) => { const v = globalThis.SSi18n && globalThis.SSi18n.t(k, subs); return v || fb || k; };
@@ -14,6 +18,14 @@ const SV = globalThis.SSStatsView, SSTATS = globalThis.SSStats;
 let statsPeriod = '7', statsToken = 0;
 // The section on screen, so a late-arriving language override can re-render it.
 let curTab = 'protection';
+// Locale-aware formatters, shared by the settings rows and the Statistics tab,
+// each falling back to English rather than throwing on a runtime that rejects
+// the UI language tag. They read UI_LANG at call time, so re-rendering after a
+// language override lands is enough to re-format everything.
+function intlDate(opts) { try { return new Intl.DateTimeFormat(UI_LANG, opts); } catch (_) { return new Intl.DateTimeFormat('en', opts); } }
+function num(n) { const v = Number(n) || 0; try { return v.toLocaleString(UI_LANG); } catch (_) { return String(v); } }
+// Date + time, in the platform's own default style for the locale.
+function stamp(ts) { try { return new Date(ts).toLocaleString(UI_LANG); } catch (_) { return new Date(ts).toLocaleString('en'); } }
 function flash(t) { $('status').textContent = t; $('status').classList.add('show'); setTimeout(() => $('status').classList.remove('show'), 1200); }
 function showTab(name, userInitiated) {
   curTab = name;
@@ -82,7 +94,7 @@ async function load() {
   $('lang').value = R && R.LOCALES.includes(lang) ? lang : 'auto';
   if (s.lastOtaAt) {
     const relStr = F.relTime(s.lastOtaAt, undefined, UI_LANG);
-    const countStr = Number(s.lastOtaCount || 0).toLocaleString();
+    const countStr = num(s.lastOtaCount);
     $('feedstatus').textContent = T('fmtUpdatedRules', [bidi(relStr), bidi(countStr)], `Updated ${relStr} · ${countStr} rules`);
   } else {
     $('feedstatus').textContent = T('feedNeverUpdated', null, 'Never updated');
@@ -104,14 +116,14 @@ function renderAllow(list, paused) {
   const entries = Object.entries(paused);
   if (!entries.length) $('pausedlist').appendChild(li(T('optNoneRightNow', null, 'None right now')));
   for (const [d, until] of entries) {
-    const whenStr = new Date(until).toLocaleString([], { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' });
+    const whenStr = intlDate({ hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' }).format(new Date(until));
     $('pausedlist').appendChild(li(d, T('fmtUntilTime', [bidi(whenStr)], 'until ' + whenStr), T('untrust', null, 'Untrust'), async () => { await send('unpauseSite', { domain: d }); load(); }));
   }
 }
 function renderHistory(list) {
   $('history').replaceChildren();
   if (!list.length) { $('history').appendChild(li(T('optNothingYetGood', null, 'Nothing yet — that’s a good thing.'))); return; }
-  for (const e of list.slice(0, 200)) $('history').appendChild(li(`${KIND(e.kind)} · ${e.host || T('unknownSite', null, 'unknown site')}`, `${LEVEL(e.level)} · ${new Date(e.ts).toLocaleString()}`, T('markMistake', null, 'Mark as mistake'), async () => { const r = await send('userReport', { host: e.host, level: e.level }); flash(r && r.via === 'relay' ? T('toastThanksSent', null, 'Thanks — sent') : T('toastOpenedReport', null, 'Opened a report')); }));
+  for (const e of list.slice(0, 200)) $('history').appendChild(li(`${KIND(e.kind)} · ${e.host || T('unknownSite', null, 'unknown site')}`, `${LEVEL(e.level)} · ${stamp(e.ts)}`, T('markMistake', null, 'Mark as mistake'), async () => { const r = await send('userReport', { host: e.host, level: e.level }); flash(r && r.via === 'relay' ? T('toastThanksSent', null, 'Thanks — sent') : T('toastOpenedReport', null, 'Opened a report')); }));
 }
 bindSwitch('enabled', 'enabled'); bindSwitch('block', 'blockKnownBad'); bindSwitch('hide', 'hideScamContent'); bindSwitch('pageanalysis', 'pageAnalysis'); bindSwitch('report', 'reportingOptIn');
 bindSwitch('clickfix', 'clickFixGuard'); bindSwitch('fakeupdate', 'fakeUpdateGuard'); bindSwitch('techscam', 'techScamGuard'); bindSwitch('clipboard', 'clipboardGuard'); bindSwitch('wallet', 'walletGuard'); bindSwitch('strict', 'strictMode');
@@ -190,10 +202,6 @@ $('resetfeed').addEventListener('click', async () => { const d = await send('get
 const CAT_EN = { phishing: 'Phishing', fakeShop: 'Fake shop', wallet: 'Wallet drainer', techSupport: 'Tech-support', clipboard: 'Clipboard', clickfix: 'Fake CAPTCHA', fakeUpdate: 'Fake update', other: 'Other' };
 const CAT = (k) => T('statsCat' + k.charAt(0).toUpperCase() + k.slice(1), null, CAT_EN[k] || k);
 const CHART_TITLE_EN = { statsChartTitle7d: 'Pages checked · last 7 days', statsChartTitle30d: 'Pages checked · last 30 days', statsChartTitleAll: 'Pages checked · since install', statsChartTitle90d: 'Pages checked · last 90 days' };
-// Locale-aware formatters, each falling back to English rather than throwing on
-// a runtime that rejects the UI language tag.
-function intlDate(opts) { try { return new Intl.DateTimeFormat(UI_LANG, opts); } catch (_) { return new Intl.DateTimeFormat('en', opts); } }
-function num(n) { const v = Number(n) || 0; try { return v.toLocaleString(UI_LANG); } catch (_) { return String(v); } }
 // Day buckets are UTC (background/stats.js), so they are formatted in UTC too —
 // otherwise a bar would be labelled with the previous day west of Greenwich.
 function dayMs(key) { const t = Date.parse(key + 'T00:00:00Z'); return Number.isFinite(t) ? t : null; }
@@ -325,6 +333,10 @@ load();
 try {
   globalThis.SSi18n.ready.then((lang) => {
     if (!lang) return;
+    // Numbers, dates and relative times follow the chosen language too. Set
+    // before the re-render below, since every formatter reads UI_LANG at call
+    // time — otherwise the page would read German with English month names.
+    UI_LANG = R.intlTag(lang);
     renderVersion();
     buildLangOptions();
     load();

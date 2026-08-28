@@ -10,25 +10,36 @@
     try { const m = api && api.i18n && api.i18n.getMessage(key, subs); if (m) return m; } catch (_) {}
     return fallback != null ? fallback : key;
   }
-  // Language override: a content script cannot fetch _locales/ (it would have
-  // to be web-accessible), so the service worker hands over the dictionary.
-  // Strictly fire-and-forget — a warning must never wait on it. Until it lands
-  // (usually well before the first verdict, which needs its own round trip)
-  // everything renders in the browser language exactly as it does today, and
-  // SSReasons.setOverride() then applies to every later string, including
-  // content_script.js's own t() and every engine reason, because both files
-  // share this world's single SSReasons instance. Requested once per frame:
-  // re-injection into an already-guarded frame must not re-ask.
+  // Language override: a content script cannot fetch the packaged locale file
+  // (it would have to be web-accessible), so the service worker hands over the
+  // dictionary. Strictly fire-and-forget — a warning must never wait on it.
+  // Until it lands (usually well before the first verdict, which needs its own
+  // round trip) everything renders in the browser language exactly as it does
+  // today, and SSReasons.setOverride() then applies to every later string,
+  // including content_script.js's own t() and every engine reason, because both
+  // files share this world's single SSReasons instance.
+  //
+  // The setting is read locally first (content scripts have storage access) so
+  // the default 'auto' path — almost every user, in every frame of every page,
+  // and this runs with all_frames — costs one local read and sends no message
+  // at all. Only a real override pays for the round trip. Guarded so a
+  // re-injection into an already-initialised frame does not re-ask.
+  //
+  // Promises, not callbacks: on Firefox `api` is the promise-only `browser`
+  // namespace, where a trailing callback is simply never invoked. Both
+  // storage.local.get and runtime.sendMessage return a promise when called
+  // without one, on Chrome (MV3, and our floor is 121) and on Firefox alike.
   if (!root.__scamshieldLangAsked) {
     root.__scamshieldLangAsked = true;
     try {
-      api.runtime.sendMessage({ type: 'getLangDict' }, (r) => {
-        try {
-          void api.runtime.lastError; // an SW that went away is not an error here
+      api.storage.local.get('settings').then((cur) => {
+        const lang = cur && cur.settings && cur.settings.uiLang;
+        if (!lang || lang === 'auto') return; // following the browser: nothing to fetch
+        return api.runtime.sendMessage({ type: 'getLangDict' }).then((r) => {
           if (r && r.lang && r.dict && root.SSReasons) root.SSReasons.setOverride(r.lang, r.dict);
-        } catch (_) {}
-      });
-    } catch (_) { /* no worker (torn-down extension) — stay on the browser language */ }
+        });
+      }).catch(() => { /* no worker/storage right now — stay on the browser language */ });
+    } catch (_) { /* torn-down extension context */ }
   }
   // Engine reasons are structured ({ code, kind, params }); ui/reasons.js turns
   // one into localized text. It is loaded before this file in both manifests,

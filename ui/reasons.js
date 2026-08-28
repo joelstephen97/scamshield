@@ -102,8 +102,17 @@
   const LRI = '⁦', PDI = '⁩';
   function bidiWrap(s) { return s == null ? '' : LRI + String(s) + PDI; }
 
+  // `$$` is chrome.i18n's escape for a literal dollar sign, and it is unescaped
+  // HERE rather than in messagesToDict() because order matters: chrome resolves
+  // placeholders and unescapes in one pass, so "$$1" must come out as the
+  // literal "$1" and never as an argument. Unescaping while building the
+  // dictionary would turn "$$1" into "$1" and this function would then
+  // substitute it — silently swallowing a literal. The alternation below tries
+  // `$$` first, so both cases land correctly, and every override lookup goes
+  // through this one function (tOverride and resolveReason both call it).
   function subst(tmpl, params, isolate) {
-    return String(tmpl).replace(/\$(\d)/g, (m, i) => {
+    return String(tmpl).replace(/\$\$|\$(\d)/g, (m, i) => {
+      if (i === undefined) return '$';
       const v = params && params[i - 1];
       if (v == null) return '';
       return isolate ? bidiWrap(v) : String(v);
@@ -140,6 +149,13 @@
     ru: 'Русский', ta: 'தமிழ்', te: 'తెలుగు', tr: 'Türkçe', ur: 'اردو',
     vi: 'Tiếng Việt', zh_CN: '中文（简体）'
   };
+
+  // Locale DIRECTORY name → BCP-47 tag for Intl. Chrome's _locales/ folders use
+  // an underscore ("pt_BR", "zh_CN"); Intl.DateTimeFormat / RelativeTimeFormat /
+  // toLocaleString want a hyphen, and throw RangeError on the underscore form.
+  // Numbers and dates have to follow the chosen language too, or a German UI
+  // would still print English month names.
+  function intlTag(lang) { return String(lang || '').replace('_', '-'); }
 
   let overrideLang = '', overrideDict = null;
 
@@ -244,5 +260,5 @@
   }
 
   return { resolveReason, reasonToEnglish, reasonKind, EN, isRTL, bidiWrap,
-    LOCALES, LANG_NAMES, setOverride, overrideLanguage, tOverride, messagesToDict };
+    LOCALES, LANG_NAMES, setOverride, overrideLanguage, tOverride, messagesToDict, intlTag };
 });

@@ -47,6 +47,41 @@ test('options: picking Deutsch reloads the page in German, and the popup follows
   await expect(popup.locator('#msgcheck summary')).toHaveText('Nachricht oder Link prüfen');
 });
 
+test('options: numbers, dates and relative times follow the override too', async ({ context, extensionId }) => {
+  const sw = context.serviceWorkers()[0];
+  // A seeded lifetime counter and a history row two hours old cover the three
+  // things these pages format through Intl — number grouping, a date+time
+  // stamp, a relative time — each with a visibly different German and English
+  // rendering. Deliberately NOT the feed counters: runOtaUpdate() rewrites
+  // those from the live feed on install, which would race this test.
+  await sw.evaluate(() => setSettings({ uiLang: 'de' }));
+  // History is newest-first, the order the worker writes it in.
+  await sw.evaluate(() => chrome.storage.local.set({
+    pagesCheckedTotal: 12345,
+    history: [{ ts: Date.now() - 2 * 3600 * 1000, host: 'recent-scam.example', kind: 'page', level: 'dangerous' },
+      { ts: Date.parse('2026-08-18T09:53:20Z'), host: 'old-scam.example', kind: 'page', level: 'dangerous' }]
+  }));
+
+  const page = await context.newPage();
+  await page.goto(optionsUrl(extensionId, '#history'));
+  // History stamps: German day.month.year, never the US month/day/year.
+  // `new Date(ts).toLocaleString()` with no locale printed the English form.
+  await expect(page.locator('#history')).toContainText('18.8.2026');
+  await expect(page.locator('#history')).not.toContainText('8/18/2026');
+
+  await page.click('nav a[data-tab="stats"]');
+  // 12345 → "12.345" in German, "12,345" in English.
+  await page.click('#statsseg button[data-p="all"]');
+  await expect(page.locator('#st-checked')).toHaveText('12.345');
+  // The "Recent" list formats through the same relative-time helper, from a
+  // second entry point (loadStats, not load): "vor 2 Stunden", not "2 hours ago".
+  await expect(page.locator('#st-recent time').first()).toHaveText('vor 2 Stunden');
+  // And the popup's own history list, which has its own copy of UI_LANG.
+  const popup = await context.newPage();
+  await popup.goto(`chrome-extension://${extensionId}/popup.html`);
+  await expect(popup.locator('#hist time').first()).toHaveText('vor 2 Stunden');
+});
+
 test('options: an RTL language flips the page direction', async ({ context, extensionId }) => {
   const page = await context.newPage();
   await page.goto(optionsUrl(extensionId, '#about'));
@@ -93,8 +128,6 @@ test('content script: a warning banner renders in the chosen language', async ({
   await expect(banner.locator('b')).toHaveText('Gefährliche Seite');
   await expect(banner.locator('.ss-leave')).toHaveText('Diese Seite verlassen');
   await expect(banner).toHaveAttribute('dir', 'ltr');
-  // The reason sentence comes from the engine as a structured code, so it is
-  // translated by the same dictionary rather than by a second mechanism.
   // The banner leads with the top reason, which the engine emits as a code
   // (noHttps / credentialFormForeignDomain here) — so it is translated by the
   // same dictionary rather than by a second, parallel mechanism.

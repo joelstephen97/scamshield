@@ -2,7 +2,10 @@
 const api = globalThis.browser || globalThis.chrome;
 const $ = (id) => document.getElementById(id);
 const SS = globalThis.ScamShield, F = globalThis.SSFormat, I = globalThis.SSIcons, R = globalThis.SSReasons, REVIEW = globalThis.SSReview;
-const UI_LANG = (() => { try { return api.i18n.getUILanguage(); } catch (_) { return 'en'; } })();
+// The locale the Intl formatters use. `let`, not `const`: a language override
+// has to move the timestamps too, or the popup reads German with English
+// relative times. Reassigned once, at the top of init().
+let UI_LANG = (() => { try { return api.i18n.getUILanguage(); } catch (_) { return 'en'; } })();
 // SSi18n.t returns '' (never key-echo) on a genuine miss, so the fallback
 // argument here actually gets used instead of being dead code.
 const T = (k, subs, fb) => { const v = globalThis.SSi18n && globalThis.SSi18n.t(k, subs); return v || fb || k; };
@@ -13,6 +16,12 @@ const send = (type, extra) => new Promise((res) => { try { api.runtime.sendMessa
 const registrable = (h) => (SS && SS.registrableDomain) ? SS.registrableDomain(h) : String(h || '').split('.').slice(-2).join('.');
 const brandName = (key) => SS.brandDisplayName ? SS.brandDisplayName(key) : key;
 function toast(t) { const el = $('toast'); el.textContent = t; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 1400); }
+// Reads UI_LANG at call time, and falls back to English rather than throwing on
+// a runtime that rejects the tag (same pattern as SSFormat.relTime).
+function timeOfDay(ts) {
+  const opts = { hour: '2-digit', minute: '2-digit' };
+  try { return new Date(ts).toLocaleTimeString(UI_LANG, opts); } catch (_) { return new Date(ts).toLocaleTimeString('en', opts); }
+}
 
 let tab = null, domain = null, settings = null, verdict = null, level = 'unknown';
 
@@ -131,7 +140,7 @@ function renderTrust() {
   const paused = settings.pausedSites && settings.pausedSites[domain];
   const always = (settings.allowlist || []).includes(domain);
   $('trust').hidden = !!paused || always; $('trusted').hidden = !(paused || always);
-  const until = paused ? new Date(paused).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+  const until = paused ? timeOfDay(paused) : '';
   $('trustedtext').textContent = always ? T('trusted', null, 'Trusted') : paused ? T('fmtTrustedUntil', [bidi(until)], 'Trusted until ' + until) : '';
 }
 function setTrustMenu(open) {
@@ -153,15 +162,22 @@ async function currentTab() {
   return others.find((t) => t.active) || others[others.length - 1] || null;
 }
 async function init() {
-  // Language override (0.7.0): one storage read, resolved before the first
-  // string is written, so the popup never renders in English and then swaps
-  // under the user. On the default 'auto' setting this resolves immediately
-  // and nothing about the popup changes.
-  try { await globalThis.SSi18n.ready; } catch (_) { /* fall back to the browser language */ }
+  // Fired BEFORE the language wait below so the two reads overlap: the popup's
+  // critical path is the verdict, and nothing here should queue behind a
+  // locale fetch that only matters on the override path.
+  const settingsPromise = send('getSettings');
+  // Language override (0.7.0): resolved before the first string is written, so
+  // the popup never renders in English and then swaps under the user. On the
+  // default 'auto' setting this is a single local storage read and nothing
+  // about the popup changes.
+  try {
+    const lang = await globalThis.SSi18n.ready;
+    if (lang) UI_LANG = R.intlTag(lang); // timestamps follow the chosen language too
+  } catch (_) { /* fall back to the browser language */ }
   $('lockline').textContent = T('runsOnDevice', null, 'Runs on your device · nothing leaves your browser');
   $('brandmark').insertAdjacentHTML('afterbegin', I.shield('safe')); $('opts').innerHTML = I.gear(); $('lockline').insertAdjacentHTML('afterbegin', I.lock());
   try { $('ver').textContent = api.runtime.getManifest().version; } catch (_) {}
-  settings = await send('getSettings');
+  settings = await settingsPromise;
   if (!settings) { renderStatus('unknown', '', T('toastExtensionError', null, 'Extension error — try reopening.')); return; }
   $('enabled').checked = !!settings.enabled; $('enabledwrap').classList.toggle('on', !!settings.enabled); $('enabledlbl').textContent = settings.enabled ? T('on', null, 'On') : T('paused', null, 'Paused');
   $('enabled').addEventListener('change', async () => { settings = await send('setSettings', { patch: { enabled: $('enabled').checked } }); $('enabledwrap').classList.toggle('on', !!settings.enabled); $('enabledlbl').textContent = settings.enabled ? T('on', null, 'On') : T('paused', null, 'Paused'); });

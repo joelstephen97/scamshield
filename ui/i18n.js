@@ -14,13 +14,16 @@
 (function (root) {
   'use strict';
   const api = root.browser || root.chrome;
-  const R = root.SSReasons;
+  // Looked up on every use, never captured at evaluation time: binding it to a
+  // const here would silently and permanently disable the override if this file
+  // were ever loaded before ui/reasons.js, with no error to notice.
+  const reasons = () => root.SSReasons;
   // Returns '' (never the raw key) when the message truly can't be resolved,
   // so callers relying on a JS-literal fallback (T(key, subs, fallback) in
   // popup.js/options.js) actually get to use it instead of key-echo, and so
   // apply() below just leaves the HTML's own English text in place.
   function t(key, subs) {
-    try { if (R && R.tOverride) { const o = R.tOverride(key, subs); if (o) return o; } } catch (_) {}
+    try { const R = reasons(); if (R && R.tOverride) { const o = R.tOverride(key, subs); if (o) return o; } } catch (_) {}
     try { const m = api.i18n.getMessage(key, subs); return m || ''; } catch (_) { return ''; }
   }
   function apply(scope) {
@@ -35,6 +38,7 @@
     try {
       // isRTL() with no argument follows the override when one is installed,
       // so the page flips direction with the chosen language, not the browser's.
+      const R = reasons();
       const rtl = R ? R.isRTL() : false;
       document.documentElement.setAttribute('dir', rtl ? 'rtl' : 'ltr');
     } catch (_) {}
@@ -45,6 +49,7 @@
   // missing/unreadable locale file degrades to the browser language rather
   // than leaving the page waiting.
   const ready = (async () => {
+    const R = reasons();
     if (!R || !R.messagesToDict || !R.LOCALES) return '';
     let lang = '';
     try {
