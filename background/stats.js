@@ -134,6 +134,28 @@
     return 'other';
   }
 
+  // Lifetime privacy-findings counter.
+  //
+  // pagesCheckedTotal and threatsBlocked have always been plain lifetime
+  // counters, but privacy findings only ever existed as a per-day field in the
+  // ring — which silently undercounts an "all time" view once an install
+  // outlives the ring's 90 days. The counter fixes that going forward; this
+  // helper decides what an install that predates it starts from.
+  //
+  // `stored` absent (or junk) means the counter has never been written: seed it
+  // from the ring, which is the best evidence available, and tell the caller to
+  // persist that seed. A stored 0 is a real value — a user who has genuinely
+  // never had a privacy finding must not be re-seeded on every read, so the
+  // backfill happens exactly once per profile.
+  function privacyTotal(stored, statsDaily) {
+    if (typeof stored === 'number' && Number.isFinite(stored) && stored >= 0) {
+      return { total: Math.floor(stored), backfilled: false };
+    }
+    let total = 0;
+    for (const b of normalize(statsDaily)) total += b.privacy;
+    return { total, backfilled: true };
+  }
+
   // Totals over the last `period` days, inclusive of today. Absent days count
   // as zero, so gaps in the ring need no special handling.
   function summarize(statsDaily, period, now) {
@@ -149,5 +171,5 @@
     return out;
   }
 
-  return { RING_DAYS, FIELDS, CATEGORIES, dayKey, normalize, bump, categoryOf, summarize };
+  return { RING_DAYS, FIELDS, CATEGORIES, dayKey, normalize, bump, categoryOf, privacyTotal, summarize };
 });

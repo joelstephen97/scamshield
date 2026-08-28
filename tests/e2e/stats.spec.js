@@ -159,6 +159,8 @@ test('popup links to the Statistics tab', async ({ context, extensionId }) => {
 
 test('a page with privacy findings counts once, however many findings it has', async ({ context }) => {
   const sw = context.serviceWorkers()[0];
+  const before = await readStats(sw);
+  expect(before.privacyFindingsTotal).toBe(0);
   const page = await context.newPage();
   await page.goto(BASE + '/fingerprint.html');
   await page.waitForTimeout(1500);
@@ -166,4 +168,45 @@ test('a page with privacy findings counts once, however many findings it has', a
   const today = stats.statsDaily.find((b) => b.d === todayKey());
   expect(today).toBeTruthy();
   expect(today.privacy).toBe(1);
+  // The lifetime counter moves with the ring — it is what the "All time" tile
+  // reads, since the ring forgets after 90 days.
+  expect(stats.privacyFindingsTotal).toBe(1);
+});
+
+test('privacyFindingsTotal backfills once from an existing ring, then only increments', async ({ context }) => {
+  const sw = context.serviceWorkers()[0];
+  // An install that predates the counter: a ring with privacy days, no total.
+  await sw.evaluate(() => {
+    const day = (n) => new Date(Date.now() - n * 86400000).toISOString().slice(0, 10);
+    return chrome.storage.local.set({
+      statsDaily: [{ d: day(3), checked: 9, threats: 0, privacy: 2 }, { d: day(1), checked: 4, threats: 0, privacy: 3 }]
+    }).then(() => chrome.storage.local.remove('privacyFindingsTotal'));
+  });
+  // The seed happens on the next boot, so re-run it the way the SW does.
+  await sw.evaluate(() => ensurePrivacyTotal());
+  expect((await readStats(sw)).privacyFindingsTotal).toBe(5);
+
+  // Seeding never runs twice: a ring that later rolls over cannot lower it.
+  await sw.evaluate(() => chrome.storage.local.set({ statsDaily: [] }));
+  await sw.evaluate(() => ensurePrivacyTotal());
+  expect((await readStats(sw)).privacyFindingsTotal).toBe(5);
+
+  // A real finding increments from the seeded value.
+  const page = await context.newPage();
+  await page.goto(BASE + '/fingerprint.html');
+  await page.waitForTimeout(1500);
+  expect((await readStats(sw)).privacyFindingsTotal).toBe(6);
+});
+
+test('options#stats "All time" privacy tile reads the lifetime counter, not the ring', async ({ context, extensionId }) => {
+  const sw = context.serviceWorkers()[0];
+  // A total larger than anything the ring holds — only the counter can show it.
+  await sw.evaluate(() => chrome.storage.local.set({ privacyFindingsTotal: 137, statsDaily: [] }));
+  const page = await context.newPage();
+  await page.goto(`chrome-extension://${extensionId}/options.html#stats`);
+  await expect(page.locator('#st-privacy')).toHaveText('0'); // 7-day view: the ring
+  await page.click('#statsseg button[data-p="all"]');
+  await expect(page.locator('#st-privacy')).toHaveText('137');
+  await page.click('#statsseg button[data-p="7"]');
+  await expect(page.locator('#st-privacy')).toHaveText('0');
 });

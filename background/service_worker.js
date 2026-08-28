@@ -100,14 +100,15 @@ function recordEngagement(tabUrl) {
 }
 
 // ---- Local-only usage statistics (0.7.0) ----
-// Four storage.local keys, all OUTSIDE the `settings` object and therefore
+// Five storage.local keys, all OUTSIDE the `settings` object and therefore
 // outside SYNCED_KEYS: statsDaily (90-day ring from background/stats.js),
-// pagesCheckedTotal, threatsByType, installedAt. Counters never sync, never
-// enter a report payload, and never leave the device. Every bump is a
-// read-modify-write of the same keys, so they are serialized through
-// statsChain the same way settings writes go through settingsChain — without
-// it two bumps landing in the same tick would each read the pre-bump ring and
-// the second write would silently drop the first count.
+// pagesCheckedTotal, privacyFindingsTotal, threatsByType, installedAt.
+// Counters never sync, never enter a report payload, and never leave the
+// device. Every bump is a read-modify-write of the same keys, so they are
+// serialized through statsChain the same way settings writes go through
+// settingsChain — without it two bumps landing in the same tick would each
+// read the pre-bump ring and the second write would silently drop the first
+// count.
 let statsChain = Promise.resolve();
 function queueStats(run) {
   const result = statsChain.then(run, run);
@@ -120,9 +121,13 @@ function bumpStat(field, event) {
   return queueStats(async () => {
     try {
       const S = globalThis.SSStats;
-      const cur = await api.storage.local.get(['statsDaily', 'pagesCheckedTotal', 'threatsByType']);
+      const cur = await api.storage.local.get(['statsDaily', 'pagesCheckedTotal', 'privacyFindingsTotal', 'threatsByType']);
       const patch = { statsDaily: S.bump(cur.statsDaily, field, Date.now()) };
       if (field === 'checked') patch.pagesCheckedTotal = (Number(cur.pagesCheckedTotal) || 0) + 1;
+      // The ring only remembers 90 days, so the "all time" privacy number needs
+      // a lifetime counter of its own. ensurePrivacyTotal() is queued ahead of
+      // every bump, so the key is already seeded by the time this reads it.
+      if (field === 'privacy') patch.privacyFindingsTotal = S.privacyTotal(cur.privacyFindingsTotal, cur.statsDaily).total + 1;
       if (field === 'threats') {
         const byType = Object.assign({}, cur.threatsByType);
         const cat = S.categoryOf(event);
@@ -147,9 +152,25 @@ function ensureInstalledAt() {
     } catch (_) { /* best-effort */ }
   });
 }
+// privacyFindingsTotal did not exist before this counter landed, and a profile
+// that already has a ring must not start its lifetime total at zero. Seeded
+// from the ring on the first boot that finds the key absent, then left alone
+// forever — a stored 0 is a real value, not a missing one (SSStats.privacyTotal
+// owns that distinction). Runs inside the same queue as bumpStat, so the seed
+// is always written before any increment reads it.
+function ensurePrivacyTotal() {
+  return queueStats(async () => {
+    try {
+      const cur = await api.storage.local.get(['privacyFindingsTotal', 'statsDaily']);
+      const r = globalThis.SSStats.privacyTotal(cur.privacyFindingsTotal, cur.statsDaily);
+      if (r.backfilled) await api.storage.local.set({ privacyFindingsTotal: r.total });
+    } catch (_) { /* best-effort */ }
+  });
+}
 // Started at script-evaluation time so a getStats() arriving on the very first
 // wake-up already sees the value (same pattern as settingsInitPromise).
 const installedAtPromise = ensureInstalledAt();
+const privacyTotalPromise = ensurePrivacyTotal();
 
 // Feed size for the stats card: the OTA count the options page shows, falling
 // back to the rule count of the blocklist bundled with the extension (what is
@@ -168,12 +189,16 @@ async function countStaticRules() {
 }
 async function getStats() {
   await installedAtPromise;
-  const cur = await api.storage.local.get(['statsDaily', 'pagesCheckedTotal', 'threatsByType', 'installedAt']);
+  await privacyTotalPromise;
+  const cur = await api.storage.local.get(['statsDaily', 'pagesCheckedTotal', 'privacyFindingsTotal', 'threatsByType', 'installedAt']);
   const s = await getSettings();
   const byType = (cur.threatsByType && typeof cur.threatsByType === 'object') ? cur.threatsByType : {};
   return {
     installedAt: (typeof cur.installedAt === 'number' && cur.installedAt > 0) ? cur.installedAt : Date.now(),
     pagesCheckedTotal: Number(cur.pagesCheckedTotal) || 0,
+    // Seeded above; privacyTotal() here only guards a read that raced a failed
+    // seed (storage error), and never re-derives a real stored value.
+    privacyFindingsTotal: globalThis.SSStats.privacyTotal(cur.privacyFindingsTotal, cur.statsDaily).total,
     threatsBlocked: Number(s.threatsBlocked) || 0,
     threatsByType: byType,
     statsDaily: globalThis.SSStats.normalize(cur.statsDaily),
@@ -823,4 +848,4 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 // module-scoped. Re-attach the debug/test surface that used to live on the
 // classic worker's global scope — the e2e suite drives these via
 // worker.evaluate, and they're handy in the SW console.
-Object.assign(globalThis, { DEFAULT_FEED_URL, getSettings, setSettings, handleUserReport, runOtaUpdate, flushReports, queueReport, exportSettings, sanitizeImport, pushSync, pullSync, getStats, bumpStat });
+Object.assign(globalThis, { DEFAULT_FEED_URL, getSettings, setSettings, handleUserReport, runOtaUpdate, flushReports, queueReport, exportSettings, sanitizeImport, pushSync, pullSync, getStats, bumpStat, ensurePrivacyTotal });

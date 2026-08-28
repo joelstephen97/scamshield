@@ -182,3 +182,66 @@ test('every category categoryOf can return is declared in CATEGORIES', () => {
   for (const c of produced) assert.ok(S.CATEGORIES.includes(c), `${c} missing from CATEGORIES`);
   assert.equal(new Set(produced).size, S.CATEGORIES.length);
 });
+
+// --- lifetime privacy counter (privacyFindingsTotal) ------------------------
+// The ring forgets after 90 days, so "all time" privacy findings need a counter
+// of their own. These pin the once-only backfill the service worker relies on.
+
+test('privacyTotal seeds a missing counter from the ring, once', () => {
+  const ring = [
+    { d: '2026-08-25', checked: 3, threats: 0, privacy: 2 },
+    { d: '2026-08-27', checked: 5, threats: 1, privacy: 1 }
+  ];
+  const first = S.privacyTotal(undefined, ring);
+  assert.deepEqual(first, { total: 3, backfilled: true });
+  // Feeding the seeded value back in is a no-op: the second boot reads storage,
+  // not the ring, so a ring that has since rolled over cannot lower the total.
+  assert.deepEqual(S.privacyTotal(first.total, ring), { total: 3, backfilled: false });
+  assert.deepEqual(S.privacyTotal(first.total, []), { total: 3, backfilled: false });
+});
+
+test('privacyTotal treats a stored 0 as a real value, never as missing', () => {
+  const ring = [{ d: '2026-08-27', checked: 1, threats: 0, privacy: 4 }];
+  assert.deepEqual(S.privacyTotal(0, ring), { total: 0, backfilled: false });
+});
+
+test('privacyTotal keeps a stored total that already exceeds the ring', () => {
+  const ring = [{ d: '2026-08-27', checked: 1, threats: 0, privacy: 1 }];
+  assert.deepEqual(S.privacyTotal(900, ring), { total: 900, backfilled: false });
+  assert.deepEqual(S.privacyTotal(7.9, ring), { total: 7, backfilled: false });
+});
+
+test('privacyTotal re-seeds junk or impossible stored values', () => {
+  const ring = [{ d: '2026-08-27', checked: 1, threats: 0, privacy: 2 }];
+  for (const junk of [undefined, null, -1, NaN, Infinity, '5', {}, []]) {
+    assert.deepEqual(S.privacyTotal(junk, ring), { total: 2, backfilled: true }, `junk: ${String(junk)}`);
+  }
+});
+
+test('privacyTotal counts only privacy, and survives a junk ring', () => {
+  const ring = [{ d: '2026-08-27', checked: 40, threats: 3, privacy: 2 }, null, { d: 'nope', privacy: 99 }];
+  assert.deepEqual(S.privacyTotal(undefined, ring), { total: 2, backfilled: true });
+  for (const junk of [undefined, null, 'nope', 42]) {
+    assert.deepEqual(S.privacyTotal(undefined, junk), { total: 0, backfilled: true });
+  }
+});
+
+// The seam the service worker actually uses: seed from the ring, then increment
+// on every privacy bump — the same read-modify-write bumpStat performs.
+test('privacyTotal + bump reproduce the service worker seam across a rollover', () => {
+  let stored; // key absent, as on an install that predates the counter
+  let ring = [{ d: '2026-08-26', checked: 2, threats: 0, privacy: 2 }];
+  const seed = S.privacyTotal(stored, ring);
+  assert.equal(seed.backfilled, true);
+  stored = seed.total; // the boot-time backfill writes this once
+  // Two privacy findings land.
+  for (const t of [T0, T0 + DAY]) {
+    ring = S.bump(ring, 'privacy', t);
+    stored = S.privacyTotal(stored, ring).total + 1;
+  }
+  assert.equal(stored, 4);
+  // The ring rolls past 90 days and forgets the old days; the total does not.
+  ring = ring.filter((b) => b.d >= '2026-08-28');
+  assert.equal(S.summarize(ring, 90, T0 + DAY).privacy, 1);
+  assert.equal(S.privacyTotal(stored, ring).total, 4);
+});

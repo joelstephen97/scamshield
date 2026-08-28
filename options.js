@@ -9,9 +9,7 @@ const T = (k, subs, fb) => { const v = globalThis.SSi18n && globalThis.SSi18n.t(
 const R = globalThis.SSReasons;
 const bidi = (s) => (R && R.bidiWrap ? R.bidiWrap(s) : (s == null ? '' : String(s)));
 const send = (type, extra) => new Promise((res) => { try { api.runtime.sendMessage(Object.assign({ type }, extra || {}), (r) => res(r)); } catch (_) { res(null); } });
-// Statistics tab state. Declared up here (not beside its render functions at
-// the bottom) because showTab() below fires loadStats() while the page is still
-// evaluating, and a `let` further down would still be in its temporal dead zone.
+// Statistics tab state (rendered by the block at the bottom of this file).
 const SV = globalThis.SSStatsView, SSTATS = globalThis.SSStats;
 let statsPeriod = '7', statsToken = 0;
 function flash(t) { $('status').textContent = t; $('status').classList.add('show'); setTimeout(() => $('status').classList.remove('show'), 1200); }
@@ -191,12 +189,13 @@ function renderStats(st, hist) {
   const now = Date.now();
   const ser = SV.series(daily, statsPeriod, now, Number(st.installedAt) || now);
   const sums = SSTATS.summarize(daily, ser.days, now);
-  // 7/30 days come from the day ring; "All time" uses the lifetime counters for
-  // pages and threats. Privacy findings have no lifetime counter, so that tile
-  // sums the ring — the full history until an install passes the ring's 90 days.
+  // 7/30 days come from the day ring, which is the only place a per-day number
+  // exists; "All time" reads the three lifetime counters instead, so it stays
+  // right after an install outlives the ring's 90 days.
   const all = statsPeriod === 'all';
   const checked = all ? Number(st.pagesCheckedTotal) || 0 : sums.checked;
   const threats = all ? Number(st.threatsBlocked) || 0 : sums.threats;
+  const privacy = all ? Number(st.privacyFindingsTotal) || 0 : sums.privacy;
 
   // getStats always sends a real epoch, but an Invalid Date would throw inside
   // Intl and leave the whole dashboard on its "—" placeholders.
@@ -205,7 +204,7 @@ function renderStats(st, hist) {
   $('statssince').textContent = T('fmtStatsSince', [bidi(sinceStr)], 'Protecting this browser since ' + sinceStr);
   $('st-checked').textContent = num(checked);
   $('st-threats').textContent = num(threats);
-  $('st-privacy').textContent = num(sums.privacy);
+  $('st-privacy').textContent = num(privacy);
   $('st-rules').textContent = num(st.feedRuleCount);
   $('st-threats-tile').classList.toggle('zero', threats === 0);
   $('st-threats-sub').textContent = threats === 0
