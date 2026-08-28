@@ -76,7 +76,12 @@ Tính năng:
 • Xuất/nhập cài đặt và đồng bộ tùy chọn giữa các thiết bị (dùng chính tính
   năng đồng bộ của trình duyệt — vẫn không có tài khoản hay máy chủ
   ScamShield)
+• Chọn ngôn ngữ của bạn: đủ 20 ngôn ngữ, chọn ngay trong popup hoặc Cài đặt,
+  không phụ thuộc vào ngôn ngữ trình duyệt
 • Lịch sử bảo vệ và thống kê, chỉ lưu trên thiết bị của bạn; chế độ tối
+• Thống kê: số trang đã kiểm tra, mối đe dọa đã chặn và phát hiện về quyền
+  riêng tư, kèm biểu đồ hoạt động hằng ngày — được đếm và lưu trên thiết bị
+  của bạn, không bao giờ gửi đi đâu cả
 • Báo cáo cộng đồng tùy chọn, mặc định tắt — không bao giờ gửi URL hay nội
   dung trang
 • Nhỏ hơn và nhanh hơn: khoảng 0,6 MB khi giải nén, không có runtime nặng

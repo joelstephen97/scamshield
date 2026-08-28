@@ -83,7 +83,12 @@ Yalnızca çevrilmiş bir mağaza listesi değil, tam menü, uyarı ve ayar
 • Ayarları dışa/içe aktarma ve isteğe bağlı cihazlar arası senkronizasyon
   (tarayıcınızın kendi senkronizasyonu — yine de ScamShield hesabı veya
   sunucusu yok)
+• Dilinizi seçin: 20 dilin tümü popup'tan veya Ayarlar'dan seçilebilir —
+  tarayıcınızın dilinden bağımsız olarak
 • Yalnızca cihazınızda saklanan koruma geçmişi ve istatistikleri; koyu mod
+• İstatistikler: kontrol edilen sayfalar, durdurulan tehditler ve gizlilik
+  bulguları, günlük etkinlik grafiğiyle birlikte — cihazınızda sayılır ve
+  saklanır, hiçbir yere gönderilmez
 • Varsayılan olarak kapalı, isteğe bağlı topluluk raporlaması — asla URL veya
   sayfa metni değil
 • Daha küçük ve daha hızlı: paketten çıkarılmış ~0,6 MB, ağır bir çalışma

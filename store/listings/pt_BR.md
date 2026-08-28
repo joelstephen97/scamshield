@@ -83,8 +83,13 @@ Recursos:
 • Exportação/importação de configurações e sincronização opcional entre
   dispositivos (usando a sincronização do seu próprio navegador — ainda sem
   conta ou servidor do ScamShield)
+• Escolha o seu idioma: todos os 20 idiomas ficam disponíveis no popup ou nas
+  configurações, independente do idioma do seu navegador
 • Histórico e estatísticas de proteção, armazenados só no seu dispositivo;
   modo escuro
+• Estatísticas: páginas verificadas, ameaças bloqueadas e descobertas de
+  privacidade, com um gráfico de atividade diária — contadas e armazenadas no
+  seu dispositivo, nunca enviadas para lugar nenhum
 • Relatórios da comunidade opcionais, desativados por padrão — nunca URLs ou
   texto da página
 • Menor e mais rápido: ~0,6 MB descompactado, sem tempo de execução pesado

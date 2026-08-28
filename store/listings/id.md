@@ -83,8 +83,13 @@ Fitur:
 • Ekspor/impor pengaturan dan sinkronisasi lintas perangkat opsional
   (sinkronisasi bawaan browser Anda sendiri — tetap tanpa akun atau server
   ScamShield)
+• Pilih bahasa Anda: seluruh 20 bahasa tersedia dari popup atau Pengaturan,
+  terlepas dari bahasa browser Anda
 • Riwayat dan statistik perlindungan, disimpan hanya di perangkat Anda;
   mode gelap
+• Statistik: halaman diperiksa, ancaman dihentikan, dan temuan privasi,
+  lengkap dengan grafik aktivitas harian — dihitung dan disimpan di perangkat
+  Anda, tidak pernah dikirim ke mana pun
 • Pelaporan komunitas opsional, nonaktif secara default — tidak pernah URL
   atau teks halaman
 • Lebih kecil dan lebih cepat: ~0,6 MB tanpa dikompresi, tanpa runtime berat

@@ -9,14 +9,21 @@ Do not hand-edit the PNGs below — re-run the script instead.
 
 1. `01-popup-dangerous.png` — popup on a dangerous look-alike login page
    ("Spots fake login pages before you type").
-2. `02-banner-rescue.png` — in-page danger banner with the one-click rescue
-   link back to the real site.
-3. `03-message-checker.png` — popup on a safe page with the message checker
-   open, showing a verdict on a pasted scam SMS.
-4. `04-settings-dark.png` — options page, dark frame theme.
+2. `02-statistics.png` — options page, Statistics tab on the 30-day view, dark
+   theme ("See the work it does — counted on your device, never sent"). The
+   day ring, lifetime counters and threat taxonomy are seeded by the script
+   (`seedStats()`) so the dashboard shows a real install's worth of history
+   instead of a fresh profile's zeros.
+3. `03-banner-rescue.png` — in-page danger banner with the one-click rescue
+   link back to the real site ("One click back to the real site").
+4. `04-language-picker.png` — popup on a safe page with the header globe menu
+   open, showing "Browser default ✓" and the shipped autonyms ("Speaks your
+   language — 20 of them").
 5. `05-wallet-guard.png` — wallet-drainer overlay blocking a fake "Connect &
-   Claim" flow.
+   Claim" flow ("Stops wallet drainers and scare pop-ups").
 
-Captured against the redesigned popup/options UI (v0.5.0). Re-run
-`npm run screenshots` after any visual change to popup/options/in-page UI
-and commit the refreshed PNGs.
+Captured against the 0.7.1 popup/options UI (globe language switcher in the
+popup header, Statistics dashboard). Re-run `npm run screenshots` after any
+visual change to popup/options/in-page UI and commit the refreshed PNGs.
+`npm run promo` re-crops `01-popup-dangerous.png` into the marquee tile, so run
+it too when that shot changes.

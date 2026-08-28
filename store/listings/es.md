@@ -86,8 +86,13 @@ Funciones:
 • Exportación/importación de ajustes y sincronización opcional entre
   dispositivos (la propia sincronización de tu navegador, siguiendo sin
   cuenta ni servidor de ScamShield)
+• Elige tu idioma: los 20 idiomas están disponibles desde la ventana
+  emergente o los ajustes, con independencia del idioma de tu navegador
 • Historial y estadísticas de protección, guardados solo en tu dispositivo;
   modo oscuro
+• Estadísticas: páginas comprobadas, amenazas detenidas y hallazgos de
+  privacidad, con un gráfico de actividad diaria, contados y almacenados en
+  tu dispositivo, nunca enviados a ningún sitio
 • Informes comunitarios opcionales, desactivados de forma predeterminada,
   nunca con URL ni texto de la página
 • Más pequeño y rápido: ~0,6 MB sin comprimir, sin tiempo de ejecución pesado

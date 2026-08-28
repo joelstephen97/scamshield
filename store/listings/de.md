@@ -85,7 +85,12 @@ Funktionen:
 • Export/Import von Einstellungen und optionale geräteübergreifende
   Synchronisierung (die eigene Synchronisierung deines Browsers – weiterhin
   kein ScamShield-Konto oder -Server)
+• Wähle deine Sprache: alle 20 Sprachen, direkt im Popup oder in den
+  Einstellungen auswählbar – unabhängig von der Sprache deines Browsers
 • Schutzverlauf und Statistiken, nur auf deinem Gerät gespeichert; Dunkelmodus
+• Statistiken: geprüfte Seiten, gestoppte Bedrohungen und Datenschutz-Funde,
+  mit einem Diagramm der täglichen Aktivität – auf deinem Gerät gezählt und
+  gespeichert, niemals irgendwohin gesendet
 • Optionale Community-Meldungen, standardmäßig deaktiviert – niemals URLs
   oder Seitentext
 • Kleiner und schneller: ~0,6 MB entpackt, keine schwere Laufzeitumgebung

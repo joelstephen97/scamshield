@@ -80,7 +80,12 @@ Features:
 • Hides fake prize/giveaway scam content
 • Settings export/import and optional cross-device sync (your browser's own
   sync — still no ScamShield account or server)
+• Choose your language: all 20 languages, picked from the popup or Settings,
+  independent of your browser's language
 • Protection history and stats, stored only on your device; dark mode
+• Statistics: pages checked, threats stopped and privacy findings, with a
+  daily activity chart — counted and stored on your device, never sent
+  anywhere
 • Optional community reporting, off by default — never URLs or page text
 • Smaller and faster: ~0.6 MB unpacked, no heavy runtime
 • 100% on-device analysis — no tracking, no data collection

@@ -85,8 +85,13 @@ Funzionalità:
 • Esportazione/importazione delle impostazioni e sincronizzazione opzionale
   tra dispositivi (la sincronizzazione del tuo browser — senza account o
   server ScamShield)
+• Scegli la tua lingua: tutte e 20 le lingue sono disponibili dal popup o
+  dalle impostazioni, indipendentemente da quella del tuo browser
 • Cronologia e statistiche di protezione, memorizzate solo sul tuo
   dispositivo; tema scuro
+• Statistiche: pagine controllate, minacce bloccate e rilevazioni sulla
+  privacy, con un grafico dell'attività giornaliera — conteggiate e
+  memorizzate sul tuo dispositivo, mai inviate altrove
 • Segnalazioni della community opzionali, disattivate per impostazione
   predefinita — mai URL o testo della pagina
 • Più leggero e veloce: ~0,6 MB non compresso, nessun runtime pesante

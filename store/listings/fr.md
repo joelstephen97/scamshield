@@ -88,8 +88,13 @@ Fonctionnalités :
 • Export/import des paramètres et synchronisation optionnelle entre
   appareils (via la synchronisation propre à votre navigateur — toujours
   sans compte ni serveur ScamShield)
+• Choisissez votre langue : les 20 langues sont accessibles depuis la fenêtre
+  pop-up ou les paramètres, indépendamment de la langue de votre navigateur
 • Historique et statistiques de protection, stockés uniquement sur votre
   appareil ; mode sombre
+• Statistiques : pages vérifiées, menaces stoppées et constats de
+  confidentialité, avec un graphique d'activité quotidienne — comptabilisés
+  et stockés sur votre appareil, jamais envoyés où que ce soit
 • Signalement communautaire optionnel, désactivé par défaut — jamais d'URL
   ni de texte de page
 • Plus léger et plus rapide : ~0,6 Mo décompressé, sans exécution lourde
