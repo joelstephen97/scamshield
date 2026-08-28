@@ -38,7 +38,6 @@
   "trusted": { "message": "विश्वसनीय" },
   "blockedOnSite": { "message": "या साइटवर ब्लॉक केलेले" },
   "blockedAllTime": { "message": "एकूण ब्लॉक केलेले" },
-  "viewAllHistory": { "message": "संपूर्ण इतिहास पाहा →" },
   "privacyOnPage": { "message": "या पृष्ठावरील गोपनीयता" },
   "shoppingCheck": { "message": "खरेदी तपासणी" },
   "checkMessageTitle": { "message": "संदेश किंवा दुवा तपासा" },

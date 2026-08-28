@@ -9,6 +9,11 @@ const T = (k, subs, fb) => { const v = globalThis.SSi18n && globalThis.SSi18n.t(
 const R = globalThis.SSReasons;
 const bidi = (s) => (R && R.bidiWrap ? R.bidiWrap(s) : (s == null ? '' : String(s)));
 const send = (type, extra) => new Promise((res) => { try { api.runtime.sendMessage(Object.assign({ type }, extra || {}), (r) => res(r)); } catch (_) { res(null); } });
+// Statistics tab state. Declared up here (not beside its render functions at
+// the bottom) because showTab() below fires loadStats() while the page is still
+// evaluating, and a `let` further down would still be in its temporal dead zone.
+const SV = globalThis.SSStatsView, SSTATS = globalThis.SSStats;
+let statsPeriod = '7', statsToken = 0;
 function flash(t) { $('status').textContent = t; $('status').classList.add('show'); setTimeout(() => $('status').classList.remove('show'), 1200); }
 function showTab(name, userInitiated) {
   for (const s of document.querySelectorAll('.tab')) s.hidden = s.id !== 'tab-' + name;
@@ -18,9 +23,12 @@ function showTab(name, userInitiated) {
   }
   try { history.replaceState(null, '', '#' + name); } catch (_) {}
   if (userInitiated) { const h = $('tab-' + name).querySelector('h2'); if (h) h.focus(); }
+  // Counters move while the page is open (any tab the user scans bumps them),
+  // and getStats can trail the last bump by a moment, so the dashboard re-reads
+  // on every activation instead of rendering a snapshot taken at page load.
+  if (name === 'stats') loadStats();
 }
 for (const a of document.querySelectorAll('nav a')) a.addEventListener('click', (e) => { e.preventDefault(); showTab(a.dataset.tab, true); });
-showTab((location.hash || '#protection').slice(1).replace(/[^a-z]/g, '') || 'protection');
 $('brandmark').insertAdjacentHTML('afterbegin', I.shield('safe'));
 try { const v = api.runtime.getManifest().version; $('ver').textContent = T('fmtVersion', [bidi(v)], 'Version ' + v); $('aboutver').textContent = v; } catch (_) {}
 
@@ -103,4 +111,138 @@ $('otaurl').addEventListener('change', async () => { await send('setSettings', {
 $('checkupd').addEventListener('click', async () => { flash(T('toastCheckingUpdates', null, 'Checking…')); const r = await send('checkForUpdates'); flash(r && r.ok ? (r.updated ? T('fmtUpdatedToVersion', [bidi(r.version)], 'Updated to v' + r.version) : T('toastAlreadyUpToDate', null, 'Already up to date')) : T('toastUpdateFailed', null, 'Update failed')); load(); });
 $('clearhist').addEventListener('click', async () => { await send('clearHistory'); renderHistory([]); flash(T('toastHistoryCleared', null, 'History cleared')); });
 $('resetfeed').addEventListener('click', async () => { const d = await send('getDefaultFeedUrl'); if (!d || !d.url) return; $('otaurl').value = d.url; await send('setSettings', { patch: { otaUrl: d.url } }); flash(T('resetToOfficialFeed', null, 'Reset to official feed')); });
+
+// ---------------------------------------------------------------------------
+// Statistics tab. Every number here is read from storage.local through the
+// service worker's getStats and rendered on this page — nothing is computed
+// remotely, sent anywhere, or kept anywhere else.
+// ---------------------------------------------------------------------------
+const CAT_EN = { phishing: 'Phishing', fakeShop: 'Fake shop', wallet: 'Wallet drainer', techSupport: 'Tech-support', clipboard: 'Clipboard', clickfix: 'Fake CAPTCHA', fakeUpdate: 'Fake update', other: 'Other' };
+const CAT = (k) => T('statsCat' + k.charAt(0).toUpperCase() + k.slice(1), null, CAT_EN[k] || k);
+const CHART_TITLE_EN = { statsChartTitle7d: 'Pages checked · last 7 days', statsChartTitle30d: 'Pages checked · last 30 days', statsChartTitleAll: 'Pages checked · since install', statsChartTitle90d: 'Pages checked · last 90 days' };
+// Locale-aware formatters, each falling back to English rather than throwing on
+// a runtime that rejects the UI language tag.
+function intlDate(opts) { try { return new Intl.DateTimeFormat(UI_LANG, opts); } catch (_) { return new Intl.DateTimeFormat('en', opts); } }
+function num(n) { const v = Number(n) || 0; try { return v.toLocaleString(UI_LANG); } catch (_) { return String(v); } }
+// Day buckets are UTC (background/stats.js), so they are formatted in UTC too —
+// otherwise a bar would be labelled with the previous day west of Greenwich.
+function dayMs(key) { const t = Date.parse(key + 'T00:00:00Z'); return Number.isFinite(t) ? t : null; }
+function dayText(key) { const t = dayMs(key); return t == null ? key : intlDate({ day: 'numeric', month: 'short', timeZone: 'UTC' }).format(t); }
+function barRangeText(bar) {
+  if (!bar || bar.days <= 1) return dayText(bar && bar.to);
+  const a = dayMs(bar.from), b = dayMs(bar.to);
+  if (a == null || b == null) return dayText(bar.to);
+  const f = intlDate({ day: 'numeric', month: 'short', timeZone: 'UTC' });
+  try { return f.formatRange(a, b); } catch (_) { return f.format(a) + ' – ' + f.format(b); }
+}
+function barTip(bar) {
+  const d = bidi(barRangeText(bar)), c = bidi(num(bar.checked));
+  if (bar.threats === 1) return T('fmtStatsBarTipThreat', [d, c], `${d} · ${c} pages checked · 1 threat stopped`);
+  if (bar.threats > 1) { const t = bidi(num(bar.threats)); return T('fmtStatsBarTipThreats', [d, c, t], `${d} · ${c} pages checked · ${t} threats stopped`); }
+  return T('fmtStatsBarTip', [d, c], `${d} · ${c} pages checked`);
+}
+function renderBars(ser) {
+  const wrap = $('st-bars'); wrap.replaceChildren();
+  const hs = SV.heights(ser.bars);
+  ser.bars.forEach((bar, i) => {
+    const b = document.createElement('div'); b.className = 'b' + (bar.threats > 0 ? ' hit' : '');
+    const tip = document.createElement('span'); tip.className = 'tip'; tip.textContent = barTip(bar);
+    const fill = document.createElement('i'); fill.style.height = hs[i] + '%';
+    b.append(tip, fill); wrap.appendChild(b);
+  });
+}
+function renderCats(byType) {
+  const wrap = $('st-cats'); wrap.replaceChildren();
+  for (const row of SV.catRows(byType)) {
+    const el = document.createElement('div'); el.className = 'cat';
+    const label = document.createElement('span'); label.textContent = CAT(row.key);
+    const track = document.createElement('div'); track.className = 'track';
+    const fill = document.createElement('div'); fill.className = 'fill'; fill.style.width = row.pct + '%';
+    track.appendChild(fill);
+    const n = document.createElement('b'); n.textContent = num(row.count);
+    el.append(label, track, n); wrap.appendChild(el);
+  }
+}
+// History rows carry a level, not a pill: dangerous pages were blocked,
+// suspicious ones only warned. Anything else (no such event today, but the
+// history is a shared ring other detectors can write to) gets the neutral
+// privacy pill rather than being dropped.
+function pillFor(level) {
+  if (level === 'dangerous') return { cls: 'danger', text: T('statsPillBlocked', null, 'Blocked') };
+  if (level === 'suspicious') return { cls: 'warn', text: T('statsPillWarned', null, 'Warned') };
+  return { cls: 'info', text: T('chipPrivacy', null, 'Privacy') };
+}
+function renderStatsRecent(list) {
+  const ul = $('st-recent'); ul.replaceChildren();
+  if (!list.length) {
+    const li = document.createElement('li'); const s = document.createElement('span'); s.className = 'host';
+    s.textContent = T('optNothingYetGood', null, 'Nothing yet — that’s a good thing.'); li.appendChild(s); ul.appendChild(li); return;
+  }
+  for (const e of list.slice(0, 3)) {
+    const li = document.createElement('li');
+    const p = pillFor(e.level); const pill = document.createElement('span'); pill.className = 'pill ' + p.cls; pill.textContent = p.text;
+    const host = document.createElement('span'); host.className = 'host'; host.textContent = e.host || T('unknownSite', null, 'unknown site');
+    const time = document.createElement('time'); time.textContent = F.relTime(e.ts, undefined, UI_LANG);
+    li.append(pill, host, time); ul.appendChild(li);
+  }
+}
+function renderStats(st, hist) {
+  const daily = st.statsDaily || [];
+  const now = Date.now();
+  const ser = SV.series(daily, statsPeriod, now, Number(st.installedAt) || now);
+  const sums = SSTATS.summarize(daily, ser.days, now);
+  // 7/30 days come from the day ring; "All time" uses the lifetime counters for
+  // pages and threats. Privacy findings have no lifetime counter, so that tile
+  // sums the ring — the full history until an install passes the ring's 90 days.
+  const all = statsPeriod === 'all';
+  const checked = all ? Number(st.pagesCheckedTotal) || 0 : sums.checked;
+  const threats = all ? Number(st.threatsBlocked) || 0 : sums.threats;
+
+  // getStats always sends a real epoch, but an Invalid Date would throw inside
+  // Intl and leave the whole dashboard on its "—" placeholders.
+  const installedAt = Number(st.installedAt) > 0 ? Number(st.installedAt) : now;
+  const sinceStr = intlDate({ day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(installedAt));
+  $('statssince').textContent = T('fmtStatsSince', [bidi(sinceStr)], 'Protecting this browser since ' + sinceStr);
+  $('st-checked').textContent = num(checked);
+  $('st-threats').textContent = num(threats);
+  $('st-privacy').textContent = num(sums.privacy);
+  $('st-rules').textContent = num(st.feedRuleCount);
+  $('st-threats-tile').classList.toggle('zero', threats === 0);
+  $('st-threats-sub').textContent = threats === 0
+    ? T('statsThreatsNone', null, "You're clear — nothing slipped through")
+    : threats === 1
+      ? T('statsScamsBlockedOne', null, '1 scam never reached you')
+      : T('fmtStatsScamsBlocked', [bidi(num(threats))], num(threats) + ' scams never reached you');
+
+  const titleKey = statsPeriod === '7' ? 'statsChartTitle7d'
+    : statsPeriod === '30' ? 'statsChartTitle30d'
+      : ser.clamped ? 'statsChartTitle90d' : 'statsChartTitleAll';
+  const title = T(titleKey, null, CHART_TITLE_EN[titleKey]);
+  $('st-charttitle').textContent = title;
+  $('st-axstart').textContent = dayText(ser.from);
+  renderBars(ser);
+  // The bars repeat what the tiles and axis already say, so one label on the
+  // chart is enough for a screen reader — 30 announced bars would not be.
+  $('st-bars').setAttribute('aria-label', title);
+  renderCats(st.threatsByType);
+  renderStatsRecent(hist);
+}
+async function loadStats() {
+  const token = ++statsToken;
+  const [st, h] = await Promise.all([send('getStats'), send('getHistory')]);
+  if (token !== statsToken) return; // a newer period/activation already won
+  if (!st) { flash(T('toastExtensionError', null, 'Extension error — try reopening.')); return; }
+  renderStats(st, (h && h.history) || []);
+}
+for (const b of document.querySelectorAll('#statsseg button')) {
+  b.addEventListener('click', () => {
+    statsPeriod = b.dataset.p;
+    for (const x of document.querySelectorAll('#statsseg button')) {
+      const on = x === b; x.classList.toggle('on', on); x.setAttribute('aria-pressed', String(on));
+    }
+    loadStats();
+  });
+}
+
+showTab((location.hash || '#protection').slice(1).replace(/[^a-z]/g, '') || 'protection');
 load();

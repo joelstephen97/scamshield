@@ -38,7 +38,6 @@
   "trusted": { "message": "বিশ্বস্ত" },
   "blockedOnSite": { "message": "এই সাইটে ব্লক করা হয়েছে" },
   "blockedAllTime": { "message": "মোট ব্লক করা হয়েছে" },
-  "viewAllHistory": { "message": "সম্পূর্ণ ইতিহাস দেখুন →" },
   "privacyOnPage": { "message": "এই পেজে গোপনীয়তা" },
   "shoppingCheck": { "message": "কেনাকাটা যাচাই" },
   "checkMessageTitle": { "message": "একটি বার্তা বা লিঙ্ক যাচাই করুন" },

@@ -38,7 +38,6 @@
   "trusted": { "message": "قابلِ بھروسا" },
   "blockedOnSite": { "message": "اس سائٹ پر بلاک کیے گئے" },
   "blockedAllTime": { "message": "کل بلاک کیے گئے" },
-  "viewAllHistory": { "message": "پورا تاریخچہ دیکھیں ←" },
   "privacyOnPage": { "message": "اس صفحے پر پرائیویسی" },
   "shoppingCheck": { "message": "خریداری کی جانچ" },
   "checkMessageTitle": { "message": "کوئی پیغام یا لنک جانچیں" },

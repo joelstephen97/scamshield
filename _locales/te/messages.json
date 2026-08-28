@@ -38,7 +38,6 @@
   "trusted": { "message": "విశ్వసించబడింది" },
   "blockedOnSite": { "message": "ఈ సైట్‌లో బ్లాక్ చేయబడినవి" },
   "blockedAllTime": { "message": "మొత్తం బ్లాక్ చేయబడినవి" },
-  "viewAllHistory": { "message": "పూర్తి చరిత్రను చూడండి →" },
   "privacyOnPage": { "message": "ఈ పేజీలో గోప్యత" },
   "shoppingCheck": { "message": "షాపింగ్ తనిఖీ" },
   "checkMessageTitle": { "message": "సందేశం లేదా లింక్‌ను తనిఖీ చేయండి" },

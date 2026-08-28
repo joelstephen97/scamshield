@@ -67,6 +67,96 @@ test('stats live in storage.local only — never in settings or sync', async ({ 
   }
 });
 
+// --- The Statistics tab (options.html#stats) --------------------------------
+
+test('options#stats renders the dashboard from a fresh install', async ({ context, extensionId }) => {
+  const page = await context.newPage();
+  await page.goto(`chrome-extension://${extensionId}/options.html#stats`);
+  await expect(page.locator('nav a.cur')).toHaveText('Statistics');
+  await expect(page.locator('#tab-stats')).toBeVisible();
+  await expect(page.locator('#statssince')).toContainText('Protecting this browser since');
+
+  // Four tiles, every number rendered (never left as the "—" placeholder).
+  const tiles = page.locator('#tab-stats .tiles .tile');
+  await expect(tiles).toHaveCount(4);
+  for (const id of ['#st-checked', '#st-threats', '#st-privacy', '#st-rules']) {
+    await expect(page.locator(id)).toHaveText(/^[0-9.,\s]+$/);
+  }
+  // Nothing blocked yet — the reassuring subline, not a scam count.
+  await expect(page.locator('#st-threats')).toHaveText('0');
+  await expect(page.locator('#st-threats-sub')).toHaveText(/nothing slipped through/);
+  await expect(page.locator('#st-threats-tile')).toHaveClass(/zero/);
+  // The bundled ruleset is enforced before the first OTA, and the tile says so.
+  await expect(page.locator('#st-rules')).not.toHaveText('0');
+  await expect(page.locator('#tab-stats .tile .note')).toContainText('built into ScamShield');
+
+  // Chart: 7 zero-filled daily bars, an axis and the every-category list.
+  await expect(page.locator('#st-charttitle')).toHaveText('Pages checked · last 7 days');
+  await expect(page.locator('#st-bars .b')).toHaveCount(7);
+  await expect(page.locator('#st-axstart')).not.toBeEmpty();
+  await expect(page.locator('#st-cats .cat')).toHaveCount(8);
+  await expect(page.locator('#st-recent li')).toHaveCount(1); // the empty-state row
+  await expect(page.locator('#tab-stats .dfoot')).toContainText('Nothing on this page is sent anywhere');
+});
+
+test('options#stats: the period toggle re-renders the chart', async ({ context, extensionId }) => {
+  const page = await context.newPage();
+  await page.goto(`chrome-extension://${extensionId}/options.html#stats`);
+  await expect(page.locator('#st-bars .b')).toHaveCount(7);
+
+  await page.click('#statsseg button[data-p="30"]');
+  await expect(page.locator('#st-charttitle')).toHaveText('Pages checked · last 30 days');
+  await expect(page.locator('#st-bars .b')).toHaveCount(30);
+  await expect(page.locator('#statsseg button[data-p="30"]')).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.locator('#statsseg button[data-p="7"]')).toHaveAttribute('aria-pressed', 'false');
+
+  // A same-day install spans one day, so "All time" is a single bar.
+  await page.click('#statsseg button[data-p="all"]');
+  await expect(page.locator('#st-charttitle')).toHaveText('Pages checked · since install');
+  await expect(page.locator('#st-bars .b')).toHaveCount(1);
+  await expect(page.locator('#statsseg button[data-p="all"]')).toHaveClass(/on/);
+
+  await page.click('#statsseg button[data-p="7"]');
+  await expect(page.locator('#st-bars .b')).toHaveCount(7);
+});
+
+test('options#stats counts a real block: threats tile, category row, recent list', async ({ context, extensionId }) => {
+  const bad = await context.newPage();
+  await bad.goto(BASE + '/phishing-login.html');
+  await expect(bad.locator('.scamshield-banner.danger')).toBeVisible({ timeout: 8000 });
+  await bad.waitForTimeout(500);
+
+  const page = await context.newPage();
+  await page.goto(`chrome-extension://${extensionId}/options.html#stats`);
+  await expect(page.locator('#st-threats')).not.toHaveText('0');
+  await expect(page.locator('#st-threats-sub')).toHaveText(/never reached you/);
+  await expect(page.locator('#st-threats-tile')).not.toHaveClass(/zero/);
+  await expect(page.locator('#st-checked')).not.toHaveText('0');
+  // Today's bar carries the threat marker.
+  await expect(page.locator('#st-bars .b.hit')).toHaveCount(1);
+  // Phishing leads the by-type list with a non-zero count.
+  await expect(page.locator('#st-cats .cat').first()).toContainText('Phishing');
+  await expect(page.locator('#st-cats .cat').first().locator('b')).not.toHaveText('0');
+  // Recent shows the blocked host with the Blocked pill.
+  const first = page.locator('#st-recent li').first();
+  await expect(first.locator('.pill')).toHaveText('Blocked');
+  await expect(first.locator('.host')).toHaveText('localhost');
+});
+
+test('popup links to the Statistics tab', async ({ context, extensionId }) => {
+  const sw = context.serviceWorkers()[0];
+  await sw.evaluate(() => chrome.storage.local.set({ history: [{ ts: Date.now(), host: 'old-scam.example', kind: 'page', level: 'dangerous' }] }));
+  const popup = await context.newPage();
+  await popup.goto(`chrome-extension://${extensionId}/popup.html`);
+  const link = popup.locator('#viewall');
+  await expect(link).toBeVisible();
+  await expect(link).toHaveText('Statistics →');
+  const [opened] = await Promise.all([context.waitForEvent('page'), link.click()]);
+  await opened.waitForLoadState('domcontentloaded').catch(() => {});
+  expect(opened.url()).toContain('options.html#stats');
+  await expect(opened.locator('#tab-stats')).toBeVisible();
+});
+
 test('a page with privacy findings counts once, however many findings it has', async ({ context }) => {
   const sw = context.serviceWorkers()[0];
   const page = await context.newPage();

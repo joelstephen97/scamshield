@@ -38,7 +38,6 @@
   "trusted": { "message": "已信任" },
   "blockedOnSite": { "message": "在此网站已拦截" },
   "blockedAllTime": { "message": "累计已拦截" },
-  "viewAllHistory": { "message": "查看全部历史记录 →" },
   "privacyOnPage": { "message": "此页面的隐私" },
   "shoppingCheck": { "message": "购物检查" },
   "checkMessageTitle": { "message": "检查消息或链接" },

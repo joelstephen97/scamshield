@@ -7,6 +7,7 @@
   <a href="#protection" data-tab="protection" class="cur" role="tab" aria-selected="true" aria-controls="tab-protection" data-i18n="tabProtection">Protection</a>
   <a href="#trusted" data-tab="trusted" role="tab" aria-selected="false" aria-controls="tab-trusted" data-i18n="tabTrusted">Trusted sites</a>
   <a href="#history" data-tab="history" role="tab" aria-selected="false" aria-controls="tab-history" data-i18n="tabHistory">History</a>
+  <a href="#stats" data-tab="stats" role="tab" aria-selected="false" aria-controls="tab-stats" data-i18n="tabStats">Statistics</a>
   <a href="#feed" data-tab="feed" role="tab" aria-selected="false" aria-controls="tab-feed" data-i18n="tabFeed">Threat feed</a>
   <a href="#about" data-tab="about" role="tab" aria-selected="false" aria-controls="tab-about" data-i18n="tabAbout">About</a>
   <span class="sp"></span><span class="ver" id="ver"></span>
@@ -59,6 +60,34 @@
   <h2 id="h-history" tabindex="-1" data-i18n="historyTitle">Protection history</h2><p class="lead" data-i18n="historyLead">Stored only on this device (site names, never full addresses).</p>
   <ul id="history" class="list"></ul><button id="clearhist" class="btn" data-i18n="clearHistory">Clear history</button>
 </section>
+<section id="tab-stats" class="tab" hidden role="tabpanel" aria-labelledby="h-stats">
+  <div class="dhead">
+    <div><h2 id="h-stats" tabindex="-1" data-i18n="tabStats">Statistics</h2><span class="since" id="statssince"></span></div>
+    <div class="seg" id="statsseg">
+      <button type="button" class="on" data-p="7" aria-pressed="true" data-i18n="stats7d">7 days</button><button type="button" data-p="30" aria-pressed="false" data-i18n="stats30d">30 days</button><button type="button" data-p="all" aria-pressed="false" data-i18n="statsAll">All time</button>
+    </div>
+  </div>
+  <div class="tiles">
+    <div class="tile"><b id="st-checked">—</b><span data-i18n="statsPagesChecked">Pages checked on-device</span></div>
+    <div class="tile" id="st-threats-tile"><b id="st-threats">—</b><span data-i18n="statsThreatsStopped">Threats stopped</span><span class="sub" id="st-threats-sub"></span></div>
+    <div class="tile"><b id="st-privacy">—</b><span data-i18n="statsPrivacyFindings">Privacy findings</span></div>
+    <div class="tile"><b id="st-rules">—</b><span data-i18n="statsRulesActive">Blocklist rules active</span><span class="note" data-i18n="statsRulesActiveHint">In force right now, including the list built into ScamShield.</span></div>
+  </div>
+  <div class="charts">
+    <div class="panel">
+      <h4 id="st-charttitle" data-i18n="statsChartTitle7d">Pages checked · last 7 days</h4>
+      <div class="bars" id="st-bars" role="img"></div>
+      <div class="axis"><span id="st-axstart"></span><span data-i18n="statsAxisToday">Today</span></div>
+      <div class="legendline"><span><span class="sw"></span><span data-i18n="statsLegendChecked">Pages checked</span></span><span><span class="dot"></span><span data-i18n="statsLegendThreat">Threat stopped that day</span></span></div>
+    </div>
+    <div class="panel">
+      <h4 data-i18n="statsByType">Threats by type · all time</h4>
+      <div class="catlist" id="st-cats"></div>
+      <div class="recent"><h4 data-i18n="statsRecent">Recent</h4><ul id="st-recent"></ul></div>
+    </div>
+  </div>
+  <p class="dfoot"><span aria-hidden="true">🔒</span><span data-i18n="statsFooter">Every number is counted on your device. Nothing on this page is sent anywhere.</span></p>
+</section>
 <section id="tab-feed" class="tab" hidden role="tabpanel" aria-labelledby="h-feed">
   <h2 id="h-feed" tabindex="-1" data-i18n="feedTitle">Threat feed</h2><p class="lead" data-i18n="feedLead">A daily-rebuilt list of known scam sites (OpenPhish + URLhaus, heavily filtered). ScamShield only downloads it.</p>
   <div class="feedline"><span class="dot" id="feeddot"></span><span id="feedstatus" data-i18n="feedNeverUpdated">Never updated</span><button id="checkupd" class="btn ghost" data-i18n="checkNow">Check now</button></div>
@@ -85,5 +114,5 @@
 </section>
 <p id="status" class="toast" role="status"></p>
 </main></div>
-<script src="engine/constants.js"></script><script src="ui/reasons.js"></script><script src="ui/format.js"></script><script src="ui/icons.js"></script><script src="ui/theme.js"></script><script src="ui/i18n.js"></script><script src="options.js"></script>
+<script src="engine/constants.js"></script><script src="background/stats.js"></script><script src="ui/stats_view.js"></script><script src="ui/reasons.js"></script><script src="ui/format.js"></script><script src="ui/icons.js"></script><script src="ui/theme.js"></script><script src="ui/i18n.js"></script><script src="options.js"></script>
 </body></html>

@@ -38,7 +38,6 @@
   "trusted": { "message": "Đã tin cậy" },
   "blockedOnSite": { "message": "Đã chặn trên trang này" },
   "blockedAllTime": { "message": "Tổng số đã chặn" },
-  "viewAllHistory": { "message": "Xem toàn bộ lịch sử →" },
   "privacyOnPage": { "message": "Quyền riêng tư trên trang này" },
   "shoppingCheck": { "message": "Kiểm tra mua sắm" },
   "checkMessageTitle": { "message": "Kiểm tra tin nhắn hoặc liên kết" },

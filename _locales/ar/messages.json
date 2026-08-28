@@ -38,7 +38,6 @@
   "trusted": { "message": "موثوق" },
   "blockedOnSite": { "message": "المحظورة في هذا الموقع" },
   "blockedAllTime": { "message": "إجمالي المحظورة" },
-  "viewAllHistory": { "message": "عرض كل السجل ←" },
   "privacyOnPage": { "message": "الخصوصية في هذه الصفحة" },
   "shoppingCheck": { "message": "فحص التسوّق" },
   "checkMessageTitle": { "message": "افحص رسالة أو رابطًا" },

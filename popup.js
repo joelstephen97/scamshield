@@ -98,7 +98,10 @@ async function init() {
   $('enabled').addEventListener('change', async () => { settings = await send('setSettings', { patch: { enabled: $('enabled').checked } }); $('enabledwrap').classList.toggle('on', !!settings.enabled); $('enabledlbl').textContent = settings.enabled ? T('on', null, 'On') : T('paused', null, 'Paused'); });
   $('opts').addEventListener('click', (e) => { e.preventDefault(); api.runtime.openOptionsPage(); });
   $('support').addEventListener('click', (e) => { e.preventDefault(); api.tabs.create({ url: 'https://github.com/sponsors/joelstephen97' }); });
-  $('viewall').addEventListener('click', (e) => { e.preventDefault(); api.runtime.openOptionsPage(); });
+  // openOptionsPage() cannot carry a #hash, so the Statistics deep link opens
+  // the options page as a normal tab (options_page/options_ui both open in a
+  // tab already) and lets the tab router pick the section up from the hash.
+  $('viewall').addEventListener('click', (e) => { e.preventDefault(); api.tabs.create({ url: api.runtime.getURL('options.html#stats') }); window.close(); });
   $('tile-all').querySelector('b').textContent = String(settings.threatsBlocked || 0);
   if (settings.whatsNewSeen !== '0.6.0') { $('whatsnew').hidden = false; $('whatsnewlink').addEventListener('click', (e) => { e.preventDefault(); api.tabs.create({ url: 'https://github.com/joelstephen97/scamshield/blob/main/CHANGELOG.md' }); }); $('whatsnewx').addEventListener('click', async () => { $('whatsnew').hidden = true; await send('setSettings', { patch: { whatsNewSeen: '0.6.0' } }); }); }
 

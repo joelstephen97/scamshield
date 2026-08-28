@@ -28,3 +28,48 @@ select{font:inherit;border:1px solid var(--hair);border-radius:var(--chip);backg
 .grp .setrow{margin:0 12px 8px;background:var(--bg,transparent)}
 .grp[open]>summary{border-bottom:1px solid var(--hair);margin-bottom:8px}
 @media (max-width:720px){.shell{grid-template-columns:1fr}nav{position:static;height:auto;flex-direction:row;flex-wrap:wrap;border-right:0;border-bottom:1px solid var(--hair)}nav .brand{width:100%}nav .sp,nav .ver{display:none}}
+
+/* ---------- Statistics tab (dashboard) ---------- */
+#tab-stats .dhead{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+#tab-stats .since{font-size:12px;color:var(--muted)}
+.seg{display:inline-flex;border:1px solid var(--hair);border-radius:99px;padding:2px;background:var(--ground)}
+.seg button{border:0;background:transparent;color:var(--muted);font:inherit;font-size:12px;padding:5px 12px;border-radius:99px;cursor:pointer}
+.seg button.on{background:var(--accent);color:var(--accent-ink);font-weight:600}
+#tab-stats .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+#tab-stats .tile{padding:12px 14px}
+#tab-stats .tile b{font-size:24px;font-weight:650}
+#tab-stats .tile.zero b{color:var(--safe)}
+#tab-stats .tile .sub{display:block;font-size:11px;color:var(--safe);margin-top:2px}
+#tab-stats .tile .note{display:block;font-size:11px;color:var(--muted);margin-top:2px}
+.charts{display:grid;grid-template-columns:3fr 2fr;gap:10px;margin-top:10px}
+.panel{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--hair);border-radius:var(--radius);padding:12px 14px}
+.panel h4{margin:0 0 10px;font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.02em;text-transform:uppercase}
+.bars{display:flex;align-items:flex-end;gap:3px;flex:1 1 auto;min-height:110px;max-height:260px}
+.bars .b{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:flex-end;height:100%;position:relative}
+.bars .b i{display:block;background:var(--accent);opacity:.75;border-radius:4px 4px 0 0;min-height:3px;transition:height .25s}
+.bars .b:hover i{opacity:1}
+.bars .b .tip{position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);background:var(--text);color:var(--ground);font-size:11px;padding:3px 8px;border-radius:var(--chip);white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .12s;z-index:1}
+.bars .b:hover .tip{opacity:1}
+.bars .b.hit::after{content:"";position:absolute;top:-8px;left:50%;transform:translateX(-50%);width:7px;height:7px;border-radius:50%;background:var(--danger)}
+.axis{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:6px;font-variant-numeric:tabular-nums}
+.legendline{display:flex;gap:14px;align-items:center;flex-wrap:wrap;font-size:11px;color:var(--muted);margin-top:10px}
+.legendline .sw{display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--accent);opacity:.75;margin-right:5px;vertical-align:-1px}
+.legendline .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--danger);margin-right:5px;vertical-align:0}
+.catlist{display:flex;flex-direction:column;gap:9px}
+.cat{display:grid;grid-template-columns:minmax(0,110px) 1fr auto;gap:8px;align-items:center;font-size:12px}
+.cat>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cat .track{height:10px;border-radius:5px;background:var(--unknown-bg);overflow:hidden}
+.cat .fill{height:100%;background:var(--accent);border-radius:5px}
+.cat b{font-variant-numeric:tabular-nums;font-weight:600;text-align:right;min-width:24px}
+.recent{margin-top:14px}
+.recent ul{list-style:none;margin:0;padding:0}
+.recent li{display:flex;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--hair);font-size:12px}
+.recent li:first-child{border-top:0}
+.recent .host{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.recent time{color:var(--muted);font-variant-numeric:tabular-nums}
+.pill{font-size:10px;padding:3px 8px;border-radius:99px;font-weight:600;letter-spacing:.02em;flex:none}
+.pill.danger{background:var(--danger-bg);color:var(--danger)}
+.pill.warn{background:var(--warn-bg);color:var(--warn)}
+.pill.info{background:var(--accent-soft);color:var(--accent)}
+.dfoot{margin:14px 0 0;font-size:11px;color:var(--muted);display:flex;gap:6px;align-items:center}
+@media (max-width:720px){.charts{grid-template-columns:1fr}}

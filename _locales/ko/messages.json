@@ -38,7 +38,6 @@
   "trusted": { "message": "신뢰됨" },
   "blockedOnSite": { "message": "이 사이트에서 차단됨" },
   "blockedAllTime": { "message": "전체 차단 수" },
-  "viewAllHistory": { "message": "전체 기록 보기 →" },
   "privacyOnPage": { "message": "이 페이지의 개인정보" },
   "shoppingCheck": { "message": "쇼핑 점검" },
   "checkMessageTitle": { "message": "메시지나 링크 확인" },

@@ -38,7 +38,6 @@
   "trusted": { "message": "நம்பப்பட்டது" },
   "blockedOnSite": { "message": "இந்தத் தளத்தில் தடுக்கப்பட்டவை" },
   "blockedAllTime": { "message": "மொத்தம் தடுக்கப்பட்டவை" },
-  "viewAllHistory": { "message": "முழு வரலாற்றைப் பார் →" },
   "privacyOnPage": { "message": "இந்தப் பக்கத்தில் தனியுரிமை" },
   "shoppingCheck": { "message": "ஷாப்பிங் சரிபார்ப்பு" },
   "checkMessageTitle": { "message": "செய்தி அல்லது இணைப்பைச் சரிபார்க்கவும்" },

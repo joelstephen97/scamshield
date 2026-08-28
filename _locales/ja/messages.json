@@ -38,7 +38,6 @@
   "trusted": { "message": "信頼済み" },
   "blockedOnSite": { "message": "このサイトでブロック" },
   "blockedAllTime": { "message": "累計ブロック数" },
-  "viewAllHistory": { "message": "すべての履歴を表示 →" },
   "privacyOnPage": { "message": "このページのプライバシー" },
   "shoppingCheck": { "message": "ショッピング確認" },
   "checkMessageTitle": { "message": "メッセージやリンクを確認" },

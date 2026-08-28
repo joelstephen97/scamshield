@@ -38,7 +38,6 @@
   "trusted": { "message": "De confiance" },
   "blockedOnSite": { "message": "Bloqués sur ce site" },
   "blockedAllTime": { "message": "Bloqués au total" },
-  "viewAllHistory": { "message": "Voir tout l'historique →" },
   "privacyOnPage": { "message": "Confidentialité sur cette page" },
   "shoppingCheck": { "message": "Vérification d'achat" },
   "checkMessageTitle": { "message": "Vérifier un message ou un lien" },
