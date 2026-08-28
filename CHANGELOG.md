@@ -2,6 +2,18 @@
 
 All notable changes to ScamShield. Versions are git tags (`vX.Y.Z`); the version on the [Chrome Web Store](https://chromewebstore.google.com/detail/fojjjofjimbfoddafoampojopijnlihl) may lag a tag by a few days while Google reviews it. Privacy-relevant changes are also reflected in the [privacy policy](https://joelstephen97.github.io/scamshield/privacy.html).
 
+## 0.7.1 — 2026-08-28
+
+### New
+- **Popup language switcher** — a globe button in the popup header, next to
+  Settings, opens the same 20-language picker the Settings page already has.
+  Picking a language writes the same `uiLang` setting the Settings dropdown
+  does (they stay in sync either way) and reloads the popup in that language
+  immediately.
+
+0.7.1 adds no new permissions, no new messages, and makes no new network
+requests — it reuses the language override shipped in 0.7.0.
+
 ## 0.7.0 — 2026-08-28
 
 ### New
