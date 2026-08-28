@@ -90,37 +90,19 @@ Fitur:
 • Lebih kecil dan lebih cepat: ~0,6 MB tanpa dikompresi, tanpa runtime berat
 • 100% analisis di perangkat — tanpa pelacakan, tanpa pengumpulan data
 
-## What's new (0.6.0)
+## What's new (0.7.0)
 
-Rilis "hanya masalah nyata" — setiap fitur baru menargetkan pola penipuan
-atau privasi dunia nyata yang tervalidasi, dan tidak satu pun menambah izin.
+- Tab Statistik baru di Pengaturan: halaman diperiksa di perangkat, ancaman
+  dihentikan, temuan privasi, dan grafik aktivitas harian — lihat 7 hari
+  terakhir, 30 hari terakhir, atau total Anda sejak dipasang — semuanya
+  dihitung dan disimpan di perangkat Anda, tidak pernah dikirim ke mana pun.
+- Prompt ulasan yang tenang dan dapat ditutup muncul di popup hanya setelah
+  ScamShield benar-benar memblokir sesuatu dua kali — tolak sekali dan
+  prompt itu akan hilang untuk selamanya.
+- Penggantian bahasa baru di Pengaturan: pilih bahasa ScamShield sendiri
+  secara independen dari bahasa browser Anda, dengan dukungan sinkronisasi
+  antar perangkat jika Anda telah mengaktifkan sinkronisasi bawaan browser
+  Anda.
 
-- Sekarang memindai di dalam iframe, tempat formulir phishing dulu
-  bersembunyi secara tak kasatmata.
-- Tingkat halaman antara layar penuh baru untuk penipuan yang hampir pasti —
-  serangan clipboard ClickFix CAPTCHA palsu, prompt pembaruan browser palsu,
-  phishing biaya pengiriman (DHL/FedEx/Aramex/Royal Mail/Evri/Emirates
-  Post/DPD), dan halaman menakut-nakuti dukungan teknis — dengan jeda wajib
-  dan perbandingan domain asli-vs-palsu, digunakan hanya untuk deteksi
-  dengan hampir nol positif palsu.
-- Paket privasi baru: peringatan formulir bocor (email/telepon Anda dikirim
-  ke pelacak sebelum Anda menekan kirim, dalam teks biasa atau di-hash),
-  deteksi fingerprinting, dan peringatan jebakan izin notifikasi — semuanya
-  di perangkat.
-- Pemeriksaan belanja baru: hitung mundur palsu, tekanan palsu "tinggal 2
-  lagi", lencana kepercayaan yang tidak menautkan ke mana pun, permintaan
-  pembayaran di luar platform, dan detail kontak yang hilang, ditambah
-  pemeriksaan hasil bersponsor di Google/Bing/DuckDuckGo.
-- Mode ketat: satu sakelar yang memblokir bahkan halaman "mencurigakan"
-  secara layar penuh dengan kata-kata lebih sederhana, untuk membantu
-  kerabat yang kurang percaya diri tetap aman.
-- Ekspor/impor pengaturan dan sinkronisasi lintas perangkat opsional
-  (sinkronisasi bawaan browser Anda sendiri — tetap tanpa akun atau server
-  ScamShield).
-- Deteksi homograf IDN dan peningkatan pencuri dompet (dukungan multi-dompet
-  EIP-6963, deteksi delegasi akun EIP-7702).
-- Dukungan 20 bahasa, dengan terjemahan lengkap menu, peringatan, dan
-  pengaturan, bukan hanya listing toko.
-
-Tidak ada izin baru. Masih `storage`, `declarativeNetRequest`, `alarms`, dan
-akses http/https, persis seperti 0.3.1.
+Tidak ada izin baru. Masih `storage`, `declarativeNetRequest`, `alarms`,
+dan akses http/https, persis seperti pada 0.3.1.

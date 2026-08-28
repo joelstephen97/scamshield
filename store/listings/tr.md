@@ -90,38 +90,18 @@ Yalnızca çevrilmiş bir mağaza listesi değil, tam menü, uyarı ve ayar
   zamanı yok
 • %100 cihaz üzerinde analiz — takip yok, veri toplama yok
 
-## What's new (0.6.0)
+## What's new (0.7.0)
 
-"Sadece gerçek sorunlar" sürümü — her yeni özellik, doğrulanmış gerçek dünya
-dolandırıcılığı veya gizlilik kalıbını hedefler ve hiçbiri yeni bir izin
-eklemez.
+- Ayarlarda yeni İstatistikler sekmesi: cihazda kontrol edilen sayfalar,
+  durdurulan tehditler, gizlilik bulguları ve günlük etkinlik grafiği — son
+  7 günü, son 30 günü veya kurulumdan bu yana toplamlarınızı görüntüleyin —
+  hepsi cihazınızda sayılır ve saklanır, hiçbir yere gönderilmez.
+- ScamShield gerçekten iki kez bir şeyi engelledikten sonra açılır
+  pencerede sessiz, kapatılabilir bir değerlendirme istemi görünür — bir kez
+  reddedin, bir daha çıkmaz.
+- Ayarlarda yeni dil geçersiz kılma: ScamShield'ın kendi dilini
+  tarayıcınızınkinden bağımsız olarak seçin; tarayıcınızın kendi
+  senkronizasyonunu açtıysanız cihazlar arası senkronizasyon desteğiyle.
 
-- Artık kimlik avı formlarının görünmez şekilde saklandığı iframe'lerin
-  içini de tarıyor.
-- Neredeyse kesin dolandırıcılıklar için yeni bir tam ekran ara sayfa
-  seviyesi — ClickFix sahte CAPTCHA pano saldırıları, sahte tarayıcı
-  güncelleme istemleri, teslimat ücreti kimlik avı (DHL/FedEx/Aramex/Royal
-  Mail/Evri/Emirates Post/DPD) ve teknik destek korkutma sayfaları; zorunlu
-  bir duraklama ve gerçek-sahte alan adı karşılaştırmasıyla birlikte,
-  yalnızca neredeyse sıfır yanlış pozitifli tespitler için kullanılır.
-- Yeni bir gizlilik paketi: veri sızdıran form uyarıları (gönder'e basmadan
-  önce e-posta/telefon bilginiz düz metin veya hash'lenmiş olarak bir
-  izleyiciye gönderilir), parmak izi tespiti ve bildirim izni tuzağı
-  uyarıları — hepsi cihaz üzerinde.
-- Yeni alışveriş kontrolleri: sahte geri sayımlar, sahte "sadece 2 tane
-  kaldı" baskısı, hiçbir yere bağlantısı olmayan güven rozetleri, platform
-  dışı ödeme istekleri ve eksik iletişim bilgileri, ayrıca
-  Google/Bing/DuckDuckGo'da sponsorlu sonuç kontrolü.
-- Katı mod: kendine daha az güvenen bir akrabanın güvende kalmasına yardımcı
-  olmak için, "şüpheli" sayfaları bile daha basit ifadelerle tam ekran
-  engelleyen tek bir düğme.
-- Ayarları dışa/içe aktarma ve isteğe bağlı cihazlar arası senkronizasyon
-  (tarayıcınızın kendi senkronizasyonu — yine de ScamShield hesabı veya
-  sunucusu yok).
-- IDN homograf tespiti ve cüzdan boşaltıcı yükseltmeleri (EIP-6963 çoklu
-  cüzdan desteği, EIP-7702 hesap devri tespiti).
-- Yalnızca mağaza listesi değil, tam menü, uyarı ve ayar çevirileriyle
-  birlikte 20 dil desteği.
-
-Yeni izin yok. 0.3.1'de olduğu gibi hâlâ yalnızca `storage`,
-`declarativeNetRequest`, `alarms` ve http/https erişimi.
+Yeni izin yok. Hâlâ `storage`, `declarativeNetRequest`, `alarms` ve
+http/https erişimi, tıpkı 0.3.1'deki gibi.

@@ -93,39 +93,20 @@ Funciones:
 • Más pequeño y rápido: ~0,6 MB sin comprimir, sin tiempo de ejecución pesado
 • Análisis 100 % en el dispositivo: sin rastreo, sin recopilación de datos
 
-## What's new (0.6.0)
+## What's new (0.7.0)
 
-La versión de «solo problemas reales»: cada función nueva se dirige a un
-patrón de estafa o privacidad real y validado, y ninguna añade un permiso.
-
-- Ahora analiza también dentro de los iframes, donde antes se escondían de
-  forma invisible los formularios de phishing.
-- Un nuevo nivel de aviso a pantalla completa para estafas casi seguras:
-  ataques al portapapeles ClickFix con CAPTCHA falsos, falsas indicaciones de
-  actualización del navegador, phishing de tarifas de entrega (DHL/FedEx/
-  Aramex/Royal Mail/Evri/Emirates Post/DPD) y páginas intimidatorias de
-  soporte técnico, con una pausa forzada y una comparación entre el dominio
-  real y el falso, reservado para detecciones con una tasa de falsos
-  positivos casi nula.
-- Un nuevo paquete de privacidad: avisos de formularios con fugas (tu correo/
-  teléfono enviado a un rastreador antes de pulsar enviar, en texto plano o
-  con hash), detección de huellas digitales y avisos de trampas de permiso de
-  notificación, todo en el dispositivo.
-- Nuevas comprobaciones de compra: cuentas atrás falsas, presión falsa de
-  «solo quedan 2», insignias de confianza enlazadas directamente, solicitudes
-  de pago fuera de la plataforma y falta de datos de contacto, además de una
-  comprobación de resultados patrocinados en Google/Bing/DuckDuckGo.
-- Modo estricto: un solo interruptor que bloquea a pantalla completa incluso
-  las páginas «sospechosas» con un lenguaje más sencillo, para ayudar a un
-  familiar menos experto a estar seguro.
-- Exportación/importación de ajustes y sincronización opcional entre
-  dispositivos (la propia sincronización de tu navegador, siguiendo sin
-  cuenta ni servidor de ScamShield).
-- Detección de homógrafos IDN y mejoras contra vaciadores de monedero
-  (compatibilidad con múltiples monederos EIP-6963, detección de la
-  delegación de cuenta EIP-7702).
-- Compatibilidad con 20 idiomas, con traducciones completas de menús, avisos
-  y ajustes, no solo de la ficha de la tienda.
+- Nueva pestaña Estadísticas en los ajustes: páginas comprobadas en el
+  dispositivo, amenazas detenidas, hallazgos de privacidad y un gráfico de
+  actividad diaria — consulta los últimos 7 días, los últimos 30 días o tus
+  totales desde la instalación — todo contado y almacenado en tu
+  dispositivo, nunca enviado a ningún sitio.
+- Un aviso de reseña discreto y descartable aparece en el popup solo
+  después de que ScamShield haya bloqueado algo realmente dos veces —
+  recházalo una vez y desaparece para siempre.
+- Nueva anulación de idioma en los ajustes: elige el idioma propio de
+  ScamShield independientemente del de tu navegador, con compatibilidad de
+  sincronización entre dispositivos si has activado la sincronización de tu
+  navegador.
 
 Sin permisos nuevos. Sigue usando `storage`, `declarativeNetRequest`,
-`alarms` y acceso http/https, exactamente igual que la 0.3.1.
+`alarms` y acceso http/https, exactamente igual que en la 0.3.1.

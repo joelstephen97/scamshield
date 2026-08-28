@@ -95,39 +95,20 @@ Fonctionnalités :
 • Plus léger et plus rapide : ~0,6 Mo décompressé, sans exécution lourde
 • Analyse 100 % sur l'appareil — aucun suivi, aucune collecte de données
 
-## What's new (0.6.0)
+## What's new (0.7.0)
 
-La version « uniquement de vrais problèmes » — chaque nouvelle fonctionnalité
-cible un schéma d'arnaque ou de confidentialité réel et validé, et aucune
-n'ajoute de permission.
-
-- Analyse désormais l'intérieur des iframes, où les formulaires de phishing
-  se cachaient auparavant de façon invisible.
-- Un nouveau niveau d'alerte plein écran pour les arnaques quasi certaines —
-  attaques presse-papiers ClickFix par faux CAPTCHA, fausses invites de mise
-  à jour du navigateur, phishing aux frais de livraison (DHL/FedEx/
-  Aramex/Royal Mail/Evri/Emirates Post/DPD) et pages d'intimidation au
-  support technique — avec une pause forcée et une comparaison de domaine
-  réel/faux, réservée aux détections à taux de faux positifs quasi nul.
-- Un nouveau pack confidentialité : alertes de formulaire qui fuit (votre
-  e-mail/téléphone envoyé à un traqueur avant votre validation, en clair ou
-  haché), détection de prise d'empreinte et alertes de piège de permission de
-  notification — le tout sur l'appareil.
-- Nouvelles vérifications d'achat : faux comptes à rebours, fausse pression
-  « plus que 2 en stock », badges de confiance en lien direct, demandes de
-  paiement hors plateforme et coordonnées manquantes, plus une vérification
-  des résultats sponsorisés sur Google/Bing/DuckDuckGo.
-- Mode strict : un seul réglage qui bloque même les pages « suspectes » en
-  plein écran avec un langage plus simple, pour aider un proche moins à
-  l'aise à rester en sécurité.
-- Export/import des paramètres et synchronisation optionnelle entre
-  appareils (via la synchronisation propre à votre navigateur — toujours
-  sans compte ni serveur ScamShield).
-- Détection des homographes IDN et améliorations anti-vidangeurs de
-  portefeuille (prise en charge multi-portefeuille EIP-6963, détection de la
-  délégation de compte EIP-7702).
-- Prise en charge de 20 langues, avec des traductions complètes des menus,
-  des alertes et des paramètres, pas seulement de la fiche boutique.
+- Nouvel onglet Statistiques dans les paramètres : pages vérifiées sur
+  l'appareil, menaces stoppées, constats de confidentialité et un graphique
+  d'activité quotidienne — consultez les 7 derniers jours, les 30 derniers
+  jours ou vos totaux depuis l'installation — le tout comptabilisé et stocké
+  sur votre appareil, jamais envoyé où que ce soit.
+- Une invite d'évaluation discrète et ignorable apparaît dans le popup
+  seulement après que ScamShield a réellement bloqué quelque chose à deux
+  reprises — refusez-la une fois et elle disparaît pour de bon.
+- Nouvelle option de langue dans les paramètres : choisissez la langue
+  propre à ScamShield indépendamment de celle de votre navigateur, avec
+  prise en charge de la synchronisation entre appareils si vous avez activé
+  la synchronisation de votre navigateur.
 
 Aucune nouvelle permission. Toujours `storage`, `declarativeNetRequest`,
-`alarms` et l'accès http/https, exactement comme la 0.3.1.
+`alarms` et l'accès http/https, exactement comme en 0.3.1.

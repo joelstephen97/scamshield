@@ -92,39 +92,20 @@ Funzionalità:
 • Più leggero e veloce: ~0,6 MB non compresso, nessun runtime pesante
 • Analisi 100% sul dispositivo: nessun tracciamento, nessuna raccolta dati
 
-## What's new (0.6.0)
+## What's new (0.7.0)
 
-La versione "solo problemi reali" — ogni nuova funzionalità mira a uno
-schema di truffa o privacy reale e convalidato, e nessuna aggiunge un
-permesso.
+- Nuova scheda Statistiche nelle impostazioni: pagine controllate sul
+  dispositivo, minacce bloccate, rilevazioni sulla privacy e un grafico
+  dell'attività giornaliera — visualizza gli ultimi 7 giorni, gli ultimi 30
+  giorni o i tuoi totali dall'installazione — tutto conteggiato e
+  memorizzato sul tuo dispositivo, mai inviato altrove.
+- Un discreto invito a lasciare una recensione, che puoi ignorare, appare
+  nel popup solo dopo che ScamShield ha effettivamente bloccato qualcosa due
+  volte — rifiutalo una volta e sparirà per sempre.
+- Nuova sostituzione della lingua nelle impostazioni: scegli la lingua di
+  ScamShield indipendentemente da quella del tuo browser, con supporto per
+  la sincronizzazione tra dispositivi se hai attivato la sincronizzazione
+  del tuo browser.
 
-- Ora esegue la scansione anche all'interno degli iframe, dove i moduli di
-  phishing prima si nascondevano invisibili.
-- Un nuovo livello di interstiziale a schermo intero per truffe quasi certe —
-  attacchi agli appunti ClickFix con falsi CAPTCHA, falsi avvisi di
-  aggiornamento del browser, phishing sulle spese di consegna (DHL/FedEx/
-  Aramex/Royal Mail/Evri/Emirates Post/DPD) e pagine intimidatorie di
-  supporto tecnico — con una pausa forzata e un confronto tra dominio reale e
-  falso, riservato a rilevamenti con un tasso di falsi positivi quasi nullo.
-- Un nuovo pacchetto privacy: avvisi sui moduli che perdono dati (la tua
-  email/telefono inviati a un tracker prima che tu prema invio, in chiaro o
-  con hash), rilevamento del fingerprinting e avvisi sulle trappole di
-  permesso per le notifiche — tutto sul dispositivo.
-- Nuovi controlli sugli acquisti: falsi conti alla rovescia, falsa pressione
-  "ne restano solo 2", badge di fiducia con link diretto, richieste di
-  pagamento fuori piattaforma e contatti mancanti, più un controllo dei
-  risultati sponsorizzati su Google/Bing/DuckDuckGo.
-- Modalità rigorosa: un unico interruttore che blocca a schermo intero anche
-  le pagine "sospette" con un linguaggio più semplice, per aiutare un
-  familiare meno esperto a restare al sicuro.
-- Esportazione/importazione delle impostazioni e sincronizzazione opzionale
-  tra dispositivi (la sincronizzazione del tuo browser — senza account o
-  server ScamShield).
-- Rilevamento degli omografi IDN e miglioramenti anti-wallet-drainer
-  (supporto multi-wallet EIP-6963, rilevamento della delega dell'account
-  EIP-7702).
-- Supporto per 20 lingue, con traduzioni complete di menu, avvisi e
-  impostazioni, non solo della scheda dello store.
-
-Nessun nuovo permesso. Continua a usare `storage`, `declarativeNetRequest`,
-`alarms` e l'accesso http/https, esattamente come la 0.3.1.
+Nessun nuovo permesso. Sempre `storage`, `declarativeNetRequest`, `alarms`
+e accesso http/https, esattamente come nella 0.3.1.

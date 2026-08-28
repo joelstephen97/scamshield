@@ -82,37 +82,18 @@ Tính năng:
 • Nhỏ hơn và nhanh hơn: khoảng 0,6 MB khi giải nén, không có runtime nặng
 • Phân tích 100% trên thiết bị — không theo dõi, không thu thập dữ liệu
 
-## What's new (0.6.0)
+## What's new (0.7.0)
 
-Bản phát hành “chỉ giải quyết vấn đề thật” — mỗi tính năng mới đều nhắm vào
-một kiểu lừa đảo hoặc xâm phạm riêng tư đã được kiểm chứng ngoài đời, và
-không tính năng nào thêm quyền mới.
+- Tab Thống kê mới trong Cài đặt: số trang đã kiểm tra trên thiết bị, mối
+  đe dọa đã chặn, phát hiện về quyền riêng tư, và biểu đồ hoạt động hằng
+  ngày — xem 7 ngày qua, 30 ngày qua, hoặc tổng số từ khi cài đặt — tất cả
+  được đếm và lưu trên thiết bị của bạn, không bao giờ gửi đi đâu cả.
+- Một lời nhắc đánh giá nhẹ nhàng, có thể bỏ qua, xuất hiện trong popup chỉ
+  sau khi ScamShield thực sự đã chặn được điều gì đó hai lần — từ chối một
+  lần là nó biến mất vĩnh viễn.
+- Tùy chọn ghi đè ngôn ngữ mới trong Cài đặt: chọn ngôn ngữ riêng của
+  ScamShield độc lập với ngôn ngữ trình duyệt của bạn, có hỗ trợ đồng bộ
+  giữa các thiết bị nếu bạn đã bật đồng bộ hóa của trình duyệt.
 
-- Giờ đây quét cả bên trong iframe, nơi các biểu mẫu phishing từng ẩn mình
-  mà không ai thấy.
-- Một lớp cảnh báo toàn màn hình mới cho những vụ gần như chắc chắn là lừa
-  đảo — tấn công clipboard qua CAPTCHA giả ClickFix, thông báo cập nhật trình
-  duyệt giả, phishing phí giao hàng
-  (DHL/FedEx/Aramex/Royal Mail/Evri/Emirates Post/DPD), và trang hù dọa hỗ
-  trợ kỹ thuật — kèm một khoảng dừng bắt buộc và phần so sánh tên miền thật
-  với tên miền giả, chỉ dành cho các phát hiện gần như không thể báo nhầm.
-- Gói riêng tư mới: cảnh báo biểu mẫu rò rỉ (email/số điện thoại của bạn bị
-  gửi cho tracker trước khi bạn bấm gửi, ở dạng thường hoặc đã băm), phát
-  hiện lấy dấu vân tay, và cảnh báo bẫy xin quyền thông báo — tất cả đều
-  chạy trên thiết bị.
-- Các bước kiểm tra mua sắm mới: đếm ngược giả, áp lực “chỉ còn 2” giả, huy
-  hiệu tin cậy hotlink, yêu cầu thanh toán ngoài nền tảng và thiếu thông tin
-  liên hệ, cùng phần kiểm tra kết quả được tài trợ trên
-  Google/Bing/DuckDuckGo.
-- Chế độ nghiêm ngặt: một công tắc chặn toàn màn hình ngay cả trang “đáng
-  ngờ” với lời lẽ đơn giản hơn, để giúp người thân ít tự tin giữ an toàn.
-- Xuất/nhập cài đặt và đồng bộ tùy chọn giữa các thiết bị (dùng chính tính
-  năng đồng bộ của trình duyệt — vẫn không có tài khoản hay máy chủ
-  ScamShield).
-- Phát hiện tên miền đồng hình IDN và nâng cấp chống rút ví (hỗ trợ đa ví
-  EIP-6963, phát hiện ủy quyền tài khoản EIP-7702).
-- Hỗ trợ 20 ngôn ngữ, dịch đầy đủ menu, cảnh báo và cài đặt, không chỉ mỗi
-  trang giới thiệu trên cửa hàng.
-
-Không thêm quyền nào. Vẫn là `storage`, `declarativeNetRequest`, `alarms` và
-quyền truy cập http/https, đúng như 0.3.1.
+Không có quyền mới nào. Vẫn dùng `storage`, `declarativeNetRequest`,
+`alarms` và quyền truy cập http/https, giống hệt như ở bản 0.3.1.

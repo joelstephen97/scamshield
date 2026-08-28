@@ -91,38 +91,20 @@ Funktionen:
 • Kleiner und schneller: ~0,6 MB entpackt, keine schwere Laufzeitumgebung
 • 100 % On-Device-Analyse – kein Tracking, keine Datensammlung
 
-## What's new (0.6.0)
+## What's new (0.7.0)
 
-Das Release „nur echte Probleme“ – jede neue Funktion zielt auf ein
-validiertes, reales Betrugs- oder Datenschutzmuster, und keine davon fügt
-eine neue Berechtigung hinzu.
-
-- Scannt jetzt auch innerhalb von iFrames, wo sich Phishing-Formulare früher
-  unsichtbar versteckt haben.
-- Eine neue Vollbild-Zwischenseiten-Stufe für nahezu sichere Betrugsfälle –
-  ClickFix Fake-CAPTCHA-Zwischenablage-Angriffe, gefälschte
-  Browser-Update-Aufforderungen, Zustellgebühren-Phishing (DHL/FedEx/
-  Aramex/Royal Mail/Evri/Emirates Post/DPD) und Tech-Support-
-  Schreckensseiten – mit erzwungener Pause und einem Echt-vs-Fake-Domain-
-  Vergleich, reserviert für Erkennungen mit nahezu keinen Fehlalarmen.
-- Ein neues Datenschutzpaket: Warnungen vor undichten Formularen (deine
-  E-Mail/Telefonnummer wird vor dem Absenden an einen Tracker gesendet, im
-  Klartext oder gehasht), Fingerprinting-Erkennung und Warnungen vor
-  Benachrichtigungsfallen – alles auf deinem Gerät.
-- Neue Einkaufsprüfungen: gefälschte Countdowns, gefälschter „nur noch 2
-  verfügbar“-Druck, verlinkte Fake-Vertrauenssiegel, Zahlungsaufforderungen
-  außerhalb der Plattform und fehlende Kontaktdaten, plus eine Prüfung
-  gesponserter Ergebnisse bei Google/Bing/DuckDuckGo.
-- Strenger Modus: ein Schalter, der selbst „verdächtige“ Seiten mit
-  einfacherer Sprache im Vollbild blockiert – um einem weniger sicheren
-  Angehörigen zu helfen, sicher zu bleiben.
-- Export/Import von Einstellungen und optionale geräteübergreifende
-  Synchronisierung (die eigene Synchronisierung deines Browsers – weiterhin
-  kein ScamShield-Konto oder -Server).
-- IDN-Homograph-Erkennung und Wallet-Drainer-Upgrades (EIP-6963-
-  Multi-Wallet-Unterstützung, EIP-7702-Kontodelegationserkennung).
-- Unterstützung für 20 Sprachen, mit vollständigen Übersetzungen von Menüs,
-  Warnungen und Einstellungen, nicht nur des Store-Eintrags.
+- Neuer Tab „Statistiken" in den Einstellungen: auf dem Gerät geprüfte
+  Seiten, gestoppte Bedrohungen, Datenschutz-Funde und ein Diagramm der
+  täglichen Aktivität – zeige die letzten 7 Tage, die letzten 30 Tage oder
+  deine Gesamtwerte seit der Installation an – alles wird auf deinem Gerät
+  gezählt und gespeichert, niemals irgendwohin gesendet.
+- Eine dezente, ausblendbare Bewertungsanfrage erscheint im Popup erst,
+  nachdem ScamShield tatsächlich zweimal etwas blockiert hat – lehne sie
+  einmal ab, und sie ist für immer verschwunden.
+- Neue Sprachüberschreibung in den Einstellungen: Wähle die Sprache von
+  ScamShield unabhängig von der deines Browsers, mit Unterstützung für die
+  geräteübergreifende Synchronisierung, wenn du die Synchronisierung deines
+  Browsers aktiviert hast.
 
 Keine neuen Berechtigungen. Weiterhin `storage`, `declarativeNetRequest`,
 `alarms` und http/https-Zugriff, genau wie bei 0.3.1.

@@ -90,39 +90,20 @@ Recursos:
 • Menor e mais rápido: ~0,6 MB descompactado, sem tempo de execução pesado
 • 100% de análise no dispositivo — sem rastreamento, sem coleta de dados
 
-## What's new (0.6.0)
+## What's new (0.7.0)
 
-A versão "só problemas reais" — todo recurso novo foca em um padrão real e
-validado de golpe ou privacidade, e nada disso adiciona uma permissão.
+- Nova aba Estatísticas nas configurações: páginas verificadas no
+  dispositivo, ameaças bloqueadas, descobertas de privacidade e um gráfico
+  de atividade diária — veja os últimos 7 dias, os últimos 30 dias ou seus
+  totais desde a instalação — tudo contado e armazenado no seu dispositivo,
+  nunca enviado para lugar nenhum.
+- Um aviso discreto e dispensável de avaliação aparece no popup somente
+  depois que o ScamShield realmente bloquear algo duas vezes — recuse uma
+  vez e ele desaparece para sempre.
+- Nova opção de idioma nas configurações: escolha o idioma do próprio
+  ScamShield, independente do seu navegador, com suporte a sincronização
+  entre dispositivos se você tiver ativado a sincronização do seu
+  navegador.
 
-- Agora também verifica dentro de iframes, onde formulários de phishing
-  costumavam se esconder de forma invisível.
-- Um novo nível de aviso em tela cheia para golpes quase certos — ataques de
-  área de transferência via ClickFix/CAPTCHA falso, avisos falsos de
-  atualização do navegador, phishing de taxa de entrega (DHL/FedEx/Aramex/
-  Royal Mail/Evri/Correios dos Emirados/DPD) e páginas de intimidação de
-  suporte técnico — com uma pausa forçada e comparação entre o domínio real e
-  o falso, reservado para detecções com quase zero falsos positivos.
-- Um novo pacote de privacidade: avisos de formulário vazando dados (seu
-  e-mail/telefone enviado a um rastreador antes de você enviar o formulário,
-  em texto simples ou com hash), detecção de fingerprinting e avisos de
-  armadilha de permissão de notificação — tudo no dispositivo.
-- Novas verificações de compras: contagens regressivas falsas, pressão falsa
-  de "restam só 2", selos de confiança sem link real, pedidos de pagamento
-  fora da plataforma e falta de dados de contato, além de uma verificação de
-  resultado patrocinado no Google/Bing/DuckDuckGo.
-- Modo estrito: um único botão que bloqueia até páginas "suspeitas" em tela
-  cheia, com linguagem mais simples, para ajudar um parente menos confiante
-  a se manter seguro.
-- Exportação/importação de configurações e sincronização opcional entre
-  dispositivos (usando a sincronização do seu próprio navegador — ainda sem
-  conta ou servidor do ScamShield).
-- Detecção de homógrafos IDN e melhorias contra drenadores de carteira
-  (suporte a múltiplas carteiras via EIP-6963, detecção de delegação de conta
-  EIP-7702).
-- Suporte a 20 idiomas, com traduções completas de menus, avisos e
-  configurações, não apenas da ficha da loja.
-
-Sem novas permissões. Continua usando apenas `storage`,
-`declarativeNetRequest`, `alarms` e acesso http/https, exatamente como na
-0.3.1.
+Nenhuma permissão nova. Continua usando `storage`, `declarativeNetRequest`,
+`alarms` e acesso http/https, exatamente como na 0.3.1.
