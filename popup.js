@@ -147,6 +147,41 @@ function setTrustMenu(open) {
   $('trustmenu').hidden = !open; $('trust').setAttribute('aria-expanded', String(open));
   if (open) { const first = $('trustmenu').querySelector('.dditem'); if (first) first.focus(); }
 }
+function setLangMenu(open) {
+  $('langdd').hidden = !open; $('langbtn').setAttribute('aria-expanded', String(open));
+  if (open) { const cur = $('langdd').querySelector('.cur') || $('langdd').querySelector('.langitem'); if (cur) cur.focus(); }
+}
+// Popup header language switcher (0.7.1): writes the SAME setting the options
+// page's dropdown does (uiLang), built from the same autonym list
+// (SSReasons.LOCALES/LANG_NAMES) options.js's buildLangOptions() already
+// reads — one source of truth, no duplicated 20-language list. Autonyms are
+// never message keys: a picker has to read the same in every locale, so a
+// Spanish speaker hunting for Japanese finds 日本語. Picking an item saves the
+// setting, then reloads the popup so every string on it — not just the ones
+// this file could patch in place — re-renders in the new language at once,
+// the same "save then reload" pattern options.js's `#lang` change handler
+// uses.
+function buildLangMenu() {
+  const dd = $('langdd'); dd.replaceChildren();
+  const current = (settings && settings.uiLang) || 'auto';
+  const mk = (value, label) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.setAttribute('role', 'menuitem');
+    b.className = 'dditem langitem' + (value === current ? ' cur' : '');
+    b.dataset.lang = value;
+    const span = document.createElement('span'); span.textContent = label;
+    const chk = document.createElement('span'); chk.className = 'chk'; chk.textContent = value === current ? '✓' : '';
+    b.append(span, chk);
+    b.addEventListener('click', async () => {
+      setLangMenu(false);
+      await send('setSettings', { patch: { uiLang: value } });
+      location.reload();
+    });
+    return b;
+  };
+  dd.appendChild(mk('auto', T('optLangAuto', null, 'Browser default')));
+  for (const code of (R ? R.LOCALES : [])) dd.appendChild(mk(code, (R && R.LANG_NAMES && R.LANG_NAMES[code]) || code));
+}
 // The real extension popup is a separate window, so tabs.query({active,
 // currentWindow}) reliably returns the page the popup was opened over.
 // tabs.getCurrent() only resolves when this script is itself running inside
@@ -175,13 +210,20 @@ async function init() {
     if (lang) UI_LANG = R.intlTag(lang); // timestamps follow the chosen language too
   } catch (_) { /* fall back to the browser language */ }
   $('lockline').textContent = T('runsOnDevice', null, 'Runs on your device · nothing leaves your browser');
-  $('brandmark').insertAdjacentHTML('afterbegin', I.shield('safe')); $('opts').innerHTML = I.gear(); $('lockline').insertAdjacentHTML('afterbegin', I.lock());
+  $('brandmark').insertAdjacentHTML('afterbegin', I.shield('safe')); $('opts').innerHTML = I.gear(); $('langbtn').innerHTML = I.globe(); $('lockline').insertAdjacentHTML('afterbegin', I.lock());
   try { $('ver').textContent = api.runtime.getManifest().version; } catch (_) {}
   settings = await settingsPromise;
   if (!settings) { renderStatus('unknown', '', T('toastExtensionError', null, 'Extension error — try reopening.')); return; }
   $('enabled').checked = !!settings.enabled; $('enabledwrap').classList.toggle('on', !!settings.enabled); $('enabledlbl').textContent = settings.enabled ? T('on', null, 'On') : T('paused', null, 'Paused');
   $('enabled').addEventListener('change', async () => { settings = await send('setSettings', { patch: { enabled: $('enabled').checked } }); $('enabledwrap').classList.toggle('on', !!settings.enabled); $('enabledlbl').textContent = settings.enabled ? T('on', null, 'On') : T('paused', null, 'Paused'); });
   $('opts').addEventListener('click', (e) => { e.preventDefault(); api.runtime.openOptionsPage(); });
+  // Language switcher (0.7.1): wired unconditionally (unlike the Trust menu
+  // below, which only exists on http(s) tabs) — switching language has
+  // nothing to do with which site the popup happened to open over.
+  buildLangMenu();
+  $('langbtn').addEventListener('click', (e) => { e.stopPropagation(); setLangMenu($('langdd').hidden); });
+  document.addEventListener('click', (e) => { if (!$('langdd').hidden && !$('langdd').contains(e.target) && e.target !== $('langbtn')) setLangMenu(false); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('langdd').hidden) { setLangMenu(false); $('langbtn').focus(); } });
   $('support').addEventListener('click', (e) => { e.preventDefault(); api.tabs.create({ url: 'https://github.com/sponsors/joelstephen97' }); });
   // openOptionsPage() cannot carry a #hash, so the Statistics deep link opens
   // the options page as a normal tab (options_page/options_ui both open in a
@@ -215,7 +257,10 @@ async function init() {
   $('trust').addEventListener('click', (e) => { e.stopPropagation(); setTrustMenu($('trustmenu').hidden); });
   document.addEventListener('click', (e) => { if (!$('trustmenu').hidden && !$('trustmenu').contains(e.target) && e.target !== $('trust')) setTrustMenu(false); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('trustmenu').hidden) { setTrustMenu(false); $('trust').focus(); } });
-  for (const b of document.querySelectorAll('.dditem')) b.addEventListener('click', async () => {
+  // Scoped to #trustmenu: the popup's language dropdown (0.7.1) also uses the
+  // shared .dditem class for its rows, and a bare `.dditem` selector here
+  // would double-bind this Trust handler onto every language item too.
+  for (const b of document.querySelectorAll('#trustmenu .dditem')) b.addEventListener('click', async () => {
     const r = await send('pauseSite', { domain, choice: b.dataset.choice }); setTrustMenu(false);
     settings = await send('getSettings'); renderTrust(); toast(r && r.until ? T('toastTrustedForNow', null, 'Trusted for now') : T('trusted', null, 'Trusted'));
   });

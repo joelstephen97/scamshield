@@ -135,6 +135,60 @@ test('content script: a warning banner renders in the chosen language', async ({
     .toHaveText(/Die Verbindung ist nicht sicher|Passwortformular/);
 });
 
+// Popup header language switcher (0.7.1) — the same `uiLang` setting as
+// above, one tap away from the popup's start screen via a globe button
+// between the On toggle and the gear.
+test('popup: globe opens a 21-item dropdown, Deutsch reloads the popup and updates the options page, Escape and Browser default both work', async ({ context, extensionId }) => {
+  const popup = await context.newPage();
+  await popup.goto(`chrome-extension://${extensionId}/popup.html`);
+  await expect(popup.locator('#langbtn')).toHaveAttribute('aria-label', 'Language');
+  await expect(popup.locator('#langbtn')).toHaveAttribute('title', 'Language');
+  await expect(popup.locator('#langdd')).toBeHidden();
+
+  await popup.click('#langbtn');
+  await expect(popup.locator('#langdd')).toBeVisible();
+  const items = popup.locator('#langdd .langitem');
+  await expect(items).toHaveCount(21); // "Browser default" + the 20 shipped locales
+  await expect(items.first()).toHaveText(/Browser default/);
+  await expect(items.first()).toHaveClass(/cur/);
+
+  // Esc closes it without picking anything (same interaction as the Trust menu).
+  await popup.keyboard.press('Escape');
+  await expect(popup.locator('#langdd')).toBeHidden();
+
+  // Pick Deutsch: saves uiLang, then the popup reloads itself in German.
+  await popup.click('#langbtn');
+  await popup.click('#langdd .langitem[data-lang="de"]');
+  await expect(popup.locator('#lockline')).toContainText('Läuft auf deinem Gerät');
+  await expect(popup.locator('#langbtn')).toHaveAttribute('aria-label', 'Sprache');
+
+  // The options page's own dropdown shows the same setting — one storage key.
+  const options = await context.newPage();
+  await options.goto(`chrome-extension://${extensionId}/options.html`);
+  await expect(options.locator('#lang')).toHaveValue('de');
+
+  // Re-open the popup's menu: the current item is now Deutsch, checked.
+  await popup.click('#langbtn');
+  await expect(popup.locator('#langdd .langitem[data-lang="de"]')).toHaveClass(/cur/);
+
+  // Browser default restores English.
+  await popup.click('#langdd .langitem[data-lang="auto"]');
+  await expect(popup.locator('#lockline')).toContainText('Runs on your device');
+  const sw = context.serviceWorkers()[0];
+  expect(await sw.evaluate(() => getSettings().then((s) => s.uiLang))).toBe('auto');
+});
+
+test('popup: with Arabic set, the language dropdown still renders under RTL', async ({ context, extensionId }) => {
+  const sw = context.serviceWorkers()[0];
+  await sw.evaluate(() => setSettings({ uiLang: 'ar' }));
+  const popup = await context.newPage();
+  await popup.goto(`chrome-extension://${extensionId}/popup.html`);
+  await expect(popup.locator('html')).toHaveAttribute('dir', 'rtl');
+  await popup.click('#langbtn');
+  await expect(popup.locator('#langdd')).toBeVisible();
+  await expect(popup.locator('#langdd .langitem[data-lang="ar"]')).toHaveClass(/cur/);
+});
+
 test('the language service refuses anything that is not a shipped locale', async ({ context }) => {
   const sw = context.serviceWorkers()[0];
   // The default is "follow the browser" — no dictionary, today's behavior.

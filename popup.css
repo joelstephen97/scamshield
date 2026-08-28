@@ -10,6 +10,20 @@ body>*{flex-shrink:0} /* children keep natural height; body scrolls instead of s
 .hdr .ver{font-size:11px;color:var(--muted);background:var(--unknown-bg);padding:2px 6px;border-radius:var(--chip)}
 .hdr .sp{flex:1}
 .hdr .gear{color:var(--muted);display:inline-flex}
+/* Popup header language switcher (0.7.1) — same chrome as the gear (a bare
+   icon, no button box), positioned between the On toggle and Settings. The
+   dropdown mirrors the Trust menu (.menu .dd) but is anchored to the RIGHT
+   edge of its own button, not the left: this button sits near the header's
+   right end, so a left-anchored dropdown (the Trust menu's default) would run
+   off the popup's 340px edge. Right-anchoring is a physical offset, so it
+   holds regardless of `dir` — the point of the RTL sanity check is that the
+   menu still renders fully on screen, not that it swaps sides. */
+.hdr .globe{background:transparent;border:0;padding:2px;color:var(--muted);display:inline-flex;cursor:pointer;border-radius:var(--chip)}
+.hdr .globe:hover,.hdr .globe:focus-visible{color:var(--accent)}
+.langmenu .dd{left:auto;right:0;min-width:190px;max-height:260px;overflow-y:auto}
+.langitem{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.langitem .chk{color:var(--accent);flex:none;width:12px;text-align:center}
+.dditem.cur{background:var(--accent-soft);color:var(--accent)}
 .body{padding:12px;display:flex;flex-direction:column;gap:10px;flex:1}
 .status h3{font-size:20px;line-height:1.15;font-weight:600;letter-spacing:-.01em;margin:0}
 .status.mini h3{font-size:15px}
