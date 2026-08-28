@@ -3,7 +3,8 @@
 // Engine modules emit structured reasons ({ code, kind, params }) and never
 // English text, so the same verdict can be shown in any locale and reported to
 // GitHub in English. This file is the only place that turns a code into words:
-// chrome.i18n first (key "reason_<code>"), then the EN table below.
+// the user's language override first (0.7.0, see below), then chrome.i18n (key
+// "reason_<code>"), then the EN table below.
 //
 // UMD like the engine modules — loadable as a content script, imported by the
 // ES-module service worker, and require()-able from Node unit tests with no
@@ -109,6 +110,96 @@
     });
   }
 
+  // ---- Per-user language override (0.7.0) ---------------------------------
+  // Chrome exposes no API to render an extension in a language other than the
+  // browser's, so the override is the documented AdBlock pattern: a custom
+  // loader over our own packaged _locales/. Whoever can read those files hands
+  // the chosen language plus a POSITIONAL dictionary to setOverride() — the
+  // extension pages read the file themselves (ui/i18n.js), content scripts get
+  // it from the service worker (message 'getLangDict', because a content script
+  // cannot fetch an extension URL without making it web-accessible, which this
+  // feature deliberately does not do). This module then answers every lookup
+  // from that dictionary before touching chrome.i18n, and it is module state on
+  // purpose: reasons, the page applier and the content scripts' own t() all
+  // share this one instance per world, so they can never disagree about which
+  // language the user is being shown.
+  //
+  // The 20 shipped locale directories, in the order the options dropdown lists
+  // them. The single source of truth for "is this a language we can switch
+  // to" — the settings validator, the options dropdown and the dictionary
+  // loader all read it from here.
+  const LOCALES = ['ar', 'bn', 'de', 'en', 'es', 'fr', 'hi', 'id', 'it', 'ja', 'ko',
+    'mr', 'pt_BR', 'ru', 'ta', 'te', 'tr', 'ur', 'vi', 'zh_CN'];
+  // Autonyms — each language written in itself, deliberately NOT message keys:
+  // a language picker must read the same in every locale, so a Spanish speaker
+  // looking for Japanese finds 日本語 and not "Japonés".
+  const LANG_NAMES = {
+    ar: 'العربية', bn: 'বাংলা', de: 'Deutsch', en: 'English', es: 'Español',
+    fr: 'Français', hi: 'हिन्दी', id: 'Bahasa Indonesia', it: 'Italiano',
+    ja: '日本語', ko: '한국어', mr: 'मराठी', pt_BR: 'Português (Brasil)',
+    ru: 'Русский', ta: 'தமிழ்', te: 'తెలుగు', tr: 'Türkçe', ur: 'اردو',
+    vi: 'Tiếng Việt', zh_CN: '中文（简体）'
+  };
+
+  let overrideLang = '', overrideDict = null;
+
+  // Installs (or, with a falsy argument, clears) the active override.
+  function setOverride(lang, dict) {
+    const ok = !!lang && !!dict && typeof dict === 'object';
+    overrideLang = ok ? String(lang) : '';
+    overrideDict = ok ? dict : null;
+  }
+  // The language actually in force, or '' when following the browser.
+  function overrideLanguage() { return overrideLang; }
+
+  // chrome.i18n.getMessage's contract, served from the override dictionary:
+  // returns '' when there is no override or the key is missing, so callers fall
+  // through to chrome.i18n and then to their own English literal — exactly the
+  // per-key fallback a partial translation already relies on.
+  function tOverride(key, subs) {
+    if (!overrideDict || !key) return '';
+    const tmpl = overrideDict[key];
+    if (typeof tmpl !== 'string' || !tmpl) return '';
+    const params = subs == null ? [] : (Array.isArray(subs) ? subs : [subs]);
+    // Callers bidi-isolate their own substitutions before calling (same as they
+    // do for chrome.i18n), so nothing is wrapped a second time here.
+    return subst(tmpl, params, false);
+  }
+
+  function escapeRe(s) { return String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+
+  // A parsed _locales/<lang>/messages.json → { key: positional template }.
+  // Chrome's format declares named placeholders ($BRAND$) whose `content` maps
+  // them onto the positional arguments getMessage() receives ("$1"); our
+  // subst() speaks the positional form, so the names are resolved away here,
+  // once per language, instead of on every lookup. Pure — no chrome, no fetch —
+  // so the service worker, the pages and the Node unit tests share one
+  // implementation.
+  function messagesToDict(json) {
+    const out = {};
+    if (!json || typeof json !== 'object') return out;
+    for (const key of Object.keys(json)) {
+      const entry = json[key];
+      if (!entry || typeof entry.message !== 'string') continue;
+      let msg = entry.message;
+      const ph = entry.placeholders;
+      if (ph && typeof ph === 'object') {
+        for (const name of Object.keys(ph)) {
+          const def = ph[name];
+          const m = /^\$([1-9])$/.exec(String((def && def.content) || ''));
+          if (!m) continue; // a placeholder that isn't a positional arg can't be mapped
+          // $NAME$ references are case-insensitive in Chrome's format, and one
+          // name may appear more than once (reason_brandIconMismatch uses
+          // $BRAND$ twice). The replacement is a function so a literal "$1"
+          // never gets re-read as a capture-group reference.
+          msg = msg.replace(new RegExp('\\$' + escapeRe(name) + '\\$', 'gi'), () => '$' + m[1]);
+        }
+      }
+      out[key] = msg;
+    }
+    return out;
+  }
+
   // Localised text for one reason. Legacy plain-string reasons (verdicts cached
   // by an older version) pass straight through. Params (hostnames, brand
   // names, phrases, URLs) are wrapped in bidi isolates so they read correctly
@@ -118,6 +209,8 @@
     if (!r || !r.code) return '';
     const params = (r.params || []).map(String);
     const isolated = params.map(bidiWrap);
+    const over = tOverride('reason_' + r.code, isolated);
+    if (over) return over;
     const api = i18n();
     if (api) {
       try { const m = api.getMessage('reason_' + r.code, isolated); if (m) return m; } catch (_) {}
@@ -135,15 +228,21 @@
   // Evidence-chip category. 'page' is the neutral default.
   function reasonKind(r) { return (r && r.kind) || 'page'; }
 
-  // Right-to-left UI language (defaults to the browser's UI language).
+  // Right-to-left UI language. With no argument it reports the language
+  // actually in force: the user's override when one is set, otherwise the
+  // browser's UI language.
   function isRTL(lang) {
     let l = lang;
     if (l == null) {
-      const api = i18n();
-      try { l = api && api.getUILanguage ? api.getUILanguage() : ''; } catch (_) { l = ''; }
+      l = overrideLang;
+      if (!l) {
+        const api = i18n();
+        try { l = api && api.getUILanguage ? api.getUILanguage() : ''; } catch (_) { l = ''; }
+      }
     }
     return /^(ar|he|fa|ur)\b/i.test(String(l || ''));
   }
 
-  return { resolveReason, reasonToEnglish, reasonKind, EN, isRTL, bidiWrap };
+  return { resolveReason, reasonToEnglish, reasonKind, EN, isRTL, bidiWrap,
+    LOCALES, LANG_NAMES, setOverride, overrideLanguage, tOverride, messagesToDict };
 });

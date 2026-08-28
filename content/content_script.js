@@ -6,8 +6,12 @@
   const SS = root.ScamShield;
   // Localised string with English fallback, same pattern as content/actions.js
   // (no shared module between the two content scripts, so this stays a tiny
-  // local copy rather than a new file).
+  // local copy rather than a new file). The user's language override is read
+  // from SSReasons, the one module both files do share — actions.js runs first
+  // in both manifests and is what asks the service worker for the dictionary,
+  // so this file only consumes it.
   function t(key, subs, fallback) {
+    try { const R = root.SSReasons; if (R && R.tOverride) { const o = R.tOverride(key, subs); if (o) return o; } } catch (_) {}
     try { const m = api && api.i18n && api.i18n.getMessage(key, subs); if (m) return m; } catch (_) {}
     return fallback != null ? fallback : key;
   }

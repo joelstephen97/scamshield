@@ -50,7 +50,8 @@ const DEFAULTS = {
   lastOtaAt: 0,              // ms epoch of the last blocklist OTA attempt (success or no-op)
   lastOtaCount: 0,           // number of blocklist rules from the last successful OTA
   lastReportAt: 0,           // ms epoch of the last community report actually sent
-  syncEnabled: false         // mirror settings to chrome.storage.sync (opt-in)
+  syncEnabled: false,        // mirror settings to chrome.storage.sync (opt-in)
+  uiLang: 'auto'             // 'auto' (follow the browser) | one of SSReasons.LOCALES
 };
 
 // Settings mirrored to chrome.storage.sync when syncEnabled (0.6.0). Only
@@ -59,7 +60,7 @@ const DEFAULTS = {
 const SYNCED_KEYS = ['enabled', 'hideScamContent', 'blockKnownBad', 'pageAnalysis',
   'clickFixGuard', 'fakeUpdateGuard', 'walletGuard', 'clipboardGuard', 'techScamGuard',
   'leakyFormGuard', 'fingerprintDetect', 'notificationGuard', 'strictMode',
-  'reportingOptIn', 'allowlist', 'theme', 'otaUrl'];
+  'reportingOptIn', 'allowlist', 'theme', 'otaUrl', 'uiLang'];
 
 // Local-only protection history: ring buffer of { ts, host, kind, level }.
 // Hostnames only, never full URLs; capped; user-clearable. Never transmitted.
@@ -497,9 +498,49 @@ function sanitizeImport(obj) {
     if (k === 'allowlist') { if (Array.isArray(v)) patch[k] = v.filter((d) => typeof d === 'string').slice(0, 2000); }
     else if (k === 'theme') { if (['auto', 'light', 'dark'].includes(v)) patch[k] = v; }
     else if (k === 'otaUrl') { if (typeof v === 'string' && (v === '' || /^https:\/\//i.test(v))) patch[k] = v; }
+    else if (k === 'uiLang') { if (isValidLang(v)) patch[k] = v; }
     else if (typeof v === 'boolean') patch[k] = v;
   }
   return Object.keys(patch).length ? patch : null;
+}
+
+// ---- Language-override dictionary service (0.7.0) ----
+// Extension pages read their own locale file (ui/i18n.js), but a content script
+// cannot fetch an extension URL unless the file is web-accessible — and making
+// _locales/ web-accessible would expose it to every page on the web for no
+// good reason. So the content scripts ask here instead, and this reads the
+// packaged file the same way countStaticRules() reads the bundled blocklist:
+// a local file we ship, no network, no new permission.
+function isValidLang(v) {
+  if (v === 'auto') return true;
+  const R = globalThis.SSReasons;
+  return !!(R && R.LOCALES && typeof v === 'string' && R.LOCALES.includes(v));
+}
+// Per-language, per-SW-lifetime cache of the transformed dictionary. A failed
+// read is deliberately not cached, so a transient error can't pin a language
+// to "unavailable" for the rest of the worker's life (same reasoning as
+// staticRuleCount above).
+const langDictCache = new Map();
+async function loadLangDict(lang) {
+  // Never let a caller's string reach getURL() unchecked — the only legal
+  // values are the directories we ship.
+  if (!isValidLang(lang) || lang === 'auto') return null;
+  if (langDictCache.has(lang)) return langDictCache.get(lang);
+  try {
+    const res = await fetch(api.runtime.getURL('_locales/' + lang + '/messages.json'));
+    const dict = globalThis.SSReasons.messagesToDict(await res.json());
+    langDictCache.set(lang, dict);
+    return dict;
+  } catch (_) { return null; }
+}
+// null means "follow the browser" — the caller then changes nothing, which is
+// exactly today's behavior and the default.
+async function getLangDict() {
+  const s = await getSettings();
+  const lang = s.uiLang;
+  if (!isValidLang(lang) || lang === 'auto') return null;
+  const dict = await loadLangDict(lang);
+  return dict ? { lang, dict } : null;
 }
 
 // ---- Opt-in community reporting (spec §6). Nothing runs unless reportingOptIn. ----
@@ -895,6 +936,8 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         }
         sendResponse({ ok: true }); break;
       }
+      case 'getLangDict':
+        sendResponse(await getLangDict()); break;
       case 'getStats':
         sendResponse(await getStats()); break;
       case 'getHistory': {
@@ -944,4 +987,4 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 // module-scoped. Re-attach the debug/test surface that used to live on the
 // classic worker's global scope — the e2e suite drives these via
 // worker.evaluate, and they're handy in the SW console.
-Object.assign(globalThis, { DEFAULT_FEED_URL, getSettings, setSettings, handleUserReport, runOtaUpdate, flushReports, queueReport, exportSettings, sanitizeImport, pushSync, pullSync, getStats, bumpStat, ensurePrivacyTotal, ensureInstalledAt, getReviewAsk, getReviewAskContext, setReviewAsk, sanitizeReviewAsk, ensureReviewAsk, importReviewAsk });
+Object.assign(globalThis, { DEFAULT_FEED_URL, getSettings, setSettings, handleUserReport, runOtaUpdate, flushReports, queueReport, exportSettings, sanitizeImport, pushSync, pullSync, getStats, bumpStat, ensurePrivacyTotal, ensureInstalledAt, getReviewAsk, getReviewAskContext, setReviewAsk, sanitizeReviewAsk, ensureReviewAsk, importReviewAsk, getLangDict, loadLangDict, isValidLang });

@@ -153,6 +153,11 @@ async function currentTab() {
   return others.find((t) => t.active) || others[others.length - 1] || null;
 }
 async function init() {
+  // Language override (0.7.0): one storage read, resolved before the first
+  // string is written, so the popup never renders in English and then swaps
+  // under the user. On the default 'auto' setting this resolves immediately
+  // and nothing about the popup changes.
+  try { await globalThis.SSi18n.ready; } catch (_) { /* fall back to the browser language */ }
   $('lockline').textContent = T('runsOnDevice', null, 'Runs on your device · nothing leaves your browser');
   $('brandmark').insertAdjacentHTML('afterbegin', I.shield('safe')); $('opts').innerHTML = I.gear(); $('lockline').insertAdjacentHTML('afterbegin', I.lock());
   try { $('ver').textContent = api.runtime.getManifest().version; } catch (_) {}

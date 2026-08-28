@@ -3,10 +3,32 @@
   const NS = 'scamshield';
   const api = root.browser || root.chrome;
   // Localised string with English fallback. Content scripts can call
-  // chrome.i18n.getMessage; getMessage itself falls back to en per-key.
+  // chrome.i18n.getMessage; getMessage itself falls back to en per-key. The
+  // user's language override (0.7.0), when one has arrived, wins over both.
   function t(key, subs, fallback) {
+    try { const R = root.SSReasons; if (R && R.tOverride) { const o = R.tOverride(key, subs); if (o) return o; } } catch (_) {}
     try { const m = api && api.i18n && api.i18n.getMessage(key, subs); if (m) return m; } catch (_) {}
     return fallback != null ? fallback : key;
+  }
+  // Language override: a content script cannot fetch _locales/ (it would have
+  // to be web-accessible), so the service worker hands over the dictionary.
+  // Strictly fire-and-forget — a warning must never wait on it. Until it lands
+  // (usually well before the first verdict, which needs its own round trip)
+  // everything renders in the browser language exactly as it does today, and
+  // SSReasons.setOverride() then applies to every later string, including
+  // content_script.js's own t() and every engine reason, because both files
+  // share this world's single SSReasons instance. Requested once per frame:
+  // re-injection into an already-guarded frame must not re-ask.
+  if (!root.__scamshieldLangAsked) {
+    root.__scamshieldLangAsked = true;
+    try {
+      api.runtime.sendMessage({ type: 'getLangDict' }, (r) => {
+        try {
+          void api.runtime.lastError; // an SW that went away is not an error here
+          if (r && r.lang && r.dict && root.SSReasons) root.SSReasons.setOverride(r.lang, r.dict);
+        } catch (_) {}
+      });
+    } catch (_) { /* no worker (torn-down extension) — stay on the browser language */ }
   }
   // Engine reasons are structured ({ code, kind, params }); ui/reasons.js turns
   // one into localized text. It is loaded before this file in both manifests,

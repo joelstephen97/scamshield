@@ -12,8 +12,11 @@ const send = (type, extra) => new Promise((res) => { try { api.runtime.sendMessa
 // Statistics tab state (rendered by the block at the bottom of this file).
 const SV = globalThis.SSStatsView, SSTATS = globalThis.SSStats;
 let statsPeriod = '7', statsToken = 0;
+// The section on screen, so a late-arriving language override can re-render it.
+let curTab = 'protection';
 function flash(t) { $('status').textContent = t; $('status').classList.add('show'); setTimeout(() => $('status').classList.remove('show'), 1200); }
 function showTab(name, userInitiated) {
+  curTab = name;
   for (const s of document.querySelectorAll('.tab')) s.hidden = s.id !== 'tab-' + name;
   for (const a of document.querySelectorAll('nav a')) {
     const cur = a.dataset.tab === name;
@@ -28,7 +31,12 @@ function showTab(name, userInitiated) {
 }
 for (const a of document.querySelectorAll('nav a')) a.addEventListener('click', (e) => { e.preventDefault(); showTab(a.dataset.tab, true); });
 $('brandmark').insertAdjacentHTML('afterbegin', I.shield('safe'));
-try { const v = api.runtime.getManifest().version; $('ver').textContent = T('fmtVersion', [bidi(v)], 'Version ' + v); $('aboutver').textContent = v; } catch (_) {}
+// A function rather than a one-liner because the language override can land
+// after this first render (see the SSi18n.ready block at the bottom).
+function renderVersion() {
+  try { const v = api.runtime.getManifest().version; $('ver').textContent = T('fmtVersion', [bidi(v)], 'Version ' + v); $('aboutver').textContent = v; } catch (_) {}
+}
+renderVersion();
 // Earned review ask (0.7.0): the always-available "leave a review" link is
 // Chrome only (no AMO listing to deep-link to). Sets nothing — this is a
 // separate, zero-pressure channel from the popup's earned ask-card.
@@ -68,6 +76,10 @@ async function load() {
   $('net-feed').textContent = s.otaUrl ? (s.lastOtaAt ? F.relTime(s.lastOtaAt, undefined, UI_LANG) : T('receiptOnInstall12h', null, 'on install + every 12h')) : T('receiptDisabled', null, 'disabled');
   $('net-report').textContent = s.reportingOptIn ? (s.lastReportAt ? F.relTime(s.lastReportAt, undefined, UI_LANG) : T('receiptWhenFlagged', null, 'when flagged')) : T('receiptOffDefault', null, 'off (default)');
   $('otaurl').value = s.otaUrl || ''; $('theme').value = s.theme || 'auto';
+  // An unknown/removed language falls back to the visible "Browser default"
+  // rather than leaving the select on whatever option happened to be first.
+  const lang = s.uiLang || 'auto';
+  $('lang').value = R && R.LOCALES.includes(lang) ? lang : 'auto';
   if (s.lastOtaAt) {
     const relStr = F.relTime(s.lastOtaAt, undefined, UI_LANG);
     const countStr = Number(s.lastOtaCount || 0).toLocaleString();
@@ -121,6 +133,50 @@ $('importfile').addEventListener('change', async () => {
 });
 $('whatsent').addEventListener('click', () => { $('whatsentbody').hidden = !$('whatsentbody').hidden; });
 $('theme').addEventListener('change', async () => { await send('setSettings', { patch: { theme: $('theme').value } }); globalThis.SSTheme.applyTheme($('theme').value); flash(T('saved', null, 'Saved')); });
+
+// ---------------------------------------------------------------------------
+// Language override (0.7.0). Chrome has no per-extension UI-language API, so
+// the picker writes one setting and the i18n layer serves strings from the
+// matching packaged locale. Languages are listed as autonyms from a code
+// constant, never as message keys: a picker has to read the same in every
+// locale, so a Spanish speaker hunting for Japanese finds 日本語.
+// ---------------------------------------------------------------------------
+function buildLangOptions() {
+  const sel = $('lang');
+  // Rebuilt when a late override re-localizes "Browser default", so the user's
+  // current choice has to survive the swap (load() would otherwise be the only
+  // thing restoring it, one async tick later — a visible flicker).
+  const prev = sel.value;
+  const opts = [];
+  // "Browser default (English)" — naming the language the browser is actually
+  // in makes the default option concrete instead of abstract.
+  const auto = document.createElement('option');
+  auto.value = 'auto';
+  // getUILanguage() returns a BCP-47 tag ("pt-BR", "en-US"); locale directories
+  // use underscores and often only the base language.
+  const tag = String(UI_LANG).replace('-', '_');
+  const names = (R && R.LANG_NAMES) || {};
+  const own = names[tag] || names[tag.split('_')[0]];
+  const autoLabel = T('optLangAuto', null, 'Browser default');
+  auto.textContent = own ? `${autoLabel} (${own})` : autoLabel;
+  opts.push(auto);
+  for (const code of (R ? R.LOCALES : [])) {
+    const o = document.createElement('option');
+    o.value = code; o.textContent = R.LANG_NAMES[code] || code;
+    opts.push(o);
+  }
+  sel.replaceChildren(...opts);
+  if (prev) sel.value = prev;
+}
+buildLangOptions();
+// Every surface reads the setting when it next starts (popup on open, content
+// scripts on the next page load), so only this page needs re-rendering — and a
+// reload is both the simplest and the most complete way to do it.
+$('lang').addEventListener('change', async () => {
+  await send('setSettings', { patch: { uiLang: $('lang').value } });
+  location.reload();
+});
+
 $('otaurl').addEventListener('change', async () => { await send('setSettings', { patch: { otaUrl: $('otaurl').value.trim() } }); flash(T('saved', null, 'Saved')); });
 $('checkupd').addEventListener('click', async () => { flash(T('toastCheckingUpdates', null, 'Checking…')); const r = await send('checkForUpdates'); flash(r && r.ok ? (r.updated ? T('fmtUpdatedToVersion', [bidi(r.version)], 'Updated to v' + r.version) : T('toastAlreadyUpToDate', null, 'Already up to date')) : T('toastUpdateFailed', null, 'Update failed')); load(); });
 $('clearhist').addEventListener('click', async () => { await send('clearHistory'); renderHistory([]); flash(T('toastHistoryCleared', null, 'History cleared')); });
@@ -261,3 +317,17 @@ for (const b of document.querySelectorAll('#statsseg button')) {
 
 showTab((location.hash || '#protection').slice(1).replace(/[^a-z]/g, '') || 'protection');
 load();
+// The override dictionary (ui/i18n.js) arrives asynchronously, so everything
+// this file writes through T() — the version line, the history rows, the
+// dashboard, the "Browser default" option — is rendered once more when it
+// lands. Nothing happens on the default 'auto' path: ready resolves to '' and
+// this returns immediately, so the page behaves exactly as it did before.
+try {
+  globalThis.SSi18n.ready.then((lang) => {
+    if (!lang) return;
+    renderVersion();
+    buildLangOptions();
+    load();
+    if (curTab === 'stats') loadStats();
+  });
+} catch (_) { /* i18n module missing — the English fallbacks already rendered */ }
