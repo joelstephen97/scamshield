@@ -153,16 +153,18 @@ const installedAtPromise = ensureInstalledAt();
 
 // Feed size for the stats card: the OTA count the options page shows, falling
 // back to the rule count of the blocklist bundled with the extension (what is
-// actually enforced before the first successful update). Read once per SW life.
+// actually enforced before the first successful update). Cached after the first
+// successful read; a failed read is NOT cached, so a transient error can't pin
+// the count at 0 for the rest of the SW's life.
 let staticRuleCount = null;
 async function countStaticRules() {
   if (staticRuleCount !== null) return staticRuleCount;
   try {
     const res = await fetch(api.runtime.getURL('rules/blocklist.json'));
     const rules = await res.json();
-    staticRuleCount = Array.isArray(rules) ? rules.length : 0;
-  } catch (_) { staticRuleCount = 0; }
-  return staticRuleCount;
+    if (Array.isArray(rules)) { staticRuleCount = rules.length; return staticRuleCount; }
+  } catch (_) { /* transient — fall through and retry on the next call */ }
+  return 0;
 }
 async function getStats() {
   await installedAtPromise;
@@ -678,7 +680,13 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       case 'privacyFinding': {
         const tabId = sender.tab && sender.tab.id;
         if (tabId != null && msg.finding) {
-          const list = privacyFindings.get(tabId) || [];
+          // Rehydrate from storage.session when the in-memory map is empty
+          // (SW eviction mid-page), exactly as getPrivacyFindings does. Without
+          // it the map would look like a fresh page: the de-dupe would re-add a
+          // finding already recorded, and the stats gate below would count the
+          // same page load a second time.
+          let list = privacyFindings.get(tabId);
+          if (list == null) list = (await readPersistedPrivacy(tabId)) || [];
           const f = msg.finding;
           // Stats count findings-pages, not raw findings: only the first one
           // for this page load counts (the list is cleared on navigation).

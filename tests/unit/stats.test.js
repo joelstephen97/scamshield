@@ -129,6 +129,30 @@ test('categoryOf maps decisive page-verdict flags', () => {
   assert.equal(S.categoryOf(page(['brand-impersonation-visual'])), 'phishing');
 });
 
+// The SW's real call-site shape: bumpThreats passes
+// { kind: msg.kind || 'page', verdict: lastVerdict.get(tabId) }.
+test('categoryOf: ClickFix escalation (kind clipboard + clickfix flag) files under clickfix', () => {
+  // content_script.js reports the clickfix verdict, then sends kind:'clipboard'.
+  const event = {
+    kind: 'clipboard',
+    verdict: { level: 'dangerous', score: 0.95, flags: ['clickfix'], reasonCodes: ['clickfixInstructions'] }
+  };
+  assert.equal(S.categoryOf(event), 'clickfix');
+});
+
+test('categoryOf: a plain clipboard toast stays clipboard', () => {
+  assert.equal(S.categoryOf({ kind: 'clipboard', verdict: { level: 'dangerous', flags: [] } }), 'clipboard');
+  assert.equal(S.categoryOf({ kind: 'clipboard', verdict: null }), 'clipboard');
+});
+
+test('categoryOf: an unrelated page verdict never overrides the detector that blocked', () => {
+  // A wallet request declined while the tab's page verdict is a phishing form:
+  // the block was the wallet guard's, so it must not be filed as phishing.
+  const pageVerdict = { level: 'dangerous', flags: ['credential-form-foreign-domain'] };
+  assert.equal(S.categoryOf({ kind: 'wallet', verdict: pageVerdict }), 'wallet');
+  assert.equal(S.categoryOf({ kind: 'techscam', verdict: { level: 'dangerous', flags: ['brand-impersonation-visual'] } }), 'techSupport');
+});
+
 test('categoryOf reads a verdict passed on its own', () => {
   assert.equal(S.categoryOf({ level: 'dangerous', flags: ['clickfix'] }), 'clickfix');
   assert.equal(S.categoryOf({ level: 'dangerous', flags: [] }), 'phishing');

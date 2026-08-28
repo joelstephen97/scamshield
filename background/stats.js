@@ -81,13 +81,24 @@
   //   - the page verdict's decisive `flags` (engine/heuristics.js and friends),
   //     which is the only thing that distinguishes one kind of dangerous page
   //     from another.
-  // Detector kinds win when present; otherwise a decisive flag decides; a
-  // shop_* reason code marks a fake storefront; any other dangerous page falls
-  // back to 'phishing'; anything unrecognisable is 'other'.
+  // A detector kind is the coarse label ("the clipboard guard fired"); a
+  // decisive flag on the same event is the precise one. So a kind wins, EXCEPT
+  // where a flag refines it (see REFINES): the ClickFix escalation neutralises
+  // a dangerous clipboard payload and still reports kind 'clipboard', while its
+  // verdict carries the 'clickfix' flag — that block belongs under clickfix.
+  // Unrelated flags never override the detector that actually blocked: the page
+  // verdict that happens to be on the tab when a wallet request is declined
+  // must not file that block as phishing.
+  // With no usable kind: a decisive flag decides; a shop_* reason code marks a
+  // fake storefront; any other dangerous page falls back to 'phishing';
+  // anything unrecognisable is 'other'.
   const BY_KIND = {
     wallet: 'wallet',
     clipboard: 'clipboard',
     techscam: 'techSupport',
+    // No sender emits these two today (ClickFix escalates through the clipboard
+    // guard, fake updates through the page verdict); kept so a future detector
+    // — or a history event carrying one of these kinds — files itself correctly.
     clickfix: 'clickfix',
     fakeupdate: 'fakeUpdate',
     fakeUpdate: 'fakeUpdate'
@@ -102,14 +113,21 @@
     'brand-impersonation-content': 'phishing',
     'brand-impersonation-visual': 'phishing'
   };
+  // kind → categories a decisive flag may upgrade that kind to.
+  const REFINES = { clipboard: ['clickfix'] };
   function categoryOf(event) {
     if (!event) return 'other';
     if (typeof event === 'string') return categoryOf({ kind: event });
     const kind = typeof event.kind === 'string' ? event.kind : '';
-    if (BY_KIND[kind]) return BY_KIND[kind];
     const verdict = (event.verdict && typeof event.verdict === 'object') ? event.verdict : event;
     const flags = Array.isArray(verdict.flags) ? verdict.flags : [];
-    for (const f of flags) if (BY_FLAG[f]) return BY_FLAG[f];
+    let flagCat = '';
+    for (const f of flags) { if (BY_FLAG[f]) { flagCat = BY_FLAG[f]; break; } }
+    if (BY_KIND[kind]) {
+      if (flagCat && (REFINES[kind] || []).includes(flagCat)) return flagCat;
+      return BY_KIND[kind];
+    }
+    if (flagCat) return flagCat;
     const codes = Array.isArray(verdict.reasonCodes) ? verdict.reasonCodes : [];
     if (codes.some((c) => typeof c === 'string' && c.indexOf('shop_') === 0)) return 'fakeShop';
     if (kind === 'page' || verdict.level === 'dangerous' || verdict.level === 'suspicious') return 'phishing';

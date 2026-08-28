@@ -41,6 +41,17 @@ test('scanning a safe page and a dangerous page fills the local stats', async ({
   expect(stats.feedRuleCount).toBeGreaterThan(0);
 });
 
+test('a ClickFix block is filed under the clickfix category, not the generic detector kind', async ({ context }) => {
+  const sw = context.serviceWorkers()[0];
+  const page = await context.newPage();
+  await page.goto(BASE + '/clickfix.html');
+  await expect(page.locator('.scamshield-interstitial')).toBeVisible({ timeout: 8000 });
+  await page.waitForTimeout(500);
+  const stats = await readStats(sw);
+  expect(stats.threatsByType.clickfix).toBeGreaterThanOrEqual(1);
+  expect(stats.threatsByType.clipboard || 0).toBe(0);
+});
+
 test('stats live in storage.local only — never in settings or sync', async ({ context }) => {
   const sw = context.serviceWorkers()[0];
   const page = await context.newPage();
