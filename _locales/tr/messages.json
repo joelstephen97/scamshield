@@ -1138,7 +1138,7 @@
   "statsCatClickfix": { "message": "Sahte CAPTCHA" },
   "statsCatFakeUpdate": { "message": "Sahte güncelleme" },
   "statsCatOther": { "message": "Diğer" },
-  "statsRecent": { "message": "Son" },
+  "statsRecent": { "message": "Son etkinlik" },
   "statsPillBlocked": { "message": "Engellendi" },
   "statsPillWarned": { "message": "Uyarıldı" },
   "statsFooter": { "message": "Her sayı cihazınızda sayılır. Bu sayfadaki hiçbir şey herhangi bir yere gönderilmez." },

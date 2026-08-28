@@ -239,7 +239,7 @@
   "statsPillWarned": { "message": "எச்சரிக்கப்பட்டது" },
   "statsFooter": { "message": "ஒவ்வொரு எண்ணும் உங்கள் சாதனத்திலேயே கணக்கிடப்படுகிறது. இந்தப் பக்கத்தில் உள்ள எதுவும் எங்கும் அனுப்பப்படுவதில்லை." },
   "reviewAskBody": { "message": "ScamShield இதுவரை உங்களுக்காக $COUNT$ மோசடிகளை நிறுத்தியுள்ளது. அது தகுதியானது எனில், ஒரு சிறு மதிப்புரை மற்றவர்கள் இதைக் கண்டறிய உதவும் — இது இலவசம், எப்போதும் இலவசமாகவே இருக்கும்.", "placeholders": { "count": { "content": "$1", "example": "2" } } },
-  "reviewRate": { "message": "ScamShield-க்கு மதிப்பிடுங்கள்" },
+  "reviewRate": { "message": "ScamShield-ஐ மதிப்பிடுங்கள்" },
   "reviewLater": { "message": "பிறகு பார்க்கலாம்" },
   "reviewNo": { "message": "வேண்டாம், நன்றி" },
   "reviewAboutLink": { "message": "ScamShield பிடித்திருக்கிறதா? மதிப்புரை எழுதுங்கள்" },

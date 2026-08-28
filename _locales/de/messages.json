@@ -359,7 +359,7 @@
   "statsPillBlocked": { "message": "Blockiert" },
   "statsPillWarned": { "message": "Gewarnt" },
   "statsFooter": { "message": "Jede Zahl wird auf deinem Gerät gezählt. Nichts auf dieser Seite wird irgendwohin gesendet." },
-  "reviewAskBody": { "message": "ScamShield hat jetzt $COUNT$ Betrugsversuche für dich gestoppt. Wenn es sich das verdient hat, hilft eine kurze Bewertung anderen, es zu finden — sie ist kostenlos und bleibt es auch.", "placeholders": { "count": { "content": "$1", "example": "2" } } },
+  "reviewAskBody": { "message": "ScamShield hat jetzt $COUNT$ Betrugsversuche für dich gestoppt. Wenn es sich das verdient hat, hilft eine kurze Bewertung anderen, es zu finden — ScamShield ist kostenlos und bleibt es auch.", "placeholders": { "count": { "content": "$1", "example": "2" } } },
   "reviewRate": { "message": "ScamShield bewerten" },
   "reviewLater": { "message": "Vielleicht später" },
   "reviewNo": { "message": "Nein, danke" },

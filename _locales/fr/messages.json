@@ -327,7 +327,7 @@
   "fmtStatsSince": { "message": "Protège ce navigateur depuis le $DATE$", "placeholders": { "date": { "content": "$1", "example": "12 Jun 2026" } } },
   "stats7d": { "message": "7 jours" },
   "stats30d": { "message": "30 jours" },
-  "statsAll": { "message": "Depuis toujours" },
+  "statsAll": { "message": "Total" },
   "statsPagesChecked": { "message": "Pages vérifiées sur l'appareil" },
   "statsThreatsStopped": { "message": "Menaces stoppées" },
   "statsThreatsNone": { "message": "Tout est en ordre — rien n'est passé" },

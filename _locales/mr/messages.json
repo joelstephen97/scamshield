@@ -238,11 +238,11 @@
   "statsPillBlocked": { "message": "ब्लॉक केले" },
   "statsPillWarned": { "message": "इशारा दिला" },
   "statsFooter": { "message": "प्रत्येक आकडा तुमच्याच डिव्हाइसवर मोजला जातो. या पृष्ठावरील काहीही कुठेही पाठवले जात नाही." },
-  "reviewAskBody": { "message": "ScamShield ने आतापर्यंत तुमच्यासाठी $COUNT$ फसवणुकी थांबवल्या आहेत. ते याला पात्र असेल तर एक छोटे परीक्षण इतरांना ते सापडायला मदत करते — ते मोफत आहे आणि नेहमी राहील.", "placeholders": { "count": { "content": "$1", "example": "2" } } },
+  "reviewAskBody": { "message": "ScamShield ने आतापर्यंत तुमच्यासाठी $COUNT$ फसवणुकी थांबवल्या आहेत. ते याला पात्र असेल तर एक छोटे पुनरावलोकन इतरांना ते सापडायला मदत करते — ते मोफत आहे आणि नेहमी राहील.", "placeholders": { "count": { "content": "$1", "example": "2" } } },
   "reviewRate": { "message": "ScamShield ला रेट करा" },
   "reviewLater": { "message": "कदाचित नंतर" },
   "reviewNo": { "message": "नको, धन्यवाद" },
-  "reviewAboutLink": { "message": "ScamShield आवडतंय? परीक्षण लिहा" },
+  "reviewAboutLink": { "message": "ScamShield आवडते का? पुनरावलोकन लिहा" },
 
   "bannerDangerBrand": { "message": "धोकादायक पृष्ठ — $BRAND$ सारखे दिसते, पण ते नाही", "placeholders": { "brand": { "content": "$1" } } },
   "bannerDanger": { "message": "धोकादायक पृष्ठ" },

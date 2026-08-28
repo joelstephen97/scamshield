@@ -355,7 +355,7 @@
   "statsCatClickfix": { "message": "CAPTCHA falso" },
   "statsCatFakeUpdate": { "message": "Actualización falsa" },
   "statsCatOther": { "message": "Otro" },
-  "statsRecent": { "message": "Reciente" },
+  "statsRecent": { "message": "Recientes" },
   "statsPillBlocked": { "message": "Bloqueado" },
   "statsPillWarned": { "message": "Avisado" },
   "statsFooter": { "message": "Cada número se cuenta en tu dispositivo. Nada en esta página se envía a ningún sitio." },

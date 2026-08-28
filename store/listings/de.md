@@ -93,7 +93,7 @@ Funktionen:
 
 ## What's new (0.7.0)
 
-- Neuer Tab „Statistiken" in den Einstellungen: auf dem Gerät geprüfte
+- Neuer Tab „Statistiken“ in den Einstellungen: auf dem Gerät geprüfte
   Seiten, gestoppte Bedrohungen, Datenschutz-Funde und ein Diagramm der
   täglichen Aktivität – zeige die letzten 7 Tage, die letzten 30 Tage oder
   deine Gesamtwerte seit der Installation an – alles wird auf deinem Gerät
