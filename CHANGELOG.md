@@ -7,9 +7,9 @@ All notable changes to ScamShield. Versions are git tags (`vX.Y.Z`); the version
 ### New
 - **Statistics tab** — a new tab in Settings pairs the number that should stay
   rare (threats stopped) with the number that's always moving (pages checked
-  on-device), plus privacy findings and a daily activity chart over the last
-  7/30/90 days. Every count is computed and stored on-device; nothing here is
-  ever transmitted.
+  on-device), plus privacy findings and a daily activity chart, toggleable
+  between the last 7 days, 30 days, and a since-install lifetime view. Every
+  count is computed and stored on-device; nothing here is ever transmitted.
 - **Earned review ask** — after ScamShield has actually blocked something
   twice and been installed at least 7 days, the popup shows a quiet,
   in-popup-only ask for a review — never a page warning, and never while a

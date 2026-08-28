@@ -88,8 +88,9 @@ Features:
 ## What's new (0.7.0)
 
 - New Statistics tab in Settings: pages checked on-device, threats stopped,
-  privacy findings, and a daily activity chart for the last 7/30/90 days —
-  all counted and stored on your device, never sent anywhere.
+  privacy findings, and a daily activity chart — view the last 7 days, last
+  30 days, or your totals since install — all counted and stored on your
+  device, never sent anywhere.
 - A quiet, dismissible review prompt appears in the popup only after
   ScamShield has actually blocked something twice — decline it once and it's
   gone for good.

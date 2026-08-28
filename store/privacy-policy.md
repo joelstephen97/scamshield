@@ -31,7 +31,7 @@ The extension keeps the following in your browser's local extension storage. It 
 - the queue of reports waiting to be sent (only while reporting is on; discarded the moment you turn it off);
 - a small count of how often you visit each site (registrable domain only), used to quieten low-confidence warnings on sites you use a lot — capped, pruned, and never transmitted;
 - a per-site record of a shop countdown timer's starting value, used only to notice a "sale ends" timer that fakes urgency by resetting on every visit;
-- statistics counters for the Statistics tab: pages checked, daily activity buckets (kept for 90 days), and threats broken down by type — all local, all on-device, never transmitted;
+- statistics counters for the Statistics tab: pages checked, daily activity buckets (kept for 90 days), threats by type, and privacy findings — plus a since-install lifetime total for each — all local, all on-device, never transmitted;
 - review-ask state (whether you've been asked, snoozed, declined, or already rated) so the earned review prompt is shown at most as described in Settings and never repeated after you decline it;
 - your language preference, if you've set one in Settings — synced only through your own browser's opt-in sync, the same as your other settings;
 - short-lived per-tab state (current verdict, any privacy findings, cached icon hashes) in *session* storage, which the browser clears when it closes.
