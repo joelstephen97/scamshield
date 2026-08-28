@@ -101,3 +101,49 @@ test('MAX_ASKS is 2 (snoozed twice caps out) and constants match the spec', () =
   assert.equal(R.SNOOZE_DAYS, 90);
   assert.equal(R.MAX_ASKS, 2);
 });
+
+// --- isChromeFromManifest -----------------------------------------------
+// Pure signal from the *packaged* manifest, not runtime globals — modern
+// Chrome (Chromium 148, 2026) ships its own native `browser.*` alias, so
+// `typeof browser === 'undefined'` no longer distinguishes the two browsers.
+
+test('Chrome manifest (no browser_specific_settings) is Chrome', () => {
+  const chromeManifest = { name: 'ScamShield', manifest_version: 3 };
+  assert.equal(R.isChromeFromManifest(chromeManifest), true);
+});
+
+test('Firefox manifest (carries browser_specific_settings) is not Chrome', () => {
+  const firefoxManifest = {
+    name: 'ScamShield', manifest_version: 3,
+    browser_specific_settings: { gecko: { id: 'scamshield@joel.dev', strict_min_version: '128.0' } }
+  };
+  assert.equal(R.isChromeFromManifest(firefoxManifest), false);
+});
+
+test('isChromeFromManifest fails open (Chrome) on junk/missing input', () => {
+  assert.equal(R.isChromeFromManifest(undefined), true);
+  assert.equal(R.isChromeFromManifest(null), true);
+  assert.equal(R.isChromeFromManifest({}), true);
+  assert.equal(R.isChromeFromManifest('not an object'), true);
+});
+
+// --- shouldShowCard (render-gate) ----------------------------------------
+// Never show the ask beneath an active warning, whatever eligible() says.
+
+test('shouldShowCard: eligible + a clean/unknown verdict shows the card', () => {
+  assert.equal(R.shouldShowCard(true, 'safe'), true);
+  assert.equal(R.shouldShowCard(true, 'unknown'), true);
+  assert.equal(R.shouldShowCard(true, undefined), true);
+  assert.equal(R.shouldShowCard(true, null), true);
+});
+
+test('shouldShowCard: dangerous or suspicious suppresses the card even when eligible', () => {
+  assert.equal(R.shouldShowCard(true, 'dangerous'), false);
+  assert.equal(R.shouldShowCard(true, 'suspicious'), false);
+});
+
+test('shouldShowCard: not eligible never shows the card, regardless of level', () => {
+  assert.equal(R.shouldShowCard(false, 'safe'), false);
+  assert.equal(R.shouldShowCard(false, 'unknown'), false);
+  assert.equal(R.shouldShowCard(false, 'dangerous'), false);
+});

@@ -55,45 +55,70 @@ function renderVerdictUI(host) {
   $('rescue').hidden = !(level === 'dangerous' && rescueUrl); if (rescueUrl) $('rescue').textContent = T('takeMeToReal', [bidi(brand)], 'Take me to the real ' + brand);
   $('reportbtn').hidden = checking;
   if (!checking) $('reportbtn').textContent = level === 'safe' || level === 'unknown' ? T('reportScam', null, 'Report: this is a scam') : T('reportSafe', null, 'Report: this is safe');
+  renderReviewAsk(level);
 }
 // Earned review ask (0.7.0): a quiet card below the status card, shown only
 // after ui/review.js's pure predicate says it's earned (2nd real block, 7+
 // day-old install, Chrome only — no AMO listing to ask for on Firefox, state
-// pending/eligible-snooze). The three buttons each report an action to the SW
-// (which owns the reviewAsk storage.local state) and hide the card; "Rate" is
-// a real <a target="_blank"> (zero new API surface) that also records the
-// state change so the card never returns.
+// pending/eligible-snooze) AND the current tab's verdict isn't an active
+// warning (never "please review us" beneath a dangerous/suspicious card —
+// the eligible state just waits for a popup open on a clean/unknown page).
+// The three buttons each report an action to the SW (which owns the
+// reviewAsk storage.local state) and hide the card; "Rate" is a real
+// <a target="_blank"> (zero new API surface) that also records the state
+// change so the card never returns.
 //
 // Chrome/Firefox detection: NOT `typeof browser === 'undefined'`. Modern
 // Chrome (verified: Chromium 148, 2026) now ships its own native `browser.*`
 // promise-API alias for cross-browser compatibility, so `browser` is defined
 // on real Chrome too — that check would make isChrome false everywhere and
-// the ask would never show. Instead this reads our OWN packaged manifest:
-// only the Firefox build (manifest.firefox.json) carries
-// `browser_specific_settings` (the Gecko extension ID) — Chrome's manifest.json
-// never has it, regardless of what globals the browser injects.
+// the ask would never show. Instead this reads our OWN packaged manifest via
+// ui/review.js's isChromeFromManifest(): only the Firefox build
+// (manifest.firefox.json) carries `browser_specific_settings` (the Gecko
+// extension ID) — Chrome's manifest.json never has it, regardless of what
+// globals the browser injects.
 function isChromeBuild() {
-  try { return !api.runtime.getManifest().browser_specific_settings; } catch (_) { return true; }
+  // Fails open (assumes Chrome) on any getManifest() error. Intentional and
+  // low-stakes: the worst case is a working CWS review link/card shown on a
+  // browser that isn't actually Chrome, never a broken feature.
+  try { return REVIEW.isChromeFromManifest(api.runtime.getManifest()); } catch (_) { return true; }
 }
+// Fetches eligibility once (cheap, and independent of which page the popup
+// happens to be over) and caches it in module scope; renderReviewAsk() below
+// applies the tab-verdict gate and can be called from multiple places
+// (renderVerdictUI's first render, its poll re-render, and the non-http
+// early-return branch) without re-fetching or re-evaluating eligibility.
+let reviewEligible = false, reviewCount = 0, reviewListenersBound = false;
 async function initReviewAsk() {
   if (!REVIEW) return;
   if (!isChromeBuild()) return;
   const ctx = await send('getReviewAsk');
   if (!ctx) return;
   const ra = ctx.reviewAsk || {};
-  const count = settings.threatsBlocked || 0;
-  const ok = REVIEW.eligible({
-    isChrome: true, threatsBlocked: count, installedAt: ctx.installedAt, now: Date.now(),
+  reviewCount = settings.threatsBlocked || 0;
+  reviewEligible = REVIEW.eligible({
+    isChrome: true, threatsBlocked: reviewCount, installedAt: ctx.installedAt, now: Date.now(),
     state: ra.state, snoozeUntil: ra.snoozeUntil, asks: ra.asks
   });
-  if (!ok) return;
-  $('askbody').textContent = T('reviewAskBody', [bidi(String(count))],
-    `ScamShield has now stopped ${count} scams for you. If it's earned it, a short review helps other people find it — it's free and always will be.`);
-  $('askcard').hidden = false;
+}
+function bindReviewButtonsOnce() {
+  if (reviewListenersBound) return;
+  reviewListenersBound = true;
   const hide = () => { $('askcard').hidden = true; };
   $('askrate').addEventListener('click', () => { send('reviewAskAction', { action: 'rate' }); hide(); });
   $('asklater').addEventListener('click', async () => { await send('reviewAskAction', { action: 'later' }); hide(); });
   $('askno').addEventListener('click', async () => { await send('reviewAskAction', { action: 'no' }); hide(); });
+}
+// Idempotent — safe to call repeatedly (e.g. once with the "checking"/unknown
+// level, again once pollVerdict's later re-render knows the real verdict): it
+// only toggles visibility/text, and binds the button listeners at most once.
+function renderReviewAsk(lvl) {
+  if (!REVIEW) return;
+  if (!REVIEW.shouldShowCard(reviewEligible, lvl)) { $('askcard').hidden = true; return; }
+  $('askbody').textContent = T('reviewAskBody', [bidi(String(reviewCount))],
+    `ScamShield has now stopped ${reviewCount} scams for you. If it's earned it, a short review helps other people find it — it's free and always will be.`);
+  $('askcard').hidden = false;
+  bindReviewButtonsOnce();
 }
 async function pollVerdict(host) {
   for (let i = 0; i < 10; i++) {
@@ -150,6 +175,7 @@ async function init() {
   if (!http) {
     const protocol = tab && tab.url ? new URL(tab.url).protocol.replace(':', '') : '';
     renderStatus('unknown', protocol ? T('fmtProtocolPage', [bidi(protocol)], protocol + ' page') : '', T('popupNotHttp', null, "Browser pages and the web store aren't scanned."));
+    renderReviewAsk('unknown');
     renderHistory(); return;
   }
   const host = new URL(tab.url).hostname; domain = registrable(host);

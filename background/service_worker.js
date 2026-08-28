@@ -179,8 +179,22 @@ const privacyTotalPromise = ensurePrivacyTotal();
 // loaded by popup.html/options.html) — this file only owns reading, lazily
 // creating, and writing the { state, snoozeUntil, asks } object.
 const REVIEW_ASK_DEFAULT = { state: 'pending', snoozeUntil: 0, asks: 0 };
+// Every read-modify-write of reviewAsk — the lazy-create below, each of the
+// three user actions, and a settings import — is serialized through this one
+// chain (same pattern as settingsChain/statsChain), so none of them can race
+// and clobber another. This used to be two separate chains (lazy-create on
+// statsChain, actions on their own reviewAskChain), which left exactly the
+// race a code review caught: an import (or an action) landing between the
+// lazy-create's read and its write could get silently overwritten back to
+// REVIEW_ASK_DEFAULT.
+let reviewAskChain = Promise.resolve();
+function queueReviewAsk(run) {
+  const result = reviewAskChain.then(run, run);
+  reviewAskChain = result.then(() => {}, () => {});
+  return result;
+}
 function ensureReviewAsk() {
-  return queueStats(async () => {
+  return queueReviewAsk(async () => {
     try {
       const cur = await api.storage.local.get('reviewAsk');
       if (!cur.reviewAsk || typeof cur.reviewAsk !== 'object') {
@@ -205,12 +219,8 @@ async function getReviewAskContext() {
   const installedAt = (typeof cur.installedAt === 'number' && cur.installedAt > 0) ? cur.installedAt : Date.now();
   return { reviewAsk: ra, installedAt };
 }
-// Serializes the three user actions (rate/later/no) against each other and
-// against the lazy-create above, the same way settingsChain/statsChain do for
-// their own keys.
-let reviewAskChain = Promise.resolve();
 function setReviewAsk(action) {
-  const run = async () => {
+  return queueReviewAsk(async () => {
     await reviewAskPromise;
     const cur = await getReviewAsk();
     let next;
@@ -220,23 +230,32 @@ function setReviewAsk(action) {
     else return cur;
     await api.storage.local.set({ reviewAsk: next });
     return next;
-  };
-  const result = reviewAskChain.then(run, run);
-  reviewAskChain = result.then(() => {}, () => {});
-  return result;
+  });
+}
+// Used by the 'importSettings' handler below — writes an already-sanitized
+// reviewAsk object through the same chain as every other reviewAsk write, so
+// an import can never race the lazy-create or a concurrent action click.
+function importReviewAsk(patch) {
+  return queueReviewAsk(async () => {
+    await reviewAskPromise;
+    await api.storage.local.set({ reviewAsk: patch });
+    return patch;
+  });
 }
 // Validates an imported reviewAsk object (see sanitizeImport below) the same
 // defensive way sanitizeImport validates settings: unknown/garbage in, null out.
 function sanitizeReviewAsk(v) {
   if (!v || typeof v !== 'object') return null;
   if (!['pending', 'snoozed', 'rated', 'declined'].includes(v.state)) return null;
-  const snoozeUntil = Number(v.snoozeUntil);
-  const asks = Number(v.asks);
-  return {
-    state: v.state,
-    snoozeUntil: Number.isFinite(snoozeUntil) && snoozeUntil >= 0 ? snoozeUntil : 0,
-    asks: Number.isFinite(asks) && asks >= 0 ? Math.floor(asks) : 0
-  };
+  const snoozeUntilRaw = Number(v.snoozeUntil);
+  // Clamp to a sane ceiling — a corrupt or hand-edited export could otherwise
+  // snooze the ask for years. 90 days matches ui/review.js's SNOOZE_DAYS (the
+  // longest a legitimate "Maybe later" ever sets).
+  const ceiling = Date.now() + 90 * 24 * 3600 * 1000;
+  const snoozeUntil = Number.isFinite(snoozeUntilRaw) && snoozeUntilRaw >= 0 ? Math.min(snoozeUntilRaw, ceiling) : 0;
+  const asksRaw = Number(v.asks);
+  const asks = Number.isFinite(asksRaw) && asksRaw >= 0 ? Math.floor(asksRaw) : 0;
+  return { state: v.state, snoozeUntil, asks };
 }
 
 // Feed size for the stats card: the OTA count the options page shows, falling
@@ -821,7 +840,7 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         const reviewPatch = sanitizeReviewAsk(msg.data && msg.data.reviewAsk);
         if (!patch && !reviewPatch) { sendResponse({ ok: false }); break; }
         if (patch) await setSettings(patch);
-        if (reviewPatch) await api.storage.local.set({ reviewAsk: reviewPatch });
+        if (reviewPatch) await importReviewAsk(reviewPatch);
         sendResponse({ ok: true }); break;
       }
       case 'getReviewAsk':
@@ -925,4 +944,4 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 // module-scoped. Re-attach the debug/test surface that used to live on the
 // classic worker's global scope — the e2e suite drives these via
 // worker.evaluate, and they're handy in the SW console.
-Object.assign(globalThis, { DEFAULT_FEED_URL, getSettings, setSettings, handleUserReport, runOtaUpdate, flushReports, queueReport, exportSettings, sanitizeImport, pushSync, pullSync, getStats, bumpStat, ensurePrivacyTotal, ensureInstalledAt, getReviewAsk, getReviewAskContext, setReviewAsk, sanitizeReviewAsk, ensureReviewAsk });
+Object.assign(globalThis, { DEFAULT_FEED_URL, getSettings, setSettings, handleUserReport, runOtaUpdate, flushReports, queueReport, exportSettings, sanitizeImport, pushSync, pullSync, getStats, bumpStat, ensurePrivacyTotal, ensureInstalledAt, getReviewAsk, getReviewAskContext, setReviewAsk, sanitizeReviewAsk, ensureReviewAsk, importReviewAsk });

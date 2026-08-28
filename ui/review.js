@@ -50,5 +50,28 @@
     return false; // 'rated' | 'declined' | anything else
   }
 
-  return { DAY, INSTALL_AGE_DAYS, THREATS_THRESHOLD, SNOOZE_DAYS, MAX_ASKS, CWS_REVIEW_URL, eligible };
+  // Pure Chrome/Firefox signal from the *packaged* manifest object (the return
+  // value of chrome.runtime.getManifest()) — deliberately NOT a runtime-globals
+  // check like `typeof browser === 'undefined'`. Verified against real Chromium
+  // 148 (2026): Chrome now ships its own native `browser.*` promise-API alias
+  // for cross-browser compatibility, so `browser` is defined on Chrome too,
+  // which would make that check false everywhere. Only the Firefox build's
+  // manifest (manifest.firefox.json, copied verbatim into the packaged
+  // manifest.json by scripts/build.js) carries `browser_specific_settings` —
+  // Chrome's manifest.json never has it, regardless of injected globals.
+  function isChromeFromManifest(manifest) {
+    return !(manifest && manifest.browser_specific_settings);
+  }
+
+  // Render-gate: even an eligible profile never gets the ask beneath an
+  // active warning ("please review us" under a dangerous/suspicious verdict
+  // is the exact pattern the design explicitly rejects) — the eligible state
+  // just waits for a popup open on a clean/unknown page instead. `level` is
+  // the popup's current verdict level ('safe' | 'suspicious' | 'dangerous' |
+  // 'unknown' | null/undefined for "not yet known").
+  function shouldShowCard(isEligible, level) {
+    return !!isEligible && level !== 'dangerous' && level !== 'suspicious';
+  }
+
+  return { DAY, INSTALL_AGE_DAYS, THREATS_THRESHOLD, SNOOZE_DAYS, MAX_ASKS, CWS_REVIEW_URL, eligible, isChromeFromManifest, shouldShowCard };
 });

@@ -1,6 +1,18 @@
 const { test } = require('./fixtures');
 const { expect } = require('@playwright/test');
 const DAY = 24 * 3600 * 1000;
+const BASE = 'http://localhost:5599';
+
+// Same pattern popup.spec.js's openPopup() uses: bringing the content page
+// and then the popup to front (and reloading the popup) is what makes
+// tabs.query({active, currentWindow}) reliably resolve to the content tab
+// rather than whichever tab Playwright's context.newPage() happened to open.
+async function openPopupOn(context, extensionId, page) {
+  const popup = await context.newPage();
+  await popup.goto(`chrome-extension://${extensionId}/popup.html`);
+  await page.bringToFront(); await popup.bringToFront(); await popup.reload();
+  return popup;
+}
 
 // Earned review ask (0.7.0): the popup shows a quiet ask-card only once a
 // profile has both a real 2nd block and a week-old install. Seeded directly
@@ -93,6 +105,27 @@ test('earned review ask: Rate ScamShield opens the CWS review tab and never show
   await expect(popup2.locator('#askcard')).toBeHidden();
 });
 
+test('earned review ask: suppressed under an active dangerous warning; shows once the same eligible profile opens the popup on a clean page', async ({ context, extensionId }) => {
+  const sw = context.serviceWorkers()[0];
+  await seedEligible(sw);
+
+  const bad = await context.newPage();
+  await bad.goto(BASE + '/phishing-login.html');
+  await expect(bad.locator('.scamshield-banner.danger')).toBeVisible({ timeout: 8000 });
+  const popupOnBad = await openPopupOn(context, extensionId, bad);
+  await expect(popupOnBad.locator('#status')).toHaveClass(/dangerous/, { timeout: 5000 });
+  // Never "please review us" beneath an active warning, even though this
+  // profile is otherwise eligible.
+  await expect(popupOnBad.locator('#askcard')).toBeHidden();
+
+  const clean = await context.newPage();
+  await clean.goto(BASE + '/clean.html');
+  await clean.waitForTimeout(500);
+  const popupOnClean = await openPopupOn(context, extensionId, clean);
+  await expect(popupOnClean.locator('#status')).toHaveClass(/safe/);
+  await expect(popupOnClean.locator('#askcard')).toBeVisible();
+});
+
 test('a fresh install with no real blocks never shows the ask-card', async ({ context, extensionId }) => {
   const popup = await context.newPage();
   await popup.goto(`chrome-extension://${extensionId}/popup.html`);
@@ -126,4 +159,23 @@ test('exportSettings includes reviewAsk; importSettings restores it (real messag
   const imported = await page.evaluate((data) => new Promise((res) => chrome.runtime.sendMessage({ type: 'importSettings', data }, res)), exported);
   expect(imported.ok).toBe(true);
   expect((await sw.evaluate(() => getReviewAsk())).state).toBe('declined');
+});
+
+test('importSettings clamps a runaway snoozeUntil to a 90-day ceiling', async ({ context, extensionId }) => {
+  const sw = context.serviceWorkers()[0];
+  const page = await context.newPage();
+  await page.goto(`chrome-extension://${extensionId}/popup.html`);
+
+  // A hand-edited/corrupt export claiming a snooze 10 years out.
+  const tenYearsOut = Date.now() + 10 * 365 * DAY;
+  const data = { schema: 1, settings: {}, reviewAsk: { state: 'snoozed', snoozeUntil: tenYearsOut, asks: 1 } };
+  const before = Date.now();
+  const imported = await page.evaluate((d) => new Promise((res) => chrome.runtime.sendMessage({ type: 'importSettings', data: d }, res)), data);
+  expect(imported.ok).toBe(true);
+
+  const ra = await sw.evaluate(() => getReviewAsk());
+  expect(ra.state).toBe('snoozed');
+  const ninetyDayCeiling = before + 90 * DAY;
+  expect(ra.snoozeUntil).toBeLessThanOrEqual(ninetyDayCeiling + 5000);
+  expect(ra.snoozeUntil).toBeLessThan(tenYearsOut);
 });
