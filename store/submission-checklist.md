@@ -39,6 +39,11 @@ Listing copy lives in `chrome-listing.md` / `firefox-listing.md`; permissions + 
 - [ ] Reply to reviews; watch the install/rating dashboard (there is no in-extension analytics).
 - [ ] After a few weeks with reporting live: `model/pull_reports.py` → retrain → next release.
 
+### 0.7.0 data-use note
+Nothing changed on the CWS data-use form: still tick only **Website content** and **Web history**, both described as opt-in community reporting only. The new Statistics tab, review-ask prompt and language override are all on-device/local (or synced only via the user's own existing opt-in browser sync) and send nothing over the network.
+
+**Reviewer notes (0.7.0):** "No new permissions since 0.3.1 (still storage, declarativeNetRequest, alarms + http/https). 0.7.0 adds: (1) a local Statistics tab in Settings — pages-checked/threats/privacy counters and 90-day daily buckets, all in chrome.storage.local, never transmitted; (2) an earned, in-popup-only review ask, gated per Chrome Web Store policy (non-incentivized, dismissible, never repeated after 'No thanks') — it appears after the 2nd blocked threat and 7 days installed, is suppressed while a page warning is showing, snoozes 90 days on 'Maybe later' (asked at most twice), and only ever links to this listing's own reviews page; Chrome only, no Firefox listing to review yet; (3) a per-user language override — a Settings dropdown that reads the extension's own packaged `_locales/` files at runtime and stores one `uiLang` setting (synced only via the user's own opt-in browser sync), with no effect on the language of this store listing. No new network requests. CWS data-use form answers unchanged. Source: github.com/joelstephen97/scamshield."
+
 ## History
 - **0.3.0** (Jun 2026) — rejected: unused `scripting` permission ("Purple Potassium"). Fixed in 0.3.1 (permission removed, `web_accessible_resources` narrowed, FP overhaul).
 - **0.3.1** — published (current store version before 0.5.0).

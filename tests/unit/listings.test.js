@@ -16,7 +16,7 @@ const LISTINGS_DIR = path.join(__dirname, '../../store/listings');
 const EXPECTED = ['en', 'zh_CN', 'hi', 'es', 'ar', 'fr', 'bn', 'pt_BR', 'ru', 'ur',
   'id', 'de', 'ja', 'mr', 'te', 'tr', 'ta', 'vi', 'ko', 'it'];
 
-const HEADINGS = ['## Name', '## Short description', '## Full description', "## What's new (0.6.0)"];
+const HEADINGS = ['## Name', '## Short description', '## Full description', "## What's new (0.7.0)"];
 
 function truncateList(items, n = 10) {
   if (items.length <= n) return items.join(', ');

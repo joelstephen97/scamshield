@@ -85,31 +85,17 @@ Features:
 • Smaller and faster: ~0.6 MB unpacked, no heavy runtime
 • 100% on-device analysis — no tracking, no data collection
 
-## What's new (0.6.0)
+## What's new (0.7.0)
 
-The "real problems only" release — every new feature targets a validated
-real-world scam or privacy pattern, and none of it adds a permission.
-
-- Now scans inside iframes, where phishing forms used to hide invisibly.
-- A new full-screen interstitial tier for near-certain scams — ClickFix
-  fake-CAPTCHA clipboard attacks, fake browser-update prompts, delivery-fee
-  phishing (DHL/FedEx/Aramex/Royal Mail/Evri/Emirates Post/DPD), and
-  tech-support scare pages — with an enforced pause and a real-vs-fake domain
-  comparison, reserved for near-zero-false-positive detections.
-- A new privacy pack: leaky-form warnings (your email/phone sent to a
-  tracker before you press submit, plain or hashed), fingerprinting
-  detection, and notification-permission-trap warnings — all on-device.
-- New shopping checks: fake countdowns, fake "only 2 left" pressure,
-  hotlinked trust badges, off-platform payment requests and missing contact
-  details, plus a sponsored-result check on Google/Bing/DuckDuckGo.
-- Strict mode: one toggle that blocks even "suspicious" pages full-screen
-  with simpler wording, for helping a less-confident relative stay safe.
-- Settings export/import and optional cross-device sync (your browser's own
-  sync — still no ScamShield account or server).
-- IDN homograph detection and wallet-drainer upgrades (EIP-6963 multi-wallet
-  support, EIP-7702 account-delegation detection).
-- 20-language support, with full menu, warning and settings translations,
-  not just the store listing.
+- New Statistics tab in Settings: pages checked on-device, threats stopped,
+  privacy findings, and a daily activity chart for the last 7/30/90 days —
+  all counted and stored on your device, never sent anywhere.
+- A quiet, dismissible review prompt appears in the popup only after
+  ScamShield has actually blocked something twice — decline it once and it's
+  gone for good.
+- New language override in Settings: pick ScamShield's own language
+  independently of your browser's, with sync-across-devices support if
+  you've turned on your browser's own sync.
 
 No new permissions. Still `storage`, `declarativeNetRequest`, `alarms` and
 http/https access, exactly as 0.3.1.

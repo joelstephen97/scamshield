@@ -1,8 +1,8 @@
 # ScamShield Privacy Policy
 
-_Last updated: 2026-08-25 · applies to ScamShield 0.6.0 and later (Chrome Web Store listing `fojjjofjimbfoddafoampojopijnlihl`, Firefox build, and source builds from [github.com/joelstephen97/scamshield](https://github.com/joelstephen97/scamshield))._
+_Last updated: 2026-08-28 · applies to ScamShield 0.7.0 and later (Chrome Web Store listing `fojjjofjimbfoddafoampojopijnlihl`, Firefox build, and source builds from [github.com/joelstephen97/scamshield](https://github.com/joelstephen97/scamshield))._
 
-_What changed in 0.6.0: several new on-device checks (fake-CAPTCHA/ClickFix, fake browser-update, leaky-form and fingerprinting detection, fake-shop and sponsored-result checks) and 20-language support. **None of them add a network request or a permission** — they all run inside the extension. Community reporting is still off by default, and the payload it sends when you opt in is unchanged. New items are stored **only on your device** (see below), plus an optional settings sync you can turn on._
+_What changed in 0.7.0: a Statistics tab, an earned review ask, and a per-user language override. **None of them add a network request or a permission** — they all run inside the extension. Community reporting is still off by default, and the payload it sends when you opt in is unchanged. New items are stored **only on your device** (see below); the language choice is the only new one of the three that can travel through your browser's own opt-in sync, exactly like your existing settings._
 
 ScamShield analyses web pages **on your device** to warn you about scams and phishing. It was designed so that your browsing stays private: by default it collects nothing, has no accounts, no analytics, no advertising and no trackers. The hosted copy of this policy lives at <https://joelstephen97.github.io/scamshield/privacy.html>; its source is this file.
 
@@ -31,6 +31,9 @@ The extension keeps the following in your browser's local extension storage. It 
 - the queue of reports waiting to be sent (only while reporting is on; discarded the moment you turn it off);
 - a small count of how often you visit each site (registrable domain only), used to quieten low-confidence warnings on sites you use a lot — capped, pruned, and never transmitted;
 - a per-site record of a shop countdown timer's starting value, used only to notice a "sale ends" timer that fakes urgency by resetting on every visit;
+- statistics counters for the Statistics tab: pages checked, daily activity buckets (kept for 90 days), and threats broken down by type — all local, all on-device, never transmitted;
+- review-ask state (whether you've been asked, snoozed, declined, or already rated) so the earned review prompt is shown at most as described in Settings and never repeated after you decline it;
+- your language preference, if you've set one in Settings — synced only through your own browser's opt-in sync, the same as your other settings;
 - short-lived per-tab state (current verdict, any privacy findings, cached icon hashes) in *session* storage, which the browser clears when it closes.
 
 If you turn on **Sync across my devices** (off by default, in Settings → About), your settings and trusted-sites list — never your history, stats or reports — are stored in your browser's own account sync so they match across your signed-in browsers. That data travels through your browser vendor's sync (e.g. Google or Mozilla), not through any ScamShield server; ScamShield still has no account and no server that stores your data.

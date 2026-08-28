@@ -2,6 +2,28 @@
 
 All notable changes to ScamShield. Versions are git tags (`vX.Y.Z`); the version on the [Chrome Web Store](https://chromewebstore.google.com/detail/fojjjofjimbfoddafoampojopijnlihl) may lag a tag by a few days while Google reviews it. Privacy-relevant changes are also reflected in the [privacy policy](https://joelstephen97.github.io/scamshield/privacy.html).
 
+## 0.7.0 — 2026-08-28
+
+### New
+- **Statistics tab** — a new tab in Settings pairs the number that should stay
+  rare (threats stopped) with the number that's always moving (pages checked
+  on-device), plus privacy findings and a daily activity chart over the last
+  7/30/90 days. Every count is computed and stored on-device; nothing here is
+  ever transmitted.
+- **Earned review ask** — after ScamShield has actually blocked something
+  twice and been installed at least 7 days, the popup shows a quiet,
+  in-popup-only ask for a review — never a page warning, and never while a
+  page warning is on screen. *Maybe later* snoozes it for 90 days and asks at
+  most twice; *No thanks* is permanent. Chrome only (there's no Firefox
+  listing to review yet).
+- **Language override** — a Settings dropdown lets you pick ScamShield's
+  language independently of your browser's, defaulting to "Browser default."
+  The choice is stored in one setting (`uiLang`) and syncs across your
+  devices only if you've already turned on your own browser's sync — it has
+  no effect on the language the Chrome Web Store listing itself displays.
+
+0.7.0 adds no new permissions and makes no new network requests.
+
 ## 0.6.1 — 2026-08-28
 
 ### Fixed
