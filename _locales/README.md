@@ -5,7 +5,7 @@ id, de, ja, mr, te, tr, ta, vi, ko, it.
 
 ## How it works
 
-- `en/messages.json` is the source of truth and is **complete** (~330 keys).
+- `en/messages.json` is the source of truth and is **complete** (311 keys).
 - Every other locale has reached **full parity** with `en`: the same key set,
   the same placeholder declarations, and no stray content. That covers every
   user-visible string — warning headlines, buttons, popup status, the
