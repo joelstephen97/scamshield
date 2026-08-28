@@ -1,13 +1,4 @@
-<!--
-  Canonical English store listing. This is the source text Task 4's
-  translation agents work from to produce the other 19 locale listings.
-
-  NOTE: two of our _locales directory names differ from the locale codes the
-  Chrome Web Store developer dashboard expects when uploading a translated
-  listing: `pt_BR` must be entered as `pt-BR`, and `zh_CN` must be entered as
-  `zh-CN` (hyphen, not underscore, and the dashboard is case-sensitive about
-  the region suffix). Every other locale code matches its directory name.
--->
+<!-- Translated store listing (bn). Canonical source: en.md. CWS dashboard locale codes: pt_BR -> pt-BR, zh_CN -> zh-CN. -->
 
 ## Name
 
