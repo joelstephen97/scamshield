@@ -668,13 +668,13 @@
     "message": "Şüpheli sayfa"
   },
   "interstitialHead1": {
-    "message": "Dur — bu sayfa seni dolandırmaya çalışıyor"
+    "message": "Durun — bu sayfa sizi dolandırmaya çalışıyor"
   },
   "interstitialHead2": {
-    "message": "Bekle — bu bir dolandırıcılık sayfasına benziyor"
+    "message": "Bekleyin — bu bir dolandırıcılık sayfasına benziyor"
   },
   "interstitialHead3": {
-    "message": "Devam etme — dolandırıcılık uyarısı"
+    "message": "Devam etmeyin — dolandırıcılık uyarısı"
   },
   "interstitialReassure": {
     "message": "Yazdıklarınızın hiçbiri henüz gönderilmedi. Şimdi ayrılmak güvenli."
@@ -974,7 +974,7 @@
     "message": "Bu işlem, bir sitenin token'larınızın bir kısmını harcamasına izin veriyor."
   },
   "reason_clickfixPasteRun": {
-    "message": "Bu sayfa panonuza bir sistem komutu koydu ve yapıştırıp çalıştırmanızı istiyor. Gerçek web siteleri bunu asla yapmaz — çalıştırmak bilgisayarınızı virüs bulaştırır."
+    "message": "Bu sayfa panonuza bir sistem komutu koydu ve yapıştırıp çalıştırmanızı istiyor. Gerçek web siteleri bunu asla yapmaz — çalıştırmak bilgisayarınıza virüs bulaştırır."
   },
   "reason_clickfixFakeCaptcha": {
     "message": "Bu \"doğrulama\", Win+R'ye basıp bir komut yapıştırmanızı istiyor. Gerçek CAPTCHA'lar asla bir şey çalıştırmanızı istemez — bu kötü amaçlı yazılım yükler."

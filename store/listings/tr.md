@@ -15,7 +15,7 @@ ScamShield — Dolandırıcılık ve Kimlik Avı Koruması
 
 ## Short description
 
-Cihazda koruma: sizi uyarır, marka taklitlerini tespit eder, mesajları kontrol eder. Hiçbir şey çıkmaz.
+Cihazda dolandırıcılık ve kimlik avı koruması: uyarır, marka taklitlerini yakalar. Hiçbir şey cihazınızdan çıkmaz.
 
 ## Full description
 

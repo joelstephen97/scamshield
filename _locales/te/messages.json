@@ -204,7 +204,7 @@
   "bannerDanger": { "message": "ప్రమాదకర పేజీ" },
   "bannerSuspicious": { "message": "అనుమానాస్పద పేజీ" },
   "interstitialHead1": { "message": "ఆగండి — ఈ పేజీ మిమ్మల్ని మోసం చేయడానికి ప్రయత్నిస్తోంది" },
-  "interstitialHead2": { "message": "ఆగండి — ఇది మోసం పేజీలా కనిపిస్తోంది" },
+  "interstitialHead2": { "message": "జాగ్రత్త — ఇది మోసం పేజీలా కనిపిస్తోంది" },
   "interstitialHead3": { "message": "ముందుకు వెళ్లవద్దు — మోసం హెచ్చరిక" },
   "interstitialReassure": { "message": "మీరు టైప్ చేసినది ఇంకా పంపబడలేదు. ఇప్పుడు నిష్క్రమించడం సురక్షితం." },
   "continueAnyway": { "message": "అయినా కొనసాగించు" },

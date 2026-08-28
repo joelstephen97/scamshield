@@ -11,7 +11,7 @@
 
 ## Name
 
-ScamShield — Bảo vệ khỏi lừa đảo & lừa đảo mạo danh
+ScamShield — Bảo vệ khỏi lừa đảo & phishing
 
 ## Short description
 

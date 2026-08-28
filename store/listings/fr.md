@@ -15,7 +15,7 @@ ScamShield — Protection contre les arnaques et le phishing
 
 ## Short description
 
-Protection contre les arnaques et le phishing sur votre appareil : alerte, détecte les fausses marques, vérifie les messages.
+Protection anti-arnaque et anti-phishing sur l’appareil : alerte, détecte les fausses marques. Rien ne quitte votre appareil.
 
 ## Full description
 

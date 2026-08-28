@@ -654,7 +654,7 @@
     }
   },
   "bannerDangerBrand": {
-    "message": "Опасная страница — похожа на $BRAND$, но это не он",
+    "message": "Опасная страница — похожа на $BRAND$, но это подделка",
     "placeholders": {
       "brand": {
         "content": "$1"
