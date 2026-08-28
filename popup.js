@@ -143,11 +143,17 @@ function renderTrust() {
   const until = paused ? timeOfDay(paused) : '';
   $('trustedtext').textContent = always ? T('trusted', null, 'Trusted') : paused ? T('fmtTrustedUntil', [bidi(until)], 'Trusted until ' + until) : '';
 }
+// Mutual exclusion (fix, review round 1): each button's click handler
+// stopPropagation()s so the OTHER menu's document-level outside-click
+// listener never sees the click and never closes it — opening one menu has
+// to close the other directly, not rely on the outside-click listener.
 function setTrustMenu(open) {
+  if (open) setLangMenu(false);
   $('trustmenu').hidden = !open; $('trust').setAttribute('aria-expanded', String(open));
   if (open) { const first = $('trustmenu').querySelector('.dditem'); if (first) first.focus(); }
 }
 function setLangMenu(open) {
+  if (open) setTrustMenu(false);
   $('langdd').hidden = !open; $('langbtn').setAttribute('aria-expanded', String(open));
   if (open) { const cur = $('langdd').querySelector('.cur') || $('langdd').querySelector('.langitem'); if (cur) cur.focus(); }
 }

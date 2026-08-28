@@ -138,6 +138,18 @@ test('content script: a warning banner renders in the chosen language', async ({
 // Popup header language switcher (0.7.1) — the same `uiLang` setting as
 // above, one tap away from the popup's start screen via a globe button
 // between the On toggle and the gear.
+// popup.js's init() attaches the globe button's click handler only after a
+// few awaits (settings, and — when an override is set — an async fetch of
+// that locale's messages.json for SSi18n.ready), so clicking the button the
+// instant goto() resolves can race that wiring, especially with a real
+// locale fetch in flight (ar below). Wait for buildLangMenu() to have run —
+// it populates #langdd in the same synchronous block that attaches the click
+// listener — before clicking, so the test exercises the real interaction
+// instead of an occasional no-op click on an unwired button.
+async function waitForLangMenuReady(popup) {
+  await popup.waitForFunction(() => document.querySelectorAll('#langdd .langitem').length > 0);
+}
+
 test('popup: globe opens a 21-item dropdown, Deutsch reloads the popup and updates the options page, Escape and Browser default both work', async ({ context, extensionId }) => {
   const popup = await context.newPage();
   await popup.goto(`chrome-extension://${extensionId}/popup.html`);
@@ -145,6 +157,7 @@ test('popup: globe opens a 21-item dropdown, Deutsch reloads the popup and updat
   await expect(popup.locator('#langbtn')).toHaveAttribute('title', 'Language');
   await expect(popup.locator('#langdd')).toBeHidden();
 
+  await waitForLangMenuReady(popup);
   await popup.click('#langbtn');
   await expect(popup.locator('#langdd')).toBeVisible();
   const items = popup.locator('#langdd .langitem');
@@ -168,6 +181,8 @@ test('popup: globe opens a 21-item dropdown, Deutsch reloads the popup and updat
   await expect(options.locator('#lang')).toHaveValue('de');
 
   // Re-open the popup's menu: the current item is now Deutsch, checked.
+  // (After the reload above, so wait for init() to have re-wired the button.)
+  await waitForLangMenuReady(popup);
   await popup.click('#langbtn');
   await expect(popup.locator('#langdd .langitem[data-lang="de"]')).toHaveClass(/cur/);
 
@@ -178,15 +193,78 @@ test('popup: globe opens a 21-item dropdown, Deutsch reloads the popup and updat
   expect(await sw.evaluate(() => getSettings().then((s) => s.uiLang))).toBe('auto');
 });
 
-test('popup: with Arabic set, the language dropdown still renders under RTL', async ({ context, extensionId }) => {
+test('popup: with Arabic set, the language dropdown still renders on screen under RTL', async ({ context, extensionId }) => {
   const sw = context.serviceWorkers()[0];
   await sw.evaluate(() => setSettings({ uiLang: 'ar' }));
   const popup = await context.newPage();
   await popup.goto(`chrome-extension://${extensionId}/popup.html`);
   await expect(popup.locator('html')).toHaveAttribute('dir', 'rtl');
+  // ar's override dictionary is a real async fetch of _locales/ar/messages.json
+  // (see waitForLangMenuReady's comment above) — slower than the default
+  // 'auto' path, so this is exactly the case that race would show up in.
+  await waitForLangMenuReady(popup);
+  await popup.click('#langbtn');
+  const dd = popup.locator('#langdd');
+  await expect(dd).toBeVisible();
+  await expect(dd.locator('.langitem[data-lang="ar"]')).toHaveClass(/cur/);
+  // toBeVisible() alone would still pass for a dropdown clipped mostly
+  // off-screen (review round 1 caught exactly that: the header's flex row
+  // mirrors under dir=rtl, so a purely physical `right:0` anchor ran the menu
+  // off the popup's 340px-wide box). Assert the actual box stays fully within
+  // the popup's 340px width instead of just "exists in the DOM" — measured
+  // relative to <html>'s own box, not the raw viewport: this test loads
+  // popup.html into a full browser tab (not the real fixed-size popup
+  // window), and Chromium right-aligns a narrower `dir=rtl` root element
+  // inside a wider viewport, which would make a plain viewport-relative
+  // bounding box look "off-screen" even when the dropdown sits correctly
+  // inside the 340px page.
+  const box = await popup.evaluate(() => {
+    const h = document.documentElement.getBoundingClientRect();
+    const d = document.getElementById('langdd').getBoundingClientRect();
+    return { x: d.left - h.left, width: d.width };
+  });
+  expect(box.x).toBeGreaterThanOrEqual(0);
+  expect(box.x + box.width).toBeLessThanOrEqual(340);
+});
+
+// Review round 1: the Trust menu and the language menu could previously both
+// be open at once — each button's click handler stopPropagation()s, so the
+// OTHER menu's outside-click listener never saw the click and never closed
+// it. Opening either now closes the other directly (setTrustMenu/setLangMenu
+// in popup.js), and Esc closes whichever one is actually open.
+test('popup: opening the language menu closes an open Trust menu, and vice versa; Escape closes whichever is open', async ({ context, extensionId }) => {
+  const page = await context.newPage(); await page.goto(BASE + '/phishing-login.html');
+  await expect(page.locator('.scamshield-banner.danger')).toBeVisible({ timeout: 8000 });
+  // popup.js's currentTab() picks the popup's own content tab as "the other tab
+  // with the highest index" when more than one non-popup tab exists — which
+  // includes the extension's own auto-opened onboarding tab (a pre-existing,
+  // unrelated race: whether onboarding finishes opening before or after this
+  // `page` is created is timing-dependent). Closing every tab except `page`
+  // before opening the popup removes that race entirely for this test, which
+  // is about the language/Trust menu interaction, not tab selection.
+  for (const p of context.pages()) if (p !== page) await p.close();
+  const popup = await context.newPage();
+  await popup.goto(`chrome-extension://${extensionId}/popup.html`);
+  await page.bringToFront(); await popup.bringToFront(); await popup.reload();
+
+  await expect(popup.locator('#trust')).toBeVisible();
+  await popup.click('#trust');
+  await expect(popup.locator('#trustmenu')).toBeVisible();
+
+  // Opening the language menu must close the Trust menu, not stack on top of it.
   await popup.click('#langbtn');
   await expect(popup.locator('#langdd')).toBeVisible();
-  await expect(popup.locator('#langdd .langitem[data-lang="ar"]')).toHaveClass(/cur/);
+  await expect(popup.locator('#trustmenu')).toBeHidden();
+
+  // And the reverse: opening Trust again closes the language menu.
+  await popup.click('#trust');
+  await expect(popup.locator('#trustmenu')).toBeVisible();
+  await expect(popup.locator('#langdd')).toBeHidden();
+
+  // Escape closes whichever one is actually open (the Trust menu here).
+  await popup.keyboard.press('Escape');
+  await expect(popup.locator('#trustmenu')).toBeHidden();
+  await expect(popup.locator('#langdd')).toBeHidden();
 });
 
 test('the language service refuses anything that is not a shipped locale', async ({ context }) => {
