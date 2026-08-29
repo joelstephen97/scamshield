@@ -19,14 +19,6 @@
       <button id="rescue" class="btn" hidden data-i18n="takeMeToRealSite">Take me to the real site</button>
     </div>
   </section>
-  <section id="askcard" class="card askcard" hidden>
-    <p id="askbody"></p>
-    <div class="acts">
-      <a id="askrate" class="btn primary" href="https://chromewebstore.google.com/detail/fojjjofjimbfoddafoampojopijnlihl/reviews" target="_blank" rel="noopener" data-i18n="reviewRate">Rate Parry</a>
-      <button id="asklater" class="btn" data-i18n="reviewLater">Maybe later</button>
-      <button id="askno" class="btn ghost" data-i18n="reviewNo">No thanks</button>
-    </div>
-  </section>
   <details id="whypanel" class="card" hidden>
     <summary class="disc">
       <span class="lbl" id="whylabel" data-i18n="whyVerdict">Why this verdict?</span>
@@ -64,9 +56,20 @@
   </details>
   <section id="whatsnew" class="card whatsnew" hidden><span data-i18n="whatsNewBanner">New in 0.6: ClickFix &amp; fake-update blocking, privacy tools, fake-shop checks, 20 languages.</span><a id="whatsnewlink" href="#" data-i18n="whatsNewLink">What's new</a><button id="whatsnewx" class="btn ghost" aria-label="Dismiss" data-i18n-aria="ariaDismiss">✕</button></section>
 </main>
-<footer class="foot"><span class="lock" id="lockline" data-i18n="runsOnDevice">Runs on your device · nothing leaves your browser</span><a id="support" href="#" data-i18n="support">Support</a></footer>
+<footer class="foot" id="foot">
+  <div id="askcard" class="footslot stack" hidden>
+    <p id="askbody" class="footline"></p>
+    <div class="footacts">
+      <a id="askrate" class="footlink" href="https://chromewebstore.google.com/detail/fojjjofjimbfoddafoampojopijnlihl/reviews" target="_blank" rel="noopener" data-i18n="reviewRate">Rate Parry</a>
+      <button type="button" id="asklater" class="footlink" data-i18n="reviewLater">Maybe later</button>
+      <button type="button" id="askno" class="footlink" data-i18n="reviewNo">No thanks</button>
+    </div>
+  </div>
+  <div id="foottrust" class="footslot" hidden><span class="lock" id="lockline" data-i18n="footerTrustLine">Made on-device. No data leaves your browser.</span></div>
+  <div id="footsupport" class="footslot" hidden><a id="support" href="#" data-i18n="support">Support</a></div>
+</footer>
 <div class="toast" id="toast" role="status"></div>
 <script src="engine/constants.js"></script><script src="background/stats.js"></script><script src="engine/features.js"></script>
 <script src="engine/heuristics.js"></script><script src="engine/message_rules.js"></script>
-<script src="engine/trust.js"></script><script src="ui/reasons.js"></script><script src="ui/format.js"></script><script src="ui/icons.js"></script><script src="ui/theme.js"></script><script src="ui/review.js"></script><script src="ui/i18n.js"></script><script src="popup.js"></script>
+<script src="engine/trust.js"></script><script src="ui/reasons.js"></script><script src="ui/format.js"></script><script src="ui/icons.js"></script><script src="ui/theme.js"></script><script src="ui/review.js"></script><script src="ui/footer.js"></script><script src="ui/i18n.js"></script><script src="popup.js"></script>
 </body></html>

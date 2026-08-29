@@ -43,7 +43,13 @@ test('options: picking Deutsch reloads the page in German, and the popup follows
   // markup it declares (data-i18n) and the strings it builds in JavaScript.
   const popup = await context.newPage();
   await popup.goto(`chrome-extension://${extensionId}/popup.html`);
-  await expect(popup.locator('#lockline')).toContainText('Läuft auf deinem Gerät');
+  // #lockline (0.8.0: the footer's rotating trust-line variant) is set from
+  // `footerTrustLine`, a brand-new key added for the rotating-footer task —
+  // it ships en-only for now (translations land in a later localization
+  // pass), so it falls back to the SAME English string under every uiLang,
+  // German included. #msgcheck below is what actually exercises a real
+  // translated string reacting to the language override.
+  await expect(popup.locator('#lockline')).toContainText('Made on-device');
   await expect(popup.locator('#msgcheck summary')).toHaveText('Nachricht oder Link prüfen');
 });
 
@@ -172,7 +178,9 @@ test('popup: globe opens a 21-item dropdown, Deutsch reloads the popup and updat
   // Pick Deutsch: saves uiLang, then the popup reloads itself in German.
   await popup.click('#langbtn');
   await popup.click('#langdd .langitem[data-lang="de"]');
-  await expect(popup.locator('#lockline')).toContainText('Läuft auf deinem Gerät');
+  // See the comment on the equivalent assertion above: `footerTrustLine` is
+  // en-only for now, so it reads the same under German as under English.
+  await expect(popup.locator('#lockline')).toContainText('Made on-device');
   await expect(popup.locator('#langbtn')).toHaveAttribute('aria-label', 'Sprache');
 
   // The options page's own dropdown shows the same setting — one storage key.
@@ -188,7 +196,7 @@ test('popup: globe opens a 21-item dropdown, Deutsch reloads the popup and updat
 
   // Browser default restores English.
   await popup.click('#langdd .langitem[data-lang="auto"]');
-  await expect(popup.locator('#lockline')).toContainText('Runs on your device');
+  await expect(popup.locator('#lockline')).toContainText('Made on-device');
   const sw = context.serviceWorkers()[0];
   expect(await sw.evaluate(() => getSettings().then((s) => s.uiLang))).toBe('auto');
 });

@@ -53,8 +53,8 @@
   "msgSafe": { "message": "Looks safe — no scam signals found" },
   "msgSuspicious": { "message": "Suspicious — treat with caution" },
   "msgDangerous": { "message": "Almost certainly a scam" },
-  "runsOnDevice": { "message": "Runs on your device · nothing leaves your browser" },
   "support": { "message": "Support" },
+  "footerTrustLine": { "message": "Made on-device. No data leaves your browser." },
 
   "takeMeToRealSite": { "message": "Take me to the real site" },
   "toastThanksNoted": { "message": "Thanks — noted" },

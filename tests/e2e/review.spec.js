@@ -40,11 +40,21 @@ test('earned review ask: shows after the 2nd block + 7-day install, with the cou
 
   const popup1 = await context.newPage();
   await popup1.goto(`chrome-extension://${extensionId}/popup.html`);
-  await expect(popup1.locator('#askcard')).toBeVisible();
+  // 0.8.0: the ask lives INSIDE the rotating footer slot now, not a separate
+  // mid-body card — and it's the only one of the three footer slots showing.
+  await expect(popup1.locator('footer#foot #askcard')).toBeVisible();
   await expect(popup1.locator('#askbody')).toContainText('2');
+  await expect(popup1.locator('#foottrust')).toBeHidden();
+  await expect(popup1.locator('#footsupport')).toBeHidden();
 
   await popup1.click('#askno');
   await expect(popup1.locator('#askcard')).toBeHidden();
+  // The footer never goes empty: declining falls through to whichever
+  // trust/support variant this popup open had already resolved.
+  const trustShown = await popup1.locator('#foottrust').isVisible();
+  const supportShown = await popup1.locator('#footsupport').isVisible();
+  expect(trustShown || supportShown).toBe(true);
+  expect(trustShown && supportShown).toBe(false);
 
   // Reopen: still gone, and storage records the permanent decline.
   const popup2 = await context.newPage();

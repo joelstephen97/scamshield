@@ -122,8 +122,17 @@ test("What's new dismisses and stays dismissed after reload; Escape closes the t
 
 test('popup layout: body is the scroll container, so a classic scrollbar can never clip the right edge', async ({ context, extensionId }) => {
   const page = await context.newPage(); await page.goto(BASE + '/safe.html');
+  // 0.8.0: #support only renders when the footer's rotation lands on the
+  // support slot. openPopup() below does goto() THEN reload() to get
+  // tabs.query() to see the content tab reliably — that's two full init()
+  // runs, i.e. two rotation steps, and two steps around a 2-slot rotation is
+  // an identity: whatever variant is seeded here is exactly what ends up
+  // rendered. Seed 'support' directly so this measurement is deterministic.
+  const sw = context.serviceWorkers()[0];
+  await sw.evaluate(() => chrome.storage.local.set({ footerVariant: 'support' }));
   const popup = await openPopup(context, extensionId, page);
   await popup.waitForTimeout(400);
+  await expect(popup.locator('#footsupport')).toBeVisible();
   // Force content taller than the 600px popup cap, as real settings/history growth does.
   const m = await popup.evaluate(() => {
     const filler = document.createElement('div');
@@ -148,4 +157,27 @@ test('popup layout: body is the scroll container, so a classic scrollbar can nev
   expect(m.htmlBoxWidth).toBe(340);
   expect(m.bodyHorizontalOverflow).toBeLessThanOrEqual(0);
   expect(m.supportRight).toBeLessThanOrEqual(m.bodyClientWidth + 1);
+});
+
+// Rotating footer slot (0.8.0): with no review ask eligible (fresh install,
+// 0 blocks), the footer alternates trust line <-> support link once per
+// popup open, persisting the choice in storage.local so the NEXT open
+// continues the rotation rather than replaying the same variant.
+test('footer: rotates between the trust line and the support link across popup opens', async ({ context, extensionId }) => {
+  const sw = context.serviceWorkers()[0];
+  // Seed the last-shown variant as 'support' so this open's rotation
+  // (nextVariant('support') === 'trust') is deterministic.
+  await sw.evaluate(() => chrome.storage.local.set({ footerVariant: 'support' }));
+
+  const popup1 = await context.newPage();
+  await popup1.goto(`chrome-extension://${extensionId}/popup.html`);
+  await expect(popup1.locator('#foottrust')).toBeVisible();
+  await expect(popup1.locator('#footsupport')).toBeHidden();
+  await expect(popup1.locator('#askcard')).toBeHidden();
+
+  // Next open: the rotation this open just persisted ('trust') alternates to 'support'.
+  const popup2 = await context.newPage();
+  await popup2.goto(`chrome-extension://${extensionId}/popup.html`);
+  await expect(popup2.locator('#footsupport')).toBeVisible();
+  await expect(popup2.locator('#foottrust')).toBeHidden();
 });

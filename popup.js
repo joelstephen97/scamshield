@@ -1,7 +1,7 @@
 'use strict';
 const api = globalThis.browser || globalThis.chrome;
 const $ = (id) => document.getElementById(id);
-const SS = globalThis.Parry, F = globalThis.SSFormat, I = globalThis.SSIcons, R = globalThis.SSReasons, REVIEW = globalThis.SSReview, SSTATS = globalThis.SSStats;
+const SS = globalThis.Parry, F = globalThis.SSFormat, I = globalThis.SSIcons, R = globalThis.SSReasons, REVIEW = globalThis.SSReview, FOOTER = globalThis.SSFooter, SSTATS = globalThis.SSStats;
 // The locale the Intl formatters use. `let`, not `const`: a language override
 // has to move the timestamps too, or the popup reads German with English
 // relative times. Reassigned once, at the top of init().
@@ -80,7 +80,7 @@ function renderVerdictUI(host) {
   $('rescue').hidden = !(level === 'dangerous' && rescueUrl); if (rescueUrl) $('rescue').textContent = T('takeMeToReal', [bidi(brand)], 'Take me to the real ' + brand);
   $('reportbtn').hidden = checking;
   if (!checking) $('reportbtn').querySelector('.lbl').textContent = level === 'safe' || level === 'unknown' ? T('reportScam', null, 'Report: this is a scam') : T('reportSafe', null, 'Report: this is safe');
-  renderReviewAsk(level);
+  renderFooter(level);
 }
 // Earned review ask (0.7.0): a quiet card below the status card, shown only
 // after ui/review.js's pure predicate says it's earned (2nd real block, 7+
@@ -109,7 +109,7 @@ function isChromeBuild() {
   try { return REVIEW.isChromeFromManifest(api.runtime.getManifest()); } catch (_) { return true; }
 }
 // Fetches eligibility once (cheap, and independent of which page the popup
-// happens to be over) and caches it in module scope; renderReviewAsk() below
+// happens to be over) and caches it in module scope; renderFooter() below
 // applies the tab-verdict gate and can be called from multiple places
 // (renderVerdictUI's first render, its poll re-render, and the non-http
 // early-return branch) without re-fetching or re-evaluating eligibility.
@@ -126,23 +126,63 @@ async function initReviewAsk() {
     state: ra.state, snoozeUntil: ra.snoozeUntil, asks: ra.asks
   });
 }
+// Rotating footer slot (0.8.0, Privacy Badger's rotating-footer pattern):
+// exactly one of review-ask / trust-line / support-link is visible at a
+// time, in that priority order. The review ask above is the ONLY thing that
+// changes render-to-render within one popup open (it tracks `lvl`, which
+// starts at 'unknown' while the SW is still scanning and can change once
+// pollVerdict()'s later render knows the real verdict); the trust/support
+// choice is resolved exactly once per open, by resolveFooterVariant() below,
+// and never recomputed mid-open — re-deriving it on every renderFooter()
+// call would let the rotation flip while the popup is still sitting open.
 function bindReviewButtonsOnce() {
   if (reviewListenersBound) return;
   reviewListenersBound = true;
-  const hide = () => { $('askcard').hidden = true; };
-  $('askrate').addEventListener('click', () => { send('reviewAskAction', { action: 'rate' }); hide(); });
-  $('asklater').addEventListener('click', async () => { await send('reviewAskAction', { action: 'later' }); hide(); });
-  $('askno').addEventListener('click', async () => { await send('reviewAskAction', { action: 'no' }); hide(); });
+  // A decline/snooze/rate doesn't just hide the review slot — the footer
+  // still has to show exactly one thing, so it falls through to whichever
+  // trust/support variant this open already resolved. `reviewEligible =
+  // false` is a local, same-open-only optimization (the SW's own state
+  // change is what makes it permanently ineligible on the NEXT open); it
+  // just avoids a redundant getReviewAsk() round trip to re-derive what a
+  // click we just fired already implies.
+  const dismiss = () => { reviewEligible = false; renderFooter(level); };
+  $('askrate').addEventListener('click', () => { send('reviewAskAction', { action: 'rate' }); dismiss(); });
+  $('asklater').addEventListener('click', async () => { await send('reviewAskAction', { action: 'later' }); dismiss(); });
+  $('askno').addEventListener('click', async () => { await send('reviewAskAction', { action: 'no' }); dismiss(); });
+}
+// Fired at the top of init(), fully independent of settings/stats/tab (see
+// the comment at its call site for why it must NOT be awaited there): reads
+// the last-shown non-review variant out of storage.local (a plain direct
+// read/write, same pattern as ui/i18n.js's settings.uiLang read — the
+// "storage" permission is already granted, so this needs no message round
+// trip through the SW and no new permission), advances it via ui/footer.js's
+// pure nextVariant(), and persists the new value so the NEXT popup open
+// continues the rotation. Deliberately unconditional: it persists even on an
+// open where the review ask ends up showing instead, so the rotation resumes
+// from the right place once eligibility lapses, rather than replaying the
+// same variant forever. Only awaited (via the promise it returns) right
+// before the first renderFooter() call, by which point it has almost always
+// already settled.
+let footerVariant = 'trust';
+async function resolveFooterVariant() {
+  if (!FOOTER) return;
+  let stored = null;
+  try { stored = (await api.storage.local.get('footerVariant')).footerVariant; } catch (_) { /* fails open to 'trust' */ }
+  footerVariant = FOOTER.nextVariant(stored);
+  try { await api.storage.local.set({ footerVariant }); } catch (_) {}
 }
 // Idempotent — safe to call repeatedly (e.g. once with the "checking"/unknown
 // level, again once pollVerdict's later re-render knows the real verdict): it
-// only toggles visibility/text, and binds the button listeners at most once.
-function renderReviewAsk(lvl) {
-  if (!REVIEW) return;
-  if (!REVIEW.shouldShowCard(reviewEligible, lvl)) { $('askcard').hidden = true; return; }
+// only toggles visibility/text, and binds the review button listeners at
+// most once. Exactly one of the three footer slots is ever un-hidden.
+function renderFooter(lvl) {
+  const showReview = !!REVIEW && REVIEW.shouldShowCard(reviewEligible, lvl);
+  $('askcard').hidden = !showReview;
+  $('foottrust').hidden = showReview || footerVariant !== 'trust';
+  $('footsupport').hidden = showReview || footerVariant !== 'support';
+  if (!showReview) return;
   $('askbody').textContent = T('reviewAskBody', [bidi(String(reviewCount))],
     `Parry has now stopped ${reviewCount} scams for you. If it's earned it, a short review helps other people find it — it's free and always will be.`);
-  $('askcard').hidden = false;
   bindReviewButtonsOnce();
 }
 async function pollVerdict(host) {
@@ -228,6 +268,16 @@ async function init() {
   // tab still shows lifetime and weekly counts, same as the old all-time
   // tile did), so there's no reason to make this wait behind the tab lookup.
   const statsPromise = send('getStats');
+  // Also fired immediately, fully independent of settings/stats/tab: resolves
+  // the trust/support rotation for this open. Deliberately NOT awaited here —
+  // currentTab() below (async tabs.query calls) is the one thing on this
+  // popup's critical path that must never queue behind extra work, since even
+  // this small extra delay is enough for a fresh install's onInstalled
+  // handler to have opened its onboarding tab by the time currentTab() runs,
+  // which would then get mistaken for the content tab by its "last other
+  // tab" fallback. footerVariantPromise is only awaited right before the
+  // first renderFooter() call, well after currentTab() has already run.
+  const footerVariantPromise = resolveFooterVariant();
   // Language override (0.7.0): resolved before the first string is written, so
   // the popup never renders in English and then swaps under the user. On the
   // default 'auto' setting this is a single local storage read and nothing
@@ -236,7 +286,7 @@ async function init() {
     const lang = await globalThis.SSi18n.ready;
     if (lang) UI_LANG = R.intlTag(lang); // timestamps follow the chosen language too
   } catch (_) { /* fall back to the browser language */ }
-  $('lockline').textContent = T('runsOnDevice', null, 'Runs on your device · nothing leaves your browser');
+  $('lockline').textContent = T('footerTrustLine', null, 'Made on-device. No data leaves your browser.');
   $('brandmark').insertAdjacentHTML('afterbegin', I.shield('safe')); $('opts').innerHTML = I.gear(); $('langbtn').innerHTML = I.globe(); $('lockline').insertAdjacentHTML('afterbegin', I.lock());
   try { $('ver').textContent = api.runtime.getManifest().version; } catch (_) {}
   settings = await settingsPromise;
@@ -272,11 +322,13 @@ async function init() {
   if (!http) {
     const protocol = tab && tab.url ? new URL(tab.url).protocol.replace(':', '') : '';
     renderStatus('unknown', protocol ? T('fmtProtocolPage', [bidi(protocol)], protocol + ' page') : '', T('popupNotHttp', null, "Browser pages and the web store aren't scanned."));
-    renderReviewAsk('unknown');
+    await footerVariantPromise;
+    renderFooter('unknown');
     renderHistory(); return;
   }
   const host = new URL(tab.url).hostname; domain = registrable(host);
   verdict = await send('getVerdict', { tabId: tab.id });
+  await footerVariantPromise;
   renderVerdictUI(host);
   if (settings.enabled && verdict == null) pollVerdict(host); // fire-and-forget; re-renders when the SW's scan lands
   $('leave').addEventListener('click', async () => { await send('leaveTab', { tabId: tab.id }); window.close(); });

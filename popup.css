@@ -48,9 +48,26 @@ details.card>summary::-webkit-details-marker{display:none}
 .msgrow{display:flex;gap:8px;align-items:center;margin-top:8px}
 .whatsnew:not([hidden]){display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);padding:8px 10px}
 .whatsnew a{color:var(--accent);text-decoration:none;white-space:nowrap}
-.foot{display:flex;align-items:center;gap:10px;padding:10px 12px;border-top:1px solid var(--hair);background:var(--surface);font-size:11px;color:var(--muted)}
+/* Rotating footer slot (0.8.0): review ask / trust line / support link are
+   three siblings inside one <footer>, exactly one un-hidden at a time
+   (popup.js's renderFooter()) — the footer chrome (border, background, font
+   size) lives here once instead of duplicated per slot. */
+.foot{padding:10px 12px;border-top:1px solid var(--hair);background:var(--surface);font-size:11px;color:var(--muted)}
+.footslot{display:flex;align-items:center;gap:10px}
+/* The review-ask slot stacks its one-line body over its action row instead
+   of trying to cram both into a single row — still just two short lines, so
+   the footer barely grows taller than the single-line trust/support slots. */
+.footslot.stack{flex-direction:column;align-items:stretch;gap:6px}
+.footline{margin:0;font-size:12.5px;color:var(--text)}
+.footacts{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
 .foot .lock{display:flex;align-items:center;gap:5px;flex:1}
 .foot a{color:var(--accent);text-decoration:none}
+/* Review actions read as links, not full buttons (brief: "Rate · Later · No
+   thanks") — bare text weight/color, no button chrome, so three of them fit
+   one compact row without the footer growing past its old height. */
+.footacts .footlink{background:transparent;border:0;padding:0;margin:0;font:inherit;font-size:11.5px;font-weight:600;color:var(--accent);cursor:pointer}
+.footacts a.footlink{text-decoration:none}
+.footacts .footlink:hover,.footacts .footlink:focus-visible{text-decoration:underline}
 .toast-inline{font-size:12px;color:var(--safe)}
 
 .cardh{font-size:12px;font-weight:600;color:var(--muted);margin:0 0 8px;text-transform:uppercase;letter-spacing:.04em}
@@ -74,8 +91,3 @@ details.card>summary::-webkit-details-marker{display:none}
 html[dir="rtl"] .chev::before{content:'‹'}
 #whypanel .end{display:flex;align-items:center;gap:6px;font-weight:400;color:var(--muted);font-size:12px}
 #whypanel .evidence{margin-top:8px}
-
-/* Earned review ask (0.7.0). Deliberately just `.card` — a hairline border
-   (var(--hair), inherited from .card), NOT a colored left accent. */
-.askcard p{margin:0 0 10px;font-size:12.5px}
-.askcard .acts{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
