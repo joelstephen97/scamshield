@@ -17,10 +17,16 @@ const registrable = (h) => (SS && SS.registrableDomain) ? SS.registrableDomain(h
 const brandName = (key) => SS.brandDisplayName ? SS.brandDisplayName(key) : key;
 function toast(t) { const el = $('toast'); el.textContent = t; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 1400); }
 // Reads UI_LANG at call time, and falls back to English rather than throwing on
-// a runtime that rejects the tag (same pattern as SSFormat.relTime).
+// a runtime that rejects the tag (same pattern as SSFormat.relTime). A 1-day
+// pause resumes on a different calendar day almost every time it's picked, so
+// a bare hour:minute ("3:45 PM") would be ambiguous about which day — add the
+// month/day whenever the resume moment isn't today.
 function timeOfDay(ts) {
   const opts = { hour: '2-digit', minute: '2-digit' };
-  try { return new Date(ts).toLocaleTimeString(UI_LANG, opts); } catch (_) { return new Date(ts).toLocaleTimeString('en', opts); }
+  const d = new Date(ts), now = new Date();
+  const sameDay = d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
+  if (!sameDay) { opts.month = 'short'; opts.day = 'numeric'; }
+  try { return d.toLocaleTimeString(UI_LANG, opts); } catch (_) { return d.toLocaleTimeString('en', opts); }
 }
 
 let tab = null, domain = null, settings = null, verdict = null, level = 'unknown';
@@ -141,7 +147,7 @@ function renderTrust() {
   const always = (settings.allowlist || []).includes(domain);
   $('trust').hidden = !!paused || always; $('trusted').hidden = !(paused || always);
   const until = paused ? timeOfDay(paused) : '';
-  $('trustedtext').textContent = always ? T('trusted', null, 'Trusted') : paused ? T('fmtTrustedUntil', [bidi(until)], 'Trusted until ' + until) : '';
+  $('trustedtext').textContent = always ? T('paused', null, 'Paused') : paused ? T('pausedUntil', [bidi(until)], 'Paused until ' + until) : '';
 }
 // Mutual exclusion (fix, review round 1): each button's click handler
 // stopPropagation()s so the OTHER menu's document-level outside-click
@@ -258,7 +264,7 @@ async function init() {
   });
   $('showwhy').addEventListener('click', () => { $('evidence').hidden = false; $('showwhy').hidden = true; });
 
-  $('trust').textContent = T('popupTrustMenu', null, 'Trust this site ▾');
+  $('trust').textContent = T('popupPauseMenu', null, 'Pause protection ▾');
   $('trust').hidden = false; renderTrust();
   $('trust').addEventListener('click', (e) => { e.stopPropagation(); setTrustMenu($('trustmenu').hidden); });
   document.addEventListener('click', (e) => { if (!$('trustmenu').hidden && !$('trustmenu').contains(e.target) && e.target !== $('trust')) setTrustMenu(false); });
@@ -268,9 +274,9 @@ async function init() {
   // would double-bind this Trust handler onto every language item too.
   for (const b of document.querySelectorAll('#trustmenu .dditem')) b.addEventListener('click', async () => {
     const r = await send('pauseSite', { domain, choice: b.dataset.choice }); setTrustMenu(false);
-    settings = await send('getSettings'); renderTrust(); toast(r && r.until ? T('toastTrustedForNow', null, 'Trusted for now') : T('trusted', null, 'Trusted'));
+    settings = await send('getSettings'); renderTrust(); toast(r && r.until ? T('toastPausedForNow', null, 'Paused for now') : T('paused', null, 'Paused'));
   });
-  $('untrust').addEventListener('click', async () => { await send('unpauseSite', { domain }); settings = await send('getSettings'); renderTrust(); toast(T('toastUntrusted', null, 'Untrusted')); });
+  $('untrust').addEventListener('click', async () => { await send('unpauseSite', { domain }); settings = await send('getSettings'); renderTrust(); toast(T('toastResumed', null, 'Protection resumed')); });
 
   $('reportbtn').addEventListener('click', async () => {
     const r = await send('userReport', { label: level === 'safe' || level === 'unknown' ? 'scam' : 'false_positive', tabId: tab.id });

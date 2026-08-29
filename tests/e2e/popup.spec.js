@@ -27,12 +27,25 @@ test('safe page: quiet card, stats tiles, report label says scam', async ({ cont
   await expect(popup.locator('#tile-all b')).toHaveText(/^\d+$/);
   await expect(popup.locator('#reportbtn')).toHaveText(/this is a scam/i);
 });
-test('Trust this site → For 1 hour suppresses the banner and shows until-time', async ({ context, extensionId }) => {
+test('Pause protection → 1 hour suppresses the banner and shows a resume time', async ({ context, extensionId }) => {
   const page = await context.newPage(); await page.goto(BASE + '/phishing-login.html');
   await expect(page.locator('.scamshield-banner.danger')).toBeVisible({ timeout: 8000 });
   const popup = await openPopup(context, extensionId, page);
   await popup.click('#trust'); await popup.click('[data-choice="1h"]');
-  await expect(popup.locator('#trusted')).toContainText(/Trusted until/);
+  await expect(popup.locator('#trusted')).toContainText(/Paused until/);
+  await expect(popup.locator('#untrust')).toHaveText('Resume now');
+  // Protection is off for this site: the danger banner no longer renders.
+  await page.reload(); await page.waitForTimeout(1200);
+  await expect(page.locator('.scamshield-banner')).toHaveCount(0);
+  await popup.reload(); await popup.click('#untrust'); await page.reload();
+  await expect(page.locator('.scamshield-banner.danger')).toBeVisible({ timeout: 8000 });
+});
+test('Pause protection → Always shows a plain "Paused" state (no time), Resume now restores it', async ({ context, extensionId }) => {
+  const page = await context.newPage(); await page.goto(BASE + '/phishing-login.html');
+  await expect(page.locator('.scamshield-banner.danger')).toBeVisible({ timeout: 8000 });
+  const popup = await openPopup(context, extensionId, page);
+  await popup.click('#trust'); await popup.click('[data-choice="always"]');
+  await expect(popup.locator('#trustedtext')).toHaveText('Paused');
   await page.reload(); await page.waitForTimeout(1200);
   await expect(page.locator('.scamshield-banner')).toHaveCount(0);
   await popup.reload(); await popup.click('#untrust'); await page.reload();

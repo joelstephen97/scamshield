@@ -3,8 +3,9 @@ const T = require('../../engine/trust');
 const NOW = Date.UTC(2026, 7, 22, 10, 0, 0);
 test('pauseUntil choices', () => {
   assert.equal(T.pauseUntil('1h', NOW), NOW + 3600000);
-  const tomorrow = new Date(NOW); tomorrow.setHours(24, 0, 0, 0);
-  assert.equal(T.pauseUntil('today', NOW), tomorrow.getTime());
+  // '1d' is a flat 24h from now, not "until local midnight" — Ghostery-style
+  // time-boxed pause, not the old "Until tomorrow" semantics.
+  assert.equal(T.pauseUntil('1d', NOW), NOW + 86400000);
   assert.equal(T.pauseUntil('always', NOW), null);
   assert.equal(T.pauseUntil('bogus', NOW), NOW + 3600000);
 });
