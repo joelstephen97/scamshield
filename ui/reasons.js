@@ -31,6 +31,13 @@
     manySubdomains: 'Unusually many subdomains.',
     urgencyKeywords: 'URL contains multiple urgency/security keywords.',
     randomHost: 'Domain name looks randomly generated.',
+    // engine/brand_match.js, engine/site_signals.js, engine/risk_rules.js — v0.9 detection upgrades (Task B3)
+    brandFuzzyMatch: "This domain closely resembles $1's real domain — check the address bar carefully before entering anything.",
+    deepSubdomainChain: 'Domain has an unusually deep chain of subdomains below its real domain — a common cloaking trick.',
+    longHostLabel: 'Domain contains an unusually long part, often used to bury a fake brand name or hide the real domain.',
+    shortenerHost: 'This is a link-shortener domain ($1) — the real destination is hidden until you click it.',
+    riskAbusedTld: "Domain's top-level domain ($1) has a high rate of scam abuse in Parry's threat-feed risk tables.",
+    riskDynamicHost: 'Domain is hosted on a dynamic-DNS or free-hosting provider frequently abused for scam pages.',
     // background/service_worker.js — v0.9 threat-feed matcher (Task B2)
     feedBlock: "This domain matches Parry's threat feed, confirmed by $1 independent source(s).",
     feedWarn: "This domain matches a lower-confidence entry in Parry's threat feed ($1 source(s)) — proceed carefully.",

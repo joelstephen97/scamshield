@@ -4,7 +4,7 @@
 // a classic-worker context (tests driving this file directly) falls back to
 // importScripts here. In the module SW `importScripts` is undefined — the
 // ReferenceError lands in the catch and the imports from sw.js already won.
-try { importScripts('../engine/constants.js', '../engine/trust.js', '../engine/features.js', '../engine/image_hash.js', '../engine/brand_icons.js', '../engine/report_payload.js', '../engine/engagement.js', '../engine/blockset.js', './stats.js', './blockstore.js'); } catch (_) { /* deps already loaded by sw.js (Chrome) or the manifest (Firefox) */ }
+try { importScripts('../engine/constants.js', '../engine/trust.js', '../engine/features.js', '../engine/risk_rules.js', '../engine/image_hash.js', '../engine/brand_icons.js', '../engine/report_payload.js', '../engine/engagement.js', '../engine/blockset.js', './stats.js', './blockstore.js'); } catch (_) { /* deps already loaded by sw.js (Chrome) or the manifest (Firefox) */ }
 const api = globalThis.browser || globalThis.chrome;
 
 // Official Parry feed: rebuilt daily by GitHub Actions from OpenPhish +
@@ -65,6 +65,8 @@ const DEFAULTS = {
   lastOtaCount: 0,           // number of blocklist rules from the last successful OTA
   lastFeedVersion: '',       // v0.9 threat-feed: version string of the last block-tier update we installed
   lastFeedAt: 0,             // ms epoch of the last v0.9 threat-feed OTA attempt (success or no-op)
+  riskTlds: {},              // risk.json's abused-TLD weight table, mirrored here by runFeedUpdate() so
+                             // content_script.js's getSettings() can pass it straight into scoreUrl()
   lastReportAt: 0,           // ms epoch of the last community report actually sent
   syncEnabled: false,        // mirror settings to chrome.storage.sync (opt-in)
   uiLang: 'auto'             // 'auto' (follow the browser) | one of SSReasons.LOCALES
@@ -734,6 +736,23 @@ async function sha256Hex(buf) {
   const digest = await crypto.subtle.digest('SHA-256', buf);
   return Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, '0')).join('');
 }
+// Same base/fallback strategy as fetchArrayBufferFromBases, but for a small
+// JSON file (risk.json). Keeps the raw text alongside the parsed object so a
+// caller can hash it for optional sha256 verification without re-fetching.
+async function fetchJsonFromBases(bases, filename) {
+  for (const base of bases) {
+    if (!base) continue;
+    try {
+      const res = await fetch(base + filename, { cache: 'no-cache' });
+      if (!res.ok) continue;
+      const text = await res.text();
+      let data;
+      try { data = JSON.parse(text); } catch (_) { continue; }
+      return { data, text };
+    } catch (_) { /* try the next base */ }
+  }
+  return null;
+}
 // gzip -> parsed {d, s} lines, via the platform's native DecompressionStream
 // (no new dependency, no new permission — Chrome ≥80 / Firefox ≥113, both
 // under our existing minimums).
@@ -762,7 +781,7 @@ function normalizeFeedHost(h) {
 async function runFeedUpdate(metaUrl) {
   const meta = await fetchJsonWithTimeout(metaUrl || FEED_META_URL, 10000);
   if (!meta || typeof meta.version !== 'string' || !meta.urls) return { ok: false, reason: 'meta-unavailable' };
-  const rec = (await globalThis.Blockstore.get()) || { version: null, blockBuf: null, warnBuf: null, warnUpdatedAt: 0 };
+  const rec = (await globalThis.Blockstore.get()) || { version: null, blockBuf: null, warnBuf: null, warnUpdatedAt: 0, riskTables: null, riskUpdatedAt: 0 };
   const bases = [meta.urls.cdn, meta.urls.fallback].filter(Boolean);
   const Bset = globalThis.Blockset;
 
@@ -794,14 +813,57 @@ async function runFeedUpdate(metaUrl) {
     }
   }
 
+  // risk.json (Task B3): abused-TLD weight table + dyndns/hoster membership
+  // arrays, same version-agnostic per-version files as set40.bin/warn40.bin,
+  // refreshed on the same 7-day cadence as the warn tier (no delta chain for
+  // this small file either). sha256-verified only when meta.json actually
+  // provides one — future-proofed the same way warn40's verification is.
+  let riskTables = rec.riskTables;
+  let riskUpdatedAt = rec.riskUpdatedAt || 0;
+  let riskChanged = false;
+  if (!riskTables || Date.now() - riskUpdatedAt >= WARN_REFRESH_MIN_MS) {
+    const fetchedRisk = await fetchJsonFromBases(bases, 'risk.json');
+    if (fetchedRisk && fetchedRisk.data && typeof fetchedRisk.data === 'object') {
+      const okHash = !(meta.sha256 && meta.sha256.risk) ||
+        (await sha256Hex(new TextEncoder().encode(fetchedRisk.text))) === meta.sha256.risk;
+      if (okHash) { riskTables = fetchedRisk.data; riskUpdatedAt = Date.now(); riskChanged = true; }
+    }
+  }
+
   const blockChanged = blockBuf !== rec.blockBuf;
   const warnChanged = warnBuf !== rec.warnBuf;
-  if (!blockChanged && !warnChanged) { await setSettings({ lastFeedAt: Date.now() }); return { ok: true, updated: false, version: rec.version || '' }; }
+  if (!blockChanged && !warnChanged && !riskChanged) { await setSettings({ lastFeedAt: Date.now() }); return { ok: true, updated: false, version: rec.version || '' }; }
 
   const nextVersion = blockChanged ? meta.version : (rec.version || '');
-  await globalThis.Blockstore.save({ version: nextVersion, blockBuf, warnBuf, warnUpdatedAt, urls: meta.urls });
+  await globalThis.Blockstore.save({ version: nextVersion, blockBuf, warnBuf, warnUpdatedAt, riskTables, riskUpdatedAt, urls: meta.urls });
+  // Mirror the (small, pure-lookup) abused-TLD table into settings so
+  // content_script.js's already-awaited getSettings() carries it straight
+  // into scoreUrl() — no new message round-trip for this half of risk.json.
+  // dyndns/hoster membership needs an async hash and stays behind the
+  // checkRisk message (checkRiskHosting() below) instead.
+  if (riskChanged && riskTables && riskTables.tlds && typeof riskTables.tlds === 'object') {
+    await setSettings({ riskTlds: riskTables.tlds });
+  }
   await setSettings({ lastFeedVersion: nextVersion, lastFeedAt: Date.now() });
-  return { ok: true, updated: true, version: nextVersion, blockUpdated: blockChanged, warnUpdated: warnChanged };
+  return { ok: true, updated: true, version: nextVersion, blockUpdated: blockChanged, warnUpdated: warnChanged, riskUpdated: riskChanged };
+}
+
+// Dyndns/hoster membership evidence (Task B3): the SW computes the SHA-256 of
+// the registrable domain itself (crypto.subtle is inherently async, so this
+// can't live in the pure/synchronous engine/risk_rules.js) and hands the
+// first 4 digest bytes to Parry.hash32FromBytes() for the actual set lookup.
+async function checkRiskHosting(host) {
+  const rec = await globalThis.Blockstore.get();
+  const risk = rec && rec.riskTables;
+  if (!risk || (!Array.isArray(risk.dyndns) && !Array.isArray(risk.hosters))) return { hit: null };
+  const SS = globalThis.Parry;
+  const reg = SS.registrableDomain(host);
+  if (!reg) return { hit: null };
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(reg));
+  const hash32 = SS.hash32FromBytes(new Uint8Array(digest));
+  const dyndnsSet = Array.isArray(risk.dyndns) ? new Set(risk.dyndns) : null;
+  const hostersSet = Array.isArray(risk.hosters) ? new Set(risk.hosters) : null;
+  return { hit: SS.matchHostingRisk(hash32, dyndnsSet, hostersSet) };
 }
 
 // Verify tier: before trusting a 40-bit hit as real, confirm the hostname
@@ -1123,6 +1185,8 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         sendResponse(await runFeedUpdate()); break;
       case 'checkFeed':
         sendResponse(await checkFeedHost(msg.host)); break;
+      case 'checkRisk':
+        sendResponse(await checkRiskHosting(msg.host)); break;
       case 'getDefaultFeedUrl':
         sendResponse({ url: DEFAULT_FEED_URL }); break;
       case 'hashIcons':
@@ -1161,4 +1225,4 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 // module-scoped. Re-attach the debug/test surface that used to live on the
 // classic worker's global scope — the e2e suite drives these via
 // worker.evaluate, and they're handy in the SW console.
-Object.assign(globalThis, { DEFAULT_FEED_URL, FEED_META_URL, getSettings, setSettings, handleUserReport, runOtaUpdate, flushReports, queueReport, exportSettings, sanitizeImport, pushSync, pullSync, getStats, bumpStat, ensurePrivacyTotal, ensureInstalledAt, getReviewAsk, getReviewAskContext, setReviewAsk, sanitizeReviewAsk, ensureReviewAsk, importReviewAsk, getLangDict, loadLangDict, isValidLang, runFeedUpdate, checkFeedHost, normalizeFeedHost });
+Object.assign(globalThis, { DEFAULT_FEED_URL, FEED_META_URL, getSettings, setSettings, handleUserReport, runOtaUpdate, flushReports, queueReport, exportSettings, sanitizeImport, pushSync, pullSync, getStats, bumpStat, ensurePrivacyTotal, ensureInstalledAt, getReviewAsk, getReviewAskContext, setReviewAsk, sanitizeReviewAsk, ensureReviewAsk, importReviewAsk, getLangDict, loadLangDict, isValidLang, runFeedUpdate, checkFeedHost, normalizeFeedHost, checkRiskHosting });

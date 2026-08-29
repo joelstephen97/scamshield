@@ -62,6 +62,17 @@ test('order confirmation with legit regional link is safe', () => {
   assert.equal(r.level, 'safe', JSON.stringify(r));
 });
 
+// --- 0.9.0 Task B3: suspicious-site-reporter shortener signal reaches links
+// extracted from message text with zero new plumbing (engine/site_signals.js
+// fires inside the SAME H.scoreUrl() call this file already makes per link).
+
+test('a shortener link in a message is judged before it would ever be followed', () => {
+  const r = scoreMessage('Congrats! Claim your prize here: http://bit.ly/abc123');
+  const link = r.links.find((l) => l.url === 'http://bit.ly/abc123');
+  assert.ok(link);
+  assert.ok(link.reasons.some((x) => x.code === 'shortenerHost'), JSON.stringify(link.reasons));
+});
+
 test('empty and malformed input do not throw', () => {
   assert.doesNotThrow(() => scoreMessage(''));
   assert.doesNotThrow(() => scoreMessage(null));

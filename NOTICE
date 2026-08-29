@@ -1,0 +1,34 @@
+Parry (formerly ScamShield) — third-party attribution notice
+==============================================================
+
+Parry is licensed under the GNU General Public License v3.0 (see LICENSE).
+This NOTICE file credits open-source projects whose publicly documented
+detection signals informed parts of Parry's local heuristics engine
+(engine/). No third-party source code is included or copied — every
+signal below was reimplemented clean-room in JavaScript from the cited
+project's public design/documentation, then covered by Parry's own unit
+tests.
+
+Chromium suspicious-site-reporter (Apache License 2.0)
+-------------------------------------------------------
+https://github.com/chromium/suspicious-site-reporter
+
+Parry's engine/site_signals.js reimplements, from that extension's public
+signal descriptions, three structural URL warn-tier heuristics:
+  - four or more labels below a page's registrable domain,
+  - any hostname label of unusually large length, and
+  - a known link-shortener/redirect-chain host.
+
+A copy of the Apache License 2.0 is available at:
+https://www.apache.org/licenses/LICENSE-2.0
+
+MetaMask eth-phishing-detect (DBAD v1.2)
+-----------------------------------------
+https://github.com/MetaMask/eth-phishing-detect
+
+Parry's engine/brand_match.js reimplements, from that project's publicly
+described algorithm, an allowlist-first reversed-label suffix match and a
+graded fuzzy brand-domain matcher (bounded edit distance, homoglyph
+normalisation, subdomain/hyphen brand-token injection, and TLD-swap
+detection). Only the algorithm shape was consulted — brand lists, weights,
+and thresholds are Parry's own.

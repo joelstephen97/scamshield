@@ -407,7 +407,10 @@
     }
 
     const { signals, foreignForms, scamBlocks } = collectSignals(settings);
-    const urlRules = SS.scoreUrl(location.href);
+    // riskTlds (0.9.0, Task B3): risk.json's abused-TLD weight table, mirrored
+    // into settings by background/service_worker.js's runFeedUpdate() — no new
+    // message round-trip needed since `settings` is already fetched above.
+    const urlRules = SS.scoreUrl(location.href, settings.riskTlds);
     let domRules = SS.scoreDom(signals);
     let modelProb = null, contentProb = null, iconMatch = false, pf = null;
     const borderline = Math.max(urlRules.score, domRules.score) >= 0.3 || signals.hasPasswordField;
@@ -460,6 +463,27 @@
         });
       }
     } catch (_) { /* feed check is best-effort — never blocks the rest of the scan */ }
+
+    // risk.json dyndns/hoster membership (0.9.0, Task B3). The abused-TLD half
+    // of risk.json is scored synchronously inside SS.scoreUrl() above; this
+    // half needs an async SHA-256 (background/service_worker.js's
+    // checkRiskHosting()) so it folds in as post-hoc warn-tier evidence here,
+    // the same pattern the feed check above uses. Never escalates past
+    // "suspicious" on its own and never overrides an existing dangerous verdict.
+    try {
+      const riskHit = await send('checkRisk', { host: location.hostname });
+      if (riskHit && riskHit.hit && verdict.level !== 'dangerous') {
+        const reason = { code: 'riskDynamicHost', kind: 'link' };
+        const newScore = Math.min(1, verdict.score + 0.30);
+        const newLevel = newScore >= 0.8 ? 'dangerous' : (newScore >= 0.5 ? 'suspicious' : verdict.level);
+        verdict = Object.assign({}, verdict, {
+          level: newLevel, score: newScore,
+          reasons: [reason].concat(verdict.reasons || []),
+          reasonCodes: [reason.code].concat(verdict.reasonCodes || []),
+          flags: ['risk-hosting'].concat(verdict.flags || [])
+        });
+      }
+    } catch (_) { /* risk-table check is best-effort — never blocks the rest of the scan */ }
 
     // Fake-shop check (0.6.0) — top frame, storefront pages only. Reported to
     // the popup's shopping card; a strong result nudges the verdict to at most

@@ -29,6 +29,17 @@ function hash40For(domain) {
   const digest = crypto.createHash('sha256').update(domain).digest();
   return Blockset.hash40FromBytes(digest);
 }
+// Top 32 bits of SHA-256(domain) — the encoding risk.json's dyndns/hosters
+// arrays use (engine/risk_rules.js hash32FromBytes()).
+function hash32For(domain) {
+  const digest = crypto.createHash('sha256').update(domain).digest();
+  return digest.readUInt32BE(0);
+}
+
+// Task B3 fixtures: risk.json abused-TLD table + dyndns/hoster membership.
+const RISK_DYNDNS_DOMAIN = 'risk-dyndns-fixture.example';
+const RISK_HOSTER_DOMAIN = 'risk-hoster-fixture.example';
+const RISK_TLD_HOST = 'risk-abused-tld-fixture.riskfixturetld';
 function buildRecords(values) {
   const sorted = [...new Set(values)].sort((a, b) => a - b);
   const buf = Buffer.alloc(sorted.length * 5);
@@ -65,6 +76,14 @@ test.beforeAll(() => {
     buildShardGz([{ d: BLOCK_DOMAIN, s: ['Phishing.Database', 'HaGeZi Threat-Intelligence-Feeds (medium)'] }]));
   fs.writeFileSync(path.join(FEED_DIR, `exact-${shardHex(warnHash)}.jsonl.gz`),
     buildShardGz([{ d: WARN_DOMAIN, s: ['ScamSniffer'] }]));
+
+  // risk.json (Task B3): abused-TLD weight table + dyndns/hoster hash32 sets.
+  const risk = {
+    tlds: { '.riskfixturetld': 8 },
+    dyndns: [hash32For(RISK_DYNDNS_DOMAIN)],
+    hosters: [hash32For(RISK_HOSTER_DOMAIN)]
+  };
+  fs.writeFileSync(path.join(FEED_DIR, 'risk.json'), JSON.stringify(risk));
 
   const meta = {
     version: '1',
@@ -144,4 +163,48 @@ test('a clean feed-fixture host (no hash hit at all) is untouched', async ({ con
   await page.waitForTimeout(1000);
   await expect(page.locator('.scamshield-interstitial')).toHaveCount(0);
   await expect(page.locator('.scamshield-banner')).toHaveCount(0);
+});
+
+// --- risk.json: abused-TLD weight table + dyndns/hoster membership (Task B3) ---
+
+test('the feed OTA cycle also installs risk.json and mirrors its TLD table into settings', async ({ context }) => {
+  const sw = context.serviceWorkers()[0];
+  const r = await installFeed(sw);
+  expect(r.ok).toBe(true);
+  const settings = await sw.evaluate(() => getSettings());
+  expect(settings.riskTlds).toEqual({ '.riskfixturetld': 8 });
+});
+
+test('checkRiskHosting reports dyndns and hoster membership by hashed registrable domain', async ({ context }) => {
+  const sw = context.serviceWorkers()[0];
+  await installFeed(sw);
+  const dyndnsHit = await sw.evaluate((host) => checkRiskHosting(host), RISK_DYNDNS_DOMAIN);
+  expect(dyndnsHit).toEqual({ hit: 'dyndns' });
+  // A subdomain of the dyndns fixture domain still matches on its
+  // REGISTRABLE domain, exactly like the feed's full-hostname matcher would
+  // not (dyndns/hosters are a coarser, provider-level signal by design).
+  const subHit = await sw.evaluate((host) => checkRiskHosting(host), 'dyndns-subdomain.' + RISK_DYNDNS_DOMAIN);
+  expect(subHit).toEqual({ hit: 'dyndns' });
+  const hosterHit = await sw.evaluate((host) => checkRiskHosting(host), RISK_HOSTER_DOMAIN);
+  expect(hosterHit).toEqual({ hit: 'hoster' });
+  const cleanHit = await sw.evaluate((host) => checkRiskHosting(host), 'clean-feed-fixture.example');
+  expect(cleanHit).toEqual({ hit: null });
+});
+
+test('a dyndns-listed host gets suspicious-tier evidence, not an interstitial', async ({ context }) => {
+  const sw = context.serviceWorkers()[0];
+  await installFeed(sw);
+  const page = await context.newPage();
+  await page.goto(`http://${RISK_DYNDNS_DOMAIN}:5599/clean.html`);
+  await expect(page.locator('.scamshield-interstitial')).toHaveCount(0);
+  const banner = page.locator('.scamshield-banner.suspicious');
+  await expect(banner).toBeVisible({ timeout: 8000 });
+});
+
+test('an abused-TLD host (risk.json tlds table) gets suspicious-tier evidence via scoreUrl', async ({ context }) => {
+  const sw = context.serviceWorkers()[0];
+  await installFeed(sw); // populates settings.riskTlds, which content_script.js passes into scoreUrl()
+  const page = await context.newPage();
+  await page.goto(`http://${RISK_TLD_HOST}:5599/clean.html`);
+  await expect(page.locator('.scamshield-banner.suspicious')).toBeVisible({ timeout: 8000 });
 });

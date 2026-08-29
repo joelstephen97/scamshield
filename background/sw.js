@@ -6,6 +6,7 @@
 import '../engine/constants.js';
 import '../engine/trust.js';
 import '../engine/features.js';
+import '../engine/risk_rules.js';
 import '../engine/image_hash.js';
 import '../engine/brand_icons.js';
 import '../engine/report_payload.js';
