@@ -59,6 +59,10 @@ product.
   you typed to a tracker, *before* you press submit, and separately names
   fingerprinting scripts and "click Allow to continue" notification-permission
   traps.
+- **Risky search results, flagged before you click** — on Google, Bing and
+  DuckDuckGo, a small red or amber dot marks a result whose domain is
+  already known-bad or a close brand lookalike, so you see the risk before
+  you click through, not after.
 
 **How it works**
 
@@ -148,29 +152,41 @@ support development, there's a link in the extension, never a paywall.
 
 Hard numbers, not adjectives: available in **20 languages** with full menu,
 warning and settings translations (not just a translated store listing);
-around **630 automated tests**; a blocklist of thousands of scam domains,
+around **875 automated tests**; a blocklist of thousands of scam domains,
 updated continuously from an open-source feed; and an install under 1 MB
 — about 450 KB zipped, no heavy runtime.
 
-## What's new (0.9.0)
+## What's new (0.10.0)
 
-- **A vastly bigger threat feed.** The blocklist grew from a few thousand
-  domains to **over 425,000 confirmed scam and phishing domains**, plus a
-  watchlist of over a million lower-confidence ones — aggregated from more
-  than a dozen open-source threat databases, cross-checked against each
-  other, and filtered against the world's most popular sites to keep false
-  alarms rare. Matching still happens entirely on your device: the feed is
-  downloaded as compact fingerprints and checked locally, so no site you
-  visit is ever sent anywhere. Updates arrive as small diffs every few hours.
-- **When ScamShield blocks a feed-listed site, it now tells you which independent
-  sources reported it** — verifiable, not a black-box score.
-- **Smarter lookalike detection**: brand-impersonation checks now catch
-  swapped letters, look-alike characters, hidden brand names inside long
-  subdomains and swapped domain endings, with strict safeguards so real
-  brand sites are never flagged.
-- **New warning signals**: unusually deep subdomain chains, abnormally long
-  address parts, link-shortener destinations, scam-heavy domain endings and
-  free-hosting providers now add cautionary evidence to a page's verdict.
+- **Risky search results, flagged before you click.** On Google, Bing and
+  DuckDuckGo, a small red or amber dot now marks a search result whose
+  domain is already on the block list, the watchlist, or a close brand
+  lookalike — visible on the results page itself, before you click through.
+  A clean result gets no badge at all.
+- **Warns before a card number or password heads to another site.** A
+  card-number or login form that submits to a different domain than the one
+  you're on (and isn't a known payment processor or SSO provider) now shows
+  a warning before it goes through, the same way the existing leaky-form
+  guard already catches beaconed form fields.
+- **Flags brand-new domains.** A newly-registered-domain check (on-device,
+  updated weekly, same privacy model as the rest of the threat feed) adds a
+  cautionary note when a page's domain was registered very recently — a
+  favorite trick for scam sites that get taken down and stood back up under
+  a fresh name — and eases off once you've safely visited that domain for a
+  while.
+- **Copy-shareable catch reports.** Every dangerous or suspicious warning
+  now has a "Copy report" button that puts a short, plain-text summary —
+  site, verdict, top reasons — on your clipboard, ready to paste into a
+  group chat or forum thread to warn someone else.
+- **Sharper false-positive discipline.** The signals used for domain-hosting
+  risk (abused TLDs, free-hosting/dynamic-DNS providers) can no longer push
+  a page all the way to a *dangerous* verdict on their own — only genuinely
+  independent evidence can. Benchmarked against 1.09 million URLs: the rate
+  of ordinary, safe pages wrongly flagged dangerous fell from 0.17% to 0.05%,
+  with no drop in real threats caught.
+- **A feedback page on uninstall.** If you do remove ScamShield, a small
+  static page opens with a link to tell us why and a link straight to the
+  false-positive report flow — no form, no analytics, nothing collected.
 
 No new permissions. Still `storage`, `declarativeNetRequest`, `alarms` and
 http/https access, exactly as 0.3.1.

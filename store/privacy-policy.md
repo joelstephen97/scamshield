@@ -1,8 +1,8 @@
 # ScamShield Privacy Policy
 
-_Last updated: 2026-08-29 · applies to ScamShield 0.8.0 and later (Chrome Web Store listing `fojjjofjimbfoddafoampojopijnlihl`, Firefox build, and source builds from [github.com/joelstephen97/scamshield](https://github.com/joelstephen97/scamshield))._
+_Last updated: 2026-08-30 · applies to ScamShield 0.10.0 and later (Chrome Web Store listing `fojjjofjimbfoddafoampojopijnlihl`, Firefox build, and source builds from [github.com/joelstephen97/scamshield](https://github.com/joelstephen97/scamshield))._
 
-_What changed in 0.8.0: ScamShield got a redesigned popup. **None of this changes what data ScamShield collects, stores or sends** — it is an interface change only. Community reporting is still off by default, and the payload it sends when you opt in is unchanged._
+_What changed in 0.10.0: ScamShield added search-result safety badges, a cross-origin credential/card warning, a "new domain" signal, a copy-shareable report button, and a static feedback page shown after you uninstall. **None of this changes what data ScamShield collects, stores or sends** — every one of these runs on your device, or, for the new-domain signal, downloads one more small file the same way the rest of the threat feed already does (see section 3). Community reporting is still off by default, and the payload it sends when you opt in is unchanged._
 
 ScamShield analyses web pages **on your device** to warn you about scams and phishing. It was designed so that your browsing stays private: by default it collects nothing, has no accounts, no analytics, no advertising and no trackers. The hosted copy of this policy lives at <https://joelstephen97.github.io/scamshield/privacy.html>; its source is this file.
 
@@ -44,6 +44,8 @@ ScamShield periodically **downloads** an updated blocklist of known scam domains
 
 Since 0.9, ScamShield also periodically **downloads** a much larger, sourced threat feed (hundreds of thousands of domains, in a compact binary format) from the same [parry-feed](https://github.com/joelstephen97/scamshield-feed) project, additively alongside the file above. The small version file is fetched from `raw.githubusercontent.com/joelstephen97/scamshield-feed`; the large files are fetched from jsDelivr's public CDN at `cdn.jsdelivr.net/gh/joelstephen97/scamshield-feed@<version>` (falling back to raw.githubusercontent.com if jsDelivr is unreachable). These are plain file downloads, on the same 12-hour cycle as the blocklist above: your IP address is visible to GitHub and to jsDelivr's CDN (see [jsDelivr's privacy policy](https://www.jsdelivr.com/turbo/privacy)) the way it would be for any file you download, and nothing about you or your browsing is ever sent — no hostnames you visit, no query, nothing. When a page you visit matches an entry in the downloaded feed, ScamShield may fetch one more small file (a "shard" naming which sources reported that domain) from the same two hosts, to confirm the match before showing a warning and to show you which sources reported it — again a plain download, never a request that names the domain to a server.
 
+Since 0.10, ScamShield also periodically **downloads** `nrd.bloom`, a compact file listing newly-registered domains, used only to add a "this domain was registered very recently" note to a page's warning. It comes from the same two hosts (jsDelivr, falling back to raw.githubusercontent.com) on the same weekly refresh cycle as the other large feed files above — another plain, sha256-verified file download, with nothing about you or the sites you visit sent alongside it.
+
 ## 4. Icon check
 
 To recognise brand look-alikes, ScamShield fetches the icon files (favicon / logo) that the page you are on references — usually from the same site, sometimes from a content-delivery network the site uses. These requests are made without cookies or credentials, only for icons the page itself would load anyway, and no third party learns anything about you or your browsing from them. The icons are hashed on your device and compared with a built-in table; neither the icons nor the hashes are sent anywhere. Turning off *Page analysis* in Settings also turns off the icon check.
@@ -67,26 +69,30 @@ If — and only if — you turn on **"Help make ScamShield smarter"** in Setting
 
 If community reporting is off and you press *Report a mistake*, ScamShield opens a pre-filled issue form on GitHub in a new tab. Nothing is sent unless you choose to submit it, you can edit the text first, and GitHub's own [privacy statement](https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement) applies to anything you post there.
 
-## 7. Third parties
+## 7. Uninstall feedback page
+
+Since 0.10, when you uninstall ScamShield your browser opens [a static feedback page](https://joelstephen97.github.io/scamshield/goodbye.html) hosted on the same GitHub Pages site as this policy. The page itself collects nothing: it has no form, no analytics and contacts no third party. The only information in the request is the version number, sent as a query parameter in the page's own URL (`?v=1.2.3`) so the page can show which version you had — the same information already visible in the URL bar. This is standard browser behavior (`chrome.runtime.setUninstallURL`), supported by Chrome and Firefox alike; ScamShield does not learn that you uninstalled it, and nothing about your uninstall is sent to us.
+
+## 8. Third parties
 
 ScamShield has no advertising, analytics or tracking SDKs. The only third-party services involved are infrastructure: **GitHub** (hosts the threat-feed file, the issue tracker and this policy), **Vercel** and **Neon** (run and store opt-in community reports, section 5), and — only if you opt in to donate — GitHub Sponsors or PayPal, which you interact with directly on their sites. None of them receive your browsing data from ScamShield.
 
-## 8. Permissions
+## 9. Permissions
 
 ScamShield requests only `storage` (your settings and history), `declarativeNetRequest` (blocking known scam domains with a static rule list — it does not read or intercept your traffic), `alarms` (the 12-hourly feed refresh) and access to http/https pages (so it can analyse the page you are on). It contains no remote code. A detailed justification is in the repository (`store/permissions-justification.md`).
 
-## 9. Children
+## 10. Children
 
 ScamShield is a general-purpose safety tool, is not directed at children, and collects no personal data from anyone.
 
-## 10. Security
+## 11. Security
 
 Everything the extension sends or receives uses HTTPS. Report submissions and icon fetches carry no cookies or credentials. Relay administration endpoints are token-protected and the data is purged on a schedule. Please report security problems to jojostev@gmail.com (see `SECURITY.md` in the repository).
 
-## 11. Changes to this policy
+## 12. Changes to this policy
 
 We will update this page when the extension's data practices change (for example, when a new release adds or changes a network request) and update the date at the top. The full edit history is visible in the repository's commit log. Material changes are also called out in the changelog that the extension links to after an update.
 
-## 12. Contact
+## 13. Contact
 
 Joel Stephen · jojostev@gmail.com · <https://github.com/joelstephen97/scamshield>

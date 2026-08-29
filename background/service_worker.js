@@ -1029,6 +1029,19 @@ if (api.alarms) {
   api.alarms.onAlarm.addListener((a) => { if (a.name === 'ota') { runOtaUpdate(); runFeedUpdate(); flushReports(); } });
 }
 
+// Uninstall feedback survey (0.10.0, Task C5): the browser opens this static
+// GitHub Pages page in a new tab when the user removes the extension. It's a
+// plain query-string version tag, nothing else — no data collection, no
+// account, no ScamShield server. Set on every SW boot (not just onInstalled)
+// so it stays current if the version changes between installs; setUninstallURL
+// is supported by both Chrome and Firefox. Guarded because a handful of test
+// harnesses stub `api.runtime` without it.
+try {
+  if (api.runtime && typeof api.runtime.setUninstallURL === 'function') {
+    api.runtime.setUninstallURL('https://joelstephen97.github.io/scamshield/goodbye.html?v=' + manifestVersion());
+  }
+} catch (_) { /* best-effort — never block boot on this */ }
+
 api.runtime.onInstalled.addListener(async (details) => {
   await settingsInitPromise; // base defaults are guaranteed to exist once this resolves
   await ensureInstalledAt(); // first-seen stamp for "protecting you since" (never overwritten)

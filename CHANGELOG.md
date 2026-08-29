@@ -2,6 +2,49 @@
 
 All notable changes to ScamShield. Versions are git tags (`vX.Y.Z`); the version on the [Chrome Web Store](https://chromewebstore.google.com/detail/fojjjofjimbfoddafoampojopijnlihl) may lag a tag by a few days while Google reviews it. Privacy-relevant changes are also reflected in the [privacy policy](https://joelstephen97.github.io/scamshield/privacy.html).
 
+## 0.10.0 — 2026-08-30
+
+### New
+- **SERP safety badges** — on Google, Bing and DuckDuckGo results pages,
+  each result now gets a small red or amber dot when its domain is on the
+  block list, the warn list, or matches a strong brand-lookalike, so a risky
+  result is visible before you click it rather than after. Results are
+  checked in one batched, network-free lookup against the feed already
+  cached on your device; a clean result gets no badge at all — there's no
+  green noise. Handles infinite-scroll and paginated results as they load.
+- **Cross-origin credential/card exfil warning** — a password or card-number
+  form that submits to a different domain than the one you're on (and isn't
+  a known SSO or payment processor) now shows a dismissible warning before
+  it goes through, the same way the existing leaky-form guard already warns
+  on beaconed form fields.
+- **"New site" signal** — a newly-registered-domain Bloom filter (updated
+  weekly, on-device, same privacy model as the rest of the threat feed) adds
+  a quiet, capped piece of evidence when a page's domain was registered
+  very recently, easing off once you've safely visited that domain for 30+
+  days.
+- **Copy-shareable catch report** — dangerous and suspicious warnings (both
+  the in-page banner and the popup) now have a "Copy report" button that
+  puts a plain-text summary — defanged hostname, verdict, top reasons, and
+  a link back to the project — on your clipboard, for pasting into a group
+  chat or forum thread.
+- **Uninstall feedback page** — uninstalling ScamShield now opens a static,
+  no-tracking page (`goodbye.html`) with a link to say why you left and a
+  link straight to the false-positive report flow. No form, no analytics,
+  no account — there's nothing else to send.
+
+### Fixed
+- **False-positive hardening.** Risk-table evidence (abused-TLD and
+  dyndns/free-hoster membership) can no longer, on its own or compounded
+  with weak URL signals, push a verdict to *dangerous* — it still counts
+  fully toward *suspicious*. Benchmarked against 1.09M URLs: the
+  benign-flagged-at-dangerous rate fell from 0.17% to 0.05%, with detection
+  recall at *suspicious or above* unchanged.
+
+No new permissions; no new data collection. SERP badges reuse the existing
+search-engine content-script matches, the "new site" signal is another feed
+file downloaded the same way as the rest of the threat feed, and the
+uninstall page is static and collects nothing.
+
 ## 0.9.0 — 2026-08-29
 
 ### Threat filter, rebuilt

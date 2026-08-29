@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sorry to see you go — ScamShield</title>
+<meta name="description" content="ScamShield has been uninstalled. No accounts, no data collection — there was nothing to delete. Three ways to tell us why, if you have a minute.">
+<link rel="icon" href="assets/icons/icon32.png">
+<style>
+  :root{color-scheme:light dark;--fg:#1a1a1a;--muted:#666;--accent:#1e7d34;--bg:#fff;--card:#f6f8f6;--line:#e5e7eb}
+  @media (prefers-color-scheme:dark){:root{--fg:#e7e7e7;--muted:#a3a3a3;--accent:#5cc36f;--bg:#111;--card:#1a1d1a;--line:#2a2a2a}}
+  body{font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;max-width:680px;margin:40px auto;padding:0 20px;color:var(--fg);background:var(--bg)}
+  nav{font-size:14px;color:var(--muted);margin-bottom:24px}
+  nav a{margin-right:10px}
+  h1{color:var(--accent);margin-bottom:4px}
+  .sub{color:var(--muted);margin:0 0 28px}
+  h2{margin-top:32px;font-size:1.1rem}
+  .grid{display:grid;gap:14px;margin-top:12px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+  .card b{display:block;margin-bottom:4px}
+  a{color:var(--accent)}
+  .cta{display:inline-block;font-weight:600}
+  .never{margin-top:32px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:15px}
+  footer{margin-top:40px;color:var(--muted);font-size:14px;border-top:1px solid var(--line);padding-top:14px}
+</style></head>
+<body>
+<nav><a href="index.html">ScamShield</a> · <a href="privacy.html">Privacy policy</a> · <a href="https://github.com/joelstephen97/scamshield">Source</a></nav>
+
+<h1>Sorry to see you go</h1>
+<p class="sub" id="versionLine">ScamShield has been uninstalled.</p>
+
+<p>This page is static — opening it is the only thing that happened just now. If you have a minute, one of these tells us more than silence does:</p>
+
+<div class="grid">
+  <div class="card">
+    <b>Tell us why you left</b>
+    Two lines is plenty — too pushy, too many false alarms, didn't need it anymore, found something else. It goes straight to a public GitHub issue, nowhere else.
+    <p><a class="cta" href="https://github.com/joelstephen97/scamshield/issues/new?title=Why%20I%20uninstalled%20ScamShield&amp;body=What%20version%20were%20you%20on%3F%0A%0AWhat%20made%20you%20uninstall%3F%0A%0AWas%20it%20a%20bug%2C%20a%20missing%20feature%2C%20too%20many%20warnings%2C%20or%20something%20else%3F%0A">Open the "why did you uninstall" form on GitHub →</a></p>
+  </div>
+  <div class="card">
+    <b>It flagged something that wasn't a scam</b>
+    If a false positive is why you left, that's a bug worth fixing — the report link below skips straight to the false-positive template.
+    <p><a class="cta" href="https://github.com/joelstephen97/scamshield/issues/new?title=False%20positive%3A%20&amp;body=Site%3A%20%0A%0AWhat%20ScamShield%20said%3A%20%0A%0AWhat%20it%20should%20have%20said%3A%20%0A">Report a false positive →</a></p>
+  </div>
+</div>
+
+<p class="never">What ScamShield never did: no account, no sign-up, no analytics, no tracking — so there's nothing tied to you to delete. Everything it ever stored (settings, history, stats) lived only in your browser and is already gone with the extension.</p>
+
+<footer>Made by <a href="https://github.com/joelstephen97">Joel Stephen</a> · <a href="mailto:jojostev@gmail.com">jojostev@gmail.com</a></footer>
+
+<script>
+(function () {
+  try {
+    var v = new URLSearchParams(location.search).get('v');
+    if (v) {
+      document.getElementById('versionLine').textContent = 'ScamShield ' + v + ' has been uninstalled.';
+    }
+  } catch (e) { /* no-op — the static text above already covers this */ }
+})();
+</script>
+</body></html>
