@@ -24,6 +24,7 @@ const WARN_DOMAIN = 'warn-feed-fixture.example';
 // which never appears in any exact-shard fixture below — the "1-in-950k"
 // false-positive case the SW must downgrade to no-hit rather than trust.
 const FP_DOMAIN = 'fp-feed-fixture.example';
+let UNVERIFIED_DOMAIN = null; // chosen at fixture-build time, see below
 
 function hash40For(domain) {
   const digest = crypto.createHash('sha256').update(domain).digest();
@@ -63,19 +64,38 @@ test.beforeAll(() => {
   const fpHash = hash40For(FP_DOMAIN);
   const warnHash = hash40For(WARN_DOMAIN);
 
-  const set40 = buildRecords([blockHash, fpHash]);
+  // A block-tier domain whose exact shard deliberately does NOT exist (its
+  // shard byte is chosen to differ from every shard file written below), for
+  // the unavailable-shard fail-caution test. Deterministic: candidates are
+  // tried in order until one lands on its own shard byte.
+  let unvHash = null;
+  for (let i = 0; i < 64 && !unvHash; i++) {
+    const cand = `unverified-${i}.example`;
+    const h = hash40For(cand);
+    if (shardHex(h) !== shardHex(blockHash) && shardHex(h) !== shardHex(warnHash) && shardHex(h) !== shardHex(hash40For(FP_DOMAIN))) {
+      unvHash = h; UNVERIFIED_DOMAIN = cand;
+    }
+  }
+  const set40 = buildRecords([blockHash, fpHash, unvHash]);
   const warn40 = buildRecords([warnHash]);
   fs.writeFileSync(path.join(FEED_DIR, 'set40.bin'), set40);
   fs.writeFileSync(path.join(FEED_DIR, 'warn40.bin'), warn40);
 
   // Real confirming exact-shard entries for the two domains meant to hit.
-  // FP_DOMAIN gets none — whether its 40-bit hash happens to share a shard
-  // byte with one of these (that shard's real content still omits it) or
-  // lands on a byte with no file at all (a fetch 404), findExact() must miss.
+  // FP_DOMAIN's shard must EXIST but omit it: since the fail-caution fix, a
+  // missing shard (fetch 404) means "unverified" and keeps the hit at warn —
+  // only a fetched shard that omits the domain proves the 40-bit
+  // false-positive and downgrades to no-hit. So its shard always gets a
+  // decoy entry (unless it already shares a byte with a real shard, whose
+  // content omits it anyway).
   fs.writeFileSync(path.join(FEED_DIR, `exact-${shardHex(blockHash)}.jsonl.gz`),
     buildShardGz([{ d: BLOCK_DOMAIN, s: ['Phishing.Database', 'HaGeZi Threat-Intelligence-Feeds (medium)'] }]));
   fs.writeFileSync(path.join(FEED_DIR, `exact-${shardHex(warnHash)}.jsonl.gz`),
     buildShardGz([{ d: WARN_DOMAIN, s: ['ScamSniffer'] }]));
+  if (shardHex(fpHash) !== shardHex(blockHash) && shardHex(fpHash) !== shardHex(warnHash)) {
+    fs.writeFileSync(path.join(FEED_DIR, `exact-${shardHex(fpHash)}.jsonl.gz`),
+      buildShardGz([{ d: 'decoy-not-the-fp-domain.example', s: ['Phishing.Database'] }]));
+  }
 
   // risk.json (Task B3): abused-TLD weight table + dyndns/hoster hash32 sets.
   const risk = {
@@ -153,6 +173,23 @@ test('a 40-bit hit not confirmed by its exact shard downgrades to no-hit (false-
   await page.waitForTimeout(1000);
   await expect(page.locator('.scamshield-interstitial')).toHaveCount(0);
   await expect(page.locator('.scamshield-banner')).toHaveCount(0);
+});
+
+test('a block hit whose exact shard is unavailable fails toward caution: warn, unverified, no negative cache', async ({ context }) => {
+  const sw = context.serviceWorkers()[0];
+  await installFeed(sw);
+  // No exact-<byte>.jsonl.gz exists for this domain → the shard fetch 404s.
+  // That is NOT proof of a 40-bit false positive, so the hit must surface at
+  // warn tier instead of silently passing — and must not be negative-cached.
+  const result = await sw.evaluate((host) => checkFeedHost(host), UNVERIFIED_DOMAIN);
+  expect(result).toEqual({ hit: 'warn', sources: [], unverified: true });
+  const again = await sw.evaluate((host) => checkFeedHost(host), UNVERIFIED_DOMAIN);
+  expect(again).toEqual({ hit: 'warn', sources: [], unverified: true });
+  const page = await context.newPage();
+  await page.goto(`http://${UNVERIFIED_DOMAIN}:5599/`);
+  const banner = page.locator('.scamshield-banner.suspicious');
+  await expect(banner).toBeVisible({ timeout: 8000 });
+  await expect(page.locator('.scamshield-interstitial')).toHaveCount(0);
 });
 
 test('a clean feed-fixture host (no hash hit at all) is untouched', async ({ context }) => {
