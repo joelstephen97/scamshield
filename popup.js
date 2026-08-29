@@ -287,7 +287,7 @@ async function init() {
     if (lang) UI_LANG = R.intlTag(lang); // timestamps follow the chosen language too
   } catch (_) { /* fall back to the browser language */ }
   $('lockline').textContent = T('footerTrustLine', null, 'Made on-device. No data leaves your browser.');
-  $('brandmark').insertAdjacentHTML('afterbegin', I.shield('safe')); $('opts').innerHTML = I.gear(); $('langbtn').innerHTML = I.globe(); $('lockline').insertAdjacentHTML('afterbegin', I.lock());
+  $('brandmark').insertAdjacentHTML('afterbegin', '<img class="ic" src="assets/icons/icon32.png" alt="" width="16" height="16">'); $('opts').innerHTML = I.gear(); $('langbtn').innerHTML = I.globe(); $('lockline').insertAdjacentHTML('afterbegin', I.lock());
   try { $('ver').textContent = api.runtime.getManifest().version; } catch (_) {}
   settings = await settingsPromise;
   if (!settings) { renderStatus('unknown', '', T('toastExtensionError', null, 'Extension error — try reopening.')); return; }

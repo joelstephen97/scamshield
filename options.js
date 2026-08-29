@@ -42,7 +42,7 @@ function showTab(name, userInitiated) {
   if (name === 'stats') loadStats();
 }
 for (const a of document.querySelectorAll('nav a')) a.addEventListener('click', (e) => { e.preventDefault(); showTab(a.dataset.tab, true); });
-$('brandmark').insertAdjacentHTML('afterbegin', I.shield('safe'));
+$('brandmark').insertAdjacentHTML('afterbegin', '<img class="ic" src="assets/icons/icon32.png" alt="" width="16" height="16">');
 // A function rather than a one-liner because the language override can land
 // after this first render (see the SSi18n.ready block at the bottom).
 function renderVersion() {
