@@ -721,11 +721,15 @@ async function fetchJsonWithTimeout(url, ms) {
 }
 // Tries each base in order (cdn first, then the raw fallback), returning the
 // first successful fetch's bytes. `bases` entries may be falsy/missing.
-async function fetchArrayBufferFromBases(bases, filename) {
+async function fetchArrayBufferFromBases(bases, filename, timeoutMs) {
   for (const base of bases) {
     if (!base) continue;
     try {
-      const res = await fetch(base + filename, { cache: 'no-cache' });
+      const opts = { cache: 'no-cache' };
+      // Per-base timeout so a stalled CDN connection can't hang a caller
+      // (the per-page verdict path fetches exact shards through here).
+      if (timeoutMs && typeof AbortSignal !== 'undefined' && AbortSignal.timeout) opts.signal = AbortSignal.timeout(timeoutMs);
+      const res = await fetch(base + filename, opts);
       if (!res.ok) continue;
       return await res.arrayBuffer();
     } catch (_) { /* try the next base */ }
@@ -875,7 +879,7 @@ async function fetchExactShardEntries(urls, hash40) {
   if (!urls) return null;
   const hex = globalThis.Blockset.shardByte(hash40).toString(16).padStart(2, '0');
   const bases = [urls.cdn, urls.fallback].filter(Boolean);
-  const buf = await fetchArrayBufferFromBases(bases, `exact-${hex}.jsonl.gz`);
+  const buf = await fetchArrayBufferFromBases(bases, `exact-${hex}.jsonl.gz`, 4000);
   if (!buf) return null;
   try { return await gunzipJsonl(buf); } catch (_) { return null; }
 }
@@ -896,8 +900,18 @@ async function checkFeedHost(host) {
   if (!blockHit && !warnHit) return { hit: null };
 
   const entries = await fetchExactShardEntries(rec.urls, hash40);
-  const match = entries ? Bset.findExact(entries, normalized) : null;
+  if (entries === null) {
+    // Shard UNAVAILABLE (network blip, corrupted/timed-out download) — not
+    // the same as "verified absent". Fail toward caution: surface the hit at
+    // warn tier (no hard interstitial on an unconfirmed 40-bit match, but
+    // never a silent pass either), and don't cache a negative we never
+    // verified — the next navigation retries the shard.
+    return { hit: 'warn', sources: [], unverified: true };
+  }
+  const match = Bset.findExact(entries, normalized);
   if (!match) {
+    // Shard fetched and the hostname genuinely isn't in it: the true 40-bit
+    // false-positive case — safe to cache the negative.
     feedNegativeCache.set(normalized, Date.now());
     if (feedNegativeCache.size > FEED_NEG_CACHE_CAP) feedNegativeCache.delete(feedNegativeCache.keys().next().value);
     return { hit: null };

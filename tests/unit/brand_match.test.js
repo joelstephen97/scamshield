@@ -192,3 +192,18 @@ test('picks the single best (highest-ranked) grade when multiple would match', (
   assert.equal(r.grade, 'strongest');
   assert.equal(r.brand, 'paypal');
 });
+
+// Final-review regression (0.9.0): rules c/d/e must judge the bare SLD, so a
+// www./secure./mail. prefix can never push a typosquat out of tolerance —
+// and the SLD length floor must not exempt short-SLD subdomain injection.
+test('subdomain prefixes do not defeat SLD typosquat rules', () => {
+  assert.equal(BM.fuzzyBrandMatch('www.paypai.com').grade, 'strong');
+  assert.equal(BM.fuzzyBrandMatch('secure.paypa1.com').grade, 'strong');
+  assert.equal(BM.fuzzyBrandMatch('mail.paypal.co').grade, 'strong'); // TLD swap behind a subdomain
+});
+test('short registrable names still get subdomain-injection checks', () => {
+  assert.equal(BM.fuzzyBrandMatch('netflix.xy.co').grade, 'strongest');
+});
+test('benign hosts with common prefixes stay clean', () => {
+  assert.equal(BM.fuzzyBrandMatch('www.example.com'), null);
+});

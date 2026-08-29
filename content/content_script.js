@@ -444,7 +444,9 @@
     // feed-* flag so the engagement gate below (which only ever suppresses a
     // flag-less "suspicious") can never silently swallow validated feed intel.
     try {
-      const feedHit = await send('checkFeed', { host: location.hostname });
+      // Bounded: the SW's shard fetch is itself timeout-capped, but the page
+      // verdict must never wait on a wedged SW either (resolves null on cap).
+      const feedHit = await withTimeout(send('checkFeed', { host: location.hostname }), 10000);
       if (feedHit && feedHit.hit === 'block') {
         const reason = { code: 'feedBlock', kind: 'link', params: [String((feedHit.sources || []).length)] };
         verdict = Object.assign({}, verdict, {
@@ -454,7 +456,9 @@
           flags: ['feed-block'].concat(verdict.flags || [])
         });
       } else if (feedHit && feedHit.hit === 'warn' && verdict.level !== 'dangerous') {
-        const reason = { code: 'feedWarn', kind: 'link', params: [String((feedHit.sources || []).length)] };
+        // An unverified hit (exact shard unavailable) has no source list yet
+        // — floor the count at 1 so the warning never reads "0 sources".
+        const reason = { code: 'feedWarn', kind: 'link', params: [String(Math.max(1, (feedHit.sources || []).length))] };
         verdict = Object.assign({}, verdict, {
           level: 'suspicious', score: Math.max(verdict.score, 0.6),
           reasons: [reason].concat(verdict.reasons || []),
@@ -471,7 +475,7 @@
     // the same pattern the feed check above uses. Never escalates past
     // "suspicious" on its own and never overrides an existing dangerous verdict.
     try {
-      const riskHit = await send('checkRisk', { host: location.hostname });
+      const riskHit = await withTimeout(send('checkRisk', { host: location.hostname }), 3000);
       if (riskHit && riskHit.hit && verdict.level !== 'dangerous') {
         const reason = { code: 'riskDynamicHost', kind: 'link' };
         const newScore = Math.min(1, verdict.score + 0.30);

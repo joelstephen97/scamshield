@@ -179,16 +179,23 @@
       const tokens = lab.split('-');
       if (tokens.length > 1 && tokens.some((t) => tokenMatchesBrand(t, brand))) return 'strongest';
     }
-    // c) TLD-swap of the exact brand: the fuzzy form matches exactly
-    // (distance 0) — only the suffix differs, and the allowlist gate the
-    // caller already ran ruled out that suffix being one the brand controls.
-    if (hostForm === form) return 'strong';
+    // Rules c/d/e judge the registrable name ITSELF, so they compare the
+    // bare SLD — not the subdomain-inclusive fuzzy form, which would let any
+    // "www."/"secure."/"mail." prefix push the distance out of tolerance and
+    // defeat typosquat detection entirely ("www.paypai.com" must still hit).
+    // The length floor sits here, after a/b: a short SLD ("talabat.xy.com")
+    // must not exempt the host from the subdomain-injection rules above.
+    if (!sld || sld.length < MIN_BRAND_LEN) return null;
+    // c) TLD-swap of the exact brand: SLD matches exactly (distance 0) —
+    // only the suffix differs, and the allowlist gate the caller already ran
+    // ruled out that suffix being one the brand controls.
+    if (sld === form) return 'strong';
     // d) homoglyph substitution match (exact, after normalising).
-    for (const variant of homoglyphVariants(hostForm)) {
+    for (const variant of homoglyphVariants(sld)) {
       if (variant === form) return 'strong';
     }
     // e) generic edit distance.
-    const dist = damerauLevenshtein(hostForm, form);
+    const dist = damerauLevenshtein(sld, form);
     if (dist === 1) return 'strong';
     if (dist === 2 && form.length >= 8) return 'weak'; // long brand names only
     return null;
@@ -201,7 +208,10 @@
   function fuzzyBrandMatch(host) {
     const h = String(host || '').toLowerCase();
     const hostForm = fuzzyForm(h);
-    if (hostForm.length < MIN_BRAND_LEN) return null; // FP discipline floor
+    // No whole-form length floor here: the SLD floor lives inside
+    // gradeAgainst() after the injection rules, so a short registrable name
+    // with a brand smuggled into a subdomain still gets caught.
+    if (!hostForm) return null;
     const parts = registrableParts(h);
     const labels = h.replace(/\.+$/, '').split('.').filter(Boolean);
     const domainLabelCount = parts.domain ? parts.domain.split('.').length : labels.length;
