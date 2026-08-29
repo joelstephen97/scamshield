@@ -255,8 +255,18 @@ async function currentTab() {
   let self = null; try { self = await api.tabs.getCurrent(); } catch (_) {}
   if (!self) { const [t] = await api.tabs.query({ active: true, currentWindow: true }); return t || null; }
   const all = await api.tabs.query({ currentWindow: true });
+  // Popup-as-a-tab path (tests, or a user opening popup.html directly).
+  // Without the "tabs" permission, query() only reveals `url` for tabs our
+  // host permissions cover — http/https pages. Extension pages (a
+  // concurrently opened onboarding/options tab), about:blank and chrome://
+  // all come back with url '', and none of them can ever be scanned — so for
+  // the no-active fallback, prefer the last tab we can actually see into
+  // rather than blindly taking the last tab (which is how this popup ended
+  // up silently inspecting the onboarding tab). An ACTIVE empty-url tab
+  // still wins, deliberately: it renders the honest "not scanned" state.
   const others = all.filter((t) => t.id !== self.id);
-  return others.find((t) => t.active) || others[others.length - 1] || null;
+  const web = others.filter((t) => t.url && /^https?:/.test(t.url));
+  return others.find((t) => t.active) || web[web.length - 1] || others[others.length - 1] || null;
 }
 async function init() {
   // Fired BEFORE the language wait below so the two reads overlap: the popup's
@@ -306,18 +316,22 @@ async function init() {
   // the options page as a normal tab (options_page/options_ui both open in a
   // tab already) and lets the tab router pick the section up from the hash.
   $('viewall').addEventListener('click', (e) => { e.preventDefault(); api.tabs.create({ url: api.runtime.getURL('options.html#stats') }); window.close(); });
-  // Two hero counters (0.8.0), replacing the old this-site/all-time tile row:
-  // "since install" is the same lifetime threatsBlocked counter the old
-  // all-time tile showed; "this week" reuses background/stats.js's own
-  // summarize() over statsDaily rather than re-deriving the 7-day window here.
-  const stats = await statsPromise;
-  $('tile-since').querySelector('b').textContent = String((stats && Number(stats.threatsBlocked)) || settings.threatsBlocked || 0);
-  const weekly = (stats && Array.isArray(stats.statsDaily) && SSTATS) ? SSTATS.summarize(stats.statsDaily, 7, Date.now()).threats : 0;
-  $('tile-week').querySelector('b').textContent = String(weekly || 0);
   await initReviewAsk();
   if (settings.whatsNewSeen !== '0.8.0') { $('whatsnew').hidden = false; $('whatsnewlink').addEventListener('click', (e) => { e.preventDefault(); api.tabs.create({ url: 'https://github.com/joelstephen97/parry/blob/main/CHANGELOG.md' }); }); $('whatsnewx').addEventListener('click', async () => { $('whatsnew').hidden = true; await send('setSettings', { patch: { whatsNewSeen: '0.8.0' } }); }); }
 
   tab = await currentTab();
+  // Two hero counters (0.8.0), replacing the old this-site/all-time tile row:
+  // "since install" is the same lifetime threatsBlocked counter the old
+  // all-time tile showed; "this week" reuses background/stats.js's own
+  // summarize() over statsDaily rather than re-deriving the 7-day window here.
+  // Awaited only AFTER currentTab() — an extra message round-trip ahead of the
+  // tabs.query would reopen the same self-selection window the
+  // footerVariantPromise comment above warns about. Both init() branches
+  // below render the counters, so filling them here covers non-http too.
+  const stats = await statsPromise;
+  $('tile-since').querySelector('b').textContent = String((stats && Number(stats.threatsBlocked)) || settings.threatsBlocked || 0);
+  const weekly = (stats && Array.isArray(stats.statsDaily) && SSTATS) ? SSTATS.summarize(stats.statsDaily, 7, Date.now()).threats : 0;
+  $('tile-week').querySelector('b').textContent = String(weekly || 0);
   const http = tab && tab.url && /^https?:/.test(tab.url);
   if (!http) {
     const protocol = tab && tab.url ? new URL(tab.url).protocol.replace(':', '') : '';

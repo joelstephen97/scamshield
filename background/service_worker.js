@@ -696,6 +696,13 @@ api.runtime.onInstalled.addListener(async (details) => {
   if (details && details.reason === 'update') {
     const cur = await getSettings();
     if (cur.otaUrl === '') await setSettings({ otaUrl: DEFAULT_FEED_URL });
+    // Migration (0.8.0 rename): installs that persisted the old scamshield-feed
+    // default keep working only through GitHub's repo-rename redirect — move
+    // them to the parry-feed URL outright. Only the exact old default is
+    // touched; a user-customised feed URL stays theirs.
+    if (cur.otaUrl === 'https://raw.githubusercontent.com/joelstephen97/scamshield-feed/main/blocklist.json') {
+      await setSettings({ otaUrl: DEFAULT_FEED_URL });
+    }
     // Migration: point pre-existing installs at the live relay. Only touches
     // the old placeholder value (or a missing/undefined field, which reads as
     // the placeholder via DEFAULTS); a user-customised reportUrl is untouched.

@@ -123,15 +123,13 @@ test("What's new dismisses and stays dismissed after reload; Escape closes the t
 test('popup layout: body is the scroll container, so a classic scrollbar can never clip the right edge', async ({ context, extensionId }) => {
   const page = await context.newPage(); await page.goto(BASE + '/safe.html');
   // 0.8.0: #support only renders when the footer's rotation lands on the
-  // support slot. openPopup() below does goto() THEN reload() to get
-  // tabs.query() to see the content tab reliably — that's two full init()
-  // runs, i.e. two rotation steps, and two steps around a 2-slot rotation is
-  // an identity: whatever variant is seeded here is exactly what ends up
-  // rendered. Seed 'support' directly so this measurement is deterministic.
-  const sw = context.serviceWorkers()[0];
-  await sw.evaluate(() => chrome.storage.local.set({ footerVariant: 'support' }));
+  // support slot. Step parity can't be relied on — a reload can interrupt an
+  // init() before its rotation write persists, so the number of EFFECTIVE
+  // steps is timing-dependent. Observe instead: if this open landed on the
+  // trust slot, one more reload is one more rotation step to support.
   const popup = await openPopup(context, extensionId, page);
   await popup.waitForTimeout(400);
+  if (!(await popup.locator('#footsupport').isVisible())) { await popup.reload(); await popup.waitForTimeout(400); }
   await expect(popup.locator('#footsupport')).toBeVisible();
   // Force content taller than the 600px popup cap, as real settings/history growth does.
   const m = await popup.evaluate(() => {

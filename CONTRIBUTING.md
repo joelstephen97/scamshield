@@ -21,7 +21,7 @@ Thanks for helping make scam protection better for everyone. This page covers th
 
 ```bash
 git clone https://github.com/joelstephen97/parry
-cd scamshield
+cd parry
 npm install
 npx playwright install chromium
 npm test                        # 375 unit + 34 e2e
@@ -46,7 +46,7 @@ Windows note: run Playwright headed with `set HEADLESS=false && npx playwright t
 
 **A URL/DOM rule** — `engine/heuristics.js` (`scoreUrl` / `scoreDom`), weighted so that a single rule stays below the *dangerous* threshold unless it is a hard signal (credential form posting cross-origin, punycode look-alike of a brand). Tests in `tests/unit/heuristics-*.test.js`.
 
-**Feed rules** — the blocklist is built in [scamshield-feed](https://github.com/joelstephen97/parry-feed); open issues/PRs there for sources or FP-guard changes. `rules/blocklist.json` here is a snapshot produced by `node build.js --snapshot` in that repo.
+**Feed rules** — the blocklist is built in [parry-feed](https://github.com/joelstephen97/parry-feed); open issues/PRs there for sources or FP-guard changes. `rules/blocklist.json` here is a snapshot produced by `node build.js --snapshot` in that repo.
 
 **Relay changes** — `relay/` has its own `package.json` and tests (`cd relay && npm test`). Keep the payload contract in `engine/report_payload.js` and `relay/lib/validate.js` in sync, and never add a field that could identify a user or carry page text/URL paths.
 

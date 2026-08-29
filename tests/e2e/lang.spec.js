@@ -44,12 +44,10 @@ test('options: picking Deutsch reloads the page in German, and the popup follows
   const popup = await context.newPage();
   await popup.goto(`chrome-extension://${extensionId}/popup.html`);
   // #lockline (0.8.0: the footer's rotating trust-line variant) is set from
-  // `footerTrustLine`, a brand-new key added for the rotating-footer task —
-  // it ships en-only for now (translations land in a later localization
-  // pass), so it falls back to the SAME English string under every uiLang,
-  // German included. #msgcheck below is what actually exercises a real
-  // translated string reacting to the language override.
-  await expect(popup.locator('#lockline')).toContainText('Made on-device');
+  // `footerTrustLine`, translated in all 20 locales as of the 0.8.0 i18n
+  // sync — under a German override it must render the German line, proving
+  // a JS-built string (not just data-i18n markup) follows the override.
+  await expect(popup.locator('#lockline')).toContainText('Läuft auf deinem Gerät');
   await expect(popup.locator('#msgcheck summary')).toHaveText('Nachricht oder Link prüfen');
 });
 
@@ -179,8 +177,8 @@ test('popup: globe opens a 21-item dropdown, Deutsch reloads the popup and updat
   await popup.click('#langbtn');
   await popup.click('#langdd .langitem[data-lang="de"]');
   // See the comment on the equivalent assertion above: `footerTrustLine` is
-  // en-only for now, so it reads the same under German as under English.
-  await expect(popup.locator('#lockline')).toContainText('Made on-device');
+  // translated, so picking Deutsch must swap it to the German line.
+  await expect(popup.locator('#lockline')).toContainText('Läuft auf deinem Gerät');
   await expect(popup.locator('#langbtn')).toHaveAttribute('aria-label', 'Sprache');
 
   // The options page's own dropdown shows the same setting — one storage key.
