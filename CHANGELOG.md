@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to Parry. Versions are git tags (`vX.Y.Z`); the version on the [Chrome Web Store](https://chromewebstore.google.com/detail/fojjjofjimbfoddafoampojopijnlihl) may lag a tag by a few days while Google reviews it. Privacy-relevant changes are also reflected in the [privacy policy](https://joelstephen97.github.io/scamshield/privacy.html).
+All notable changes to Parry. Versions are git tags (`vX.Y.Z`); the version on the [Chrome Web Store](https://chromewebstore.google.com/detail/fojjjofjimbfoddafoampojopijnlihl) may lag a tag by a few days while Google reviews it. Privacy-relevant changes are also reflected in the [privacy policy](https://joelstephen97.github.io/parry/privacy.html).
 
 ## 0.7.1 — 2026-08-28
 
@@ -228,7 +228,7 @@ http/https access, exactly as 0.3.1.
 ### Added
 - **Real threat feed, on by default.** The blocklist now actually blocks
   things: a daily-rebuilt open-source feed
-  (github.com/joelstephen97/scamshield-feed; OpenPhish + URLhaus sources,
+  (github.com/joelstephen97/parry-feed; OpenPhish + URLhaus sources,
   Tranco top-10k false-positive guard, shared-hosting scoping, 5,000-rule
   cap) is the default OTA source, fetched on install and every 12 h. A
   500-rule static snapshot ships inside the package for out-of-the-box

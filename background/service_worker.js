@@ -11,7 +11,7 @@ const api = globalThis.browser || globalThis.chrome;
 // URLhaus with a Tranco top-10k false-positive guard. Download-only static
 // JSON — no user or browsing data is ever sent. Users can point this at
 // their own feed or clear it in settings to disable updates.
-const DEFAULT_FEED_URL = 'https://raw.githubusercontent.com/joelstephen97/scamshield-feed/main/blocklist.json';
+const DEFAULT_FEED_URL = 'https://raw.githubusercontent.com/joelstephen97/parry-feed/main/blocklist.json';
 // Community reporting relay: opt-in only, off by default. Placeholder host
 // until Task 6 deploys the real relay; users can point this at their own or
 // clear it to disable even when opted in.
@@ -618,7 +618,7 @@ function githubIssueUrl(host, verdict) {
     .map((r) => r.code + ((r.params || []).length ? `(${r.params.join(', ')})` : ''));
   const codesBlock = codes.length ? `Codes: ${codes.join(', ')}\n\n` : '';
   const body = encodeURIComponent(`Site: ${host}\nVerdict: ${(verdict && verdict.level) || 'n/a'} (score ${(verdict && verdict.score) || 0})\n${reasonsBlock}${codesBlock}What happened:\n`);
-  return `https://github.com/joelstephen97/scamshield/issues/new?title=${title}&body=${body}`;
+  return `https://github.com/joelstephen97/parry/issues/new?title=${title}&body=${body}`;
 }
 const lastReportInput = new Map(); // tabId → report input (from content script)
 async function handleUserReport(msg, sender) {

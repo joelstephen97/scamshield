@@ -3,32 +3,32 @@
 Live listing (Chrome Web Store): **https://chromewebstore.google.com/detail/fojjjofjimbfoddafoampojopijnlihl** (item ID `fojjjofjimbfoddafoampojopijnlihl`).
 Firefox AMO: not yet listed — add the URL here, in `README.md`, `index.html` and `privacy.html` once live.
 
-Listing copy lives in `chrome-listing.md` / `firefox-listing.md`; permissions + data-use text in `permissions-justification.md`; privacy policy at https://joelstephen97.github.io/scamshield/privacy.html (source `privacy-policy.md` → `/privacy.html`).
+Listing copy lives in `chrome-listing.md` / `firefox-listing.md`; permissions + data-use text in `permissions-justification.md`; privacy policy at https://joelstephen97.github.io/parry/privacy.html (source `privacy-policy.md` → `/privacy.html`).
 
 ## Pre-flight (every release)
 - [ ] Version bumped in `manifest.json`, `manifest.firefox.json`, `package.json` (all identical) and `CHANGELOG.md` has the section.
 - [ ] `npm test` green (unit + e2e). `cd relay && npm test` green if the relay changed.
-- [ ] `npm run build` → `dist/scamshield-chrome.zip` + `dist/scamshield-firefox.zip` (~170 KB; the build fails if > 2.5 MB or if the staged manifest drifts).
+- [ ] `npm run build` → `dist/parry-chrome.zip` + `dist/parry-firefox.zip` (~170 KB; the build fails if > 2.5 MB or if the staged manifest drifts).
 - [ ] Open the zip: contains `manifest.json`, `background/`, `content/`, `engine/`, `model/url-model.js` + `model/page-content.js` (no `.onnx`, no `vendor/`), `rules/`, `ui/`, `popup.*`, `options.*`, `onboarding.html`, `assets/icons/`.
 - [ ] **Permissions unchanged** (`storage`, `declarativeNetRequest`, `alarms`, http/https hosts) — `tests/unit/build_manifest.test.js` enforces this. A new permission would disable the extension for existing users.
 - [ ] UI changed? `npm run screenshots && npm run promo`, commit the PNGs.
 - [ ] Network behaviour changed? Update `privacy-policy.md` + `/privacy.html` (date!), `permissions-justification.md`, and the CWS data-use answers below.
-- [ ] `git tag vX.Y.Z && git push origin refs/tags/vX.Y.Z`, then `gh release create vX.Y.Z dist/scamshield-chrome.zip dist/scamshield-firefox.zip --title "Parry X.Y.Z" --notes-file <notes>` (v0.5.0: https://github.com/joelstephen97/scamshield/releases/tag/v0.5.0).
+- [ ] `git tag vX.Y.Z && git push origin refs/tags/vX.Y.Z`, then `gh release create vX.Y.Z dist/parry-chrome.zip dist/parry-firefox.zip --title "Parry X.Y.Z" --notes-file <notes>` (v0.5.0: https://github.com/joelstephen97/parry/releases/tag/v0.5.0).
 
 ## Chrome Web Store (dashboard → item → Package / Store listing / Privacy)
-- [ ] **Package:** upload `dist/scamshield-chrome.zip` (replaces the current draft; 0.4.0 was never uploaded and is superseded).
-- [ ] **Store listing:** description + "What's new" from `chrome-listing.md`; category *Productivity → Tools* (or *Privacy & Security*); language English; homepage `https://joelstephen97.github.io/scamshield/`; support URL `https://github.com/joelstephen97/scamshield/issues`.
+- [ ] **Package:** upload `dist/parry-chrome.zip` (replaces the current draft; 0.4.0 was never uploaded and is superseded).
+- [ ] **Store listing:** description + "What's new" from `chrome-listing.md`; category *Productivity → Tools* (or *Privacy & Security*); language English; homepage `https://joelstephen97.github.io/parry/`; support URL `https://github.com/joelstephen97/parry/issues`.
 - [ ] **Localized listings (0.6.0):** in the dashboard's language selector (Store listing tab), add each of the 19 translated languages and paste its Name / Short description / Full description / What's new from `store/listings/<locale>.md`. Two directory names don't match the dashboard's language codes: `pt_BR` → select `pt-BR`, `zh_CN` → select `zh-CN` (hyphen, case-sensitive region suffix); every other locale code matches its `store/listings/` filename exactly. Firefox AMO stays English-only for now (its listing form has no per-language variants in `firefox-listing.md`'s current setup).
 - [ ] **Graphics:** icon 128 (`assets/icons/icon128.png`), 5 screenshots 1280×800 from `screenshots/01–05`, small promo tile `promo-small-440x280.png`, marquee `promo-marquee-1400x560.png`.
 - [ ] **Privacy tab — single purpose:** "Warns users about scam and phishing pages and blocks known scam domains, analysing pages on-device."
 - [ ] **Privacy tab — permission justifications:** paste from `permissions-justification.md` (storage / declarativeNetRequest / alarms / host permissions / content scripts). **Remote code:** No.
 - [ ] **Privacy tab — data usage:** tick only **Website content** and **Web history**, both described as "only when the user opts in to community reporting (off by default); hostname + derived numeric features, never URLs or page text". Certify all three statements (not sold, not used for unrelated purposes, not used for creditworthiness).
-- [ ] **Privacy policy URL:** `https://joelstephen97.github.io/scamshield/privacy.html`.
-- [ ] **Reviewer notes (0.7.0)** (supersedes the 0.6.0 note previously here — see History for the 0.6.0 text): "No new permissions since 0.3.1 (still storage, declarativeNetRequest, alarms + http/https). 0.7.0 adds: (1) a local Statistics tab in Settings — pages-checked/threats/privacy counters, 90-day daily buckets, and since-install lifetime totals, all in chrome.storage.local, never transmitted; (2) an earned, in-popup-only review ask, gated per Chrome Web Store policy (non-incentivized, dismissible, never repeated after 'No thanks') — it appears after the 2nd blocked threat and 7 days installed, is suppressed while a page warning is showing, snoozes 90 days on 'Maybe later' (asked at most twice), and only ever links to this listing's own reviews page; Chrome only, no Firefox listing to review yet; (3) a per-user language override — a Settings dropdown that reads the extension's own packaged `_locales/` files at runtime and stores one `uiLang` setting (synced only via the user's own opt-in browser sync), with no effect on the language of this store listing. No new network requests. CWS data-use form answers unchanged. Source: github.com/joelstephen97/scamshield."
+- [ ] **Privacy policy URL:** `https://joelstephen97.github.io/parry/privacy.html`.
+- [ ] **Reviewer notes (0.7.0)** (supersedes the 0.6.0 note previously here — see History for the 0.6.0 text): "No new permissions since 0.3.1 (still storage, declarativeNetRequest, alarms + http/https). 0.7.0 adds: (1) a local Statistics tab in Settings — pages-checked/threats/privacy counters, 90-day daily buckets, and since-install lifetime totals, all in chrome.storage.local, never transmitted; (2) an earned, in-popup-only review ask, gated per Chrome Web Store policy (non-incentivized, dismissible, never repeated after 'No thanks') — it appears after the 2nd blocked threat and 7 days installed, is suppressed while a page warning is showing, snoozes 90 days on 'Maybe later' (asked at most twice), and only ever links to this listing's own reviews page; Chrome only, no Firefox listing to review yet; (3) a per-user language override — a Settings dropdown that reads the extension's own packaged `_locales/` files at runtime and stores one `uiLang` setting (synced only via the user's own opt-in browser sync), with no effect on the language of this store listing. No new network requests. CWS data-use form answers unchanged. Source: github.com/joelstephen97/parry."
 - [ ] Submit for review. Typical turnaround: 1–3 days; updates usually faster than first review.
 
 ## Firefox AMO (addons.mozilla.org/developers)
-- [ ] Submit `dist/scamshield-firefox.zip` ("On this site" distribution).
+- [ ] Submit `dist/parry-firefox.zip` ("On this site" distribution).
 - [ ] Listing from `firefox-listing.md` (name, summary, categories, license GPL-3.0-or-later, homepage, support URL, privacy URL, screenshots, What's new).
 - [ ] Reviewer notes from `firefox-listing.md` (no remote code, no wasm, models trained via `model/train.py` / `model/train_page.py`; source repo is public so no separate source upload is needed, but link it).
 - [ ] Submit; once approved record the AMO URL (see top of this file).

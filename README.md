@@ -14,19 +14,19 @@
   <a href="https://chromewebstore.google.com/detail/fojjjofjimbfoddafoampojopijnlihl"><img alt="Chrome Web Store users" src="https://img.shields.io/chrome-web-store/users/fojjjofjimbfoddafoampojopijnlihl?color=1e7d34"></a>
   <a href="https://chromewebstore.google.com/detail/fojjjofjimbfoddafoampojopijnlihl"><img alt="Chrome Web Store rating" src="https://img.shields.io/chrome-web-store/rating/fojjjofjimbfoddafoampojopijnlihl?color=1e7d34"></a>
   <a href="LICENSE"><img alt="License: GPL-3.0-or-later" src="https://img.shields.io/badge/license-GPL--3.0--or--later-blue"></a>
-  <a href="https://github.com/joelstephen97/scamshield/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/joelstephen97/scamshield?label=release&sort=semver"></a>
+  <a href="https://github.com/joelstephen97/parry/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/joelstephen97/parry?label=release&sort=semver"></a>
 </p>
 
 <p align="center">
   <a href="https://chromewebstore.google.com/detail/fojjjofjimbfoddafoampojopijnlihl"><b>Install from the Chrome Web Store</b></a>
   ·
-  <a href="https://joelstephen97.github.io/scamshield/privacy.html">Privacy policy</a>
+  <a href="https://joelstephen97.github.io/parry/privacy.html">Privacy policy</a>
   ·
   <a href="CHANGELOG.md">Changelog</a>
   ·
-  <a href="https://github.com/joelstephen97/scamshield-feed">Threat feed</a>
+  <a href="https://github.com/joelstephen97/parry-feed">Threat feed</a>
   ·
-  <a href="https://github.com/joelstephen97/scamshield/issues/new">Report a problem</a>
+  <a href="https://github.com/joelstephen97/parry/issues/new">Report a problem</a>
   ·
   <a href="#support-the-project">Support</a>
 </p>
@@ -54,7 +54,7 @@
 | Browser | How |
 |---|---|
 | **Chrome, Edge, Brave, Opera, Vivaldi** (any Chromium browser) | Install from the **[Chrome Web Store](https://chromewebstore.google.com/detail/fojjjofjimbfoddafoampojopijnlihl)** (extension ID `fojjjofjimbfoddafoampojopijnlihl`). |
-| **Firefox 128+** | Download `scamshield-firefox.zip` from the **[latest GitHub Release](https://github.com/joelstephen97/scamshield/releases/latest)**, unzip it, and load it via `about:debugging#/runtime/this-firefox → Load Temporary Add-on → manifest.json` (temporary add-ons are removed on restart). An [addons.mozilla.org](https://addons.mozilla.org/) listing is pending; this row will link to it once live. |
+| **Firefox 128+** | Download `parry-firefox.zip` from the **[latest GitHub Release](https://github.com/joelstephen97/parry/releases/latest)**, unzip it, and load it via `about:debugging#/runtime/this-firefox → Load Temporary Add-on → manifest.json` (temporary add-ons are removed on restart). An [addons.mozilla.org](https://addons.mozilla.org/) listing is pending; this row will link to it once live. |
 | **From source** | `chrome://extensions → Developer mode → Load unpacked → select this folder`. See [Development](#development). |
 
 Current release: **0.5.0** (submitted to the Chrome Web Store and awaiting review; the store serves 0.3.1 until it clears) — see the [changelog](CHANGELOG.md) for everything that changed since the 0.3.1 store version. The package is about **0.6 MB unpacked / ~170 KB zipped**.
@@ -69,7 +69,7 @@ Parry watches every page you open and steps in only when something looks wrong. 
 - **Page analysis** — an on-device model reads the page itself (wording, layout, login-form structure), catching brand-new phishing pages that a URL-only check would miss.
 - **Brand look-alike detection by icon** — favicons and logos are perceptually hashed and matched against a 64-brand table (49 with icon hashes) including UAE banks, telcos and government services (Emirates NBD, ADCB, FAB, Mashreq, RAKBANK, e&, du, Noon, Aramex, Talabat, Careem, ADNOC, DEWA, ICP, MOHRE, Dubai Police, UAE PASS, Emirates, Etihad) plus PayPal, Microsoft, Google, Apple, DHL and more. A page using a brand's icon with a password form on the wrong domain is flagged even if the brand's name never appears.
 - **URL model + heuristics** — a gradient-boosted URL classifier and hand-written rules (look-alike domains, punycode, suspicious tokens, IP hosts, deep-path tricks, brand-in-subdomain, …), with a built-in safe-domain allowlist for top sites.
-- **Known-bad domain blocking** — a `declarativeNetRequest` ruleset refreshed daily from the open-source [scamshield-feed](https://github.com/joelstephen97/scamshield-feed) (OpenPhish + URLhaus, heavily false-positive filtered).
+- **Known-bad domain blocking** — a `declarativeNetRequest` ruleset refreshed daily from the open-source [scamshield-feed](https://github.com/joelstephen97/parry-feed) (OpenPhish + URLhaus, heavily false-positive filtered).
 
 **Intervention**
 
@@ -120,7 +120,7 @@ The engine modules are DOM-free UMD wrappers, so the same files run in the brows
 
 ## Privacy
 
-**Parry collects nothing by default.** All classification runs locally. Full policy: **<https://joelstephen97.github.io/scamshield/privacy.html>** (source: [`privacy.html`](privacy.html) / [`store/privacy-policy.md`](store/privacy-policy.md)).
+**Parry collects nothing by default.** All classification runs locally. Full policy: **<https://joelstephen97.github.io/parry/privacy.html>** (source: [`privacy.html`](privacy.html) / [`store/privacy-policy.md`](store/privacy-policy.md)).
 
 The extension makes exactly three kinds of network request:
 
@@ -149,10 +149,10 @@ No remote code, no WebAssembly, no `web_accessible_resources`. Reviewer-facing d
 
 ## Threat feed
 
-The blocklist is built in a separate open-source repo, **[joelstephen97/scamshield-feed](https://github.com/joelstephen97/scamshield-feed)**, and published as a static file:
+The blocklist is built in a separate open-source repo, **[joelstephen97/parry-feed](https://github.com/joelstephen97/parry-feed)**, and published as a static file:
 
 ```
-https://raw.githubusercontent.com/joelstephen97/scamshield-feed/main/blocklist.json
+https://raw.githubusercontent.com/joelstephen97/parry-feed/main/blocklist.json
 ```
 
 - **Sources:** [OpenPhish](https://openphish.com/) community feed + [URLhaus](https://urlhaus.abuse.ch/) online URLs, reduced to domain-level rules.
@@ -213,7 +213,7 @@ npx playwright install chromium
 npm run test:unit        # node --test, 375 tests
 npm run test:e2e         # Playwright, 34 tests (headed: HEADLESS=false npx playwright test)
 npm test                 # both
-npm run build            # dist/scamshield-chrome.zip + dist/scamshield-firefox.zip (asserts size + manifest parity)
+npm run build            # dist/parry-chrome.zip + dist/parry-firefox.zip (asserts size + manifest parity)
 ```
 
 Other scripts: `npm run screenshots` (regenerate `store/screenshots/*` via Playwright + `tools/frame.html`), `npm run promo` (promo tiles), `npm run build:brands` (rebuild `engine/brand_icons.json` from live brand sites), `npm run measure:icon-fp` (icon false-positive sweep), `npm run gen:parity` (200-URL JS↔Python parity set), `npm run crawl:pages` (page-model training crawl — feature rows only, no HTML stored), `npm run bundle:models` (wrap model JSON into the `.js` bundles the manifest loads).
@@ -248,8 +248,8 @@ Known limits (honest): the page model is data-limited (few live positives on any
 1. Bump the version in **three** places: `manifest.json`, `manifest.firefox.json`, `package.json`; update `CHANGELOG.md` and, if user-visible, the `whatsNewSeen` version in `popup.js`.
 2. `npm test && npm run build` — the build asserts the zip stays small (≤ 2.5 MB) and that the staged manifest matches the source.
 3. Regenerate store assets if the UI changed: `npm run screenshots && npm run promo`.
-4. Commit, tag (`git tag vX.Y.Z && git push origin refs/tags/vX.Y.Z`), then publish a GitHub Release with both zips attached: `gh release create vX.Y.Z dist/scamshield-chrome.zip dist/scamshield-firefox.zip --title "Parry X.Y.Z" --notes-file <notes>` (the Firefox install instructions link to the latest release).
-5. Upload `dist/scamshield-chrome.zip` to the [Chrome Web Store developer dashboard](https://chrome.google.com/webstore/devconsole) and `dist/scamshield-firefox.zip` to AMO, using the copy in [`store/chrome-listing.md`](store/chrome-listing.md) / [`store/firefox-listing.md`](store/firefox-listing.md) and the checklist in [`store/submission-checklist.md`](store/submission-checklist.md).
+4. Commit, tag (`git tag vX.Y.Z && git push origin refs/tags/vX.Y.Z`), then publish a GitHub Release with both zips attached: `gh release create vX.Y.Z dist/parry-chrome.zip dist/parry-firefox.zip --title "Parry X.Y.Z" --notes-file <notes>` (the Firefox install instructions link to the latest release).
+5. Upload `dist/parry-chrome.zip` to the [Chrome Web Store developer dashboard](https://chrome.google.com/webstore/devconsole) and `dist/parry-firefox.zip` to AMO, using the copy in [`store/chrome-listing.md`](store/chrome-listing.md) / [`store/firefox-listing.md`](store/firefox-listing.md) and the checklist in [`store/submission-checklist.md`](store/submission-checklist.md).
 
 ## Upgrade safety
 
@@ -271,7 +271,7 @@ Security extensions live or die on trust, and several well-known ones lost it �
 
 ## Contributing
 
-Bug reports, false positives and missed scams are the most useful contributions — the easiest way is the in-extension **Report a mistake** button (opens a pre-filled issue when reporting is off) or [open an issue](https://github.com/joelstephen97/scamshield/issues/new). Pull requests welcome; please read [CONTRIBUTING.md](CONTRIBUTING.md) first (tests, the no-new-permissions rule, how to add a brand or a safe domain).
+Bug reports, false positives and missed scams are the most useful contributions — the easiest way is the in-extension **Report a mistake** button (opens a pre-filled issue when reporting is off) or [open an issue](https://github.com/joelstephen97/parry/issues/new). Pull requests welcome; please read [CONTRIBUTING.md](CONTRIBUTING.md) first (tests, the no-new-permissions rule, how to add a brand or a safe domain).
 
 ## Security
 

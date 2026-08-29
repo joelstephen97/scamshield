@@ -4,7 +4,7 @@ Thanks for helping make scam protection better for everyone. This page covers th
 
 ## The fastest ways to help
 
-1. **Report a false positive or a missed scam.** In the extension, press **Report a mistake** (popup → status card). If community reporting is off (the default) it opens a pre-filled GitHub issue in a new tab — add a screenshot if you can. Or [open an issue](https://github.com/joelstephen97/scamshield/issues/new) by hand with: the hostname (not the full URL if it contains anything personal), what Parry said, what it should have said, extension version and browser.
+1. **Report a false positive or a missed scam.** In the extension, press **Report a mistake** (popup → status card). If community reporting is off (the default) it opens a pre-filled GitHub issue in a new tab — add a screenshot if you can. Or [open an issue](https://github.com/joelstephen97/parry/issues/new) by hand with: the hostname (not the full URL if it contains anything personal), what Parry said, what it should have said, extension version and browser.
 2. **Add a brand or a safe domain** (see below) — regional banks, telcos and government portals are the most valuable additions.
 3. **Improve detection** with a unit-tested rule or a model retrain.
 
@@ -20,7 +20,7 @@ Thanks for helping make scam protection better for everyone. This page covers th
 ## Development setup
 
 ```bash
-git clone https://github.com/joelstephen97/scamshield
+git clone https://github.com/joelstephen97/parry
 cd scamshield
 npm install
 npx playwright install chromium
@@ -46,7 +46,7 @@ Windows note: run Playwright headed with `set HEADLESS=false && npx playwright t
 
 **A URL/DOM rule** — `engine/heuristics.js` (`scoreUrl` / `scoreDom`), weighted so that a single rule stays below the *dangerous* threshold unless it is a hard signal (credential form posting cross-origin, punycode look-alike of a brand). Tests in `tests/unit/heuristics-*.test.js`.
 
-**Feed rules** — the blocklist is built in [scamshield-feed](https://github.com/joelstephen97/scamshield-feed); open issues/PRs there for sources or FP-guard changes. `rules/blocklist.json` here is a snapshot produced by `node build.js --snapshot` in that repo.
+**Feed rules** — the blocklist is built in [scamshield-feed](https://github.com/joelstephen97/parry-feed); open issues/PRs there for sources or FP-guard changes. `rules/blocklist.json` here is a snapshot produced by `node build.js --snapshot` in that repo.
 
 **Relay changes** — `relay/` has its own `package.json` and tests (`cd relay && npm test`). Keep the payload contract in `engine/report_payload.js` and `relay/lib/validate.js` in sync, and never add a field that could identify a user or carry page text/URL paths.
 

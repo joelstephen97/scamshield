@@ -1,8 +1,8 @@
 # Chrome Web Store Listing
 
 **Live listing:** https://chromewebstore.google.com/detail/fojjjofjimbfoddafoampojopijnlihl (item ID `fojjjofjimbfoddafoampojopijnlihl`)
-**Homepage URL:** https://joelstephen97.github.io/scamshield/
-**Support URL:** https://github.com/joelstephen97/scamshield/issues
+**Homepage URL:** https://joelstephen97.github.io/parry/
+**Support URL:** https://github.com/joelstephen97/parry/issues
 
 **Name:** Parry — Scam & Phishing Protection
 **Summary (132 chars max):** On-device scam & phishing protection: warns you, spots brand look-alikes, checks messages. Nothing leaves your device.
@@ -66,5 +66,5 @@ with dark mode, a ~0.6 MB package (was 14 MB — the ONNX runtime is gone), and
 optional off-by-default community reporting. No new permissions; your
 settings, trusted sites and history carry over.
 
-**Privacy policy URL:** https://joelstephen97.github.io/scamshield/privacy.html
+**Privacy policy URL:** https://joelstephen97.github.io/parry/privacy.html
 **Screenshots:** see store/screenshots/README.md

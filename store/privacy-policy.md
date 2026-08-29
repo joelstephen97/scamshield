@@ -1,10 +1,10 @@
 # Parry Privacy Policy
 
-_Last updated: 2026-08-28 · applies to Parry 0.7.0 and later (Chrome Web Store listing `fojjjofjimbfoddafoampojopijnlihl`, Firefox build, and source builds from [github.com/joelstephen97/scamshield](https://github.com/joelstephen97/scamshield))._
+_Last updated: 2026-08-28 · applies to Parry 0.7.0 and later (Chrome Web Store listing `fojjjofjimbfoddafoampojopijnlihl`, Firefox build, and source builds from [github.com/joelstephen97/parry](https://github.com/joelstephen97/parry))._
 
 _What changed in 0.7.0: a Statistics tab, an earned review ask, and a per-user language override. **None of them add a network request or a permission** — they all run inside the extension. Community reporting is still off by default, and the payload it sends when you opt in is unchanged. New items are stored **only on your device** (see below); the language choice is the only new one of the three that can travel through your browser's own opt-in sync, exactly like your existing settings._
 
-Parry analyses web pages **on your device** to warn you about scams and phishing. It was designed so that your browsing stays private: by default it collects nothing, has no accounts, no analytics, no advertising and no trackers. The hosted copy of this policy lives at <https://joelstephen97.github.io/scamshield/privacy.html>; its source is this file.
+Parry analyses web pages **on your device** to warn you about scams and phishing. It was designed so that your browsing stays private: by default it collects nothing, has no accounts, no analytics, no advertising and no trackers. The hosted copy of this policy lives at <https://joelstephen97.github.io/parry/privacy.html>; its source is this file.
 
 ## At a glance
 
@@ -40,7 +40,7 @@ If you turn on **Sync across my devices** (off by default, in Settings → About
 
 ## 3. Threat-list download
 
-Parry periodically **downloads** an updated blocklist of known scam domains — a static JSON file, by default from Parry's public open-source feed at `https://raw.githubusercontent.com/joelstephen97/scamshield-feed/main/blocklist.json` (built daily from the OpenPhish and URLhaus community feeds; source: [github.com/joelstephen97/scamshield-feed](https://github.com/joelstephen97/scamshield-feed)). It is the same file for every user, fetched on install and then every 12 hours. Nothing about you or your browsing is sent with the request beyond what any file download implies (your IP address reaching GitHub's servers; see [GitHub's privacy statement](https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement)). In *Settings* you can point the URL at your own feed or clear it to disable downloads entirely. The download never uploads anything.
+Parry periodically **downloads** an updated blocklist of known scam domains — a static JSON file, by default from Parry's public open-source feed at `https://raw.githubusercontent.com/joelstephen97/parry-feed/main/blocklist.json` (built daily from the OpenPhish and URLhaus community feeds; source: [github.com/joelstephen97/parry-feed](https://github.com/joelstephen97/parry-feed)). It is the same file for every user, fetched on install and then every 12 hours. Nothing about you or your browsing is sent with the request beyond what any file download implies (your IP address reaching GitHub's servers; see [GitHub's privacy statement](https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement)). In *Settings* you can point the URL at your own feed or clear it to disable downloads entirely. The download never uploads anything.
 
 ## 4. Icon check
 
@@ -87,4 +87,4 @@ We will update this page when the extension's data practices change (for example
 
 ## 12. Contact
 
-Joel Stephen · jojostev@gmail.com · <https://github.com/joelstephen97/scamshield>
+Joel Stephen · jojostev@gmail.com · <https://github.com/joelstephen97/parry>

@@ -1,17 +1,17 @@
 {
-  "name": "scamshield",
+  "name": "parry",
   "version": "0.7.1",
   "description": "On-device scam & phishing detection for Chromium and Firefox.",
   "private": true,
   "license": "GPL-3.0-or-later",
   "author": "Joel Stephen <jojostev@gmail.com> (https://github.com/joelstephen97)",
-  "homepage": "https://joelstephen97.github.io/scamshield/",
+  "homepage": "https://joelstephen97.github.io/parry/",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/joelstephen97/scamshield.git"
+    "url": "git+https://github.com/joelstephen97/parry.git"
   },
   "bugs": {
-    "url": "https://github.com/joelstephen97/scamshield/issues"
+    "url": "https://github.com/joelstephen97/parry/issues"
   },
   "keywords": [
     "browser-extension",

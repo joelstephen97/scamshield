@@ -11,7 +11,7 @@ const H = require('./lib/crawl_helpers');
 const C = require('../engine/constants');
 
 const OUT = path.join(__dirname, '..', 'model', 'data', 'pages.jsonl');
-const UA = 'ParryCrawler/0.5 (+https://github.com/joelstephen97/scamshield)';
+const UA = 'ParryCrawler/0.5 (+https://github.com/joelstephen97/parry)';
 const TIMEOUT = 8000, CAP = 1.5 * 1024 * 1024;
 // Feed downloads (OpenPhish/URLhaus/Phishing.Database lists, Tranco zip) are
 // bulk files, not individual pages — they need a much larger time/size

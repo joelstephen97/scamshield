@@ -1,6 +1,6 @@
 # scamshield-relay
 
-Part of [Parry](../README.md) — see the README section [Optional community reporting (the relay)](../README.md#optional-community-reporting-the-relay) for the end-to-end data flow and the [privacy policy](https://joelstephen97.github.io/scamshield/privacy.html) §5 for the user-facing promise this service must keep. Live: https://scamshield-relay-seven.vercel.app/api/health · License: GPL-3.0-or-later (same as the extension).
+Part of [Parry](../README.md) — see the README section [Optional community reporting (the relay)](../README.md#optional-community-reporting-the-relay) for the end-to-end data flow and the [privacy policy](https://joelstephen97.github.io/parry/privacy.html) §5 for the user-facing promise this service must keep. Live: https://scamshield-relay-seven.vercel.app/api/health · License: GPL-3.0-or-later (same as the extension).
 
 Opt-in report receiver for the Parry browser extension. Receives host-level, anonymised risk reports (never URLs, page text, or identifiers), stores them in Postgres, exports NDJSON for model training, purges after 180 days. IPs are used only for in-memory rate limiting and never stored.
 

@@ -93,8 +93,8 @@ function build(target, manifestFile, zipName) {
 
 function main() {
   fs.mkdirSync(DIST, { recursive: true });
-  build('chrome', 'manifest.json', 'scamshield-chrome.zip');
-  build('firefox', 'manifest.firefox.json', 'scamshield-firefox.zip');
+  build('chrome', 'manifest.json', 'parry-chrome.zip');
+  build('firefox', 'manifest.firefox.json', 'parry-firefox.zip');
   console.log('Done.');
 }
 
