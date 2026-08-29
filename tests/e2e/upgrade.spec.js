@@ -11,7 +11,7 @@ test('0.3.1 settings + history load, migrate additively, and the UI works', asyn
   // simulate the update hook (otaUrl '' → official feed)
   await sw.evaluate(async () => { const cur = await chrome.storage.local.get('settings'); if (cur.settings.otaUrl === '') await chrome.storage.local.set({ settings: Object.assign({}, cur.settings, { otaUrl: DEFAULT_FEED_URL }) }); });
   const s = await sw.evaluate(() => getSettings());
-  expect(s.allowlist).toEqual(['trusted-shop.example']); expect(s.threatsBlocked).toBe(7); expect(s.otaUrl).toContain('scamshield-feed');
+  expect(s.allowlist).toEqual(['trusted-shop.example']); expect(s.threatsBlocked).toBe(7); expect(s.otaUrl).toContain('parry-feed');
   expect(s.pageAnalysis).toBe(true); expect(s.theme).toBe('auto'); expect(s.pausedSites).toEqual({}); expect(s.reportingOptIn).toBe(false);
   // 0.6.0 keys arrive with safe defaults on an upgraded profile, old keys intact.
   expect(s.clickFixGuard).toBe(true); expect(s.fakeUpdateGuard).toBe(true); expect(s.walletGuard).toBe(true);
