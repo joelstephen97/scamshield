@@ -1,6 +1,6 @@
 # Translations
 
-Parry ships in 20 languages: en, zh_CN, hi, es, ar, fr, bn, pt_BR, ru, ur,
+ScamShield ships in 20 languages: en, zh_CN, hi, es, ar, fr, bn, pt_BR, ru, ur,
 id, de, ja, mr, te, tr, ta, vi, ko, it.
 
 ## How it works

@@ -19,7 +19,7 @@ const OUT = path.join(__dirname, '..', 'engine', 'brand_icons.json');
   // the NEXT brand's goto() and cancels it — a cascading false-negative, not
   // a real network failure. Isolating each domain visit in its own page
   // stops that cross-brand contamination.
-  const context = await browser.newContext({ userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/128 ParryBrandBuilder' });
+  const context = await browser.newContext({ userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/128 ScamShieldBrandBuilder' });
   await context.addInitScript(IH_SRC);
   const brands = [];
   for (const b of C.BRANDS) {
@@ -47,7 +47,7 @@ const OUT = path.join(__dirname, '..', 'engine', 'brand_icons.json');
           const h = await page.evaluate(async (url) => {
             try { const r = await fetch(url, { credentials: 'omit' }); if (!r.ok) return null;
               const blob = await r.blob(); if (!/^image\//.test(blob.type) && !/\.ico$/i.test(url)) return null;
-              return await Parry.hashImageBlob(blob); } catch (_) { return null; }
+              return await ScamShield.hashImageBlob(blob); } catch (_) { return null; }
           }, url);
           if (h && h !== '0000000000000000' && h !== 'ffffffffffffffff') {
             hashes.add(h);

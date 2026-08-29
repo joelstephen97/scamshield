@@ -2,7 +2,7 @@
 (function (root, factory) {
   const mod = factory(root);
   if (typeof module !== 'undefined' && module.exports) module.exports = mod;
-  root.Parry = Object.assign(root.Parry || {}, mod);
+  root.ScamShield = Object.assign(root.ScamShield || {}, mod);
 })(typeof globalThis !== 'undefined' ? globalThis : self, function (root) {
   'use strict';
   let MODEL = null, W = null; // decoded Int8Array cache for MODEL
@@ -18,7 +18,7 @@
   }
   function currentModel() {
     if (MODEL) return MODEL;
-    const ss = root.Parry;
+    const ss = root.ScamShield;
     if (ss && ss.PAGE_MODEL && ss.PAGE_MODEL.w) setPageModel(ss.PAGE_MODEL);
     return MODEL;
   }

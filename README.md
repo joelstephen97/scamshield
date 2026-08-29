@@ -1,10 +1,9 @@
 <p align="center">
-  <img src="assets/icons/icon128.png" width="96" height="96" alt="Parry icon">
+  <img src="assets/icons/icon128.png" width="96" height="96" alt="ScamShield icon">
 </p>
 
-<h1 align="center">Parry</h1>
+<h1 align="center">ScamShield</h1>
 
-<p align="center"><em>Formerly ScamShield — renamed in 0.8.0 to avoid confusion with Singapore's government ScamShield app and T-Mobile's Scam Shield service. Same extension, same privacy promise.</em></p>
 
 <p align="center">
   <strong>On-device scam &amp; phishing protection for Chrome, Edge, Brave, Opera and Firefox.</strong><br>
@@ -16,19 +15,19 @@
   <a href="https://chromewebstore.google.com/detail/fojjjofjimbfoddafoampojopijnlihl"><img alt="Chrome Web Store users" src="https://img.shields.io/chrome-web-store/users/fojjjofjimbfoddafoampojopijnlihl?color=1e7d34"></a>
   <a href="https://chromewebstore.google.com/detail/fojjjofjimbfoddafoampojopijnlihl"><img alt="Chrome Web Store rating" src="https://img.shields.io/chrome-web-store/rating/fojjjofjimbfoddafoampojopijnlihl?color=1e7d34"></a>
   <a href="LICENSE"><img alt="License: GPL-3.0-or-later" src="https://img.shields.io/badge/license-GPL--3.0--or--later-blue"></a>
-  <a href="https://github.com/joelstephen97/parry/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/joelstephen97/parry?label=release&sort=semver"></a>
+  <a href="https://github.com/joelstephen97/scamshield/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/joelstephen97/scamshield?label=release&sort=semver"></a>
 </p>
 
 <p align="center">
   <a href="https://chromewebstore.google.com/detail/fojjjofjimbfoddafoampojopijnlihl"><b>Install from the Chrome Web Store</b></a>
   ·
-  <a href="https://joelstephen97.github.io/parry/privacy.html">Privacy policy</a>
+  <a href="https://joelstephen97.github.io/scamshield/privacy.html">Privacy policy</a>
   ·
   <a href="CHANGELOG.md">Changelog</a>
   ·
-  <a href="https://github.com/joelstephen97/parry-feed">Threat feed</a>
+  <a href="https://github.com/joelstephen97/scamshield-feed">Threat feed</a>
   ·
-  <a href="https://github.com/joelstephen97/parry/issues/new">Report a problem</a>
+  <a href="https://github.com/joelstephen97/scamshield/issues/new">Report a problem</a>
   ·
   <a href="#support-the-project">Support</a>
 </p>
@@ -56,14 +55,14 @@
 | Browser | How |
 |---|---|
 | **Chrome, Edge, Brave, Opera, Vivaldi** (any Chromium browser) | Install from the **[Chrome Web Store](https://chromewebstore.google.com/detail/fojjjofjimbfoddafoampojopijnlihl)** (extension ID `fojjjofjimbfoddafoampojopijnlihl`). |
-| **Firefox 128+** | Download `parry-firefox.zip` from the **[latest GitHub Release](https://github.com/joelstephen97/parry/releases/latest)**, unzip it, and load it via `about:debugging#/runtime/this-firefox → Load Temporary Add-on → manifest.json` (temporary add-ons are removed on restart). An [addons.mozilla.org](https://addons.mozilla.org/) listing is pending; this row will link to it once live. |
+| **Firefox 128+** | Download `scamshield-firefox.zip` from the **[latest GitHub Release](https://github.com/joelstephen97/scamshield/releases/latest)**, unzip it, and load it via `about:debugging#/runtime/this-firefox → Load Temporary Add-on → manifest.json` (temporary add-ons are removed on restart). An [addons.mozilla.org](https://addons.mozilla.org/) listing is pending; this row will link to it once live. |
 | **From source** | `chrome://extensions → Developer mode → Load unpacked → select this folder`. See [Development](#development). |
 
 Current release: **0.8.0** (the Chrome Web Store and Firefox Add-ons listings may lag a release by a few days while they clear review) — see the [changelog](CHANGELOG.md) for what changed. The package is about **450 KB zipped**.
 
 ## What it does
 
-Parry watches every page you open and steps in only when something looks wrong. It is **conservative by design**: a page is only marked *dangerous* when at least two independent signals agree, and a single weak signal never produces more than a yellow *suspicious* notice.
+ScamShield watches every page you open and steps in only when something looks wrong. It is **conservative by design**: a page is only marked *dangerous* when at least two independent signals agree, and a single weak signal never produces more than a yellow *suspicious* notice.
 
 **Detection**
 
@@ -71,7 +70,7 @@ Parry watches every page you open and steps in only when something looks wrong. 
 - **Page analysis** — an on-device model reads the page itself (wording, layout, login-form structure), catching brand-new phishing pages that a URL-only check would miss.
 - **Brand look-alike detection by icon** — favicons and logos are perceptually hashed and matched against a 64-brand table (49 with icon hashes) including UAE banks, telcos and government services (Emirates NBD, ADCB, FAB, Mashreq, RAKBANK, e&, du, Noon, Aramex, Talabat, Careem, ADNOC, DEWA, ICP, MOHRE, Dubai Police, UAE PASS, Emirates, Etihad) plus PayPal, Microsoft, Google, Apple, DHL and more. A page using a brand's icon with a password form on the wrong domain is flagged even if the brand's name never appears.
 - **URL model + heuristics** — a gradient-boosted URL classifier and hand-written rules (look-alike domains, punycode, suspicious tokens, IP hosts, deep-path tricks, brand-in-subdomain, …), with a built-in safe-domain allowlist for top sites.
-- **Known-bad domain blocking** — a `declarativeNetRequest` ruleset refreshed daily from the open-source [parry-feed](https://github.com/joelstephen97/parry-feed) (14 aggregated open-source threat databases, ~425k confirmed-bad domains + ~1M watchlist, heavily false-positive filtered).
+- **Known-bad domain blocking** — a `declarativeNetRequest` ruleset refreshed daily from the open-source [parry-feed](https://github.com/joelstephen97/scamshield-feed) (14 aggregated open-source threat databases, ~425k confirmed-bad domains + ~1M watchlist, heavily false-positive filtered).
 
 **Intervention**
 
@@ -122,7 +121,7 @@ The engine modules are DOM-free UMD wrappers, so the same files run in the brows
 
 ## Privacy
 
-**Parry collects nothing by default.** All classification runs locally. Full policy: **<https://joelstephen97.github.io/parry/privacy.html>** (source: [`privacy.html`](privacy.html) / [`store/privacy-policy.md`](store/privacy-policy.md)).
+**ScamShield collects nothing by default.** All classification runs locally. Full policy: **<https://joelstephen97.github.io/scamshield/privacy.html>** (source: [`privacy.html`](privacy.html) / [`store/privacy-policy.md`](store/privacy-policy.md)).
 
 The extension makes exactly three kinds of network request:
 
@@ -130,15 +129,15 @@ The extension makes exactly three kinds of network request:
 |---|---|---|---|
 | **Threat-feed download** | On install, then every 12 h | A plain GET for a static JSON file from GitHub — the same file for every user. Nothing about you or your browsing. | Yes — clear the feed URL in Settings (or point it at your own feed). |
 | **Icon fetch** | When a page references a favicon/logo that needs checking | A GET for the icon file the page itself references (usually same-site, sometimes the site's CDN), with no cookies or credentials. No third party is contacted. | It is part of page analysis, which can be turned off in Settings. |
-| **Community report** (relay) | **Only if you opt in** ("Help make Parry smarter"), and then only for pages flagged *dangerous* (max once per site per day) or when you press *Report a mistake* | Hostname, verdict + reason codes, numeric risk signals (hashed word counts, form/input/link counts — never text), matched brand names, extension version, hour. Never the full URL, page text, anything you typed, cookies, or any identifier. | Off by default; turn off any time and queued reports are discarded. |
+| **Community report** (relay) | **Only if you opt in** ("Help make ScamShield smarter"), and then only for pages flagged *dangerous* (max once per site per day) or when you press *Report a mistake* | Hostname, verdict + reason codes, numeric risk signals (hashed word counts, form/input/link counts — never text), matched brand names, extension version, hour. Never the full URL, page text, anything you typed, cookies, or any identifier. | Off by default; turn off any time and queued reports are discarded. |
 
 Everything else — settings, trusted sites, protection history (hostnames + event types only, 200-event ring buffer), queued reports while opted in — lives in the browser's extension storage, can be cleared in Settings, and is removed on uninstall.
 
-If you report a mistake while reporting is **off**, Parry simply opens a pre-filled GitHub issue in a new tab; nothing is sent unless you submit it yourself.
+If you report a mistake while reporting is **off**, ScamShield simply opens a pre-filled GitHub issue in a new tab; nothing is sent unless you submit it yourself.
 
 ## Permissions
 
-Parry requests the minimum it needs and has **not added a permission since 0.3.1** (adding one would disable the extension for existing users until re-approved).
+ScamShield requests the minimum it needs and has **not added a permission since 0.3.1** (adding one would disable the extension for existing users until re-approved).
 
 | Permission | Why |
 |---|---|
@@ -151,20 +150,20 @@ No remote code, no WebAssembly, no `web_accessible_resources`. Reviewer-facing d
 
 ## Threat feed
 
-The blocklist is built in a separate open-source repo, **[joelstephen97/parry-feed](https://github.com/joelstephen97/parry-feed)**, and published as a static file:
+The blocklist is built in a separate open-source repo, **[joelstephen97/scamshield-feed](https://github.com/joelstephen97/scamshield-feed)**, and published as a static file:
 
 ```
-https://raw.githubusercontent.com/joelstephen97/parry-feed/main/blocklist.json
+https://raw.githubusercontent.com/joelstephen97/scamshield-feed/main/blocklist.json
 ```
 
-- **Sources:** 14 open-source threat databases (Phishing.Database, PhishDestroy, MetaMask eth-phishing-detect, ScamSniffer, HaGeZi, polkadot-js, malware-filter and more — see [parry-feed's ATTRIBUTION](https://github.com/joelstephen97/parry-feed/blob/main/ATTRIBUTION.md)), reduced to domain-level rules.
+- **Sources:** 14 open-source threat databases (Phishing.Database, PhishDestroy, MetaMask eth-phishing-detect, ScamSniffer, HaGeZi, polkadot-js, malware-filter and more — see [parry-feed's ATTRIBUTION](https://github.com/joelstephen97/scamshield-feed/blob/main/ATTRIBUTION.md)), reduced to domain-level rules.
 - **False-positive guards:** anything in the Tranco top-10k is dropped; on shared hosts (`pages.dev`, `netlify.app`, `github.io`, …) only the exact abusive hostname is blocked; path-based gateways (IPFS, archive.org, Drive/Dropbox) are skipped; multi-label public suffixes can never become a rule; capped at 5,000 rules.
 - **Schedule:** rebuilt daily by GitHub Actions; the extension downloads it on install and every 12 hours, shows *last updated* and rule count in Settings, and ships a 501-rule snapshot in [`rules/blocklist.json`](rules/blocklist.json) so blocking works before the first download.
 - **Your choice:** Settings lets you point the URL at your own feed (same `{ "version": n, "rules": ["||host^", …] }` format) or clear it to disable downloads entirely.
 
 ## Optional community reporting (the relay)
 
-Off by default. When a user turns on *Help make Parry smarter*, anonymised host-level reports go to a tiny relay so the models can be retrained on real misses and false positives.
+Off by default. When a user turns on *Help make ScamShield smarter*, anonymised host-level reports go to a tiny relay so the models can be retrained on real misses and false positives.
 
 ```
 browser (opt-in)                   Vercel project "scamshield-relay"            Neon Postgres         maintainer
@@ -215,7 +214,7 @@ npx playwright install chromium
 npm run test:unit        # node --test, 375 tests
 npm run test:e2e         # Playwright, 34 tests (headed: HEADLESS=false npx playwright test)
 npm test                 # both
-npm run build            # dist/parry-chrome.zip + dist/parry-firefox.zip (asserts size + manifest parity)
+npm run build            # dist/scamshield-chrome.zip + dist/scamshield-firefox.zip (asserts size + manifest parity)
 ```
 
 Other scripts: `npm run screenshots` (regenerate `store/screenshots/*` via Playwright + `tools/frame.html`), `npm run promo` (promo tiles), `npm run build:brands` (rebuild `engine/brand_icons.json` from live brand sites), `npm run measure:icon-fp` (icon false-positive sweep), `npm run gen:parity` (200-URL JS↔Python parity set), `npm run crawl:pages` (page-model training crawl — feature rows only, no HTML stored), `npm run bundle:models` (wrap model JSON into the `.js` bundles the manifest loads).
@@ -250,8 +249,8 @@ Known limits (honest): the page model is data-limited (few live positives on any
 1. Bump the version in **three** places: `manifest.json`, `manifest.firefox.json`, `package.json`; update `CHANGELOG.md` and, if user-visible, the `whatsNewSeen` version in `popup.js`.
 2. `npm test && npm run build` — the build asserts the zip stays small (≤ 2.5 MB) and that the staged manifest matches the source.
 3. Regenerate store assets if the UI changed: `npm run screenshots && npm run promo`.
-4. Commit, tag (`git tag vX.Y.Z && git push origin refs/tags/vX.Y.Z`), then publish a GitHub Release with both zips attached: `gh release create vX.Y.Z dist/parry-chrome.zip dist/parry-firefox.zip --title "Parry X.Y.Z" --notes-file <notes>` (the Firefox install instructions link to the latest release).
-5. Upload `dist/parry-chrome.zip` to the [Chrome Web Store developer dashboard](https://chrome.google.com/webstore/devconsole) and `dist/parry-firefox.zip` to AMO, using the copy in [`store/chrome-listing.md`](store/chrome-listing.md) / [`store/firefox-listing.md`](store/firefox-listing.md) and the checklist in [`store/submission-checklist.md`](store/submission-checklist.md).
+4. Commit, tag (`git tag vX.Y.Z && git push origin refs/tags/vX.Y.Z`), then publish a GitHub Release with both zips attached: `gh release create vX.Y.Z dist/scamshield-chrome.zip dist/scamshield-firefox.zip --title "ScamShield X.Y.Z" --notes-file <notes>` (the Firefox install instructions link to the latest release).
+5. Upload `dist/scamshield-chrome.zip` to the [Chrome Web Store developer dashboard](https://chrome.google.com/webstore/devconsole) and `dist/scamshield-firefox.zip` to AMO, using the copy in [`store/chrome-listing.md`](store/chrome-listing.md) / [`store/firefox-listing.md`](store/firefox-listing.md) and the checklist in [`store/submission-checklist.md`](store/submission-checklist.md).
 
 ## Upgrade safety
 
@@ -263,9 +262,9 @@ Active users are on the store version, so every release must be a drop-in upgrad
 
 ## Our promises
 
-Security extensions live or die on trust, and several well-known ones lost it — some sold browsing history, some quietly changed hands and turned malicious after an update. Parry is built so you don't have to take that on faith:
+Security extensions live or die on trust, and several well-known ones lost it — some sold browsing history, some quietly changed hands and turned malicious after an update. ScamShield is built so you don't have to take that on faith:
 
-- **No telemetry, verifiable by you.** In normal use Parry makes at most three network requests, all listed in Settings → About: the public threat-list download, opt-in community reports (off by default), and same-page favicon fetches for brand matching. Open your browser's DevTools → Network tab and check — you'll see nothing else.
+- **No telemetry, verifiable by you.** In normal use ScamShield makes at most three network requests, all listed in Settings → About: the public threat-list download, opt-in community reports (off by default), and same-page favicon fetches for brand matching. Open your browser's DevTools → Network tab and check — you'll see nothing else.
 - **Permissions are frozen.** `storage`, `declarativeNetRequest`, `alarms` and http/https access — the same set since 0.3.1. A unit test fails the build if that ever changes, and a new permission would disable the extension for existing users until they re-approve it.
 - **Everything is auditable.** The whole extension is open source (GPL-3.0-or-later) and releases are tagged and published with the exact zips; you can diff any version against the last.
 - **It will not be sold or quietly re-owned.** The extension will not be transferred to a new owner without a clear, public heads-up in this repository and the changelog. No ads, no data resale, no account, ever.
@@ -273,7 +272,7 @@ Security extensions live or die on trust, and several well-known ones lost it �
 
 ## Contributing
 
-Bug reports, false positives and missed scams are the most useful contributions — the easiest way is the in-extension **Report a mistake** button (opens a pre-filled issue when reporting is off) or [open an issue](https://github.com/joelstephen97/parry/issues/new). Pull requests welcome; please read [CONTRIBUTING.md](CONTRIBUTING.md) first (tests, the no-new-permissions rule, how to add a brand or a safe domain).
+Bug reports, false positives and missed scams are the most useful contributions — the easiest way is the in-extension **Report a mistake** button (opens a pre-filled issue when reporting is off) or [open an issue](https://github.com/joelstephen97/scamshield/issues/new). Pull requests welcome; please read [CONTRIBUTING.md](CONTRIBUTING.md) first (tests, the no-new-permissions rule, how to add a brand or a safe domain).
 
 ## Security
 
@@ -281,12 +280,12 @@ Please report vulnerabilities privately to **jojostev@gmail.com** rather than in
 
 ## License
 
-Parry is free software, released under the **GNU General Public License v3.0 or later** — see [LICENSE](LICENSE). You may use, study, modify and redistribute it under the same terms. The trained model files in `model/` and the brand-icon hash table are covered by the same license. If you want to embed the detection engine in a product under different terms, get in touch.
+ScamShield is free software, released under the **GNU General Public License v3.0 or later** — see [LICENSE](LICENSE). You may use, study, modify and redistribute it under the same terms. The trained model files in `model/` and the brand-icon hash table are covered by the same license. If you want to embed the detection engine in a product under different terms, get in touch.
 
-Third-party data: the threat feed aggregates 14 open-source threat databases, each under its own license (full list: [parry-feed ATTRIBUTION](https://github.com/joelstephen97/parry-feed/blob/main/ATTRIBUTION.md)); brand names and icons referenced for look-alike detection belong to their respective owners and are used solely to protect users from impersonation.
+Third-party data: the threat feed aggregates 14 open-source threat databases, each under its own license (full list: [parry-feed ATTRIBUTION](https://github.com/joelstephen97/scamshield-feed/blob/main/ATTRIBUTION.md)); brand names and icons referenced for look-alike detection belong to their respective owners and are used solely to protect users from impersonation.
 
 ## Support the project
 
-Parry is free, ad-free and on-device. If it helped you, consider supporting development via [GitHub Sponsors](https://github.com/sponsors/joelstephen97) or [PayPal](https://www.paypal.me/joelstephen1). Donations never change the privacy promise: nothing leaves your device.
+ScamShield is free, ad-free and on-device. If it helped you, consider supporting development via [GitHub Sponsors](https://github.com/sponsors/joelstephen97) or [PayPal](https://www.paypal.me/joelstephen1). Donations never change the privacy promise: nothing leaves your device.
 
 Made by [Joel Stephen](https://github.com/joelstephen97) · contact: jojostev@gmail.com

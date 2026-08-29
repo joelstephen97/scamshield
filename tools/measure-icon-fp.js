@@ -48,7 +48,7 @@ const COLLECT_CANDIDATES_SRC = `
 async function fetchFeed(url) {
   const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 120000);
   try {
-    const r = await fetch(url, { headers: { 'user-agent': 'ParryFpMeasure/0.5' }, redirect: 'follow', signal: ctl.signal });
+    const r = await fetch(url, { headers: { 'user-agent': 'ScamShieldFpMeasure/0.5' }, redirect: 'follow', signal: ctl.signal });
     if (!r.ok) return null;
     return Buffer.from(await r.arrayBuffer());
   } catch (_) { return null; } finally { clearTimeout(t); }
@@ -67,7 +67,7 @@ async function main() {
 
   async function launch() {
     const browser = await chromium.launch();
-    const context = await browser.newContext({ userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/128 ParryFpMeasure' });
+    const context = await browser.newContext({ userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/128 ScamShieldFpMeasure' });
     await context.addInitScript(IH_SRC);
     await context.addInitScript(COLLECT_CANDIDATES_SRC);
     return { browser, context };
@@ -122,7 +122,7 @@ async function main() {
                 if (!r.ok) return null;
                 const blob = await r.blob();
                 if (!/^image\//.test(blob.type) && !/\.ico(\?|$)/i.test(url)) return null;
-                return await Parry.hashImageBlob(blob);
+                return await ScamShield.hashImageBlob(blob);
               } finally { clearTimeout(t); }
             } catch (_) { return null; }
           }, url);

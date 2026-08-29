@@ -1,9 +1,9 @@
 {
   "extName": {
-    "message": "Bloqueador de golpes e phishing: Parry"
+    "message": "Bloqueador de golpes e phishing: ScamShield"
   },
   "extShortName": {
-    "message": "Parry"
+    "message": "ScamShield"
   },
   "extDescription": {
     "message": "Proteção contra golpes e phishing no seu dispositivo: avisa você, detecta imitações de marcas e verifica mensagens. Nada sai do seu dispositivo."
@@ -187,7 +187,7 @@
     "message": "Erro na extensão — tente reabrir."
   },
   "whatsNewBanner": {
-    "message": "Novidades na 0.8: o ScamShield agora é o Parry, popup redesenhado com pausa programada e contadores de golpes, novo ícone."
+    "message": "Novidades na 0.8: o ScamShield agora é o ScamShield, popup redesenhado com pausa programada e contadores de golpes, novo ícone."
   },
   "popupBrandDangerSummary": {
     "message": "Parece com a $BRAND$, mas não é. Não digite sua senha aqui.",
@@ -417,7 +417,7 @@
     "message": "Para quem quer o máximo de cautela: até páginas \"suspeitas\" são bloqueadas com um aviso em tela cheia e linguagem mais simples. Ideal para ajudar um familiar menos confiante a se manter seguro."
   },
   "optReporting": {
-    "message": "Ajude a tornar o Parry mais inteligente"
+    "message": "Ajude a tornar o ScamShield mais inteligente"
   },
   "optReportingHint": {
     "message": "Envia o nome do site (nunca o endereço completo ou o texto da página) e sinais de risco anônimos de páginas sinalizadas como perigosas, e de sites que você denuncia. Desativado por padrão."
@@ -453,7 +453,7 @@
     "message": "Lista de ameaças"
   },
   "feedLead": {
-    "message": "Uma lista de sites de golpe conhecidos, reconstruída diariamente (OpenPhish + URLhaus, fortemente filtrada). O Parry apenas a baixa."
+    "message": "Uma lista de sites de golpe conhecidos, reconstruída diariamente (OpenPhish + URLhaus, fortemente filtrada). O ScamShield apenas a baixa."
   },
   "checkNow": {
     "message": "Verificar agora"
@@ -483,10 +483,10 @@
     "message": "Sincronizar entre meus dispositivos"
   },
   "syncHint": {
-    "message": "Mantenha suas configurações e sites em pausa sincronizados em todos os navegadores em que você está conectado. Usa a sincronização própria do seu navegador — o Parry continua sem conta ou servidor. Desativado por padrão."
+    "message": "Mantenha suas configurações e sites em pausa sincronizados em todos os navegadores em que você está conectado. Usa a sincronização própria do seu navegador — o ScamShield continua sem conta ou servidor. Desativado por padrão."
   },
   "optDocTitle": {
-    "message": "Configurações do Parry"
+    "message": "Configurações do ScamShield"
   },
   "ariaSettingsSections": {
     "message": "Seções de configurações"
@@ -537,7 +537,7 @@
     "message": "Relatar um problema"
   },
   "supportFreeOnDevice": {
-    "message": "O Parry é gratuito e funciona totalmente no seu dispositivo."
+    "message": "O ScamShield é gratuito e funciona totalmente no seu dispositivo."
   },
   "supportSponsorGithub": {
     "message": "Patrocinar no GitHub"
@@ -546,7 +546,7 @@
     "message": "Doar via PayPal"
   },
   "netNoTelemetry": {
-    "message": "O Parry nunca faz solicitações de análise, telemetria ou rastreamento. As únicas solicitações que ele pode fazer são estas três, e você mesmo pode verificar: abra as DevTools do seu navegador → aba Rede, use o Parry normalmente e você não verá nada além delas."
+    "message": "O ScamShield nunca faz solicitações de análise, telemetria ou rastreamento. As únicas solicitações que ele pode fazer são estas três, e você mesmo pode verificar: abra as DevTools do seu navegador → aba Rede, use o ScamShield normalmente e você não verá nada além delas."
   },
   "receiptFeedLabel": {
     "message": "Download da lista de ameaças"
@@ -756,7 +756,7 @@
     "message": "Esta página corresponde ao padrão de um golpe conhecido."
   },
   "toastSupportAsk": {
-    "message": "O Parry acabou de te proteger — é gratuito e funciona no seu dispositivo. Quer contribuir? ❤"
+    "message": "O ScamShield acabou de te proteger — é gratuito e funciona no seu dispositivo. Quer contribuir? ❤"
   },
   "guardFormDestKnown": {
     "message": "Este formulário envia sua senha para $DEST$, não para $HOST$. Enviar uma senha para um site diferente é como golpistas roubam logins.",
@@ -775,10 +775,10 @@
     "message": "Este formulário envia sua senha para um site diferente daquele que você está visitando. Esta é uma forma comum de golpistas roubarem logins."
   },
   "guardHiddenTag": {
-    "message": "Ocultado pelo Parry"
+    "message": "Ocultado pelo ScamShield"
   },
   "guardWalletCollision": {
-    "message": "O Parry bloqueou uma solicitação de carteira enquanto outro aviso estava aberto. Feche-o e tente novamente."
+    "message": "O ScamShield bloqueou uma solicitação de carteira enquanto outro aviso estava aberto. Feche-o e tente novamente."
   },
   "guardWalletFallback": {
     "message": "Este site está solicitando uma ação sensível da carteira."
@@ -793,7 +793,7 @@
     "message": "Esta página está usando táticas de intimidação."
   },
   "guardClipboardBlockedPayload": {
-    "message": "Bloqueado pelo Parry — este site colocou um comando perigoso na sua área de transferência. Não cole em lugar nenhum."
+    "message": "Bloqueado pelo ScamShield — este site colocou um comando perigoso na sua área de transferência. Não cole em lugar nenhum."
   },
   "guardLeakyFormPlain": {
     "message": "Este site enviou seu e-mail/telefone para $HOST$ em texto simples — antes de você pressionar enviar.",
@@ -821,7 +821,7 @@
     "message": "Este site está tentando obter permissão de notificação usando o truque \"clique em Permitir para continuar\". Você pode bloqueá-lo com segurança."
   },
   "serpAdMismatch": {
-    "message": "⚠ Parry: este anúncio leva a $ACTUAL$, não a $SHOWN$",
+    "message": "⚠ ScamShield: este anúncio leva a $ACTUAL$, não a $SHOWN$",
     "placeholders": {
       "actual": {
         "content": "$1",
@@ -918,7 +918,7 @@
     }
   },
   "reason_riskAbusedTld": {
-    "message": "O domínio de nível superior ($TLD$) deste site tem alta taxa de abuso por golpes nas tabelas de risco da lista de ameaças do Parry.",
+    "message": "O domínio de nível superior ($TLD$) deste site tem alta taxa de abuso por golpes nas tabelas de risco da lista de ameaças do ScamShield.",
     "placeholders": {
       "tld": {
         "content": "$1",
@@ -930,7 +930,7 @@
     "message": "O domínio está hospedado em um provedor de DNS dinâmico ou hospedagem gratuita, frequentemente usado em páginas de golpe."
   },
   "reason_feedBlock": {
-    "message": "Este domínio corresponde à lista de ameaças do Parry, confirmado por $COUNT$ fonte(s) independente(s).",
+    "message": "Este domínio corresponde à lista de ameaças do ScamShield, confirmado por $COUNT$ fonte(s) independente(s).",
     "placeholders": {
       "count": {
         "content": "$1",
@@ -939,7 +939,7 @@
     }
   },
   "reason_feedWarn": {
-    "message": "Este domínio corresponde a uma entrada de baixa confiança na lista de ameaças do Parry ($COUNT$ fonte(s)) — prossiga com cautela.",
+    "message": "Este domínio corresponde a uma entrada de baixa confiança na lista de ameaças do ScamShield ($COUNT$ fonte(s)) — prossiga com cautela.",
     "placeholders": {
       "count": {
         "content": "$1",
@@ -1116,10 +1116,10 @@
     "message": "Sem endereço real, telefone ou dados da empresa — comum em lojas de golpe descartáveis."
   },
   "obDocTitle": {
-    "message": "Bem-vindo ao Parry"
+    "message": "Bem-vindo ao ScamShield"
   },
   "obTitle": {
-    "message": "O Parry está protegendo você"
+    "message": "O ScamShield está protegendo você"
   },
   "obLead": {
     "message": "Ele observa as páginas que você visita e avisa sobre golpes — totalmente no seu dispositivo. Sua navegação nunca sai do seu computador."
@@ -1161,21 +1161,21 @@
     "message": "Interrompe o loop assustador de pop-ups e ajuda você a sair."
   },
   "obPin": {
-    "message": "Fixar o Parry"
+    "message": "Fixar o ScamShield"
   },
   "obPinBody": {
-    "message": "Clique no ícone de peça de quebra-cabeça na sua barra de ferramentas e, em seguida, no alfinete ao lado do Parry, para poder ver o status de cada página rapidamente."
+    "message": "Clique no ícone de peça de quebra-cabeça na sua barra de ferramentas e, em seguida, no alfinete ao lado do ScamShield, para poder ver o status de cada página rapidamente."
   },
   "obOpenSettings": {
     "message": "Abrir configurações"
   },
   "obNote": {
-    "message": "O Parry é gratuito. Opcional: nas Configurações, você pode ajudar a torná-lo mais inteligente compartilhando relatórios anônimos dos golpes que ele detecta — está desativado a menos que você o ative. Se ele te ajudou, você pode apoiar o desenvolvimento na página de Configurações."
+    "message": "O ScamShield é gratuito. Opcional: nas Configurações, você pode ajudar a torná-lo mais inteligente compartilhando relatórios anônimos dos golpes que ele detecta — está desativado a menos que você o ative. Se ele te ajudou, você pode apoiar o desenvolvimento na página de Configurações."
   },
   "statsLink": { "message": "Estatísticas →" },
   "tabStats": { "message": "Estatísticas" },
   "optLang": { "message": "Idioma" },
-  "optLangHint": { "message": "Aplica-se aos avisos, ao popup e às configurações do Parry. Sincroniza com seus outros dispositivos se a sincronização estiver ativada." },
+  "optLangHint": { "message": "Aplica-se aos avisos, ao popup e às configurações do ScamShield. Sincroniza com seus outros dispositivos se a sincronização estiver ativada." },
   "optLangAuto": { "message": "Padrão do navegador" },
   "fmtStatsSince": { "message": "Protegendo este navegador desde $DATE$", "placeholders": { "date": { "content": "$1", "example": "12 Jun 2026" } } },
   "stats7d": { "message": "7 dias" },
@@ -1188,7 +1188,7 @@
   "fmtStatsScamsBlocked": { "message": "$COUNT$ golpes nunca chegaram até você", "placeholders": { "count": { "content": "$1", "example": "8" } } },
   "statsPrivacyFindings": { "message": "Descobertas de privacidade" },
   "statsRulesActive": { "message": "Regras da lista de bloqueio ativas" },
-  "statsRulesActiveHint": { "message": "Em vigor agora, incluindo a lista integrada ao Parry." },
+  "statsRulesActiveHint": { "message": "Em vigor agora, incluindo a lista integrada ao ScamShield." },
   "statsChartTitle7d": { "message": "Páginas verificadas · últimos 7 dias" },
   "statsChartTitle30d": { "message": "Páginas verificadas · últimos 30 dias" },
   "statsChartTitleAll": { "message": "Páginas verificadas · desde a instalação" },
@@ -1212,9 +1212,9 @@
   "statsPillBlocked": { "message": "Bloqueado" },
   "statsPillWarned": { "message": "Avisado" },
   "statsFooter": { "message": "Cada número é contado no seu dispositivo. Nada nesta página é enviado a lugar nenhum." },
-  "reviewAskBody": { "message": "O Parry já bloqueou $COUNT$ golpes para você. Se você acha que ele merece, uma avaliação curta ajuda outras pessoas a encontrá-lo — é grátis e sempre será.", "placeholders": { "count": { "content": "$1", "example": "2" } } },
-  "reviewRate": { "message": "Avaliar o Parry" },
+  "reviewAskBody": { "message": "O ScamShield já bloqueou $COUNT$ golpes para você. Se você acha que ele merece, uma avaliação curta ajuda outras pessoas a encontrá-lo — é grátis e sempre será.", "placeholders": { "count": { "content": "$1", "example": "2" } } },
+  "reviewRate": { "message": "Avaliar o ScamShield" },
   "reviewLater": { "message": "Talvez depois" },
   "reviewNo": { "message": "Não, obrigado" },
-  "reviewAboutLink": { "message": "Gostando do Parry? Deixe uma avaliação" }
+  "reviewAboutLink": { "message": "Gostando do ScamShield? Deixe uma avaliação" }
 }

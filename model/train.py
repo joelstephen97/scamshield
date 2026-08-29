@@ -1,4 +1,4 @@
-"""Train the Parry phishing-URL classifier and export to ONNX.
+"""Train the ScamShield phishing-URL classifier and export to ONNX.
 
 Feature order MUST match engine/constants.js FEATURE_NAMES exactly.
 Default data: model/data/sample.csv (url,label).

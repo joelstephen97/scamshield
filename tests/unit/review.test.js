@@ -108,13 +108,13 @@ test('MAX_ASKS is 2 (snoozed twice caps out) and constants match the spec', () =
 // `typeof browser === 'undefined'` no longer distinguishes the two browsers.
 
 test('Chrome manifest (no browser_specific_settings) is Chrome', () => {
-  const chromeManifest = { name: 'Parry', manifest_version: 3 };
+  const chromeManifest = { name: 'ScamShield', manifest_version: 3 };
   assert.equal(R.isChromeFromManifest(chromeManifest), true);
 });
 
 test('Firefox manifest (carries browser_specific_settings) is not Chrome', () => {
   const firefoxManifest = {
-    name: 'Parry', manifest_version: 3,
+    name: 'ScamShield', manifest_version: 3,
     browser_specific_settings: { gecko: { id: 'scamshield@joel.dev', strict_min_version: '128.0' } }
   };
   assert.equal(R.isChromeFromManifest(firefoxManifest), false);

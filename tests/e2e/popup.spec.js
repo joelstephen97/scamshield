@@ -91,7 +91,7 @@ test('Report a mistake (opted out) confirms inline and opens a GitHub issue tab'
   const popup = await openPopup(context, extensionId, page);
   const [issue] = await Promise.all([context.waitForEvent('page'), popup.click('#reportbtn')]);
   const firstUrl = issue.url();
-  expect(decodeURIComponent(firstUrl) + ' ' + decodeURIComponent(issue.url())).toContain('joelstephen97/parry/issues/new');
+  expect(decodeURIComponent(firstUrl) + ' ' + decodeURIComponent(issue.url())).toContain('joelstephen97/scamshield/issues/new');
   await expect(popup.locator('#reportdone')).toBeVisible();
 });
 test('Leave this page navigates away from a dangerous page', async ({ context, extensionId }) => {

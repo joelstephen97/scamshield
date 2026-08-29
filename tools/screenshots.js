@@ -64,7 +64,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
       threatsByType: { phishing: 11, fakeShop: 5, wallet: 4, techSupport: 3 },
       installedAt: d.installedAt,
       // A 150-day-old install with 23 blocks satisfies every condition in
-      // ui/review.js, so the popup would start showing its "Rate Parry"
+      // ui/review.js, so the popup would start showing its "Rate ScamShield"
       // card from here on and cover the language menu in shot 4. 'declined' is
       // the one permanently-ineligible state.
       reviewAsk: { state: 'declined', asks: 0, snoozeUntil: 0 }

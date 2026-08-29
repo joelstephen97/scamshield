@@ -2,7 +2,7 @@
 
 ## Name
 
-Pemblokir Penipuan & Phishing: Parry
+Pemblokir Penipuan & Phishing: ScamShield
 
 ## Short description
 
@@ -10,16 +10,16 @@ Memblokir situs penipuan, phishing, dan toko palsu. 100% di perangkat — aktivi
 
 ## Full description
 
-Tidak ada server. Parry membaca halaman yang sedang Anda buka, pesan yang
+Tidak ada server. ScamShield membaca halaman yang sedang Anda buka, pesan yang
 Anda tempel, dan toko tempat Anda checkout — sepenuhnya di dalam browser
 Anda — dan tidak pernah mengirim apa pun yang Anda jelajahi, ketik, atau
 tempel ke tempat lain.
 
-**Mengapa Parry**
+**Mengapa ScamShield**
 
 Sebagian besar ekstensi anti-penipuan mengirim data ke server mereka:
 mereka mengirim halaman yang Anda kunjungi, atau hash-nya, ke server
-perusahaan dan menerima vonis kembali. Parry tidak melakukan itu, karena
+perusahaan dan menerima vonis kembali. ScamShield tidak melakukan itu, karena
 tidak perlu — deteksi yang sama yang akan berjalan di cloud, berjalan
 secara lokal. Artinya tidak ada akun, tidak ada gangguan server yang
 membuat Anda tanpa perlindungan, dan tidak ada apa pun tentang aktivitas
@@ -30,7 +30,7 @@ produk gratis.
 
 **Apa yang diblokir**
 
-- **Login bank & merek palsu** — Parry mencocokkan hash ikon dan logo
+- **Login bank & merek palsu** — ScamShield mencocokkan hash ikon dan logo
   halaman dengan tabel 64 merek (termasuk bank, operator telekomunikasi,
   dan layanan pemerintah UEA, di samping PayPal, Microsoft, Google, dan
   lainnya), serta mendeteksi domain homograf IDN yang mengeja sebuah merek
@@ -51,7 +51,7 @@ produk gratis.
   tombol Kembali di halaman tersebut.
 - **Serangan ClickFix & clipboard** — trik malware yang paling cepat
   berkembang di tahun 2025: CAPTCHA palsu "verifikasi Anda manusia" yang
-  membujuk Anda menempelkan perintah ke Run Windows. Parry menimpa muatan
+  membujuk Anda menempelkan perintah ke Run Windows. ScamShield menimpa muatan
   clipboard berbahaya dan memblokir halaman secara layar penuh sebelum
   bisa dijalankan.
 - **Formulir bocor** — memperingatkan begitu sebuah situs mengirim email
@@ -61,7 +61,7 @@ produk gratis.
 
 **Cara kerjanya**
 
-1. Parry membaca halaman itu sendiri, di perangkat Anda — kata-kata,
+1. ScamShield membaca halaman itu sendiri, di perangkat Anda — kata-kata,
    tata letak, formulir login, dan ikonnya — pada saat Anda membukanya,
    atau pesan yang Anda tempel ke popup untuk pemeriksaan pesan penipuan.
 2. Model di perangkat dan seperangkat aturan menilai apa yang ditemukan.
@@ -71,7 +71,7 @@ produk gratis.
 3. Anda mendapatkan alasan dalam bahasa sederhana, bukan sekadar banner
    merah, dengan solusi satu klik: *Tinggalkan halaman ini* pada
    peringatan berbahaya, *Bawa saya ke situs asli* pada halaman peniruan
-   merek — atau, jika Parry salah, jeda peringatan pada situs itu selama
+   merek — atau, jika ScamShield salah, jeda peringatan pada situs itu selama
    satu jam, satu hari, atau selamanya.
 
 **Statistik & keterjelasan**
@@ -85,15 +85,15 @@ yang bisa Anda alihkan antara 7 hari terakhir, 30 hari terakhir, atau total
 Anda sejak pemasangan. Setiap angka dihitung dan disimpan di perangkat
 Anda; tidak satu pun pernah dikirim ke mana pun.
 
-**Privasi: apa yang dilakukan dan tidak dilakukan Parry**
+**Privasi: apa yang dilakukan dan tidak dilakukan ScamShield**
 
-Parry meminta akses ke halaman yang Anda kunjungi karena begitulah analisis
+ScamShield meminta akses ke halaman yang Anda kunjungi karena begitulah analisis
 di perangkat sebenarnya membacanya — kata-kata, tata letak, formulir
 login, dan ikon — pemeriksaan terjadi secara lokal, di browser Anda, bukan
 di server di suatu tempat. Satu-satunya hal yang keluar dari perangkat
 Anda secara default adalah unduhan file biasa: daftar ancaman publik
 berisi domain penipuan yang diketahui, diambil secara berkala dari feed
-open-source Parry agar pemblokiran tetap berfungsi segera setelah
+open-source ScamShield agar pemblokiran tetap berfungsi segera setelah
 pemasangan dan saat offline. Tidak ada apa pun tentang Anda atau aktivitas
 browsing spesifik Anda yang menyertai unduhan itu. Pelaporan komunitas
 yang opsional dan nonaktif secara default dapat mengirim nama host yang
@@ -106,7 +106,7 @@ kami.
 
 **Pertanyaan yang sering diajukan**
 
-**Apa bedanya Parry dengan Guardio, Malwarebytes, atau Norton?**
+**Apa bedanya ScamShield dengan Guardio, Malwarebytes, atau Norton?**
 
 Ekstensi-ekstensi itu memeriksa halaman yang Anda kunjungi dengan mengirim
 informasi ke server mereka sendiri: Guardio dan Bitdefender TrafficLight
@@ -114,29 +114,29 @@ memindai halaman di cloud, Norton Safe Web menjalankan "Remote URL
 Reputation Service" dan, menurut pengungkapannya sendiri, mengumpulkan
 data pribadi, lokasi, dan riwayat web Anda, sementara Avast Online
 Security mengirim URL yang Anda kunjungi bersama ID perangkat dan
-informasi perangkat ke servernya. Parry tidak memiliki server. Setiap
+informasi perangkat ke servernya. ScamShield tidak memiliki server. Setiap
 pemeriksaan — membaca halaman, mencocokkan ikon merek, memindai pesan
 yang ditempel — berjalan di perangkat Anda, dan tidak ada yang Anda
 jelajahi, ketik, atau periksa yang dikirim ke mana pun. Daftar Guardio
 sendiri juga membatasi tingkat gratisnya hanya untuk peringatan situs web;
 pemblokiran real-time, perlindungan unduhan, dan pemantauan kebocoran
-adalah fitur berbayar ($9,99–$34,99/bulan). Rangkaian fitur lengkap Parry —
+adalah fitur berbayar ($9,99–$34,99/bulan). Rangkaian fitur lengkap ScamShield —
 pemblokiran real-time, deteksi toko palsu, perlindungan penguras wallet
 kripto, pemblokiran penipuan dukungan teknis, perlindungan clipboard/
 ClickFix, dasbor statistik, dan alasan berbahasa sederhana di setiap
 peringatan — gratis tanpa tingkat premium.
 
-**Apakah Parry benar-benar gratis? Apa jebakannya?**
+**Apakah ScamShield benar-benar gratis? Apa jebakannya?**
 
 Ya, dan tidak ada jebakan: tidak ada tingkat premium, tidak ada uji coba,
-tidak ada "tingkatkan untuk membuka perlindungan real-time". Parry tidak
+tidak ada "tingkatkan untuk membuka perlindungan real-time". ScamShield tidak
 menjalankan server untuk menagih Anda, jadi tidak ada yang perlu dijual
 lebih lanjut — seluruh produk adalah produk gratis. Itu berbeda dari
 sebagian besar kategori ini: beberapa pesaing memberikan tingkat gratis
 terbatas dan menagih bulanan untuk perlindungan sesungguhnya (tingkat
 gratis Guardio hanya peringatan; pemblokiran penuh $9,99–$34,99/bulan),
 sementara yang lain adalah ekstensi gratis yang melakukan cross-sell ke
-paket keamanan berbayar. Parry menghidupi dirinya dengan cara lain —
+paket keamanan berbayar. ScamShield menghidupi dirinya dengan cara lain —
 dengan tetap kecil, di perangkat, dan cukup berguna sehingga Anda tetap
 memasangnya, ditambah donasi opsional. Jika Anda ingin mendukung
 pengembangan, ada tautan di ekstensi, tidak pernah ada paywall.
@@ -154,7 +154,7 @@ pengembangan, ada tautan di ekstensi, tidak pernah ada paywall.
   Pengaturan, terlepas dari bahasa browser Anda.
 - Ekspor/impor pengaturan dan sinkronisasi antar-perangkat opsional —
   sinkronisasi bawaan browser Anda sendiri, tetap tanpa akun atau server
-  Parry.
+  ScamShield.
 - Mode gelap, riwayat perlindungan, dan tautan penyelamatan satu klik,
   konten hadiah/undian palsu yang disembunyikan.
 
@@ -177,7 +177,7 @@ tanpa runtime berat.
   Anda: daftar diunduh sebagai sidik jari ringkas dan diperiksa secara
   lokal, sehingga tidak ada situs yang Anda kunjungi yang pernah dikirim
   ke mana pun. Pembaruan datang sebagai diff kecil setiap beberapa jam.
-- **Saat Parry memblokir situs yang ada dalam daftar, kini Parry memberi
+- **Saat ScamShield memblokir situs yang ada dalam daftar, kini ScamShield memberi
   tahu Anda sumber independen mana yang melaporkannya** — dapat
   diverifikasi, bukan skor kotak hitam.
 - **Deteksi peniruan yang lebih cerdas**: pemeriksaan peniruan merek kini

@@ -1,9 +1,9 @@
 {
   "extName": {
-    "message": "Dolandırıcılık ve Kimlik Avı Engelleyici: Parry"
+    "message": "Dolandırıcılık ve Kimlik Avı Engelleyici: ScamShield"
   },
   "extShortName": {
-    "message": "Parry"
+    "message": "ScamShield"
   },
   "extDescription": {
     "message": "Cihazınızda dolandırıcılık ve kimlik avı koruması: sizi uyarır, marka taklitlerini tespit eder ve mesajları kontrol eder. Hiçbir şey cihazınızdan çıkmaz."
@@ -187,7 +187,7 @@
     "message": "Uzantı hatası — yeniden açmayı deneyin."
   },
   "whatsNewBanner": {
-    "message": "0.8'deki yenilikler: ScamShield artık Parry oldu, zaman sınırlı duraklatma ve dolandırıcılık sayaçlarıyla yeniden tasarlanmış popup, yeni simge."
+    "message": "0.8'deki yenilikler: ScamShield artık ScamShield oldu, zaman sınırlı duraklatma ve dolandırıcılık sayaçlarıyla yeniden tasarlanmış popup, yeni simge."
   },
   "popupBrandDangerSummary": {
     "message": "$BRAND$ gibi görünüyor ama değil. Buraya şifrenizi girmeyin.",
@@ -417,7 +417,7 @@
     "message": "Maksimum dikkat isteyenler için: \"şüpheli\" sayfalar bile tam ekran uyarı ve daha basit ifadelerle engellenir. Kendine daha az güvenen bir aile bireyinin güvende kalmasına yardımcı olmak için idealdir."
   },
   "optReporting": {
-    "message": "Parry'ı daha akıllı hale getirmeye yardım edin"
+    "message": "ScamShield'ı daha akıllı hale getirmeye yardım edin"
   },
   "optReportingHint": {
     "message": "Tehlikeli olarak işaretlenen sayfaların ve bildirdiğiniz sitelerin site adını (asla tam adresi veya sayfa metnini değil) ve anonim risk sinyallerini gönderir. Varsayılan olarak kapalıdır."
@@ -453,7 +453,7 @@
     "message": "Tehdit listesi"
   },
   "feedLead": {
-    "message": "Günlük olarak yeniden oluşturulan bilinen dolandırıcılık siteleri listesi (OpenPhish + URLhaus, yoğun şekilde filtrelenmiş). Parry sadece onu indirir."
+    "message": "Günlük olarak yeniden oluşturulan bilinen dolandırıcılık siteleri listesi (OpenPhish + URLhaus, yoğun şekilde filtrelenmiş). ScamShield sadece onu indirir."
   },
   "checkNow": {
     "message": "Şimdi kontrol et"
@@ -483,10 +483,10 @@
     "message": "Cihazlarım arasında senkronize et"
   },
   "syncHint": {
-    "message": "Ayarlarınızı ve duraklattığınız siteleri oturum açtığınız her tarayıcıda senkronize tutun. Tarayıcınızın kendi senkronizasyonunu kullanır — Parry'ın hâlâ hesabı veya sunucusu yoktur. Varsayılan olarak kapalıdır."
+    "message": "Ayarlarınızı ve duraklattığınız siteleri oturum açtığınız her tarayıcıda senkronize tutun. Tarayıcınızın kendi senkronizasyonunu kullanır — ScamShield'ın hâlâ hesabı veya sunucusu yoktur. Varsayılan olarak kapalıdır."
   },
   "optDocTitle": {
-    "message": "Parry Ayarları"
+    "message": "ScamShield Ayarları"
   },
   "ariaSettingsSections": {
     "message": "Ayar bölümleri"
@@ -537,7 +537,7 @@
     "message": "Bir sorun bildir"
   },
   "supportFreeOnDevice": {
-    "message": "Parry ücretsizdir ve tamamen cihazınızda çalışır."
+    "message": "ScamShield ücretsizdir ve tamamen cihazınızda çalışır."
   },
   "supportSponsorGithub": {
     "message": "GitHub'da sponsor ol"
@@ -546,7 +546,7 @@
     "message": "PayPal ile bağış yap"
   },
   "netNoTelemetry": {
-    "message": "Parry asla analitik, telemetri veya takip isteği yapmaz. Yapabileceği tek istekler bu üçüdür ve bunu kendiniz doğrulayabilirsiniz: tarayıcınızın Geliştirici Araçları'nı açın → Ağ sekmesi, Parry'ı normal şekilde kullanın ve bunların dışında hiçbir şey görmeyeceksiniz."
+    "message": "ScamShield asla analitik, telemetri veya takip isteği yapmaz. Yapabileceği tek istekler bu üçüdür ve bunu kendiniz doğrulayabilirsiniz: tarayıcınızın Geliştirici Araçları'nı açın → Ağ sekmesi, ScamShield'ı normal şekilde kullanın ve bunların dışında hiçbir şey görmeyeceksiniz."
   },
   "receiptFeedLabel": {
     "message": "Tehdit listesi indirme"
@@ -756,7 +756,7 @@
     "message": "Bu sayfa bilinen bir dolandırıcılık kalıbıyla eşleşiyor."
   },
   "toastSupportAsk": {
-    "message": "Parry az önce sizi korudu — ücretsizdir ve cihazınızda çalışır. Katkıda bulunmak ister misiniz? ❤"
+    "message": "ScamShield az önce sizi korudu — ücretsizdir ve cihazınızda çalışır. Katkıda bulunmak ister misiniz? ❤"
   },
   "guardFormDestKnown": {
     "message": "Bu form şifrenizi $HOST$ yerine $DEST$ adresine gönderiyor. Şifreyi farklı bir web sitesine göndermek, dolandırıcıların oturum bilgilerini çalma yöntemidir.",
@@ -775,10 +775,10 @@
     "message": "Bu form şifrenizi ziyaret ettiğiniz siteden farklı bir web sitesine gönderiyor. Bu, dolandırıcıların oturum bilgilerini çalmak için yaygın kullandığı bir yöntemdir."
   },
   "guardHiddenTag": {
-    "message": "Parry tarafından gizlendi"
+    "message": "ScamShield tarafından gizlendi"
   },
   "guardWalletCollision": {
-    "message": "Başka bir uyarı açıkken Parry bir cüzdan isteğini engelledi. Kapatıp tekrar deneyin."
+    "message": "Başka bir uyarı açıkken ScamShield bir cüzdan isteğini engelledi. Kapatıp tekrar deneyin."
   },
   "guardWalletFallback": {
     "message": "Bu site hassas bir cüzdan işlemi talep ediyor."
@@ -793,7 +793,7 @@
     "message": "Bu sayfa korkutma taktikleri kullanıyor."
   },
   "guardClipboardBlockedPayload": {
-    "message": "Parry tarafından engellendi — bu site panonuza tehlikeli bir komut koydu. Hiçbir yere yapıştırmayın."
+    "message": "ScamShield tarafından engellendi — bu site panonuza tehlikeli bir komut koydu. Hiçbir yere yapıştırmayın."
   },
   "guardLeakyFormPlain": {
     "message": "Bu site, gönder'e basmadan önce e-posta/telefon bilginizi düz metin olarak $HOST$ adresine gönderdi.",
@@ -821,7 +821,7 @@
     "message": "Bu site, \"devam etmek için İzin Ver'e tıklayın\" hilesini kullanarak bildirim izni almaya çalışıyor. Güvenle Engelle'yi seçebilirsiniz."
   },
   "serpAdMismatch": {
-    "message": "⚠ Parry: bu reklam $SHOWN$ yerine $ACTUAL$ adresine gidiyor",
+    "message": "⚠ ScamShield: bu reklam $SHOWN$ yerine $ACTUAL$ adresine gidiyor",
     "placeholders": {
       "actual": {
         "content": "$1",
@@ -918,7 +918,7 @@
     }
   },
   "reason_riskAbusedTld": {
-    "message": "Bu sitenin üst düzey alan adı ($TLD$), Parry'ın tehdit listesi risk tablolarında yüksek oranda dolandırıcılık amacıyla kötüye kullanılıyor.",
+    "message": "Bu sitenin üst düzey alan adı ($TLD$), ScamShield'ın tehdit listesi risk tablolarında yüksek oranda dolandırıcılık amacıyla kötüye kullanılıyor.",
     "placeholders": {
       "tld": {
         "content": "$1",
@@ -930,7 +930,7 @@
     "message": "Alan adı, dolandırıcılık sayfaları için sıkça kötüye kullanılan bir dinamik DNS veya ücretsiz barındırma sağlayıcısında barındırılıyor."
   },
   "reason_feedBlock": {
-    "message": "Bu alan adı, Parry'ın tehdit listesiyle eşleşiyor ve $COUNT$ bağımsız kaynak tarafından doğrulandı.",
+    "message": "Bu alan adı, ScamShield'ın tehdit listesiyle eşleşiyor ve $COUNT$ bağımsız kaynak tarafından doğrulandı.",
     "placeholders": {
       "count": {
         "content": "$1",
@@ -939,7 +939,7 @@
     }
   },
   "reason_feedWarn": {
-    "message": "Bu alan adı, Parry'ın tehdit listesinde daha düşük güvenilirlikte bir kayıtla eşleşiyor ($COUNT$ kaynak) — dikkatli ilerleyin.",
+    "message": "Bu alan adı, ScamShield'ın tehdit listesinde daha düşük güvenilirlikte bir kayıtla eşleşiyor ($COUNT$ kaynak) — dikkatli ilerleyin.",
     "placeholders": {
       "count": {
         "content": "$1",
@@ -1116,10 +1116,10 @@
     "message": "Gerçek adres, telefon veya şirket bilgisi yok — tek kullanımlık sahte mağazalar için normal."
   },
   "obDocTitle": {
-    "message": "Parry'a Hoş Geldiniz"
+    "message": "ScamShield'a Hoş Geldiniz"
   },
   "obTitle": {
-    "message": "Parry sizi koruyor"
+    "message": "ScamShield sizi koruyor"
   },
   "obLead": {
     "message": "Ziyaret ettiğiniz sayfaları izler ve dolandırıcılıklara karşı sizi uyarır — tamamen cihazınızda. Gezinme geçmişiniz asla bilgisayarınızdan çıkmaz."
@@ -1161,21 +1161,21 @@
     "message": "Korkutucu açılır pencere döngüsünü kırar ve çıkmanıza yardımcı olur."
   },
   "obPin": {
-    "message": "Parry'ı sabitle"
+    "message": "ScamShield'ı sabitle"
   },
   "obPinBody": {
-    "message": "Araç çubuğunuzdaki yapboz parçası simgesine, ardından Parry'ın yanındaki iğneye tıklayın, böylece her sayfanın durumunu bir bakışta görebilirsiniz."
+    "message": "Araç çubuğunuzdaki yapboz parçası simgesine, ardından ScamShield'ın yanındaki iğneye tıklayın, böylece her sayfanın durumunu bir bakışta görebilirsiniz."
   },
   "obOpenSettings": {
     "message": "Ayarları aç"
   },
   "obNote": {
-    "message": "Parry ücretsizdir. İsteğe bağlı: Ayarlar'da, yakaladığı dolandırıcılıkların anonim raporlarını paylaşarak onu daha akıllı hale getirmeye yardımcı olabilirsiniz — siz açmadığınız sürece kapalıdır. Size yardımcı olduysa, Ayarlar sayfasından geliştirmeyi destekleyebilirsiniz."
+    "message": "ScamShield ücretsizdir. İsteğe bağlı: Ayarlar'da, yakaladığı dolandırıcılıkların anonim raporlarını paylaşarak onu daha akıllı hale getirmeye yardımcı olabilirsiniz — siz açmadığınız sürece kapalıdır. Size yardımcı olduysa, Ayarlar sayfasından geliştirmeyi destekleyebilirsiniz."
   },
   "statsLink": { "message": "İstatistikler →" },
   "tabStats": { "message": "İstatistikler" },
   "optLang": { "message": "Dil" },
-  "optLangHint": { "message": "Parry'ın uyarılarına, açılır penceresine ve ayarlarına uygulanır. Senkronizasyon açıksa diğer cihazlarınızla senkronize edilir." },
+  "optLangHint": { "message": "ScamShield'ın uyarılarına, açılır penceresine ve ayarlarına uygulanır. Senkronizasyon açıksa diğer cihazlarınızla senkronize edilir." },
   "optLangAuto": { "message": "Tarayıcı varsayılanı" },
   "fmtStatsSince": { "message": "Bu tarayıcıyı $DATE$ tarihinden beri koruyor", "placeholders": { "date": { "content": "$1", "example": "12 Jun 2026" } } },
   "stats7d": { "message": "7 gün" },
@@ -1188,7 +1188,7 @@
   "fmtStatsScamsBlocked": { "message": "$COUNT$ dolandırıcılık size hiç ulaşmadı", "placeholders": { "count": { "content": "$1", "example": "8" } } },
   "statsPrivacyFindings": { "message": "Gizlilik bulguları" },
   "statsRulesActive": { "message": "Etkin engelleme listesi kuralı" },
-  "statsRulesActiveHint": { "message": "Parry'a yerleşik liste dahil, şu anda yürürlükte." },
+  "statsRulesActiveHint": { "message": "ScamShield'a yerleşik liste dahil, şu anda yürürlükte." },
   "statsChartTitle7d": { "message": "Kontrol edilen sayfalar · son 7 gün" },
   "statsChartTitle30d": { "message": "Kontrol edilen sayfalar · son 30 gün" },
   "statsChartTitleAll": { "message": "Kontrol edilen sayfalar · kurulumdan bu yana" },
@@ -1212,9 +1212,9 @@
   "statsPillBlocked": { "message": "Engellendi" },
   "statsPillWarned": { "message": "Uyarıldı" },
   "statsFooter": { "message": "Her sayı cihazınızda sayılır. Bu sayfadaki hiçbir şey herhangi bir yere gönderilmez." },
-  "reviewAskBody": { "message": "Parry şu ana kadar sizin için $COUNT$ dolandırıcılığı durdurdu. Hak ettiğini düşünüyorsanız kısa bir değerlendirme, başkalarının onu bulmasına yardımcı olur — ücretsizdir ve her zaman ücretsiz kalacaktır.", "placeholders": { "count": { "content": "$1", "example": "2" } } },
-  "reviewRate": { "message": "Parry'ı değerlendirin" },
+  "reviewAskBody": { "message": "ScamShield şu ana kadar sizin için $COUNT$ dolandırıcılığı durdurdu. Hak ettiğini düşünüyorsanız kısa bir değerlendirme, başkalarının onu bulmasına yardımcı olur — ücretsizdir ve her zaman ücretsiz kalacaktır.", "placeholders": { "count": { "content": "$1", "example": "2" } } },
+  "reviewRate": { "message": "ScamShield'ı değerlendirin" },
   "reviewLater": { "message": "Belki sonra" },
   "reviewNo": { "message": "Hayır, teşekkürler" },
-  "reviewAboutLink": { "message": "Parry'ı beğendiniz mi? Bir değerlendirme bırakın" }
+  "reviewAboutLink": { "message": "ScamShield'ı beğendiniz mi? Bir değerlendirme bırakın" }
 }

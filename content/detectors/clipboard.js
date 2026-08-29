@@ -7,8 +7,8 @@
 
   const analyze = (t) => {
     try {
-      return (window.Parry && window.Parry.analyzeClipboardWrite)
-        ? window.Parry.analyzeClipboardWrite(t) : { level: 'safe', reasons: [] };
+      return (window.ScamShield && window.ScamShield.analyzeClipboardWrite)
+        ? window.ScamShield.analyzeClipboardWrite(t) : { level: 'safe', reasons: [] };
     } catch (_) { return { level: 'safe', reasons: [] }; }
   };
   function emit(verdict, sample) {

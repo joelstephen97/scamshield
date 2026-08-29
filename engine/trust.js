@@ -2,7 +2,7 @@
 (function (root, factory) {
   const mod = factory();
   if (typeof module !== 'undefined' && module.exports) module.exports = mod;
-  root.Parry = Object.assign(root.Parry || {}, mod);
+  root.ScamShield = Object.assign(root.ScamShield || {}, mod);
 })(typeof globalThis !== 'undefined' ? globalThis : self, function () {
   'use strict';
   function pauseUntil(choice, now) {

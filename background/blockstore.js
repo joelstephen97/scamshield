@@ -29,6 +29,9 @@
 })(typeof globalThis !== 'undefined' ? globalThis : self, function () {
   'use strict';
 
+  // Kept as 'parry' although the product rename was reverted: 0.9.0 builds
+  // already persist their blockset under this database name, and renaming it
+  // would orphan those caches for nothing — it is invisible to users.
   const DB_NAME = 'parry';
   const STORE_NAME = 'blockset';
   const DB_VERSION = 1;

@@ -36,11 +36,11 @@
     deepSubdomainChain: 'Domain has an unusually deep chain of subdomains below its real domain — a common cloaking trick.',
     longHostLabel: 'Domain contains an unusually long part, often used to bury a fake brand name or hide the real domain.',
     shortenerHost: 'This is a link-shortener domain ($1) — the real destination is hidden until you click it.',
-    riskAbusedTld: "Domain's top-level domain ($1) has a high rate of scam abuse in Parry's threat-feed risk tables.",
+    riskAbusedTld: "Domain's top-level domain ($1) has a high rate of scam abuse in ScamShield's threat-feed risk tables.",
     riskDynamicHost: 'Domain is hosted on a dynamic-DNS or free-hosting provider frequently abused for scam pages.',
     // background/service_worker.js — v0.9 threat-feed matcher (Task B2)
-    feedBlock: "This domain matches Parry's threat feed, confirmed by $1 independent source(s).",
-    feedWarn: "This domain matches a lower-confidence entry in Parry's threat feed ($1 source(s)) — proceed carefully.",
+    feedBlock: "This domain matches ScamShield's threat feed, confirmed by $1 independent source(s).",
+    feedWarn: "This domain matches a lower-confidence entry in ScamShield's threat feed ($1 source(s)) — proceed carefully.",
     // engine/heuristics.js — scoreDom
     credentialFormForeignDomain: 'A password form on this page sends your credentials to a different site.',
     hiddenIframes: 'Page contains hidden frames that may capture input.',

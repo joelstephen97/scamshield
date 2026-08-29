@@ -185,7 +185,12 @@ test('findExact returns null on a miss — the 40-bit false-positive downgrade p
 
 // --- smoke test against the real parry-feed output (B1) -------------------
 
-const FEED_DIR = path.resolve(__dirname, '../../../parry-feed/v/current');
+// Tries both local checkout names — the feed repo is scamshield-feed on
+// GitHub, but a clone may still sit in a parry-feed directory locally.
+const FEED_DIR = [
+  path.resolve(__dirname, '../../../scamshield-feed/v/current'),
+  path.resolve(__dirname, '../../../parry-feed/v/current')
+].find((p) => { try { return require('fs').existsSync(p); } catch (_) { return false; } }) || path.resolve(__dirname, '../../../scamshield-feed/v/current');
 const hasFeedFixtures = fs.existsSync(path.join(FEED_DIR, 'set40.bin')) && fs.existsSync(path.join(FEED_DIR, 'meta.json'));
 
 test('real parry-feed set40.bin/warn40.bin: open, sorted, counts match meta.json', (t) => {

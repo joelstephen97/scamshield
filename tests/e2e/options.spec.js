@@ -83,6 +83,6 @@ test('options: history "Mark as mistake" opens a GitHub issue when reporting is 
   await expect(page.locator('#status')).toHaveText(/Opened a report/);
   await issuePage.waitForLoadState('domcontentloaded').catch(() => {});
   const url = decodeURIComponent(issuePage.url());
-  expect(url).toContain('joelstephen97/parry/issues/new');
+  expect(url).toContain('joelstephen97/scamshield/issues/new');
   expect(url).toContain('old-scam.example');
 });

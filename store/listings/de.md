@@ -2,7 +2,7 @@
 
 ## Name
 
-Schutz vor Betrug & Phishing: Parry
+Schutz vor Betrug & Phishing: ScamShield
 
 ## Short description
 
@@ -10,16 +10,16 @@ Blockiert Betrugsseiten, Phishing und Fake-Shops. 100% auf dem Gerät – dein S
 
 ## Full description
 
-Es gibt keinen Server. Parry liest die Seite, auf der du dich befindest, die
+Es gibt keinen Server. ScamShield liest die Seite, auf der du dich befindest, die
 Nachricht, die du einfügst, und den Shop, bei dem du gerade bezahlst –
 vollständig innerhalb deines Browsers – und sendet niemals, was du ansiehst,
 eingibst oder einfügst, irgendwohin sonst.
 
-**Warum Parry**
+**Warum ScamShield**
 
 Die meisten Anti-Betrugs-Erweiterungen telefonieren nach Hause: Sie senden
 die von dir besuchten Seiten oder einen Hash davon an die Server eines
-Unternehmens und erhalten ein Urteil zurück. Parry tut das nicht, weil es
+Unternehmens und erhalten ein Urteil zurück. ScamShield tut das nicht, weil es
 nicht nötig ist – dieselbe Erkennung, die sonst in der Cloud liefe, läuft
 stattdessen lokal. Das bedeutet: kein Konto, kein Serverausfall, der dich
 ungeschützt zurücklässt, und nichts über dein Surfverhalten, das später
@@ -29,7 +29,7 @@ Echtzeitschutz freischalten“ – das ganze Produkt ist das kostenlose Produkt.
 
 **Was es blockiert**
 
-- **Gefälschte Bank- und Marken-Logins** – Parry gleicht das Icon und Logo
+- **Gefälschte Bank- und Marken-Logins** – ScamShield gleicht das Icon und Logo
   der Seite per Hash mit einer Tabelle von 64 Marken ab (VAE-Banken,
   Telekommunikationsanbieter und Regierungsdienste eingeschlossen, neben
   PayPal, Microsoft, Google und mehr) und erkennt IDN-Homograph-Domains, die
@@ -51,7 +51,7 @@ Echtzeitschutz freischalten“ – das ganze Produkt ist das kostenlose Produkt.
 - **ClickFix- und Zwischenablage-Angriffe** – der am schnellsten wachsende
   Malware-Trick von 2025: ein gefälschtes „Bestätige, dass du ein Mensch
   bist“-CAPTCHA, das dich dazu bringt, einen Befehl in die Windows-Ausführen-
-  Funktion einzufügen. Parry überschreibt die schädliche
+  Funktion einzufügen. ScamShield überschreibt die schädliche
   Zwischenablage-Nutzlast und blockiert die Seite im Vollbild, bevor sie
   ausgeführt werden kann.
 - **Undichte Formulare** – warnt in dem Moment, in dem eine Seite die
@@ -61,7 +61,7 @@ Echtzeitschutz freischalten“ – das ganze Produkt ist das kostenlose Produkt.
 
 **Wie es funktioniert**
 
-1. Parry liest die Seite selbst, auf deinem Gerät – ihren Wortlaut, Layout,
+1. ScamShield liest die Seite selbst, auf deinem Gerät – ihren Wortlaut, Layout,
    Login-Formulare und Icons – in dem Moment, in dem du sie öffnest, oder
    die Nachricht, die du für eine Betrugsnachrichten-Prüfung ins Popup
    einfügst.
@@ -72,7 +72,7 @@ Echtzeitschutz freischalten“ – das ganze Produkt ist das kostenlose Produkt.
 3. Du erhältst eine Begründung in klarer Sprache, nicht nur ein rotes Banner,
    mit einer Ein-Klick-Lösung: *Diese Seite verlassen* bei einer
    gefährlich-Warnung, *Zur echten Seite bringen* bei einer
-   Marken-Fälschungsseite – oder, falls Parry sich geirrt hat, pausiere die
+   Marken-Fälschungsseite – oder, falls ScamShield sich geirrt hat, pausiere die
    Warnung für diese Seite für eine Stunde, einen Tag oder für immer.
 
 **Statistiken & Nachvollziehbarkeit**
@@ -88,14 +88,14 @@ deinen Gesamtwerten seit der Installation umschalten kannst. Jede Zahl wird
 auf deinem Gerät berechnet und gespeichert; nichts davon wird jemals
 irgendwohin gesendet.
 
-**Datenschutz: Was Parry tut und was nicht**
+**Datenschutz: Was ScamShield tut und was nicht**
 
-Parry bittet um Zugriff auf die von dir besuchten Seiten, weil die
+ScamShield bittet um Zugriff auf die von dir besuchten Seiten, weil die
 On-Device-Analyse sie genau dadurch tatsächlich liest – den Wortlaut, das
 Layout, die Login-Formulare und Icons – die Prüfung findet lokal statt, in
 deinem Browser, nicht irgendwo auf einem Server. Das Einzige, was dein Gerät
 standardmäßig verlässt, ist ein reiner Datei-Download: die öffentliche
-Bedrohungsliste bekannter Betrugsdomains, die regelmäßig aus Parrys
+Bedrohungsliste bekannter Betrugsdomains, die regelmäßig aus ScamShields
 Open-Source-Feed abgerufen wird, damit die Blockierung direkt nach der
 Installation und auch offline funktioniert. Nichts über dich oder dein
 konkretes Surfverhalten begleitet diesen Download. Optionale, standardmäßig
@@ -108,7 +108,7 @@ statt uns einfach zu glauben.
 
 **Häufige Fragen**
 
-**Wie unterscheidet sich Parry von Guardio, Malwarebytes oder Norton?**
+**Wie unterscheidet sich ScamShield von Guardio, Malwarebytes oder Norton?**
 
 Diese Erweiterungen prüfen die von dir besuchten Seiten, indem sie
 Informationen an ihre eigenen Server senden: Guardio und Bitdefender
@@ -116,23 +116,23 @@ TrafficLight scannen Seiten in der Cloud, Norton Safe Web betreibt einen
 „Remote URL Reputation Service“ und sammelt laut eigener Offenlegung deine
 personenbezogenen Daten, deinen Standort und deinen Browserverlauf, und
 Avast Online Security sendet die von dir besuchten URLs zusammen mit einer
-Geräte-ID und Geräteinformationen an seine Server. Parry hat keinen Server.
+Geräte-ID und Geräteinformationen an seine Server. ScamShield hat keinen Server.
 Jede Prüfung – das Lesen der Seite, der Abgleich von Marken-Icons, das
 Scannen einer eingefügten Nachricht – läuft auf deinem Gerät, und nichts,
 was du ansiehst, eingibst oder prüfst, wird irgendwohin gesendet. Guardios
 eigener Eintrag beschränkt seine kostenlose Stufe zudem auf reine
 Website-Warnungen; Echtzeit-Blockierung, Downloadschutz und
 Leak-Überwachung sind kostenpflichtige Funktionen (9,99–34,99 $/Monat).
-Parrys vollständiger Funktionsumfang – Echtzeit-Blockierung, Erkennung von
+ScamShields vollständiger Funktionsumfang – Echtzeit-Blockierung, Erkennung von
 Fake-Shops, Schutz vor Krypto-Wallet-Drainern, Blockierung von
 Tech-Support-Betrug, Zwischenablage-/ClickFix-Schutz, ein
 Statistik-Dashboard und eine klar formulierte Begründung bei jeder Warnung –
 ist kostenlos, ohne Premium-Stufe.
 
-**Ist Parry wirklich kostenlos? Wo ist der Haken?**
+**Ist ScamShield wirklich kostenlos? Wo ist der Haken?**
 
 Ja, und es gibt keinen Haken: keine Premium-Stufe, keine Testphase, kein
-„Upgrade, um Echtzeitschutz freizuschalten“. Parry betreibt keinen Server,
+„Upgrade, um Echtzeitschutz freizuschalten“. ScamShield betreibt keinen Server,
 für den es dich abrechnen müsste, also gibt es nichts nachzuverkaufen – das
 ganze Produkt ist das kostenlose Produkt. Das unterscheidet sich von den
 meisten Anbietern der Kategorie: Mehrere Konkurrenten verschenken eine
@@ -140,7 +140,7 @@ eingeschränkte kostenlose Stufe und verlangen monatlich für den echten
 Schutz (Guardios kostenlose Stufe bietet nur Warnungen; vollständige
 Blockierung kostet 9,99–34,99 $/Monat), während andere kostenlose
 Erweiterungen sind, die in eine kostenpflichtige Sicherheits-Suite
-weiterverkaufen. Parry verdient sich sein Bestehen anders – indem es klein,
+weiterverkaufen. ScamShield verdient sich sein Bestehen anders – indem es klein,
 lokal und nützlich genug bleibt, dass du es installiert lässt, plus
 optionale Spenden. Wenn du die Entwicklung unterstützen möchtest, gibt es
 einen Link in der Erweiterung, aber nie eine Bezahlschranke.
@@ -158,7 +158,7 @@ einen Link in der Erweiterung, aber nie eine Bezahlschranke.
   Einstellungen, unabhängig von der Sprache deines Browsers.
 - Export/Import von Einstellungen und optionale geräteübergreifende
   Synchronisierung – die eigene Synchronisierung deines Browsers, weiterhin
-  ohne Parry-Konto oder -Server.
+  ohne ScamShield-Konto oder -Server.
 - Dunkelmodus, Schutzverlauf und Ein-Klick-Rettungslinks, ausgeblendete
   Fake-Preis-/Gewinnspiel-Inhalte.
 
@@ -181,7 +181,7 @@ keine schwere Laufzeitumgebung.
   statt: Die Liste wird als kompakte Fingerabdrücke heruntergeladen und
   lokal geprüft, sodass keine von dir besuchte Seite jemals irgendwohin
   gesendet wird. Updates kommen alle paar Stunden als kleine Diffs.
-- **Wenn Parry eine in der Liste geführte Seite blockiert, nennt es dir
+- **Wenn ScamShield eine in der Liste geführte Seite blockiert, nennt es dir
   jetzt, welche unabhängigen Quellen sie gemeldet haben** – nachprüfbar
   statt eine Blackbox-Bewertung.
 - **Klügere Fälschungserkennung**: Marken-Fälschungsprüfungen erkennen jetzt

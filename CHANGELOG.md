@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to Parry. Versions are git tags (`vX.Y.Z`); the version on the [Chrome Web Store](https://chromewebstore.google.com/detail/fojjjofjimbfoddafoampojopijnlihl) may lag a tag by a few days while Google reviews it. Privacy-relevant changes are also reflected in the [privacy policy](https://joelstephen97.github.io/parry/privacy.html).
+All notable changes to ScamShield. Versions are git tags (`vX.Y.Z`); the version on the [Chrome Web Store](https://chromewebstore.google.com/detail/fojjjofjimbfoddafoampojopijnlihl) may lag a tag by a few days while Google reviews it. Privacy-relevant changes are also reflected in the [privacy policy](https://joelstephen97.github.io/scamshield/privacy.html).
 
 ## 0.9.0 — 2026-08-29
 
@@ -30,18 +30,10 @@ All notable changes to Parry. Versions are git tags (`vX.Y.Z`); the version on t
 
 ## 0.8.0 — 2026-08-29
 
-### Renamed: ScamShield is now Parry
-- Two very well-known products already use the "ScamShield" name —
-  Singapore's government runs its own national anti-scam app called
-  ScamShield, and T-Mobile's Scam Shield is a widely-used US carrier
-  scam-blocking service — so this extension has renamed to Parry to avoid
-  confusion with either. This is a name change only: detection logic,
-  settings, permissions and privacy behaviour are unchanged, and existing
-  installs update in place with all settings, trusted sites and history
-  preserved. The GitHub repo moved to
-  [github.com/joelstephen97/parry](https://github.com/joelstephen97/parry)
-  (old URLs redirect) and the threat-feed repo moved to
-  [joelstephen97/parry-feed](https://github.com/joelstephen97/parry-feed).
+### Naming note
+- 0.8.0 briefly renamed the project to "Parry" in this repository. The
+  rename was reverted in 0.10.0, before any store submission carried it —
+  store users only ever saw ScamShield. Repo and feed URLs are unchanged.
 
 ### New
 - **Redesigned popup** — a time-boxed *Pause protection* menu (1 hour, 1 day
@@ -50,7 +42,6 @@ All notable changes to Parry. Versions are git tags (`vX.Y.Z`); the version on t
   *Why this verdict?* panel listing the exact reasons behind it; and a
   rotating footer alternates a quiet privacy reminder, the earned review ask
   and a support link instead of showing all three at once.
-- **New icon** — a simple deflection mark that fits the new name.
 - **Comparison page** — [`docs/comparison.md`](docs/comparison.md), a sourced
   feature-and-privacy comparison against Guardio, Malwarebytes Browser
   Guard, Norton Safe Web, McAfee WebAdvisor, Bitdefender TrafficLight,
@@ -79,13 +70,13 @@ requests — it reuses the language override shipped in 0.7.0.
   on-device), plus privacy findings and a daily activity chart, toggleable
   between the last 7 days, 30 days, and a since-install lifetime view. Every
   count is computed and stored on-device; nothing here is ever transmitted.
-- **Earned review ask** — after Parry has actually blocked something
+- **Earned review ask** — after ScamShield has actually blocked something
   twice and been installed at least 7 days, the popup shows a quiet,
   in-popup-only ask for a review — never a page warning, and never while a
   page warning is on screen. *Maybe later* snoozes it for 90 days and asks at
   most twice; *No thanks* is permanent. Chrome only (there's no Firefox
   listing to review yet).
-- **Language override** — a Settings dropdown lets you pick Parry's
+- **Language override** — a Settings dropdown lets you pick ScamShield's
   language independently of your browser's, defaulting to "Browser default."
   The choice is stored in one setting (`uiLang`) and syncs across your
   devices only if you've already turned on your own browser's sync — it has
@@ -114,7 +105,7 @@ still leaves your device by default.
 ### New protection
 - **ClickFix / fake-CAPTCHA blocker** — the fastest-growing malware delivery
   trick of 2025 (fake "verify you're human" pages that get you to paste a
-  command into Windows Run). Parry now overwrites the malicious clipboard
+  command into Windows Run). ScamShield now overwrites the malicious clipboard
   payload and blocks the page full-screen.
 - **Fake browser-update blocker** — a browser "update" prompt rendered *by a
   web page* is always fake. Blocked full-screen when the download doesn't go to
@@ -167,9 +158,9 @@ still leaves your device by default.
   formatting via `Intl`. Non-English translations are AI-generated and
   pending native-speaker review (`ur`, `mr`, `te` highest priority).
 - **Settings export/import** and optional **cross-device sync** (your browser's
-  own sync; still no Parry account or server).
+  own sync; still no ScamShield account or server).
 - A **"what leaves your device" receipt** in Settings listing the only three
-  requests Parry can make, so you can verify zero-telemetry yourself.
+  requests ScamShield can make, so you can verify zero-telemetry yourself.
 
 ### Platform
 - Now scans inside **iframes** (`all_frames`) — iframe-hosted phishing forms
@@ -213,7 +204,7 @@ http/https access, exactly as 0.3.1.
 - **Smaller and faster** — about 0.6 MB unpacked / ~170 KB zipped, down from
   14 MB: the ONNX runtime is gone. Both models now run as plain JS, with no
   WebAssembly and no web-accessible resources.
-- **Optional community reporting, off by default** — "Help make Parry
+- **Optional community reporting, off by default** — "Help make ScamShield
   smarter" sends only the site's host name and anonymous risk signals, and
   only for pages flagged dangerous or that you report as a mistake. Never
   URLs, page text, or anything that identifies you. Not sold, and not used
@@ -285,7 +276,7 @@ http/https access, exactly as 0.3.1.
 ### Added
 - **Real threat feed, on by default.** The blocklist now actually blocks
   things: a daily-rebuilt open-source feed
-  (github.com/joelstephen97/parry-feed; OpenPhish + URLhaus sources,
+  (github.com/joelstephen97/scamshield-feed; OpenPhish + URLhaus sources,
   Tranco top-10k false-positive guard, shared-hosting scoping, 5,000-rule
   cap) is the default OTA source, fetched on install and every 12 h. A
   500-rule static snapshot ships inside the package for out-of-the-box

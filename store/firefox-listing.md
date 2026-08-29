@@ -1,11 +1,11 @@
 # Firefox AMO Listing
 
-**Name:** Scam & Phishing Blocker: Parry
+**Name:** Scam & Phishing Blocker: ScamShield
 **Summary:** Blocks scam sites, phishing pages and fake shops. 100% on-device — your browsing never leaves your computer.
 **Categories:** Privacy & Security
-**License:** GNU General Public License v3.0 or later (GPL-3.0-or-later) — source: https://github.com/joelstephen97/parry
-**Homepage:** https://joelstephen97.github.io/parry/
-**Support URL:** https://github.com/joelstephen97/parry/issues
+**License:** GNU General Public License v3.0 or later (GPL-3.0-or-later) — source: https://github.com/joelstephen97/scamshield
+**Homepage:** https://joelstephen97.github.io/scamshield/
+**Support URL:** https://github.com/joelstephen97/scamshield/issues
 
 **Description:** (reuse the Chrome description text above)
 
@@ -26,5 +26,5 @@
 - Source of the models: trained offline via `model/train.py` and
   `model/train_page.py` (both included in the repo).
 
-**Privacy policy URL:** https://joelstephen97.github.io/parry/privacy.html
+**Privacy policy URL:** https://joelstephen97.github.io/scamshield/privacy.html
 **Also published on:** Chrome Web Store — https://chromewebstore.google.com/detail/fojjjofjimbfoddafoampojopijnlihl

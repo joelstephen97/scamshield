@@ -1,7 +1,7 @@
 'use strict';
 const api = globalThis.browser || globalThis.chrome;
 const $ = (id) => document.getElementById(id);
-const SS = globalThis.Parry, F = globalThis.SSFormat, I = globalThis.SSIcons, R = globalThis.SSReasons, REVIEW = globalThis.SSReview, FOOTER = globalThis.SSFooter, SSTATS = globalThis.SSStats;
+const SS = globalThis.ScamShield, F = globalThis.SSFormat, I = globalThis.SSIcons, R = globalThis.SSReasons, REVIEW = globalThis.SSReview, FOOTER = globalThis.SSFooter, SSTATS = globalThis.SSStats;
 // The locale the Intl formatters use. `let`, not `const`: a language override
 // has to move the timestamps too, or the popup reads German with English
 // relative times. Reassigned once, at the top of init().
@@ -182,7 +182,7 @@ function renderFooter(lvl) {
   $('footsupport').hidden = showReview || footerVariant !== 'support';
   if (!showReview) return;
   $('askbody').textContent = T('reviewAskBody', [bidi(String(reviewCount))],
-    `Parry has now stopped ${reviewCount} scams for you. If it's earned it, a short review helps other people find it — it's free and always will be.`);
+    `ScamShield has now stopped ${reviewCount} scams for you. If it's earned it, a short review helps other people find it — it's free and always will be.`);
   bindReviewButtonsOnce();
 }
 async function pollVerdict(host) {
@@ -317,7 +317,7 @@ async function init() {
   // tab already) and lets the tab router pick the section up from the hash.
   $('viewall').addEventListener('click', (e) => { e.preventDefault(); api.tabs.create({ url: api.runtime.getURL('options.html#stats') }); window.close(); });
   await initReviewAsk();
-  if (settings.whatsNewSeen !== '0.8.0') { $('whatsnew').hidden = false; $('whatsnewlink').addEventListener('click', (e) => { e.preventDefault(); api.tabs.create({ url: 'https://github.com/joelstephen97/parry/blob/main/CHANGELOG.md' }); }); $('whatsnewx').addEventListener('click', async () => { $('whatsnew').hidden = true; await send('setSettings', { patch: { whatsNewSeen: '0.8.0' } }); }); }
+  if (settings.whatsNewSeen !== '0.8.0') { $('whatsnew').hidden = false; $('whatsnewlink').addEventListener('click', (e) => { e.preventDefault(); api.tabs.create({ url: 'https://github.com/joelstephen97/scamshield/blob/main/CHANGELOG.md' }); }); $('whatsnewx').addEventListener('click', async () => { $('whatsnew').hidden = true; await send('setSettings', { patch: { whatsNewSeen: '0.8.0' } }); }); }
 
   tab = await currentTab();
   // Two hero counters (0.8.0), replacing the old this-site/all-time tile row:
@@ -426,4 +426,4 @@ function wireMessageChecker() {
   });
 }
 wireMessageChecker();
-init().catch((err) => { renderStatus('unknown', '', T('toastExtensionError', null, 'Extension error — try reopening.')); console.error('[Parry] popup init failed:', err); });
+init().catch((err) => { renderStatus('unknown', '', T('toastExtensionError', null, 'Extension error — try reopening.')); console.error('[ScamShield] popup init failed:', err); });

@@ -9,8 +9,8 @@
   let seq = 0;
   const analyze = (req) => {
     try {
-      return (window.Parry && window.Parry.analyzeWalletRequest)
-        ? window.Parry.analyzeWalletRequest(req) : { level: 'safe', reasons: [] };
+      return (window.ScamShield && window.ScamShield.analyzeWalletRequest)
+        ? window.ScamShield.analyzeWalletRequest(req) : { level: 'safe', reasons: [] };
     } catch (_) { return { level: 'safe', reasons: [] }; }
   };
 
@@ -43,7 +43,7 @@
       if (verdict.level === 'dangerous' || verdict.level === 'suspicious') {
         const allow = await confirm(verdict);
         if (!allow) {
-          const err = new Error('Parry blocked a risky wallet request.');
+          const err = new Error('ScamShield blocked a risky wallet request.');
           err.code = 4001; // EIP-1193 user rejected
           throw err;
         }

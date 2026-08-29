@@ -1,4 +1,4 @@
-# Parry vs. other browser scam & phishing extensions
+# ScamShield vs. other browser scam & phishing extensions
 
 Figures as of 2026-08-29. Every competitor claim in this table is drawn from
 that product's own Chrome Web Store listing or its own privacy/help
@@ -12,7 +12,7 @@ disclosure says, not an opinion of it.
 
 ## Comparison
 
-| Feature | Parry | Guardio | Malwarebytes Browser Guard | Norton Safe Web | McAfee WebAdvisor | Bitdefender TrafficLight | Netcraft | Avast Online Security | ScamAdviser |
+| Feature | ScamShield | Guardio | Malwarebytes Browser Guard | Norton Safe Web | McAfee WebAdvisor | Bitdefender TrafficLight | Netcraft | Avast Online Security | ScamAdviser |
 |---|---|---|---|---|---|---|---|---|---|
 | Real-time scam/phishing blocking | Yes — free, no tier gate | Free tier = fake-website alerts only; real-time blocking is a paid feature ($9.99–$34.99/mo) | Yes, free (cloud-assisted) | Yes, via a "Remote URL Reputation Service" (search-result badges) | Yes (search-result badges + phishing block) | Yes (cloud page scan + search-result annotation) | Yes (cloud blocklists + local heuristics) | Yes (ratings from a 400M-user reputation community) | Trust-score lookup rather than blocking (cloud) |
 | Fake-shop detection | Yes — fake countdowns, "only N left" pressure, hotlinked trust badges, off-platform payment requests, missing contact details | — | — | — | — | — | — | — | — |
@@ -26,7 +26,7 @@ disclosure says, not an opinion of it.
 | Data collected (per own disclosure) | None — nothing you browse, type or check leaves your device; an anonymized host name and risk signal are sent only if you opt in | — | — | PII, location and web history (per own disclosure) | — | — | — | Visited URLs, device GUID and device info (per own disclosure) | — |
 
 No polished, well-rated, on-device, free-forever scam blocker exists in the
-Chrome Web Store's Privacy & Security category outside Parry, based on the
+Chrome Web Store's Privacy & Security category outside ScamShield, based on the
 listings reviewed above.
 
 ## Notes
@@ -47,7 +47,7 @@ listings reviewed above.
 
 Every claim above traces to the named product's own Chrome Web Store
 listing, or its own privacy/help-center disclosure, read live on 2026-08-29
-as part of Parry's listing research. Store listings change over time and
+as part of ScamShield's listing research. Store listings change over time and
 figures here reflect only that one day.
 
 - [Guardio — Chrome Web Store](https://chromewebstore.google.com/detail/guardio-protection-for-ch/gjfpmkejnolcfklaaddjnckanhhgegla) · [guard.io/plans](https://guard.io/plans) (free-tier vs. paid-tier feature breakdown and pricing)
@@ -59,6 +59,6 @@ figures here reflect only that one day.
 - [Avast Online Security & Privacy — Chrome Web Store](https://chromewebstore.google.com/detail/avast-online-security-and/gomekmidlodglbbmalcneegieacbdmki) (its data-collection disclosure lists visited URLs, a GUID, device info) · [Avast's own Jumpshot settlement FAQ](https://support.avast.com/en-us/article/jumpshot-settlement-faqs/) (FTC order, February 2024)
 - [ScamAdviser — Chrome Web Store](https://chromewebstore.google.com/detail/scamadviser/lcmofkcgjjagmhodenahpocfkpopjdci)
 
-Parry's own figures (free, on-device, 20 languages, statistics tab,
+ScamShield's own figures (free, on-device, 20 languages, statistics tab,
 explainable verdicts) reflect the shipped extension as of this release, not
 a third-party listing.

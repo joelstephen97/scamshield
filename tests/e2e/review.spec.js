@@ -90,7 +90,7 @@ test('earned review ask: Maybe later snoozes ~90 days, hides the card, and stays
   await expect(popup2.locator('#askcard')).toBeHidden();
 });
 
-test('earned review ask: Rate Parry opens the CWS review tab and never shows the card again', async ({ context, extensionId }) => {
+test('earned review ask: Rate ScamShield opens the CWS review tab and never shows the card again', async ({ context, extensionId }) => {
   const sw = context.serviceWorkers()[0];
   await seedEligible(sw);
 

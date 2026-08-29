@@ -2,7 +2,7 @@
 
 ## Name
 
-Dolandırıcılık ve Kimlik Avı Engelleyici: Parry
+Dolandırıcılık ve Kimlik Avı Engelleyici: ScamShield
 
 ## Short description
 
@@ -10,16 +10,16 @@ Dolandırıcılık sitelerini, kimlik avını ve sahte mağazaları engeller. %1
 
 ## Full description
 
-Sunucu yoktur. Parry bulunduğunuz sayfayı, yapıştırdığınız mesajı ve
+Sunucu yoktur. ScamShield bulunduğunuz sayfayı, yapıştırdığınız mesajı ve
 ödeme yaptığınız mağazayı — tamamen tarayıcınızın içinde — okur ve
 gezindiğiniz, yazdığınız veya yapıştırdığınız hiçbir şeyi başka bir yere
 asla göndermez.
 
-**Neden Parry**
+**Neden ScamShield**
 
 Dolandırıcılık engelleyici uzantıların çoğu eve telefon eder: ziyaret
 ettiğiniz sayfaları veya bunların bir özetini bir şirketin sunucularına
-gönderir ve karşılığında bir karar alır. Parry bunu yapmaz, çünkü buna
+gönderir ve karşılığında bir karar alır. ScamShield bunu yapmaz, çünkü buna
 gerek yoktur — bulutta çalışacak aynı tespit bunun yerine yerel olarak
 çalışır. Bu, hesap olmaması, sizi korumasız bırakacak bir sunucu kesintisi
 olmaması ve geziniz hakkında sızabilecek, mahkeme celbiyle istenebilecek
@@ -30,7 +30,7 @@ korumanın kilidini açmak için yükseltin" yoktur — ürünün tamamı ücret
 
 **Neleri engeller**
 
-- **Sahte banka ve marka girişleri** — Parry, sayfanın simgesini ve
+- **Sahte banka ve marka girişleri** — ScamShield, sayfanın simgesini ve
   logosunu 64 markadan oluşan bir tabloyla (BAE bankaları, telekom
   operatörleri ve devlet hizmetleri dahil, PayPal, Microsoft, Google ve
   daha fazlasının yanı sıra) özet karşılaştırması yapar ve bir markayı
@@ -50,7 +50,7 @@ korumanın kilidini açmak için yükseltin" yoktur — ürünün tamamı ücret
   birlikte tam ekran engelleme.
 - **ClickFix ve pano saldırıları** — 2025'in en hızlı büyüyen kötü amaçlı
   yazılım hilesi: sizi Windows Çalıştır'a bir komut yapıştırmaya ikna eden
-  sahte bir "insan olduğunuzu doğrulayın" CAPTCHA'sı. Parry kötü amaçlı
+  sahte bir "insan olduğunuzu doğrulayın" CAPTCHA'sı. ScamShield kötü amaçlı
   pano içeriğinin üzerine yazar ve çalıştırılabilmeden önce sayfayı tam
   ekran olarak engeller.
 - **Sızdıran formlar** — bir site, siz gönder'e basmadan *önce* yazdığınız
@@ -60,7 +60,7 @@ korumanın kilidini açmak için yükseltin" yoktur — ürünün tamamı ücret
 
 **Nasıl çalışır**
 
-1. Parry, sayfayı açtığınız anda cihazınızda sayfanın kendisini — metnini,
+1. ScamShield, sayfayı açtığınız anda cihazınızda sayfanın kendisini — metnini,
    düzenini, giriş formlarını ve simgelerini — veya bir dolandırıcılık
    mesajı kontrolü için açılır pencereye yapıştırdığınız mesajı okur.
 2. Cihaz üzerinde çalışan bir model ve bir kural kümesi bulduklarını
@@ -71,7 +71,7 @@ korumanın kilidini açmak için yükseltin" yoktur — ürünün tamamı ücret
 3. Sadece kırmızı bir bant değil, sade bir dille bir gerekçe alırsınız,
    tek tıklamalı bir çözümle birlikte: tehlikeli bir uyarıda *Bu sayfadan
    çık*, bir marka taklidi sayfasında *Beni gerçek siteye götür* — veya
-   Parry yanılmışsa, o sitedeki uyarıyı bir saat, bir gün veya süresiz
+   ScamShield yanılmışsa, o sitedeki uyarıyı bir saat, bir gün veya süresiz
    olarak duraklatın.
 
 **İstatistikler ve açıklanabilirlik**
@@ -86,15 +86,15 @@ arasında geçiş yapabileceğiniz günlük etkinlik grafiğiyle gösterir. Her
 sayı cihazınızda hesaplanır ve saklanır; hiçbiri hiçbir zaman herhangi bir
 yere gönderilmez.
 
-**Gizlilik: Parry ne yapar, ne yapmaz**
+**Gizlilik: ScamShield ne yapar, ne yapmaz**
 
-Parry, ziyaret ettiğiniz sayfalara erişim ister, çünkü cihaz üzerindeki
+ScamShield, ziyaret ettiğiniz sayfalara erişim ister, çünkü cihaz üzerindeki
 analiz onları gerçekten böyle okur — metni, düzeni, giriş formlarını ve
 simgeleri — kontrol yerel olarak, tarayıcınızda gerçekleşir, bir yerdeki
 bir sunucuda değil. Varsayılan olarak cihazınızdan çıkan tek şey, düz bir
 dosya indirmedir: bilinen dolandırıcılık alan adlarının herkese açık tehdit
 listesi, kurulumdan hemen sonra ve çevrimdışıyken de engellemenin çalışması
-için Parry'nin açık kaynaklı akışından periyodik olarak alınır. Sizinle
+için ScamShield'nin açık kaynaklı akışından periyodik olarak alınır. Sizinle
 veya belirli geziniz ile ilgili hiçbir şey bu indirmeye eşlik etmez.
 Varsayılan olarak kapalı, isteğe bağlı topluluk raporlaması, tehlikeli
 olarak işaretlenen bir sayfa için anonimleştirilmiş bir ana bilgisayar adı
@@ -105,35 +105,35 @@ sözümüze güvenmek yerine sıfır telemetriyi kendiniz doğrulayabilirsiniz.
 
 **Sıkça Sorulan Sorular**
 
-**Parry, Guardio, Malwarebytes veya Norton'dan nasıl farklıdır?**
+**ScamShield, Guardio, Malwarebytes veya Norton'dan nasıl farklıdır?**
 
 Bu uzantılar, ziyaret ettiğiniz sayfaları kendi sunucularına bilgi
 göndererek kontrol eder: Guardio ve Bitdefender TrafficLight sayfaları
 bulutta tarar, Norton Safe Web bir "Uzak URL İtibar Hizmeti" çalıştırır ve
 kendi açıklamasına göre kişisel verilerinizi, konumunuzu ve web geçmişinizi
 toplar, Avast Online Security ise ziyaret ettiğiniz URL'leri bir cihaz
-kimliği ve cihaz bilgileriyle birlikte sunucularına gönderir. Parry'nin
+kimliği ve cihaz bilgileriyle birlikte sunucularına gönderir. ScamShield'nin
 sunucusu yoktur. Her kontrol — sayfayı okumak, marka simgelerini
 eşleştirmek, yapıştırılan bir mesajı taramak — cihazınızda çalışır ve
 gezindiğiniz, yazdığınız veya kontrol ettiğiniz hiçbir şey herhangi bir
 yere gönderilmez. Guardio'nun kendi listesi de ücretsiz katmanını yalnızca
 web sitesi uyarılarıyla sınırlar; gerçek zamanlı engelleme, indirme
-koruması ve sızıntı izleme ücretli özelliklerdir (9,99–34,99 $/ay). Parry'nin
+koruması ve sızıntı izleme ücretli özelliklerdir (9,99–34,99 $/ay). ScamShield'nin
 tam özellik seti — gerçek zamanlı engelleme, sahte mağaza tespiti, kripto
 cüzdan boşaltıcı koruması, teknik destek dolandırıcılığı engellemesi, pano/
 ClickFix koruması, bir istatistik panosu ve her uyarıda sade bir dille
 gerekçe — premium katmanı olmadan ücretsizdir.
 
-**Parry gerçekten ücretsiz mi? Ne şart var?**
+**ScamShield gerçekten ücretsiz mi? Ne şart var?**
 
 Evet ve hiçbir şart yok: premium katman yok, deneme yok, "gerçek zamanlı
-korumanın kilidini açmak için yükseltin" yok. Parry, sizi faturalandıracak
+korumanın kilidini açmak için yükseltin" yok. ScamShield, sizi faturalandıracak
 bir sunucu çalıştırmaz, bu yüzden üst satacak bir şey yoktur — ürünün
 tamamı ücretsiz üründür. Bu, kategorideki çoğu üründen farklı bir
 yaklaşımdır: birçok rakip sınırlı bir ücretsiz katman verir ve gerçek
 korumaları için aylık ücret alır (Guardio'nun ücretsiz katmanı sadece
 uyarılardır; tam engelleme 9,99–34,99 $/ay tutar), diğerleri ise ücretli
-bir güvenlik paketine çapraz satış yapan ücretsiz uzantılardır. Parry
+bir güvenlik paketine çapraz satış yapan ücretsiz uzantılardır. ScamShield
 kendini farklı şekilde ayakta tutar — küçük, cihaz üzerinde ve kurulu
 tutmanızı sağlayacak kadar faydalı kalarak, artı isteğe bağlı bağışlar.
 Geliştirmeyi desteklemek isterseniz, uzantıda bir bağlantı vardır, asla bir
@@ -150,7 +150,7 @@ Geliştirmeyi desteklemek isterseniz, uzantıda bir bağlantı vardır, asla bir
 - Dilinizi seçin: tarayıcınızın dilinden bağımsız olarak açılır pencereden
   veya ayarlardan seçilebilen 20 dilin tamamı.
 - Ayarları dışa/içe aktarma ve isteğe bağlı cihazlar arası senkronizasyon —
-  tarayıcınızın kendi senkronizasyonu, hâlâ Parry hesabı veya sunucusu
+  tarayıcınızın kendi senkronizasyonu, hâlâ ScamShield hesabı veya sunucusu
   olmadan.
 - Karanlık mod, koruma geçmişi ve tek tıkla kurtarma bağlantıları, gizlenmiş
   sahte ödül/çekiliş içeriği.
@@ -175,7 +175,7 @@ ağır bir çalışma zamanı olmadan.
   indirilir ve yerel olarak kontrol edilir, bu yüzden ziyaret ettiğiniz
   hiçbir site hiçbir yere gönderilmez. Güncellemeler birkaç saatte bir
   küçük fark (diff) dosyaları olarak gelir.
-- **Parry, listede yer alan bir siteyi engellediğinde, artık hangi
+- **ScamShield, listede yer alan bir siteyi engellediğinde, artık hangi
   bağımsız kaynakların onu bildirdiğini de söylüyor** — doğrulanabilir,
   kara kutu bir puan değil.
 - **Daha akıllı taklit tespiti**: marka taklidi kontrolleri artık yer

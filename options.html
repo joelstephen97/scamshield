@@ -1,9 +1,9 @@
-<!doctype html><html data-i18n-doctitle="optDocTitle"><head><meta charset="utf-8"><title>Parry Settings</title>
+<!doctype html><html data-i18n-doctitle="optDocTitle"><head><meta charset="utf-8"><title>ScamShield Settings</title>
 <link rel="stylesheet" href="ui/tokens.css"><link rel="stylesheet" href="options.css"></head>
 <body class="ui">
 <div class="shell">
 <nav aria-label="Settings sections" data-i18n-aria="ariaSettingsSections" role="tablist">
-  <div class="brand" id="brandmark">Parry</div>
+  <div class="brand" id="brandmark">ScamShield</div>
   <a href="#protection" data-tab="protection" class="cur" role="tab" aria-selected="true" aria-controls="tab-protection" data-i18n="tabProtection">Protection</a>
   <a href="#trusted" data-tab="trusted" role="tab" aria-selected="false" aria-controls="tab-trusted" data-i18n="tabTrusted">Paused sites</a>
   <a href="#history" data-tab="history" role="tab" aria-selected="false" aria-controls="tab-history" data-i18n="tabHistory">History</a>
@@ -47,8 +47,8 @@
 
   <div class="setrow"><div class="t"><b data-i18n="optStrict">Strict mode</b><span data-i18n="optStrictHint">For anyone who wants maximum caution: even "suspicious" pages are blocked with a full-screen warning and simpler wording. Best for helping a less confident family member stay safe.</span></div><label class="switch" for="strict"><input type="checkbox" id="strict" class="sr"><i></i></label></div>
 
-  <div class="setrow"><div class="t"><b data-i18n="optReporting">Help make Parry smarter</b><span data-i18n="optReportingHint">Sends the site name (never the full address or page text) and anonymous risk signals of pages flagged dangerous, and of sites you report. Off by default.</span><button id="whatsent" class="exp" data-i18n="optWhatSentToggle">What exactly is sent ▾</button>
-    <div id="whatsentbody" class="hint" hidden><span data-i18n="optWhatSentBody">A report contains only: the site name (hostname), the verdict and internal reason codes, numeric risk signals derived from the address and page layout (hashed word counts and counts of forms, inputs and links — never the text itself), matched brand names, the extension version, and the hour. Never the full address (path or query), page text, anything you typed, cookies, or any identifier of you or your device. Reports are deleted after 180 days.</span> <a href="https://joelstephen97.github.io/parry/privacy.html" target="_blank" rel="noopener" data-i18n="privacyPolicyLink">Privacy policy</a></div></div>
+  <div class="setrow"><div class="t"><b data-i18n="optReporting">Help make ScamShield smarter</b><span data-i18n="optReportingHint">Sends the site name (never the full address or page text) and anonymous risk signals of pages flagged dangerous, and of sites you report. Off by default.</span><button id="whatsent" class="exp" data-i18n="optWhatSentToggle">What exactly is sent ▾</button>
+    <div id="whatsentbody" class="hint" hidden><span data-i18n="optWhatSentBody">A report contains only: the site name (hostname), the verdict and internal reason codes, numeric risk signals derived from the address and page layout (hashed word counts and counts of forms, inputs and links — never the text itself), matched brand names, the extension version, and the hour. Never the full address (path or query), page text, anything you typed, cookies, or any identifier of you or your device. Reports are deleted after 180 days.</span> <a href="https://joelstephen97.github.io/scamshield/privacy.html" target="_blank" rel="noopener" data-i18n="privacyPolicyLink">Privacy policy</a></div></div>
     <label class="switch" for="report"><input type="checkbox" id="report" class="sr"><i></i></label></div>
 </section>
 <section id="tab-trusted" class="tab" hidden role="tabpanel" aria-labelledby="h-trusted">
@@ -71,7 +71,7 @@
     <div class="tile"><b id="st-checked">—</b><span data-i18n="statsPagesChecked">Pages checked on-device</span></div>
     <div class="tile" id="st-threats-tile"><b id="st-threats">—</b><span data-i18n="statsThreatsStopped">Threats stopped</span><span class="sub" id="st-threats-sub"></span></div>
     <div class="tile"><b id="st-privacy">—</b><span data-i18n="statsPrivacyFindings">Privacy findings</span></div>
-    <div class="tile"><b id="st-rules">—</b><span data-i18n="statsRulesActive">Blocklist rules active</span><span class="note" data-i18n="statsRulesActiveHint">In force right now, including the list built into Parry.</span></div>
+    <div class="tile"><b id="st-rules">—</b><span data-i18n="statsRulesActive">Blocklist rules active</span><span class="note" data-i18n="statsRulesActiveHint">In force right now, including the list built into ScamShield.</span></div>
   </div>
   <div class="charts">
     <div class="panel">
@@ -89,7 +89,7 @@
   <p class="dfoot"><span aria-hidden="true">🔒</span><span data-i18n="statsFooter">Every number is counted on your device. Nothing on this page is sent anywhere.</span></p>
 </section>
 <section id="tab-feed" class="tab" hidden role="tabpanel" aria-labelledby="h-feed">
-  <h2 id="h-feed" tabindex="-1" data-i18n="feedTitle">Threat feed</h2><p class="lead" data-i18n="feedLead">A daily-rebuilt list of known scam sites (OpenPhish + URLhaus, heavily filtered). Parry only downloads it.</p>
+  <h2 id="h-feed" tabindex="-1" data-i18n="feedTitle">Threat feed</h2><p class="lead" data-i18n="feedLead">A daily-rebuilt list of known scam sites (OpenPhish + URLhaus, heavily filtered). ScamShield only downloads it.</p>
   <div class="feedline"><span class="dot" id="feeddot"></span><span id="feedstatus" data-i18n="feedNeverUpdated">Never updated</span><button id="checkupd" class="btn ghost" data-i18n="checkNow">Check now</button></div>
   <details class="adv"><summary data-i18n="optAdvancedFeedUrl">Advanced: feed URL</summary>
     <label class="row"><span data-i18n="optFeedUrlLabel">Feed URL</span><input type="url" id="otaurl" placeholder="https://…/blocklist.json" data-i18n-ph="optFeedUrlPlaceholder"></label>
@@ -99,12 +99,12 @@
   <h2 id="h-about" tabindex="-1" data-i18n="tabAbout">About</h2>
   <div class="setrow"><div class="t"><b data-i18n="aboutVersion">Version</b><span id="aboutver"></span></div></div>
   <div class="setrow"><div class="t"><b data-i18n="appearance">Appearance</b><span data-i18n="optThemeHint">Follow your system, or pick one.</span></div><select id="theme"><option value="auto" data-i18n="optThemeAuto">Auto</option><option value="light" data-i18n="optThemeLight">Light</option><option value="dark" data-i18n="optThemeDark">Dark</option></select></div>
-  <div class="setrow"><div class="t"><b data-i18n="optLang">Language</b><span data-i18n="optLangHint">Applies to Parry's warnings, popup and settings. Syncs with your other devices if sync is on.</span></div><select id="lang" aria-label="Language" data-i18n-aria="optLang"></select></div>
-  <div class="setrow"><div class="t"><b data-i18n="optLinksTitle">Links</b><span><a href="https://joelstephen97.github.io/parry/privacy.html" target="_blank" rel="noopener" data-i18n="privacyPolicyLink">Privacy policy</a> · <a href="https://github.com/joelstephen97/parry" target="_blank" rel="noopener" data-i18n="optLinkGithub">GitHub</a> · <a href="https://github.com/joelstephen97/parry/issues/new" target="_blank" rel="noopener" data-i18n="optLinkReportIssue">Report an issue</a> · <a href="https://github.com/joelstephen97/parry/blob/main/CHANGELOG.md" target="_blank" rel="noopener" data-i18n="whatsNewLink">What's new</a></span></div></div>
-  <div class="setrow" id="reviewaboutrow" hidden><div class="t"><span><a id="reviewaboutlink" href="https://chromewebstore.google.com/detail/fojjjofjimbfoddafoampojopijnlihl/reviews" target="_blank" rel="noopener" data-i18n="reviewAboutLink">Enjoying Parry? Leave a review</a></span></div></div>
-  <div class="setrow"><div class="t"><b data-i18n="support">Support</b><span><span data-i18n="supportFreeOnDevice">Parry is free and runs entirely on your device.</span> <a id="support" href="https://github.com/sponsors/joelstephen97" target="_blank" rel="noopener" data-i18n="supportSponsorGithub">Sponsor on GitHub</a> · <a href="https://www.paypal.me/joelstephen1" target="_blank" rel="noopener" data-i18n="supportDonatePaypal">Donate via PayPal</a></span></div></div>
+  <div class="setrow"><div class="t"><b data-i18n="optLang">Language</b><span data-i18n="optLangHint">Applies to ScamShield's warnings, popup and settings. Syncs with your other devices if sync is on.</span></div><select id="lang" aria-label="Language" data-i18n-aria="optLang"></select></div>
+  <div class="setrow"><div class="t"><b data-i18n="optLinksTitle">Links</b><span><a href="https://joelstephen97.github.io/scamshield/privacy.html" target="_blank" rel="noopener" data-i18n="privacyPolicyLink">Privacy policy</a> · <a href="https://github.com/joelstephen97/scamshield" target="_blank" rel="noopener" data-i18n="optLinkGithub">GitHub</a> · <a href="https://github.com/joelstephen97/scamshield/issues/new" target="_blank" rel="noopener" data-i18n="optLinkReportIssue">Report an issue</a> · <a href="https://github.com/joelstephen97/scamshield/blob/main/CHANGELOG.md" target="_blank" rel="noopener" data-i18n="whatsNewLink">What's new</a></span></div></div>
+  <div class="setrow" id="reviewaboutrow" hidden><div class="t"><span><a id="reviewaboutlink" href="https://chromewebstore.google.com/detail/fojjjofjimbfoddafoampojopijnlihl/reviews" target="_blank" rel="noopener" data-i18n="reviewAboutLink">Enjoying ScamShield? Leave a review</a></span></div></div>
+  <div class="setrow"><div class="t"><b data-i18n="support">Support</b><span><span data-i18n="supportFreeOnDevice">ScamShield is free and runs entirely on your device.</span> <a id="support" href="https://github.com/sponsors/joelstephen97" target="_blank" rel="noopener" data-i18n="supportSponsorGithub">Sponsor on GitHub</a> · <a href="https://www.paypal.me/joelstephen1" target="_blank" rel="noopener" data-i18n="supportDonatePaypal">Donate via PayPal</a></span></div></div>
   <h3 data-i18n="whatLeaves">What leaves your device</h3>
-  <p class="lead" data-i18n="netNoTelemetry">Parry makes no analytics, telemetry or tracking requests — ever. The only requests it can make are these three, and you can verify it yourself: open your browser's DevTools → Network tab, use Parry normally, and you will see nothing beyond them.</p>
+  <p class="lead" data-i18n="netNoTelemetry">ScamShield makes no analytics, telemetry or tracking requests — ever. The only requests it can make are these three, and you can verify it yourself: open your browser's DevTools → Network tab, use ScamShield normally, and you will see nothing beyond them.</p>
   <ul id="netreceipt" class="list">
     <li><span><b data-i18n="receiptFeedLabel">Threat-list download</b><br><span class="meta" data-i18n="receiptFeedDetail">The public blocklist file — the same for everyone, nothing about you is sent.</span></span><span class="meta" id="net-feed">—</span></li>
     <li><span><b data-i18n="receiptReportLabel">Community reports</b><br><span class="meta" data-i18n="receiptReportDetail">Only if you turned reporting on. Site name + numeric signals, never URLs or page text.</span></span><span class="meta" id="net-report">—</span></li>
@@ -112,7 +112,7 @@
   </ul>
   <p class="hint" data-i18n="optExportSyncHint">Settings can be exported/imported below and (optionally) synced across your own devices.</p>
   <div class="setrow"><div class="t"><b data-i18n="backupSettings">Back up settings</b><span data-i18n="backupHint">Save your settings and trusted sites to a file, or load them on another computer.</span></div><span><button id="exportbtn" class="btn" data-i18n="exportBtn">Export</button> <button id="importbtn" class="btn" data-i18n="importBtn">Import</button><input type="file" id="importfile" accept="application/json" hidden></span></div>
-  <div class="setrow"><div class="t"><b data-i18n="syncTitle">Sync across my devices</b><span data-i18n="syncHint">Keep your settings and trusted sites in step on every browser where you're signed in. Uses your browser's own sync — Parry still has no account or server. Off by default.</span></div><label class="switch" for="sync"><input type="checkbox" id="sync" class="sr"><i></i></label></div>
+  <div class="setrow"><div class="t"><b data-i18n="syncTitle">Sync across my devices</b><span data-i18n="syncHint">Keep your settings and trusted sites in step on every browser where you're signed in. Uses your browser's own sync — ScamShield still has no account or server. Off by default.</span></div><label class="switch" for="sync"><input type="checkbox" id="sync" class="sr"><i></i></label></div>
 </section>
 <p id="status" class="toast" role="status"></p>
 </main></div>

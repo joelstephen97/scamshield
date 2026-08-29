@@ -1,7 +1,6 @@
-// tools/make-icons.js — generate Parry icon PNGs (no deps).
-// Draws a parry motif — a bold diagonal blade deflecting an incoming dart —
-// 3x3 supersampled for smooth edges, on a transparent background.
-// Run: node tools/make-icons.js
+// tools/make-icons.js — generate ScamShield icon PNGs (no deps).
+// Draws a green shield with a white check, 3x3 supersampled for smooth edges,
+// on a transparent background. Run: node tools/make-icons.js
 const fs = require('fs'), zlib = require('zlib'), path = require('path');
 
 function crc32(buf) {
@@ -16,6 +15,19 @@ function chunk(type, data) {
   return Buffer.concat([len, t, data, crc]);
 }
 
+// Shield coverage at normalized (u,v), both in [0,1]. Returns true if inside.
+function inShield(u, v) {
+  const cx = 0.5, halfTop = 0.40;
+  if (v < 0.08 || v > 0.95) return false;
+  if (v <= 0.58) {
+    let hw = halfTop;
+    if (v < 0.22) { const t = (0.22 - v) / 0.14; hw = halfTop * Math.sqrt(Math.max(0, 1 - t * t)); } // round top
+    return Math.abs(u - cx) <= hw;
+  }
+  const t = (v - 0.58) / (0.95 - 0.58);   // taper to a point at the bottom
+  return Math.abs(u - cx) <= halfTop * (1 - t);
+}
+
 // Distance from point (u,v) to segment (ax,ay)-(bx,by).
 function segDist(u, v, ax, ay, bx, by) {
   const dx = bx - ax, dy = by - ay;
@@ -25,57 +37,20 @@ function segDist(u, v, ax, ay, bx, by) {
   const px = ax + s * dx, py = ay + s * dy;
   return Math.hypot(u - px, v - py);
 }
-
-// --- Parry motif geometry -------------------------------------------------
-// A bold diagonal blade — flat-cut base, tapered to a point tip — crosses
-// the icon from bottom-left to top-right. A white dart bends sharply where
-// it meets the blade: one arm coming in, a second arm kicking away at a
-// wide angle, reading as the attack bouncing off. Two elements: blade + dart.
-
-const BLADE_A = { x: 0.16, y: 0.86 }, BLADE_B = { x: 0.86, y: 0.16 }, BLADE_HW = 0.125;
-const bladeDx = BLADE_B.x - BLADE_A.x, bladeDy = BLADE_B.y - BLADE_A.y;
-const bladeLen = Math.hypot(bladeDx, bladeDy);
-const bladeTx = bladeDx / bladeLen, bladeTy = bladeDy / bladeLen;   // tangent (A -> B)
-const bladeNx = -bladeTy, bladeNy = bladeTx;                        // normal
-const BLADE_TIP_START = 0.70; // fraction of length where the taper to a point begins (near B)
-
-// Flat-cut base at A, tapering to a point at B — an oriented "blade" bar,
-// not a rounded capsule, so the silhouette reads as a blade, not a pill.
-function inBlade(u, v) {
-  const rx = u - BLADE_A.x, ry = v - BLADE_A.y;
-  const t = rx * bladeTx + ry * bladeTy;      // position along the blade, 0..bladeLen
-  if (t < 0 || t > bladeLen) return false;
-  const n = rx * bladeNx + ry * bladeNy;      // signed distance off the centerline
-  const frac = t / bladeLen;
-  let hw = BLADE_HW;
-  if (frac > BLADE_TIP_START) hw = BLADE_HW * (1 - (frac - BLADE_TIP_START) / (1 - BLADE_TIP_START));
-  return Math.abs(n) <= Math.max(0, hw);
+// White check mark coverage.
+function inCheck(u, v) {
+  const hw = 0.058;
+  return segDist(u, v, 0.30, 0.51, 0.44, 0.65) < hw || segDist(u, v, 0.44, 0.65, 0.73, 0.34) < hw;
 }
 
-// Dart: a bold chevron (two thick arms meeting at a vertex on the blade) —
-// same construction as a checkmark, sized and angled to read as a deflection.
-const DART_VERTEX = { x: 0.44, y: 0.50 };     // where the dart meets the blade (embedded in it)
-const DART_IN_END = { x: 0.09, y: 0.12 };     // incoming arm (from upper-left)
-const DART_OUT_END = { x: 0.68, y: 0.14 };    // deflected arm (kicked up-and-right)
-const DART_HW = 0.085, DART_OUTLINE = 0.022;  // fill half-width, + outline half-width delta
-
-function inDart(u, v, margin) {
-  const hw = DART_HW + margin;
-  return segDist(u, v, DART_IN_END.x, DART_IN_END.y, DART_VERTEX.x, DART_VERTEX.y) < hw ||
-    segDist(u, v, DART_VERTEX.x, DART_VERTEX.y, DART_OUT_END.x, DART_OUT_END.y) < hw;
-}
-
-// Returns [r,g,b] for a normalized point on the motif, or null if outside.
+// Returns [r,g,b] for a normalized point inside the shield, or null if outside.
 function sample(u, v) {
   const GREEN = [0x0b, 0x6e, 0x4f], RIM = [0x09, 0x57, 0x3f], WHITE = [0xff, 0xff, 0xff];
-  if (inDart(u, v, 0)) return WHITE;                  // white dart, drawn on top
-  if (inDart(u, v, DART_OUTLINE)) return RIM;         // dark-green halo around the dart for contrast
-  if (inBlade(u, v)) {
-    const eps = 0.02; // subtle darker rim near the blade edge for depth
-    const edge = !(inBlade(u - eps, v) && inBlade(u + eps, v) && inBlade(u, v - eps) && inBlade(u, v + eps));
-    return edge ? RIM : GREEN;
-  }
-  return null;
+  if (!inShield(u, v)) return null;
+  if (inCheck(u, v)) return WHITE;
+  const eps = 0.03; // subtle darker rim near the shield edge for depth
+  const edge = !(inShield(u - eps, v) && inShield(u + eps, v) && inShield(u, v - eps) && inShield(u, v + eps));
+  return edge ? RIM : GREEN;
 }
 
 function png(size) {

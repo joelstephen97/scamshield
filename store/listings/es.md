@@ -2,7 +2,7 @@
 
 ## Name
 
-Bloqueador de estafas y phishing: Parry
+Bloqueador de estafas y phishing: ScamShield
 
 ## Short description
 
@@ -10,15 +10,15 @@ Bloquea sitios de estafa, phishing y tiendas falsas. 100% en el dispositivo: tu 
 
 ## Full description
 
-No hay servidor. Parry lee la página en la que estás, el mensaje que pegas
+No hay servidor. ScamShield lee la página en la que estás, el mensaje que pegas
 y la tienda donde estás pagando — todo dentro de tu navegador — y nunca
 envía a ningún otro sitio lo que navegas, escribes o pegas.
 
-**Por qué Parry**
+**Por qué ScamShield**
 
 La mayoría de las extensiones antiestafa se conectan a sus servidores:
 envían las páginas que visitas, o un hash de ellas, a los servidores de una
-empresa y reciben un veredicto de vuelta. Parry no lo hace, porque no lo
+empresa y reciben un veredicto de vuelta. ScamShield no lo hace, porque no lo
 necesita — la misma detección que se ejecutaría en la nube se ejecuta
 localmente en su lugar. Eso significa sin cuenta, sin una caída del
 servidor que te deje desprotegido, y nada sobre tu navegación que pueda
@@ -28,7 +28,7 @@ la protección en tiempo real" — todo el producto es el producto gratuito.
 
 **Qué bloquea**
 
-- **Inicios de sesión de bancos y marcas falsificados** — Parry compara
+- **Inicios de sesión de bancos y marcas falsificados** — ScamShield compara
   mediante hash el icono y el logo de la página con una tabla de 64 marcas
   (bancos, operadoras y servicios gubernamentales de los EAU incluidos,
   junto a PayPal, Microsoft, Google y más) y detecta dominios con
@@ -49,7 +49,7 @@ la protección en tiempo real" — todo el producto es el producto gratuito.
   pantalla y del botón Atrás de la página.
 - **Ataques ClickFix y del portapapeles** — el truco de malware de más
   rápido crecimiento de 2025: un falso CAPTCHA de "verifica que eres
-  humano" que te convence de pegar un comando en Ejecutar de Windows. Parry
+  humano" que te convence de pegar un comando en Ejecutar de Windows. ScamShield
   sobrescribe la carga maliciosa del portapapeles y bloquea la página a
   pantalla completa antes de que pueda ejecutarse.
 - **Formularios que filtran datos** — avisa en el momento en que un sitio
@@ -60,7 +60,7 @@ la protección en tiempo real" — todo el producto es el producto gratuito.
 
 **Cómo funciona**
 
-1. Parry lee la propia página, en tu dispositivo — su texto, diseño,
+1. ScamShield lee la propia página, en tu dispositivo — su texto, diseño,
    formularios de inicio de sesión e iconos — en el momento en que la
    abres, o el mensaje que pegas en el popup para una comprobación de
    mensaje sospechoso.
@@ -72,7 +72,7 @@ la protección en tiempo real" — todo el producto es el producto gratuito.
 3. Obtienes una razón en lenguaje sencillo, no solo un banner rojo, con una
    solución en un clic: *Salir de esta página* ante una alerta peligrosa,
    *Llévame al sitio real* ante una página de suplantación de marca — o, si
-   Parry se equivocó, pausa la alerta en ese sitio durante una hora, un día
+   ScamShield se equivocó, pausa la alerta en ese sitio durante una hora, un día
    o para siempre.
 
 **Estadísticas y explicabilidad**
@@ -87,15 +87,15 @@ los últimos 7 días, los últimos 30 días o tus totales desde la instalación.
 Cada cifra se calcula y almacena en tu dispositivo; ninguna se envía jamás
 a ningún sitio.
 
-**Privacidad: qué hace y qué no hace Parry**
+**Privacidad: qué hace y qué no hace ScamShield**
 
-Parry solicita acceso a las páginas que visitas porque así es como el
+ScamShield solicita acceso a las páginas que visitas porque así es como el
 análisis en el dispositivo realmente las lee — el texto, el diseño, los
 formularios de inicio de sesión y los iconos — la comprobación ocurre
 localmente, en tu navegador, no en un servidor en algún lugar. Lo único que
 sale de tu dispositivo de forma predeterminada es una simple descarga de
 archivo: la lista pública de amenazas de dominios de estafa conocidos,
-obtenida periódicamente del feed de código abierto de Parry para que el
+obtenida periódicamente del feed de código abierto de ScamShield para que el
 bloqueo funcione justo después de la instalación y sin conexión. Nada sobre
 ti o tu navegación específica acompaña esa descarga. El envío de reportes
 comunitarios, opcional y desactivado de forma predeterminada, puede enviar
@@ -107,7 +107,7 @@ mismo la telemetría cero en lugar de fiarte de nuestra palabra.
 
 **Preguntas frecuentes**
 
-**¿En qué se diferencia Parry de Guardio, Malwarebytes o Norton?**
+**¿En qué se diferencia ScamShield de Guardio, Malwarebytes o Norton?**
 
 Esas extensiones comprueban las páginas que visitas enviando información a
 sus propios servidores: Guardio y Bitdefender TrafficLight analizan páginas
@@ -115,29 +115,29 @@ en la nube, Norton Safe Web ejecuta un "servicio de reputación de URL
 remoto" y, según su propia divulgación, recopila tus datos personales, tu
 ubicación y tu historial web, y Avast Online Security envía las URL que
 visitas junto con un ID de dispositivo e información del dispositivo a sus
-servidores. Parry no tiene servidor. Cada comprobación — leer la página,
+servidores. ScamShield no tiene servidor. Cada comprobación — leer la página,
 cotejar iconos de marca, analizar un mensaje pegado — se ejecuta en tu
 dispositivo, y nada de lo que navegas, escribes o compruebas se envía a
 ningún sitio. La propia ficha de Guardio también limita su nivel gratuito a
 solo alertas de sitios web; el bloqueo en tiempo real, la protección de
 descargas y la monitorización de filtraciones son funciones de pago
-(9,99–34,99 $/mes). El conjunto completo de funciones de Parry — bloqueo en
+(9,99–34,99 $/mes). El conjunto completo de funciones de ScamShield — bloqueo en
 tiempo real, detección de tiendas falsas, protección contra vaciadores de
 wallets cripto, bloqueo de estafas de soporte técnico, protección de
 portapapeles/ClickFix, un panel de estadísticas y una razón en lenguaje
 sencillo en cada alerta — es gratis, sin nivel premium.
 
-**¿Parry es realmente gratis? ¿Cuál es la trampa?**
+**¿ScamShield es realmente gratis? ¿Cuál es la trampa?**
 
 Sí, y no hay ninguna trampa: sin nivel premium, sin prueba, sin "actualiza
-para desbloquear la protección en tiempo real". Parry no gestiona un
+para desbloquear la protección en tiempo real". ScamShield no gestiona un
 servidor por el que cobrarte, así que no hay nada que venderte después — el
 producto entero es el producto gratuito. Eso es distinto de la mayoría de
 la categoría: varios rivales regalan un nivel gratuito limitado y cobran
 mensualmente por su protección real (el nivel gratuito de Guardio es solo
 alertas; el bloqueo completo cuesta 9,99–34,99 $/mes), mientras que otros
 son extensiones gratuitas que venden de forma cruzada una suite de
-seguridad de pago. Parry se sostiene de otra manera — manteniéndose
+seguridad de pago. ScamShield se sostiene de otra manera — manteniéndose
 pequeño, en el dispositivo y lo bastante útil para que lo mantengas
 instalado, más donaciones opcionales. Si quieres apoyar su desarrollo, hay
 un enlace en la extensión, nunca un muro de pago.
@@ -155,7 +155,7 @@ un enlace en la extensión, nunca un muro de pago.
   ajustes, independientemente del idioma de tu navegador.
 - Exportación/importación de ajustes y sincronización opcional entre
   dispositivos — la propia sincronización de tu navegador, aún sin cuenta
-  ni servidor de Parry.
+  ni servidor de ScamShield.
 - Modo oscuro, historial de protección y enlaces de rescate en un clic,
   contenido falso de premios/sorteos oculto.
 
@@ -179,7 +179,7 @@ comprimidos, sin runtime pesado.
   compactas y se comprueba localmente, así que ningún sitio que visitas se
   envía jamás a ningún sitio. Las actualizaciones llegan como pequeños
   diffs cada pocas horas.
-- **Cuando Parry bloquea un sitio incluido en la lista, ahora te indica qué
+- **Cuando ScamShield bloquea un sitio incluido en la lista, ahora te indica qué
   fuentes independientes lo reportaron** — verificable, no una puntuación
   de caja negra.
 - **Detección de imitaciones más inteligente**: las comprobaciones de

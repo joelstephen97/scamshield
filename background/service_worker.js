@@ -7,11 +7,11 @@
 try { importScripts('../engine/constants.js', '../engine/trust.js', '../engine/features.js', '../engine/risk_rules.js', '../engine/image_hash.js', '../engine/brand_icons.js', '../engine/report_payload.js', '../engine/engagement.js', '../engine/blockset.js', './stats.js', './blockstore.js'); } catch (_) { /* deps already loaded by sw.js (Chrome) or the manifest (Firefox) */ }
 const api = globalThis.browser || globalThis.chrome;
 
-// Official Parry feed: rebuilt daily by GitHub Actions from OpenPhish +
+// Official ScamShield feed: rebuilt daily by GitHub Actions from OpenPhish +
 // URLhaus with a Tranco top-10k false-positive guard. Download-only static
 // JSON — no user or browsing data is ever sent. Users can point this at
 // their own feed or clear it in settings to disable updates.
-const DEFAULT_FEED_URL = 'https://raw.githubusercontent.com/joelstephen97/parry-feed/main/blocklist.json';
+const DEFAULT_FEED_URL = 'https://raw.githubusercontent.com/joelstephen97/scamshield-feed/main/blocklist.json';
 // Community reporting relay: opt-in only, off by default. Placeholder host
 // until Task 6 deploys the real relay; users can point this at their own or
 // clear it to disable even when opted in.
@@ -30,7 +30,7 @@ const PLACEHOLDER_RELAY_URL = 'https://scamshield-relay.vercel.app/api/report';
 // so it stays cacheable and immutable) with `urls.fallback` (raw, same tag's
 // tree) as a backup — both constants live here, next to DEFAULT_FEED_URL, per
 // the task brief.
-const FEED_META_URL = 'https://raw.githubusercontent.com/joelstephen97/parry-feed/main/v/current/meta.json';
+const FEED_META_URL = 'https://raw.githubusercontent.com/joelstephen97/scamshield-feed/main/v/current/meta.json';
 
 const DEFAULTS = {
   enabled: true,
@@ -108,7 +108,7 @@ function recordEngagement(tabUrl) {
     try {
       const u = new URL(tabUrl);
       if (!/^https?:$/.test(u.protocol)) return;
-      const SS = globalThis.Parry;
+      const SS = globalThis.ScamShield;
       const reg = SS.registrableDomain(u.hostname);
       const cur = await api.storage.local.get('engagement');
       const next = SS.engagement.recordVisit(cur.engagement || {}, reg, Date.now());
@@ -385,7 +385,7 @@ async function hashIconUrl(url) {
     const len = Number(res.headers.get('content-length') || 0);
     if (res.ok && len <= ICON_MAX_BYTES && (/^image\//i.test(ct) || /\.ico(\?|$)/i.test(url)) && !/svg/i.test(ct)) {
       const blob = await res.blob();
-      if (blob.size <= ICON_MAX_BYTES) hash = await globalThis.Parry.hashImageBlob(blob);
+      if (blob.size <= ICON_MAX_BYTES) hash = await globalThis.ScamShield.hashImageBlob(blob);
     }
   } catch (_) { hash = null; } finally { clearTimeout(t); }
   iconCache.set(url, { hash, ts: Date.now() });
@@ -394,7 +394,7 @@ async function hashIconUrl(url) {
   return hash;
 }
 async function handleHashIcons(urls) {
-  const SS = globalThis.Parry;
+  const SS = globalThis.ScamShield;
   const table = (SS.BRAND_ICONS && SS.BRAND_ICONS.brands) || [];
   const maxDist = (SS.THRESHOLDS && SS.THRESHOLDS.iconHamming) || 6;
   const entryByHash = new Map();
@@ -435,7 +435,7 @@ async function getSettings() {
   await settingsInitPromise;
   const stored = await api.storage.local.get('settings');
   const merged = Object.assign({}, DEFAULTS, stored.settings || {});
-  merged.pausedSites = globalThis.Parry.prunePaused(merged.pausedSites, Date.now());
+  merged.pausedSites = globalThis.ScamShield.prunePaused(merged.pausedSites, Date.now());
   return merged;
 }
 // All setSettings() callers (onInstalled, runOtaUpdate, message handlers,
@@ -610,7 +610,7 @@ async function maybeAutoReport(tabUrl, verdict, report, detectors) {
   const s = await getSettings();
   if (!s.reportingOptIn || !verdict || verdict.level !== 'dangerous') return;
   let host; try { host = new URL(tabUrl).hostname; } catch (_) { return; }
-  const SS = globalThis.Parry;
+  const SS = globalThis.ScamShield;
   const reg = SS.registrableDomain(host);
   if (SS.isSafeHost(host) || (s.allowlist || []).includes(reg)) return;
   const cur = await api.storage.local.get('reportedHosts');
@@ -636,7 +636,7 @@ function githubIssueUrl(host, verdict) {
     .map((r) => r.code + ((r.params || []).length ? `(${r.params.join(', ')})` : ''));
   const codesBlock = codes.length ? `Codes: ${codes.join(', ')}\n\n` : '';
   const body = encodeURIComponent(`Site: ${host}\nVerdict: ${(verdict && verdict.level) || 'n/a'} (score ${(verdict && verdict.score) || 0})\n${reasonsBlock}${codesBlock}What happened:\n`);
-  return `https://github.com/joelstephen97/parry/issues/new?title=${title}&body=${body}`;
+  return `https://github.com/joelstephen97/scamshield/issues/new?title=${title}&body=${body}`;
 }
 const lastReportInput = new Map(); // tabId → report input (from content script)
 async function handleUserReport(msg, sender) {
@@ -658,7 +658,7 @@ async function handleUserReport(msg, sender) {
     try { await api.tabs.create({ url: issueUrl }); } catch (_) {}
     return { ok: true, via: 'github', issueUrl };
   }
-  const SS = globalThis.Parry;
+  const SS = globalThis.ScamShield;
   const input = Object.assign({ url, verdict, detectors: ['page'], urlFeatures: SS.extractUrlFeatures(url) }, lastReportInput.get(tabId) || {});
   const payload = SS.buildReportPayload(Object.assign({ kind: 'user', label: msg.label === 'scam' ? 'scam' : 'false_positive', extVersion: manifestVersion(), now: Date.now() }, input));
   const queued = await queueReport(payload);
@@ -855,12 +855,12 @@ async function runFeedUpdate(metaUrl) {
 // Dyndns/hoster membership evidence (Task B3): the SW computes the SHA-256 of
 // the registrable domain itself (crypto.subtle is inherently async, so this
 // can't live in the pure/synchronous engine/risk_rules.js) and hands the
-// first 4 digest bytes to Parry.hash32FromBytes() for the actual set lookup.
+// first 4 digest bytes to ScamShield.hash32FromBytes() for the actual set lookup.
 async function checkRiskHosting(host) {
   const rec = await globalThis.Blockstore.get();
   const risk = rec && rec.riskTables;
   if (!risk || (!Array.isArray(risk.dyndns) && !Array.isArray(risk.hosters))) return { hit: null };
-  const SS = globalThis.Parry;
+  const SS = globalThis.ScamShield;
   const reg = SS.registrableDomain(host);
   if (!reg) return { hit: null };
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(reg));
@@ -930,13 +930,13 @@ async function checkFeedHost(host) {
 // 'warn' | null } } — keyed on the caller's own strings (not the normalized
 // form) so content_script.js never has to duplicate normalizeFeedHost().
 async function checkFeedBatchHosts(hosts) {
-  const list = globalThis.Parry.dedupeCapped(Array.isArray(hosts) ? hosts.filter((h) => typeof h === 'string') : [], 50);
+  const list = globalThis.ScamShield.dedupeCapped(Array.isArray(hosts) ? hosts.filter((h) => typeof h === 'string') : [], 50);
   const out = {};
   if (!list.length) return { results: out };
 
   const rec = await globalThis.Blockstore.get();
   const Bset = globalThis.Blockset;
-  const SS = globalThis.Parry;
+  const SS = globalThis.ScamShield;
   const blockSet = rec && rec.blockBuf ? Bset.open(rec.blockBuf) : null;
   const warnSet = rec && rec.warnBuf ? Bset.open(rec.warnBuf) : null;
   const risk = rec && rec.riskTables;
@@ -982,13 +982,6 @@ api.runtime.onInstalled.addListener(async (details) => {
   if (details && details.reason === 'update') {
     const cur = await getSettings();
     if (cur.otaUrl === '') await setSettings({ otaUrl: DEFAULT_FEED_URL });
-    // Migration (0.8.0 rename): installs that persisted the old scamshield-feed
-    // default keep working only through GitHub's repo-rename redirect — move
-    // them to the parry-feed URL outright. Only the exact old default is
-    // touched; a user-customised feed URL stays theirs.
-    if (cur.otaUrl === 'https://raw.githubusercontent.com/joelstephen97/scamshield-feed/main/blocklist.json') {
-      await setSettings({ otaUrl: DEFAULT_FEED_URL });
-    }
     // Migration: point pre-existing installs at the live relay. Only touches
     // the old placeholder value (or a missing/undefined field, which reads as
     // the placeholder via DEFAULTS); a user-customised reportUrl is untouched.
@@ -1184,7 +1177,7 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         sendResponse(await setReviewAsk(msg.action)); break;
       case 'getEngagement': {
         const cur = await api.storage.local.get('engagement');
-        const SS = globalThis.Parry;
+        const SS = globalThis.ScamShield;
         sendResponse({ engaged: SS.engagement.isEngaged(cur.engagement || {}, msg.domain, Date.now()) });
         break;
       }
@@ -1258,7 +1251,7 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       case 'userReport':
         sendResponse(await handleUserReport(msg, sender)); break;
       case 'pauseSite': {
-        const s = await getSettings(); const SS = globalThis.Parry;
+        const s = await getSettings(); const SS = globalThis.ScamShield;
         const until = SS.pauseUntil(msg.choice, Date.now());
         if (until === null) { if (!s.allowlist.includes(msg.domain)) s.allowlist.push(msg.domain); await setSettings({ allowlist: s.allowlist }); sendResponse({ ok: true, until: null }); break; }
         const ps = Object.assign({}, s.pausedSites, { [msg.domain]: until });
@@ -1270,7 +1263,7 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       }
       case 'getTabStats': {
         const cur = await api.storage.local.get('history'); const list = Array.isArray(cur.history) ? cur.history : [];
-        const SS = globalThis.Parry;
+        const SS = globalThis.ScamShield;
         sendResponse({ siteCount: list.filter((e) => SS.registrableDomain(e.host) === msg.domain).length }); break;
       }
       case 'leaveTab': {

@@ -22,7 +22,7 @@ Do not hand-edit the PNGs below — re-run the script instead.
 5. `05-wallet-guard.png` — wallet-drainer overlay blocking a fake "Connect &
    Claim" flow ("Stops wallet drainers and scare pop-ups").
 
-Captured against the 0.8.0 popup/options UI (Parry rebrand and icon,
+Captured against the 0.8.0 popup/options UI (ScamShield rebrand and icon,
 time-boxed pause menu, hero counters, "Why this verdict?" panel, rotating
 footer). Re-run `npm run screenshots` after any visual change to
 popup/options/in-page UI and commit the refreshed PNGs. `npm run promo`

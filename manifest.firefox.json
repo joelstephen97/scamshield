@@ -27,6 +27,6 @@
   ],
   "declarative_net_request": { "rule_resources": [ { "id": "blocklist", "enabled": true, "path": "rules/blocklist.json" } ] },
   "icons": { "16": "assets/icons/icon16.png","32":"assets/icons/icon32.png","48": "assets/icons/icon48.png", "128": "assets/icons/icon128.png" },
-  "action": { "default_title": "Parry", "default_popup": "popup.html", "default_icon": { "16": "assets/icons/icon16.png","32":"assets/icons/icon32.png","48": "assets/icons/icon48.png", "128": "assets/icons/icon128.png" } },
+  "action": { "default_title": "ScamShield", "default_popup": "popup.html", "default_icon": { "16": "assets/icons/icon16.png","32":"assets/icons/icon32.png","48": "assets/icons/icon48.png", "128": "assets/icons/icon128.png" } },
   "options_ui": { "page": "options.html", "open_in_tab": true }
 }

@@ -15,9 +15,9 @@
 //     hash32FromBytes() here.
 (function (root, factory) {
   const req = typeof require === 'function';
-  const mod = factory(req ? require('./constants') : root.Parry);
+  const mod = factory(req ? require('./constants') : root.ScamShield);
   if (typeof module !== 'undefined' && module.exports) module.exports = mod;
-  root.Parry = Object.assign(root.Parry || {}, mod);
+  root.ScamShield = Object.assign(root.ScamShield || {}, mod);
 })(typeof globalThis !== 'undefined' ? globalThis : self, function (C) {
   'use strict';
 

@@ -16,7 +16,7 @@ test('0.3.1 settings + history load, migrate additively, and the UI works', asyn
   await sw.evaluate(async () => { const cur = await getSettings(); if (cur.otaUrl === '') await setSettings({ otaUrl: DEFAULT_FEED_URL }); });
   const s = await sw.evaluate(() => getSettings());
   expect(s.allowlist).toEqual(['trusted-shop.example']); expect(s.threatsBlocked).toBe(7);
-  await expect.poll(() => sw.evaluate(() => getSettings().then((x) => x.otaUrl)), { timeout: 5000 }).toContain('parry-feed');
+  await expect.poll(() => sw.evaluate(() => getSettings().then((x) => x.otaUrl)), { timeout: 5000 }).toContain('scamshield-feed');
   expect(s.pageAnalysis).toBe(true); expect(s.theme).toBe('auto'); expect(s.pausedSites).toEqual({}); expect(s.reportingOptIn).toBe(false);
   // 0.6.0 keys arrive with safe defaults on an upgraded profile, old keys intact.
   expect(s.clickFixGuard).toBe(true); expect(s.fakeUpdateGuard).toBe(true); expect(s.walletGuard).toBe(true);

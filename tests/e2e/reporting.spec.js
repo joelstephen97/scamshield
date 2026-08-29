@@ -51,6 +51,6 @@ test('user report: opted in → relay; opted out → GitHub issue URL', async ({
   await expect.poll(async () => (await relayState(page)).last && (await relayState(page)).last.label, { timeout: 5000 }).toBe('scam');
   await setSettings(context, { reportingOptIn: false });
   const r2 = await sw.evaluate((id) => handleUserReport({ label: 'false_positive', tabId: id }, { tab: { id } }), tabId);
-  expect(r2.via).toBe('github'); expect(r2.issueUrl).toContain('github.com/joelstephen97/parry/issues/new');
+  expect(r2.via).toBe('github'); expect(r2.issueUrl).toContain('github.com/joelstephen97/scamshield/issues/new');
   expect(r2.issueUrl).toContain('localhost');
 });

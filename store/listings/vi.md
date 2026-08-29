@@ -2,7 +2,7 @@
 
 ## Name
 
-Chặn lừa đảo & Phishing: Parry
+Chặn lừa đảo & Phishing: ScamShield
 
 ## Short description
 
@@ -10,16 +10,16 @@ Chặn trang web lừa đảo, phishing và shop giả. 100% trên thiết bị 
 
 ## Full description
 
-Không có máy chủ nào cả. Parry đọc trang bạn đang xem, tin nhắn bạn dán
+Không có máy chủ nào cả. ScamShield đọc trang bạn đang xem, tin nhắn bạn dán
 vào, và shop bạn đang thanh toán — hoàn toàn bên trong trình duyệt của
 bạn — và không bao giờ gửi những gì bạn duyệt, gõ hoặc dán đi bất kỳ nơi
 nào khác.
 
-**Vì sao chọn Parry**
+**Vì sao chọn ScamShield**
 
 Hầu hết các tiện ích chống lừa đảo đều "gọi về nhà": chúng gửi các trang
 bạn truy cập, hoặc mã băm của chúng, tới máy chủ của một công ty và nhận
-lại kết luận. Parry không làm vậy, vì không cần thiết — cùng một cơ chế
+lại kết luận. ScamShield không làm vậy, vì không cần thiết — cùng một cơ chế
 phát hiện lẽ ra chạy trên đám mây thì nay chạy cục bộ. Điều đó có nghĩa là
 không có tài khoản, không có sự cố máy chủ khiến bạn mất bảo vệ, và không
 có gì về hoạt động duyệt web của bạn có thể bị rò rỉ, bị yêu cầu theo lệnh
@@ -29,7 +29,7 @@ sản phẩm chính là sản phẩm miễn phí.
 
 **Những gì nó chặn**
 
-- **Trang đăng nhập giả mạo ngân hàng & thương hiệu** — Parry so khớp
+- **Trang đăng nhập giả mạo ngân hàng & thương hiệu** — ScamShield so khớp
   bằng mã băm biểu tượng và logo của trang với bảng 64 thương hiệu (bao
   gồm ngân hàng, nhà mạng và dịch vụ chính phủ UAE, cùng với PayPal,
   Microsoft, Google và nhiều hơn nữa), và phát hiện các tên miền
@@ -49,7 +49,7 @@ sản phẩm chính là sản phẩm miễn phí.
   của trang.
 - **Tấn công ClickFix & clipboard** — thủ đoạn mã độc phát triển nhanh
   nhất năm 2025: một CAPTCHA giả "xác minh bạn là con người" thuyết phục
-  bạn dán một lệnh vào hộp Run của Windows. Parry ghi đè nội dung độc
+  bạn dán một lệnh vào hộp Run của Windows. ScamShield ghi đè nội dung độc
   hại trong clipboard và chặn trang toàn màn hình trước khi nó có thể
   chạy.
 - **Biểu mẫu rò rỉ** — cảnh báo ngay khi một trang gửi email hoặc số điện
@@ -59,7 +59,7 @@ sản phẩm chính là sản phẩm miễn phí.
 
 **Cách hoạt động**
 
-1. Parry đọc chính trang đó, trên thiết bị của bạn — nội dung, bố cục,
+1. ScamShield đọc chính trang đó, trên thiết bị của bạn — nội dung, bố cục,
    biểu mẫu đăng nhập và biểu tượng — ngay khi bạn mở nó, hoặc tin nhắn
    bạn dán vào popup để kiểm tra tin nhắn lừa đảo.
 2. Một mô hình trên thiết bị và một bộ quy tắc chấm điểm những gì tìm
@@ -69,7 +69,7 @@ sản phẩm chính là sản phẩm miễn phí.
 3. Bạn nhận được lý do bằng ngôn ngữ đơn giản, không chỉ một biểu ngữ
    đỏ, cùng giải pháp một cú nhấp: *Rời khỏi trang này* với cảnh báo
    nguy hiểm, *Đưa tôi đến trang thật* với trang giả mạo thương hiệu —
-   hoặc, nếu Parry sai, hãy tạm dừng cảnh báo trên trang đó trong một
+   hoặc, nếu ScamShield sai, hãy tạm dừng cảnh báo trên trang đó trong một
    giờ, một ngày hoặc mãi mãi.
 
 **Thống kê & khả năng giải thích**
@@ -83,15 +83,15 @@ hoạt động hằng ngày mà bạn có thể chuyển đổi giữa 7 ngày q
 hoặc tổng số kể từ khi cài đặt. Mọi con số đều được tính toán và lưu trữ
 trên thiết bị của bạn; không con số nào từng được gửi đi bất kỳ đâu.
 
-**Quyền riêng tư: Parry làm gì và không làm gì**
+**Quyền riêng tư: ScamShield làm gì và không làm gì**
 
-Parry yêu cầu quyền truy cập vào các trang bạn ghé thăm vì đó là cách để
+ScamShield yêu cầu quyền truy cập vào các trang bạn ghé thăm vì đó là cách để
 việc phân tích trên thiết bị thực sự đọc được chúng — nội dung, bố cục,
 biểu mẫu đăng nhập và biểu tượng — việc kiểm tra diễn ra cục bộ, trong
 trình duyệt của bạn, không phải trên một máy chủ nào đó. Điều duy nhất
 rời khỏi thiết bị của bạn theo mặc định là một lượt tải tệp đơn giản:
 danh sách mối đe dọa công khai gồm các tên miền lừa đảo đã biết, được
-lấy định kỳ từ nguồn mở của Parry để việc chặn vẫn hoạt động ngay sau khi
+lấy định kỳ từ nguồn mở của ScamShield để việc chặn vẫn hoạt động ngay sau khi
 cài đặt và cả khi ngoại tuyến. Không có gì về bạn hoặc hoạt động duyệt web
 cụ thể của bạn đi kèm với lượt tải đó. Báo cáo cộng đồng, tùy chọn và mặc
 định tắt, có thể gửi một tên máy chủ được ẩn danh và một tín hiệu rủi ro
@@ -103,34 +103,34 @@ lời chúng tôi.
 
 **Câu hỏi thường gặp**
 
-**Parry khác gì so với Guardio, Malwarebytes hay Norton?**
+**ScamShield khác gì so với Guardio, Malwarebytes hay Norton?**
 
 Các tiện ích đó kiểm tra các trang bạn truy cập bằng cách gửi thông tin
 đến máy chủ riêng của họ: Guardio và Bitdefender TrafficLight quét trang
 trên đám mây, Norton Safe Web chạy một "Dịch vụ đánh giá URL từ xa" và,
 theo tiết lộ của chính họ, thu thập thông tin cá nhân, vị trí và lịch sử
 web của bạn, còn Avast Online Security gửi các URL bạn truy cập cùng với
-ID thiết bị và thông tin thiết bị tới máy chủ của họ. Parry không có máy
+ID thiết bị và thông tin thiết bị tới máy chủ của họ. ScamShield không có máy
 chủ. Mọi lượt kiểm tra — đọc trang, đối chiếu biểu tượng thương hiệu, quét
 một tin nhắn đã dán — đều chạy trên thiết bị của bạn, và không điều gì
 bạn duyệt, gõ hoặc kiểm tra được gửi đi bất kỳ đâu. Trang giới thiệu của
 chính Guardio cũng giới hạn gói miễn phí chỉ ở cảnh báo trang web; chặn
 thời gian thực, bảo vệ tải xuống và giám sát rò rỉ là tính năng trả phí
-(9,99–34,99 $/tháng). Toàn bộ bộ tính năng của Parry — chặn thời gian
+(9,99–34,99 $/tháng). Toàn bộ bộ tính năng của ScamShield — chặn thời gian
 thực, phát hiện shop giả, bảo vệ khỏi kẻ rút cạn ví crypto, chặn lừa đảo
 hỗ trợ kỹ thuật, bảo vệ clipboard/ClickFix, bảng thống kê và lý do bằng
 ngôn ngữ đơn giản cho mỗi cảnh báo — đều miễn phí, không có gói cao cấp.
 
-**Parry có thực sự miễn phí không? Có cạm bẫy gì không?**
+**ScamShield có thực sự miễn phí không? Có cạm bẫy gì không?**
 
 Có, và không hề có cạm bẫy nào: không gói cao cấp, không dùng thử, không
-"nâng cấp để mở khóa bảo vệ thời gian thực". Parry không vận hành máy chủ
+"nâng cấp để mở khóa bảo vệ thời gian thực". ScamShield không vận hành máy chủ
 để tính phí bạn, nên không có gì để bán thêm — toàn bộ sản phẩm chính là
 sản phẩm miễn phí. Đó là một cách tiếp cận khác với phần lớn trong ngành
 này: một số đối thủ tặng gói miễn phí giới hạn và tính phí hằng tháng cho
 bảo vệ thật sự (gói miễn phí của Guardio chỉ có cảnh báo; chặn đầy đủ tốn
 9,99–34,99 $/tháng), trong khi số khác là tiện ích miễn phí bán chéo sang
-một gói bảo mật trả phí. Parry duy trì hoạt động theo cách khác — bằng
+một gói bảo mật trả phí. ScamShield duy trì hoạt động theo cách khác — bằng
 cách giữ nhỏ gọn, chạy trên thiết bị và đủ hữu ích để bạn giữ nó cài đặt,
 cộng thêm quyên góp tùy chọn. Nếu bạn muốn hỗ trợ phát triển, có một liên
 kết trong tiện ích, không bao giờ có bức tường thu phí.
@@ -148,7 +148,7 @@ kết trong tiện ích, không bao giờ có bức tường thu phí.
   đặt, không phụ thuộc vào ngôn ngữ trình duyệt của bạn.
 - Xuất/nhập cài đặt và đồng bộ tùy chọn giữa các thiết bị — tính năng
   đồng bộ riêng của trình duyệt bạn, vẫn không có tài khoản hay máy chủ
-  Parry.
+  ScamShield.
 - Chế độ tối, lịch sử bảo vệ và liên kết cứu hộ một cú nhấp, ẩn nội dung
   giả mạo giải thưởng/quà tặng.
 
@@ -170,7 +170,7 @@ lượng cài đặt dưới 1 MB — khoảng 450 KB khi nén, không có runti
   xuống dưới dạng dấu vân tay gọn nhẹ và được kiểm tra cục bộ, vì vậy
   không trang nào bạn truy cập từng bị gửi đi bất kỳ đâu. Các bản cập
   nhật đến dưới dạng các gói khác biệt nhỏ mỗi vài giờ.
-- **Khi Parry chặn một trang có trong danh sách, giờ đây Parry sẽ cho bạn
+- **Khi ScamShield chặn một trang có trong danh sách, giờ đây ScamShield sẽ cho bạn
   biết những nguồn độc lập nào đã báo cáo trang đó** — có thể kiểm chứng,
   không phải một điểm số hộp đen.
 - **Phát hiện giả mạo thông minh hơn**: các kiểm tra giả mạo thương hiệu
