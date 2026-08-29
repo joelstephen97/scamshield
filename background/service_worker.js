@@ -787,7 +787,11 @@ async function runFeedUpdate(metaUrl) {
   let warnUpdatedAt = rec.warnUpdatedAt || 0;
   if (!warnBuf || Date.now() - warnUpdatedAt >= WARN_REFRESH_MIN_MS) {
     const fetchedWarn = await fetchArrayBufferFromBases(bases, 'warn40.bin');
-    if (fetchedWarn) { warnBuf = fetchedWarn; warnUpdatedAt = Date.now(); }
+    // sha256-verified like the block tier; an older meta.json without a warn
+    // hash (pre-fix feeds) installs unverified rather than never updating.
+    if (fetchedWarn && (!(meta.sha256 && meta.sha256.warn40) || (await sha256Hex(fetchedWarn)) === meta.sha256.warn40)) {
+      warnBuf = fetchedWarn; warnUpdatedAt = Date.now();
+    }
   }
 
   const blockChanged = blockBuf !== rec.blockBuf;
