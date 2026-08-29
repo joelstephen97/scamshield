@@ -68,7 +68,7 @@
   "toastResumed": { "message": "استؤنفت الحماية" },
   "toastCopied": { "message": "تم النسخ" },
   "toastExtensionError": { "message": "خطأ في الإضافة — جرّب إعادة فتحها." },
-  "whatsNewBanner": { "message": "الجديد في 0.8: نافذة منبثقة مُعاد تصميمها بإيقاف مؤقت محدد بوقت، وعدادات احتيال، ولوحة «لماذا هذا الحكم؟»." },
+  "whatsNewBanner": { "message": "الجديد في 0.10: شارات أمان على نتائج البحث، وتحذيرات سرقة البطاقات، وتنبيهات النطاقات الجديدة جدًا، وتقارير احتيال قابلة للمشاركة." },
   "popupBrandDangerSummary": { "message": "يبدو مثل $BRAND$ لكنه ليس كذلك. لا تُدخِل كلمة المرور هنا.", "placeholders": { "brand": { "content": "$1", "example": "PayPal" } } },
   "pausedUntil": { "message": "متوقّف حتى $TIME$", "placeholders": { "time": { "content": "$1", "example": "3:45 PM" } } },
   "fmtProtocolPage": { "message": "صفحة $PROTOCOL$", "placeholders": { "protocol": { "content": "$1", "example": "chrome" } } },

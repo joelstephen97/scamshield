@@ -68,7 +68,7 @@
   "toastResumed": { "message": "সুরক্ষা আবার চালু হয়েছে" },
   "toastCopied": { "message": "কপি হয়েছে" },
   "toastExtensionError": { "message": "এক্সটেনশনে সমস্যা — আবার খুলে দেখুন।" },
-  "whatsNewBanner": { "message": "0.8-এ নতুন: সময়-সীমিত বিরতি, প্রতারণার সংখ্যা এবং \"এই রায় কেন?\" প্যানেলসহ নতুন করে ডিজাইন করা পপআপ।" },
+  "whatsNewBanner": { "message": "0.10-এ নতুন: সার্চ ফলাফলে সুরক্ষা ব্যাজ, কার্ড চুরির সতর্কতা, একদম নতুন ডোমেইন সতর্কতা এবং শেয়ারযোগ্য প্রতারণা রিপোর্ট।" },
   "popupBrandDangerSummary": { "message": "$BRAND$-এর মতো দেখায়, কিন্তু নয়। এখানে আপনার পাসওয়ার্ড দেবেন না।", "placeholders": { "brand": { "content": "$1", "example": "PayPal" } } },
   "pausedUntil": { "message": "$TIME$ পর্যন্ত থামানো", "placeholders": { "time": { "content": "$1", "example": "3:45 PM" } } },
   "fmtProtocolPage": { "message": "$PROTOCOL$ পেজ", "placeholders": { "protocol": { "content": "$1", "example": "chrome" } } },

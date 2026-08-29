@@ -68,7 +68,7 @@
   "toastResumed": { "message": "రక్షణ తిరిగి ప్రారంభమైంది" },
   "toastCopied": { "message": "కాపీ చేయబడింది" },
   "toastExtensionError": { "message": "ఎక్స్‌టెన్షన్ లోపం — మళ్లీ తెరిచి చూడండి." },
-  "whatsNewBanner": { "message": "0.8లో కొత్తవి: సమయ-పరిమిత నిలుపుదల, మోసాల లెక్కలు మరియు \"ఈ నిర్ణయం ఎందుకు?\" ప్యానెల్‌తో తిరిగి రూపొందించిన పాపప్." },
+  "whatsNewBanner": { "message": "0.10లో కొత్తవి: శోధన ఫలితాలపై భద్రతా బ్యాడ్జీలు, కార్డు దొంగతనం హెచ్చరికలు, పూర్తిగా కొత్త డొమైన్ హెచ్చరికలు మరియు పంచుకోదగిన మోసం నివేదికలు." },
   "popupBrandDangerSummary": { "message": "$BRAND$ లా కనిపిస్తోంది, కానీ కాదు. ఇక్కడ మీ పాస్‌వర్డ్ నమోదు చేయవద్దు.", "placeholders": { "brand": { "content": "$1", "example": "PayPal" } } },
   "pausedUntil": { "message": "$TIME$ వరకు నిలిపివేయబడింది", "placeholders": { "time": { "content": "$1", "example": "3:45 PM" } } },
   "fmtProtocolPage": { "message": "$PROTOCOL$ పేజీ", "placeholders": { "protocol": { "content": "$1", "example": "chrome" } } },

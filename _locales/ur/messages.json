@@ -68,7 +68,7 @@
   "toastResumed": { "message": "تحفظ دوبارہ شروع ہو گیا" },
   "toastCopied": { "message": "کاپی ہو گیا" },
   "toastExtensionError": { "message": "ایکسٹینشن میں خرابی — دوبارہ کھول کر دیکھیں۔" },
-  "whatsNewBanner": { "message": "0.8 میں نیا: وقت کے تعین کے ساتھ توقف، دھوکے کے شمار، اور ”یہ فیصلہ کیوں؟“ پینل کے ساتھ نئی ڈیزائن شدہ پاپ اپ۔" },
+  "whatsNewBanner": { "message": "0.10 میں نیا: سرچ نتائج پر حفاظتی بیج، کارڈ چوری کی وارننگز، بالکل نئے ڈومین کی وارننگز، اور قابلِ اشتراک دھوکہ رپورٹس۔" },
   "popupBrandDangerSummary": { "message": "$BRAND$ جیسا لگتا ہے، مگر ہے نہیں۔ یہاں اپنا پاس ورڈ درج نہ کریں۔", "placeholders": { "brand": { "content": "$1", "example": "PayPal" } } },
   "pausedUntil": { "message": "$TIME$ تک روکا گیا", "placeholders": { "time": { "content": "$1", "example": "3:45 PM" } } },
   "fmtProtocolPage": { "message": "$PROTOCOL$ صفحہ", "placeholders": { "protocol": { "content": "$1", "example": "chrome" } } },

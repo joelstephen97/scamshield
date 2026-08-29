@@ -67,7 +67,7 @@
   "toastResumed": { "message": "Protección reanudada" },
   "toastCopied": { "message": "Copiado" },
   "toastExtensionError": { "message": "Error de la extensión; prueba a volver a abrirla." },
-  "whatsNewBanner": { "message": "Novedades de la 0.8: popup rediseñado con pausa programada, contadores de estafas y un panel de por qué este veredicto." },
+  "whatsNewBanner": { "message": "Novedades de la 0.10: insignias de seguridad en los resultados de búsqueda, avisos de robo de tarjetas, avisos de dominios recién creados y informes de estafa compartibles." },
   "popupBrandDangerSummary": { "message": "Parece $BRAND$, pero no lo es. No introduzcas tu contraseña aquí.", "placeholders": { "brand": { "content": "$1", "example": "PayPal" } } },
   "pausedUntil": { "message": "Pausado hasta las $TIME$", "placeholders": { "time": { "content": "$1", "example": "3:45 PM" } } },
   "fmtProtocolPage": { "message": "Página $PROTOCOL$", "placeholders": { "protocol": { "content": "$1", "example": "chrome" } } },

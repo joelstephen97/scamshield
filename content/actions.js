@@ -359,6 +359,9 @@
 
   // Privacy findings are informational (badge/popup tier), never blocking.
   function privacyToast(detail) {
+    // Replace, never stack: same rule as crossOriginCredToast/copiedToast —
+    // two toasts share one fixed position, so the newer one must win.
+    const old = document.querySelector('.' + NS + '-toast'); if (old) old.remove();
     const toast = el('div', NS + '-toast ' + (detail.level === 'warn' ? 'warn' : ''));
     toast.setAttribute('role', 'status');
     setDir(toast);

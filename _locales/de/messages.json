@@ -67,7 +67,7 @@
   "toastResumed": { "message": "Schutz fortgesetzt" },
   "toastCopied": { "message": "Kopiert" },
   "toastExtensionError": { "message": "Erweiterungsfehler – versuche, sie neu zu öffnen." },
-  "whatsNewBanner": { "message": "Neu in 0.8: neu gestaltetes Popup mit zeitlich begrenzter Pause, Betrugszählern und einem Warum-dieses-Urteil-Panel." },
+  "whatsNewBanner": { "message": "Neu in 0.10: Sicherheits-Badges bei Suchergebnissen, Warnungen vor Kartendiebstahl, Warnungen bei brandneuen Domains und teilbare Betrugsberichte." },
   "popupBrandDangerSummary": { "message": "Sieht aus wie $BRAND$, ist es aber nicht. Gib hier nicht dein Passwort ein.", "placeholders": { "brand": { "content": "$1", "example": "PayPal" } } },
   "pausedUntil": { "message": "Pausiert bis $TIME$", "placeholders": { "time": { "content": "$1", "example": "3:45 PM" } } },
   "fmtProtocolPage": { "message": "$PROTOCOL$-Seite", "placeholders": { "protocol": { "content": "$1", "example": "chrome" } } },

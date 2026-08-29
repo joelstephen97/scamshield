@@ -68,7 +68,7 @@
   "toastResumed": { "message": "संरक्षण पुन्हा सुरू झाले" },
   "toastCopied": { "message": "कॉपी झाले" },
   "toastExtensionError": { "message": "एक्स्टेंशनमध्ये अडचण — पुन्हा उघडून पाहा." },
-  "whatsNewBanner": { "message": "0.8 मधील नवीन: वेळ-मर्यादित थांबा, फसवणूक मोजणी आणि \"हा निष्कर्ष का?\" पॅनेलसह पुन्हा डिझाइन केलेला पॉपअप." },
+  "whatsNewBanner": { "message": "0.10 मधील नवीन: शोध निकालांवर सुरक्षा बॅज, कार्ड चोरीचा इशारा, अगदी नवीन डोमेनचा इशारा आणि सामायिक करण्यायोग्य फसवणूक अहवाल." },
   "popupBrandDangerSummary": { "message": "$BRAND$ सारखे दिसते, पण ते नाही. इथे तुमचा पासवर्ड टाकू नका.", "placeholders": { "brand": { "content": "$1", "example": "PayPal" } } },
   "pausedUntil": { "message": "$TIME$ पर्यंत थांबवले", "placeholders": { "time": { "content": "$1", "example": "3:45 PM" } } },
   "fmtProtocolPage": { "message": "$PROTOCOL$ पृष्ठ", "placeholders": { "protocol": { "content": "$1", "example": "chrome" } } },

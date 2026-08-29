@@ -5,6 +5,16 @@ Firefox AMO: not yet listed — add the URL here, in `README.md`, `index.html` a
 
 Listing copy lives in `chrome-listing.md` / `firefox-listing.md`; permissions + data-use text in `permissions-justification.md`; privacy policy at https://joelstephen97.github.io/scamshield/privacy.html (source `privacy-policy.md` → `/privacy.html`).
 
+## Pre-flight (every release)
+- [ ] Version bumped in `manifest.json`, `manifest.firefox.json`, `package.json` (all identical) and `CHANGELOG.md` has the section.
+- [ ] `npm test` green (unit + e2e). `cd relay && npm test` green if the relay changed.
+- [ ] `npm run build` → `dist/scamshield-chrome.zip` + `dist/scamshield-firefox.zip` (the build fails if > 2.5 MB or if the staged manifest drifts).
+- [ ] Open the zip: contains `manifest.json`, `background/`, `content/`, `engine/`, `model/url-model.js` + `model/page-content.js` (no `.onnx`, no `vendor/`), `rules/`, `ui/`, `popup.*`, `options.*`, `onboarding.html`, `goodbye.html` is NOT packaged (it is a Pages-only file), `assets/icons/`.
+- [ ] **Permissions unchanged** (`storage`, `declarativeNetRequest`, `alarms`, http/https hosts) — `tests/unit/build_manifest.test.js` enforces this. A new permission would disable the extension for existing users.
+- [ ] UI changed? `npm run screenshots && npm run promo`, commit the PNGs.
+- [ ] Network behaviour changed? Update `privacy-policy.md` + `/privacy.html` (date!), `permissions-justification.md`, and the CWS data-use answers below.
+- [ ] `git tag vX.Y.Z && git push origin refs/tags/vX.Y.Z`, then `gh release create vX.Y.Z dist/scamshield-chrome.zip dist/scamshield-firefox.zip --title "ScamShield X.Y.Z" --notes-file <notes>`.
+
 ## Chrome Web Store (dashboard → item → Package / Store listing / Privacy)
 - [ ] **Package:** upload `dist/scamshield-chrome.zip` (replaces the current draft; 0.4.0 was never uploaded and is superseded).
 - [ ] **Store listing:** description + "What's new" from `chrome-listing.md`; category *Productivity → Tools* (or *Privacy & Security*); language English; homepage `https://joelstephen97.github.io/scamshield/`; support URL `https://github.com/joelstephen97/scamshield/issues`.
@@ -49,7 +59,7 @@ Nothing changed on the CWS data-use form: still tick only **Website content** an
 ### 0.8.0 reviewer notes (superseded)
 "No new permissions since 0.3.1 (still storage, declarativeNetRequest, alarms + http/https). 0.8.0 also redesigns the popup: the per-site allowlist control is now a time-boxed 'Pause protection' menu (1 hour / 1 day / Always), the stats row shows since-install and this-week blocked counters (all counted in chrome.storage.local, never transmitted), the existing evidence list is grouped under a 'Why this verdict?' disclosure, and the footer rotates between an on-device notice, the existing policy-compliant review ask (unchanged gating from 0.7.0), and a support link. New icon, same single purpose. No new network requests. CWS data-use form answers unchanged. Source: github.com/joelstephen97/scamshield."
 
-- **0.9.0** — parry-feed pipeline v2 (425k+ block / ~1M warn domains, 14 aggregated sources), on-device fingerprint matcher with exact-shard confirmation, brand-lookalike upgrades, new URL risk signals (subdomain depth, long labels, IDN, shorteners, abused-TLD/dyndns/hoster tables). No new permissions.
+- **0.9.0** — scamshield-feed pipeline v2 (425k+ block / ~1M warn domains, 14 aggregated sources), on-device fingerprint matcher with exact-shard confirmation, brand-lookalike upgrades, new URL risk signals (subdomain depth, long labels, IDN, shorteners, abused-TLD/dyndns/hoster tables). No new permissions.
 
 ### 0.9.0 data-use note
 Nothing changed on the CWS data-use form: still tick only **Website content** and **Web history**, both described as opt-in community reporting only. The bigger threat feed and new risk signals are plain file downloads and on-device scoring — no new data collection.

@@ -68,7 +68,7 @@
   "toastResumed": { "message": "सुरक्षा फिर से शुरू हुई" },
   "toastCopied": { "message": "कॉपी हो गया" },
   "toastExtensionError": { "message": "एक्सटेंशन में गड़बड़ी — दोबारा खोलकर देखें।" },
-  "whatsNewBanner": { "message": "0.8 में नया: समय-सीमित रोक, घोटाला गिनतियों और \"यह नतीजा क्यों?\" पैनल के साथ फिर से डिज़ाइन किया गया पॉपअप।" },
+  "whatsNewBanner": { "message": "0.10 में नया: खोज परिणामों पर सुरक्षा बैज, कार्ड चोरी की चेतावनी, बिल्कुल नए डोमेन की चेतावनी और साझा करने योग्य घोटाला रिपोर्ट।" },
   "popupBrandDangerSummary": { "message": "$BRAND$ जैसा दिखता है, पर है नहीं। यहाँ अपना पासवर्ड न डालें।", "placeholders": { "brand": { "content": "$1", "example": "PayPal" } } },
   "pausedUntil": { "message": "$TIME$ तक रोका गया", "placeholders": { "time": { "content": "$1", "example": "3:45 PM" } } },
   "fmtProtocolPage": { "message": "$PROTOCOL$ पेज", "placeholders": { "protocol": { "content": "$1", "example": "chrome" } } },

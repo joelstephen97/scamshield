@@ -70,7 +70,7 @@ ScamShield watches every page you open and steps in only when something looks wr
 - **Page analysis** — an on-device model reads the page itself (wording, layout, login-form structure), catching brand-new phishing pages that a URL-only check would miss.
 - **Brand look-alike detection by icon** — favicons and logos are perceptually hashed and matched against a 64-brand table (49 with icon hashes) including UAE banks, telcos and government services (Emirates NBD, ADCB, FAB, Mashreq, RAKBANK, e&, du, Noon, Aramex, Talabat, Careem, ADNOC, DEWA, ICP, MOHRE, Dubai Police, UAE PASS, Emirates, Etihad) plus PayPal, Microsoft, Google, Apple, DHL and more. A page using a brand's icon with a password form on the wrong domain is flagged even if the brand's name never appears.
 - **URL model + heuristics** — a gradient-boosted URL classifier and hand-written rules (look-alike domains, punycode, suspicious tokens, IP hosts, deep-path tricks, brand-in-subdomain, …), with a built-in safe-domain allowlist for top sites.
-- **Known-bad domain blocking** — a `declarativeNetRequest` ruleset refreshed daily from the open-source [parry-feed](https://github.com/joelstephen97/scamshield-feed) (14 aggregated open-source threat databases, ~425k confirmed-bad domains + ~1M watchlist, heavily false-positive filtered).
+- **Known-bad domain blocking** — a `declarativeNetRequest` ruleset refreshed daily from the open-source [scamshield-feed](https://github.com/joelstephen97/scamshield-feed) (14 aggregated open-source threat databases, ~425k confirmed-bad domains + ~1M watchlist, heavily false-positive filtered).
 
 **Intervention**
 
@@ -156,7 +156,7 @@ The blocklist is built in a separate open-source repo, **[joelstephen97/scamshie
 https://raw.githubusercontent.com/joelstephen97/scamshield-feed/main/blocklist.json
 ```
 
-- **Sources:** 14 open-source threat databases (Phishing.Database, PhishDestroy, MetaMask eth-phishing-detect, ScamSniffer, HaGeZi, polkadot-js, malware-filter and more — see [parry-feed's ATTRIBUTION](https://github.com/joelstephen97/scamshield-feed/blob/main/ATTRIBUTION.md)), reduced to domain-level rules.
+- **Sources:** 14 open-source threat databases (Phishing.Database, PhishDestroy, MetaMask eth-phishing-detect, ScamSniffer, HaGeZi, polkadot-js, malware-filter and more — see [scamshield-feed's ATTRIBUTION](https://github.com/joelstephen97/scamshield-feed/blob/main/ATTRIBUTION.md)), reduced to domain-level rules.
 - **False-positive guards:** anything in the Tranco top-10k is dropped; on shared hosts (`pages.dev`, `netlify.app`, `github.io`, …) only the exact abusive hostname is blocked; path-based gateways (IPFS, archive.org, Drive/Dropbox) are skipped; multi-label public suffixes can never become a rule; capped at 5,000 rules.
 - **Schedule:** rebuilt daily by GitHub Actions; the extension downloads it on install and every 12 hours, shows *last updated* and rule count in Settings, and ships a 501-rule snapshot in [`rules/blocklist.json`](rules/blocklist.json) so blocking works before the first download.
 - **Your choice:** Settings lets you point the URL at your own feed (same `{ "version": n, "rules": ["||host^", …] }` format) or clear it to disable downloads entirely.
@@ -282,7 +282,7 @@ Please report vulnerabilities privately to **jojostev@gmail.com** rather than in
 
 ScamShield is free software, released under the **GNU General Public License v3.0 or later** — see [LICENSE](LICENSE). You may use, study, modify and redistribute it under the same terms. The trained model files in `model/` and the brand-icon hash table are covered by the same license. If you want to embed the detection engine in a product under different terms, get in touch.
 
-Third-party data: the threat feed aggregates 14 open-source threat databases, each under its own license (full list: [parry-feed ATTRIBUTION](https://github.com/joelstephen97/scamshield-feed/blob/main/ATTRIBUTION.md)); brand names and icons referenced for look-alike detection belong to their respective owners and are used solely to protect users from impersonation.
+Third-party data: the threat feed aggregates 14 open-source threat databases, each under its own license (full list: [scamshield-feed ATTRIBUTION](https://github.com/joelstephen97/scamshield-feed/blob/main/ATTRIBUTION.md)); brand names and icons referenced for look-alike detection belong to their respective owners and are used solely to protect users from impersonation.
 
 ## Support the project
 

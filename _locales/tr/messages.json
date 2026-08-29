@@ -217,7 +217,7 @@
     "message": "Uzantı hatası — yeniden açmayı deneyin."
   },
   "whatsNewBanner": {
-    "message": "0.8'deki yenilikler: zaman sınırlı duraklatma, dolandırıcılık sayaçları ve bu karar neden verildi paneliyle yeniden tasarlanmış popup."
+    "message": "0.10'daki yenilikler: arama sonuçlarında güvenlik rozetleri, kart hırsızlığı uyarıları, yepyeni alan adı uyarıları ve paylaşılabilir dolandırıcılık raporları."
   },
   "popupBrandDangerSummary": {
     "message": "$BRAND$ gibi görünüyor ama değil. Buraya şifrenizi girmeyin.",

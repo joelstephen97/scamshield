@@ -67,7 +67,7 @@
   "toastResumed": { "message": "防护已恢复" },
   "toastCopied": { "message": "已复制" },
   "toastExtensionError": { "message": "扩展程序出错——请重新打开。" },
-  "whatsNewBanner": { "message": "0.8 版新增：弹窗全新设计，支持限时暂停、诈骗拦截计数与\"为什么是这个判定\"面板。" },
+  "whatsNewBanner": { "message": "0.10 版新增：搜索结果安全徽章、银行卡盗用警告、全新域名警报和可分享的诈骗报告。" },
   "popupBrandDangerSummary": { "message": "看起来像 $BRAND$，但并不是。请勿在此输入密码。", "placeholders": { "brand": { "content": "$1", "example": "PayPal" } } },
   "pausedUntil": { "message": "暂停至 $TIME$", "placeholders": { "time": { "content": "$1", "example": "3:45 PM" } } },
   "fmtProtocolPage": { "message": "$PROTOCOL$ 页面", "placeholders": { "protocol": { "content": "$1", "example": "chrome" } } },

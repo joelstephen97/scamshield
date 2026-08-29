@@ -67,7 +67,7 @@
   "toastResumed": { "message": "保護を再開しました" },
   "toastCopied": { "message": "コピーしました" },
   "toastExtensionError": { "message": "拡張機能エラー — 開き直してください。" },
-  "whatsNewBanner": { "message": "0.8の新機能：時間指定の一時停止、詐欺件数カウンター、なぜこの判定？パネルを備えた新デザインのポップアップ。" },
+  "whatsNewBanner": { "message": "0.10の新機能：検索結果の安全バッジ、カード盗難の警告、新規ドメインの警告、共有できる詐欺レポート。" },
   "popupBrandDangerSummary": { "message": "$BRAND$ に似ていますが違います。ここにパスワードを入力しないでください。", "placeholders": { "brand": { "content": "$1", "example": "PayPal" } } },
   "pausedUntil": { "message": "$TIME$まで一時停止", "placeholders": { "time": { "content": "$1", "example": "3:45 PM" } } },
   "fmtProtocolPage": { "message": "$PROTOCOL$ ページ", "placeholders": { "protocol": { "content": "$1", "example": "chrome" } } },

@@ -68,7 +68,7 @@
   "toastResumed": { "message": "பாதுகாப்பு மீண்டும் தொடங்கியது" },
   "toastCopied": { "message": "நகலெடுக்கப்பட்டது" },
   "toastExtensionError": { "message": "நீட்டிப்பில் பிழை — மீண்டும் திறந்து பாருங்கள்." },
-  "whatsNewBanner": { "message": "0.8-இல் புதியவை: நேரம் வரையறுக்கப்பட்ட இடைநிறுத்தம், மோசடி எண்ணிக்கைகள் மற்றும் \"ஏன் இந்த முடிவு?\" பலகத்துடன் புதிதாக வடிவமைக்கப்பட்ட பாப்அப்." },
+  "whatsNewBanner": { "message": "0.10-இல் புதியவை: தேடல் முடிவுகளில் பாதுகாப்பு பேட்ஜ்கள், கார்டு திருட்டு எச்சரிக்கைகள், புத்தம்புதிய டொமைன் எச்சரிக்கைகள் மற்றும் பகிரக்கூடிய மோசடி அறிக்கைகள்." },
   "popupBrandDangerSummary": { "message": "$BRAND$ போலத் தெரிகிறது, ஆனால் அல்ல. இங்கே உங்கள் கடவுச்சொல்லை உள்ளிடாதீர்கள்.", "placeholders": { "brand": { "content": "$1", "example": "PayPal" } } },
   "pausedUntil": { "message": "$TIME$ வரை இடைநிறுத்தப்பட்டது", "placeholders": { "time": { "content": "$1", "example": "3:45 PM" } } },
   "fmtProtocolPage": { "message": "$PROTOCOL$ பக்கம்", "placeholders": { "protocol": { "content": "$1", "example": "chrome" } } },

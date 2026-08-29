@@ -34,7 +34,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   // dangerous shot either way, but the language-picker shot's popup is short
   // enough to show it, and a stale version banner is not what that shot is
   // about.
-  await sw.evaluate(() => setSettings({ threatsBlocked: 23, whatsNewSeen: '0.8.0' }));
+  await sw.evaluate(() => setSettings({ threatsBlocked: 23, whatsNewSeen: '0.10.0' }));
 
   // Statistics-tab seed. The dashboard is the one surface that looks empty on
   // a fresh profile — a store shot of it has to show a real install's worth of
@@ -114,6 +114,12 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
           if (rect.height <= 0 || rect.bottom > cap) continue;
           if (rect.bottom > best) best = rect.bottom;
         }
+        // Degenerate case: one tall section (the auto-open why-verdict panel
+        // on a signal-heavy page) spans the cap, so no "complete section"
+        // boundary exists below it and `best` collapses to the status card.
+        // A real popup shows exactly cap-height with a scrollbar there — so
+        // does the shot.
+        if (best < cap * 0.65) return cap;
         return Math.round(best) || cap;
       }, 600);
     }

@@ -217,7 +217,7 @@
     "message": "Erro na extensão — tente reabrir."
   },
   "whatsNewBanner": {
-    "message": "Novidades na 0.8: popup redesenhado com pausa programada, contadores de golpes e um painel de por que este veredito."
+    "message": "Novidades na 0.10: selos de segurança nos resultados de pesquisa, avisos de roubo de cartão, avisos de domínios recém-registrados e relatórios de golpe compartilháveis."
   },
   "popupBrandDangerSummary": {
     "message": "Parece com a $BRAND$, mas não é. Não digite sua senha aqui.",

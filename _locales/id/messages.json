@@ -217,7 +217,7 @@
     "message": "Terjadi kesalahan ekstensi — coba buka kembali."
   },
   "whatsNewBanner": {
-    "message": "Baru di 0.8: popup dirancang ulang dengan jeda berbatas waktu, penghitung penipuan, dan panel mengapa vonis ini."
+    "message": "Baru di 0.10: lencana keamanan pada hasil pencarian, peringatan pencurian kartu, peringatan domain yang sangat baru, dan laporan penipuan yang dapat dibagikan."
   },
   "popupBrandDangerSummary": {
     "message": "Tampak seperti $BRAND$, tetapi bukan. Jangan masukkan kata sandi Anda di sini.",

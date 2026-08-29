@@ -67,7 +67,7 @@
   "toastResumed": { "message": "보호 재개됨" },
   "toastCopied": { "message": "복사됨" },
   "toastExtensionError": { "message": "확장 프로그램 오류 — 다시 열어 보세요." },
-  "whatsNewBanner": { "message": "0.8 버전 신규 기능: 시간제 일시 중지, 사기 차단 횟수 표시, 왜 이런 판정인가요 패널이 추가된 새로운 팝업 디자인." },
+  "whatsNewBanner": { "message": "0.10 버전 신규 기능: 검색 결과 안전 배지, 카드 도용 경고, 최신 등록 도메인 경고, 공유 가능한 사기 신고서." },
   "popupBrandDangerSummary": { "message": "$BRAND$처럼 보이지만 아닙니다. 여기에 비밀번호를 입력하지 마세요.", "placeholders": { "brand": { "content": "$1", "example": "PayPal" } } },
   "pausedUntil": { "message": "$TIME$까지 일시 중지", "placeholders": { "time": { "content": "$1", "example": "3:45 PM" } } },
   "fmtProtocolPage": { "message": "$PROTOCOL$ 페이지", "placeholders": { "protocol": { "content": "$1", "example": "chrome" } } },

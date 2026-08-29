@@ -67,7 +67,7 @@
   "toastResumed": { "message": "Đã tiếp tục bảo vệ" },
   "toastCopied": { "message": "Đã sao chép" },
   "toastExtensionError": { "message": "Lỗi tiện ích — hãy thử mở lại." },
-  "whatsNewBanner": { "message": "Mới trong 0.8: popup được thiết kế lại với tạm dừng có giới hạn thời gian, bộ đếm lừa đảo và bảng vì sao có kết luận này." },
+  "whatsNewBanner": { "message": "Mới trong 0.10: huy hiệu an toàn trên kết quả tìm kiếm, cảnh báo trộm thẻ, cảnh báo tên miền hoàn toàn mới và báo cáo lừa đảo có thể chia sẻ." },
   "popupBrandDangerSummary": { "message": "Trông giống $BRAND$ nhưng không phải. Đừng nhập mật khẩu ở đây.", "placeholders": { "brand": { "content": "$1", "example": "PayPal" } } },
   "pausedUntil": { "message": "Tạm dừng đến $TIME$", "placeholders": { "time": { "content": "$1", "example": "3:45 PM" } } },
   "fmtProtocolPage": { "message": "Trang $PROTOCOL$", "placeholders": { "protocol": { "content": "$1", "example": "chrome" } } },
