@@ -111,3 +111,40 @@ test('brandDisplayName returns the canonical mixed-case name', () => {
   assert.equal(C2.brandDisplayName('unknown-brand-xyz'), 'unknown-brand-xyz'); // falls back to key
   assert.equal(C2.brandDisplayName('mashreq'), 'Mashreq'); // no explicit display: title-cased names[0]
 });
+
+// --- SERP badge helpers (0.10.0, Task C1) -----------------------------------
+test('unwrapSerpRedirect unwraps a Google /url?q= redirect wrapper', () => {
+  const href = 'https://www.google.com/url?q=https://evil-lookalike.tk/pay&sa=U&ved=abc';
+  assert.equal(C.unwrapSerpRedirect(href, 'https://www.google.com/search?q=x'), 'https://evil-lookalike.tk/pay');
+});
+test('unwrapSerpRedirect unwraps a Google ad /url?adurl= redirect wrapper', () => {
+  const href = 'https://www.google.com/url?adurl=https://ad-dest.example/x&ust=1';
+  assert.equal(C.unwrapSerpRedirect(href, 'https://www.google.com/search?q=x'), 'https://ad-dest.example/x');
+});
+test('unwrapSerpRedirect passes through an ordinary organic result href unchanged', () => {
+  const href = 'https://en.wikipedia.org/wiki/Example';
+  assert.equal(C.unwrapSerpRedirect(href, 'https://www.google.com/search?q=x'), href);
+});
+test('unwrapSerpRedirect resolves a relative href against the page it was found on', () => {
+  assert.equal(C.unwrapSerpRedirect('/relative/path', 'https://example.com/page'), 'https://example.com/relative/path');
+});
+test('unwrapSerpRedirect rejects non-http(s) schemes and unparsable input', () => {
+  assert.equal(C.unwrapSerpRedirect('javascript:alert(1)', 'https://www.google.com/'), null);
+  assert.equal(C.unwrapSerpRedirect('', 'https://www.google.com/'), null);
+});
+test('unwrapSerpRedirect on a Google host with no recognised wrapper param returns the URL itself', () => {
+  const href = 'https://maps.google.com/maps?q=coffee';
+  assert.equal(C.unwrapSerpRedirect(href, 'https://www.google.com/search?q=x'), href);
+});
+
+test('dedupeCapped keeps first-seen order and drops duplicates', () => {
+  assert.deepEqual(C.dedupeCapped(['a', 'b', 'a', 'c', 'b'], 10), ['a', 'b', 'c']);
+});
+test('dedupeCapped enforces the cap even with no duplicates', () => {
+  assert.deepEqual(C.dedupeCapped(['a', 'b', 'c', 'd'], 2), ['a', 'b']);
+});
+test('dedupeCapped tolerates null/undefined entries and a missing/empty list', () => {
+  assert.deepEqual(C.dedupeCapped(['a', null, undefined, 'b'], 10), ['a', 'b']);
+  assert.deepEqual(C.dedupeCapped(null, 10), []);
+  assert.deepEqual(C.dedupeCapped([], 10), []);
+});

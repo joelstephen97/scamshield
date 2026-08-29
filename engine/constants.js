@@ -242,10 +242,61 @@
   // form rather than a password form — drives the delivery-fee-scam rule.
   const CARRIER_BRANDS = ['dhl', 'fedex', 'usps', 'ups', 'aramex', 'royalmail', 'evri', 'emiratespost', 'dpd'];
 
+  // SERP redirect-wrapper hosts (0.10.0, Task C1): search engines that route
+  // an organic/sponsored result through a same-origin tracking redirect
+  // before the real destination, keyed on the query param(s) that carry it.
+  // Pure string/URL parsing only — no network fetch, no DOM — so the SERP
+  // badge annotator (content/content_script.js) can unwrap a result href
+  // before taking its registrable domain, and this stays unit-testable here
+  // like every other constants.js helper.
+  // `path` scopes the unwrap to the actual redirect endpoint — e.g. Google's
+  // own /maps or /search also carry a "q" parameter that means something
+  // else entirely, so only /url and /aclk (its ad-click redirect) qualify.
+  const SERP_REDIRECT_HOSTS = [
+    { re: /(^|\.)google\.[a-z.]+$/i, path: /^\/(url|aclk)$/, params: ['q', 'url', 'adurl'] },
+    { re: /(^|\.)bing\.com$/i, path: /^\/aclick$/, params: ['u'] },
+    { re: /(^|\.)duckduckgo\.com$/i, path: /^\/y\.js$/, params: ['uddg'] }
+  ];
+  function unwrapSerpRedirect(href, baseHref) {
+    if (!href) return null;
+    let u;
+    try { u = new URL(href, baseHref); } catch (_) { return null; }
+    if (!/^https?:$/.test(u.protocol)) return null;
+    const host = u.hostname.toLowerCase();
+    const entry = SERP_REDIRECT_HOSTS.find((e) => e.re.test(host) && e.path.test(u.pathname));
+    if (entry) {
+      for (const p of entry.params) {
+        const wrapped = u.searchParams.get(p);
+        if (!wrapped) continue;
+        try {
+          const w = new URL(wrapped, baseHref);
+          if (/^https?:$/.test(w.protocol)) return w.href;
+        } catch (_) { /* not a real wrapped URL — fall through */ }
+      }
+    }
+    return u.href;
+  }
+
+  // Unique, insertion-ordered, bounded — the SERP badge annotator's own
+  // "hard cap the work" requirement, and generic enough for any other caller
+  // that wants to dedup a list without an unbounded scan.
+  function dedupeCapped(list, cap) {
+    const seen = new Set();
+    const out = [];
+    for (const item of (list || [])) {
+      if (item == null || seen.has(item)) continue;
+      seen.add(item);
+      out.push(item);
+      if (out.length >= cap) break;
+    }
+    return out;
+  }
+
   return {
     FEATURE_NAMES, THRESHOLDS, BRANDS, POPULAR_BRANDS, SUSPICIOUS_TLDS, SUSPICIOUS_TOKENS,
     SCAM_PHRASES, SAFE_DOMAINS, BRAND_DOMAINS, SEED_PHRASE_HINTS, CARRIER_BRANDS,
     MULTI_LABEL_SUFFIXES, KNOWN_AUTH_PROVIDERS, KNOWN_BRAND_REGISTRABLES,
-    registrableParts, registrableDomain, isSafeHost, brandNameIn, brandDisplayName
+    registrableParts, registrableDomain, isSafeHost, brandNameIn, brandDisplayName,
+    unwrapSerpRedirect, dedupeCapped
   };
 });
