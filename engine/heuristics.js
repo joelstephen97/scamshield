@@ -28,6 +28,20 @@
     const host = F.parseHost(urlString).host;
     const reasons = [];
     let score = 0;
+    // Risk-table-class evidence tracked alongside `score` (0.10.0, Task C6):
+    // the feed's risk.json abused-TLD weight table is real signal for the
+    // "suspicious" tier, but the ancient-dreaming-breeze benchmark found it
+    // (together with the dyndns/hoster combo, scored async in
+    // background/service_worker.js, and the NRD bloom hit, folded in
+    // content_script.js) compounding with weak URL signals past the
+    // "dangerous" threshold on ordinary old pages hosted on multi-tenant
+    // platforms the risk table lists (blogspot.com, weebly.com, ...) — an
+    // eTLD+1 collapse false-positive, not a real threat signal on its own.
+    // `riskScore` is pure bookkeeping: it never changes `score` or any
+    // individual rule's weight, it just lets engine/verdict.js's fuse()
+    // exclude this contribution from the dangerous-tier choke point while
+    // still counting it toward suspicious.
+    let riskScore = 0;
 
     if (get('has_ip_host')) { score += 0.45; reasons.push({ code: 'ipHost', kind: 'link' }); }
     if (get('has_at_symbol')) { score += 0.35; reasons.push({ code: 'atSymbol', kind: 'link' }); }
@@ -74,10 +88,10 @@
     // tier evidence only when the OTA feed cycle has fetched the table.
     if (Risk && Risk.abusedTldWeight && riskTlds) {
       const tldHit = Risk.abusedTldWeight(host, riskTlds);
-      if (tldHit) { score += 0.20; reasons.push({ code: 'riskAbusedTld', kind: 'link', params: [tldHit.tld] }); }
+      if (tldHit) { score += 0.20; riskScore += 0.20; reasons.push({ code: 'riskAbusedTld', kind: 'link', params: [tldHit.tld] }); }
     }
 
-    return { score: clamp(score), reasons };
+    return { score: clamp(score), reasons, riskScore };
   }
 
   // Canonical implementation lives in constants.js; re-exported here for API compat.

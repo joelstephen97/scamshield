@@ -81,3 +81,25 @@ test('risk.json abused-TLD weight table is scored only when supplied', () => {
   assert.ok(withTable.reasons.some((x) => x.code === 'riskAbusedTld'));
   assert.ok(withTable.score > withoutTable.score);
 });
+
+// ---- 0.10.0 Task C6: risk-table-class evidence is tracked separately so a
+// downstream dangerous-tier choke point can exclude it (FP-hardening
+// doctrine: risk-table evidence may inform "suspicious" but must never by
+// itself lift a verdict into "dangerous"). scoreUrl's own weights are
+// UNCHANGED — this is pure additional bookkeeping alongside `score`.
+
+test('scoreUrl reports riskScore: 0 when no risk table is supplied or hit', () => {
+  const noTable = scoreUrl('https://example.top/');
+  assert.equal(noTable.riskScore, 0);
+  const noHit = scoreUrl('https://example.com/', { '.top': 8 });
+  assert.equal(noHit.riskScore, 0);
+});
+
+test('scoreUrl reports riskScore equal to the riskAbusedTld weight when it hits, without changing score', () => {
+  const withTable = scoreUrl('https://example.top/', { '.top': 8 });
+  assert.equal(withTable.riskScore, 0.20);
+  // The bookkeeping field never changes what `score` itself is — same value
+  // as before this field existed.
+  const stock = scoreUrl('https://example.top/');
+  assert.ok(Math.abs((withTable.score - stock.score) - withTable.riskScore) < 1e-9);
+});

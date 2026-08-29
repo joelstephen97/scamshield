@@ -302,6 +302,26 @@ test('an abused-TLD host (risk.json tlds table) gets suspicious-tier evidence vi
   await expect(page.locator('.scamshield-banner.suspicious')).toBeVisible({ timeout: 8000 });
 });
 
+// --- Task C6 (0.10.0): risk-table-class evidence can never make a page
+// "dangerous" (FP hardening — ancient-dreaming-breeze benchmark finding).
+// This host reproduces the real benchmark false-positive shape: an ordinary
+// old-blog-style subdomain (noHttps, a long/random label — the same
+// eTLD+1 collapse blogspot.com/weebly.com/stormpages.com/webspawner.com hit
+// in the live feed's hosters table) of a hoster-listed registrable domain.
+// Before Task C6 this reached the hard "dangerous" interstitial; it must
+// only ever surface a "suspicious" banner.
+const RISK_HOSTER_WEAK_SIGNAL_HOST = 'zx9qplwkdvbtnfhrjyec8sm2.' + RISK_HOSTER_DOMAIN;
+
+test('a hoster-listed host with only weak URL signals gets a suspicious banner, never the dangerous interstitial (Task C6)', async ({ context }) => {
+  const sw = context.serviceWorkers()[0];
+  await installFeed(sw);
+  const page = await context.newPage();
+  await page.goto(`http://${RISK_HOSTER_WEAK_SIGNAL_HOST}:5599/clean.html`);
+  await expect(page.locator('.scamshield-interstitial')).toHaveCount(0);
+  const banner = page.locator('.scamshield-banner.suspicious');
+  await expect(banner).toBeVisible({ timeout: 8000 });
+});
+
 // --- nrd.bloom "new site" signal (0.10.0, Task C3) --------------------------
 
 test('the feed OTA cycle also installs nrd.bloom', async ({ context }) => {

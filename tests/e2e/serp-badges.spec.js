@@ -25,10 +25,22 @@ const SERP_URL = BASE_HTTPS.replace('localhost', 'www.google.com') + '/serp.html
 
 const BLOCK_DOMAIN = 'serp-badge-block-fixture.example';
 const WARN_DOMAIN = 'serp-badge-warn-fixture.example';
+// Task C6 (0.10.0): risk.json abused-TLD + dyndns/hoster "combo" — no feed
+// hit at all, only risk-table evidence. See background/service_worker.js
+// checkFeedBatchHosts()'s combo branch and the FP-hardening doctrine this
+// task implements: risk-table-class evidence may only ever badge amber
+// ("caution"), never red ("danger").
+const RISK_DOMAIN = 'serp-badge-risk-fixture.riskfixturetld';
 
 function hash40For(domain) {
   const digest = crypto.createHash('sha256').update(domain).digest();
   return Blockset.hash40FromBytes(digest);
+}
+// Top 32 bits of SHA-256(domain) — risk.json's dyndns/hosters encoding
+// (engine/risk_rules.js hash32FromBytes()), same as tests/e2e/feed.spec.js.
+function hash32For(domain) {
+  const digest = crypto.createHash('sha256').update(domain).digest();
+  return digest.readUInt32BE(0);
 }
 function buildRecords(values) {
   const sorted = [...new Set(values)].sort((a, b) => a - b);
@@ -47,6 +59,11 @@ test.beforeAll(() => {
   const warn40 = buildRecords([hash40For(WARN_DOMAIN)]);
   fs.writeFileSync(path.join(FEED_DIR, 'set40.bin'), set40);
   fs.writeFileSync(path.join(FEED_DIR, 'warn40.bin'), warn40);
+  // Overwrites whatever tests/e2e/feed.spec.js's own beforeAll left in the
+  // shared feed-fixtures/ dir — this spec needs its own deterministic
+  // risk.json, keyed to RISK_DOMAIN, not feed.spec.js's fixture domains.
+  const risk = { tlds: { '.riskfixturetld': 8 }, dyndns: [], hosters: [hash32For(RISK_DOMAIN)] };
+  fs.writeFileSync(path.join(FEED_DIR, 'risk.json'), JSON.stringify(risk));
   const meta = {
     version: 'serp-badges-1',
     generatedAt: new Date().toISOString(),
@@ -95,6 +112,17 @@ test('a result injected after the initial scan (infinite scroll) still gets badg
   const lateBadge = page.locator('#badge-late-result .scamshield-serp-badge');
   await expect(lateBadge).toBeVisible({ timeout: 8000 });
   await expect(lateBadge).toHaveClass(/scamshield-serp-badge-danger/);
+});
+
+test('a risk.json abused-TLD+hoster combo result (no feed hit) gets an amber (caution) badge, never red (Task C6)', async ({ context }) => {
+  const sw = context.serviceWorkers()[0];
+  await installFeed(sw);
+  const page = await context.newPage();
+  await page.goto(`${SERP_URL}?risk=${RISK_DOMAIN}`);
+  const riskBadge = page.locator('#badge-risk-result .scamshield-serp-badge');
+  await expect(riskBadge).toBeVisible({ timeout: 8000 });
+  await expect(riskBadge).toHaveClass(/scamshield-serp-badge-caution/);
+  await expect(riskBadge).not.toHaveClass(/scamshield-serp-badge-danger/);
 });
 
 test('turning serpCheck off suppresses all per-result badges', async ({ context }) => {

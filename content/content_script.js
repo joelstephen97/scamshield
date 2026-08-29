@@ -664,44 +664,32 @@
     // risk.json dyndns/hoster membership (0.9.0, Task B3). The abused-TLD half
     // of risk.json is scored synchronously inside SS.scoreUrl() above; this
     // half needs an async SHA-256 (background/service_worker.js's
-    // checkRiskHosting()) so it folds in as post-hoc warn-tier evidence here,
-    // the same pattern the feed check above uses. Never escalates past
-    // "suspicious" on its own and never overrides an existing dangerous verdict.
+    // checkRiskHosting()) so it folds in as post-hoc evidence here, the same
+    // pattern the feed check above uses. Risk-table-class evidence (0.10.0,
+    // Task C6 — see ancient-dreaming-breeze benchmark finding): folded via
+    // SS.foldRiskEvidence so it can never by itself lift the verdict into
+    // "dangerous" (only ever "suspicious"), and never touches a verdict
+    // already dangerous on other grounds.
     try {
       const riskHit = await withTimeout(send('checkRisk', { host: location.hostname }), 3000);
-      if (riskHit && riskHit.hit && verdict.level !== 'dangerous') {
-        const reason = { code: 'riskDynamicHost', kind: 'link' };
-        const newScore = Math.min(1, verdict.score + 0.30);
-        const newLevel = newScore >= 0.8 ? 'dangerous' : (newScore >= 0.5 ? 'suspicious' : verdict.level);
-        verdict = Object.assign({}, verdict, {
-          level: newLevel, score: newScore,
-          reasons: [reason].concat(verdict.reasons || []),
-          reasonCodes: [reason.code].concat(verdict.reasonCodes || []),
-          flags: ['risk-hosting'].concat(verdict.flags || [])
-        });
+      if (riskHit && riskHit.hit) {
+        verdict = SS.foldRiskEvidence(verdict, 0.30, { code: 'riskDynamicHost', kind: 'link' }, 'risk-hosting');
       }
     } catch (_) { /* risk-table check is best-effort — never blocks the rest of the scan */ }
 
     // "New site" signal (0.10.0, Task C3): nrd.bloom membership (background/
     // service_worker.js checkNrdHost()), approximating Netcraft's "New Site"
-    // domain-age indicator on-device. Warn-tier evidence only: the score
-    // bump is modest and the level cap below means this signal can never by
-    // itself push a "safe" page past "suspicious" (never bumped to
-    // "dangerous" alone, and never touched if something else already made
-    // the page dangerous). A genuine first-ever visit to this install
+    // domain-age indicator on-device. Risk-table-class evidence (Task C6):
+    // same SS.foldRiskEvidence choke point as the dyndns/hoster fold above,
+    // so this can never by itself push a page past "suspicious" alone — even
+    // stacked with other risk-table signals — and never touches an
+    // already-dangerous verdict. A genuine first-ever visit to this install
     // strengthens the reason's wording via the params slot.
     try {
       const nrdHit = await withTimeout(send('checkNrd', { host: location.hostname }), 3000);
-      if (nrdHit && nrdHit.hit && verdict.level !== 'dangerous') {
+      if (nrdHit && nrdHit.hit) {
         const extra = nrdHit.strengthen ? ', and you have never visited it before' : '';
-        const reason = { code: 'newDomain', kind: 'link', params: [extra] };
-        verdict = Object.assign({}, verdict, {
-          level: verdict.level === 'safe' ? 'suspicious' : verdict.level, // never escalates past suspicious alone
-          score: Math.min(1, verdict.score + 0.2),
-          reasons: [reason].concat(verdict.reasons || []),
-          reasonCodes: [reason.code].concat(verdict.reasonCodes || []),
-          flags: ['new-domain'].concat(verdict.flags || [])
-        });
+        verdict = SS.foldRiskEvidence(verdict, 0.20, { code: 'newDomain', kind: 'link', params: [extra] }, 'new-domain', { minLevel: 'suspicious' });
       }
     } catch (_) { /* NRD check is best-effort — never blocks the rest of the scan */ }
 

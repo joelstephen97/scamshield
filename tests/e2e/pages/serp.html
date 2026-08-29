@@ -20,16 +20,25 @@
     <a href="#"><h3>Badge-target: warn domain</h3><cite></cite></a>
     <p>Organic result whose destination should hit the feed warn set.</p>
   </div>
+  <!-- Task C6 (0.10.0): risk.json abused-TLD + dyndns/hoster "combo" badge
+       target — see the ?risk= handling below. -->
+  <div class="g" id="badge-risk-result">
+    <a href="#"><h3>Badge-target: risk-table combo domain</h3><cite></cite></a>
+    <p>Organic result whose destination hits the abused-TLD+hoster combo, no feed hit.</p>
+  </div>
 </div>
 <script>
-  // Query params let each spec point the two badge-fixture anchors at its own
-  // feed-fixture domains without a parallel copy of this page: ?block=<host>
-  // and ?warn=<host>. ?lateinject=1 injects a THIRD block-domain result after
-  // a delay, simulating an infinite-scroll/paginated results page.
+  // Query params let each spec point the badge-fixture anchors at its own
+  // feed-fixture domains without a parallel copy of this page: ?block=<host>,
+  // ?warn=<host>, ?risk=<host> (Task C6: risk.json abused-TLD+dyndns/hoster
+  // combo, no feed hit — must only ever badge amber/caution, never red).
+  // ?lateinject=1 injects a THIRD block-domain result after a delay,
+  // simulating an infinite-scroll/paginated results page.
   (function () {
     var params = new URLSearchParams(location.search);
     var block = params.get('block');
     var warn = params.get('warn');
+    var risk = params.get('risk');
     if (block) {
       var a = document.querySelector('#badge-block-result a');
       a.href = 'https://' + block + '/x'; a.querySelector('cite').textContent = block;
@@ -37,6 +46,10 @@
     if (warn) {
       var b = document.querySelector('#badge-warn-result a');
       b.href = 'https://' + warn + '/y'; b.querySelector('cite').textContent = warn;
+    }
+    if (risk) {
+      var c = document.querySelector('#badge-risk-result a');
+      c.href = 'https://' + risk + '/z'; c.querySelector('cite').textContent = risk;
     }
     if (params.get('lateinject') === '1' && block) {
       setTimeout(function () {
