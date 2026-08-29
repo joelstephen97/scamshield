@@ -92,8 +92,33 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
     // popup's own extension-page tab as "active" and report a false "safe".
     await p.goto(`chrome-extension://${id}/popup.html`); await contentPage.bringToFront(); await p.reload(); await sleep(700);
     if (after) await after(p);
-    const h = await p.evaluate(() => document.body.scrollHeight); await p.setViewportSize({ width: 340, height: Math.min(600, h) });
-    const png = await p.screenshot(); await p.close(); if (theme) await sw.evaluate(() => setSettings({ theme: 'auto' })); return { png, w: 340, h: Math.min(600, h) };
+    const full = await p.evaluate(() => document.body.scrollHeight);
+    let h = Math.min(600, full);
+    if (full > 600) {
+      // 0.8.0 grew the popup (hero counters, why-this-verdict panel, rotating
+      // footer) past the 600px cap popup.css puts on <body> (real installs
+      // scroll for it — see tests/e2e/popup.spec.js). A static store shot
+      // can't scroll, and stopping the capture at a flat 600px lands mid-tile
+      // or mid-footer, which reads as broken rather than "scrollable". Stop
+      // instead at the lowest *complete* top-level section so the shot always
+      // ends on a clean edge.
+      h = await p.evaluate((cap) => {
+        const els = document.querySelectorAll('body > *, main > *, footer > *');
+        let best = 0;
+        for (const el of els) {
+          // Skip anything not in normal document flow (the #toast notification
+          // is position:fixed/opacity:0 off in a corner regardless of scroll
+          // position — it is not a content boundary) and anything hidden.
+          if (el.hidden || getComputedStyle(el).position === 'fixed') continue;
+          const rect = el.getBoundingClientRect();
+          if (rect.height <= 0 || rect.bottom > cap) continue;
+          if (rect.bottom > best) best = rect.bottom;
+        }
+        return Math.round(best) || cap;
+      }, 600);
+    }
+    await p.setViewportSize({ width: 340, height: h });
+    const png = await p.screenshot(); await p.close(); if (theme) await sw.evaluate(() => setSettings({ theme: 'auto' })); return { png, w: 340, h };
   }
   console.log('Capturing…');
   // 1 popup on a dangerous look-alike page — served from the mapped

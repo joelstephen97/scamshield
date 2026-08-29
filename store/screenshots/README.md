@@ -22,8 +22,16 @@ Do not hand-edit the PNGs below — re-run the script instead.
 5. `05-wallet-guard.png` — wallet-drainer overlay blocking a fake "Connect &
    Claim" flow ("Stops wallet drainers and scare pop-ups").
 
-Captured against the 0.7.1 popup/options UI (globe language switcher in the
-popup header, Statistics dashboard). Re-run `npm run screenshots` after any
-visual change to popup/options/in-page UI and commit the refreshed PNGs.
-`npm run promo` re-crops `01-popup-dangerous.png` into the marquee tile, so run
-it too when that shot changes.
+Captured against the 0.8.0 popup/options UI (Parry rebrand and icon,
+time-boxed pause menu, hero counters, "Why this verdict?" panel, rotating
+footer). Re-run `npm run screenshots` after any visual change to
+popup/options/in-page UI and commit the refreshed PNGs. `npm run promo`
+re-crops `01-popup-dangerous.png` into the marquee tile, so run it too when
+that shot changes.
+
+The popup's `<body>` caps itself at 600px tall and scrolls internally past
+that (see `popup.css`) — 0.8.0's extra sections (hero counters, why-panel,
+footer) push the full popup taller than that on the dangerous-page and
+language-picker shots. `tools/screenshots.js`'s `popupShot()` handles this by
+capturing up to the lowest *complete* top-level section that still fits in
+600px, rather than a flat 600px cut that would land mid-tile or mid-footer.
