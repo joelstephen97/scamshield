@@ -9,4 +9,43 @@
     <a href="https://en.wikipedia.org/wiki/Notepad++"><h3>Notepad++ - Wikipedia</h3><cite>en.wikipedia.org</cite></a>
     <p>Organic result, should not be flagged.</p>
   </div>
+  <!-- Task C1 (0.10.0): per-result safety badge fixtures. Domain names are
+       injected via the ?block=/warn= query params below so a single fixture
+       page can be reused with any spec's own feed-fixture domains. -->
+  <div class="g" id="badge-block-result">
+    <a href="#"><h3>Badge-target: block domain</h3><cite></cite></a>
+    <p>Organic result whose destination should hit the feed block set.</p>
+  </div>
+  <div class="g" id="badge-warn-result">
+    <a href="#"><h3>Badge-target: warn domain</h3><cite></cite></a>
+    <p>Organic result whose destination should hit the feed warn set.</p>
+  </div>
 </div>
+<script>
+  // Query params let each spec point the two badge-fixture anchors at its own
+  // feed-fixture domains without a parallel copy of this page: ?block=<host>
+  // and ?warn=<host>. ?lateinject=1 injects a THIRD block-domain result after
+  // a delay, simulating an infinite-scroll/paginated results page.
+  (function () {
+    var params = new URLSearchParams(location.search);
+    var block = params.get('block');
+    var warn = params.get('warn');
+    if (block) {
+      var a = document.querySelector('#badge-block-result a');
+      a.href = 'https://' + block + '/x'; a.querySelector('cite').textContent = block;
+    }
+    if (warn) {
+      var b = document.querySelector('#badge-warn-result a');
+      b.href = 'https://' + warn + '/y'; b.querySelector('cite').textContent = warn;
+    }
+    if (params.get('lateinject') === '1' && block) {
+      setTimeout(function () {
+        var div = document.createElement('div');
+        div.className = 'g';
+        div.id = 'badge-late-result';
+        div.innerHTML = '<a href="https://' + block + '/late"><h3>Badge-target: late-injected block domain</h3><cite>' + block + '</cite></a><p>Injected after the initial scan, simulating infinite scroll.</p>';
+        document.getElementById('results').appendChild(div);
+      }, 1200);
+    }
+  })();
+</script>
