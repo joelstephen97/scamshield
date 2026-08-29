@@ -47,3 +47,14 @@
 .scamshield-banner.danger .ss-compare{background:rgba(255,255,255,.95)}
 .scamshield-serp{display:inline-block;margin:4px 0 0;padding:3px 8px;border-radius:6px;background:#FFF1D6;color:#9A5B00;font:600 12px/1.3 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;border:1px solid #9A5B00}
 @media (prefers-color-scheme:dark){.scamshield-serp{background:#2A2110;color:#FBBF24;border-color:#FBBF24}}
+/* Per-result SERP safety badge (0.10.0, Task C1): an inline dot right after
+   the result link, never an absolute overlay, so it can only ever nudge the
+   line's own inline flow — it cannot shift or cover surrounding layout. */
+.scamshield-serp-badge{display:inline-block;margin-left:5px;margin-right:0;vertical-align:middle;cursor:default}
+[dir="rtl"].scamshield-serp-badge{margin-left:0;margin-right:5px}
+.scamshield-serp-badge-danger{color:#C0392B}
+.scamshield-serp-badge-caution{color:#9A5B00}
+@media (prefers-color-scheme:dark){
+  .scamshield-serp-badge-danger{color:#FF6B6B}
+  .scamshield-serp-badge-caution{color:#FBBF24}
+}

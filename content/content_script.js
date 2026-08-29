@@ -384,6 +384,121 @@
     return flagged;
   }
 
+  // Per-result SERP safety badges (0.10.0, Task C1). Extends the sponsored-
+  // mismatch check above into the same settings.serpCheck-gated surface, but
+  // covers every organic result too: a red dot when the destination hits the
+  // feed BLOCK set, an amber dot on a warn-set hit or a high-confidence local
+  // URL signal (strong/strongest brand-fuzzy match, or the abused-TLD+
+  // dyndns/hoster combo — both computed via engine/blockset.js +
+  // engine/risk_rules.js reused as-is, batched into ONE background message
+  // per scan pass so a 50-result page never costs 50 round trips, and never
+  // a network fetch: checkFeedBatch is hash-set membership only, no exact-
+  // shard lookup — a badge is advisory, never an interstitial).
+  const SERP_BADGE_CAP = 50;
+  let serpBadgeBudget = SERP_BADGE_CAP;
+  let serpBadgeRunning = false;
+  let serpBadgePending = false;
+  let serpObserverStarted = false;
+  let serpObserverTimer = null;
+
+  // Resolves a result anchor to the hostname it actually leads to, unwrapping
+  // a same-engine tracking redirect first (Google's /url?q=, /aclk, etc — see
+  // engine/constants.js unwrapSerpRedirect) so a wrapped href doesn't get
+  // mistaken for a link back into the search engine itself.
+  function serpResultHost(a) {
+    const href = a && a.getAttribute && a.getAttribute('href');
+    if (!href || !SS || typeof SS.unwrapSerpRedirect !== 'function') return null;
+    const real = SS.unwrapSerpRedirect(href, location.href);
+    if (!real) return null;
+    try { const u = new URL(real); return /^https?:$/.test(u.protocol) ? u.hostname : null; } catch (_) { return null; }
+  }
+
+  function badgeGlyph() {
+    return '<svg viewBox="0 0 8 8" width="8" height="8" aria-hidden="true" focusable="false"><circle cx="4" cy="4" r="4" fill="currentColor"/></svg>';
+  }
+  function paintSerpBadge(a, level) {
+    const dot = document.createElement('span');
+    dot.className = 'scamshield-serp-badge scamshield-serp-badge-' + level;
+    setDir(dot);
+    dot.setAttribute('role', 'img');
+    const label = level === 'danger'
+      ? t('serpBadgeDanger', null, 'Parry: this result is on our threat block list')
+      : t('serpBadgeCaution', null, 'Parry: this result shows scam warning signs');
+    dot.setAttribute('aria-label', label);
+    dot.setAttribute('title', label);
+    dot.innerHTML = badgeGlyph();
+    // Sibling of the anchor, inline-block + margin only (content/content.css)
+    // — never an absolute overlay, so it can't shift or cover result layout.
+    a.insertAdjacentElement('afterend', dot);
+  }
+
+  // Walks visible result anchors, skipping ones already handled and links
+  // that resolve back into the search engine itself, and reserves this
+  // page's badge budget synchronously (before the async batch round trip)
+  // so a MutationObserver tick firing mid-flight can't double-count work.
+  function collectSerpBadgeTargets() {
+    if (serpBadgeBudget <= 0) return [];
+    const anchors = document.querySelectorAll('a[href]');
+    const targets = [];
+    let scanned = 0;
+    for (const a of anchors) {
+      if (serpBadgeBudget <= 0 || ++scanned > 4000) break;
+      if (a.__ssSerpBadge) continue;
+      a.__ssSerpBadge = true;
+      const host = serpResultHost(a);
+      if (!host || SEARCH_HOSTS.test(host)) continue;
+      targets.push({ a, host });
+      serpBadgeBudget--;
+    }
+    return targets;
+  }
+
+  async function annotateSerpResults() {
+    if (serpBadgeRunning) { serpBadgePending = true; return; }
+    serpBadgeRunning = true;
+    try {
+      do {
+        serpBadgePending = false;
+        const targets = collectSerpBadgeTargets();
+        if (!targets.length) break;
+        const hosts = SS.dedupeCapped(targets.map((tg) => tg.host), SERP_BADGE_CAP);
+        let feedResults = {};
+        try {
+          const res = await send('checkFeedBatch', { hosts });
+          feedResults = (res && res.results) || {};
+        } catch (_) { /* best-effort — local signals below still apply */ }
+        for (const { a, host } of targets) {
+          if (!a.isConnected) continue; // removed before the round trip resolved
+          const feedHit = feedResults[host];
+          let level = null;
+          if (feedHit === 'block') level = 'danger';
+          else if (feedHit === 'warn') level = 'caution';
+          else if (SS.fuzzyBrandMatch && SS.allowlistBrandMatch && !SS.allowlistBrandMatch(host)) {
+            const fuzzy = SS.fuzzyBrandMatch(host);
+            if (fuzzy && (fuzzy.grade === 'strongest' || fuzzy.grade === 'strong')) level = 'caution';
+          }
+          if (level) paintSerpBadge(a, level);
+        }
+      } while (serpBadgePending);
+    } catch (_) { /* badges are best-effort — never break the results page */ }
+    finally { serpBadgeRunning = false; }
+  }
+
+  // MutationObserver for infinite-scroll/paginated SERPs, throttled to one
+  // pass per burst of DOM churn (matches the 400ms debounce content_script.js
+  // already uses for same-document navigation, below).
+  function ensureSerpBadgeObserver() {
+    if (serpObserverStarted || !('MutationObserver' in root)) return;
+    serpObserverStarted = true;
+    try {
+      const mo = new MutationObserver(() => {
+        clearTimeout(serpObserverTimer);
+        serpObserverTimer = setTimeout(() => { annotateSerpResults(); }, 400);
+      });
+      mo.observe(document.body, { childList: true, subtree: true });
+    } catch (_) {}
+  }
+
   async function run() {
     if (!SS || typeof SS.scoreUrl !== 'function') return; // engine not loaded
     // Sub-frame gate: only frames a user can actually interact with, and only
@@ -399,6 +514,7 @@
     // Sponsored-search check runs even on (trusted) search-engine hosts.
     if (IS_TOP && settings.serpCheck !== false && SEARCH_HOSTS.test(location.hostname)) {
       try { checkSerp(); } catch (_) {}
+      try { annotateSerpResults(); ensureSerpBadgeObserver(); } catch (_) {}
     }
     // Trusted (built-in safe list or user allowlist): report safe, do nothing else.
     if (isTrustedHost(location.hostname, settings)) {
@@ -578,6 +694,11 @@
     if (location.href === lastUrl) return;
     lastUrl = location.href;
     clearTimeout(navTimer);
+    // A same-document SPA re-search (e.g. a new query on a search engine
+    // that doesn't hard-navigate) gets a fresh badge budget — the old result
+    // anchors are gone from the DOM either way, so the cap should reset with
+    // them rather than staying exhausted for the rest of the tab's life.
+    serpBadgeBudget = SERP_BADGE_CAP;
     navTimer = setTimeout(() => { if (SS && SS.actions) SS.actions.clearAll(); run(); }, 400);
   });
 

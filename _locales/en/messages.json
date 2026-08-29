@@ -118,7 +118,7 @@
   "optShop": { "message": "Fake-shop checks" },
   "optShopHint": { "message": "Looks for fake countdowns, fake \"only 2 left\" pressure, missing contact details and off-platform payment (Zelle/wire/crypto), and shows them in the popup." },
   "optSerp": { "message": "Sponsored-result check" },
-  "optSerpHint": { "message": "On Google/Bing/DuckDuckGo, flags a sponsored result whose ad goes somewhere other than the site it shows." },
+  "optSerpHint": { "message": "On Google/Bing/DuckDuckGo, flags a sponsored result whose ad goes somewhere other than the site it shows, and marks risky results with a small red/amber dot." },
   "optWallet": { "message": "Wallet drainer protection" },
   "optWalletHint": { "message": "Warns before you approve token spends, \"Permit\" signatures or account delegations that drainers abuse." },
   "optLeakyForm": { "message": "Leaky-form warning" },
@@ -288,6 +288,8 @@
   "guardLeakyFormHashed": { "message": "This site sent your email/phone to $HOST$ as a hashed ($ALGO$) identifier — before you pressed submit.", "placeholders": { "host": { "content": "$1", "example": "tracker.example" }, "algo": { "content": "$2", "example": "MD5" } } },
   "guardNotifyLure": { "message": "This site is trying to get notification permission using a \"click Allow to continue\" trick. You can safely Block it." },
   "serpAdMismatch": { "message": "⚠ Parry: this ad goes to $ACTUAL$, not $SHOWN$", "placeholders": { "actual": { "content": "$1", "example": "malicious-download.example" }, "shown": { "content": "$2", "example": "trusted-brand.example" } } },
+  "serpBadgeDanger": { "message": "Parry: this result is on our threat block list" },
+  "serpBadgeCaution": { "message": "Parry: this result shows scam warning signs" },
 
   "chipLink": { "message": "Link" },
   "chipBrand": { "message": "Brand" },
