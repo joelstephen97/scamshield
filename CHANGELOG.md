@@ -2,6 +2,32 @@
 
 All notable changes to Parry. Versions are git tags (`vX.Y.Z`); the version on the [Chrome Web Store](https://chromewebstore.google.com/detail/fojjjofjimbfoddafoampojopijnlihl) may lag a tag by a few days while Google reviews it. Privacy-relevant changes are also reflected in the [privacy policy](https://joelstephen97.github.io/parry/privacy.html).
 
+## 0.9.0 — 2026-08-29
+
+### Threat filter, rebuilt
+- **parry-feed pipeline v2**: aggregates 14 license-vetted open-source
+  threat databases (Phishing.Database, PhishDestroy, MetaMask,
+  ScamSniffer, HaGeZi, polkadot-js, malware-filter and more) into
+  ~425k confirmed-bad domains (block tier) + ~1M watchlist domains
+  (warn tier), gated against the Tranco top-100k and brand allowlists.
+  OpenPhish and URLhaus were removed — their licenses never allowed
+  redistribution. The feed repo is now GPL-3.0 with per-source attribution.
+- **On-device matcher**: the extension downloads the feed as sorted 40-bit
+  hash fingerprints (~2 MB block / ~5 MB warn), stores them in IndexedDB and
+  checks pages with a local binary search. Hits are confirmed against an
+  exact-domain shard before any hard warning, and the warning shows which
+  sources reported the domain. Updates are sha256-verified deltas every 6
+  hours via CDN; the legacy blocklist keeps updating for older installs.
+- **Brand lookalike upgrades**: allowlist-first matching, homoglyph and
+  edit-distance detection with strict guards (evidence-only, capped below
+  hard-block on its own).
+- **New URL risk signals** (ported from Google's Apache-2.0
+  suspicious-site-reporter, with NOTICE): deep subdomain chains, ≥22-char
+  labels, IDN flags, shortener hosts; plus abused-TLD / dynamic-DNS /
+  badware-hoster tables from the feed.
+- No new permissions; no new data collection — feed downloads are the only
+  network activity, disclosed in the privacy policy.
+
 ## 0.8.0 — 2026-08-29
 
 ### Renamed: ScamShield is now Parry

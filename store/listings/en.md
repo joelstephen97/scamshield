@@ -152,21 +152,25 @@ around **630 automated tests**; a blocklist of thousands of scam domains,
 updated continuously from an open-source feed; and an install under 1 MB
 — about 450 KB zipped, no heavy runtime.
 
-## What's new (0.8.0)
+## What's new (0.9.0)
 
-- **ScamShield is now Parry.** Two very well-known products already use the
-  "ScamShield" name — Singapore's government runs its own national
-  anti-scam app called ScamShield, and T-Mobile's Scam Shield is a
-  widely-used US carrier scam-blocking service — so the extension has
-  renamed to avoid confusion with either. Nothing about how it protects you,
-  what it collects (nothing) or your settings has changed.
-- **Redesigned popup:** a time-boxed *Pause protection* menu (1 hour, 1 day
-  or Always) replaces the old trust wording, hero counters show threats
-  stopped since install and this week at a glance, every warning opens to a
-  *Why this verdict?* panel with the exact reasons behind it, and a cleaner
-  rotating footer alternates a privacy reminder, an earned review ask and a
-  support link.
-- **New icon** — a simple deflection mark that better fits the new name.
+- **A vastly bigger threat feed.** The blocklist grew from a few thousand
+  domains to **over 425,000 confirmed scam and phishing domains**, plus a
+  watchlist of over a million lower-confidence ones — aggregated from more
+  than a dozen open-source threat databases, cross-checked against each
+  other, and filtered against the world's most popular sites to keep false
+  alarms rare. Matching still happens entirely on your device: the feed is
+  downloaded as compact fingerprints and checked locally, so no site you
+  visit is ever sent anywhere. Updates arrive as small diffs every few hours.
+- **When Parry blocks a feed-listed site, it now tells you which independent
+  sources reported it** — verifiable, not a black-box score.
+- **Smarter lookalike detection**: brand-impersonation checks now catch
+  swapped letters, look-alike characters, hidden brand names inside long
+  subdomains and swapped domain endings, with strict safeguards so real
+  brand sites are never flagged.
+- **New warning signals**: unusually deep subdomain chains, abnormally long
+  address parts, link-shortener destinations, scam-heavy domain endings and
+  free-hosting providers now add cautionary evidence to a page's verdict.
 
 No new permissions. Still `storage`, `declarativeNetRequest`, `alarms` and
 http/https access, exactly as 0.3.1.
