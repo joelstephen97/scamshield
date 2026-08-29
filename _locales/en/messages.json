@@ -308,6 +308,8 @@
   "reason_manySubdomains": { "message": "Unusually many subdomains." },
   "reason_urgencyKeywords": { "message": "URL contains multiple urgency/security keywords." },
   "reason_randomHost": { "message": "Domain name looks randomly generated." },
+  "reason_feedBlock": { "message": "This domain matches Parry's threat feed, confirmed by $COUNT$ independent source(s).", "placeholders": { "count": { "content": "$1", "example": "3" } } },
+  "reason_feedWarn": { "message": "This domain matches a lower-confidence entry in Parry's threat feed ($COUNT$ source(s)) — proceed carefully.", "placeholders": { "count": { "content": "$1", "example": "1" } } },
   "reason_credentialFormForeignDomain": { "message": "A password form on this page sends your credentials to a different site." },
   "reason_hiddenIframes": { "message": "Page contains hidden frames that may capture input." },
   "reason_scamPhrase": { "message": "Page shows classic scam/giveaway language (\"$PHRASE$\").", "placeholders": { "phrase": { "content": "$1", "example": "you won" } } },

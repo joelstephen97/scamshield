@@ -31,6 +31,9 @@
     manySubdomains: 'Unusually many subdomains.',
     urgencyKeywords: 'URL contains multiple urgency/security keywords.',
     randomHost: 'Domain name looks randomly generated.',
+    // background/service_worker.js — v0.9 threat-feed matcher (Task B2)
+    feedBlock: "This domain matches Parry's threat feed, confirmed by $1 independent source(s).",
+    feedWarn: "This domain matches a lower-confidence entry in Parry's threat feed ($1 source(s)) — proceed carefully.",
     // engine/heuristics.js — scoreDom
     credentialFormForeignDomain: 'A password form on this page sends your credentials to a different site.',
     hiddenIframes: 'Page contains hidden frames that may capture input.',
