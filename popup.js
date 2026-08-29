@@ -390,13 +390,16 @@ function renderPrivacy(findings) {
   if (!findings.length) return;
   $('privacycard').hidden = false;
   const ul = $('privacylist'); ul.replaceChildren();
-  const label = { 'leaky-form': () => T('chipDataLeak', null, 'Data leak'), fingerprint: () => T('chipTracking', null, 'Tracking'), 'notify-lure': () => T('chipPopups', null, 'Pop-ups') };
+  const label = { 'leaky-form': () => T('chipDataLeak', null, 'Data leak'), fingerprint: () => T('chipTracking', null, 'Tracking'), 'notify-lure': () => T('chipPopups', null, 'Pop-ups'), 'cross-origin-cred-post': () => T('chipDataLeak', null, 'Data leak') };
   const text = (f) =>
     f.kind === 'leaky-form' ? (f.detail && f.detail !== 'plain'
       ? T('popupPrivacyLeakHashed', [bidi(f.host)], 'Sent your email/phone to ' + f.host + ' (hashed) before you submitted.')
       : T('popupPrivacyLeakPlain', [bidi(f.host)], 'Sent your email/phone to ' + f.host + ' before you submitted.')) :
     f.kind === 'fingerprint' ? T('popupPrivacyFingerprint', [bidi(f.host)], f.host + ' is fingerprinting your device to track you.') :
     f.kind === 'notify-lure' ? T('popupPrivacyNotifyLure', null, 'This site tried a "click Allow" notification trick.') :
+    f.kind === 'cross-origin-cred-post' ? (f.detail === 'password'
+      ? T('popupPrivacyCredExfilPassword', [bidi(f.host)], 'Sent your password to ' + f.host + ' — a different site than the one you were on.')
+      : T('popupPrivacyCredExfilCard', [bidi(f.host)], 'Sent your card details to ' + f.host + ' — a different site than the one you were on.')) :
     T('popupPrivacyDefaultText', null, 'Privacy issue detected.');
   for (const f of findings.slice(0, 5)) {
     const li = document.createElement('li');

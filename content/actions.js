@@ -319,6 +319,27 @@
     setTimeout(() => toast.remove(), 14000);
   }
 
+  // Cross-origin credential/card exfil watch (0.10.0, Task C2) — warn-tier
+  // sibling of guardForms above, rendered as a dismissible toast (like the
+  // leaky-form/notify-lure privacy findings) instead of the blocking
+  // "possible phishing" overlay. The submit that triggered this was already
+  // paused (content/content_script.js's guardExfilForms calls preventDefault
+  // before calling here), so — unlike privacyToast, which is purely
+  // informational — this toast carries an explicit "Send anyway" so a
+  // legitimate but unlisted cross-origin post isn't silently stuck forever.
+  function crossOriginCredToast(reason, onProceed) {
+    const old = document.querySelector('.' + NS + '-toast'); if (old) old.remove();
+    const toast = el('div', NS + '-toast warn');
+    toast.setAttribute('role', 'alert');
+    setDir(toast);
+    toast.append(iconSpan('suspicious'), el('span', 'ss-msg', reasonText(reason) || t('guardPrivacyFallback', null, 'A privacy issue was detected on this page.')));
+    const proceed = el('button', null, t('submitAnyway', null, 'Submit anyway'));
+    proceed.addEventListener('click', () => { toast.remove(); onProceed && onProceed(); });
+    const x = el('button', null, t('dismiss', null, 'Dismiss')); x.addEventListener('click', () => toast.remove());
+    toast.append(proceed, x); (document.body || document.documentElement).appendChild(toast);
+    setTimeout(() => toast.remove(), 20000);
+  }
+
   function clipboardToast(detail) {
     const old = document.querySelector('.' + NS + '-toast'); if (old) old.remove();
     const toast = el('div', NS + '-toast ' + (detail.level === 'dangerous' ? 'danger' : 'warn'));
@@ -354,5 +375,5 @@
   }
 
   root.ScamShield = root.ScamShield || {};
-  root.ScamShield.actions = { showBanner, guardForms, hideScamBlocks, clearAll, walletConfirmOverlay, clipboardToast, techScamEscapeOverlay, supportToast, dangerInterstitial, armDelayed, privacyToast };
+  root.ScamShield.actions = { showBanner, guardForms, hideScamBlocks, clearAll, walletConfirmOverlay, clipboardToast, techScamEscapeOverlay, supportToast, dangerInterstitial, armDelayed, privacyToast, crossOriginCredToast };
 })(typeof globalThis !== 'undefined' ? globalThis : self);

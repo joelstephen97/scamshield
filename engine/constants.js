@@ -292,11 +292,90 @@
     return out;
   }
 
+  // --- Cross-origin credential/card exfil watch (0.10.0, Task C2) -----------
+  // Netcraft-style "watches outgoing requests for credentials posted cross-
+  // domain" and Malwarebytes-style "credit card skimmer protection", done
+  // on-device: content_script.js flags a form submit whose action posts a
+  // password or a PAN-shaped card number to a different registrable domain.
+  // These are pure helpers only — no DOM, no chrome — so the submit-time
+  // wiring in content/content_script.js stays unit-testable here.
+
+  // Standard Luhn checksum (mod 10, doubling every second digit from the
+  // right). `digits` is expected pre-stripped to [0-9]; a non-digit anywhere
+  // fails closed rather than throwing.
+  function luhnValid(digits) {
+    const s = String(digits || '');
+    if (!s.length) return false;
+    let sum = 0, alt = false;
+    for (let i = s.length - 1; i >= 0; i--) {
+      const code = s.charCodeAt(i) - 48;
+      if (code < 0 || code > 9) return false;
+      let d = code;
+      if (alt) { d *= 2; if (d > 9) d -= 9; }
+      sum += d;
+      alt = !alt;
+    }
+    return sum % 10 === 0;
+  }
+
+  // A raw input value "looks like a PAN" when, digits-only, it falls in the
+  // 13-19 length range every real card scheme uses AND passes Luhn. This is
+  // deliberately the ONLY place a typed value is inspected for card-shape —
+  // callers identify *candidate* inputs by attribute (autocomplete="cc-number",
+  // name/id/placeholder containing "card") and only run this at submit time.
+  function isPanShaped(value) {
+    const digits = String(value || '').replace(/\D/g, '');
+    if (digits.length < 13 || digits.length > 19) return false;
+    return luhnValid(digits);
+  }
+
+  // The small set of SSO / payment-processor hosts that legitimately receive
+  // a password or card-number form POST from a different registrable domain
+  // (federated login, hosted checkout). Documented by the exact host each
+  // flow actually posts to; matched by registrable domain (registrableDomain,
+  // the same eTLD+1 comparison used everywhere else in this file), so any
+  // subdomain of these still clears. Deliberately separate from
+  // KNOWN_AUTH_PROVIDERS above (password-login only, no payment processors) —
+  // this list backs the distinct exfil-watch signal below, which also covers
+  // card forms; check both callers before merging the two.
+  const CRED_EXFIL_ALLOWLIST_HOSTS = [
+    'accounts.google.com', 'login.microsoftonline.com', 'appleid.apple.com',
+    'checkout.stripe.com', 'pay.google.com', 'www.paypal.com', 'checkout.paypal.com'
+  ];
+  const CRED_EXFIL_ALLOWLIST = [...new Set(CRED_EXFIL_ALLOWLIST_HOSTS.map((h) => registrableDomain(h)))];
+  function isCredExfilAllowlisted(host) {
+    return CRED_EXFIL_ALLOWLIST.includes(registrableDomain(host));
+  }
+
+  // The destination registrable domain when a form's raw `action` attribute
+  // points cross-origin to a non-allowlisted http(s) host — or null when the
+  // submission must never be flagged:
+  //   - no action attribute at all (a falsy `actionAttr` — a self-post, since
+  //     browsers submit an action-less form back to the current page);
+  //   - a non-http(s) scheme (javascript:, about:, mailto:, ...);
+  //   - the same registrable domain as the page, including any subdomain;
+  //   - a known SSO/payment target (isCredExfilAllowlisted above).
+  // `pageHref` is the page's own URL, used both to resolve a relative action
+  // and as the same-origin comparison baseline.
+  function crossOriginCredPostHost(pageHref, actionAttr) {
+    if (!actionAttr) return null;
+    let base, u;
+    try { base = new URL(pageHref); } catch (_) { return null; }
+    try { u = new URL(actionAttr, base); } catch (_) { return null; }
+    if (!/^https?:$/.test(u.protocol)) return null;
+    const pageDomain = registrableDomain(base.hostname);
+    const actionDomain = registrableDomain(u.hostname);
+    if (actionDomain === pageDomain) return null;
+    if (isCredExfilAllowlisted(u.hostname)) return null;
+    return actionDomain;
+  }
+
   return {
     FEATURE_NAMES, THRESHOLDS, BRANDS, POPULAR_BRANDS, SUSPICIOUS_TLDS, SUSPICIOUS_TOKENS,
     SCAM_PHRASES, SAFE_DOMAINS, BRAND_DOMAINS, SEED_PHRASE_HINTS, CARRIER_BRANDS,
     MULTI_LABEL_SUFFIXES, KNOWN_AUTH_PROVIDERS, KNOWN_BRAND_REGISTRABLES,
     registrableParts, registrableDomain, isSafeHost, brandNameIn, brandDisplayName,
-    unwrapSerpRedirect, dedupeCapped
+    unwrapSerpRedirect, dedupeCapped,
+    luhnValid, isPanShaped, CRED_EXFIL_ALLOWLIST, isCredExfilAllowlisted, crossOriginCredPostHost
   };
 });

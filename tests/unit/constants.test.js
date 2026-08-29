@@ -148,3 +148,70 @@ test('dedupeCapped tolerates null/undefined entries and a missing/empty list', (
   assert.deepEqual(C.dedupeCapped(null, 10), []);
   assert.deepEqual(C.dedupeCapped([], 10), []);
 });
+
+// --- Cross-origin credential/card exfil watch (0.10.0, Task C2) ------------
+
+test('luhnValid accepts real test-card numbers and rejects a single-digit tamper', () => {
+  assert.ok(C.luhnValid('4111111111111111')); // Visa test PAN
+  assert.ok(C.luhnValid('5500005555555559')); // Mastercard test PAN
+  assert.ok(C.luhnValid('340000000000009')); // Amex test PAN (15 digits)
+  assert.ok(!C.luhnValid('4111111111111112')); // last digit tampered
+  assert.ok(!C.luhnValid(''));
+  assert.ok(!C.luhnValid('abc'));
+});
+
+test('isPanShaped enforces the 13-19 digit window on top of Luhn, ignoring separators', () => {
+  assert.ok(C.isPanShaped('4111 1111 1111 1111'));
+  assert.ok(C.isPanShaped('4111-1111-1111-1111'));
+  assert.ok(!C.isPanShaped('411111111111')); // 12 digits: below the floor even if some 12-digit string passed Luhn
+  assert.ok(!C.isPanShaped('41111111111111111111')); // 20 digits: above the ceiling
+  assert.ok(!C.isPanShaped('4111111111111112')); // right length, fails Luhn
+  assert.ok(!C.isPanShaped(''));
+  assert.ok(!C.isPanShaped(null));
+});
+
+test('isCredExfilAllowlisted matches by registrable domain, subdomains included', () => {
+  assert.ok(C.isCredExfilAllowlisted('accounts.google.com'));
+  assert.ok(C.isCredExfilAllowlisted('login.microsoftonline.com'));
+  assert.ok(C.isCredExfilAllowlisted('appleid.apple.com'));
+  assert.ok(C.isCredExfilAllowlisted('checkout.stripe.com'));
+  assert.ok(C.isCredExfilAllowlisted('pay.google.com'));
+  assert.ok(C.isCredExfilAllowlisted('www.paypal.com'));
+  assert.ok(C.isCredExfilAllowlisted('checkout.paypal.com'));
+  // Registrable-domain match, not exact-host: a sibling subdomain of the same
+  // allowlisted domain clears too.
+  assert.ok(C.isCredExfilAllowlisted('google.com'));
+  assert.ok(C.isCredExfilAllowlisted('some-other-subdomain.paypal.com'));
+  assert.ok(!C.isCredExfilAllowlisted('paypal.com.evil.tk'));
+  assert.ok(!C.isCredExfilAllowlisted('stripe.com.attacker.example'));
+});
+
+test('crossOriginCredPostHost flags a genuine cross-origin post and returns its registrable domain', () => {
+  assert.equal(C.crossOriginCredPostHost('https://shop.example.com/checkout', 'https://collector.evil.tk/grab'), 'evil.tk');
+  // Relative action resolved against the page URL.
+  assert.equal(C.crossOriginCredPostHost('https://shop.example.com/checkout', '//collector.evil.tk/grab'), 'evil.tk');
+});
+
+test('crossOriginCredPostHost clears same-site posts, including subdomains and multi-label suffixes', () => {
+  assert.equal(C.crossOriginCredPostHost('https://shop.example.com/pay', '/submit'), null);
+  assert.equal(C.crossOriginCredPostHost('https://shop.example.com/pay', 'https://api.example.com/submit'), null);
+  assert.equal(C.crossOriginCredPostHost('https://www.amazon.co.uk/pay', 'https://checkout.amazon.co.uk/submit'), null);
+});
+
+test('crossOriginCredPostHost clears known SSO/payment allowlist targets', () => {
+  assert.equal(C.crossOriginCredPostHost('https://myapp.example.com/login', 'https://accounts.google.com/o/oauth2'), null);
+  assert.equal(C.crossOriginCredPostHost('https://shop.example.com/checkout', 'https://checkout.stripe.com/pay/cs_123'), null);
+  assert.equal(C.crossOriginCredPostHost('https://shop.example.com/checkout', 'https://www.paypal.com/checkoutnow'), null);
+});
+
+test('crossOriginCredPostHost never flags a self-post (no action) or a non-http(s) action', () => {
+  assert.equal(C.crossOriginCredPostHost('https://shop.example.com/pay', ''), null);
+  assert.equal(C.crossOriginCredPostHost('https://shop.example.com/pay', null), null);
+  assert.equal(C.crossOriginCredPostHost('https://shop.example.com/pay', 'javascript:void(document.forms[0].submit())'), null);
+  assert.equal(C.crossOriginCredPostHost('https://shop.example.com/pay', 'about:blank'), null);
+  assert.equal(C.crossOriginCredPostHost('https://shop.example.com/pay', 'mailto:evil@evil.tk'), null);
+});
+
+test('crossOriginCredPostHost fails safe on an unparsable page URL', () => {
+  assert.equal(C.crossOriginCredPostHost('not a url', 'https://evil.tk/grab'), null);
+});

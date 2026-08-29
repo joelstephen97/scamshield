@@ -43,6 +43,8 @@
     feedWarn: "This domain matches a lower-confidence entry in ScamShield's threat feed ($1 source(s)) — proceed carefully.",
     // engine/heuristics.js — scoreDom
     credentialFormForeignDomain: 'A password form on this page sends your credentials to a different site.',
+    // engine/constants.js crossOriginCredPostHost + content/content_script.js guardExfilForms (0.10.0, Task C2)
+    crossOriginCredPost: 'This form sends your password or card details to $1 — a different site than the one you are on.',
     hiddenIframes: 'Page contains hidden frames that may capture input.',
     scamPhrase: 'Page shows classic scam/giveaway language ("$1").',
     seedPhraseAsk: 'This page asks for your wallet recovery phrase — never enter it; this steals your funds.',

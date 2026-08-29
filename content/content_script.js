@@ -55,6 +55,14 @@
     return Promise.race([p, timeout]).finally(() => clearTimeout(t));
   };
 
+  // Card-number input candidates: attribute heuristic only (autocomplete or a
+  // "card" name/id/placeholder) — shared by the delivery-fee-scam signal and
+  // the cross-origin exfil watch (0.10.0, Task C2) below. Neither ever reads
+  // .value from this selector alone; the exfil watch only inspects the value
+  // at submit time, gated on an actual Luhn pass (engine/constants.js
+  // isPanShaped) — see guardExfilForms.
+  const CARD_INPUT_SEL = 'input[autocomplete="cc-number"], input[name*="card" i], input[id*="card" i], input[placeholder*="card" i]';
+
   function registrable(host) {
     if (SS && typeof SS.registrableDomain === 'function') return SS.registrableDomain(host);
     return String(host || '').toLowerCase().split('.').filter(Boolean).slice(-2).join('.');
@@ -196,6 +204,32 @@
         return actionDomain !== registrable(pageHost) && !AUTH.includes(actionDomain);
       } catch (_) { return false; }
     });
+    // Cross-origin credential/card exfil watch (0.10.0, Task C2): the same
+    // "posts off-domain" idea as foreignForms above, widened to also catch
+    // PAN-shaped card forms, kept warn-tier (a dismissible toast, not the
+    // blocking phishing overlay), and gated on its own settings check —
+    // see guardExfilForms in content/actions.js and its call site below.
+    // Forms already caught by foreignForms are excluded here so the same
+    // submit doesn't trigger both the blocking overlay AND this toast.
+    const exfilForms = [...document.querySelectorAll('form')]
+      .filter((f) => !foreignForms.includes(f))
+      .filter((f) => {
+        const hasPassword = !!f.querySelector('input[type="password"]');
+        if (!hasPassword && !f.querySelector(CARD_INPUT_SEL)) return false;
+        // A password-bearing form the EXISTING form-guard already exempts as
+        // federated login (KNOWN_AUTH_PROVIDERS) must stay exempt here too —
+        // this signal's own allowlist is payment-processor-focused and
+        // deliberately narrower, so it must never re-warn on a provider the
+        // form-guard has already cleared.
+        if (hasPassword) {
+          try {
+            const actionDomain = registrable(new URL(f.getAttribute('action') || location.href, location.href).hostname);
+            if (AUTH.includes(actionDomain)) return false;
+          } catch (_) {}
+        }
+        return !!(SS && SS.crossOriginCredPostHost && SS.crossOriginCredPostHost(location.href, f.getAttribute('action')));
+      });
+
     const hiddenIframeCount = [...document.querySelectorAll('iframe')].filter((fr) => {
       const cs = getComputedStyle(fr);
       return cs.display === 'none' || cs.visibility === 'hidden' ||
@@ -288,7 +322,7 @@
     }
 
     // Delivery-fee scam signals (0.6.0): card-number input + small-fee wording.
-    const hasCardInput = !!document.querySelector('input[autocomplete="cc-number"], input[name*="card" i], input[id*="card" i], input[placeholder*="card" i]');
+    const hasCardInput = !!document.querySelector(CARD_INPUT_SEL);
     const deliveryFeeText = /(redeliver|redelivery|customs|clearance|delivery|shipping|postage)\s+fee|unpaid\s+(postage|customs|fee)|pay\s+(a\s+)?(small\s+)?fee|schedule.{0,24}redelivery/i.test(bodyText);
 
     return {
@@ -297,7 +331,7 @@
         titleBrand, ogSiteName, faviconHost, logoAltBrands, seedPhraseForm,
         clickfix, fakeUpdate, hasCardInput, deliveryFeeText
       },
-      foreignForms, scamBlocks
+      foreignForms, scamBlocks, exfilForms
     };
   }
 
@@ -499,6 +533,49 @@
     } catch (_) {}
   }
 
+  // Cross-origin credential/card exfil watch (0.10.0, Task C2) — a warn-tier
+  // sibling of guardForms above. `forms` are already known (at the point they
+  // were collected) to hold a password input or a card-attribute-shaped input
+  // AND to post cross-origin to a non-allowlisted host; this listener does the
+  // one check that can only happen at submit time — reading the actual typed
+  // value and running it through Luhn (engine/constants.js isPanShaped) —
+  // before deciding whether to warn at all. A password field never needs that
+  // extra check: its mere presence plus a foreign, non-allowlisted action is
+  // already the signal. Nothing is prevented unless the check actually trips,
+  // so an unflagged submit (e.g. a "card" field that isn't holding a PAN)
+  // proceeds exactly as if this listener didn't exist.
+  function guardExfilForms(forms) {
+    forms.forEach((form) => {
+      if (form.__scamshieldExfilGuarded) return;
+      form.__scamshieldExfilGuarded = true;
+      form.addEventListener('submit', (ev) => {
+        const hasPassword = !!form.querySelector('input[type="password"]');
+        let kind = null;
+        if (hasPassword) {
+          kind = 'password';
+        } else {
+          const panInput = [...form.querySelectorAll(CARD_INPUT_SEL)]
+            .find((inp) => SS.isPanShaped && SS.isPanShaped(inp.value));
+          if (panInput) kind = 'card';
+        }
+        if (!kind) return; // not shaped like a credential/card post — let it submit
+        const destHost = SS.crossOriginCredPostHost && SS.crossOriginCredPostHost(location.href, form.getAttribute('action'));
+        if (!destHost) return; // action changed since collection, or no longer flaggable — fail open
+        ev.preventDefault(); ev.stopPropagation();
+        const reason = { code: 'crossOriginCredPost', kind: 'page', params: [destHost] };
+        if (SS.actions && SS.actions.crossOriginCredToast) {
+          // form.submit() is the isolated world's native (unhooked) method, so
+          // "Send anyway" really submits without re-triggering this listener —
+          // same technique guardForms uses for its own "Submit anyway".
+          SS.actions.crossOriginCredToast(reason, () => form.submit());
+        } else {
+          form.submit(); // never trap the user behind a UI that failed to load
+        }
+        send('privacyFinding', { finding: { kind: 'cross-origin-cred-post', host: destHost, detail: kind } });
+      }, true);
+    });
+  }
+
   async function run() {
     if (!SS || typeof SS.scoreUrl !== 'function') return; // engine not loaded
     // Sub-frame gate: only frames a user can actually interact with, and only
@@ -522,7 +599,7 @@
       return;
     }
 
-    const { signals, foreignForms, scamBlocks } = collectSignals(settings);
+    const { signals, foreignForms, scamBlocks, exfilForms } = collectSignals(settings);
     // riskTlds (0.9.0, Task B3): risk.json's abused-TLD weight table, mirrored
     // into settings by background/service_worker.js's runFeedUpdate() — no new
     // message round-trip needed since `settings` is already fetched above.
@@ -685,6 +762,10 @@
     // credential iframe is exactly the all_frames win. Content hiding stays
     // top-frame (frames are too small for the overlay tag to make sense).
     if (foreignForms.length) SS.actions.guardForms(foreignForms, verdict.reasons, () => send('userReport', { label: 'false_positive' }));
+    // Reuses leakyFormGuard (0.10.0, Task C2): the closest existing warn-tier
+    // "form leak before/at submit" toggle — see task-c2-report.md for why no
+    // new setting was added.
+    if (settings.leakyFormGuard !== false && exfilForms.length) guardExfilForms(exfilForms);
     if (settings.hideScamContent && scamBlocks.length && IS_TOP) SS.actions.hideScamBlocks(scamBlocks);
   }
 
