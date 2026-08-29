@@ -68,6 +68,52 @@
     return e;
   }
 
+  // "Copy report" (0.10.0, Task C4) — Privacy Badger's popup Share button,
+  // adapted for organic distribution: a plain-text summary of the CURRENT
+  // verdict, built fresh on every click so it always matches what's on
+  // screen, that a person can paste into WhatsApp/Reddit to warn others.
+  // Offered only on the banner and the interstitial, i.e. only ever on a
+  // dangerous/suspicious verdict — both call sites below are already gated
+  // that way by content_script.js (showBanner/dangerInterstitial are never
+  // invoked for a 'safe' verdict).
+  function buildReportText(verdict) {
+    const R = root.SSReasons;
+    const dangerous = verdict.level === 'dangerous';
+    const levelLabel = dangerous ? t('popupDangerous', null, 'Dangerous page') : t('popupSuspicious', null, 'Suspicious page');
+    const hostText = bidi(R && R.defangHost ? R.defangHost(location.hostname) : location.hostname);
+    const headerLine = t('copyReportHeader', [hostText], '⚠ ScamShield flagged this site: ' + location.hostname);
+    const verdictLine = t('copyReportVerdict', [levelLabel], 'Verdict: ' + levelLabel);
+    const signalsLabel = t('copyReportSignals', null, 'Signals:');
+    const footerLine = t('copyReportFooter', null, 'Checked on-device by ScamShield — free, open-source: https://joelstephen97.github.io/scamshield/');
+    const reasons = (verdict.reasons || []).slice(0, 4).map(reasonText).filter(Boolean);
+    return (R && R.buildCopyReportText)
+      ? R.buildCopyReportText({ headerLine, verdictLine, signalsLabel, reasons, footerLine })
+      : [headerLine, verdictLine, signalsLabel].concat(reasons.map((r) => '- ' + r), [footerLine]).join('\n');
+  }
+  function copiedToast() {
+    const old = document.querySelector('.' + NS + '-toast'); if (old) old.remove();
+    const toast = el('div', NS + '-toast ok');
+    toast.setAttribute('role', 'status');
+    setDir(toast);
+    toast.append(el('span', 'ss-msg', t('toastCopied', null, 'Copied')));
+    (document.body || document.documentElement).appendChild(toast);
+    setTimeout(() => toast.remove(), 2500);
+  }
+  function copyReportButton(verdict) {
+    const btn = el('button', 'ss-copy', t('copyReportBtn', null, 'Copy report'));
+    btn.addEventListener('click', () => {
+      const text = buildReportText(verdict);
+      // e2e test hook (same pattern as content_script.js's window.__ssLastVerdict):
+      // lets a spec assert the exact composed string without depending on
+      // headless Chromium's clipboard permission behaviour.
+      try { window.__ssLastCopyReport = text; } catch (_) {}
+      const R = root.SSReasons;
+      const copy = R && R.copyToClipboard ? R.copyToClipboard(text) : Promise.resolve(false);
+      copy.then((ok) => { if (ok) copiedToast(); });
+    });
+    return btn;
+  }
+
   function clearAll() {
     document.querySelectorAll('.' + NS + '-banner, .' + NS + '-overlay').forEach((n) => n.remove());
     document.querySelectorAll('.' + NS + '-hidden-block').forEach((n) => {
@@ -132,8 +178,9 @@
     if (!danger) { const why = el('button', 'ss-why', t('showWhy', null, 'Show why')); why.addEventListener('click', () => { text.querySelector('span').textContent = verdict.reasons.slice(0, 3).map(reasonText).join(' · '); why.remove(); }); acts.appendChild(why); }
     const trust = el('button', 'ss-trust', t('trustThisSite', null, 'Trust this site')); trust.addEventListener('click', () => { onAllow && onAllow(); bar.remove(); });
     const report = el('button', 'ss-report', t('reportMistake', null, 'Report a mistake')); report.addEventListener('click', () => { report.textContent = t('thanks', null, 'Thanks'); report.disabled = true; x.onReport && x.onReport(); });
+    const copyBtn = copyReportButton(verdict);
     const close = el('button', 'ss-x', '✕'); close.setAttribute('aria-label', t('ariaDismiss', null, 'Dismiss')); close.addEventListener('click', () => bar.remove());
-    acts.append(trust, report, close);
+    acts.append(trust, report, copyBtn, close);
     bar.append(ico, text, acts);
     (document.body || document.documentElement).appendChild(bar);
   }
@@ -188,6 +235,8 @@
     const rep = el('button', 'ss-report', t('reportMistake', null, 'Report a mistake'));
     rep.addEventListener('click', () => { rep.textContent = t('thanks', null, 'Thanks'); rep.disabled = true; x.onReport && x.onReport(); });
     actions.prepend(rep);
+    const copyBtn = copyReportButton(verdict);
+    rep.insertAdjacentElement('afterend', copyBtn);
     card.append(actions);
     ov.append(card);
     document.documentElement.appendChild(ov);

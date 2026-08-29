@@ -58,6 +58,27 @@ function renderEvidence(reasons, level) {
   $('whypanel').hidden = n === 0;
   $('whycount').textContent = n === 0 ? '' : n === 1 ? T('whyVerdictCountOne', null, '· 1 signal') : T('fmtWhyVerdictCount', [bidi(String(n))], `· ${n} signals`);
   $('whypanel').open = level === 'dangerous' || level === 'suspicious';
+  // "Copy report" (0.10.0, Task C4): only ever offered on an active
+  // dangerous/suspicious warning, never on a safe page's incidental weak
+  // signal (e.g. clean-login.html's randomHost quirk still opens the panel
+  // with a signal count, but nothing worth sharing).
+  $('whyfoot').hidden = !(level === 'dangerous' || level === 'suspicious');
+}
+// Builds the same plain-text "Copy report" summary as content/actions.js's
+// buildReportText(), from the popup's own module-scope `verdict`/`level`/
+// `tab` — see ui/reasons.js's buildCopyReportText for the shared assembly.
+function copyReportText() {
+  const host = tab && tab.url ? new URL(tab.url).hostname : '';
+  const hostText = bidi(R && R.defangHost ? R.defangHost(host) : host);
+  const lvlLabel = levelLabel(level);
+  const headerLine = T('copyReportHeader', [hostText], '⚠ ScamShield flagged this site: ' + host);
+  const verdictLine = T('copyReportVerdict', [lvlLabel], 'Verdict: ' + lvlLabel);
+  const signalsLabel = T('copyReportSignals', null, 'Signals:');
+  const footerLine = T('copyReportFooter', null, 'Checked on-device by ScamShield — free, open-source: https://joelstephen97.github.io/scamshield/');
+  const reasons = ((verdict && verdict.reasons) || []).slice(0, 4).map((r) => R.resolveReason(r)).filter(Boolean);
+  return (R && R.buildCopyReportText)
+    ? R.buildCopyReportText({ headerLine, verdictLine, signalsLabel, reasons, footerLine })
+    : [headerLine, verdictLine, signalsLabel].concat(reasons.map((r) => '- ' + r), [footerLine]).join('\n');
 }
 // Renders the status card / evidence / leave-rescue-report controls from the
 // current module-scope `verdict`. Called once with the popup's first
@@ -346,6 +367,15 @@ async function init() {
   renderVerdictUI(host);
   if (settings.enabled && verdict == null) pollVerdict(host); // fire-and-forget; re-renders when the SW's scan lands
   $('leave').addEventListener('click', async () => { await send('leaveTab', { tabId: tab.id }); window.close(); });
+  $('copyreport').addEventListener('click', () => {
+    const text = copyReportText();
+    // e2e test hook (mirrors content/actions.js's window.__ssLastCopyReport):
+    // lets a spec assert the exact composed string without depending on
+    // headless Chromium's clipboard permission behaviour.
+    try { window.__ssLastCopyReport = text; } catch (_) {}
+    const copy = R && R.copyToClipboard ? R.copyToClipboard(text) : Promise.resolve(false);
+    copy.then((ok) => { if (ok) toast(T('toastCopied', null, 'Copied')); });
+  });
   $('rescue').addEventListener('click', () => {
     const rescueUrl = verdict && verdict.brand && SS.BRAND_DOMAINS[verdict.brand] ? 'https://' + SS.BRAND_DOMAINS[verdict.brand][0] + '/' : null;
     if (rescueUrl) { api.tabs.update(tab.id, { url: rescueUrl }); window.close(); }

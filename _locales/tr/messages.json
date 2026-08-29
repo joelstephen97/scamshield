@@ -102,6 +102,33 @@
       }
     }
   },
+  "copyReportBtn": {
+    "message": "Copy report"
+  },
+  "copyReportHeader": {
+    "message": "⚠ ScamShield flagged this site: $HOST$",
+    "placeholders": {
+      "host": {
+        "content": "$1",
+        "example": "evil[.]example"
+      }
+    }
+  },
+  "copyReportVerdict": {
+    "message": "Verdict: $LEVEL$",
+    "placeholders": {
+      "level": {
+        "content": "$1",
+        "example": "Dangerous page"
+      }
+    }
+  },
+  "copyReportSignals": {
+    "message": "Signals:"
+  },
+  "copyReportFooter": {
+    "message": "Checked on-device by ScamShield — free, open-source: https://joelstephen97.github.io/scamshield/"
+  },
   "reportScam": {
     "message": "Bildir: bu dolandırıcılık"
   },
@@ -183,6 +210,9 @@
   "toastResumed": {
     "message": "Koruma devam ettirildi"
   },
+  "toastCopied": {
+    "message": "Copied"
+  },
   "toastExtensionError": {
     "message": "Uzantı hatası — yeniden açmayı deneyin."
   },
@@ -262,6 +292,24 @@
   },
   "popupPrivacyNotifyLure": {
     "message": "Bu site \"İzin Ver'e tıklayın\" bildirim hilesini denedi."
+  },
+  "popupPrivacyCredExfilPassword": {
+    "message": "Sent your password to $HOST$ — a different site than the one you were on.",
+    "placeholders": {
+      "host": {
+        "content": "$1",
+        "example": "collector.example"
+      }
+    }
+  },
+  "popupPrivacyCredExfilCard": {
+    "message": "Sent your card details to $HOST$ — a different site than the one you were on.",
+    "placeholders": {
+      "host": {
+        "content": "$1",
+        "example": "collector.example"
+      }
+    }
   },
   "popupPrivacyDefaultText": {
     "message": "Gizlilik sorunu tespit edildi."
@@ -833,6 +881,12 @@
       }
     }
   },
+  "serpBadgeDanger": {
+    "message": "ScamShield: this result is on our threat block list"
+  },
+  "serpBadgeCaution": {
+    "message": "ScamShield: this result shows scam warning signs"
+  },
   "chipLink": {
     "message": "Bağlantı"
   },
@@ -958,6 +1012,15 @@
   },
   "reason_credentialFormForeignDomain": {
     "message": "Bu sayfadaki bir şifre formu, kimlik bilgilerinizi farklı bir siteye gönderiyor."
+  },
+  "reason_crossOriginCredPost": {
+    "message": "This form sends your password or card details to $HOST$ — a different site than the one you are on.",
+    "placeholders": {
+      "host": {
+        "content": "$1",
+        "example": "collector.example"
+      }
+    }
   },
   "reason_hiddenIframes": {
     "message": "Sayfa, girdinizi yakalayabilecek gizli çerçeveler içeriyor."
@@ -1181,49 +1244,191 @@
   "obNote": {
     "message": "ScamShield ücretsizdir. İsteğe bağlı: Ayarlar'da, yakaladığı dolandırıcılıkların anonim raporlarını paylaşarak onu daha akıllı hale getirmeye yardımcı olabilirsiniz — siz açmadığınız sürece kapalıdır. Size yardımcı olduysa, Ayarlar sayfasından geliştirmeyi destekleyebilirsiniz."
   },
-  "statsLink": { "message": "İstatistikler →" },
-  "tabStats": { "message": "İstatistikler" },
-  "optLang": { "message": "Dil" },
-  "optLangHint": { "message": "ScamShield'ın uyarılarına, açılır penceresine ve ayarlarına uygulanır. Senkronizasyon açıksa diğer cihazlarınızla senkronize edilir." },
-  "optLangAuto": { "message": "Tarayıcı varsayılanı" },
-  "fmtStatsSince": { "message": "Bu tarayıcıyı $DATE$ tarihinden beri koruyor", "placeholders": { "date": { "content": "$1", "example": "12 Jun 2026" } } },
-  "stats7d": { "message": "7 gün" },
-  "stats30d": { "message": "30 gün" },
-  "statsAll": { "message": "Tüm zamanlar" },
-  "statsPagesChecked": { "message": "Cihazda kontrol edilen sayfalar" },
-  "statsThreatsStopped": { "message": "Durdurulan tehditler" },
-  "statsThreatsNone": { "message": "Temizsiniz — hiçbir şey sızmadı" },
-  "statsScamsBlockedOne": { "message": "1 dolandırıcılık size hiç ulaşmadı" },
-  "fmtStatsScamsBlocked": { "message": "$COUNT$ dolandırıcılık size hiç ulaşmadı", "placeholders": { "count": { "content": "$1", "example": "8" } } },
-  "statsPrivacyFindings": { "message": "Gizlilik bulguları" },
-  "statsRulesActive": { "message": "Etkin engelleme listesi kuralı" },
-  "statsRulesActiveHint": { "message": "ScamShield'a yerleşik liste dahil, şu anda yürürlükte." },
-  "statsChartTitle7d": { "message": "Kontrol edilen sayfalar · son 7 gün" },
-  "statsChartTitle30d": { "message": "Kontrol edilen sayfalar · son 30 gün" },
-  "statsChartTitleAll": { "message": "Kontrol edilen sayfalar · kurulumdan bu yana" },
-  "statsChartTitle90d": { "message": "Kontrol edilen sayfalar · son 90 gün" },
-  "statsAxisToday": { "message": "Bugün" },
-  "statsLegendChecked": { "message": "Kontrol edilen sayfalar" },
-  "statsLegendThreat": { "message": "O gün durdurulan tehdit" },
-  "fmtStatsBarTip": { "message": "$DATE$ · $COUNT$ sayfa kontrol edildi", "placeholders": { "date": { "content": "$1", "example": "21 Aug" }, "count": { "content": "$2", "example": "63" } } },
-  "fmtStatsBarTipThreat": { "message": "$DATE$ · $COUNT$ sayfa kontrol edildi · 1 tehdit durduruldu", "placeholders": { "date": { "content": "$1", "example": "21 Aug" }, "count": { "content": "$2", "example": "63" } } },
-  "fmtStatsBarTipThreats": { "message": "$DATE$ · $COUNT$ sayfa kontrol edildi · $THREATS$ tehdit durduruldu", "placeholders": { "date": { "content": "$1", "example": "21 Aug" }, "count": { "content": "$2", "example": "63" }, "threats": { "content": "$3", "example": "2" } } },
-  "statsByType": { "message": "Türe göre tehditler · tüm zamanlar" },
-  "statsCatPhishing": { "message": "Kimlik avı" },
-  "statsCatFakeShop": { "message": "Sahte mağaza" },
-  "statsCatWallet": { "message": "Cüzdan boşaltıcı" },
-  "statsCatTechSupport": { "message": "Teknik destek" },
-  "statsCatClipboard": { "message": "Pano" },
-  "statsCatClickfix": { "message": "Sahte CAPTCHA" },
-  "statsCatFakeUpdate": { "message": "Sahte güncelleme" },
-  "statsCatOther": { "message": "Diğer" },
-  "statsRecent": { "message": "Son etkinlik" },
-  "statsPillBlocked": { "message": "Engellendi" },
-  "statsPillWarned": { "message": "Uyarıldı" },
-  "statsFooter": { "message": "Her sayı cihazınızda sayılır. Bu sayfadaki hiçbir şey herhangi bir yere gönderilmez." },
-  "reviewAskBody": { "message": "ScamShield şu ana kadar sizin için $COUNT$ dolandırıcılığı durdurdu. Hak ettiğini düşünüyorsanız kısa bir değerlendirme, başkalarının onu bulmasına yardımcı olur — ücretsizdir ve her zaman ücretsiz kalacaktır.", "placeholders": { "count": { "content": "$1", "example": "2" } } },
-  "reviewRate": { "message": "ScamShield'ı değerlendirin" },
-  "reviewLater": { "message": "Belki sonra" },
-  "reviewNo": { "message": "Hayır, teşekkürler" },
-  "reviewAboutLink": { "message": "ScamShield'ı beğendiniz mi? Bir değerlendirme bırakın" }
+  "statsLink": {
+    "message": "İstatistikler →"
+  },
+  "tabStats": {
+    "message": "İstatistikler"
+  },
+  "optLang": {
+    "message": "Dil"
+  },
+  "optLangHint": {
+    "message": "ScamShield'ın uyarılarına, açılır penceresine ve ayarlarına uygulanır. Senkronizasyon açıksa diğer cihazlarınızla senkronize edilir."
+  },
+  "optLangAuto": {
+    "message": "Tarayıcı varsayılanı"
+  },
+  "fmtStatsSince": {
+    "message": "Bu tarayıcıyı $DATE$ tarihinden beri koruyor",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "12 Jun 2026"
+      }
+    }
+  },
+  "stats7d": {
+    "message": "7 gün"
+  },
+  "stats30d": {
+    "message": "30 gün"
+  },
+  "statsAll": {
+    "message": "Tüm zamanlar"
+  },
+  "statsPagesChecked": {
+    "message": "Cihazda kontrol edilen sayfalar"
+  },
+  "statsThreatsStopped": {
+    "message": "Durdurulan tehditler"
+  },
+  "statsThreatsNone": {
+    "message": "Temizsiniz — hiçbir şey sızmadı"
+  },
+  "statsScamsBlockedOne": {
+    "message": "1 dolandırıcılık size hiç ulaşmadı"
+  },
+  "fmtStatsScamsBlocked": {
+    "message": "$COUNT$ dolandırıcılık size hiç ulaşmadı",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "8"
+      }
+    }
+  },
+  "statsPrivacyFindings": {
+    "message": "Gizlilik bulguları"
+  },
+  "statsRulesActive": {
+    "message": "Etkin engelleme listesi kuralı"
+  },
+  "statsRulesActiveHint": {
+    "message": "ScamShield'a yerleşik liste dahil, şu anda yürürlükte."
+  },
+  "statsChartTitle7d": {
+    "message": "Kontrol edilen sayfalar · son 7 gün"
+  },
+  "statsChartTitle30d": {
+    "message": "Kontrol edilen sayfalar · son 30 gün"
+  },
+  "statsChartTitleAll": {
+    "message": "Kontrol edilen sayfalar · kurulumdan bu yana"
+  },
+  "statsChartTitle90d": {
+    "message": "Kontrol edilen sayfalar · son 90 gün"
+  },
+  "statsAxisToday": {
+    "message": "Bugün"
+  },
+  "statsLegendChecked": {
+    "message": "Kontrol edilen sayfalar"
+  },
+  "statsLegendThreat": {
+    "message": "O gün durdurulan tehdit"
+  },
+  "fmtStatsBarTip": {
+    "message": "$DATE$ · $COUNT$ sayfa kontrol edildi",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "21 Aug"
+      },
+      "count": {
+        "content": "$2",
+        "example": "63"
+      }
+    }
+  },
+  "fmtStatsBarTipThreat": {
+    "message": "$DATE$ · $COUNT$ sayfa kontrol edildi · 1 tehdit durduruldu",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "21 Aug"
+      },
+      "count": {
+        "content": "$2",
+        "example": "63"
+      }
+    }
+  },
+  "fmtStatsBarTipThreats": {
+    "message": "$DATE$ · $COUNT$ sayfa kontrol edildi · $THREATS$ tehdit durduruldu",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "21 Aug"
+      },
+      "count": {
+        "content": "$2",
+        "example": "63"
+      },
+      "threats": {
+        "content": "$3",
+        "example": "2"
+      }
+    }
+  },
+  "statsByType": {
+    "message": "Türe göre tehditler · tüm zamanlar"
+  },
+  "statsCatPhishing": {
+    "message": "Kimlik avı"
+  },
+  "statsCatFakeShop": {
+    "message": "Sahte mağaza"
+  },
+  "statsCatWallet": {
+    "message": "Cüzdan boşaltıcı"
+  },
+  "statsCatTechSupport": {
+    "message": "Teknik destek"
+  },
+  "statsCatClipboard": {
+    "message": "Pano"
+  },
+  "statsCatClickfix": {
+    "message": "Sahte CAPTCHA"
+  },
+  "statsCatFakeUpdate": {
+    "message": "Sahte güncelleme"
+  },
+  "statsCatOther": {
+    "message": "Diğer"
+  },
+  "statsRecent": {
+    "message": "Son etkinlik"
+  },
+  "statsPillBlocked": {
+    "message": "Engellendi"
+  },
+  "statsPillWarned": {
+    "message": "Uyarıldı"
+  },
+  "statsFooter": {
+    "message": "Her sayı cihazınızda sayılır. Bu sayfadaki hiçbir şey herhangi bir yere gönderilmez."
+  },
+  "reviewAskBody": {
+    "message": "ScamShield şu ana kadar sizin için $COUNT$ dolandırıcılığı durdurdu. Hak ettiğini düşünüyorsanız kısa bir değerlendirme, başkalarının onu bulmasına yardımcı olur — ücretsizdir ve her zaman ücretsiz kalacaktır.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
+  },
+  "reviewRate": {
+    "message": "ScamShield'ı değerlendirin"
+  },
+  "reviewLater": {
+    "message": "Belki sonra"
+  },
+  "reviewNo": {
+    "message": "Hayır, teşekkürler"
+  },
+  "reviewAboutLink": {
+    "message": "ScamShield'ı beğendiniz mi? Bir değerlendirme bırakın"
+  }
 }

@@ -273,6 +273,73 @@
     return /^(ar|he|fa|ur)\b/i.test(String(l || ''));
   }
 
+  // ---- Copy-shareable catch report (0.10.0, Task C4) ----------------------
+  // Privacy Badger's popup Share button, adapted for organic distribution: a
+  // plain-text summary of the CURRENT verdict a person can paste into
+  // WhatsApp/Reddit to warn others. Shared by the in-page banner/interstitial
+  // (content/actions.js) and the popup why-panel (popup.js) so both places
+  // build the exact same text from the same pieces.
+
+  // Defangs a hostname for safe pasting: replaces the LAST "." with "[.]" so
+  // chat apps and forums don't auto-link it into a clickable URL. No prior
+  // defang convention existed in this codebase to reuse, so this introduces
+  // the common security-research one (e.g. "evil[.]example").
+  function defangHost(host) {
+    const s = String(host || '');
+    const i = s.lastIndexOf('.');
+    return i === -1 ? s : s.slice(0, i) + '[.]' + s.slice(i + 1);
+  }
+
+  // Pure line-assembly only: every string handed in (`headerLine`,
+  // `verdictLine`, `signalsLabel`, `reasons`, `footerLine`) is ALREADY fully
+  // resolved by the caller (t()/T() have already substituted $HOST$/$LEVEL$
+  // via chrome.i18n/tOverride, and `reasons` are already resolveReason()'d
+  // text) — this function only lays the lines out and caps signals at 4, so
+  // it stays engine-free and require()-able from a Node unit test with fake
+  // resolved strings, no chrome.* anywhere in sight.
+  function buildCopyReportText(o) {
+    const opts = o || {};
+    const lines = [opts.headerLine || '', opts.verdictLine || ''];
+    const signals = (opts.reasons || []).filter(Boolean).slice(0, 4);
+    if (signals.length) {
+      lines.push(opts.signalsLabel || '');
+      for (const s of signals) lines.push('- ' + s);
+    }
+    lines.push(opts.footerLine || '');
+    return lines.filter((l) => l !== '').join('\n');
+  }
+
+  // Clipboard write for the "Copy report" button's user-gesture click
+  // handler. navigator.clipboard.writeText needs no permission grant at all
+  // when called synchronously from a click (Chrome/Firefox both allow
+  // "clipboard-write" on user activation) — this is why C4 needs no
+  // manifest change. Falls back to a temporary textarea + execCommand
+  // ('copy') for a runtime where the Clipboard API is unavailable or
+  // blocked. Guarded for Node: requiring this file in a unit test has no
+  // `navigator`/`document` in scope, so this resolves false rather than
+  // throwing.
+  function execCommandCopy(text) {
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = text; ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed'; ta.style.opacity = '0'; ta.style.left = '-9999px';
+      (document.body || document.documentElement).appendChild(ta);
+      ta.focus(); ta.select();
+      const ok = document.execCommand('copy');
+      ta.remove();
+      return ok;
+    } catch (_) { return false; }
+  }
+  function copyToClipboard(text) {
+    try {
+      if (typeof navigator !== 'undefined' && navigator.clipboard && navigator.clipboard.writeText) {
+        return navigator.clipboard.writeText(text).then(() => true).catch(() => execCommandCopy(text));
+      }
+    } catch (_) {}
+    return Promise.resolve(typeof document !== 'undefined' ? execCommandCopy(text) : false);
+  }
+
   return { resolveReason, reasonToEnglish, reasonKind, EN, isRTL, bidiWrap,
-    LOCALES, LANG_NAMES, setOverride, overrideLanguage, tOverride, messagesToDict, intlTag };
+    LOCALES, LANG_NAMES, setOverride, overrideLanguage, tOverride, messagesToDict, intlTag,
+    defangHost, buildCopyReportText, copyToClipboard };
 });

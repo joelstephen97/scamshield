@@ -102,6 +102,33 @@
       }
     }
   },
+  "copyReportBtn": {
+    "message": "Copy report"
+  },
+  "copyReportHeader": {
+    "message": "⚠ ScamShield flagged this site: $HOST$",
+    "placeholders": {
+      "host": {
+        "content": "$1",
+        "example": "evil[.]example"
+      }
+    }
+  },
+  "copyReportVerdict": {
+    "message": "Verdict: $LEVEL$",
+    "placeholders": {
+      "level": {
+        "content": "$1",
+        "example": "Dangerous page"
+      }
+    }
+  },
+  "copyReportSignals": {
+    "message": "Signals:"
+  },
+  "copyReportFooter": {
+    "message": "Checked on-device by ScamShield — free, open-source: https://joelstephen97.github.io/scamshield/"
+  },
   "reportScam": {
     "message": "Сообщить: это мошенничество"
   },
@@ -183,6 +210,9 @@
   "toastResumed": {
     "message": "Защита возобновлена"
   },
+  "toastCopied": {
+    "message": "Copied"
+  },
   "toastExtensionError": {
     "message": "Ошибка расширения — попробуйте открыть заново."
   },
@@ -262,6 +292,24 @@
   },
   "popupPrivacyNotifyLure": {
     "message": "Этот сайт попытался использовать трюк с уведомлением «нажмите Разрешить»."
+  },
+  "popupPrivacyCredExfilPassword": {
+    "message": "Sent your password to $HOST$ — a different site than the one you were on.",
+    "placeholders": {
+      "host": {
+        "content": "$1",
+        "example": "collector.example"
+      }
+    }
+  },
+  "popupPrivacyCredExfilCard": {
+    "message": "Sent your card details to $HOST$ — a different site than the one you were on.",
+    "placeholders": {
+      "host": {
+        "content": "$1",
+        "example": "collector.example"
+      }
+    }
   },
   "popupPrivacyDefaultText": {
     "message": "Обнаружена проблема конфиденциальности."
@@ -833,6 +881,12 @@
       }
     }
   },
+  "serpBadgeDanger": {
+    "message": "ScamShield: this result is on our threat block list"
+  },
+  "serpBadgeCaution": {
+    "message": "ScamShield: this result shows scam warning signs"
+  },
   "chipLink": {
     "message": "Ссылка"
   },
@@ -958,6 +1012,15 @@
   },
   "reason_credentialFormForeignDomain": {
     "message": "Форма ввода пароля на этой странице отправляет ваши учётные данные на другой сайт."
+  },
+  "reason_crossOriginCredPost": {
+    "message": "This form sends your password or card details to $HOST$ — a different site than the one you are on.",
+    "placeholders": {
+      "host": {
+        "content": "$1",
+        "example": "collector.example"
+      }
+    }
   },
   "reason_hiddenIframes": {
     "message": "Страница содержит скрытые фреймы, которые могут перехватывать ввод."
@@ -1181,49 +1244,191 @@
   "obNote": {
     "message": "ScamShield бесплатен. Необязательно: в Настройках вы можете помочь сделать его умнее, делясь анонимными отчётами о выявленном мошенничестве — по умолчанию отключено, если вы сами не включите. Если он вам помог, вы можете поддержать разработку на странице Настроек."
   },
-  "statsLink": { "message": "Статистика →" },
-  "tabStats": { "message": "Статистика" },
-  "optLang": { "message": "Язык" },
-  "optLangHint": { "message": "Применяется к предупреждениям, всплывающему окну и настройкам ScamShield. Синхронизируется с другими вашими устройствами, если синхронизация включена." },
-  "optLangAuto": { "message": "По умолчанию в браузере" },
-  "fmtStatsSince": { "message": "Защищает этот браузер с $DATE$", "placeholders": { "date": { "content": "$1", "example": "12 Jun 2026" } } },
-  "stats7d": { "message": "7 дней" },
-  "stats30d": { "message": "30 дней" },
-  "statsAll": { "message": "За всё время" },
-  "statsPagesChecked": { "message": "Страниц проверено на устройстве" },
-  "statsThreatsStopped": { "message": "Угроз остановлено" },
-  "statsThreatsNone": { "message": "Всё чисто — ничего не проскочило" },
-  "statsScamsBlockedOne": { "message": "1 мошенничество не добралось до вас" },
-  "fmtStatsScamsBlocked": { "message": "$COUNT$ мошеннических схем не добрались до вас", "placeholders": { "count": { "content": "$1", "example": "8" } } },
-  "statsPrivacyFindings": { "message": "Находки по приватности" },
-  "statsRulesActive": { "message": "Активных правил блокировки" },
-  "statsRulesActiveHint": { "message": "Действуют прямо сейчас, включая список, встроенный в ScamShield." },
-  "statsChartTitle7d": { "message": "Проверено страниц · последние 7 дней" },
-  "statsChartTitle30d": { "message": "Проверено страниц · последние 30 дней" },
-  "statsChartTitleAll": { "message": "Проверено страниц · с момента установки" },
-  "statsChartTitle90d": { "message": "Проверено страниц · последние 90 дней" },
-  "statsAxisToday": { "message": "Сегодня" },
-  "statsLegendChecked": { "message": "Проверено страниц" },
-  "statsLegendThreat": { "message": "Угроза остановлена в этот день" },
-  "fmtStatsBarTip": { "message": "$DATE$ · $COUNT$ страниц проверено", "placeholders": { "date": { "content": "$1", "example": "21 Aug" }, "count": { "content": "$2", "example": "63" } } },
-  "fmtStatsBarTipThreat": { "message": "$DATE$ · $COUNT$ страниц проверено · остановлена 1 угроза", "placeholders": { "date": { "content": "$1", "example": "21 Aug" }, "count": { "content": "$2", "example": "63" } } },
-  "fmtStatsBarTipThreats": { "message": "$DATE$ · $COUNT$ страниц проверено · остановлено угроз: $THREATS$", "placeholders": { "date": { "content": "$1", "example": "21 Aug" }, "count": { "content": "$2", "example": "63" }, "threats": { "content": "$3", "example": "2" } } },
-  "statsByType": { "message": "Угрозы по типу · за всё время" },
-  "statsCatPhishing": { "message": "Фишинг" },
-  "statsCatFakeShop": { "message": "Поддельный магазин" },
-  "statsCatWallet": { "message": "Опустошение кошелька" },
-  "statsCatTechSupport": { "message": "Техподдержка" },
-  "statsCatClipboard": { "message": "Буфер обмена" },
-  "statsCatClickfix": { "message": "Фальшивая CAPTCHA" },
-  "statsCatFakeUpdate": { "message": "Фальшивое обновление" },
-  "statsCatOther": { "message": "Другое" },
-  "statsRecent": { "message": "Недавние" },
-  "statsPillBlocked": { "message": "Заблокировано" },
-  "statsPillWarned": { "message": "Предупреждено" },
-  "statsFooter": { "message": "Каждое число подсчитывается на вашем устройстве. Ничто на этой странице никуда не отправляется." },
-  "reviewAskBody": { "message": "ScamShield уже остановил для вас $COUNT$ мошеннических попыток. Если считаете, что он это заслужил, короткий отзыв поможет другим людям его найти — это бесплатно и всегда будет бесплатно.", "placeholders": { "count": { "content": "$1", "example": "2" } } },
-  "reviewRate": { "message": "Оценить ScamShield" },
-  "reviewLater": { "message": "Может быть, позже" },
-  "reviewNo": { "message": "Нет, спасибо" },
-  "reviewAboutLink": { "message": "Нравится ScamShield? Оставьте отзыв" }
+  "statsLink": {
+    "message": "Статистика →"
+  },
+  "tabStats": {
+    "message": "Статистика"
+  },
+  "optLang": {
+    "message": "Язык"
+  },
+  "optLangHint": {
+    "message": "Применяется к предупреждениям, всплывающему окну и настройкам ScamShield. Синхронизируется с другими вашими устройствами, если синхронизация включена."
+  },
+  "optLangAuto": {
+    "message": "По умолчанию в браузере"
+  },
+  "fmtStatsSince": {
+    "message": "Защищает этот браузер с $DATE$",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "12 Jun 2026"
+      }
+    }
+  },
+  "stats7d": {
+    "message": "7 дней"
+  },
+  "stats30d": {
+    "message": "30 дней"
+  },
+  "statsAll": {
+    "message": "За всё время"
+  },
+  "statsPagesChecked": {
+    "message": "Страниц проверено на устройстве"
+  },
+  "statsThreatsStopped": {
+    "message": "Угроз остановлено"
+  },
+  "statsThreatsNone": {
+    "message": "Всё чисто — ничего не проскочило"
+  },
+  "statsScamsBlockedOne": {
+    "message": "1 мошенничество не добралось до вас"
+  },
+  "fmtStatsScamsBlocked": {
+    "message": "$COUNT$ мошеннических схем не добрались до вас",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "8"
+      }
+    }
+  },
+  "statsPrivacyFindings": {
+    "message": "Находки по приватности"
+  },
+  "statsRulesActive": {
+    "message": "Активных правил блокировки"
+  },
+  "statsRulesActiveHint": {
+    "message": "Действуют прямо сейчас, включая список, встроенный в ScamShield."
+  },
+  "statsChartTitle7d": {
+    "message": "Проверено страниц · последние 7 дней"
+  },
+  "statsChartTitle30d": {
+    "message": "Проверено страниц · последние 30 дней"
+  },
+  "statsChartTitleAll": {
+    "message": "Проверено страниц · с момента установки"
+  },
+  "statsChartTitle90d": {
+    "message": "Проверено страниц · последние 90 дней"
+  },
+  "statsAxisToday": {
+    "message": "Сегодня"
+  },
+  "statsLegendChecked": {
+    "message": "Проверено страниц"
+  },
+  "statsLegendThreat": {
+    "message": "Угроза остановлена в этот день"
+  },
+  "fmtStatsBarTip": {
+    "message": "$DATE$ · $COUNT$ страниц проверено",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "21 Aug"
+      },
+      "count": {
+        "content": "$2",
+        "example": "63"
+      }
+    }
+  },
+  "fmtStatsBarTipThreat": {
+    "message": "$DATE$ · $COUNT$ страниц проверено · остановлена 1 угроза",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "21 Aug"
+      },
+      "count": {
+        "content": "$2",
+        "example": "63"
+      }
+    }
+  },
+  "fmtStatsBarTipThreats": {
+    "message": "$DATE$ · $COUNT$ страниц проверено · остановлено угроз: $THREATS$",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "21 Aug"
+      },
+      "count": {
+        "content": "$2",
+        "example": "63"
+      },
+      "threats": {
+        "content": "$3",
+        "example": "2"
+      }
+    }
+  },
+  "statsByType": {
+    "message": "Угрозы по типу · за всё время"
+  },
+  "statsCatPhishing": {
+    "message": "Фишинг"
+  },
+  "statsCatFakeShop": {
+    "message": "Поддельный магазин"
+  },
+  "statsCatWallet": {
+    "message": "Опустошение кошелька"
+  },
+  "statsCatTechSupport": {
+    "message": "Техподдержка"
+  },
+  "statsCatClipboard": {
+    "message": "Буфер обмена"
+  },
+  "statsCatClickfix": {
+    "message": "Фальшивая CAPTCHA"
+  },
+  "statsCatFakeUpdate": {
+    "message": "Фальшивое обновление"
+  },
+  "statsCatOther": {
+    "message": "Другое"
+  },
+  "statsRecent": {
+    "message": "Недавние"
+  },
+  "statsPillBlocked": {
+    "message": "Заблокировано"
+  },
+  "statsPillWarned": {
+    "message": "Предупреждено"
+  },
+  "statsFooter": {
+    "message": "Каждое число подсчитывается на вашем устройстве. Ничто на этой странице никуда не отправляется."
+  },
+  "reviewAskBody": {
+    "message": "ScamShield уже остановил для вас $COUNT$ мошеннических попыток. Если считаете, что он это заслужил, короткий отзыв поможет другим людям его найти — это бесплатно и всегда будет бесплатно.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
+  },
+  "reviewRate": {
+    "message": "Оценить ScamShield"
+  },
+  "reviewLater": {
+    "message": "Может быть, позже"
+  },
+  "reviewNo": {
+    "message": "Нет, спасибо"
+  },
+  "reviewAboutLink": {
+    "message": "Нравится ScamShield? Оставьте отзыв"
+  }
 }

@@ -394,6 +394,48 @@ test('every content-script verdict with reasons also reports reasonCodes', () =>
   }
 });
 
+// --- Copy-shareable catch report (0.10.0, Task C4) -------------------------
+
+test('defangHost replaces only the last "." with "[.]"', () => {
+  assert.equal(R.defangHost('evil.example'), 'evil[.]example');
+  assert.equal(R.defangHost('secure-paypa1-login.com'), 'secure-paypa1-login[.]com');
+  assert.equal(R.defangHost('a.b.c.d.deep.example'), 'a.b.c.d.deep[.]example');
+  assert.equal(R.defangHost('localhost'), 'localhost'); // no dot to defang
+  assert.equal(R.defangHost(''), '');
+  assert.equal(R.defangHost(null), '');
+});
+
+test('buildCopyReportText assembles header/verdict/signals/footer from already-resolved strings, capped at 4 reasons', () => {
+  const text = R.buildCopyReportText({
+    headerLine: '⚠ ScamShield flagged this site: evil[.]example',
+    verdictLine: 'Verdict: Dangerous page',
+    signalsLabel: 'Signals:',
+    reasons: ['Uses a raw IP address.', 'No HTTPS.', 'Punycode domain.', 'Many subdomains.', 'A fifth reason that must be dropped.'],
+    footerLine: 'Checked on-device by ScamShield — free, open-source: https://joelstephen97.github.io/scamshield/'
+  });
+  assert.equal(text, [
+    '⚠ ScamShield flagged this site: evil[.]example',
+    'Verdict: Dangerous page',
+    'Signals:',
+    '- Uses a raw IP address.',
+    '- No HTTPS.',
+    '- Punycode domain.',
+    '- Many subdomains.',
+    'Checked on-device by ScamShield — free, open-source: https://joelstephen97.github.io/scamshield/'
+  ].join('\n'));
+});
+
+test('buildCopyReportText omits the Signals section when there are no reasons, and tolerates missing fields', () => {
+  const text = R.buildCopyReportText({ headerLine: 'H', verdictLine: 'V', footerLine: 'F' });
+  assert.equal(text, 'H\nV\nF');
+  assert.equal(R.buildCopyReportText(), '');
+  assert.equal(R.buildCopyReportText({ reasons: [null, '', undefined, 'kept'] }), '- kept');
+});
+
+test('copyToClipboard resolves false in Node (no navigator/document) rather than throwing', async () => {
+  assert.equal(await R.copyToClipboard('anything'), false);
+});
+
 test('every reason code emitted by the engine is in the EN table with a valid kind', () => {
   let found = 0;
   for (const { name, src } of engineFiles) {

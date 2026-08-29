@@ -102,6 +102,33 @@
       }
     }
   },
+  "copyReportBtn": {
+    "message": "Copy report"
+  },
+  "copyReportHeader": {
+    "message": "⚠ ScamShield flagged this site: $HOST$",
+    "placeholders": {
+      "host": {
+        "content": "$1",
+        "example": "evil[.]example"
+      }
+    }
+  },
+  "copyReportVerdict": {
+    "message": "Verdict: $LEVEL$",
+    "placeholders": {
+      "level": {
+        "content": "$1",
+        "example": "Dangerous page"
+      }
+    }
+  },
+  "copyReportSignals": {
+    "message": "Signals:"
+  },
+  "copyReportFooter": {
+    "message": "Checked on-device by ScamShield — free, open-source: https://joelstephen97.github.io/scamshield/"
+  },
   "reportScam": {
     "message": "Laporkan: ini penipuan"
   },
@@ -183,6 +210,9 @@
   "toastResumed": {
     "message": "Perlindungan dilanjutkan"
   },
+  "toastCopied": {
+    "message": "Copied"
+  },
   "toastExtensionError": {
     "message": "Terjadi kesalahan ekstensi — coba buka kembali."
   },
@@ -262,6 +292,24 @@
   },
   "popupPrivacyNotifyLure": {
     "message": "Situs ini mencoba trik notifikasi \"klik Izinkan\"."
+  },
+  "popupPrivacyCredExfilPassword": {
+    "message": "Sent your password to $HOST$ — a different site than the one you were on.",
+    "placeholders": {
+      "host": {
+        "content": "$1",
+        "example": "collector.example"
+      }
+    }
+  },
+  "popupPrivacyCredExfilCard": {
+    "message": "Sent your card details to $HOST$ — a different site than the one you were on.",
+    "placeholders": {
+      "host": {
+        "content": "$1",
+        "example": "collector.example"
+      }
+    }
   },
   "popupPrivacyDefaultText": {
     "message": "Masalah privasi terdeteksi."
@@ -833,6 +881,12 @@
       }
     }
   },
+  "serpBadgeDanger": {
+    "message": "ScamShield: this result is on our threat block list"
+  },
+  "serpBadgeCaution": {
+    "message": "ScamShield: this result shows scam warning signs"
+  },
   "chipLink": {
     "message": "Tautan"
   },
@@ -958,6 +1012,15 @@
   },
   "reason_credentialFormForeignDomain": {
     "message": "Formulir kata sandi di halaman ini mengirim kredensial Anda ke situs yang berbeda."
+  },
+  "reason_crossOriginCredPost": {
+    "message": "This form sends your password or card details to $HOST$ — a different site than the one you are on.",
+    "placeholders": {
+      "host": {
+        "content": "$1",
+        "example": "collector.example"
+      }
+    }
   },
   "reason_hiddenIframes": {
     "message": "Halaman berisi frame tersembunyi yang mungkin menangkap input Anda."
@@ -1181,49 +1244,191 @@
   "obNote": {
     "message": "ScamShield gratis. Opsional: di Pengaturan Anda dapat membantu membuatnya lebih pintar dengan membagikan laporan anonim tentang penipuan yang terdeteksi — ini nonaktif kecuali Anda mengaktifkannya. Jika ini membantu Anda, Anda dapat mendukung pengembangannya dari halaman Pengaturan."
   },
-  "statsLink": { "message": "Statistik →" },
-  "tabStats": { "message": "Statistik" },
-  "optLang": { "message": "Bahasa" },
-  "optLangHint": { "message": "Berlaku untuk peringatan, popup, dan pengaturan ScamShield. Disinkronkan dengan perangkat Anda yang lain jika sinkronisasi aktif." },
-  "optLangAuto": { "message": "Default browser" },
-  "fmtStatsSince": { "message": "Melindungi browser ini sejak $DATE$", "placeholders": { "date": { "content": "$1", "example": "12 Jun 2026" } } },
-  "stats7d": { "message": "7 hari" },
-  "stats30d": { "message": "30 hari" },
-  "statsAll": { "message": "Sepanjang waktu" },
-  "statsPagesChecked": { "message": "Halaman diperiksa di perangkat" },
-  "statsThreatsStopped": { "message": "Ancaman dihentikan" },
-  "statsThreatsNone": { "message": "Aman — tidak ada yang lolos" },
-  "statsScamsBlockedOne": { "message": "1 penipuan tidak pernah sampai ke Anda" },
-  "fmtStatsScamsBlocked": { "message": "$COUNT$ penipuan tidak pernah sampai ke Anda", "placeholders": { "count": { "content": "$1", "example": "8" } } },
-  "statsPrivacyFindings": { "message": "Temuan privasi" },
-  "statsRulesActive": { "message": "Aturan blocklist aktif" },
-  "statsRulesActiveHint": { "message": "Berlaku saat ini, termasuk daftar bawaan ScamShield." },
-  "statsChartTitle7d": { "message": "Halaman diperiksa · 7 hari terakhir" },
-  "statsChartTitle30d": { "message": "Halaman diperiksa · 30 hari terakhir" },
-  "statsChartTitleAll": { "message": "Halaman diperiksa · sejak dipasang" },
-  "statsChartTitle90d": { "message": "Halaman diperiksa · 90 hari terakhir" },
-  "statsAxisToday": { "message": "Hari ini" },
-  "statsLegendChecked": { "message": "Halaman diperiksa" },
-  "statsLegendThreat": { "message": "Ancaman dihentikan hari itu" },
-  "fmtStatsBarTip": { "message": "$DATE$ · $COUNT$ halaman diperiksa", "placeholders": { "date": { "content": "$1", "example": "21 Aug" }, "count": { "content": "$2", "example": "63" } } },
-  "fmtStatsBarTipThreat": { "message": "$DATE$ · $COUNT$ halaman diperiksa · 1 ancaman dihentikan", "placeholders": { "date": { "content": "$1", "example": "21 Aug" }, "count": { "content": "$2", "example": "63" } } },
-  "fmtStatsBarTipThreats": { "message": "$DATE$ · $COUNT$ halaman diperiksa · $THREATS$ ancaman dihentikan", "placeholders": { "date": { "content": "$1", "example": "21 Aug" }, "count": { "content": "$2", "example": "63" }, "threats": { "content": "$3", "example": "2" } } },
-  "statsByType": { "message": "Ancaman berdasarkan jenis · sepanjang waktu" },
-  "statsCatPhishing": { "message": "Phishing" },
-  "statsCatFakeShop": { "message": "Toko palsu" },
-  "statsCatWallet": { "message": "Pengurasan dompet" },
-  "statsCatTechSupport": { "message": "Dukungan teknis" },
-  "statsCatClipboard": { "message": "Clipboard" },
-  "statsCatClickfix": { "message": "CAPTCHA palsu" },
-  "statsCatFakeUpdate": { "message": "Pembaruan palsu" },
-  "statsCatOther": { "message": "Lainnya" },
-  "statsRecent": { "message": "Terbaru" },
-  "statsPillBlocked": { "message": "Diblokir" },
-  "statsPillWarned": { "message": "Diperingatkan" },
-  "statsFooter": { "message": "Setiap angka dihitung di perangkat Anda. Tidak ada apa pun di halaman ini yang dikirim ke mana pun." },
-  "reviewAskBody": { "message": "ScamShield kini telah menghentikan $COUNT$ penipuan untuk Anda. Jika menurut Anda ini pantas, ulasan singkat membantu orang lain menemukannya — gratis dan akan selalu gratis.", "placeholders": { "count": { "content": "$1", "example": "2" } } },
-  "reviewRate": { "message": "Beri nilai ScamShield" },
-  "reviewLater": { "message": "Mungkin nanti" },
-  "reviewNo": { "message": "Tidak, terima kasih" },
-  "reviewAboutLink": { "message": "Menyukai ScamShield? Tinggalkan ulasan" }
+  "statsLink": {
+    "message": "Statistik →"
+  },
+  "tabStats": {
+    "message": "Statistik"
+  },
+  "optLang": {
+    "message": "Bahasa"
+  },
+  "optLangHint": {
+    "message": "Berlaku untuk peringatan, popup, dan pengaturan ScamShield. Disinkronkan dengan perangkat Anda yang lain jika sinkronisasi aktif."
+  },
+  "optLangAuto": {
+    "message": "Default browser"
+  },
+  "fmtStatsSince": {
+    "message": "Melindungi browser ini sejak $DATE$",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "12 Jun 2026"
+      }
+    }
+  },
+  "stats7d": {
+    "message": "7 hari"
+  },
+  "stats30d": {
+    "message": "30 hari"
+  },
+  "statsAll": {
+    "message": "Sepanjang waktu"
+  },
+  "statsPagesChecked": {
+    "message": "Halaman diperiksa di perangkat"
+  },
+  "statsThreatsStopped": {
+    "message": "Ancaman dihentikan"
+  },
+  "statsThreatsNone": {
+    "message": "Aman — tidak ada yang lolos"
+  },
+  "statsScamsBlockedOne": {
+    "message": "1 penipuan tidak pernah sampai ke Anda"
+  },
+  "fmtStatsScamsBlocked": {
+    "message": "$COUNT$ penipuan tidak pernah sampai ke Anda",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "8"
+      }
+    }
+  },
+  "statsPrivacyFindings": {
+    "message": "Temuan privasi"
+  },
+  "statsRulesActive": {
+    "message": "Aturan blocklist aktif"
+  },
+  "statsRulesActiveHint": {
+    "message": "Berlaku saat ini, termasuk daftar bawaan ScamShield."
+  },
+  "statsChartTitle7d": {
+    "message": "Halaman diperiksa · 7 hari terakhir"
+  },
+  "statsChartTitle30d": {
+    "message": "Halaman diperiksa · 30 hari terakhir"
+  },
+  "statsChartTitleAll": {
+    "message": "Halaman diperiksa · sejak dipasang"
+  },
+  "statsChartTitle90d": {
+    "message": "Halaman diperiksa · 90 hari terakhir"
+  },
+  "statsAxisToday": {
+    "message": "Hari ini"
+  },
+  "statsLegendChecked": {
+    "message": "Halaman diperiksa"
+  },
+  "statsLegendThreat": {
+    "message": "Ancaman dihentikan hari itu"
+  },
+  "fmtStatsBarTip": {
+    "message": "$DATE$ · $COUNT$ halaman diperiksa",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "21 Aug"
+      },
+      "count": {
+        "content": "$2",
+        "example": "63"
+      }
+    }
+  },
+  "fmtStatsBarTipThreat": {
+    "message": "$DATE$ · $COUNT$ halaman diperiksa · 1 ancaman dihentikan",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "21 Aug"
+      },
+      "count": {
+        "content": "$2",
+        "example": "63"
+      }
+    }
+  },
+  "fmtStatsBarTipThreats": {
+    "message": "$DATE$ · $COUNT$ halaman diperiksa · $THREATS$ ancaman dihentikan",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "21 Aug"
+      },
+      "count": {
+        "content": "$2",
+        "example": "63"
+      },
+      "threats": {
+        "content": "$3",
+        "example": "2"
+      }
+    }
+  },
+  "statsByType": {
+    "message": "Ancaman berdasarkan jenis · sepanjang waktu"
+  },
+  "statsCatPhishing": {
+    "message": "Phishing"
+  },
+  "statsCatFakeShop": {
+    "message": "Toko palsu"
+  },
+  "statsCatWallet": {
+    "message": "Pengurasan dompet"
+  },
+  "statsCatTechSupport": {
+    "message": "Dukungan teknis"
+  },
+  "statsCatClipboard": {
+    "message": "Clipboard"
+  },
+  "statsCatClickfix": {
+    "message": "CAPTCHA palsu"
+  },
+  "statsCatFakeUpdate": {
+    "message": "Pembaruan palsu"
+  },
+  "statsCatOther": {
+    "message": "Lainnya"
+  },
+  "statsRecent": {
+    "message": "Terbaru"
+  },
+  "statsPillBlocked": {
+    "message": "Diblokir"
+  },
+  "statsPillWarned": {
+    "message": "Diperingatkan"
+  },
+  "statsFooter": {
+    "message": "Setiap angka dihitung di perangkat Anda. Tidak ada apa pun di halaman ini yang dikirim ke mana pun."
+  },
+  "reviewAskBody": {
+    "message": "ScamShield kini telah menghentikan $COUNT$ penipuan untuk Anda. Jika menurut Anda ini pantas, ulasan singkat membantu orang lain menemukannya — gratis dan akan selalu gratis.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
+  },
+  "reviewRate": {
+    "message": "Beri nilai ScamShield"
+  },
+  "reviewLater": {
+    "message": "Mungkin nanti"
+  },
+  "reviewNo": {
+    "message": "Tidak, terima kasih"
+  },
+  "reviewAboutLink": {
+    "message": "Menyukai ScamShield? Tinggalkan ulasan"
+  }
 }

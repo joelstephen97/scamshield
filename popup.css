@@ -91,3 +91,9 @@ details.card>summary::-webkit-details-marker{display:none}
 html[dir="rtl"] .chev::before{content:'‹'}
 #whypanel .end{display:flex;align-items:center;gap:6px;font-weight:400;color:var(--muted);font-size:12px}
 #whypanel .evidence{margin-top:8px}
+/* "Copy report" (0.10.0, Task C4): a small ghost button in the why-panel's
+   own footer, offered only on a dangerous/suspicious verdict — see
+   popup.js's renderEvidence(). Right-aligned so it reads as a secondary,
+   panel-scoped action rather than competing with the evidence rows above. */
+#whyfoot{display:flex;justify-content:flex-end;margin-top:6px}
+#whyfoot .btn{font-size:12px;padding:4px 6px}

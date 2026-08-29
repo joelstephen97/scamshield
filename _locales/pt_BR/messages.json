@@ -102,6 +102,33 @@
       }
     }
   },
+  "copyReportBtn": {
+    "message": "Copy report"
+  },
+  "copyReportHeader": {
+    "message": "⚠ ScamShield flagged this site: $HOST$",
+    "placeholders": {
+      "host": {
+        "content": "$1",
+        "example": "evil[.]example"
+      }
+    }
+  },
+  "copyReportVerdict": {
+    "message": "Verdict: $LEVEL$",
+    "placeholders": {
+      "level": {
+        "content": "$1",
+        "example": "Dangerous page"
+      }
+    }
+  },
+  "copyReportSignals": {
+    "message": "Signals:"
+  },
+  "copyReportFooter": {
+    "message": "Checked on-device by ScamShield — free, open-source: https://joelstephen97.github.io/scamshield/"
+  },
   "reportScam": {
     "message": "Relatar: isto é um golpe"
   },
@@ -183,6 +210,9 @@
   "toastResumed": {
     "message": "Proteção retomada"
   },
+  "toastCopied": {
+    "message": "Copied"
+  },
   "toastExtensionError": {
     "message": "Erro na extensão — tente reabrir."
   },
@@ -262,6 +292,24 @@
   },
   "popupPrivacyNotifyLure": {
     "message": "Este site tentou o truque de notificação \"clique em Permitir\"."
+  },
+  "popupPrivacyCredExfilPassword": {
+    "message": "Sent your password to $HOST$ — a different site than the one you were on.",
+    "placeholders": {
+      "host": {
+        "content": "$1",
+        "example": "collector.example"
+      }
+    }
+  },
+  "popupPrivacyCredExfilCard": {
+    "message": "Sent your card details to $HOST$ — a different site than the one you were on.",
+    "placeholders": {
+      "host": {
+        "content": "$1",
+        "example": "collector.example"
+      }
+    }
   },
   "popupPrivacyDefaultText": {
     "message": "Problema de privacidade detectado."
@@ -833,6 +881,12 @@
       }
     }
   },
+  "serpBadgeDanger": {
+    "message": "ScamShield: this result is on our threat block list"
+  },
+  "serpBadgeCaution": {
+    "message": "ScamShield: this result shows scam warning signs"
+  },
   "chipLink": {
     "message": "Link"
   },
@@ -958,6 +1012,15 @@
   },
   "reason_credentialFormForeignDomain": {
     "message": "Um formulário de senha nesta página envia suas credenciais para um site diferente."
+  },
+  "reason_crossOriginCredPost": {
+    "message": "This form sends your password or card details to $HOST$ — a different site than the one you are on.",
+    "placeholders": {
+      "host": {
+        "content": "$1",
+        "example": "collector.example"
+      }
+    }
   },
   "reason_hiddenIframes": {
     "message": "A página contém quadros ocultos que podem capturar sua entrada."
@@ -1181,49 +1244,191 @@
   "obNote": {
     "message": "O ScamShield é gratuito. Opcional: nas Configurações, você pode ajudar a torná-lo mais inteligente compartilhando relatórios anônimos dos golpes que ele detecta — está desativado a menos que você o ative. Se ele te ajudou, você pode apoiar o desenvolvimento na página de Configurações."
   },
-  "statsLink": { "message": "Estatísticas →" },
-  "tabStats": { "message": "Estatísticas" },
-  "optLang": { "message": "Idioma" },
-  "optLangHint": { "message": "Aplica-se aos avisos, ao popup e às configurações do ScamShield. Sincroniza com seus outros dispositivos se a sincronização estiver ativada." },
-  "optLangAuto": { "message": "Padrão do navegador" },
-  "fmtStatsSince": { "message": "Protegendo este navegador desde $DATE$", "placeholders": { "date": { "content": "$1", "example": "12 Jun 2026" } } },
-  "stats7d": { "message": "7 dias" },
-  "stats30d": { "message": "30 dias" },
-  "statsAll": { "message": "Desde sempre" },
-  "statsPagesChecked": { "message": "Páginas verificadas no dispositivo" },
-  "statsThreatsStopped": { "message": "Ameaças bloqueadas" },
-  "statsThreatsNone": { "message": "Tudo limpo — nada passou" },
-  "statsScamsBlockedOne": { "message": "1 golpe nunca chegou até você" },
-  "fmtStatsScamsBlocked": { "message": "$COUNT$ golpes nunca chegaram até você", "placeholders": { "count": { "content": "$1", "example": "8" } } },
-  "statsPrivacyFindings": { "message": "Descobertas de privacidade" },
-  "statsRulesActive": { "message": "Regras da lista de bloqueio ativas" },
-  "statsRulesActiveHint": { "message": "Em vigor agora, incluindo a lista integrada ao ScamShield." },
-  "statsChartTitle7d": { "message": "Páginas verificadas · últimos 7 dias" },
-  "statsChartTitle30d": { "message": "Páginas verificadas · últimos 30 dias" },
-  "statsChartTitleAll": { "message": "Páginas verificadas · desde a instalação" },
-  "statsChartTitle90d": { "message": "Páginas verificadas · últimos 90 dias" },
-  "statsAxisToday": { "message": "Hoje" },
-  "statsLegendChecked": { "message": "Páginas verificadas" },
-  "statsLegendThreat": { "message": "Ameaça bloqueada nesse dia" },
-  "fmtStatsBarTip": { "message": "$DATE$ · $COUNT$ páginas verificadas", "placeholders": { "date": { "content": "$1", "example": "21 Aug" }, "count": { "content": "$2", "example": "63" } } },
-  "fmtStatsBarTipThreat": { "message": "$DATE$ · $COUNT$ páginas verificadas · 1 ameaça bloqueada", "placeholders": { "date": { "content": "$1", "example": "21 Aug" }, "count": { "content": "$2", "example": "63" } } },
-  "fmtStatsBarTipThreats": { "message": "$DATE$ · $COUNT$ páginas verificadas · $THREATS$ ameaças bloqueadas", "placeholders": { "date": { "content": "$1", "example": "21 Aug" }, "count": { "content": "$2", "example": "63" }, "threats": { "content": "$3", "example": "2" } } },
-  "statsByType": { "message": "Ameaças por tipo · desde sempre" },
-  "statsCatPhishing": { "message": "Phishing" },
-  "statsCatFakeShop": { "message": "Loja falsa" },
-  "statsCatWallet": { "message": "Drenagem de carteira" },
-  "statsCatTechSupport": { "message": "Suporte técnico" },
-  "statsCatClipboard": { "message": "Área de transferência" },
-  "statsCatClickfix": { "message": "CAPTCHA falso" },
-  "statsCatFakeUpdate": { "message": "Atualização falsa" },
-  "statsCatOther": { "message": "Outro" },
-  "statsRecent": { "message": "Recente" },
-  "statsPillBlocked": { "message": "Bloqueado" },
-  "statsPillWarned": { "message": "Avisado" },
-  "statsFooter": { "message": "Cada número é contado no seu dispositivo. Nada nesta página é enviado a lugar nenhum." },
-  "reviewAskBody": { "message": "O ScamShield já bloqueou $COUNT$ golpes para você. Se você acha que ele merece, uma avaliação curta ajuda outras pessoas a encontrá-lo — é grátis e sempre será.", "placeholders": { "count": { "content": "$1", "example": "2" } } },
-  "reviewRate": { "message": "Avaliar o ScamShield" },
-  "reviewLater": { "message": "Talvez depois" },
-  "reviewNo": { "message": "Não, obrigado" },
-  "reviewAboutLink": { "message": "Gostando do ScamShield? Deixe uma avaliação" }
+  "statsLink": {
+    "message": "Estatísticas →"
+  },
+  "tabStats": {
+    "message": "Estatísticas"
+  },
+  "optLang": {
+    "message": "Idioma"
+  },
+  "optLangHint": {
+    "message": "Aplica-se aos avisos, ao popup e às configurações do ScamShield. Sincroniza com seus outros dispositivos se a sincronização estiver ativada."
+  },
+  "optLangAuto": {
+    "message": "Padrão do navegador"
+  },
+  "fmtStatsSince": {
+    "message": "Protegendo este navegador desde $DATE$",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "12 Jun 2026"
+      }
+    }
+  },
+  "stats7d": {
+    "message": "7 dias"
+  },
+  "stats30d": {
+    "message": "30 dias"
+  },
+  "statsAll": {
+    "message": "Desde sempre"
+  },
+  "statsPagesChecked": {
+    "message": "Páginas verificadas no dispositivo"
+  },
+  "statsThreatsStopped": {
+    "message": "Ameaças bloqueadas"
+  },
+  "statsThreatsNone": {
+    "message": "Tudo limpo — nada passou"
+  },
+  "statsScamsBlockedOne": {
+    "message": "1 golpe nunca chegou até você"
+  },
+  "fmtStatsScamsBlocked": {
+    "message": "$COUNT$ golpes nunca chegaram até você",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "8"
+      }
+    }
+  },
+  "statsPrivacyFindings": {
+    "message": "Descobertas de privacidade"
+  },
+  "statsRulesActive": {
+    "message": "Regras da lista de bloqueio ativas"
+  },
+  "statsRulesActiveHint": {
+    "message": "Em vigor agora, incluindo a lista integrada ao ScamShield."
+  },
+  "statsChartTitle7d": {
+    "message": "Páginas verificadas · últimos 7 dias"
+  },
+  "statsChartTitle30d": {
+    "message": "Páginas verificadas · últimos 30 dias"
+  },
+  "statsChartTitleAll": {
+    "message": "Páginas verificadas · desde a instalação"
+  },
+  "statsChartTitle90d": {
+    "message": "Páginas verificadas · últimos 90 dias"
+  },
+  "statsAxisToday": {
+    "message": "Hoje"
+  },
+  "statsLegendChecked": {
+    "message": "Páginas verificadas"
+  },
+  "statsLegendThreat": {
+    "message": "Ameaça bloqueada nesse dia"
+  },
+  "fmtStatsBarTip": {
+    "message": "$DATE$ · $COUNT$ páginas verificadas",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "21 Aug"
+      },
+      "count": {
+        "content": "$2",
+        "example": "63"
+      }
+    }
+  },
+  "fmtStatsBarTipThreat": {
+    "message": "$DATE$ · $COUNT$ páginas verificadas · 1 ameaça bloqueada",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "21 Aug"
+      },
+      "count": {
+        "content": "$2",
+        "example": "63"
+      }
+    }
+  },
+  "fmtStatsBarTipThreats": {
+    "message": "$DATE$ · $COUNT$ páginas verificadas · $THREATS$ ameaças bloqueadas",
+    "placeholders": {
+      "date": {
+        "content": "$1",
+        "example": "21 Aug"
+      },
+      "count": {
+        "content": "$2",
+        "example": "63"
+      },
+      "threats": {
+        "content": "$3",
+        "example": "2"
+      }
+    }
+  },
+  "statsByType": {
+    "message": "Ameaças por tipo · desde sempre"
+  },
+  "statsCatPhishing": {
+    "message": "Phishing"
+  },
+  "statsCatFakeShop": {
+    "message": "Loja falsa"
+  },
+  "statsCatWallet": {
+    "message": "Drenagem de carteira"
+  },
+  "statsCatTechSupport": {
+    "message": "Suporte técnico"
+  },
+  "statsCatClipboard": {
+    "message": "Área de transferência"
+  },
+  "statsCatClickfix": {
+    "message": "CAPTCHA falso"
+  },
+  "statsCatFakeUpdate": {
+    "message": "Atualização falsa"
+  },
+  "statsCatOther": {
+    "message": "Outro"
+  },
+  "statsRecent": {
+    "message": "Recente"
+  },
+  "statsPillBlocked": {
+    "message": "Bloqueado"
+  },
+  "statsPillWarned": {
+    "message": "Avisado"
+  },
+  "statsFooter": {
+    "message": "Cada número é contado no seu dispositivo. Nada nesta página é enviado a lugar nenhum."
+  },
+  "reviewAskBody": {
+    "message": "O ScamShield já bloqueou $COUNT$ golpes para você. Se você acha que ele merece, uma avaliação curta ajuda outras pessoas a encontrá-lo — é grátis e sempre será.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
+  },
+  "reviewRate": {
+    "message": "Avaliar o ScamShield"
+  },
+  "reviewLater": {
+    "message": "Talvez depois"
+  },
+  "reviewNo": {
+    "message": "Não, obrigado"
+  },
+  "reviewAboutLink": {
+    "message": "Gostando do ScamShield? Deixe uma avaliação"
+  }
 }
