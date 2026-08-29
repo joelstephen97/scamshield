@@ -67,4 +67,17 @@ test('matchHostingRisk is null on a miss or missing/invalid input', () => {
   assert.equal(Risk.matchHostingRisk(1, new Set([2]), new Set([3])), null);
   assert.equal(Risk.matchHostingRisk(1, null, null), null);
   assert.equal(Risk.matchHostingRisk('not-a-number', new Set([1]), null), null);
+  assert.equal(Risk.matchHostingRisk(NaN, new Set([NaN]), null), null);
+});
+
+test('matchHostingRisk fails safe (never throws) on a non-Set-like argument', () => {
+  // Set<number> is the documented contract, but a malformed caller input
+  // (a plain array, a bare object, a string) must degrade to "no match"
+  // rather than throw — same fail-open discipline as engine/blockset.js.
+  // Found during a verification sweep: the original version called
+  // `.has()` unconditionally and threw on a plain array.
+  assert.doesNotThrow(() => Risk.matchHostingRisk(1, [1, 2, 3], null));
+  assert.equal(Risk.matchHostingRisk(1, [1, 2, 3], null), null);
+  assert.equal(Risk.matchHostingRisk(1, {}, null), null);
+  assert.equal(Risk.matchHostingRisk(1, 'not-a-set', null), null);
 });

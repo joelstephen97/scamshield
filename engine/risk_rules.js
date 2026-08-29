@@ -45,11 +45,13 @@
   }
 
   // dyndns/hoster membership against precomputed hash32 sets (Set<number> or
-  // any object with a .has()). Returns 'dyndns', 'hoster', or null.
+  // any object with a .has()). Fails safe (null, never throws) on a
+  // malformed/non-Set-like argument — same "contribute nothing" discipline
+  // engine/blockset.js's evalTree uses for a malformed tree.
   function matchHostingRisk(hash32, dyndnsSet, hostersSet) {
-    if (typeof hash32 !== 'number') return null;
-    if (dyndnsSet && dyndnsSet.has(hash32)) return 'dyndns';
-    if (hostersSet && hostersSet.has(hash32)) return 'hoster';
+    if (typeof hash32 !== 'number' || Number.isNaN(hash32)) return null;
+    if (dyndnsSet && typeof dyndnsSet.has === 'function' && dyndnsSet.has(hash32)) return 'dyndns';
+    if (hostersSet && typeof hostersSet.has === 'function' && hostersSet.has(hash32)) return 'hoster';
     return null;
   }
 
