@@ -41,8 +41,8 @@ html[dir="rtl"] .langmenu .dd{left:0;right:auto}
 .dditem{text-align:left;border:0;background:transparent;color:var(--text);padding:7px 10px;border-radius:var(--chip);font:inherit;cursor:pointer}
 .dditem:hover,.dditem:focus-visible{background:var(--accent-soft);color:var(--accent)}
 .morewrap{margin-top:8px}
-#msgcheck summary{list-style:none;cursor:pointer}
-#msgcheck summary::-webkit-details-marker{display:none}
+details.card>summary{list-style:none;cursor:pointer}
+details.card>summary::-webkit-details-marker{display:none}
 #msgcheck .hint{font-size:11px;color:var(--muted);margin:6px 0 0}
 #msgtext{width:100%;font:inherit;border:1px solid var(--hair);border-radius:var(--chip);background:var(--ground);color:var(--text);padding:8px;resize:vertical;min-height:64px;margin-top:8px}
 .msgrow{display:flex;gap:8px;align-items:center;margin-top:8px}
@@ -54,6 +54,26 @@ html[dir="rtl"] .langmenu .dd{left:0;right:auto}
 .toast-inline{font-size:12px;color:var(--safe)}
 
 .cardh{font-size:12px;font-weight:600;color:var(--muted);margin:0 0 8px;text-transform:uppercase;letter-spacing:.04em}
+
+/* Chevron actions (0.8.0): Statistics / Report a mistake, and the Why-verdict
+   disclosure's own summary row, all share this look — a full-width row with a
+   label on the inline-start and a trailing chevron. `.disc` (tokens.css)
+   already gives the flex/space-between/bold layout that both a <details>
+   <summary> and a plain <a>/<button> need; `.actionrow` adds the tappable
+   card chrome (border, background, padding) that a bare <summary> doesn't
+   get from `.card` alone (the parent <details> supplies that instead). */
+.actions{display:flex;flex-direction:column;gap:6px}
+.actionrow{width:100%;border:1px solid var(--hair);border-radius:var(--radius);background:var(--surface);padding:10px 12px;color:var(--text);text-decoration:none;cursor:pointer}
+.actionrow:hover,.actionrow:focus-visible{background:var(--accent-soft);color:var(--accent)}
+/* CSS-generated, not real text: keeps #viewall/#reportbtn's accessible name
+   and Playwright's toHaveText() reading just the label, with the arrow as a
+   pure visual affordance. `›` points into the page's reading direction, so it
+   flips to `‹` under RTL rather than the physical arrow staying put. */
+.chev{color:var(--muted);flex:none}
+.chev::before{content:'›'}
+html[dir="rtl"] .chev::before{content:'‹'}
+#whypanel .end{display:flex;align-items:center;gap:6px;font-weight:400;color:var(--muted);font-size:12px}
+#whypanel .evidence{margin-top:8px}
 
 /* Earned review ask (0.7.0). Deliberately just `.card` — a hairline border
    (var(--hair), inherited from .card), NOT a colored left accent. */

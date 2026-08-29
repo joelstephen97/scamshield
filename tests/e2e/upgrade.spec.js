@@ -19,7 +19,7 @@ test('0.3.1 settings + history load, migrate additively, and the UI works', asyn
   expect(s.leakyFormGuard).toBe(true); expect(s.fingerprintDetect).toBe(true); expect(s.notificationGuard).toBe(true);
   expect(s.shopGuard).toBe(true); expect(s.serpCheck).toBe(true); expect(s.syncEnabled).toBe(false);
   const popup = await context.newPage(); await popup.goto(`chrome-extension://${extensionId}/popup.html`);
-  await expect(popup.locator('#tile-all b')).toHaveText('7'); await expect(popup.locator('#hist li')).toHaveCount(1);
+  await expect(popup.locator('#tile-since b')).toHaveText('7'); await expect(popup.locator('#hist li')).toHaveCount(1);
   const opts = await context.newPage(); await opts.goto(`chrome-extension://${extensionId}/options.html#trusted`);
   await expect(opts.locator('#allowlist')).toContainText('trusted-shop.example');
   // allowlisted host stays silent on a scammy page (host resolves to the fixture server)

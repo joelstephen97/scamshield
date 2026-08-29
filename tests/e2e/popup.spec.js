@@ -14,6 +14,9 @@ test('dangerous brand page: red card, Leave + real-site actions, evidence rows',
   await expect(popup.locator('#level')).toHaveText('Dangerous page');
   await expect(popup.locator('#leave')).toBeVisible(); await expect(popup.locator('#rescue')).toBeVisible();
   await expect(popup.locator('#reasons li')).not.toHaveCount(0);
+  // "Why this verdict?" opens by default on a dangerous verdict — no manual
+  // "Show why" click needed any more (0.8.0: the panel absorbed that button).
+  await expect(popup.locator('#whypanel')).toHaveJSProperty('open', true);
   await expect(popup.locator('#trustmenu')).toBeHidden();
   await expect(popup.locator('#reportbtn')).toHaveText(/this is safe/i);
 });
@@ -24,8 +27,40 @@ test('safe page: quiet card, stats tiles, report label says scam', async ({ cont
   await expect(popup.locator('#level')).toHaveText('Nothing suspicious here');
   await expect(popup.locator('#level')).not.toHaveText('Checking…');
   await expect(popup.locator('#leave')).toBeHidden();
-  await expect(popup.locator('#tile-all b')).toHaveText(/^\d+$/);
+  await expect(popup.locator('#tile-since b')).toHaveText(/^\d+$/);
+  await expect(popup.locator('#tile-week b')).toHaveText(/^\d+$/);
   await expect(popup.locator('#reportbtn')).toHaveText(/this is a scam/i);
+});
+test('hero counters render both since-install and this-week totals from seeded stats', async ({ context, extensionId }) => {
+  const sw = context.serviceWorkers()[0];
+  const today = new Date().toISOString().slice(0, 10);
+  await sw.evaluate(async (d) => {
+    await setSettings({ threatsBlocked: 12 });
+    await chrome.storage.local.set({ statsDaily: [{ d, checked: 5, threats: 4, privacy: 0 }] });
+  }, today);
+  const popup = await context.newPage();
+  await popup.goto(`chrome-extension://${extensionId}/popup.html`);
+  await expect(popup.locator('#tile-since b')).toHaveText('12');
+  await expect(popup.locator('#tile-week b')).toHaveText('4');
+});
+// clean-login.html over this host is a documented "safe" fixture (see
+// tests/e2e/detection.spec.js) whose URL still trips one weak rule
+// (randomHost, host-entropy heuristic) — exactly the case the "Why this
+// verdict?" panel exists for: a safe verdict that still has something to
+// show, collapsed behind a signal count until the user asks for it.
+test('Why-verdict panel: collapsed with a signal count on a safe page, expands on click', async ({ context, extensionId }) => {
+  const page = await context.newPage();
+  await page.goto('https://shop.contoso-fixture.com:5600/clean-login.html');
+  await page.waitForTimeout(1200);
+  const popup = await openPopup(context, extensionId, page);
+  await expect(popup.locator('#status')).toHaveClass(/safe/, { timeout: 5000 });
+  const panel = popup.locator('#whypanel');
+  await expect(panel).toBeVisible();
+  await expect(panel).toHaveJSProperty('open', false);
+  await expect(popup.locator('#whycount')).toContainText('signal');
+  await popup.click('#whypanel summary');
+  await expect(panel).toHaveJSProperty('open', true);
+  await expect(popup.locator('#reasons li')).not.toHaveCount(0);
 });
 test('Pause protection → 1 hour suppresses the banner and shows a resume time', async ({ context, extensionId }) => {
   const page = await context.newPage(); await page.goto(BASE + '/phishing-login.html');

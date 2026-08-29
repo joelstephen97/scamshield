@@ -1,7 +1,7 @@
 'use strict';
 const api = globalThis.browser || globalThis.chrome;
 const $ = (id) => document.getElementById(id);
-const SS = globalThis.Parry, F = globalThis.SSFormat, I = globalThis.SSIcons, R = globalThis.SSReasons, REVIEW = globalThis.SSReview;
+const SS = globalThis.Parry, F = globalThis.SSFormat, I = globalThis.SSIcons, R = globalThis.SSReasons, REVIEW = globalThis.SSReview, SSTATS = globalThis.SSStats;
 // The locale the Intl formatters use. `let`, not `const`: a language override
 // has to move the timestamps too, or the popup reads German with English
 // relative times. Reassigned once, at the top of init().
@@ -39,15 +39,25 @@ function renderStatus(level, host, summary, levelTextOverride) {
 // Evidence chips are driven by the reason's own `kind` (link|brand|page|wallet|
 // clipboard|techscam|shop|message) — no more guessing from the English text.
 const chipLabel = (kind) => T('chip' + kind.charAt(0).toUpperCase() + kind.slice(1), null, F.detectorLabel(kind));
-function renderEvidence(reasons, open) {
+// "Why this verdict?" panel (0.8.0): absorbs the old #evidence card + #showwhy
+// button into one <details> disclosure. Collapsed to just the heading (+
+// signal count) on a safe/unknown verdict; expanded by default the moment
+// there's something to explain (suspicious or dangerous) — no more manual
+// "Show why" click to reveal a suspicious page's reasons. Hidden outright when
+// there are no reasons at all (nothing to disclose, same as the old card).
+function renderEvidence(reasons, level) {
   const ul = $('reasons'); ul.replaceChildren();
-  for (const r of (reasons || []).slice(0, 5)) {
+  const list = (reasons || []).slice(0, 5);
+  for (const r of list) {
     const kind = R.reasonKind(r);
     const li = document.createElement('li'); const chip = document.createElement('span'); chip.className = 'chip' + (kind === 'brand' ? ' brand' : '');
     chip.textContent = chipLabel(kind);
     const span = document.createElement('span'); span.textContent = R.resolveReason(r); li.append(chip, span); ul.appendChild(li);
   }
-  $('evidence').hidden = !(open && reasons && reasons.length);
+  const n = list.length;
+  $('whypanel').hidden = n === 0;
+  $('whycount').textContent = n === 0 ? '' : n === 1 ? T('whyVerdictCountOne', null, '· 1 signal') : T('fmtWhyVerdictCount', [bidi(String(n))], `· ${n} signals`);
+  $('whypanel').open = level === 'dangerous' || level === 'suspicious';
 }
 // Renders the status card / evidence / leave-rescue-report controls from the
 // current module-scope `verdict`. Called once with the popup's first
@@ -63,13 +73,13 @@ function renderVerdictUI(host) {
     level === 'dangerous' ? (brand ? T('popupBrandDangerSummary', [bidi(brand)], `Looks like ${brand}, but isn't. Don't enter your password here.`) : T('popupDangerSummary', null, "Don't enter passwords or card details here.")) :
     level === 'suspicious' ? T('popupSuspiciousSummary', null, 'Take care before typing anything here.') : '',
     checking ? T('popupChecking', null, 'Checking…') : undefined);
-  renderEvidence(verdict && verdict.reasons, level === 'dangerous');
-  $('leave').hidden = level !== 'dangerous'; $('showwhy').hidden = level !== 'suspicious';
-  $('leave').textContent = T('leaveThisPage', null, 'Leave this page'); $('showwhy').textContent = T('showWhy', null, 'Show why');
+  renderEvidence(verdict && verdict.reasons, level);
+  $('leave').hidden = level !== 'dangerous';
+  $('leave').textContent = T('leaveThisPage', null, 'Leave this page');
   const rescueUrl = verdict && verdict.brand && SS.BRAND_DOMAINS[verdict.brand] ? 'https://' + SS.BRAND_DOMAINS[verdict.brand][0] + '/' : null;
   $('rescue').hidden = !(level === 'dangerous' && rescueUrl); if (rescueUrl) $('rescue').textContent = T('takeMeToReal', [bidi(brand)], 'Take me to the real ' + brand);
   $('reportbtn').hidden = checking;
-  if (!checking) $('reportbtn').textContent = level === 'safe' || level === 'unknown' ? T('reportScam', null, 'Report: this is a scam') : T('reportSafe', null, 'Report: this is safe');
+  if (!checking) $('reportbtn').querySelector('.lbl').textContent = level === 'safe' || level === 'unknown' ? T('reportScam', null, 'Report: this is a scam') : T('reportSafe', null, 'Report: this is safe');
   renderReviewAsk(level);
 }
 // Earned review ask (0.7.0): a quiet card below the status card, shown only
@@ -213,6 +223,11 @@ async function init() {
   // critical path is the verdict, and nothing here should queue behind a
   // locale fetch that only matters on the override path.
   const settingsPromise = send('getSettings');
+  // Fired in parallel with settings: the hero counters need statsDaily/
+  // threatsBlocked regardless of which tab the popup opened over (a non-http
+  // tab still shows lifetime and weekly counts, same as the old all-time
+  // tile did), so there's no reason to make this wait behind the tab lookup.
+  const statsPromise = send('getStats');
   // Language override (0.7.0): resolved before the first string is written, so
   // the popup never renders in English and then swaps under the user. On the
   // default 'auto' setting this is a single local storage read and nothing
@@ -241,7 +256,14 @@ async function init() {
   // the options page as a normal tab (options_page/options_ui both open in a
   // tab already) and lets the tab router pick the section up from the hash.
   $('viewall').addEventListener('click', (e) => { e.preventDefault(); api.tabs.create({ url: api.runtime.getURL('options.html#stats') }); window.close(); });
-  $('tile-all').querySelector('b').textContent = String(settings.threatsBlocked || 0);
+  // Two hero counters (0.8.0), replacing the old this-site/all-time tile row:
+  // "since install" is the same lifetime threatsBlocked counter the old
+  // all-time tile showed; "this week" reuses background/stats.js's own
+  // summarize() over statsDaily rather than re-deriving the 7-day window here.
+  const stats = await statsPromise;
+  $('tile-since').querySelector('b').textContent = String((stats && Number(stats.threatsBlocked)) || settings.threatsBlocked || 0);
+  const weekly = (stats && Array.isArray(stats.statsDaily) && SSTATS) ? SSTATS.summarize(stats.statsDaily, 7, Date.now()).threats : 0;
+  $('tile-week').querySelector('b').textContent = String(weekly || 0);
   await initReviewAsk();
   if (settings.whatsNewSeen !== '0.6.0') { $('whatsnew').hidden = false; $('whatsnewlink').addEventListener('click', (e) => { e.preventDefault(); api.tabs.create({ url: 'https://github.com/joelstephen97/parry/blob/main/CHANGELOG.md' }); }); $('whatsnewx').addEventListener('click', async () => { $('whatsnew').hidden = true; await send('setSettings', { patch: { whatsNewSeen: '0.6.0' } }); }); }
 
@@ -262,8 +284,6 @@ async function init() {
     const rescueUrl = verdict && verdict.brand && SS.BRAND_DOMAINS[verdict.brand] ? 'https://' + SS.BRAND_DOMAINS[verdict.brand][0] + '/' : null;
     if (rescueUrl) { api.tabs.update(tab.id, { url: rescueUrl }); window.close(); }
   });
-  $('showwhy').addEventListener('click', () => { $('evidence').hidden = false; $('showwhy').hidden = true; });
-
   $('trust').textContent = T('popupPauseMenu', null, 'Pause protection ▾');
   $('trust').hidden = false; renderTrust();
   $('trust').addEventListener('click', (e) => { e.stopPropagation(); setTrustMenu($('trustmenu').hidden); });
@@ -283,8 +303,7 @@ async function init() {
     $('reportbtn').hidden = true; $('reportdone').hidden = false; $('reportdone').textContent = r && r.via === 'relay' ? T('toastThanksSent', null, 'Thanks — sent') : T('toastThanksNoted', null, 'Thanks — noted');
   });
 
-  const [st, h, pf, shop] = await Promise.all([send('getTabStats', { domain }), send('getHistory'), send('getPrivacyFindings', { tabId: tab.id }), send('getShopFindings', { tabId: tab.id })]);
-  $('tile-site').querySelector('b').textContent = String((st && st.siteCount) || 0);
+  const [h, pf, shop] = await Promise.all([send('getHistory'), send('getPrivacyFindings', { tabId: tab.id }), send('getShopFindings', { tabId: tab.id })]);
   renderHistoryList((h && h.history) || []);
   renderPrivacy((pf && pf.findings) || []);
   renderShop(shop || { flags: [] });

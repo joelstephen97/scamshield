@@ -150,7 +150,9 @@ test('popup links to the Statistics tab', async ({ context, extensionId }) => {
   await popup.goto(`chrome-extension://${extensionId}/popup.html`);
   const link = popup.locator('#viewall');
   await expect(link).toBeVisible();
-  await expect(link).toHaveText('Statistics →');
+  // The trailing arrow is a CSS-generated chevron (0.8.0 chevron-row actions
+  // list), not text, so the link's own text content is just the label.
+  await expect(link).toHaveText('Statistics');
   const [opened] = await Promise.all([context.waitForEvent('page'), link.click()]);
   await opened.waitForLoadState('domcontentloaded').catch(() => {});
   expect(opened.url()).toContain('options.html#stats');
