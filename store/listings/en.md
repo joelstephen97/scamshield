@@ -152,7 +152,7 @@ support development, there's a link in the extension, never a paywall.
 
 Hard numbers, not adjectives: available in **20 languages** with full menu,
 warning and settings translations (not just a translated store listing);
-around **875 automated tests**; a blocklist of thousands of scam domains,
+around **875 automated tests**; a blocklist of over 425,000 confirmed scam domains (plus a million-domain watchlist),
 updated continuously from an open-source feed; and an install under 1 MB
 — about 450 KB zipped, no heavy runtime.
 
