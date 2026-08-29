@@ -59,7 +59,7 @@
 | **Firefox 128+** | Download `parry-firefox.zip` from the **[latest GitHub Release](https://github.com/joelstephen97/parry/releases/latest)**, unzip it, and load it via `about:debugging#/runtime/this-firefox → Load Temporary Add-on → manifest.json` (temporary add-ons are removed on restart). An [addons.mozilla.org](https://addons.mozilla.org/) listing is pending; this row will link to it once live. |
 | **From source** | `chrome://extensions → Developer mode → Load unpacked → select this folder`. See [Development](#development). |
 
-Current release: **0.5.0** (submitted to the Chrome Web Store and awaiting review; the store serves 0.3.1 until it clears) — see the [changelog](CHANGELOG.md) for everything that changed since the 0.3.1 store version. The package is about **0.6 MB unpacked / ~170 KB zipped**.
+Current release: **0.8.0** (the Chrome Web Store and Firefox Add-ons listings may lag a release by a few days while they clear review) — see the [changelog](CHANGELOG.md) for what changed. The package is about **450 KB zipped**.
 
 ## What it does
 
