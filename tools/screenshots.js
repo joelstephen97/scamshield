@@ -30,11 +30,11 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
     { ts: Date.now() - 90000000, host: 'claim-airdrop.site', kind: 'wallet', level: 'dangerous' },
     { ts: Date.now() - 300000000, host: 'pc-alert-0093.top', kind: 'techscam', level: 'dangerous' } ] }));
   // whatsNewSeen is pinned to the CURRENT what's-new version so the popup's
-  // "New in 0.6…" banner stays dismissed. It sits below the 600px fold on the
+  // "New in 0.8…" banner stays dismissed. It sits below the 600px fold on the
   // dangerous shot either way, but the language-picker shot's popup is short
   // enough to show it, and a stale version banner is not what that shot is
   // about.
-  await sw.evaluate(() => setSettings({ threatsBlocked: 23, whatsNewSeen: '0.6.0' }));
+  await sw.evaluate(() => setSettings({ threatsBlocked: 23, whatsNewSeen: '0.8.0' }));
 
   // Statistics-tab seed. The dashboard is the one surface that looks empty on
   // a fresh profile — a store shot of it has to show a real install's worth of

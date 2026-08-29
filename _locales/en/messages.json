@@ -62,7 +62,7 @@
   "toastPausedForNow": { "message": "Paused for now" },
   "toastResumed": { "message": "Protection resumed" },
   "toastExtensionError": { "message": "Extension error — try reopening." },
-  "whatsNewBanner": { "message": "New in 0.6: ClickFix & fake-update blocking, privacy tools, fake-shop checks, 20 languages." },
+  "whatsNewBanner": { "message": "New in 0.8: ScamShield is now Parry, redesigned popup with time-boxed pause and scam counters, new icon." },
   "popupBrandDangerSummary": { "message": "Looks like $BRAND$, but isn't. Don't enter your password here.", "placeholders": { "brand": { "content": "$1", "example": "PayPal" } } },
   "pausedUntil": { "message": "Paused until $TIME$", "placeholders": { "time": { "content": "$1", "example": "3:45 PM" } } },
   "fmtProtocolPage": { "message": "$PROTOCOL$ page", "placeholders": { "protocol": { "content": "$1", "example": "chrome" } } },

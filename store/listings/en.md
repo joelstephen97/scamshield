@@ -11,97 +11,162 @@
 
 ## Name
 
-Parry — Scam & Phishing Protection
+Scam & Phishing Blocker: Parry
 
 ## Short description
 
-On-device scam & phishing protection: warns you, spots brand look-alikes, checks messages. Nothing leaves your device.
+Blocks scam sites, phishing pages and fake shops. 100% on-device — your browsing never leaves your computer.
 
 ## Full description
 
-Parry warns you before a scam or phishing page tricks you — entirely on
-your device. It reads more than the address bar: it looks at the page's
-wording, layout and login form, and it recognises when a page is wearing a
-brand's icon or logo on the wrong domain, so it catches convincing look-alikes
-that a URL-only checker would miss. Got a suspicious WhatsApp, SMS or email?
-Paste it into the popup for an instant, private verdict.
+There is no server. Parry reads the page you're on, the message you paste
+and the shop you're checking out on — entirely inside your browser — and it
+never sends what you browse, type or paste anywhere else.
 
-One click gets you back to safety: *Leave this page* on a dangerous warning,
-or *Take me to the real site* on a brand-impersonation page. If Parry
-gets it wrong, *Trust this site* for an hour, until tomorrow, or always — and
-*Report a mistake* in one tap.
+**Why Parry**
 
-Private by design: nothing you browse, type or check ever leaves your
-device. The only network activity is downloading the public threat-feed
-file, and — only if you opt in — sending an anonymized host name and risk
-signal for a flagged page. A Settings page shows exactly what leaves your
-device so you can verify zero-telemetry yourself.
+Most scam-blocking extensions call home: they send the pages you visit, or a
+hash of them, to a company's servers and get a verdict back. Parry doesn't,
+because it doesn't have to — the same detection that would run in the cloud
+runs locally instead. That means no account, no server outage that leaves
+you unprotected, and nothing about your browsing to leak, subpoena or quietly
+start selling later. It's free with no premium tier, no trial and no
+"upgrade to unlock real-time protection" — the whole product is the free
+product.
 
-Available in 20 languages, including full menu, warning and settings
-translations — not just a translated store listing.
+**What it blocks**
 
-Features:
-• Real-time phishing & scam warnings with plain-language reasons
-• Page analysis: an on-device model reads the page itself — wording, layout,
-  login forms — to catch brand-new phishing pages, not just known-bad URLs
-• Brand look-alike detection: icons and logos hash-matched against a
-  64-brand table (49 with icon hashes), including UAE banks, telcos and
-  government services (Emirates NBD, ADCB, FAB, Mashreq, e&, du, Noon,
-  UAE PASS, MOHRE, Dubai Police…), plus IDN homograph domains (look-alike
-  foreign characters standing in for Latin letters)
-• Scam message checker: paste any SMS/WhatsApp/email text for an instant,
-  fully-private verdict
-• Detects fake login forms that send your password to another site
-  (single-sign-on logins via Google/Microsoft/Okta are recognized as safe)
-• Privacy pack: warns when a site sends your email/phone to a tracker before
-  you press submit, names fingerprinting scripts, and flags "click Allow to
-  continue" notification-permission traps
-• Shopping checks: fake countdowns, fake "only 2 left" pressure, hotlinked
-  trust badges, off-platform payment requests and missing contact details,
-  surfaced in a popup shopping card
-• Sponsored-result check on Google/Bing/DuckDuckGo — flags an ad that goes
-  somewhere other than the site it shows
-• Full-screen interstitial for near-certain scams (ClickFix fake-CAPTCHA
-  clipboard attacks, fake browser-update prompts, delivery-fee phishing,
-  tech-support scare pages), with an enforced pause and a real-vs-fake domain
-  comparison, reserved for near-zero-false-positive detections
-• Strict mode: one toggle that blocks even "suspicious" pages full-screen
-  with simpler wording, for a less tech-confident family member
-• One-click rescue: *Take me to the real site* on brand-impersonation pages,
-  *Leave this page* on any dangerous warning
-• Trust a site for 1 hour, until tomorrow, or always — and report a mistake
-  in one tap
-• Blocks known scam domains — refreshed daily from an open-source feed
-  (OpenPhish + URLhaus, heavily filtered against false positives)
-• Crypto-wallet guard: warns before risky approvals & blind signatures
-  (including EIP-7702 account-delegation and multi-wallet EIP-6963 support);
-  blocks recovery-phrase theft
-• Clipboard-hijack guard: warns when a site copies a command to your clipboard
-• Hides fake prize/giveaway scam content
-• Settings export/import and optional cross-device sync (your browser's own
-  sync — still no Parry account or server)
-• Choose your language: all 20 languages, picked from the popup or Settings,
-  independent of your browser's language
-• Protection history and stats, stored only on your device; dark mode
-• Statistics: pages checked, threats stopped and privacy findings, with a
-  daily activity chart — counted and stored on your device, never sent
-  anywhere
-• Optional community reporting, off by default — never URLs or page text
-• Smaller and faster: ~0.6 MB unpacked, no heavy runtime
-• 100% on-device analysis — no tracking, no data collection
+- **Lookalike bank & brand logins** — Parry hash-matches the page's icon and
+  logo against a 64-brand table (UAE banks, telcos and government services
+  included, alongside PayPal, Microsoft, Google and more) and catches IDN
+  homograph domains that spell a brand using look-alike foreign characters.
+  A fake login wearing the right logo on the wrong domain gets caught even
+  when the address itself looks unfamiliar.
+- **Fake shops** — fake countdown timers, "only 2 left" urgency, hotlinked
+  trust badges, off-platform payment requests and missing contact details
+  are surfaced in a popup shopping card before you check out.
+- **Crypto wallet drainers** — warns before risky approvals and blind
+  signatures, including EIP-7702 account-delegation and EIP-6963
+  multi-wallet requests, and blocks recovery-phrase theft attempts outright.
+- **Tech-support scams** — a full-screen block for "your PC is infected,
+  call this number now" pages, with a one-click escape that defuses the
+  page's screen-lock and Back-button traps first.
+- **ClickFix & clipboard attacks** — the fastest-growing malware trick of
+  2025: a fake "verify you're human" CAPTCHA that talks you into pasting a
+  command into Windows Run. Parry overwrites the malicious clipboard payload
+  and blocks the page full-screen before it can run.
+- **Leaky forms** — warns the moment a site sends the email or phone number
+  you typed to a tracker, *before* you press submit, and separately names
+  fingerprinting scripts and "click Allow to continue" notification-permission
+  traps.
 
-## What's new (0.7.0)
+**How it works**
 
-- New Statistics tab in Settings: pages checked on-device, threats stopped,
-  privacy findings, and a daily activity chart — view the last 7 days, last
-  30 days, or your totals since install — all counted and stored on your
-  device, never sent anywhere.
-- A quiet, dismissible review prompt appears in the popup only after
-  Parry has actually blocked something twice — decline it once and it's
-  gone for good.
-- New language override in Settings: pick Parry's own language
-  independently of your browser's, with sync-across-devices support if
-  you've turned on your browser's own sync.
+1. Parry reads the page itself, on your device — its wording, layout, login
+   forms and icons — the moment you open it, or the message you paste into
+   the popup for a scam-message check.
+2. An on-device model and a rule set score what it finds. A single weak
+   signal never produces more than a quiet *suspicious* note; a *dangerous*
+   verdict needs independent signals to agree, so real pages are rarely
+   flagged by mistake.
+3. You get a plain-language reason, not just a red banner, with a one-click
+   fix: *Leave this page* on a dangerous warning, *Take me to the real site*
+   on a brand-impersonation page, or — if Parry got it wrong — pause the
+   warning on that site for an hour, a day, or always.
+
+**Statistics & explainability**
+
+Every warning opens to a *Why this verdict?* panel that lists the exact
+reasons behind it — a brand icon on the wrong domain, a look-alike domain,
+a password field posting to a foreign host — instead of an unexplained
+score. The Statistics tab in Settings shows pages checked, threats stopped
+and privacy findings, with a daily activity chart you can switch between the
+last 7 days, the last 30 days, or your totals since install. Every number is
+computed and stored on your device; none of it is ever sent anywhere.
+
+**Privacy: what Parry does and doesn't do**
+
+Parry asks for access to the pages you visit because that's how the
+on-device analysis actually reads them — the wording, layout, login forms
+and icons — the check happens locally, in your browser, not on a server
+somewhere. The one thing that leaves your device by default is a plain file
+download: the public threat-list of known scam domains, fetched periodically
+from Parry's open-source feed so blocking still works right after install
+and while you're offline. Nothing about you or your specific browsing rides
+along with that download. Optional, off-by-default community reporting can
+send an anonymized host name and a numeric risk signal for a page flagged
+dangerous — never a URL, page text or anything you typed — and only if you
+turn it on yourself. Settings → About shows exactly what has left your
+device, so you can verify zero telemetry rather than take our word for it.
+
+**FAQ**
+
+**How is Parry different from Guardio, Malwarebytes or Norton?**
+
+Those extensions check the pages you visit by sending information to their
+own servers: Guardio and Bitdefender TrafficLight scan pages in the cloud,
+Norton Safe Web runs a "Remote URL Reputation Service" and, by its own
+disclosure, collects your PII, location and web history, and Avast Online
+Security sends the URLs you visit along with a device ID and device info to
+its servers. Parry has no server. Every check — reading the page, matching
+brand icons, scanning a pasted message — runs on your device, and nothing
+you browse, type or check is sent anywhere. Guardio's own listing also
+limits its free tier to website alerts only; real-time blocking, download
+protection and leak monitoring are paid features ($9.99–$34.99/mo). Parry's
+full feature set — real-time blocking, fake-shop detection, crypto
+wallet-drainer guard, tech-support-scam blocking, clipboard/ClickFix
+protection, a statistics dashboard and a plain-language reason on every
+warning — is free with no premium tier.
+
+**Is Parry really free? What's the catch?**
+
+Yes, and there is no catch: no premium tier, no trial, no "upgrade to unlock
+real-time protection." Parry doesn't run a server to bill you for, so there
+is nothing to upsell — the whole product is the free product. That's a
+different shape from most of the category: several rivals give away a
+limited free tier and charge monthly for their real protection (Guardio's
+free tier is alerts-only; full blocking is $9.99–$34.99/mo), while others
+are free extensions that cross-sell into a paid security suite. Parry earns
+its keep a different way — by staying small, on-device and useful enough
+that you'll leave it installed, plus optional donations. If you want to
+support development, there's a link in the extension, never a paywall.
+
+**Also inside**
+
+- Scam message checker — paste any SMS/WhatsApp/email text for an instant,
+  fully-private verdict.
+- Sponsored-result check on Google/Bing/DuckDuckGo — flags an ad that goes
+  somewhere other than the site it shows.
+- Strict mode — one toggle blocks even "suspicious" pages full-screen with
+  simpler wording, for a less tech-confident family member.
+- Choose your language: all 20 languages, picked from the popup or Settings,
+  independent of your browser's language.
+- Settings export/import and optional cross-device sync — your browser's own
+  sync, still no Parry account or server.
+- Dark mode, protection history and one-click rescue links, hidden fake
+  prize/giveaway content.
+
+Hard numbers, not adjectives: available in **20 languages** with full menu,
+warning and settings translations (not just a translated store listing);
+around **630 automated tests**; a blocklist of thousands of scam domains,
+updated continuously from an open-source feed; and an install under 1 MB
+— about 450 KB zipped, no heavy runtime.
+
+## What's new (0.8.0)
+
+- **ScamShield is now Parry.** Two very well-known products already use the
+  "ScamShield" name — Singapore's government runs its own national
+  anti-scam app called ScamShield, and T-Mobile's Scam Shield is a
+  widely-used US carrier scam-blocking service — so the extension has
+  renamed to avoid confusion with either. Nothing about how it protects you,
+  what it collects (nothing) or your settings has changed.
+- **Redesigned popup:** a time-boxed *Pause protection* menu (1 hour, 1 day
+  or Always) replaces the old trust wording, hero counters show threats
+  stopped since install and this week at a glance, every warning opens to a
+  *Why this verdict?* panel with the exact reasons behind it, and a cleaner
+  rotating footer alternates a privacy reminder, an earned review ask and a
+  support link.
+- **New icon** — a simple deflection mark that better fits the new name.
 
 No new permissions. Still `storage`, `declarativeNetRequest`, `alarms` and
 http/https access, exactly as 0.3.1.

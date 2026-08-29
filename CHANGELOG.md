@@ -2,6 +2,37 @@
 
 All notable changes to Parry. Versions are git tags (`vX.Y.Z`); the version on the [Chrome Web Store](https://chromewebstore.google.com/detail/fojjjofjimbfoddafoampojopijnlihl) may lag a tag by a few days while Google reviews it. Privacy-relevant changes are also reflected in the [privacy policy](https://joelstephen97.github.io/parry/privacy.html).
 
+## 0.8.0 — 2026-08-29
+
+### Renamed: ScamShield is now Parry
+- Two very well-known products already use the "ScamShield" name —
+  Singapore's government runs its own national anti-scam app called
+  ScamShield, and T-Mobile's Scam Shield is a widely-used US carrier
+  scam-blocking service — so this extension has renamed to Parry to avoid
+  confusion with either. This is a name change only: detection logic,
+  settings, permissions and privacy behaviour are unchanged, and existing
+  installs update in place with all settings, trusted sites and history
+  preserved. The GitHub repo moved to
+  [github.com/joelstephen97/parry](https://github.com/joelstephen97/parry)
+  (old URLs redirect) and the threat-feed repo moved to
+  [joelstephen97/parry-feed](https://github.com/joelstephen97/parry-feed).
+
+### New
+- **Redesigned popup** — a time-boxed *Pause protection* menu (1 hour, 1 day
+  or Always) replaces the old trust wording; hero counters show threats
+  stopped since install and this week at a glance; every warning opens to a
+  *Why this verdict?* panel listing the exact reasons behind it; and a
+  rotating footer alternates a quiet privacy reminder, the earned review ask
+  and a support link instead of showing all three at once.
+- **New icon** — a simple deflection mark that fits the new name.
+- **Comparison page** — [`docs/comparison.md`](docs/comparison.md), a sourced
+  feature-and-privacy comparison against Guardio, Malwarebytes Browser
+  Guard, Norton Safe Web, McAfee WebAdvisor, Bitdefender TrafficLight,
+  Netcraft, Avast Online Security and ScamAdviser, with every claim traced
+  to that product's own listing or disclosure.
+
+0.8.0 adds no new permissions and makes no new network requests.
+
 ## 0.7.1 — 2026-08-28
 
 ### New

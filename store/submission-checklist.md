@@ -5,6 +5,17 @@ Firefox AMO: not yet listed — add the URL here, in `README.md`, `index.html` a
 
 Listing copy lives in `chrome-listing.md` / `firefox-listing.md`; permissions + data-use text in `permissions-justification.md`; privacy policy at https://joelstephen97.github.io/parry/privacy.html (source `privacy-policy.md` → `/privacy.html`).
 
+## 0.8.0 rename (ScamShield → Parry) — one-time steps
+This release renames the extension; do these in addition to the normal pre-flight below.
+- [ ] **Chrome Web Store dashboard:** for *every* published language, update Store listing → Product name to `Scam & Phishing Blocker: Parry` and paste the new Short/Full description + "What's new (0.8.0)" from `store/listings/<locale>.md` (en is canon; the 19 translations carry the same rename).
+- [ ] Upload the new icon (`assets/icons/icon128.png`) if the dashboard caches an old one separately from the package.
+- [ ] Regenerate and upload new screenshots/promo tiles reflecting the redesigned popup: `npm run screenshots && npm run promo`, then upload the 5 screenshots, small promo tile and marquee.
+- [ ] **Privacy tab → Privacy policy URL:** update to `https://joelstephen97.github.io/parry/privacy.html` (the repo/Pages URLs already moved in 0.8.0's migration commit; verify the dashboard field itself was actually saved, not just the source file).
+- [ ] Reviewer notes: mention the rename explicitly so a reviewer doesn't flag a "new" listing — "Renamed from ScamShield to Parry (0.8.0); same extension ID, no change to data practices or permissions. Old GitHub repo/Pages URLs redirect to the new `joelstephen97/parry` location."
+- [ ] **AMO (addons.mozilla.org):** same name/summary/description update in `firefox-listing.md`; update the add-on's listed name and homepage/support URLs if AMO caches them separately from the manifest.
+- [ ] **Nominate for the Chrome Web Store Featured badge** once the 0.8.0 listing is live and has cleared review — Parry meets the stated criteria by design (privacy, quality, no dark patterns) and this is a natural checkpoint to ask, since the listing copy and screenshots are freshly updated.
+- [ ] After both stores show the new name, do a final sweep for any leftover "ScamShield" text in dashboard-only fields the repo doesn't control (dashboard developer name/contact page, any saved-but-unpublished draft listings).
+
 ## Pre-flight (every release)
 - [ ] Version bumped in `manifest.json`, `manifest.firefox.json`, `package.json` (all identical) and `CHANGELOG.md` has the section.
 - [ ] `npm test` green (unit + e2e). `cd relay && npm test` green if the relay changed.

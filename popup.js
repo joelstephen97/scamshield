@@ -315,7 +315,7 @@ async function init() {
   const weekly = (stats && Array.isArray(stats.statsDaily) && SSTATS) ? SSTATS.summarize(stats.statsDaily, 7, Date.now()).threats : 0;
   $('tile-week').querySelector('b').textContent = String(weekly || 0);
   await initReviewAsk();
-  if (settings.whatsNewSeen !== '0.6.0') { $('whatsnew').hidden = false; $('whatsnewlink').addEventListener('click', (e) => { e.preventDefault(); api.tabs.create({ url: 'https://github.com/joelstephen97/parry/blob/main/CHANGELOG.md' }); }); $('whatsnewx').addEventListener('click', async () => { $('whatsnew').hidden = true; await send('setSettings', { patch: { whatsNewSeen: '0.6.0' } }); }); }
+  if (settings.whatsNewSeen !== '0.8.0') { $('whatsnew').hidden = false; $('whatsnewlink').addEventListener('click', (e) => { e.preventDefault(); api.tabs.create({ url: 'https://github.com/joelstephen97/parry/blob/main/CHANGELOG.md' }); }); $('whatsnewx').addEventListener('click', async () => { $('whatsnew').hidden = true; await send('setSettings', { patch: { whatsNewSeen: '0.8.0' } }); }); }
 
   tab = await currentTab();
   const http = tab && tab.url && /^https?:/.test(tab.url);

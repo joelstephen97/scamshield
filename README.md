@@ -4,6 +4,8 @@
 
 <h1 align="center">Parry</h1>
 
+<p align="center"><em>Formerly ScamShield — renamed in 0.8.0 to avoid confusion with Singapore's government ScamShield app and T-Mobile's Scam Shield service. Same extension, same privacy promise.</em></p>
+
 <p align="center">
   <strong>On-device scam &amp; phishing protection for Chrome, Edge, Brave, Opera and Firefox.</strong><br>
   Warns you before a page tricks you, spots brand look-alikes, checks suspicious messages — and nothing you browse, type or check ever leaves your device.

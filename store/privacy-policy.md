@@ -1,8 +1,8 @@
 # Parry Privacy Policy
 
-_Last updated: 2026-08-28 · applies to Parry 0.7.0 and later (Chrome Web Store listing `fojjjofjimbfoddafoampojopijnlihl`, Firefox build, and source builds from [github.com/joelstephen97/parry](https://github.com/joelstephen97/parry))._
+_Last updated: 2026-08-29 · applies to Parry 0.8.0 and later (Chrome Web Store listing `fojjjofjimbfoddafoampojopijnlihl`, Firefox build, and source builds from [github.com/joelstephen97/parry](https://github.com/joelstephen97/parry))._
 
-_What changed in 0.7.0: a Statistics tab, an earned review ask, and a per-user language override. **None of them add a network request or a permission** — they all run inside the extension. Community reporting is still off by default, and the payload it sends when you opt in is unchanged. New items are stored **only on your device** (see below); the language choice is the only new one of the three that can travel through your browser's own opt-in sync, exactly like your existing settings._
+_What changed in 0.8.0: this extension was renamed from ScamShield to Parry (two well-known products — Singapore's government ScamShield app and T-Mobile's Scam Shield — already used the old name) and got a redesigned popup and new icon. **None of this changes what data Parry collects, stores or sends** — it is a name and interface change only. Community reporting is still off by default, and the payload it sends when you opt in is unchanged._
 
 Parry analyses web pages **on your device** to warn you about scams and phishing. It was designed so that your browsing stays private: by default it collects nothing, has no accounts, no analytics, no advertising and no trackers. The hosted copy of this policy lives at <https://joelstephen97.github.io/parry/privacy.html>; its source is this file.
 

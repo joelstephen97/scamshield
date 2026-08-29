@@ -16,7 +16,15 @@ const LISTINGS_DIR = path.join(__dirname, '../../store/listings');
 const EXPECTED = ['en', 'zh_CN', 'hi', 'es', 'ar', 'fr', 'bn', 'pt_BR', 'ru', 'ur',
   'id', 'de', 'ja', 'mr', 'te', 'tr', 'ta', 'vi', 'ko', 'it'];
 
-const HEADINGS = ['## Name', '## Short description', '## Full description', "## What's new (0.7.0)"];
+// The three version-independent headings are required verbatim in every
+// locale. The "What's new" heading carries a version number that only `en`
+// (canon, owned by this task) is pinned to; the other 19 locales are a
+// translation task's responsibility and may still carry an older version's
+// "What's new" section — so they're only required to have SOME correctly
+// formed "## What's new (X.Y.Z)" heading, not the current one.
+const HEADINGS = ['## Name', '## Short description', '## Full description'];
+const WHATS_NEW_RE = /## What's new \(\d+\.\d+\.\d+\)/;
+const EN_WHATS_NEW_HEADING = "## What's new (0.8.0)";
 
 function truncateList(items, n = 10) {
   if (items.length <= n) return items.join(', ');
@@ -27,6 +35,15 @@ test('all 20 locales have a store listing file', () => {
   for (const loc of EXPECTED) {
     assert.ok(fs.existsSync(path.join(LISTINGS_DIR, `${loc}.md`)), 'missing listing: ' + loc);
   }
+});
+
+test('store listing (en): "What\'s new" heading is pinned to the current version (0.8.0)', () => {
+  const p = path.join(LISTINGS_DIR, 'en.md');
+  const content = fs.readFileSync(p, 'utf8');
+  assert.ok(
+    content.includes(EN_WHATS_NEW_HEADING),
+    `en.md: expected heading "${EN_WHATS_NEW_HEADING}" not found`
+  );
 });
 
 for (const loc of EXPECTED) {
@@ -40,6 +57,10 @@ for (const loc of EXPECTED) {
       missingHeadings.length,
       0,
       `${loc}.md: missing heading(s): ${truncateList(missingHeadings)}`
+    );
+    assert.ok(
+      WHATS_NEW_RE.test(content),
+      `${loc}.md: missing a "## What's new (X.Y.Z)" heading`
     );
 
     // No leftover $NAME$-style placeholder tokens anywhere in the file — the

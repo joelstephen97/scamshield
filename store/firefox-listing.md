@@ -1,7 +1,7 @@
 # Firefox AMO Listing
 
-**Name:** Parry — Scam & Phishing Protection
-**Summary:** On-device scam & phishing protection: warns you, spots brand look-alikes, checks messages. Nothing leaves your device.
+**Name:** Scam & Phishing Blocker: Parry
+**Summary:** Blocks scam sites, phishing pages and fake shops. 100% on-device — your browsing never leaves your computer.
 **Categories:** Privacy & Security
 **License:** GNU General Public License v3.0 or later (GPL-3.0-or-later) — source: https://github.com/joelstephen97/parry
 **Homepage:** https://joelstephen97.github.io/parry/
