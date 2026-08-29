@@ -947,6 +947,15 @@
       }
     }
   },
+  "reason_newDomain": {
+    "message": "Domain appears on a newly-registered-domains list — most scam sites are only days old$EXTRA$.",
+    "placeholders": {
+      "extra": {
+        "content": "$1",
+        "example": ", and you have never visited it before"
+      }
+    }
+  },
   "reason_credentialFormForeignDomain": {
     "message": "Форма ввода пароля на этой странице отправляет ваши учётные данные на другой сайт."
   },

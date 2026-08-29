@@ -12,6 +12,8 @@ import '../engine/brand_icons.js';
 import '../engine/report_payload.js';
 import '../engine/engagement.js';
 import '../engine/blockset.js';
+import '../engine/bloom.js';
+import '../engine/first_seen.js';
 import '../ui/reasons.js';
 import './stats.js';
 import './blockstore.js';

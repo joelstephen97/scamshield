@@ -682,6 +682,29 @@
       }
     } catch (_) { /* risk-table check is best-effort — never blocks the rest of the scan */ }
 
+    // "New site" signal (0.10.0, Task C3): nrd.bloom membership (background/
+    // service_worker.js checkNrdHost()), approximating Netcraft's "New Site"
+    // domain-age indicator on-device. Warn-tier evidence only: the score
+    // bump is modest and the level cap below means this signal can never by
+    // itself push a "safe" page past "suspicious" (never bumped to
+    // "dangerous" alone, and never touched if something else already made
+    // the page dangerous). A genuine first-ever visit to this install
+    // strengthens the reason's wording via the params slot.
+    try {
+      const nrdHit = await withTimeout(send('checkNrd', { host: location.hostname }), 3000);
+      if (nrdHit && nrdHit.hit && verdict.level !== 'dangerous') {
+        const extra = nrdHit.strengthen ? ', and you have never visited it before' : '';
+        const reason = { code: 'newDomain', kind: 'link', params: [extra] };
+        verdict = Object.assign({}, verdict, {
+          level: verdict.level === 'safe' ? 'suspicious' : verdict.level, // never escalates past suspicious alone
+          score: Math.min(1, verdict.score + 0.2),
+          reasons: [reason].concat(verdict.reasons || []),
+          reasonCodes: [reason.code].concat(verdict.reasonCodes || []),
+          flags: ['new-domain'].concat(verdict.flags || [])
+        });
+      }
+    } catch (_) { /* NRD check is best-effort — never blocks the rest of the scan */ }
+
     // Fake-shop check (0.6.0) — top frame, storefront pages only. Reported to
     // the popup's shopping card; a strong result nudges the verdict to at most
     // suspicious (never a full-screen block — these signals are probabilistic).

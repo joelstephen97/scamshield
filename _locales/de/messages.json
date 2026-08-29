@@ -269,6 +269,7 @@
   "reason_riskDynamicHost": { "message": "Die Domain wird bei einem Dynamic-DNS- oder Gratis-Hosting-Anbieter gehostet, der häufig für Betrugsseiten missbraucht wird." },
   "reason_feedBlock": { "message": "Diese Domain stimmt mit ScamShields Bedrohungsliste überein, bestätigt von $COUNT$ unabhängigen Quelle(n).", "placeholders": { "count": { "content": "$1", "example": "3" } } },
   "reason_feedWarn": { "message": "Diese Domain stimmt mit einem weniger sicheren Eintrag in ScamShields Bedrohungsliste überein ($COUNT$ Quelle(n)) – gehe vorsichtig vor.", "placeholders": { "count": { "content": "$1", "example": "1" } } },
+  "reason_newDomain": { "message": "Domain appears on a newly-registered-domains list — most scam sites are only days old$EXTRA$.", "placeholders": { "extra": { "content": "$1", "example": ", and you have never visited it before" } } },
   "reason_credentialFormForeignDomain": { "message": "Ein Passwortformular auf dieser Seite sendet deine Zugangsdaten an eine andere Seite." },
   "reason_hiddenIframes": { "message": "Die Seite enthält versteckte Frames, die Eingaben abfangen könnten." },
   "reason_scamPhrase": { "message": "Die Seite zeigt klassische Betrugs-/Gewinnspiel-Sprache („$PHRASE$“).", "placeholders": { "phrase": { "content": "$1", "example": "you won" } } },

@@ -314,6 +314,7 @@
   "reason_riskDynamicHost": { "message": "డొమైన్ ఒక డైనమిక్-DNS లేదా ఉచిత హోస్టింగ్ ప్రొవైడర్‌పై హోస్ట్ చేయబడింది, ఇది మోసపు పేజీల కోసం తరచుగా దుర్వినియోగం చేయబడుతుంది." },
   "reason_feedBlock": { "message": "ఈ డొమైన్ ScamShield ముప్పు జాబితాతో సరిపోలుతుంది, $COUNT$ స్వతంత్ర మూలం(ల) ద్వారా నిర్ధారించబడింది.", "placeholders": { "count": { "content": "$1", "example": "3" } } },
   "reason_feedWarn": { "message": "ఈ డొమైన్ ScamShield ముప్పు జాబితాలోని తక్కువ-విశ్వసనీయ ఎంట్రీతో సరిపోలుతుంది ($COUNT$ మూలం(లు)) — జాగ్రత్తగా కొనసాగండి.", "placeholders": { "count": { "content": "$1", "example": "1" } } },
+  "reason_newDomain": { "message": "Domain appears on a newly-registered-domains list — most scam sites are only days old$EXTRA$.", "placeholders": { "extra": { "content": "$1", "example": ", and you have never visited it before" } } },
   "reason_credentialFormForeignDomain": { "message": "ఈ పేజీలోని పాస్‌వర్డ్ ఫారమ్ మీ లాగిన్ వివరాలను వేరే సైట్‌కు పంపుతుంది." },
   "reason_hiddenIframes": { "message": "మీరు టైప్ చేసేది పట్టుకోగల దాచిన ఫ్రేమ్‌లు పేజీలో ఉన్నాయి." },
   "reason_scamPhrase": { "message": "పేజీలో సాధారణ మోసం లేదా బహుమతి భాష ఉంది (\"$PHRASE$\").", "placeholders": { "phrase": { "content": "$1", "example": "you won" } } },

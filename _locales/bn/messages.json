@@ -314,6 +314,7 @@
   "reason_riskDynamicHost": { "message": "ডোমেনটি একটি ডায়নামিক-DNS বা ফ্রি হোস্টিং প্রদানকারীতে হোস্ট করা, যার অপব্যবহার প্রতারণার পেজের জন্য প্রায়ই হয়।" },
   "reason_feedBlock": { "message": "এই ডোমেন ScamShield-এর হুমকি-তালিকার সাথে মেলে, যা $COUNT$টি স্বাধীন উৎস দ্বারা নিশ্চিত।", "placeholders": { "count": { "content": "$1", "example": "3" } } },
   "reason_feedWarn": { "message": "এই ডোমেন ScamShield-এর হুমকি-তালিকার একটি কম-নিশ্চিত এন্ট্রির সাথে মেলে ($COUNT$টি উৎস) — সাবধানে এগিয়ে যান।", "placeholders": { "count": { "content": "$1", "example": "1" } } },
+  "reason_newDomain": { "message": "Domain appears on a newly-registered-domains list — most scam sites are only days old$EXTRA$.", "placeholders": { "extra": { "content": "$1", "example": ", and you have never visited it before" } } },
   "reason_credentialFormForeignDomain": { "message": "এই পেজের পাসওয়ার্ড ফর্ম আপনার লগইন তথ্য অন্য একটি সাইটে পাঠায়।" },
   "reason_hiddenIframes": { "message": "পেজে লুকানো ফ্রেম আছে যা আপনার টাইপ করা তথ্য ধরে নিতে পারে।" },
   "reason_scamPhrase": { "message": "পেজে চিরচেনা প্রতারণা বা পুরস্কারের ভাষা আছে (\"$PHRASE$\")।", "placeholders": { "phrase": { "content": "$1", "example": "you won" } } },

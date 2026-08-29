@@ -314,6 +314,7 @@
   "reason_riskDynamicHost": { "message": "النطاق مستضاف على مزوّد DNS ديناميكي أو استضافة مجانية يُساء استخدامه كثيرًا لصفحات الاحتيال." },
   "reason_feedBlock": { "message": "يطابق هذا النطاق خِلاصة تهديدات ScamShield، مؤكَّد من قِبل $COUNT$ مصدر (مصادر) مستقل(ة).", "placeholders": { "count": { "content": "$1", "example": "3" } } },
   "reason_feedWarn": { "message": "يطابق هذا النطاق إدخالًا أقل ثقة في خِلاصة تهديدات ScamShield ($COUNT$ مصدر (مصادر)) — تابع بحذر.", "placeholders": { "count": { "content": "$1", "example": "1" } } },
+  "reason_newDomain": { "message": "Domain appears on a newly-registered-domains list — most scam sites are only days old$EXTRA$.", "placeholders": { "extra": { "content": "$1", "example": ", and you have never visited it before" } } },
   "reason_credentialFormForeignDomain": { "message": "نموذج كلمة مرور في هذه الصفحة يرسل بيانات دخولك إلى موقع مختلف." },
   "reason_hiddenIframes": { "message": "تحتوي الصفحة على إطارات مخفية قد تلتقط ما تكتبه." },
   "reason_scamPhrase": { "message": "تعرض الصفحة لغة احتيال أو جوائز نمطية («$PHRASE$»).", "placeholders": { "phrase": { "content": "$1", "example": "you won" } } },

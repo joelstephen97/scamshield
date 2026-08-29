@@ -41,6 +41,8 @@
     // background/service_worker.js — v0.9 threat-feed matcher (Task B2)
     feedBlock: "This domain matches ScamShield's threat feed, confirmed by $1 independent source(s).",
     feedWarn: "This domain matches a lower-confidence entry in ScamShield's threat feed ($1 source(s)) — proceed carefully.",
+    // background/service_worker.js checkNrdHost() — "new site" signal (0.10.0, Task C3)
+    newDomain: 'Domain appears on a newly-registered-domains list — most scam sites are only days old$1.',
     // engine/heuristics.js — scoreDom
     credentialFormForeignDomain: 'A password form on this page sends your credentials to a different site.',
     // engine/constants.js crossOriginCredPostHost + content/content_script.js guardExfilForms (0.10.0, Task C2)

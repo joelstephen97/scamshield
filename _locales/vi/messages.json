@@ -269,6 +269,7 @@
   "reason_riskDynamicHost": { "message": "Tên miền được lưu trữ trên nhà cung cấp DNS động hoặc hosting miễn phí, thường bị lạm dụng cho các trang lừa đảo." },
   "reason_feedBlock": { "message": "Tên miền này khớp với danh sách mối đe dọa của ScamShield, được xác nhận bởi $COUNT$ nguồn độc lập.", "placeholders": { "count": { "content": "$1", "example": "3" } } },
   "reason_feedWarn": { "message": "Tên miền này khớp với một mục có độ tin cậy thấp hơn trong danh sách mối đe dọa của ScamShield ($COUNT$ nguồn) — hãy thận trọng.", "placeholders": { "count": { "content": "$1", "example": "1" } } },
+  "reason_newDomain": { "message": "Domain appears on a newly-registered-domains list — most scam sites are only days old$EXTRA$.", "placeholders": { "extra": { "content": "$1", "example": ", and you have never visited it before" } } },
   "reason_credentialFormForeignDomain": { "message": "Một biểu mẫu mật khẩu trên trang này gửi thông tin đăng nhập của bạn sang trang khác." },
   "reason_hiddenIframes": { "message": "Trang chứa khung ẩn có thể ghi lại những gì bạn nhập." },
   "reason_scamPhrase": { "message": "Trang dùng lời lẽ lừa đảo hoặc trúng thưởng điển hình (“$PHRASE$”).", "placeholders": { "phrase": { "content": "$1", "example": "you won" } } },

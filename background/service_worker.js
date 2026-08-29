@@ -4,7 +4,7 @@
 // a classic-worker context (tests driving this file directly) falls back to
 // importScripts here. In the module SW `importScripts` is undefined — the
 // ReferenceError lands in the catch and the imports from sw.js already won.
-try { importScripts('../engine/constants.js', '../engine/trust.js', '../engine/features.js', '../engine/risk_rules.js', '../engine/image_hash.js', '../engine/brand_icons.js', '../engine/report_payload.js', '../engine/engagement.js', '../engine/blockset.js', './stats.js', './blockstore.js'); } catch (_) { /* deps already loaded by sw.js (Chrome) or the manifest (Firefox) */ }
+try { importScripts('../engine/constants.js', '../engine/trust.js', '../engine/features.js', '../engine/risk_rules.js', '../engine/image_hash.js', '../engine/brand_icons.js', '../engine/report_payload.js', '../engine/engagement.js', '../engine/blockset.js', '../engine/bloom.js', '../engine/first_seen.js', './stats.js', './blockstore.js'); } catch (_) { /* deps already loaded by sw.js (Chrome) or the manifest (Firefox) */ }
 const api = globalThis.browser || globalThis.chrome;
 
 // Official ScamShield feed: rebuilt daily by GitHub Actions from OpenPhish +
@@ -785,7 +785,7 @@ function normalizeFeedHost(h) {
 async function runFeedUpdate(metaUrl) {
   const meta = await fetchJsonWithTimeout(metaUrl || FEED_META_URL, 10000);
   if (!meta || typeof meta.version !== 'string' || !meta.urls) return { ok: false, reason: 'meta-unavailable' };
-  const rec = (await globalThis.Blockstore.get()) || { version: null, blockBuf: null, warnBuf: null, warnUpdatedAt: 0, riskTables: null, riskUpdatedAt: 0 };
+  const rec = (await globalThis.Blockstore.get()) || { version: null, blockBuf: null, warnBuf: null, warnUpdatedAt: 0, riskTables: null, riskUpdatedAt: 0, nrdBuf: null, nrdUpdatedAt: 0 };
   const bases = [meta.urls.cdn, meta.urls.fallback].filter(Boolean);
   const Bset = globalThis.Blockset;
 
@@ -834,12 +834,26 @@ async function runFeedUpdate(metaUrl) {
     }
   }
 
+  // nrd.bloom (0.10.0, Task C3): newly-registered-domains Bloom filter, same
+  // version-agnostic per-version file as warn40.bin/risk.json, refreshed on
+  // the same 7-day warn-tier cadence (no delta chain — a Bloom filter has no
+  // meaningful "added/removed" diff). sha256-verified against meta.nrd.sha256
+  // only when meta.json actually provides it (future-proofed like warn40).
+  let nrdBuf = rec.nrdBuf;
+  let nrdUpdatedAt = rec.nrdUpdatedAt || 0;
+  let nrdChanged = false;
+  if (!nrdBuf || Date.now() - nrdUpdatedAt >= WARN_REFRESH_MIN_MS) {
+    const fetchedNrd = await fetchArrayBufferFromBases(bases, 'nrd.bloom');
+    const okHash = !(meta.nrd && meta.nrd.sha256) || (fetchedNrd && (await sha256Hex(fetchedNrd)) === meta.nrd.sha256);
+    if (fetchedNrd && okHash) { nrdBuf = fetchedNrd; nrdUpdatedAt = Date.now(); nrdChanged = true; }
+  }
+
   const blockChanged = blockBuf !== rec.blockBuf;
   const warnChanged = warnBuf !== rec.warnBuf;
-  if (!blockChanged && !warnChanged && !riskChanged) { await setSettings({ lastFeedAt: Date.now() }); return { ok: true, updated: false, version: rec.version || '' }; }
+  if (!blockChanged && !warnChanged && !riskChanged && !nrdChanged) { await setSettings({ lastFeedAt: Date.now() }); return { ok: true, updated: false, version: rec.version || '' }; }
 
   const nextVersion = blockChanged ? meta.version : (rec.version || '');
-  await globalThis.Blockstore.save({ version: nextVersion, blockBuf, warnBuf, warnUpdatedAt, riskTables, riskUpdatedAt, urls: meta.urls });
+  await globalThis.Blockstore.save({ version: nextVersion, blockBuf, warnBuf, warnUpdatedAt, riskTables, riskUpdatedAt, nrdBuf, nrdUpdatedAt, urls: meta.urls });
   // Mirror the (small, pure-lookup) abused-TLD table into settings so
   // content_script.js's already-awaited getSettings() carries it straight
   // into scoreUrl() — no new message round-trip for this half of risk.json.
@@ -849,7 +863,7 @@ async function runFeedUpdate(metaUrl) {
     await setSettings({ riskTlds: riskTables.tlds });
   }
   await setSettings({ lastFeedVersion: nextVersion, lastFeedAt: Date.now() });
-  return { ok: true, updated: true, version: nextVersion, blockUpdated: blockChanged, warnUpdated: warnChanged, riskUpdated: riskChanged };
+  return { ok: true, updated: true, version: nextVersion, blockUpdated: blockChanged, warnUpdated: warnChanged, riskUpdated: riskChanged, nrdUpdated: nrdChanged };
 }
 
 // Dyndns/hoster membership evidence (Task B3): the SW computes the SHA-256 of
@@ -868,6 +882,49 @@ async function checkRiskHosting(host) {
   const dyndnsSet = Array.isArray(risk.dyndns) ? new Set(risk.dyndns) : null;
   const hostersSet = Array.isArray(risk.hosters) ? new Set(risk.hosters) : null;
   return { hit: SS.matchHostingRisk(hash32, dyndnsSet, hostersSet) };
+}
+
+// "New site" signal (0.10.0, Task C3): nrd.bloom membership of EITHER the
+// full hostname or its registrable domain (either hit counts — a
+// newly-registered apex domain's subdomains are just as new), combined with
+// a per-device "first seen locally" memory so the warning can be stronger on
+// a genuine first visit and suppressed entirely once the user has safely
+// used the domain for a month. Warn-tier evidence only; content_script.js
+// (the caller) never lets this escalate past suspicious on its own.
+async function checkNrdHost(host) {
+  const rec = await globalThis.Blockstore.get();
+  if (!rec || !rec.nrdBuf) return { hit: false };
+  const Bloom = globalThis.Bloom;
+  let parsed;
+  try { parsed = Bloom.parseHeader(new Uint8Array(rec.nrdBuf)); } catch (_) { return { hit: false }; }
+
+  const SS = globalThis.ScamShield;
+  const normalized = normalizeFeedHost(host);
+  if (!normalized) return { hit: false };
+  const reg = SS.registrableDomain(normalized);
+  const fullDigest = new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(normalized)));
+  const regDigest = reg === normalized ? fullDigest
+    : new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(reg)));
+  const hit = Bloom.test(parsed, fullDigest) || Bloom.test(parsed, regDigest);
+  if (!hit) return { hit: false };
+
+  // First-seen-locally ring, keyed by a hex slice of the registrable
+  // domain's own digest — never the raw hostname (see engine/first_seen.js
+  // header comment on why this stays SW-only state, not a fingerprint
+  // surface). Only ever touched for domains the bloom filter already
+  // flagged, so this never becomes a general browsing-history log.
+  const FirstSeen = globalThis.SSFirstSeen;
+  const hostHash = Array.from(regDigest.subarray(0, 8)).map((b) => b.toString(16).padStart(2, '0')).join('');
+  const store = await api.storage.local.get('firstSeen');
+  const priorList = FirstSeen.normalize(store.firstSeen);
+  const now = Date.now();
+  if (FirstSeen.isEstablished(priorList, hostHash, now)) {
+    // Seen locally for 30+ days — it's been fine for a month, suppress.
+    return { hit: false, suppressed: 'establishedLocally' };
+  }
+  const { list, isNew } = FirstSeen.touch(priorList, hostHash, now);
+  await api.storage.local.set({ firstSeen: list });
+  return { hit: true, strengthen: isNew };
 }
 
 // Verify tier: before trusting a 40-bit hit as real, confirm the hostname
@@ -1244,6 +1301,8 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         sendResponse(await checkFeedBatchHosts(msg.hosts)); break;
       case 'checkRisk':
         sendResponse(await checkRiskHosting(msg.host)); break;
+      case 'checkNrd':
+        sendResponse(await checkNrdHost(msg.host)); break;
       case 'getDefaultFeedUrl':
         sendResponse({ url: DEFAULT_FEED_URL }); break;
       case 'hashIcons':
@@ -1282,4 +1341,4 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 // module-scoped. Re-attach the debug/test surface that used to live on the
 // classic worker's global scope — the e2e suite drives these via
 // worker.evaluate, and they're handy in the SW console.
-Object.assign(globalThis, { DEFAULT_FEED_URL, FEED_META_URL, getSettings, setSettings, handleUserReport, runOtaUpdate, flushReports, queueReport, exportSettings, sanitizeImport, pushSync, pullSync, getStats, bumpStat, ensurePrivacyTotal, ensureInstalledAt, getReviewAsk, getReviewAskContext, setReviewAsk, sanitizeReviewAsk, ensureReviewAsk, importReviewAsk, getLangDict, loadLangDict, isValidLang, runFeedUpdate, checkFeedHost, checkFeedBatchHosts, normalizeFeedHost, checkRiskHosting });
+Object.assign(globalThis, { DEFAULT_FEED_URL, FEED_META_URL, getSettings, setSettings, handleUserReport, runOtaUpdate, flushReports, queueReport, exportSettings, sanitizeImport, pushSync, pullSync, getStats, bumpStat, ensurePrivacyTotal, ensureInstalledAt, getReviewAsk, getReviewAskContext, setReviewAsk, sanitizeReviewAsk, ensureReviewAsk, importReviewAsk, getLangDict, loadLangDict, isValidLang, runFeedUpdate, checkFeedHost, checkFeedBatchHosts, normalizeFeedHost, checkRiskHosting, checkNrdHost });

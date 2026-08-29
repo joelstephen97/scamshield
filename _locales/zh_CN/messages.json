@@ -269,6 +269,7 @@
   "reason_riskDynamicHost": { "message": "该域名托管在动态 DNS 或免费托管服务商上，此类服务商经常被滥用于诈骗页面。" },
   "reason_feedBlock": { "message": "此域名与 ScamShield 的威胁列表匹配，已由 $COUNT$ 个独立来源确认。", "placeholders": { "count": { "content": "$1", "example": "3" } } },
   "reason_feedWarn": { "message": "此域名与 ScamShield 威胁列表中一个可信度较低的条目匹配（$COUNT$ 个来源）——请谨慎操作。", "placeholders": { "count": { "content": "$1", "example": "1" } } },
+  "reason_newDomain": { "message": "Domain appears on a newly-registered-domains list — most scam sites are only days old$EXTRA$.", "placeholders": { "extra": { "content": "$1", "example": ", and you have never visited it before" } } },
   "reason_credentialFormForeignDomain": { "message": "此页面上的密码表单会将您的登录凭据发送到其他网站。" },
   "reason_hiddenIframes": { "message": "页面中包含可能捕获输入内容的隐藏框架。" },
   "reason_scamPhrase": { "message": "页面显示典型的诈骗/抽奖话术（\"$PHRASE$\"）。", "placeholders": { "phrase": { "content": "$1", "example": "you won" } } },

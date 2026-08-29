@@ -57,6 +57,52 @@ function buildShardGz(entries) {
 }
 function sha256Hex(buf) { return crypto.createHash('sha256').update(buf).digest('hex'); }
 
+// --- nrd.bloom fixture (Task C3): a tiny Bloom filter built with the SAME
+// index-derivation algorithm as engine/bloom.js / parry-feed's lib/bloom.js
+// (see engine/bloom.js's header comment for the spec this mirrors).
+const NRD_DOMAIN = 'nrd-fixture.example';           // bloom-positive, first-ever visit
+const NRD_ESTABLISHED_DOMAIN = 'nrd-established.example'; // bloom-positive but seen locally 40 days ago
+function nrdOptimalParams(n, p) {
+  const m = Math.ceil(-(n * Math.log(p)) / (Math.LN2 * Math.LN2));
+  const mBits = Math.max(8, Math.ceil(m / 8) * 8);
+  let k = Math.max(1, Math.round((mBits / n) * Math.LN2));
+  if (k > 7) k = 7;
+  return { mBits, k };
+}
+function nrdIndicesFor(digest, k, mBits) {
+  const h1 = digest.readUInt32BE(0);
+  let h2 = digest.readUInt32BE(4);
+  if (h2 === 0) h2 = 1;
+  const out = [];
+  for (let i = 0; i < k; i++) out.push((h1 + i * h2) % mBits);
+  return out;
+}
+function buildNrdBloomFixture(hosts, p) {
+  const n = hosts.length;
+  const { mBits, k } = nrdOptimalParams(n, p);
+  const bits = Buffer.alloc(Math.ceil(mBits / 8));
+  for (const h of hosts) {
+    const digest = crypto.createHash('sha256').update(h, 'utf8').digest();
+    for (const idx of nrdIndicesFor(digest, k, mBits)) bits[idx >> 3] |= 1 << (7 - (idx & 7));
+  }
+  const header = Buffer.alloc(16);
+  header.write('NRDB', 0, 4, 'ascii');
+  header.writeUInt8(1, 4);
+  header.writeUInt8(k, 5);
+  header.writeUInt16BE(0, 6);
+  header.writeUInt32BE(n, 8);
+  header.writeUInt32BE(mBits, 12);
+  return Buffer.concat([header, bits]);
+}
+// The exact hex the SW derives for storage.local's firstSeen ring key: the
+// first 8 bytes of SHA-256(registrable domain), hex-encoded (both fixture
+// domains here are already bare registrable domains, so no eTLD+1 collapse
+// happens).
+function nrdHostHash(domain) {
+  const digest = crypto.createHash('sha256').update(domain, 'utf8').digest();
+  return Array.from(digest.subarray(0, 8)).map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
 test.beforeAll(() => {
   fs.mkdirSync(FEED_DIR, { recursive: true });
 
@@ -107,6 +153,13 @@ test.beforeAll(() => {
   };
   fs.writeFileSync(path.join(FEED_DIR, 'risk.json'), JSON.stringify(risk));
 
+  // nrd.bloom (Task C3): both fixture domains are inserted so they test
+  // positive; NRD_ESTABLISHED_DOMAIN's own suppression comes from a
+  // pre-seeded storage.local firstSeen entry (set per-test, since context is
+  // fresh per test), not from being absent here.
+  const nrdBloomBuf = buildNrdBloomFixture([NRD_DOMAIN, NRD_ESTABLISHED_DOMAIN], 0.01);
+  fs.writeFileSync(path.join(FEED_DIR, 'nrd.bloom'), nrdBloomBuf);
+
   const meta = {
     version: '1',
     generatedAt: new Date().toISOString(),
@@ -114,7 +167,8 @@ test.beforeAll(() => {
     sha256: { set40: sha256Hex(set40), deltaFromPrev: null },
     prev: null,
     urls: { cdn: FEED_BASE_URL, fallback: FEED_BASE_URL },
-    ttlHours: 6
+    ttlHours: 6,
+    nrd: { file: 'nrd.bloom', sha256: sha256Hex(nrdBloomBuf), n: 2, mBits: nrdOptimalParams(2, 0.01).mBits, k: nrdOptimalParams(2, 0.01).k, windowDays: 14 }
   };
   fs.writeFileSync(path.join(FEED_DIR, 'meta.json'), JSON.stringify(meta));
 });
@@ -246,4 +300,77 @@ test('an abused-TLD host (risk.json tlds table) gets suspicious-tier evidence vi
   const page = await context.newPage();
   await page.goto(`http://${RISK_TLD_HOST}:5599/clean.html`);
   await expect(page.locator('.scamshield-banner.suspicious')).toBeVisible({ timeout: 8000 });
+});
+
+// --- nrd.bloom "new site" signal (0.10.0, Task C3) --------------------------
+
+test('the feed OTA cycle also installs nrd.bloom', async ({ context }) => {
+  const sw = context.serviceWorkers()[0];
+  const r = await installFeed(sw);
+  expect(r.ok).toBe(true);
+  expect(r.nrdUpdated).toBe(true);
+  // A second cycle against the same (unchanged) meta.json is a no-op.
+  const again = await installFeed(sw);
+  expect(again.updated).toBe(false);
+});
+
+test('checkNrd reports a bloom hit and strengthens on a genuine first visit', async ({ context }) => {
+  const sw = context.serviceWorkers()[0];
+  await installFeed(sw);
+  const result = await sw.evaluate((host) => checkNrdHost(host), NRD_DOMAIN);
+  expect(result.hit).toBe(true);
+  expect(result.strengthen).toBe(true);
+  // A second check for the same host in the same install is no longer a
+  // "first visit" — the reason must not strengthen again.
+  const second = await sw.evaluate((host) => checkNrdHost(host), NRD_DOMAIN);
+  expect(second.hit).toBe(true);
+  expect(second.strengthen).toBe(false);
+});
+
+test('checkNrd reports no hit for a clean (non-bloom-listed) host', async ({ context }) => {
+  const sw = context.serviceWorkers()[0];
+  await installFeed(sw);
+  const result = await sw.evaluate((host) => checkNrdHost(host), 'clean-feed-fixture.example');
+  expect(result).toEqual({ hit: false });
+});
+
+test('an NRD-listed, first-time-visited domain gets a suspicious evidence chip with the strengthened wording', async ({ context }) => {
+  const sw = context.serviceWorkers()[0];
+  await installFeed(sw);
+  const page = await context.newPage();
+  await page.goto(`http://${NRD_DOMAIN}:5599/clean.html`);
+  await expect(page.locator('.scamshield-interstitial')).toHaveCount(0); // never escalates past suspicious alone
+  const banner = page.locator('.scamshield-banner.suspicious');
+  await expect(banner).toBeVisible({ timeout: 8000 });
+  await expect(banner.locator('.ss-text span').first()).toContainText(/newly-registered-domains/i);
+  await expect(banner.locator('.ss-text span').first()).toContainText(/never visited it before/i);
+});
+
+test('a clean domain (no nrd.bloom hit) gets no evidence chip', async ({ context }) => {
+  const sw = context.serviceWorkers()[0];
+  await installFeed(sw);
+  const page = await context.newPage();
+  await page.goto('http://clean-feed-fixture.example:5599/clean.html');
+  await page.waitForTimeout(1000);
+  await expect(page.locator('.scamshield-interstitial')).toHaveCount(0);
+  await expect(page.locator('.scamshield-banner')).toHaveCount(0);
+});
+
+test('a domain seen locally for 30+ days suppresses the NRD signal even though it still tests bloom-positive', async ({ context }) => {
+  const sw = context.serviceWorkers()[0];
+  await installFeed(sw);
+  // Pre-seed storage.local's firstSeen ring as if this install first saw the
+  // domain 40 days ago — "it's been fine for a month".
+  const hostHash = nrdHostHash(NRD_ESTABLISHED_DOMAIN);
+  const fortyDaysAgo = Date.now() - 40 * 24 * 3600 * 1000;
+  await sw.evaluate(([key, ts]) => chrome.storage.local.set({ firstSeen: [[key, ts]] }), [hostHash, fortyDaysAgo]);
+
+  const result = await sw.evaluate((host) => checkNrdHost(host), NRD_ESTABLISHED_DOMAIN);
+  expect(result).toEqual({ hit: false, suppressed: 'establishedLocally' });
+
+  const page = await context.newPage();
+  await page.goto(`http://${NRD_ESTABLISHED_DOMAIN}:5599/clean.html`);
+  await page.waitForTimeout(1000);
+  await expect(page.locator('.scamshield-interstitial')).toHaveCount(0);
+  await expect(page.locator('.scamshield-banner')).toHaveCount(0);
 });

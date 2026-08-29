@@ -269,6 +269,7 @@
   "reason_riskDynamicHost": { "message": "このドメインは、詐欺ページに頻繁に悪用されるダイナミックDNSまたは無料ホスティングのプロバイダーでホストされています。" },
   "reason_feedBlock": { "message": "このドメインはScamShieldの脅威フィードに一致しており、$COUNT$件の独立した情報源で確認されています。", "placeholders": { "count": { "content": "$1", "example": "3" } } },
   "reason_feedWarn": { "message": "このドメインはScamShieldの脅威フィード内の信頼度が低いエントリ（$COUNT$件の情報源）に一致しています — 慎重に進めてください。", "placeholders": { "count": { "content": "$1", "example": "1" } } },
+  "reason_newDomain": { "message": "Domain appears on a newly-registered-domains list — most scam sites are only days old$EXTRA$.", "placeholders": { "extra": { "content": "$1", "example": ", and you have never visited it before" } } },
   "reason_credentialFormForeignDomain": { "message": "このページのパスワードフォームは、あなたの認証情報を別のサイトに送信します。" },
   "reason_hiddenIframes": { "message": "ページには入力内容を取得する可能性のある非表示フレームが含まれています。" },
   "reason_scamPhrase": { "message": "ページには典型的な詐欺・懸賞の文言（「$PHRASE$」）が表示されています。", "placeholders": { "phrase": { "content": "$1", "example": "you won" } } },

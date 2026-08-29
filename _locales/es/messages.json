@@ -269,6 +269,7 @@
   "reason_riskDynamicHost": { "message": "El dominio está alojado en un proveedor de DNS dinámico o alojamiento gratuito, muy utilizado para páginas de estafa." },
   "reason_feedBlock": { "message": "Este dominio coincide con la lista de amenazas de ScamShield, confirmado por $COUNT$ fuente(s) independiente(s).", "placeholders": { "count": { "content": "$1", "example": "3" } } },
   "reason_feedWarn": { "message": "Este dominio coincide con una entrada de menor confianza en la lista de amenazas de ScamShield ($COUNT$ fuente(s)); procede con cautela.", "placeholders": { "count": { "content": "$1", "example": "1" } } },
+  "reason_newDomain": { "message": "Domain appears on a newly-registered-domains list — most scam sites are only days old$EXTRA$.", "placeholders": { "extra": { "content": "$1", "example": ", and you have never visited it before" } } },
   "reason_credentialFormForeignDomain": { "message": "Un formulario de contraseña en esta página envía tus credenciales a otro sitio." },
   "reason_hiddenIframes": { "message": "La página contiene marcos ocultos que podrían capturar lo que escribes." },
   "reason_scamPhrase": { "message": "La página muestra un lenguaje clásico de estafa o regalo («$PHRASE$»).", "placeholders": { "phrase": { "content": "$1", "example": "you won" } } },

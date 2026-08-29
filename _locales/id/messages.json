@@ -947,6 +947,15 @@
       }
     }
   },
+  "reason_newDomain": {
+    "message": "Domain appears on a newly-registered-domains list — most scam sites are only days old$EXTRA$.",
+    "placeholders": {
+      "extra": {
+        "content": "$1",
+        "example": ", and you have never visited it before"
+      }
+    }
+  },
   "reason_credentialFormForeignDomain": {
     "message": "Formulir kata sandi di halaman ini mengirim kredensial Anda ke situs yang berbeda."
   },

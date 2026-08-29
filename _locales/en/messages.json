@@ -320,6 +320,7 @@
   "reason_riskDynamicHost": { "message": "Domain is hosted on a dynamic-DNS or free-hosting provider frequently abused for scam pages." },
   "reason_feedBlock": { "message": "This domain matches ScamShield's threat feed, confirmed by $COUNT$ independent source(s).", "placeholders": { "count": { "content": "$1", "example": "3" } } },
   "reason_feedWarn": { "message": "This domain matches a lower-confidence entry in ScamShield's threat feed ($COUNT$ source(s)) — proceed carefully.", "placeholders": { "count": { "content": "$1", "example": "1" } } },
+  "reason_newDomain": { "message": "Domain appears on a newly-registered-domains list — most scam sites are only days old$EXTRA$.", "placeholders": { "extra": { "content": "$1", "example": ", and you have never visited it before" } } },
   "reason_credentialFormForeignDomain": { "message": "A password form on this page sends your credentials to a different site." },
   "reason_crossOriginCredPost": { "message": "This form sends your password or card details to $HOST$ — a different site than the one you are on.", "placeholders": { "host": { "content": "$1", "example": "collector.example" } } },
   "reason_hiddenIframes": { "message": "Page contains hidden frames that may capture input." },
