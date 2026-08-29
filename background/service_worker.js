@@ -919,6 +919,54 @@ async function checkFeedHost(host) {
   return { hit: blockHit ? 'block' : 'warn', sources: Array.isArray(match.s) ? match.s : [] };
 }
 
+// Batched, network-free counterpart to checkFeedHost() for the SERP-badge
+// annotator (0.10.0, Task C1): hash-set membership only — NO exact-shard
+// fetch, ever. A badge is advisory, not an interstitial, so it must never
+// cost a network round trip per visible search result, and one page can
+// carry dozens of them. Also folds in the risk.json abused-TLD+dyndns/hoster
+// "combo" checkRiskHosting() computes one host at a time, so the content
+// script needs exactly one message for every signal a badge can show.
+// Returns { results: { <the exact host string the caller sent>: 'block' |
+// 'warn' | null } } — keyed on the caller's own strings (not the normalized
+// form) so content_script.js never has to duplicate normalizeFeedHost().
+async function checkFeedBatchHosts(hosts) {
+  const list = globalThis.Parry.dedupeCapped(Array.isArray(hosts) ? hosts.filter((h) => typeof h === 'string') : [], 50);
+  const out = {};
+  if (!list.length) return { results: out };
+
+  const rec = await globalThis.Blockstore.get();
+  const Bset = globalThis.Blockset;
+  const SS = globalThis.Parry;
+  const blockSet = rec && rec.blockBuf ? Bset.open(rec.blockBuf) : null;
+  const warnSet = rec && rec.warnBuf ? Bset.open(rec.warnBuf) : null;
+  const risk = rec && rec.riskTables;
+  const dyndnsSet = risk && Array.isArray(risk.dyndns) ? new Set(risk.dyndns) : null;
+  const hostersSet = risk && Array.isArray(risk.hosters) ? new Set(risk.hosters) : null;
+
+  for (const raw of list) {
+    const normalized = normalizeFeedHost(raw);
+    let category = null;
+    if (normalized && (blockSet || warnSet || dyndnsSet || hostersSet)) {
+      try {
+        const hostBytes = new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(normalized)));
+        const hash40 = Bset.hash40FromBytes(hostBytes);
+        if (blockSet && Bset.has(blockSet, hash40)) category = 'block';
+        else if (warnSet && Bset.has(warnSet, hash40)) category = 'warn';
+        else if (risk && risk.tlds && (dyndnsSet || hostersSet)) {
+          const reg = SS.registrableDomain(normalized);
+          if (SS.abusedTldWeight(reg, risk.tlds)) {
+            const regBytes = reg === normalized ? hostBytes : new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(reg)));
+            const hash32 = SS.hash32FromBytes(regBytes);
+            if (SS.matchHostingRisk(hash32, dyndnsSet, hostersSet)) category = 'warn';
+          }
+        }
+      } catch (_) { category = null; }
+    }
+    out[raw] = category;
+  }
+  return { results: out };
+}
+
 if (api.alarms) {
   api.alarms.create('ota', { periodInMinutes: 720 }); // every 12h — feed OTA rides the same cadence
   api.alarms.onAlarm.addListener((a) => { if (a.name === 'ota') { runOtaUpdate(); runFeedUpdate(); flushReports(); } });
@@ -1199,6 +1247,8 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         sendResponse(await runFeedUpdate()); break;
       case 'checkFeed':
         sendResponse(await checkFeedHost(msg.host)); break;
+      case 'checkFeedBatch':
+        sendResponse(await checkFeedBatchHosts(msg.hosts)); break;
       case 'checkRisk':
         sendResponse(await checkRiskHosting(msg.host)); break;
       case 'getDefaultFeedUrl':
@@ -1239,4 +1289,4 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 // module-scoped. Re-attach the debug/test surface that used to live on the
 // classic worker's global scope — the e2e suite drives these via
 // worker.evaluate, and they're handy in the SW console.
-Object.assign(globalThis, { DEFAULT_FEED_URL, FEED_META_URL, getSettings, setSettings, handleUserReport, runOtaUpdate, flushReports, queueReport, exportSettings, sanitizeImport, pushSync, pullSync, getStats, bumpStat, ensurePrivacyTotal, ensureInstalledAt, getReviewAsk, getReviewAskContext, setReviewAsk, sanitizeReviewAsk, ensureReviewAsk, importReviewAsk, getLangDict, loadLangDict, isValidLang, runFeedUpdate, checkFeedHost, normalizeFeedHost, checkRiskHosting });
+Object.assign(globalThis, { DEFAULT_FEED_URL, FEED_META_URL, getSettings, setSettings, handleUserReport, runOtaUpdate, flushReports, queueReport, exportSettings, sanitizeImport, pushSync, pullSync, getStats, bumpStat, ensurePrivacyTotal, ensureInstalledAt, getReviewAsk, getReviewAskContext, setReviewAsk, sanitizeReviewAsk, ensureReviewAsk, importReviewAsk, getLangDict, loadLangDict, isValidLang, runFeedUpdate, checkFeedHost, checkFeedBatchHosts, normalizeFeedHost, checkRiskHosting });
