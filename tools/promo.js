@@ -6,7 +6,10 @@
  * Run: npm run promo  → store/promo-small-440x280.png, store/promo-marquee-1400x560.png */
 const { chromium } = require('@playwright/test'); const path = require('path'); const fs = require('fs');
 
-const SHIELD_SVG = (big) => `<svg viewBox="0 0 24 24" style="position:absolute;right:${big ? 120 : 28}px;top:50%;transform:translateY(-50%);width:${big ? 300 : 130}px;height:${big ? 300 : 130}px;stroke:#fff;fill:rgba(255,255,255,.12);stroke-width:1.2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 2l8 3v6c0 5.2-3.4 9.6-8 11-4.6-1.4-8-5.8-8-11V5l8-3z"/><path d="M8.5 12.5l2.5 2.5 4.5-5"/></svg>`;
+// Parry motif fallback: a diagonal blade with a dart deflecting off it
+// (matches tools/make-icons.js), used when the popup screenshot can't be
+// cropped for the marquee tile.
+const SHIELD_SVG = (big) => `<svg viewBox="0 0 24 24" style="position:absolute;right:${big ? 120 : 28}px;top:50%;transform:translateY(-50%);width:${big ? 300 : 130}px;height:${big ? 300 : 130}px;stroke:#fff;fill:rgba(255,255,255,.12);stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round"><path d="M6 20L20 6"/><path d="M2.5 3.5l9 9 5-2"/></svg>`;
 
 const html = (w, h, big, shotDataUrl) => `<!doctype html><html><body style="margin:0;width:${w}px;height:${h}px;background:#0B6E4F;font:${big ? 44 : 22}px/1.15 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;color:#fff;position:relative;overflow:hidden">
 <div style="position:absolute;inset:0;background:radial-gradient(120% 80% at 100% 100%,rgba(255,255,255,.12),transparent 60%)"></div>
