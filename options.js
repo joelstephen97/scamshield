@@ -117,7 +117,7 @@ function renderAllow(list, paused) {
   if (!entries.length) $('pausedlist').appendChild(li(T('optNoneRightNow', null, 'None right now')));
   for (const [d, until] of entries) {
     const whenStr = intlDate({ hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' }).format(new Date(until));
-    $('pausedlist').appendChild(li(d, T('fmtUntilTime', [bidi(whenStr)], 'until ' + whenStr), T('untrust', null, 'Untrust'), async () => { await send('unpauseSite', { domain: d }); load(); }));
+    $('pausedlist').appendChild(li(d, T('fmtUntilTime', [bidi(whenStr)], 'until ' + whenStr), T('resumeNow', null, 'Resume now'), async () => { await send('unpauseSite', { domain: d }); load(); }));
   }
 }
 function renderHistory(list) {

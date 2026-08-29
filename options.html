@@ -5,7 +5,7 @@
 <nav aria-label="Settings sections" data-i18n-aria="ariaSettingsSections" role="tablist">
   <div class="brand" id="brandmark">Parry</div>
   <a href="#protection" data-tab="protection" class="cur" role="tab" aria-selected="true" aria-controls="tab-protection" data-i18n="tabProtection">Protection</a>
-  <a href="#trusted" data-tab="trusted" role="tab" aria-selected="false" aria-controls="tab-trusted" data-i18n="tabTrusted">Trusted sites</a>
+  <a href="#trusted" data-tab="trusted" role="tab" aria-selected="false" aria-controls="tab-trusted" data-i18n="tabTrusted">Paused sites</a>
   <a href="#history" data-tab="history" role="tab" aria-selected="false" aria-controls="tab-history" data-i18n="tabHistory">History</a>
   <a href="#stats" data-tab="stats" role="tab" aria-selected="false" aria-controls="tab-stats" data-i18n="tabStats">Statistics</a>
   <a href="#feed" data-tab="feed" role="tab" aria-selected="false" aria-controls="tab-feed" data-i18n="tabFeed">Threat feed</a>
@@ -52,7 +52,7 @@
     <label class="switch" for="report"><input type="checkbox" id="report" class="sr"><i></i></label></div>
 </section>
 <section id="tab-trusted" class="tab" hidden role="tabpanel" aria-labelledby="h-trusted">
-  <h2 id="h-trusted" tabindex="-1" data-i18n="tabTrusted">Trusted sites</h2><p class="lead" data-i18n="trustedLead">Parry stays quiet on these sites. Remove one to protect it again.</p>
+  <h2 id="h-trusted" tabindex="-1" data-i18n="tabTrusted">Paused sites</h2><p class="lead" data-i18n="trustedLead">Protection is paused on these sites. Resume one to protect it again.</p>
   <h3 data-i18n="trustedAlways">Always</h3><ul id="allowlist" class="list"></ul>
   <h3 data-i18n="trustedForAWhile">For a while</h3><ul id="pausedlist" class="list"></ul>
 </section>
