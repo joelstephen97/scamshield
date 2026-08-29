@@ -12,7 +12,9 @@ model/.venv/
 __pycache__/
 
 # Internal docs (guides, monetization, publishing, planning) — kept local, not published
-docs/
+docs/*
+# ...except the public, linked-from-Pages/store competitor comparison
+!docs/comparison.md
 
 # local git worktrees
 .worktrees/
