@@ -2,112 +2,187 @@
 
 ## Name
 
-Parry — Perlindungan Penipuan & Phishing
+Pemblokir Penipuan & Phishing: Parry
 
 ## Short description
 
-Perlindungan di perangkat: memperingatkan Anda, mendeteksi tiruan merek, memeriksa pesan. Tidak ada yang keluar.
+Memblokir situs penipuan, phishing, dan toko palsu. 100% di perangkat — aktivitas browsing Anda tidak pernah keluar dari komputer.
 
 ## Full description
 
-Parry memperingatkan Anda sebelum halaman penipuan atau phishing
-mengelabui Anda — sepenuhnya di perangkat Anda. Ia membaca lebih dari sekadar
-bilah alamat: memeriksa teks, tata letak, dan formulir login halaman, serta
-mengenali saat sebuah halaman menampilkan ikon atau logo merek di domain yang
-salah, sehingga mendeteksi tiruan meyakinkan yang akan terlewat oleh
-pemeriksa berbasis URL saja. Menerima WhatsApp, SMS, atau email yang
-mencurigakan? Tempelkan ke popup untuk mendapatkan putusan instan dan
-pribadi.
+Tidak ada server. Parry membaca halaman yang sedang Anda buka, pesan yang
+Anda tempel, dan toko tempat Anda checkout — sepenuhnya di dalam browser
+Anda — dan tidak pernah mengirim apa pun yang Anda jelajahi, ketik, atau
+tempel ke tempat lain.
 
-Satu klik membawa Anda kembali ke keamanan: *Tinggalkan halaman ini* pada
-peringatan berbahaya, atau *Bawa saya ke situs asli* pada halaman peniruan
-merek. Jika Parry salah menilai, gunakan *Percayai situs ini* selama satu
-jam, sampai besok, atau selamanya — dan *Laporkan kesalahan* dengan satu
-ketukan.
+**Mengapa Parry**
 
-Privat secara desain: apa pun yang Anda jelajahi, ketik, atau periksa tidak
-pernah keluar dari perangkat Anda. Satu-satunya aktivitas jaringan adalah
-mengunduh file daftar ancaman publik, dan — hanya jika Anda memilih untuk
-ikut serta — mengirim nama host teranonimkan dan sinyal risiko untuk halaman
-yang ditandai. Halaman Pengaturan menunjukkan persis apa yang keluar dari
-perangkat Anda sehingga Anda bisa memverifikasi sendiri nol telemetri.
+Sebagian besar ekstensi anti-penipuan mengirim data ke server mereka:
+mereka mengirim halaman yang Anda kunjungi, atau hash-nya, ke server
+perusahaan dan menerima vonis kembali. Parry tidak melakukan itu, karena
+tidak perlu — deteksi yang sama yang akan berjalan di cloud, berjalan
+secara lokal. Artinya tidak ada akun, tidak ada gangguan server yang
+membuat Anda tanpa perlindungan, dan tidak ada apa pun tentang aktivitas
+browsing Anda yang bisa bocor, diminta lewat somasi hukum, atau diam-diam
+dijual nanti. Ini gratis, tanpa tingkat premium, tanpa uji coba, dan tanpa
+"tingkatkan untuk membuka perlindungan real-time" — seluruh produk adalah
+produk gratis.
 
-Tersedia dalam 20 bahasa, termasuk terjemahan lengkap menu, peringatan, dan
-pengaturan — bukan hanya listing toko yang diterjemahkan.
+**Apa yang diblokir**
 
-Fitur:
-• Peringatan phishing & penipuan secara real-time dengan alasan berbahasa
-  sederhana
-• Analisis halaman: model di perangkat membaca halaman itu sendiri — teks,
-  tata letak, formulir login — untuk mendeteksi halaman phishing yang benar-
-  benar baru, bukan hanya URL yang sudah dikenal berbahaya
-• Deteksi tiruan merek: ikon dan logo dicocokkan hash-nya dengan tabel 64
-  merek (49 dengan hash ikon), termasuk bank, operator telekomunikasi, dan
-  layanan pemerintah UEA (Emirates NBD, ADCB, FAB, Mashreq, e&, du, Noon,
-  UAE PASS, MOHRE, Dubai Police…), ditambah domain homograf IDN (karakter
-  asing yang mirip menggantikan huruf Latin)
-• Pemeriksa pesan penipuan: tempel teks SMS/WhatsApp/email apa pun untuk
-  putusan instan dan sepenuhnya privat
-• Mendeteksi formulir login palsu yang mengirim kata sandi Anda ke situs
-  lain (login single-sign-on melalui Google/Microsoft/Okta dikenali sebagai
-  aman)
-• Paket privasi: memperingatkan saat situs mengirim email/telepon Anda ke
-  pelacak sebelum Anda menekan kirim, menyebutkan skrip fingerprinting, dan
-  menandai jebakan izin notifikasi "klik Izinkan untuk melanjutkan"
-• Pemeriksaan belanja: hitung mundur palsu, tekanan palsu "tinggal 2 lagi",
-  lencana kepercayaan yang tidak menautkan ke mana pun, permintaan
-  pembayaran di luar platform, dan detail kontak yang hilang, ditampilkan
-  dalam kartu belanja popup
-• Pemeriksaan hasil bersponsor di Google/Bing/DuckDuckGo — menandai iklan
-  yang menuju ke tempat lain selain situs yang ditampilkan
-• Halaman antara layar penuh untuk penipuan yang hampir pasti (serangan
-  clipboard ClickFix CAPTCHA palsu, prompt pembaruan browser palsu, phishing
-  biaya pengiriman, halaman menakut-nakuti dukungan teknis), dengan jeda
-  wajib dan perbandingan domain asli-vs-palsu, digunakan hanya untuk deteksi
-  dengan hampir nol positif palsu
-• Mode ketat: satu sakelar yang memblokir bahkan halaman "mencurigakan"
-  secara layar penuh dengan kata-kata lebih sederhana, untuk anggota
-  keluarga yang kurang paham teknologi
-• Penyelamatan satu klik: *Bawa saya ke situs asli* pada halaman peniruan
-  merek, *Tinggalkan halaman ini* pada peringatan berbahaya apa pun
-• Percayai sebuah situs selama 1 jam, sampai besok, atau selamanya — dan
-  laporkan kesalahan dengan satu ketukan
-• Memblokir domain penipuan yang dikenal — diperbarui setiap hari dari
-  sumber terbuka (OpenPhish + URLhaus, disaring ketat dari positif palsu)
-• Penjaga dompet kripto: memperingatkan sebelum persetujuan berisiko dan
-  tanda tangan buta (termasuk delegasi akun EIP-7702 dan dukungan multi-
-  dompet EIP-6963); memblokir pencurian frasa pemulihan
-• Penjaga pembajakan clipboard: memperingatkan saat situs menyalin perintah
-  ke clipboard Anda
-• Menyembunyikan konten penipuan hadiah/undian palsu
-• Ekspor/impor pengaturan dan sinkronisasi lintas perangkat opsional
-  (sinkronisasi bawaan browser Anda sendiri — tetap tanpa akun atau server
-  Parry)
-• Pilih bahasa Anda: seluruh 20 bahasa tersedia dari popup atau Pengaturan,
-  terlepas dari bahasa browser Anda
-• Riwayat dan statistik perlindungan, disimpan hanya di perangkat Anda;
-  mode gelap
-• Statistik: halaman diperiksa, ancaman dihentikan, dan temuan privasi,
-  lengkap dengan grafik aktivitas harian — dihitung dan disimpan di perangkat
-  Anda, tidak pernah dikirim ke mana pun
-• Pelaporan komunitas opsional, nonaktif secara default — tidak pernah URL
-  atau teks halaman
-• Lebih kecil dan lebih cepat: ~0,6 MB tanpa dikompresi, tanpa runtime berat
-• 100% analisis di perangkat — tanpa pelacakan, tanpa pengumpulan data
+- **Login bank & merek palsu** — Parry mencocokkan hash ikon dan logo
+  halaman dengan tabel 64 merek (termasuk bank, operator telekomunikasi,
+  dan layanan pemerintah UEA, di samping PayPal, Microsoft, Google, dan
+  lainnya), serta mendeteksi domain homograf IDN yang mengeja sebuah merek
+  menggunakan karakter asing yang mirip. Login palsu dengan logo yang
+  benar di domain yang salah tetap terdeteksi meski alamatnya sendiri
+  terlihat familiar.
+- **Toko palsu** — hitung mundur palsu, tekanan palsu "tinggal 2 lagi",
+  lencana kepercayaan hotlink, permintaan pembayaran di luar platform, dan
+  informasi kontak yang hilang ditampilkan dalam kartu belanja pop-up
+  sebelum Anda checkout.
+- **Penguras wallet kripto** — memperingatkan sebelum persetujuan berisiko
+  dan tanda tangan buta, termasuk delegasi akun EIP-7702 dan permintaan
+  multi-wallet EIP-6963, dan langsung memblokir upaya pencurian frasa
+  pemulihan.
+- **Penipuan dukungan teknis** — pemblokiran layar penuh untuk halaman
+  "PC Anda terinfeksi, telepon nomor ini sekarang", dengan jalan keluar
+  satu klik yang terlebih dahulu menonaktifkan jebakan kunci layar dan
+  tombol Kembali di halaman tersebut.
+- **Serangan ClickFix & clipboard** — trik malware yang paling cepat
+  berkembang di tahun 2025: CAPTCHA palsu "verifikasi Anda manusia" yang
+  membujuk Anda menempelkan perintah ke Run Windows. Parry menimpa muatan
+  clipboard berbahaya dan memblokir halaman secara layar penuh sebelum
+  bisa dijalankan.
+- **Formulir bocor** — memperingatkan begitu sebuah situs mengirim email
+  atau nomor telepon yang Anda ketik ke pelacak, *sebelum* Anda menekan
+  kirim, dan secara terpisah menyebutkan skrip fingerprinting serta
+  jebakan izin notifikasi "klik Izinkan untuk melanjutkan".
 
-## What's new (0.7.0)
+**Cara kerjanya**
 
-- Tab Statistik baru di Pengaturan: halaman diperiksa di perangkat, ancaman
-  dihentikan, temuan privasi, dan grafik aktivitas harian — lihat 7 hari
-  terakhir, 30 hari terakhir, atau total Anda sejak dipasang — semuanya
-  dihitung dan disimpan di perangkat Anda, tidak pernah dikirim ke mana pun.
-- Prompt ulasan yang tenang dan dapat ditutup muncul di popup hanya setelah
-  Parry benar-benar memblokir sesuatu dua kali — tolak sekali dan
-  prompt itu akan hilang untuk selamanya.
-- Penggantian bahasa baru di Pengaturan: pilih bahasa Parry sendiri
-  secara independen dari bahasa browser Anda, dengan dukungan sinkronisasi
-  antar perangkat jika Anda telah mengaktifkan sinkronisasi bawaan browser
-  Anda.
+1. Parry membaca halaman itu sendiri, di perangkat Anda — kata-kata,
+   tata letak, formulir login, dan ikonnya — pada saat Anda membukanya,
+   atau pesan yang Anda tempel ke popup untuk pemeriksaan pesan penipuan.
+2. Model di perangkat dan seperangkat aturan menilai apa yang ditemukan.
+   Satu sinyal lemah tidak pernah menghasilkan lebih dari catatan
+   *mencurigakan* yang tenang; vonis *berbahaya* memerlukan kesepakatan
+   sinyal independen, sehingga halaman asli jarang salah ditandai.
+3. Anda mendapatkan alasan dalam bahasa sederhana, bukan sekadar banner
+   merah, dengan solusi satu klik: *Tinggalkan halaman ini* pada
+   peringatan berbahaya, *Bawa saya ke situs asli* pada halaman peniruan
+   merek — atau, jika Parry salah, jeda peringatan pada situs itu selama
+   satu jam, satu hari, atau selamanya.
 
-Tidak ada izin baru. Masih `storage`, `declarativeNetRequest`, `alarms`,
-dan akses http/https, persis seperti pada 0.3.1.
+**Statistik & keterjelasan**
+
+Setiap peringatan terbuka ke panel *Mengapa vonis ini?* yang mencantumkan
+alasan pasti di baliknya — ikon merek pada domain yang salah, domain yang
+mirip, kolom kata sandi yang mengirim ke host asing — alih-alih skor tanpa
+penjelasan. Tab Statistik di Pengaturan menampilkan halaman yang diperiksa,
+ancaman yang dihentikan, dan temuan privasi, dengan grafik aktivitas harian
+yang bisa Anda alihkan antara 7 hari terakhir, 30 hari terakhir, atau total
+Anda sejak pemasangan. Setiap angka dihitung dan disimpan di perangkat
+Anda; tidak satu pun pernah dikirim ke mana pun.
+
+**Privasi: apa yang dilakukan dan tidak dilakukan Parry**
+
+Parry meminta akses ke halaman yang Anda kunjungi karena begitulah analisis
+di perangkat sebenarnya membacanya — kata-kata, tata letak, formulir
+login, dan ikon — pemeriksaan terjadi secara lokal, di browser Anda, bukan
+di server di suatu tempat. Satu-satunya hal yang keluar dari perangkat
+Anda secara default adalah unduhan file biasa: daftar ancaman publik
+berisi domain penipuan yang diketahui, diambil secara berkala dari feed
+open-source Parry agar pemblokiran tetap berfungsi segera setelah
+pemasangan dan saat offline. Tidak ada apa pun tentang Anda atau aktivitas
+browsing spesifik Anda yang menyertai unduhan itu. Pelaporan komunitas
+yang opsional dan nonaktif secara default dapat mengirim nama host yang
+dianonimkan dan sinyal risiko numerik untuk halaman yang ditandai
+berbahaya — tidak pernah URL, teks halaman, atau apa pun yang Anda ketik —
+dan hanya jika Anda sendiri mengaktifkannya. Pengaturan → Tentang
+menunjukkan persis apa yang telah keluar dari perangkat Anda, sehingga
+Anda bisa memverifikasi sendiri telemetri nol, bukan sekadar percaya kata
+kami.
+
+**Pertanyaan yang sering diajukan**
+
+**Apa bedanya Parry dengan Guardio, Malwarebytes, atau Norton?**
+
+Ekstensi-ekstensi itu memeriksa halaman yang Anda kunjungi dengan mengirim
+informasi ke server mereka sendiri: Guardio dan Bitdefender TrafficLight
+memindai halaman di cloud, Norton Safe Web menjalankan "Remote URL
+Reputation Service" dan, menurut pengungkapannya sendiri, mengumpulkan
+data pribadi, lokasi, dan riwayat web Anda, sementara Avast Online
+Security mengirim URL yang Anda kunjungi bersama ID perangkat dan
+informasi perangkat ke servernya. Parry tidak memiliki server. Setiap
+pemeriksaan — membaca halaman, mencocokkan ikon merek, memindai pesan
+yang ditempel — berjalan di perangkat Anda, dan tidak ada yang Anda
+jelajahi, ketik, atau periksa yang dikirim ke mana pun. Daftar Guardio
+sendiri juga membatasi tingkat gratisnya hanya untuk peringatan situs web;
+pemblokiran real-time, perlindungan unduhan, dan pemantauan kebocoran
+adalah fitur berbayar ($9,99–$34,99/bulan). Rangkaian fitur lengkap Parry —
+pemblokiran real-time, deteksi toko palsu, perlindungan penguras wallet
+kripto, pemblokiran penipuan dukungan teknis, perlindungan clipboard/
+ClickFix, dasbor statistik, dan alasan berbahasa sederhana di setiap
+peringatan — gratis tanpa tingkat premium.
+
+**Apakah Parry benar-benar gratis? Apa jebakannya?**
+
+Ya, dan tidak ada jebakan: tidak ada tingkat premium, tidak ada uji coba,
+tidak ada "tingkatkan untuk membuka perlindungan real-time". Parry tidak
+menjalankan server untuk menagih Anda, jadi tidak ada yang perlu dijual
+lebih lanjut — seluruh produk adalah produk gratis. Itu berbeda dari
+sebagian besar kategori ini: beberapa pesaing memberikan tingkat gratis
+terbatas dan menagih bulanan untuk perlindungan sesungguhnya (tingkat
+gratis Guardio hanya peringatan; pemblokiran penuh $9,99–$34,99/bulan),
+sementara yang lain adalah ekstensi gratis yang melakukan cross-sell ke
+paket keamanan berbayar. Parry menghidupi dirinya dengan cara lain —
+dengan tetap kecil, di perangkat, dan cukup berguna sehingga Anda tetap
+memasangnya, ditambah donasi opsional. Jika Anda ingin mendukung
+pengembangan, ada tautan di ekstensi, tidak pernah ada paywall.
+
+**Juga termasuk**
+
+- Pemeriksa pesan penipuan — tempel teks SMS/WhatsApp/email apa pun untuk
+  vonis instan yang sepenuhnya privat.
+- Pemeriksaan hasil bersponsor di Google/Bing/DuckDuckGo — menandai iklan
+  yang mengarah ke tempat lain selain situs yang ditampilkan.
+- Mode ketat — satu sakelar memblokir layar penuh bahkan halaman
+  "mencurigakan" dengan bahasa yang lebih sederhana, untuk anggota
+  keluarga yang kurang percaya diri dengan teknologi.
+- Pilih bahasa Anda: semua 20 bahasa, dapat dipilih dari popup atau
+  Pengaturan, terlepas dari bahasa browser Anda.
+- Ekspor/impor pengaturan dan sinkronisasi antar-perangkat opsional —
+  sinkronisasi bawaan browser Anda sendiri, tetap tanpa akun atau server
+  Parry.
+- Mode gelap, riwayat perlindungan, dan tautan penyelamatan satu klik,
+  konten hadiah/undian palsu yang disembunyikan.
+
+Angka pasti, bukan kata sifat: tersedia dalam **20 bahasa** dengan
+terjemahan lengkap menu, peringatan, dan pengaturan (bukan hanya daftar
+toko yang diterjemahkan); sekitar **630 pengujian otomatis**; daftar
+blokir berisi ribuan domain penipuan, diperbarui terus-menerus dari feed
+open-source; dan pemasangan di bawah 1 MB — sekitar 450 KB terkompresi,
+tanpa runtime berat.
+
+## What's new (0.8.0)
+
+- **ScamShield kini menjadi Parry.** Dua produk yang sudah sangat dikenal
+  memakai nama "ScamShield" — pemerintah Singapura menjalankan aplikasi
+  anti-penipuan nasionalnya sendiri bernama ScamShield, dan Scam Shield
+  dari T-Mobile adalah layanan pemblokiran penipuan operator AS yang
+  banyak digunakan — sehingga ekstensi ini berganti nama untuk menghindari
+  kebingungan dengan keduanya. Tidak ada yang berubah dalam cara
+  melindungi Anda, apa yang dikumpulkan (tidak ada), atau pengaturan Anda.
+- **Popup yang dirancang ulang:** menu *Jeda perlindungan* berbatas waktu
+  (1 jam, 1 hari, atau Selalu) menggantikan kata-kata kepercayaan yang
+  lama, penghitung utama menunjukkan sekilas ancaman yang dihentikan sejak
+  pemasangan dan minggu ini, setiap peringatan terbuka ke panel *Mengapa
+  vonis ini?* dengan alasan pastinya, dan footer berputar yang lebih rapi
+  bergantian antara pengingat privasi, permintaan ulasan yang layak, dan
+  tautan dukungan.
+- **Ikon baru** — tanda tangkisan sederhana yang lebih cocok dengan nama
+  baru.
+
+Tidak ada izin baru. Tetap `storage`, `declarativeNetRequest`, `alarms`,
+dan akses http/https, persis seperti 0.3.1.

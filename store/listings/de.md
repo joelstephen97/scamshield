@@ -2,114 +2,192 @@
 
 ## Name
 
-Parry — Schutz vor Betrug und Phishing
+Schutz vor Betrug & Phishing: Parry
 
 ## Short description
 
-Schutz vor Betrug & Phishing auf dem Gerät: warnt dich, erkennt Marken-Fälschungen, prüft Nachrichten. Nichts verlässt das Gerät.
+Blockiert Betrugsseiten, Phishing und Fake-Shops. 100% auf dem Gerät – dein Surfverhalten verlässt nie deinen Computer.
 
 ## Full description
 
-Parry warnt dich, bevor dich eine Betrugs- oder Phishing-Seite hereinlegt
-– vollständig auf deinem Gerät. Es prüft mehr als nur die Adressleiste: Es
-schaut sich Wortlaut, Layout und Login-Formular der Seite an und erkennt,
-wenn eine Seite das Icon oder Logo einer Marke auf der falschen Domain trägt
-– so erkennt es überzeugende Fälschungen, die ein reiner URL-Prüfer übersehen
-würde. Eine verdächtige WhatsApp-, SMS- oder E-Mail-Nachricht erhalten? Füge
-sie ins Popup ein für ein sofortiges, privates Urteil.
+Es gibt keinen Server. Parry liest die Seite, auf der du dich befindest, die
+Nachricht, die du einfügst, und den Shop, bei dem du gerade bezahlst –
+vollständig innerhalb deines Browsers – und sendet niemals, was du ansiehst,
+eingibst oder einfügst, irgendwohin sonst.
 
-Ein Klick bringt dich zurück in Sicherheit: *Diese Seite verlassen* bei einer
-gefährlichen Warnung, oder *Zur echten Seite bringen* bei einer
-Marken-Fälschungsseite. Wenn Parry sich irrt, kannst du *dieser Seite
-vertrauen* – für eine Stunde, bis morgen oder für immer – und mit einem Tipp
-*einen Fehler melden*.
+**Warum Parry**
 
-Privatsphäre von Anfang an: Nichts, was du durchsuchst, eingibst oder prüfst,
-verlässt jemals dein Gerät. Die einzige Netzwerkaktivität ist das
-Herunterladen der öffentlichen Bedrohungslisten-Datei und – nur wenn du dich
-dafür entscheidest – das Senden eines anonymisierten Hostnamens und eines
-Risikosignals für eine markierte Seite. Eine Einstellungsseite zeigt dir
-genau, was dein Gerät verlässt, damit du die Null-Telemetrie selbst
-überprüfen kannst.
+Die meisten Anti-Betrugs-Erweiterungen telefonieren nach Hause: Sie senden
+die von dir besuchten Seiten oder einen Hash davon an die Server eines
+Unternehmens und erhalten ein Urteil zurück. Parry tut das nicht, weil es
+nicht nötig ist – dieselbe Erkennung, die sonst in der Cloud liefe, läuft
+stattdessen lokal. Das bedeutet: kein Konto, kein Serverausfall, der dich
+ungeschützt zurücklässt, und nichts über dein Surfverhalten, das später
+durchsickern, per Vorladung herausgegeben oder still verkauft werden könnte.
+Es ist kostenlos, ohne Premium-Stufe, ohne Testphase und ohne „Upgrade für
+Echtzeitschutz freischalten“ – das ganze Produkt ist das kostenlose Produkt.
 
-Verfügbar in 20 Sprachen, einschließlich vollständiger Übersetzungen von
-Menüs, Warnungen und Einstellungen – nicht nur ein übersetzter Store-Eintrag.
+**Was es blockiert**
 
-Funktionen:
-• Echtzeit-Warnungen vor Phishing und Betrug mit verständlichen Begründungen
-• Seitenanalyse: Ein On-Device-Modell liest die Seite selbst – Wortlaut,
-  Layout, Login-Formulare –, um brandneue Phishing-Seiten zu erkennen, nicht
-  nur bereits bekannte schädliche URLs
-• Erkennung von Marken-Fälschungen: Icons und Logos werden per Hash mit einer
-  Tabelle von 64 Marken abgeglichen (49 mit Icon-Hashes), einschließlich
-  VAE-Banken, Telekommunikationsanbietern und Regierungsdiensten (Emirates
-  NBD, ADCB, FAB, Mashreq, e&, du, Noon, UAE PASS, MOHRE, Dubai Police …),
-  sowie IDN-Homograph-Domains (täuschend ähnliche fremde Zeichen anstelle
-  lateinischer Buchstaben)
-• Betrugsnachrichten-Prüfer: Füge einen beliebigen SMS-/WhatsApp-/E-Mail-Text
-  ein für ein sofortiges, vollständig privates Urteil
-• Erkennt gefälschte Login-Formulare, die dein Passwort an eine andere Seite
-  senden (Single-Sign-On-Logins über Google/Microsoft/Okta werden als sicher
-  erkannt)
-• Datenschutzpaket: Warnt, wenn eine Seite deine E-Mail/Telefonnummer vor dem
-  Absenden an einen Tracker sendet, nennt Fingerprinting-Skripte und
-  markiert „Auf Zulassen klicken, um fortzufahren“-Benachrichtigungsfallen
-• Einkaufsprüfungen: gefälschte Countdowns, gefälschter „nur noch 2
-  verfügbar“-Druck, verlinkte Fake-Vertrauenssiegel, Zahlungsaufforderungen
-  außerhalb der Plattform und fehlende Kontaktdaten, angezeigt in einer
-  Popup-Einkaufskarte
-• Prüfung gesponserter Ergebnisse bei Google/Bing/DuckDuckGo – markiert eine
-  Anzeige, die woanders hinführt als die angezeigte Seite
-• Vollbild-Zwischenseite für nahezu sichere Betrugsfälle (ClickFix
-  Fake-CAPTCHA-Zwischenablage-Angriffe, gefälschte
-  Browser-Update-Aufforderungen, Zustellgebühren-Phishing,
-  Tech-Support-Schreckensseiten) mit erzwungener Pause und einem
-  Echt-vs-Fake-Domain-Vergleich, reserviert für Erkennungen mit
-  nahezu keinen Fehlalarmen
-• Strenger Modus: ein Schalter, der selbst „verdächtige“ Seiten mit
-  einfacherer Sprache im Vollbild blockiert – für ein weniger technikaffines
-  Familienmitglied
-• Rettung mit einem Klick: *Zur echten Seite bringen* bei
-  Marken-Fälschungsseiten, *Diese Seite verlassen* bei jeder gefährlichen
-  Warnung
-• Vertraue einer Seite für 1 Stunde, bis morgen oder für immer – und melde
-  einen Fehler mit einem Tipp
-• Blockiert bekannte Betrugsdomains – täglich aktualisiert aus einem
-  Open-Source-Feed (OpenPhish + URLhaus, stark gegen Fehlalarme gefiltert)
-• Krypto-Wallet-Schutz: Warnt vor riskanten Genehmigungen und Blind-Signaturen
-  (einschließlich EIP-7702-Kontodelegation und Multi-Wallet-EIP-6963-
-  Unterstützung); blockiert Diebstahl von Wiederherstellungsphrasen
-• Zwischenablage-Hijacking-Schutz: Warnt, wenn eine Seite einen Befehl in
-  deine Zwischenablage kopiert
-• Blendet gefälschte Preis-/Gewinnspiel-Betrugsinhalte aus
-• Export/Import von Einstellungen und optionale geräteübergreifende
-  Synchronisierung (die eigene Synchronisierung deines Browsers – weiterhin
-  kein Parry-Konto oder -Server)
-• Wähle deine Sprache: alle 20 Sprachen, direkt im Popup oder in den
-  Einstellungen auswählbar – unabhängig von der Sprache deines Browsers
-• Schutzverlauf und Statistiken, nur auf deinem Gerät gespeichert; Dunkelmodus
-• Statistiken: geprüfte Seiten, gestoppte Bedrohungen und Datenschutz-Funde,
-  mit einem Diagramm der täglichen Aktivität – auf deinem Gerät gezählt und
-  gespeichert, niemals irgendwohin gesendet
-• Optionale Community-Meldungen, standardmäßig deaktiviert – niemals URLs
-  oder Seitentext
-• Kleiner und schneller: ~0,6 MB entpackt, keine schwere Laufzeitumgebung
-• 100 % On-Device-Analyse – kein Tracking, keine Datensammlung
+- **Gefälschte Bank- und Marken-Logins** – Parry gleicht das Icon und Logo
+  der Seite per Hash mit einer Tabelle von 64 Marken ab (VAE-Banken,
+  Telekommunikationsanbieter und Regierungsdienste eingeschlossen, neben
+  PayPal, Microsoft, Google und mehr) und erkennt IDN-Homograph-Domains, die
+  eine Marke mit täuschend ähnlichen fremden Zeichen nachbilden. Ein
+  gefälschter Login mit dem richtigen Logo auf der falschen Domain wird
+  erkannt, selbst wenn die Adresse selbst unauffällig wirkt.
+- **Fake-Shops** – gefälschte Countdown-Timer, „nur noch 2 verfügbar“-Druck,
+  hotgelinkte Vertrauenssiegel, Zahlungsaufforderungen außerhalb der
+  Plattform und fehlende Kontaktdaten werden in einer Popup-Einkaufskarte
+  angezeigt, bevor du zur Kasse gehst.
+- **Krypto-Wallet-Drainer** – warnt vor riskanten Genehmigungen und
+  Blind-Signaturen, einschließlich EIP-7702-Kontodelegation und
+  EIP-6963-Multi-Wallet-Anfragen, und blockiert Diebstahlversuche von
+  Wiederherstellungsphrasen von vornherein.
+- **Tech-Support-Betrug** – eine Vollbildsperre für „Ihr PC ist infiziert,
+  rufen Sie jetzt diese Nummer an“-Seiten, mit einem Ein-Klick-Ausweg, der
+  zuerst die Bildschirmsperre und die Zurück-Taste-Fallen der Seite
+  entschärft.
+- **ClickFix- und Zwischenablage-Angriffe** – der am schnellsten wachsende
+  Malware-Trick von 2025: ein gefälschtes „Bestätige, dass du ein Mensch
+  bist“-CAPTCHA, das dich dazu bringt, einen Befehl in die Windows-Ausführen-
+  Funktion einzufügen. Parry überschreibt die schädliche
+  Zwischenablage-Nutzlast und blockiert die Seite im Vollbild, bevor sie
+  ausgeführt werden kann.
+- **Undichte Formulare** – warnt in dem Moment, in dem eine Seite die
+  eingegebene E-Mail-Adresse oder Telefonnummer an einen Tracker sendet,
+  *bevor* du auf Absenden klickst, und benennt separat Fingerprinting-Skripte
+  und „Auf Zulassen klicken, um fortzufahren“-Benachrichtigungsfallen.
 
-## What's new (0.7.0)
+**Wie es funktioniert**
 
-- Neuer Tab „Statistiken“ in den Einstellungen: auf dem Gerät geprüfte
-  Seiten, gestoppte Bedrohungen, Datenschutz-Funde und ein Diagramm der
-  täglichen Aktivität – zeige die letzten 7 Tage, die letzten 30 Tage oder
-  deine Gesamtwerte seit der Installation an – alles wird auf deinem Gerät
-  gezählt und gespeichert, niemals irgendwohin gesendet.
-- Eine dezente, ausblendbare Bewertungsanfrage erscheint im Popup erst,
-  nachdem Parry tatsächlich zweimal etwas blockiert hat – lehne sie
-  einmal ab, und sie ist für immer verschwunden.
-- Neue Sprachüberschreibung in den Einstellungen: Wähle die Sprache von
-  Parry unabhängig von der deines Browsers, mit Unterstützung für die
-  geräteübergreifende Synchronisierung, wenn du die Synchronisierung deines
-  Browsers aktiviert hast.
+1. Parry liest die Seite selbst, auf deinem Gerät – ihren Wortlaut, Layout,
+   Login-Formulare und Icons – in dem Moment, in dem du sie öffnest, oder
+   die Nachricht, die du für eine Betrugsnachrichten-Prüfung ins Popup
+   einfügst.
+2. Ein On-Device-Modell und ein Regelwerk bewerten den Befund. Ein einzelnes
+   schwaches Signal führt nie zu mehr als einem stillen *verdächtig*-Hinweis;
+   für ein *gefährlich*-Urteil müssen unabhängige Signale übereinstimmen,
+   sodass echte Seiten selten fälschlich markiert werden.
+3. Du erhältst eine Begründung in klarer Sprache, nicht nur ein rotes Banner,
+   mit einer Ein-Klick-Lösung: *Diese Seite verlassen* bei einer
+   gefährlich-Warnung, *Zur echten Seite bringen* bei einer
+   Marken-Fälschungsseite – oder, falls Parry sich geirrt hat, pausiere die
+   Warnung für diese Seite für eine Stunde, einen Tag oder für immer.
+
+**Statistiken & Nachvollziehbarkeit**
+
+Jede Warnung lässt sich zu einem *Warum dieses Urteil?*-Panel aufklappen, das
+die genauen Gründe dahinter auflistet – ein Marken-Icon auf der falschen
+Domain, eine ähnlich aussehende Domain, ein Passwortfeld, das an einen
+fremden Host sendet – statt einer unerklärten Bewertung. Der
+Statistiken-Tab in den Einstellungen zeigt geprüfte Seiten, gestoppte
+Bedrohungen und Datenschutz-Funde, mit einem Diagramm der täglichen
+Aktivität, das du zwischen den letzten 7 Tagen, den letzten 30 Tagen oder
+deinen Gesamtwerten seit der Installation umschalten kannst. Jede Zahl wird
+auf deinem Gerät berechnet und gespeichert; nichts davon wird jemals
+irgendwohin gesendet.
+
+**Datenschutz: Was Parry tut und was nicht**
+
+Parry bittet um Zugriff auf die von dir besuchten Seiten, weil die
+On-Device-Analyse sie genau dadurch tatsächlich liest – den Wortlaut, das
+Layout, die Login-Formulare und Icons – die Prüfung findet lokal statt, in
+deinem Browser, nicht irgendwo auf einem Server. Das Einzige, was dein Gerät
+standardmäßig verlässt, ist ein reiner Datei-Download: die öffentliche
+Bedrohungsliste bekannter Betrugsdomains, die regelmäßig aus Parrys
+Open-Source-Feed abgerufen wird, damit die Blockierung direkt nach der
+Installation und auch offline funktioniert. Nichts über dich oder dein
+konkretes Surfverhalten begleitet diesen Download. Optionale, standardmäßig
+deaktivierte Community-Meldungen können einen anonymisierten Hostnamen und
+ein numerisches Risikosignal für eine als gefährlich markierte Seite senden –
+nie eine URL, Seitentext oder irgendetwas, das du eingegeben hast – und nur,
+wenn du es selbst aktivierst. Einstellungen → Über zeigt genau, was dein
+Gerät verlassen hat, damit du null Telemetrie selbst überprüfen kannst,
+statt uns einfach zu glauben.
+
+**Häufige Fragen**
+
+**Wie unterscheidet sich Parry von Guardio, Malwarebytes oder Norton?**
+
+Diese Erweiterungen prüfen die von dir besuchten Seiten, indem sie
+Informationen an ihre eigenen Server senden: Guardio und Bitdefender
+TrafficLight scannen Seiten in der Cloud, Norton Safe Web betreibt einen
+„Remote URL Reputation Service“ und sammelt laut eigener Offenlegung deine
+personenbezogenen Daten, deinen Standort und deinen Browserverlauf, und
+Avast Online Security sendet die von dir besuchten URLs zusammen mit einer
+Geräte-ID und Geräteinformationen an seine Server. Parry hat keinen Server.
+Jede Prüfung – das Lesen der Seite, der Abgleich von Marken-Icons, das
+Scannen einer eingefügten Nachricht – läuft auf deinem Gerät, und nichts,
+was du ansiehst, eingibst oder prüfst, wird irgendwohin gesendet. Guardios
+eigener Eintrag beschränkt seine kostenlose Stufe zudem auf reine
+Website-Warnungen; Echtzeit-Blockierung, Downloadschutz und
+Leak-Überwachung sind kostenpflichtige Funktionen (9,99–34,99 $/Monat).
+Parrys vollständiger Funktionsumfang – Echtzeit-Blockierung, Erkennung von
+Fake-Shops, Schutz vor Krypto-Wallet-Drainern, Blockierung von
+Tech-Support-Betrug, Zwischenablage-/ClickFix-Schutz, ein
+Statistik-Dashboard und eine klar formulierte Begründung bei jeder Warnung –
+ist kostenlos, ohne Premium-Stufe.
+
+**Ist Parry wirklich kostenlos? Wo ist der Haken?**
+
+Ja, und es gibt keinen Haken: keine Premium-Stufe, keine Testphase, kein
+„Upgrade, um Echtzeitschutz freizuschalten“. Parry betreibt keinen Server,
+für den es dich abrechnen müsste, also gibt es nichts nachzuverkaufen – das
+ganze Produkt ist das kostenlose Produkt. Das unterscheidet sich von den
+meisten Anbietern der Kategorie: Mehrere Konkurrenten verschenken eine
+eingeschränkte kostenlose Stufe und verlangen monatlich für den echten
+Schutz (Guardios kostenlose Stufe bietet nur Warnungen; vollständige
+Blockierung kostet 9,99–34,99 $/Monat), während andere kostenlose
+Erweiterungen sind, die in eine kostenpflichtige Sicherheits-Suite
+weiterverkaufen. Parry verdient sich sein Bestehen anders – indem es klein,
+lokal und nützlich genug bleibt, dass du es installiert lässt, plus
+optionale Spenden. Wenn du die Entwicklung unterstützen möchtest, gibt es
+einen Link in der Erweiterung, aber nie eine Bezahlschranke.
+
+**Auch enthalten**
+
+- Betrugsnachrichten-Prüfer – füge jeden SMS-/WhatsApp-/E-Mail-Text ein für
+  ein sofortiges, vollständig privates Urteil.
+- Prüfung gesponserter Ergebnisse bei Google/Bing/DuckDuckGo – markiert eine
+  Anzeige, die woanders hinführt als die angezeigte Seite.
+- Strenger Modus – ein Schalter blockiert selbst „verdächtige“ Seiten im
+  Vollbild mit einfacherer Sprache, für ein weniger technikaffines
+  Familienmitglied.
+- Wähle deine Sprache: alle 20 Sprachen, wählbar im Popup oder in den
+  Einstellungen, unabhängig von der Sprache deines Browsers.
+- Export/Import von Einstellungen und optionale geräteübergreifende
+  Synchronisierung – die eigene Synchronisierung deines Browsers, weiterhin
+  ohne Parry-Konto oder -Server.
+- Dunkelmodus, Schutzverlauf und Ein-Klick-Rettungslinks, ausgeblendete
+  Fake-Preis-/Gewinnspiel-Inhalte.
+
+Harte Zahlen statt Adjektive: verfügbar in **20 Sprachen** mit vollständigen
+Übersetzungen von Menüs, Warnungen und Einstellungen (nicht nur ein
+übersetzter Store-Eintrag); rund **630 automatisierte Tests**; eine
+Sperrliste mit Tausenden Betrugsdomains, laufend aktualisiert aus einem
+Open-Source-Feed; und eine Installation unter 1 MB – etwa 450 KB gepackt,
+keine schwere Laufzeitumgebung.
+
+## What's new (0.8.0)
+
+- **ScamShield heißt jetzt Parry.** Zwei sehr bekannte Produkte tragen
+  bereits den Namen „ScamShield“ – Singapurs Regierung betreibt eine eigene
+  nationale Anti-Betrugs-App namens ScamShield, und T-Mobiles Scam Shield
+  ist ein weit verbreiteter US-Mobilfunk-Betrugsschutzdienst –, daher hat
+  sich die Erweiterung umbenannt, um Verwechslungen mit beiden zu vermeiden.
+  An der Art, wie sie dich schützt, was sie sammelt (nichts) oder deinen
+  Einstellungen hat sich nichts geändert.
+- **Neu gestaltetes Popup:** Ein zeitlich begrenztes *Schutz
+  pausieren*-Menü (1 Stunde, 1 Tag oder Immer) ersetzt die alte
+  Vertrauens-Formulierung, Hero-Zähler zeigen auf einen Blick gestoppte
+  Bedrohungen seit der Installation und diese Woche, jede Warnung lässt sich
+  zu einem *Warum dieses Urteil?*-Panel mit den genauen Gründen aufklappen,
+  und eine klarere, rotierende Fußzeile wechselt zwischen einem
+  Datenschutzhinweis, einer verdienten Bewertungsanfrage und einem
+  Unterstützungslink.
+- **Neues Symbol** – ein einfaches Abwehrzeichen, das besser zum neuen Namen
+  passt.
 
 Keine neuen Berechtigungen. Weiterhin `storage`, `declarativeNetRequest`,
 `alarms` und http/https-Zugriff, genau wie bei 0.3.1.

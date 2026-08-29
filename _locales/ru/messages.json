@@ -1,6 +1,6 @@
 {
   "extName": {
-    "message": "Parry — защита от мошенничества и фишинга"
+    "message": "Защита от мошенничества и фишинга: Parry"
   },
   "extShortName": {
     "message": "Parry"
@@ -35,8 +35,8 @@
   "trustThisSite": {
     "message": "Доверять этому сайту"
   },
-  "popupTrustMenu": {
-    "message": "Доверять этому сайту ▾"
+  "popupPauseMenu": {
+    "message": "Приостановить защиту ▾"
   },
   "privacyPolicyLink": {
     "message": "Политика конфиденциальности"
@@ -80,6 +80,20 @@
   "showWhy": {
     "message": "Показать причину"
   },
+  "whyVerdict": {
+    "message": "Почему такой вердикт?"
+  },
+  "whyVerdictCountOne": {
+    "message": "· 1 признак"
+  },
+  "fmtWhyVerdictCount": {
+    "message": "· $COUNT$ признаков",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
   "takeMeToReal": {
     "message": "Перейти на настоящий сайт $BRAND$",
     "placeholders": {
@@ -94,26 +108,29 @@
   "reportSafe": {
     "message": "Сообщить: это безопасно"
   },
-  "trustFor1h": {
-    "message": "На 1 час"
+  "pause1h": {
+    "message": "1 час"
   },
-  "trustToday": {
-    "message": "До завтра"
+  "pause1d": {
+    "message": "1 день"
   },
-  "trustAlways": {
+  "pauseAlways": {
     "message": "Всегда"
   },
-  "untrust": {
-    "message": "Убрать доверие"
-  },
-  "trusted": {
-    "message": "Доверенный"
+  "resumeNow": {
+    "message": "Возобновить сейчас"
   },
   "blockedOnSite": {
     "message": "Заблокировано на сайте"
   },
   "blockedAllTime": {
     "message": "Заблокировано всего"
+  },
+  "sinceInstall": {
+    "message": "С момента установки"
+  },
+  "thisWeek": {
+    "message": "На этой неделе"
   },
   "privacyOnPage": {
     "message": "Конфиденциальность на странице"
@@ -145,11 +162,11 @@
   "msgDangerous": {
     "message": "Почти наверняка мошенничество"
   },
-  "runsOnDevice": {
-    "message": "Работает на вашем устройстве · ничто не покидает браузер"
-  },
   "support": {
     "message": "Поддержать"
+  },
+  "footerTrustLine": {
+    "message": "Работает на вашем устройстве. Никакие данные не покидают ваш браузер."
   },
   "takeMeToRealSite": {
     "message": "Перейти на настоящий сайт"
@@ -160,17 +177,17 @@
   "toastThanksSent": {
     "message": "Спасибо — отправлено"
   },
-  "toastTrustedForNow": {
-    "message": "Доверие установлено на время"
+  "toastPausedForNow": {
+    "message": "Пока приостановлено"
   },
-  "toastUntrusted": {
-    "message": "Доверие отменено"
+  "toastResumed": {
+    "message": "Защита возобновлена"
   },
   "toastExtensionError": {
     "message": "Ошибка расширения — попробуйте открыть заново."
   },
   "whatsNewBanner": {
-    "message": "Новое в 0.6: блокировка ClickFix и поддельных обновлений, инструменты конфиденциальности, проверка поддельных магазинов, 20 языков."
+    "message": "Новое в 0.8: ScamShield теперь называется Parry, обновлённое всплывающее окно с таймером паузы и счётчиками мошенничества, новая иконка."
   },
   "popupBrandDangerSummary": {
     "message": "Похоже на $BRAND$, но это не так. Не вводите здесь свой пароль.",
@@ -181,12 +198,11 @@
       }
     }
   },
-  "fmtTrustedUntil": {
-    "message": "Доверие до $TIME$",
+  "pausedUntil": {
+    "message": "Приостановлено до $TIME$",
     "placeholders": {
       "time": {
-        "content": "$1",
-        "example": "3:45 PM"
+        "content": "$1"
       }
     }
   },
@@ -266,7 +282,7 @@
     "message": "Защита"
   },
   "tabTrusted": {
-    "message": "Доверенные сайты"
+    "message": "Сайты на паузе"
   },
   "tabHistory": {
     "message": "История"
@@ -410,7 +426,7 @@
     "message": "Сохранено"
   },
   "trustedLead": {
-    "message": "Parry не вмешивается на этих сайтах. Удалите сайт из списка, чтобы снова его защищать."
+    "message": "Защита приостановлена на этих сайтах. Возобновите её для сайта, чтобы снова его защищать."
   },
   "trustedAlways": {
     "message": "Всегда"
@@ -455,7 +471,7 @@
     "message": "Резервное копирование настроек"
   },
   "backupHint": {
-    "message": "Сохраните настройки и доверенные сайты в файл или загрузите их на другом компьютере."
+    "message": "Сохраните настройки и сайты на паузе в файл или загрузите их на другом компьютере."
   },
   "exportBtn": {
     "message": "Экспорт"
@@ -467,7 +483,7 @@
     "message": "Синхронизация между моими устройствами"
   },
   "syncHint": {
-    "message": "Синхронизируйте настройки и доверенные сайты во всех браузерах, где вы вошли в аккаунт. Использует встроенную синхронизацию браузера — у Parry по-прежнему нет ни аккаунта, ни сервера. По умолчанию отключено."
+    "message": "Синхронизируйте настройки и сайты на паузе во всех браузерах, где вы вошли в аккаунт. Использует встроенную синхронизацию браузера — у Parry по-прежнему нет ни аккаунта, ни сервера. По умолчанию отключено."
   },
   "optDocTitle": {
     "message": "Настройки Parry"

@@ -1,6 +1,6 @@
 {
   "extName": {
-    "message": "Parry — Dolandırıcılık ve Kimlik Avı Koruması"
+    "message": "Dolandırıcılık ve Kimlik Avı Engelleyici: Parry"
   },
   "extShortName": {
     "message": "Parry"
@@ -35,8 +35,8 @@
   "trustThisSite": {
     "message": "Bu siteye güven"
   },
-  "popupTrustMenu": {
-    "message": "Bu siteye güven ▾"
+  "popupPauseMenu": {
+    "message": "Korumayı duraklat ▾"
   },
   "privacyPolicyLink": {
     "message": "Gizlilik politikası"
@@ -80,6 +80,20 @@
   "showWhy": {
     "message": "Nedenini göster"
   },
+  "whyVerdict": {
+    "message": "Bu karar neden verildi?"
+  },
+  "whyVerdictCountOne": {
+    "message": "· 1 sinyal"
+  },
+  "fmtWhyVerdictCount": {
+    "message": "· $COUNT$ sinyal",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
   "takeMeToReal": {
     "message": "Beni gerçek $BRAND$ sitesine götür",
     "placeholders": {
@@ -94,26 +108,29 @@
   "reportSafe": {
     "message": "Bildir: bu güvenli"
   },
-  "trustFor1h": {
-    "message": "1 saat boyunca"
+  "pause1h": {
+    "message": "1 saat"
   },
-  "trustToday": {
-    "message": "Yarına kadar"
+  "pause1d": {
+    "message": "1 gün"
   },
-  "trustAlways": {
+  "pauseAlways": {
     "message": "Her zaman"
   },
-  "untrust": {
-    "message": "Güveni kaldır"
-  },
-  "trusted": {
-    "message": "Güvenilir"
+  "resumeNow": {
+    "message": "Şimdi devam ettir"
   },
   "blockedOnSite": {
     "message": "Bu sitede engellenen"
   },
   "blockedAllTime": {
     "message": "Toplam engellenen"
+  },
+  "sinceInstall": {
+    "message": "Kurulumdan bu yana"
+  },
+  "thisWeek": {
+    "message": "Bu hafta"
   },
   "privacyOnPage": {
     "message": "Bu sayfada gizlilik"
@@ -145,11 +162,11 @@
   "msgDangerous": {
     "message": "Neredeyse kesinlikle dolandırıcılık"
   },
-  "runsOnDevice": {
-    "message": "Cihazınızda çalışır · hiçbir şey tarayıcınızdan çıkmaz"
-  },
   "support": {
     "message": "Destekle"
+  },
+  "footerTrustLine": {
+    "message": "Cihazınızda çalışır. Hiçbir veri tarayıcınızdan çıkmaz."
   },
   "takeMeToRealSite": {
     "message": "Beni gerçek siteye götür"
@@ -160,17 +177,17 @@
   "toastThanksSent": {
     "message": "Teşekkürler — gönderildi"
   },
-  "toastTrustedForNow": {
-    "message": "Şimdilik güvenilir"
+  "toastPausedForNow": {
+    "message": "Şimdilik duraklatıldı"
   },
-  "toastUntrusted": {
-    "message": "Güven kaldırıldı"
+  "toastResumed": {
+    "message": "Koruma devam ettirildi"
   },
   "toastExtensionError": {
     "message": "Uzantı hatası — yeniden açmayı deneyin."
   },
   "whatsNewBanner": {
-    "message": "0.6'daki yenilikler: ClickFix ve sahte güncelleme engelleme, gizlilik araçları, sahte mağaza kontrolleri, 20 dil."
+    "message": "0.8'deki yenilikler: ScamShield artık Parry oldu, zaman sınırlı duraklatma ve dolandırıcılık sayaçlarıyla yeniden tasarlanmış popup, yeni simge."
   },
   "popupBrandDangerSummary": {
     "message": "$BRAND$ gibi görünüyor ama değil. Buraya şifrenizi girmeyin.",
@@ -181,12 +198,11 @@
       }
     }
   },
-  "fmtTrustedUntil": {
-    "message": "$TIME$ tarihine kadar güvenilir",
+  "pausedUntil": {
+    "message": "$TIME$ saatine kadar duraklatıldı",
     "placeholders": {
       "time": {
-        "content": "$1",
-        "example": "3:45 PM"
+        "content": "$1"
       }
     }
   },
@@ -266,7 +282,7 @@
     "message": "Koruma"
   },
   "tabTrusted": {
-    "message": "Güvenilir siteler"
+    "message": "Duraklatılan siteler"
   },
   "tabHistory": {
     "message": "Geçmiş"
@@ -410,7 +426,7 @@
     "message": "Kaydedildi"
   },
   "trustedLead": {
-    "message": "Parry bu sitelerde sessiz kalır. Tekrar korumak için birini kaldırın."
+    "message": "Koruma bu sitelerde duraklatıldı. Birini devam ettirerek tekrar koruma altına alın."
   },
   "trustedAlways": {
     "message": "Her zaman"
@@ -455,7 +471,7 @@
     "message": "Ayarları yedekle"
   },
   "backupHint": {
-    "message": "Ayarlarınızı ve güvenilir sitelerinizi bir dosyaya kaydedin veya başka bir bilgisayarda yükleyin."
+    "message": "Ayarlarınızı ve duraklattığınız siteleri bir dosyaya kaydedin veya başka bir bilgisayarda yükleyin."
   },
   "exportBtn": {
     "message": "Dışa aktar"
@@ -467,7 +483,7 @@
     "message": "Cihazlarım arasında senkronize et"
   },
   "syncHint": {
-    "message": "Ayarlarınızı ve güvenilir sitelerinizi oturum açtığınız her tarayıcıda senkronize tutun. Tarayıcınızın kendi senkronizasyonunu kullanır — Parry'ın hâlâ hesabı veya sunucusu yoktur. Varsayılan olarak kapalıdır."
+    "message": "Ayarlarınızı ve duraklattığınız siteleri oturum açtığınız her tarayıcıda senkronize tutun. Tarayıcınızın kendi senkronizasyonunu kullanır — Parry'ın hâlâ hesabı veya sunucusu yoktur. Varsayılan olarak kapalıdır."
   },
   "optDocTitle": {
     "message": "Parry Ayarları"

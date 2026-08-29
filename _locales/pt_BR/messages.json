@@ -1,6 +1,6 @@
 {
   "extName": {
-    "message": "Parry — Proteção contra golpes e phishing"
+    "message": "Bloqueador de golpes e phishing: Parry"
   },
   "extShortName": {
     "message": "Parry"
@@ -35,8 +35,8 @@
   "trustThisSite": {
     "message": "Confiar neste site"
   },
-  "popupTrustMenu": {
-    "message": "Confiar neste site ▾"
+  "popupPauseMenu": {
+    "message": "Pausar proteção ▾"
   },
   "privacyPolicyLink": {
     "message": "Política de privacidade"
@@ -80,6 +80,20 @@
   "showWhy": {
     "message": "Ver por quê"
   },
+  "whyVerdict": {
+    "message": "Por que esse veredito?"
+  },
+  "whyVerdictCountOne": {
+    "message": "· 1 sinal"
+  },
+  "fmtWhyVerdictCount": {
+    "message": "· $COUNT$ sinais",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
   "takeMeToReal": {
     "message": "Ir para o site real da $BRAND$",
     "placeholders": {
@@ -94,26 +108,29 @@
   "reportSafe": {
     "message": "Relatar: isto é seguro"
   },
-  "trustFor1h": {
-    "message": "Por 1 hora"
+  "pause1h": {
+    "message": "1 hora"
   },
-  "trustToday": {
-    "message": "Até amanhã"
+  "pause1d": {
+    "message": "1 dia"
   },
-  "trustAlways": {
+  "pauseAlways": {
     "message": "Sempre"
   },
-  "untrust": {
-    "message": "Deixar de confiar"
-  },
-  "trusted": {
-    "message": "Confiável"
+  "resumeNow": {
+    "message": "Retomar agora"
   },
   "blockedOnSite": {
     "message": "Bloqueados neste site"
   },
   "blockedAllTime": {
     "message": "Bloqueados no total"
+  },
+  "sinceInstall": {
+    "message": "Desde a instalação"
+  },
+  "thisWeek": {
+    "message": "Esta semana"
   },
   "privacyOnPage": {
     "message": "Privacidade nesta página"
@@ -145,11 +162,11 @@
   "msgDangerous": {
     "message": "Quase com certeza é um golpe"
   },
-  "runsOnDevice": {
-    "message": "Funciona no seu dispositivo · nada sai do navegador"
-  },
   "support": {
     "message": "Apoiar"
+  },
+  "footerTrustLine": {
+    "message": "Funciona no seu dispositivo. Nenhum dado sai do seu navegador."
   },
   "takeMeToRealSite": {
     "message": "Ir para o site real"
@@ -160,17 +177,17 @@
   "toastThanksSent": {
     "message": "Obrigado — enviado"
   },
-  "toastTrustedForNow": {
-    "message": "Confiável por agora"
+  "toastPausedForNow": {
+    "message": "Pausado por agora"
   },
-  "toastUntrusted": {
-    "message": "Confiança removida"
+  "toastResumed": {
+    "message": "Proteção retomada"
   },
   "toastExtensionError": {
     "message": "Erro na extensão — tente reabrir."
   },
   "whatsNewBanner": {
-    "message": "Novidades na 0.6: bloqueio de ClickFix e falsas atualizações, ferramentas de privacidade, verificação de lojas falsas, 20 idiomas."
+    "message": "Novidades na 0.8: o ScamShield agora é o Parry, popup redesenhado com pausa programada e contadores de golpes, novo ícone."
   },
   "popupBrandDangerSummary": {
     "message": "Parece com a $BRAND$, mas não é. Não digite sua senha aqui.",
@@ -181,12 +198,11 @@
       }
     }
   },
-  "fmtTrustedUntil": {
-    "message": "Confiável até $TIME$",
+  "pausedUntil": {
+    "message": "Pausado até $TIME$",
     "placeholders": {
       "time": {
-        "content": "$1",
-        "example": "3:45 PM"
+        "content": "$1"
       }
     }
   },
@@ -266,7 +282,7 @@
     "message": "Proteção"
   },
   "tabTrusted": {
-    "message": "Sites confiáveis"
+    "message": "Sites em pausa"
   },
   "tabHistory": {
     "message": "Histórico"
@@ -410,7 +426,7 @@
     "message": "Salvo"
   },
   "trustedLead": {
-    "message": "O Parry fica em silêncio nesses sites. Remova um para protegê-lo novamente."
+    "message": "A proteção está pausada nesses sites. Retome um deles para protegê-lo novamente."
   },
   "trustedAlways": {
     "message": "Sempre"
@@ -455,7 +471,7 @@
     "message": "Fazer backup das configurações"
   },
   "backupHint": {
-    "message": "Salve suas configurações e sites confiáveis em um arquivo, ou carregue-os em outro computador."
+    "message": "Salve suas configurações e sites em pausa em um arquivo, ou carregue-os em outro computador."
   },
   "exportBtn": {
     "message": "Exportar"
@@ -467,7 +483,7 @@
     "message": "Sincronizar entre meus dispositivos"
   },
   "syncHint": {
-    "message": "Mantenha suas configurações e sites confiáveis sincronizados em todos os navegadores em que você está conectado. Usa a sincronização própria do seu navegador — o Parry continua sem conta ou servidor. Desativado por padrão."
+    "message": "Mantenha suas configurações e sites em pausa sincronizados em todos os navegadores em que você está conectado. Usa a sincronização própria do seu navegador — o Parry continua sem conta ou servidor. Desativado por padrão."
   },
   "optDocTitle": {
     "message": "Configurações do Parry"

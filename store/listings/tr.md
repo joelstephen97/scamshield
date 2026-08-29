@@ -2,111 +2,183 @@
 
 ## Name
 
-Parry — Dolandırıcılık ve Kimlik Avı Koruması
+Dolandırıcılık ve Kimlik Avı Engelleyici: Parry
 
 ## Short description
 
-Cihazda dolandırıcılık ve kimlik avı koruması: uyarır, marka taklitlerini yakalar. Hiçbir şey cihazınızdan çıkmaz.
+Dolandırıcılık sitelerini, kimlik avını ve sahte mağazaları engeller. %100 cihaz üzerinde — geziniz asla bilgisayarınızdan çıkmaz.
 
 ## Full description
 
-Parry, bir dolandırıcılık veya kimlik avı sayfası sizi kandırmadan önce
-sizi uyarır — tamamen cihazınızda. Yalnızca adres çubuğuna bakmaz: sayfanın
-metnini, düzenini ve giriş formunu inceler ve bir sayfanın yanlış bir alan
-adında bir markanın simgesini veya logosunu taşıdığını fark eder, böylece
-yalnızca URL'ye bakan bir denetleyicinin kaçıracağı ikna edici taklitleri
-yakalar. Şüpheli bir WhatsApp, SMS veya e-posta mı aldınız? Anında, gizli bir
-karar için popup'a yapıştırın.
+Sunucu yoktur. Parry bulunduğunuz sayfayı, yapıştırdığınız mesajı ve
+ödeme yaptığınız mağazayı — tamamen tarayıcınızın içinde — okur ve
+gezindiğiniz, yazdığınız veya yapıştırdığınız hiçbir şeyi başka bir yere
+asla göndermez.
 
-Tek bir tıklama sizi güvene geri götürür: tehlikeli bir uyarıda *Bu sayfadan
-ayrıl*, marka taklidi bir sayfada *Beni gerçek siteye götür*. Parry
-yanılırsa, bir saatliğine, yarına kadar veya her zaman için *Bu siteye
-güven* diyebilir, tek dokunuşla *Hata bildir* diyebilirsiniz.
+**Neden Parry**
 
-Tasarım gereği gizli: gezindiğiniz, yazdığınız veya kontrol ettiğiniz hiçbir
-şey cihazınızdan çıkmaz. Tek ağ etkinliği, herkese açık tehdit listesi
-dosyasını indirmek ve — yalnızca siz izin verirseniz — işaretlenmiş bir sayfa
-için anonimleştirilmiş bir ana bilgisayar adı ve risk sinyali göndermektir.
-Bir Ayarlar sayfası, sıfır telemetriyi kendiniz doğrulayabilmeniz için
-cihazınızdan tam olarak neyin çıktığını gösterir.
+Dolandırıcılık engelleyici uzantıların çoğu eve telefon eder: ziyaret
+ettiğiniz sayfaları veya bunların bir özetini bir şirketin sunucularına
+gönderir ve karşılığında bir karar alır. Parry bunu yapmaz, çünkü buna
+gerek yoktur — bulutta çalışacak aynı tespit bunun yerine yerel olarak
+çalışır. Bu, hesap olmaması, sizi korumasız bırakacak bir sunucu kesintisi
+olmaması ve geziniz hakkında sızabilecek, mahkeme celbiyle istenebilecek
+veya daha sonra sessizce satılabilecek hiçbir şey olmaması anlamına gelir.
+Ücretsizdir, premium katmanı yoktur, denemesi yoktur ve "gerçek zamanlı
+korumanın kilidini açmak için yükseltin" yoktur — ürünün tamamı ücretsiz
+üründür.
 
-Yalnızca çevrilmiş bir mağaza listesi değil, tam menü, uyarı ve ayar
-çevirileri dahil 20 dilde mevcuttur.
+**Neleri engeller**
 
-Özellikler:
-• Sade dilde nedenler içeren gerçek zamanlı kimlik avı ve dolandırıcılık
-  uyarıları
-• Sayfa analizi: cihaz üzerindeki bir model, henüz hiçbir listede olmayan
-  yepyeni kimlik avı sayfalarını yakalamak için sayfanın metnini, düzenini
-  ve giriş formlarını okur — sadece bilinen kötü URL'leri değil
-• Marka taklidi tespiti: simgeler ve logolar, BAE bankaları, operatörleri ve
-  devlet hizmetleri dahil (Emirates NBD, ADCB, FAB, Mashreq, e&, du, Noon,
-  UAE PASS, MOHRE, Dubai Polisi…) 64 markalık bir tabloya (49'unda simge
-  hash'i bulunur) göre hash ile eşleştirilir; ayrıca Latin harflerin yerine
-  geçen benzer yabancı karakterlerden oluşan IDN homograf alan adları da
-  tespit edilir
-• Dolandırıcılık mesajı denetleyicisi: anında ve tamamen gizli bir karar
-  için herhangi bir SMS/WhatsApp/e-posta metnini yapıştırın
-• Şifrenizi başka bir siteye gönderen sahte giriş formlarını tespit eder
-  (Google/Microsoft/Okta üzerinden tek oturum açma girişleri güvenli olarak
-  tanınır)
-• Gizlilik paketi: gönder'e basmadan önce bir sitenin e-posta/telefon
-  bilginizi bir izleyiciye gönderdiğinde uyarır, parmak izi alan betikleri
-  adlandırır ve "devam etmek için İzin Ver'e tıklayın" bildirim izni
-  tuzaklarını işaretler
-• Alışveriş kontrolleri: sahte geri sayımlar, sahte "sadece 2 tane kaldı"
-  baskısı, hiçbir yere bağlantısı olmayan güven rozetleri, platform dışı
-  ödeme istekleri ve eksik iletişim bilgileri, popup alışveriş kartında
-  gösterilir
-• Google/Bing/DuckDuckGo'da sponsorlu sonuç kontrolü — gösterdiği siteden
-  başka bir yere giden bir reklamı işaretler
-• Neredeyse kesin dolandırıcılıklar için tam ekran ara sayfa (ClickFix sahte
-  CAPTCHA pano saldırıları, sahte tarayıcı güncelleme istemleri, teslimat
-  ücreti kimlik avı, teknik destek korkutma sayfaları), zorunlu bir duraklama
-  ve gerçek-sahte alan adı karşılaştırmasıyla birlikte; yalnızca neredeyse
-  sıfır yanlış pozitifli tespitler için kullanılır
-• Katı mod: kendine daha az güvenen bir aile bireyi için, "şüpheli" sayfaları
-  bile daha basit ifadelerle tam ekran engelleyen tek bir düğme
-• Tek tıkla kurtarma: marka taklidi sayfalarda *Beni gerçek siteye götür*,
-  herhangi bir tehlikeli uyarıda *Bu sayfadan ayrıl*
-• Bir siteye 1 saatliğine, yarına kadar veya her zaman güvenin — ve tek
-  dokunuşla bir hata bildirin
-• Bilinen dolandırıcılık alan adlarını engeller — açık kaynaklı bir
-  beslemeden (OpenPhish + URLhaus, yanlış pozitiflere karşı yoğun şekilde
-  filtrelenmiş) günlük olarak yenilenir
-• Kripto cüzdan koruması: riskli onaylardan ve körlemesine imzalardan önce
-  uyarır (EIP-7702 hesap devri ve çoklu cüzdan EIP-6963 desteği dahil);
-  kurtarma ifadesi hırsızlığını engeller
-• Pano ele geçirme koruması: bir site panonuza bir komut kopyaladığında
-  uyarır
-• Sahte ödül/hediye dolandırıcılık içeriğini gizler
-• Ayarları dışa/içe aktarma ve isteğe bağlı cihazlar arası senkronizasyon
-  (tarayıcınızın kendi senkronizasyonu — yine de Parry hesabı veya
-  sunucusu yok)
-• Dilinizi seçin: 20 dilin tümü popup'tan veya Ayarlar'dan seçilebilir —
-  tarayıcınızın dilinden bağımsız olarak
-• Yalnızca cihazınızda saklanan koruma geçmişi ve istatistikleri; koyu mod
-• İstatistikler: kontrol edilen sayfalar, durdurulan tehditler ve gizlilik
-  bulguları, günlük etkinlik grafiğiyle birlikte — cihazınızda sayılır ve
-  saklanır, hiçbir yere gönderilmez
-• Varsayılan olarak kapalı, isteğe bağlı topluluk raporlaması — asla URL veya
-  sayfa metni değil
-• Daha küçük ve daha hızlı: paketten çıkarılmış ~0,6 MB, ağır bir çalışma
-  zamanı yok
-• %100 cihaz üzerinde analiz — takip yok, veri toplama yok
+- **Sahte banka ve marka girişleri** — Parry, sayfanın simgesini ve
+  logosunu 64 markadan oluşan bir tabloyla (BAE bankaları, telekom
+  operatörleri ve devlet hizmetleri dahil, PayPal, Microsoft, Google ve
+  daha fazlasının yanı sıra) özet karşılaştırması yapar ve bir markayı
+  benzer görünen yabancı karakterlerle yazan IDN homograf alan adlarını
+  tespit eder. Doğru logoyu yanlış alan adında taşıyan sahte bir giriş,
+  adresin kendisi tanıdık görünse bile yakalanır.
+- **Sahte mağazalar** — sahte geri sayım sayaçları, sahte "sadece 2 kaldı"
+  baskısı, hotlink ile bağlanan güven rozetleri, platform dışı ödeme
+  talepleri ve eksik iletişim bilgileri, siz ödeme yapmadan önce açılır
+  pencere alışveriş kartında gösterilir.
+- **Kripto cüzdan boşaltıcıları** — riskli onaylardan ve kör imzalardan
+  önce, EIP-7702 hesap devri ve EIP-6963 çoklu cüzdan istekleri dahil,
+  uyarır ve kurtarma cümlesi hırsızlık girişimlerini doğrudan engeller.
+- **Teknik destek dolandırıcılığı** — "bilgisayarınız virüslü, şimdi bu
+  numarayı arayın" sayfaları için önce sayfanın ekran kilidi ve Geri
+  düğmesi tuzaklarını etkisiz hale getiren tek tıklamalı bir çıkışla
+  birlikte tam ekran engelleme.
+- **ClickFix ve pano saldırıları** — 2025'in en hızlı büyüyen kötü amaçlı
+  yazılım hilesi: sizi Windows Çalıştır'a bir komut yapıştırmaya ikna eden
+  sahte bir "insan olduğunuzu doğrulayın" CAPTCHA'sı. Parry kötü amaçlı
+  pano içeriğinin üzerine yazar ve çalıştırılabilmeden önce sayfayı tam
+  ekran olarak engeller.
+- **Sızdıran formlar** — bir site, siz gönder'e basmadan *önce* yazdığınız
+  e-postayı veya telefonu bir izleyiciye gönderdiği anda uyarır ve ayrıca
+  parmak izi çıkarma betiklerini ve "devam etmek için İzin Ver'e
+  tıklayın" bildirim izni tuzaklarını adlandırır.
 
-## What's new (0.7.0)
+**Nasıl çalışır**
 
-- Ayarlarda yeni İstatistikler sekmesi: cihazda kontrol edilen sayfalar,
-  durdurulan tehditler, gizlilik bulguları ve günlük etkinlik grafiği — son
-  7 günü, son 30 günü veya kurulumdan bu yana toplamlarınızı görüntüleyin —
-  hepsi cihazınızda sayılır ve saklanır, hiçbir yere gönderilmez.
-- Parry gerçekten iki kez bir şeyi engelledikten sonra açılır
-  pencerede sessiz, kapatılabilir bir değerlendirme istemi görünür — bir kez
-  reddedin, bir daha çıkmaz.
-- Ayarlarda yeni dil geçersiz kılma: Parry'ın kendi dilini
-  tarayıcınızınkinden bağımsız olarak seçin; tarayıcınızın kendi
-  senkronizasyonunu açtıysanız cihazlar arası senkronizasyon desteğiyle.
+1. Parry, sayfayı açtığınız anda cihazınızda sayfanın kendisini — metnini,
+   düzenini, giriş formlarını ve simgelerini — veya bir dolandırıcılık
+   mesajı kontrolü için açılır pencereye yapıştırdığınız mesajı okur.
+2. Cihaz üzerinde çalışan bir model ve bir kural kümesi bulduklarını
+   puanlar. Tek başına zayıf bir sinyal hiçbir zaman sessiz bir *şüpheli*
+   notundan fazlasını üretmez; bir *tehlikeli* kararı bağımsız sinyallerin
+   uyuşmasını gerektirir, bu yüzden gerçek sayfalar nadiren yanlışlıkla
+   işaretlenir.
+3. Sadece kırmızı bir bant değil, sade bir dille bir gerekçe alırsınız,
+   tek tıklamalı bir çözümle birlikte: tehlikeli bir uyarıda *Bu sayfadan
+   çık*, bir marka taklidi sayfasında *Beni gerçek siteye götür* — veya
+   Parry yanılmışsa, o sitedeki uyarıyı bir saat, bir gün veya süresiz
+   olarak duraklatın.
 
-Yeni izin yok. Hâlâ `storage`, `declarativeNetRequest`, `alarms` ve
-http/https erişimi, tıpkı 0.3.1'deki gibi.
+**İstatistikler ve açıklanabilirlik**
+
+Her uyarı, açıklanmamış bir puan yerine, arkasındaki tam nedenleri
+listeleyen bir *Bu karar neden verildi?* paneline açılır — yanlış alan
+adındaki bir marka simgesi, benzer görünen bir alan adı, yabancı bir ana
+bilgisayara gönderim yapan bir parola alanı. Ayarlar'daki İstatistikler
+sekmesi, kontrol edilen sayfaları, durdurulan tehditleri ve gizlilik
+bulgularını, son 7 gün, son 30 gün veya kurulumdan bu yana toplamlarınız
+arasında geçiş yapabileceğiniz günlük etkinlik grafiğiyle gösterir. Her
+sayı cihazınızda hesaplanır ve saklanır; hiçbiri hiçbir zaman herhangi bir
+yere gönderilmez.
+
+**Gizlilik: Parry ne yapar, ne yapmaz**
+
+Parry, ziyaret ettiğiniz sayfalara erişim ister, çünkü cihaz üzerindeki
+analiz onları gerçekten böyle okur — metni, düzeni, giriş formlarını ve
+simgeleri — kontrol yerel olarak, tarayıcınızda gerçekleşir, bir yerdeki
+bir sunucuda değil. Varsayılan olarak cihazınızdan çıkan tek şey, düz bir
+dosya indirmedir: bilinen dolandırıcılık alan adlarının herkese açık tehdit
+listesi, kurulumdan hemen sonra ve çevrimdışıyken de engellemenin çalışması
+için Parry'nin açık kaynaklı akışından periyodik olarak alınır. Sizinle
+veya belirli geziniz ile ilgili hiçbir şey bu indirmeye eşlik etmez.
+Varsayılan olarak kapalı, isteğe bağlı topluluk raporlaması, tehlikeli
+olarak işaretlenen bir sayfa için anonimleştirilmiş bir ana bilgisayar adı
+ve sayısal bir risk sinyali gönderebilir — asla bir URL, sayfa metni veya
+yazdığınız herhangi bir şey — ve yalnızca bunu kendiniz açarsanız. Ayarlar
+→ Hakkında, cihazınızdan tam olarak neyin çıktığını gösterir, böylece
+sözümüze güvenmek yerine sıfır telemetriyi kendiniz doğrulayabilirsiniz.
+
+**Sıkça Sorulan Sorular**
+
+**Parry, Guardio, Malwarebytes veya Norton'dan nasıl farklıdır?**
+
+Bu uzantılar, ziyaret ettiğiniz sayfaları kendi sunucularına bilgi
+göndererek kontrol eder: Guardio ve Bitdefender TrafficLight sayfaları
+bulutta tarar, Norton Safe Web bir "Uzak URL İtibar Hizmeti" çalıştırır ve
+kendi açıklamasına göre kişisel verilerinizi, konumunuzu ve web geçmişinizi
+toplar, Avast Online Security ise ziyaret ettiğiniz URL'leri bir cihaz
+kimliği ve cihaz bilgileriyle birlikte sunucularına gönderir. Parry'nin
+sunucusu yoktur. Her kontrol — sayfayı okumak, marka simgelerini
+eşleştirmek, yapıştırılan bir mesajı taramak — cihazınızda çalışır ve
+gezindiğiniz, yazdığınız veya kontrol ettiğiniz hiçbir şey herhangi bir
+yere gönderilmez. Guardio'nun kendi listesi de ücretsiz katmanını yalnızca
+web sitesi uyarılarıyla sınırlar; gerçek zamanlı engelleme, indirme
+koruması ve sızıntı izleme ücretli özelliklerdir (9,99–34,99 $/ay). Parry'nin
+tam özellik seti — gerçek zamanlı engelleme, sahte mağaza tespiti, kripto
+cüzdan boşaltıcı koruması, teknik destek dolandırıcılığı engellemesi, pano/
+ClickFix koruması, bir istatistik panosu ve her uyarıda sade bir dille
+gerekçe — premium katmanı olmadan ücretsizdir.
+
+**Parry gerçekten ücretsiz mi? Ne şart var?**
+
+Evet ve hiçbir şart yok: premium katman yok, deneme yok, "gerçek zamanlı
+korumanın kilidini açmak için yükseltin" yok. Parry, sizi faturalandıracak
+bir sunucu çalıştırmaz, bu yüzden üst satacak bir şey yoktur — ürünün
+tamamı ücretsiz üründür. Bu, kategorideki çoğu üründen farklı bir
+yaklaşımdır: birçok rakip sınırlı bir ücretsiz katman verir ve gerçek
+korumaları için aylık ücret alır (Guardio'nun ücretsiz katmanı sadece
+uyarılardır; tam engelleme 9,99–34,99 $/ay tutar), diğerleri ise ücretli
+bir güvenlik paketine çapraz satış yapan ücretsiz uzantılardır. Parry
+kendini farklı şekilde ayakta tutar — küçük, cihaz üzerinde ve kurulu
+tutmanızı sağlayacak kadar faydalı kalarak, artı isteğe bağlı bağışlar.
+Geliştirmeyi desteklemek isterseniz, uzantıda bir bağlantı vardır, asla bir
+ödeme duvarı yoktur.
+
+**Ayrıca içinde**
+
+- Dolandırıcılık mesajı denetleyicisi — anında ve tamamen özel bir karar
+  için herhangi bir SMS/WhatsApp/e-posta metnini yapıştırın.
+- Google/Bing/DuckDuckGo'da sponsorlu sonuç kontrolü — gösterilenden
+  başka bir yere giden bir reklamı işaretler.
+- Sıkı mod — tek bir anahtar, teknolojiye daha az güvenen bir aile üyesi
+  için daha basit bir dille "şüpheli" sayfaları bile tam ekran engeller.
+- Dilinizi seçin: tarayıcınızın dilinden bağımsız olarak açılır pencereden
+  veya ayarlardan seçilebilen 20 dilin tamamı.
+- Ayarları dışa/içe aktarma ve isteğe bağlı cihazlar arası senkronizasyon —
+  tarayıcınızın kendi senkronizasyonu, hâlâ Parry hesabı veya sunucusu
+  olmadan.
+- Karanlık mod, koruma geçmişi ve tek tıkla kurtarma bağlantıları, gizlenmiş
+  sahte ödül/çekiliş içeriği.
+
+Sıfatlar değil, somut sayılar: menü, uyarı ve ayar çevirilerinin tamamıyla
+**20 dilde** kullanılabilir (yalnızca çevrilmiş bir mağaza listesi değil);
+yaklaşık **630 otomatik test**; açık kaynaklı bir akıştan sürekli
+güncellenen, binlerce dolandırıcılık alan adından oluşan bir engelleme
+listesi; ve 1 MB'ın altında bir kurulum — sıkıştırılmış yaklaşık 450 KB,
+ağır bir çalışma zamanı olmadan.
+
+## What's new (0.8.0)
+
+- **ScamShield artık Parry oldu.** Zaten iki çok tanınmış ürün "ScamShield"
+  adını kullanıyor — Singapur hükümeti ScamShield adlı kendi ulusal
+  dolandırıcılık karşıtı uygulamasını işletiyor ve T-Mobile'ın Scam Shield'i
+  yaygın olarak kullanılan bir ABD operatör dolandırıcılık engelleme
+  hizmeti — bu yüzden uzantı, her ikisiyle de karışıklığı önlemek için adını
+  değiştirdi. Sizi nasıl koruduğu, ne topladığı (hiçbir şey) veya
+  ayarlarınız konusunda hiçbir şey değişmedi.
+- **Yeniden tasarlanan popup:** zaman sınırlı bir *Korumayı duraklat* menüsü
+  (1 saat, 1 gün veya Her zaman) eski güven ifadesinin yerini alıyor, öne
+  çıkan sayaçlar kurulumdan bu yana ve bu hafta durdurulan tehditleri bir
+  bakışta gösteriyor, her uyarı arkasındaki tam nedenlerle bir *Bu karar
+  neden verildi?* paneline açılıyor ve daha temiz, dönen bir alt bilgi bir
+  gizlilik hatırlatması, hak edilmiş bir değerlendirme isteği ve bir destek
+  bağlantısı arasında geçiş yapıyor.
+- **Yeni simge** — yeni isme daha uygun basit bir savuşturma işareti.
+
+Yeni izin yok. Hâlâ 0.3.1'deki gibi tam olarak `storage`,
+`declarativeNetRequest`, `alarms` ve http/https erişimi.

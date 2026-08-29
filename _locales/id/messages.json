@@ -1,6 +1,6 @@
 {
   "extName": {
-    "message": "Parry — Perlindungan Penipuan & Phishing"
+    "message": "Pemblokir Penipuan & Phishing: Parry"
   },
   "extShortName": {
     "message": "Parry"
@@ -35,8 +35,8 @@
   "trustThisSite": {
     "message": "Percayai situs ini"
   },
-  "popupTrustMenu": {
-    "message": "Percayai situs ini ▾"
+  "popupPauseMenu": {
+    "message": "Jeda perlindungan ▾"
   },
   "privacyPolicyLink": {
     "message": "Kebijakan privasi"
@@ -80,6 +80,20 @@
   "showWhy": {
     "message": "Lihat alasannya"
   },
+  "whyVerdict": {
+    "message": "Mengapa vonis ini?"
+  },
+  "whyVerdictCountOne": {
+    "message": "· 1 sinyal"
+  },
+  "fmtWhyVerdictCount": {
+    "message": "· $COUNT$ sinyal",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
   "takeMeToReal": {
     "message": "Bawa saya ke situs $BRAND$ asli",
     "placeholders": {
@@ -94,26 +108,29 @@
   "reportSafe": {
     "message": "Laporkan: ini aman"
   },
-  "trustFor1h": {
-    "message": "Selama 1 jam"
+  "pause1h": {
+    "message": "1 jam"
   },
-  "trustToday": {
-    "message": "Sampai besok"
+  "pause1d": {
+    "message": "1 hari"
   },
-  "trustAlways": {
+  "pauseAlways": {
     "message": "Selalu"
   },
-  "untrust": {
-    "message": "Hentikan kepercayaan"
-  },
-  "trusted": {
-    "message": "Tepercaya"
+  "resumeNow": {
+    "message": "Lanjutkan sekarang"
   },
   "blockedOnSite": {
     "message": "Diblokir di situs ini"
   },
   "blockedAllTime": {
     "message": "Total diblokir"
+  },
+  "sinceInstall": {
+    "message": "Sejak pemasangan"
+  },
+  "thisWeek": {
+    "message": "Minggu ini"
   },
   "privacyOnPage": {
     "message": "Privasi di halaman ini"
@@ -145,11 +162,11 @@
   "msgDangerous": {
     "message": "Hampir pasti penipuan"
   },
-  "runsOnDevice": {
-    "message": "Berjalan di perangkat Anda · tidak ada yang keluar dari browser"
-  },
   "support": {
     "message": "Dukung"
+  },
+  "footerTrustLine": {
+    "message": "Berjalan di perangkat Anda. Tidak ada data yang keluar dari browser Anda."
   },
   "takeMeToRealSite": {
     "message": "Bawa saya ke situs asli"
@@ -160,17 +177,17 @@
   "toastThanksSent": {
     "message": "Terima kasih — terkirim"
   },
-  "toastTrustedForNow": {
-    "message": "Dipercaya untuk saat ini"
+  "toastPausedForNow": {
+    "message": "Dijeda untuk saat ini"
   },
-  "toastUntrusted": {
-    "message": "Kepercayaan dihapus"
+  "toastResumed": {
+    "message": "Perlindungan dilanjutkan"
   },
   "toastExtensionError": {
     "message": "Terjadi kesalahan ekstensi — coba buka kembali."
   },
   "whatsNewBanner": {
-    "message": "Baru di 0.6: pemblokiran ClickFix & pembaruan palsu, alat privasi, pemeriksaan toko palsu, 20 bahasa."
+    "message": "Baru di 0.8: ScamShield kini menjadi Parry, popup dirancang ulang dengan jeda berbatas waktu dan penghitung penipuan, ikon baru."
   },
   "popupBrandDangerSummary": {
     "message": "Tampak seperti $BRAND$, tetapi bukan. Jangan masukkan kata sandi Anda di sini.",
@@ -181,12 +198,11 @@
       }
     }
   },
-  "fmtTrustedUntil": {
-    "message": "Dipercaya sampai $TIME$",
+  "pausedUntil": {
+    "message": "Dijeda hingga $TIME$",
     "placeholders": {
       "time": {
-        "content": "$1",
-        "example": "3:45 PM"
+        "content": "$1"
       }
     }
   },
@@ -266,7 +282,7 @@
     "message": "Perlindungan"
   },
   "tabTrusted": {
-    "message": "Situs tepercaya"
+    "message": "Situs dijeda"
   },
   "tabHistory": {
     "message": "Riwayat"
@@ -410,7 +426,7 @@
     "message": "Tersimpan"
   },
   "trustedLead": {
-    "message": "Parry tetap diam di situs-situs ini. Hapus salah satu untuk melindunginya lagi."
+    "message": "Perlindungan dijeda di situs-situs ini. Lanjutkan salah satu untuk melindunginya lagi."
   },
   "trustedAlways": {
     "message": "Selalu"
@@ -455,7 +471,7 @@
     "message": "Cadangkan pengaturan"
   },
   "backupHint": {
-    "message": "Simpan pengaturan dan situs tepercaya Anda ke sebuah file, atau muat di komputer lain."
+    "message": "Simpan pengaturan dan situs yang dijeda ke sebuah file, atau muat di komputer lain."
   },
   "exportBtn": {
     "message": "Ekspor"
@@ -467,7 +483,7 @@
     "message": "Sinkronkan di semua perangkat saya"
   },
   "syncHint": {
-    "message": "Jaga pengaturan dan situs tepercaya Anda tetap sinkron di setiap browser tempat Anda masuk. Menggunakan sinkronisasi bawaan browser Anda — Parry tetap tidak memiliki akun atau server. Nonaktif secara default."
+    "message": "Jaga pengaturan dan situs yang dijeda tetap sinkron di setiap browser tempat Anda masuk. Menggunakan sinkronisasi bawaan browser Anda — Parry tetap tidak memiliki akun atau server. Nonaktif secara default."
   },
   "optDocTitle": {
     "message": "Pengaturan Parry"

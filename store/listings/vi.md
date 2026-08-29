@@ -2,103 +2,179 @@
 
 ## Name
 
-Parry — Bảo vệ khỏi lừa đảo & phishing
+Chặn lừa đảo & Phishing: Parry
 
 ## Short description
 
-Chống lừa đảo & phishing ngay trên thiết bị: cảnh báo, phát hiện thương hiệu giả mạo, kiểm tra tin nhắn. Không gì rời máy bạn.
+Chặn trang web lừa đảo, phishing và shop giả. 100% trên thiết bị — hoạt động duyệt web của bạn không bao giờ rời khỏi máy tính.
 
 ## Full description
 
-Parry cảnh báo bạn trước khi một trang lừa đảo hay phishing kịp gài
-bẫy — hoàn toàn trên thiết bị của bạn. Nó đọc nhiều hơn thanh địa chỉ: nó
-xem câu chữ, bố cục và biểu mẫu đăng nhập của trang, và nhận ra khi một
-trang đang khoác biểu tượng hay logo của một thương hiệu trên tên miền sai.
-Nhờ vậy nó bắt được những bản sao rất giống thật mà công cụ chỉ soi URL sẽ
-bỏ lọt. Nhận được tin WhatsApp, SMS hay email đáng ngờ? Dán vào popup để có
-ngay một kết luận riêng tư.
+Không có máy chủ nào cả. Parry đọc trang bạn đang xem, tin nhắn bạn dán
+vào, và shop bạn đang thanh toán — hoàn toàn bên trong trình duyệt của
+bạn — và không bao giờ gửi những gì bạn duyệt, gõ hoặc dán đi bất kỳ nơi
+nào khác.
 
-Một cú bấm đưa bạn về nơi an toàn: *Rời khỏi trang này* trên cảnh báo nguy
-hiểm, hoặc *Đưa tôi đến trang thật* trên trang mạo danh thương hiệu. Nếu
-Parry nhầm, hãy *Tin cậy trang này* trong một giờ, đến ngày mai, hoặc
-luôn luôn — và *Báo lỗi* chỉ với một chạm.
+**Vì sao chọn Parry**
 
-Riêng tư từ thiết kế: những gì bạn duyệt, nhập hay kiểm tra không bao giờ
-rời khỏi thiết bị. Hoạt động mạng duy nhất là tải tệp danh sách mối đe dọa
-công khai, và — chỉ khi bạn đồng ý — gửi một tên máy chủ ẩn danh cùng tín
-hiệu rủi ro của trang bị đánh dấu. Trang Cài đặt cho thấy chính xác những gì
-rời khỏi thiết bị, để bạn tự kiểm chứng rằng không hề có đo từ xa.
+Hầu hết các tiện ích chống lừa đảo đều "gọi về nhà": chúng gửi các trang
+bạn truy cập, hoặc mã băm của chúng, tới máy chủ của một công ty và nhận
+lại kết luận. Parry không làm vậy, vì không cần thiết — cùng một cơ chế
+phát hiện lẽ ra chạy trên đám mây thì nay chạy cục bộ. Điều đó có nghĩa là
+không có tài khoản, không có sự cố máy chủ khiến bạn mất bảo vệ, và không
+có gì về hoạt động duyệt web của bạn có thể bị rò rỉ, bị yêu cầu theo lệnh
+tòa, hay âm thầm bị bán sau này. Nó miễn phí, không có gói cao cấp, không
+dùng thử và không có "nâng cấp để mở khóa bảo vệ thời gian thực" — toàn bộ
+sản phẩm chính là sản phẩm miễn phí.
 
-Có sẵn bằng 20 ngôn ngữ, dịch đầy đủ cả menu, cảnh báo và cài đặt — không
-chỉ mỗi trang giới thiệu trên cửa hàng.
+**Những gì nó chặn**
 
-Tính năng:
-• Cảnh báo phishing & lừa đảo theo thời gian thực, kèm lý do bằng ngôn ngữ
-  đời thường
-• Phân tích trang: một mô hình chạy trên thiết bị đọc chính trang đó — câu
-  chữ, bố cục, biểu mẫu đăng nhập — để bắt cả những trang phishing mới tinh,
-  chứ không chỉ các URL xấu đã biết
-• Phát hiện thương hiệu giả mạo: biểu tượng và logo được đối chiếu bằng hàm
-  băm với bảng 64 thương hiệu (49 thương hiệu có hash biểu tượng), gồm ngân
-  hàng, nhà mạng và dịch vụ công UAE (Emirates NBD, ADCB, FAB, Mashreq, e&,
-  du, Noon, UAE PASS, MOHRE, Cảnh sát Dubai…), cùng tên miền đồng hình IDN
-  (ký tự nước ngoài trông giống hệt chữ Latinh)
-• Bộ kiểm tra tin nhắn lừa đảo: dán bất kỳ nội dung SMS/WhatsApp/email nào
-  để có kết luận tức thì, hoàn toàn riêng tư
-• Phát hiện biểu mẫu đăng nhập giả gửi mật khẩu của bạn sang trang khác
-  (đăng nhập một lần qua Google/Microsoft/Okta được nhận diện là an toàn)
-• Gói riêng tư: cảnh báo khi một trang gửi email/số điện thoại của bạn cho
-  tracker trước khi bạn bấm gửi, nêu tên các script lấy dấu vân tay, và đánh
-  dấu bẫy xin quyền thông báo kiểu “bấm Cho phép để tiếp tục”
-• Kiểm tra mua sắm: đếm ngược giả, áp lực “chỉ còn 2” giả, huy hiệu tin cậy
-  hotlink, yêu cầu thanh toán ngoài nền tảng và thiếu thông tin liên hệ, hiện
-  ra trong thẻ mua sắm ở popup
-• Kiểm tra kết quả được tài trợ trên Google/Bing/DuckDuckGo — đánh dấu quảng
-  cáo dẫn tới nơi khác với trang mà nó hiển thị
-• Màn hình cảnh báo toàn màn hình cho những vụ gần như chắc chắn là lừa đảo
-  (tấn công clipboard qua CAPTCHA giả ClickFix, thông báo cập nhật trình
-  duyệt giả, phishing phí giao hàng, trang hù dọa hỗ trợ kỹ thuật), kèm một
-  khoảng dừng bắt buộc và phần so sánh tên miền thật với tên miền giả, chỉ
-  dành cho các phát hiện gần như không thể báo nhầm
-• Chế độ nghiêm ngặt: một công tắc chặn toàn màn hình ngay cả trang “đáng
-  ngờ” với lời lẽ đơn giản hơn, dành cho người thân ít rành công nghệ
-• Cứu hộ một chạm: *Đưa tôi đến trang thật* trên trang mạo danh thương hiệu,
-  *Rời khỏi trang này* trên mọi cảnh báo nguy hiểm
-• Tin cậy một trang trong 1 giờ, đến ngày mai, hoặc luôn luôn — và báo lỗi
-  chỉ với một chạm
-• Chặn các tên miền lừa đảo đã biết — làm mới hằng ngày từ nguồn cấp mã
-  nguồn mở (OpenPhish + URLhaus, lọc rất kỹ để tránh báo nhầm)
-• Bảo vệ ví crypto: cảnh báo trước các phê duyệt rủi ro và chữ ký mù (gồm cả
-  ủy quyền tài khoản EIP-7702 và hỗ trợ đa ví EIP-6963); chặn hành vi trộm
-  cụm từ khôi phục
-• Bảo vệ clipboard: cảnh báo khi một trang chép lệnh vào clipboard của bạn
-• Ẩn nội dung lừa đảo kiểu trúng thưởng/tặng quà
-• Xuất/nhập cài đặt và đồng bộ tùy chọn giữa các thiết bị (dùng chính tính
-  năng đồng bộ của trình duyệt — vẫn không có tài khoản hay máy chủ
-  Parry)
-• Chọn ngôn ngữ của bạn: đủ 20 ngôn ngữ, chọn ngay trong popup hoặc Cài đặt,
-  không phụ thuộc vào ngôn ngữ trình duyệt
-• Lịch sử bảo vệ và thống kê, chỉ lưu trên thiết bị của bạn; chế độ tối
-• Thống kê: số trang đã kiểm tra, mối đe dọa đã chặn và phát hiện về quyền
-  riêng tư, kèm biểu đồ hoạt động hằng ngày — được đếm và lưu trên thiết bị
-  của bạn, không bao giờ gửi đi đâu cả
-• Báo cáo cộng đồng tùy chọn, mặc định tắt — không bao giờ gửi URL hay nội
-  dung trang
-• Nhỏ hơn và nhanh hơn: khoảng 0,6 MB khi giải nén, không có runtime nặng
-• Phân tích 100% trên thiết bị — không theo dõi, không thu thập dữ liệu
+- **Trang đăng nhập giả mạo ngân hàng & thương hiệu** — Parry so khớp
+  bằng mã băm biểu tượng và logo của trang với bảng 64 thương hiệu (bao
+  gồm ngân hàng, nhà mạng và dịch vụ chính phủ UAE, cùng với PayPal,
+  Microsoft, Google và nhiều hơn nữa), và phát hiện các tên miền
+  homograph IDN đánh vần một thương hiệu bằng ký tự nước ngoài trông
+  giống hệt. Một trang đăng nhập giả mang đúng logo trên sai tên miền vẫn
+  bị phát hiện ngay cả khi bản thân địa chỉ trông quen thuộc.
+- **Shop giả** — đồng hồ đếm ngược giả, áp lực "chỉ còn 2 sản phẩm" giả,
+  huy hiệu tin cậy gắn hotlink, yêu cầu thanh toán ngoài nền tảng và
+  thiếu thông tin liên hệ đều được hiển thị trong thẻ mua sắm pop-up
+  trước khi bạn thanh toán.
+- **Kẻ rút cạn ví crypto** — cảnh báo trước các phê duyệt rủi ro và chữ
+  ký mù, bao gồm ủy quyền tài khoản EIP-7702 và yêu cầu đa ví EIP-6963,
+  và chặn thẳng các nỗ lực đánh cắp cụm từ khôi phục.
+- **Lừa đảo hỗ trợ kỹ thuật** — chặn toàn màn hình cho các trang "máy
+  tính của bạn bị nhiễm virus, hãy gọi số này ngay", kèm lối thoát một
+  cú nhấp trước tiên vô hiệu hóa các bẫy khóa màn hình và nút Quay lại
+  của trang.
+- **Tấn công ClickFix & clipboard** — thủ đoạn mã độc phát triển nhanh
+  nhất năm 2025: một CAPTCHA giả "xác minh bạn là con người" thuyết phục
+  bạn dán một lệnh vào hộp Run của Windows. Parry ghi đè nội dung độc
+  hại trong clipboard và chặn trang toàn màn hình trước khi nó có thể
+  chạy.
+- **Biểu mẫu rò rỉ** — cảnh báo ngay khi một trang gửi email hoặc số điện
+  thoại bạn đã nhập tới một trình theo dõi, *trước khi* bạn nhấn gửi, và
+  chỉ rõ riêng các tập lệnh lấy dấu vân tay thiết bị cùng bẫy quyền
+  thông báo "nhấp Cho phép để tiếp tục".
 
-## What's new (0.7.0)
+**Cách hoạt động**
 
-- Tab Thống kê mới trong Cài đặt: số trang đã kiểm tra trên thiết bị, mối
-  đe dọa đã chặn, phát hiện về quyền riêng tư, và biểu đồ hoạt động hằng
-  ngày — xem 7 ngày qua, 30 ngày qua, hoặc tổng số từ khi cài đặt — tất cả
-  được đếm và lưu trên thiết bị của bạn, không bao giờ gửi đi đâu cả.
-- Một lời nhắc đánh giá nhẹ nhàng, có thể bỏ qua, xuất hiện trong popup chỉ
-  sau khi Parry thực sự đã chặn được điều gì đó hai lần — từ chối một
-  lần là nó biến mất vĩnh viễn.
-- Tùy chọn ghi đè ngôn ngữ mới trong Cài đặt: chọn ngôn ngữ riêng của
-  Parry độc lập với ngôn ngữ trình duyệt của bạn, có hỗ trợ đồng bộ
-  giữa các thiết bị nếu bạn đã bật đồng bộ hóa của trình duyệt.
+1. Parry đọc chính trang đó, trên thiết bị của bạn — nội dung, bố cục,
+   biểu mẫu đăng nhập và biểu tượng — ngay khi bạn mở nó, hoặc tin nhắn
+   bạn dán vào popup để kiểm tra tin nhắn lừa đảo.
+2. Một mô hình trên thiết bị và một bộ quy tắc chấm điểm những gì tìm
+   thấy. Một tín hiệu yếu đơn lẻ không bao giờ tạo ra hơn một ghi chú
+   *đáng ngờ* lặng lẽ; kết luận *nguy hiểm* cần các tín hiệu độc lập
+   đồng thuận, nên các trang hợp lệ hiếm khi bị gắn cờ nhầm.
+3. Bạn nhận được lý do bằng ngôn ngữ đơn giản, không chỉ một biểu ngữ
+   đỏ, cùng giải pháp một cú nhấp: *Rời khỏi trang này* với cảnh báo
+   nguy hiểm, *Đưa tôi đến trang thật* với trang giả mạo thương hiệu —
+   hoặc, nếu Parry sai, hãy tạm dừng cảnh báo trên trang đó trong một
+   giờ, một ngày hoặc mãi mãi.
 
-Không có quyền mới nào. Vẫn dùng `storage`, `declarativeNetRequest`,
-`alarms` và quyền truy cập http/https, giống hệt như ở bản 0.3.1.
+**Thống kê & khả năng giải thích**
+
+Mỗi cảnh báo mở ra bảng *Vì sao có kết luận này?* liệt kê chính xác các
+lý do đằng sau nó — biểu tượng thương hiệu trên sai tên miền, tên miền
+giống hệt, trường mật khẩu gửi đến máy chủ lạ — thay vì một điểm số
+không giải thích. Tab Thống kê trong Cài đặt hiển thị số trang đã kiểm
+tra, mối đe dọa đã chặn và các phát hiện về quyền riêng tư, cùng biểu đồ
+hoạt động hằng ngày mà bạn có thể chuyển đổi giữa 7 ngày qua, 30 ngày qua
+hoặc tổng số kể từ khi cài đặt. Mọi con số đều được tính toán và lưu trữ
+trên thiết bị của bạn; không con số nào từng được gửi đi bất kỳ đâu.
+
+**Quyền riêng tư: Parry làm gì và không làm gì**
+
+Parry yêu cầu quyền truy cập vào các trang bạn ghé thăm vì đó là cách để
+việc phân tích trên thiết bị thực sự đọc được chúng — nội dung, bố cục,
+biểu mẫu đăng nhập và biểu tượng — việc kiểm tra diễn ra cục bộ, trong
+trình duyệt của bạn, không phải trên một máy chủ nào đó. Điều duy nhất
+rời khỏi thiết bị của bạn theo mặc định là một lượt tải tệp đơn giản:
+danh sách mối đe dọa công khai gồm các tên miền lừa đảo đã biết, được
+lấy định kỳ từ nguồn mở của Parry để việc chặn vẫn hoạt động ngay sau khi
+cài đặt và cả khi ngoại tuyến. Không có gì về bạn hoặc hoạt động duyệt web
+cụ thể của bạn đi kèm với lượt tải đó. Báo cáo cộng đồng, tùy chọn và mặc
+định tắt, có thể gửi một tên máy chủ được ẩn danh và một tín hiệu rủi ro
+dạng số cho trang bị gắn cờ nguy hiểm — không bao giờ là URL, nội dung
+trang hay bất cứ điều gì bạn đã gõ — và chỉ khi chính bạn bật nó lên. Cài
+đặt → Giới thiệu hiển thị chính xác những gì đã rời khỏi thiết bị của
+bạn, để bạn có thể tự xác minh mức độ đo từ xa bằng không thay vì chỉ tin
+lời chúng tôi.
+
+**Câu hỏi thường gặp**
+
+**Parry khác gì so với Guardio, Malwarebytes hay Norton?**
+
+Các tiện ích đó kiểm tra các trang bạn truy cập bằng cách gửi thông tin
+đến máy chủ riêng của họ: Guardio và Bitdefender TrafficLight quét trang
+trên đám mây, Norton Safe Web chạy một "Dịch vụ đánh giá URL từ xa" và,
+theo tiết lộ của chính họ, thu thập thông tin cá nhân, vị trí và lịch sử
+web của bạn, còn Avast Online Security gửi các URL bạn truy cập cùng với
+ID thiết bị và thông tin thiết bị tới máy chủ của họ. Parry không có máy
+chủ. Mọi lượt kiểm tra — đọc trang, đối chiếu biểu tượng thương hiệu, quét
+một tin nhắn đã dán — đều chạy trên thiết bị của bạn, và không điều gì
+bạn duyệt, gõ hoặc kiểm tra được gửi đi bất kỳ đâu. Trang giới thiệu của
+chính Guardio cũng giới hạn gói miễn phí chỉ ở cảnh báo trang web; chặn
+thời gian thực, bảo vệ tải xuống và giám sát rò rỉ là tính năng trả phí
+(9,99–34,99 $/tháng). Toàn bộ bộ tính năng của Parry — chặn thời gian
+thực, phát hiện shop giả, bảo vệ khỏi kẻ rút cạn ví crypto, chặn lừa đảo
+hỗ trợ kỹ thuật, bảo vệ clipboard/ClickFix, bảng thống kê và lý do bằng
+ngôn ngữ đơn giản cho mỗi cảnh báo — đều miễn phí, không có gói cao cấp.
+
+**Parry có thực sự miễn phí không? Có cạm bẫy gì không?**
+
+Có, và không hề có cạm bẫy nào: không gói cao cấp, không dùng thử, không
+"nâng cấp để mở khóa bảo vệ thời gian thực". Parry không vận hành máy chủ
+để tính phí bạn, nên không có gì để bán thêm — toàn bộ sản phẩm chính là
+sản phẩm miễn phí. Đó là một cách tiếp cận khác với phần lớn trong ngành
+này: một số đối thủ tặng gói miễn phí giới hạn và tính phí hằng tháng cho
+bảo vệ thật sự (gói miễn phí của Guardio chỉ có cảnh báo; chặn đầy đủ tốn
+9,99–34,99 $/tháng), trong khi số khác là tiện ích miễn phí bán chéo sang
+một gói bảo mật trả phí. Parry duy trì hoạt động theo cách khác — bằng
+cách giữ nhỏ gọn, chạy trên thiết bị và đủ hữu ích để bạn giữ nó cài đặt,
+cộng thêm quyên góp tùy chọn. Nếu bạn muốn hỗ trợ phát triển, có một liên
+kết trong tiện ích, không bao giờ có bức tường thu phí.
+
+**Cũng có trong tiện ích**
+
+- Trình kiểm tra tin nhắn lừa đảo — dán bất kỳ văn bản SMS/WhatsApp/email
+  nào để nhận kết luận tức thì và hoàn toàn riêng tư.
+- Kiểm tra kết quả được tài trợ trên Google/Bing/DuckDuckGo — gắn cờ một
+  quảng cáo dẫn đến nơi khác so với trang được hiển thị.
+- Chế độ nghiêm ngặt — một công tắc chặn toàn màn hình ngay cả các trang
+  "đáng ngờ" bằng ngôn ngữ đơn giản hơn, dành cho thành viên gia đình ít
+  tự tin về công nghệ.
+- Chọn ngôn ngữ của bạn: đầy đủ 20 ngôn ngữ, chọn được từ popup hoặc Cài
+  đặt, không phụ thuộc vào ngôn ngữ trình duyệt của bạn.
+- Xuất/nhập cài đặt và đồng bộ tùy chọn giữa các thiết bị — tính năng
+  đồng bộ riêng của trình duyệt bạn, vẫn không có tài khoản hay máy chủ
+  Parry.
+- Chế độ tối, lịch sử bảo vệ và liên kết cứu hộ một cú nhấp, ẩn nội dung
+  giả mạo giải thưởng/quà tặng.
+
+Con số cụ thể, không phải tính từ: có sẵn bằng **20 ngôn ngữ** với bản
+dịch đầy đủ cho menu, cảnh báo và cài đặt (không chỉ là một danh sách cửa
+hàng được dịch); khoảng **630 bài kiểm thử tự động**; danh sách chặn gồm
+hàng nghìn tên miền lừa đảo, liên tục được cập nhật từ nguồn mở; và dung
+lượng cài đặt dưới 1 MB — khoảng 450 KB khi nén, không có runtime nặng.
+
+## What's new (0.8.0)
+
+- **ScamShield giờ đây là Parry.** Đã có hai sản phẩm rất nổi tiếng dùng
+  tên "ScamShield" — chính phủ Singapore vận hành ứng dụng chống lừa đảo
+  quốc gia riêng có tên ScamShield, và Scam Shield của T-Mobile là dịch
+  vụ chặn lừa đảo phổ biến của một nhà mạng Mỹ — nên tiện ích này đã đổi
+  tên để tránh nhầm lẫn với cả hai. Không có gì thay đổi về cách nó bảo vệ
+  bạn, những gì nó thu thập (không gì cả) hay cài đặt của bạn.
+- **Popup được thiết kế lại:** menu *Tạm dừng bảo vệ* có giới hạn thời
+  gian (1 giờ, 1 ngày hoặc Luôn luôn) thay thế cách diễn đạt tin cậy cũ,
+  bộ đếm nổi bật hiển thị nhanh số mối đe dọa đã chặn kể từ khi cài đặt
+  và trong tuần này, mỗi cảnh báo mở ra bảng *Vì sao có kết luận này?*
+  với lý do chính xác, và chân trang xoay vòng gọn gàng hơn luân phiên
+  giữa lời nhắc về quyền riêng tư, lời mời đánh giá xứng đáng và liên kết
+  hỗ trợ.
+- **Biểu tượng mới** — một ký hiệu gạt đỡ đơn giản phù hợp hơn với tên
+  mới.
+
+Không có quyền mới nào. Vẫn là `storage`, `declarativeNetRequest`,
+`alarms` và quyền truy cập http/https, chính xác như phiên bản 0.3.1.
