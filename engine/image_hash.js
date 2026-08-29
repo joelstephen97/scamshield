@@ -2,7 +2,7 @@
 (function (root, factory) {
   const mod = factory(root);
   if (typeof module !== 'undefined' && module.exports) module.exports = mod;
-  root.ScamShield = Object.assign(root.ScamShield || {}, mod);
+  root.Parry = Object.assign(root.Parry || {}, mod);
 })(typeof globalThis !== 'undefined' ? globalThis : self, function (root) {
   'use strict';
   // gray: 72 luma values, 9 columns × 8 rows, row-major. Bit = right > left.

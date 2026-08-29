@@ -88,7 +88,7 @@ test('options#stats renders the dashboard from a fresh install', async ({ contex
   await expect(page.locator('#st-threats-tile')).toHaveClass(/zero/);
   // The bundled ruleset is enforced before the first OTA, and the tile says so.
   await expect(page.locator('#st-rules')).not.toHaveText('0');
-  await expect(page.locator('#tab-stats .tile .note')).toContainText('built into ScamShield');
+  await expect(page.locator('#tab-stats .tile .note')).toContainText('built into Parry');
 
   // Chart: 7 zero-filled daily bars, an axis and the every-category list.
   await expect(page.locator('#st-charttitle')).toHaveText('Pages checked · last 7 days');

@@ -4,13 +4,13 @@
 **Homepage URL:** https://joelstephen97.github.io/scamshield/
 **Support URL:** https://github.com/joelstephen97/scamshield/issues
 
-**Name:** ScamShield — Scam & Phishing Protection
+**Name:** Parry — Scam & Phishing Protection
 **Summary (132 chars max):** On-device scam & phishing protection: warns you, spots brand look-alikes, checks messages. Nothing leaves your device.
 **Category:** Productivity (or Privacy & Security)
 **Language:** English
 
 **Description:**
-ScamShield warns you before a scam or phishing page tricks you — entirely on
+Parry warns you before a scam or phishing page tricks you — entirely on
 your device. It reads more than the address bar: it looks at the page's
 wording, layout and login form, and it recognises when a page is wearing a
 brand's icon or logo on the wrong domain, so it catches convincing look-alikes
@@ -18,7 +18,7 @@ that a URL-only checker would miss. Got a suspicious WhatsApp, SMS or email?
 Paste it into the popup for an instant, private verdict.
 
 One click gets you back to safety: *Leave this page* on a dangerous warning,
-or *Take me to the real site* on a brand-impersonation page. If ScamShield
+or *Take me to the real site* on a brand-impersonation page. If Parry
 gets it wrong, *Trust this site* for an hour, until tomorrow, or always — and
 *Report a mistake* in one tap.
 

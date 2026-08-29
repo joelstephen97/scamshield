@@ -3,7 +3,7 @@
   if (root.__scamshieldIsolatedGuard) return; // avoid duplicate listeners on re-injection
   root.__scamshieldIsolatedGuard = true;
   const api = root.browser || root.chrome;
-  const SS = root.ScamShield;
+  const SS = root.Parry;
   // Localised string with English fallback, same pattern as content/actions.js
   // (no shared module between the two content scripts, so this stays a tiny
   // local copy rather than a new file). The user's language override is read
@@ -98,7 +98,7 @@
       const text = (document.body ? document.body.innerText : '').slice(0, 20000);
       const cf = SS.scoreClickFix({ text, clipboardLevel: 'dangerous' });
       if (cf.level === 'dangerous') {
-        try { await navigator.clipboard.writeText(t('guardClipboardBlockedPayload', null, 'Blocked by ScamShield — this site put a dangerous command on your clipboard. Do not paste it anywhere.')); } catch (_) { /* overwrite is best-effort */ }
+        try { await navigator.clipboard.writeText(t('guardClipboardBlockedPayload', null, 'Blocked by Parry — this site put a dangerous command on your clipboard. Do not paste it anywhere.')); } catch (_) { /* overwrite is best-effort */ }
         SS.actions.dangerInterstitial(
           { level: 'dangerous', reasons: cf.reasons, flags: cf.flags },
           { onLeave: () => send('leaveTab'), onReport: () => send('userReport', { label: 'false_positive' }) }
@@ -377,7 +377,7 @@
       const chip = document.createElement('span');
       chip.className = 'scamshield-serp';
       setDir(chip);
-      chip.textContent = t('serpAdMismatch', [bidi(destReg), bidi(shownReg)], '⚠ ScamShield: this ad goes to ' + destReg + ', not ' + shownReg);
+      chip.textContent = t('serpAdMismatch', [bidi(destReg), bidi(shownReg)], '⚠ Parry: this ad goes to ' + destReg + ', not ' + shownReg);
       (a.closest('div,li,article') || a).appendChild(chip);
       flagged++;
     }
@@ -500,7 +500,7 @@
           SS.actions.clearAll();
         }, handlers);
       }
-      // One-time-ever support ask, only after ScamShield visibly earned it.
+      // One-time-ever support ask, only after Parry visibly earned it.
       if (verdict.level === 'dangerous' && !settings.supportAskShown && SS.actions.supportToast) {
         send('setSettings', { patch: { supportAskShown: true } });
         setTimeout(() => SS.actions.supportToast(), 1500);

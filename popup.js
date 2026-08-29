@@ -1,7 +1,7 @@
 'use strict';
 const api = globalThis.browser || globalThis.chrome;
 const $ = (id) => document.getElementById(id);
-const SS = globalThis.ScamShield, F = globalThis.SSFormat, I = globalThis.SSIcons, R = globalThis.SSReasons, REVIEW = globalThis.SSReview;
+const SS = globalThis.Parry, F = globalThis.SSFormat, I = globalThis.SSIcons, R = globalThis.SSReasons, REVIEW = globalThis.SSReview;
 // The locale the Intl formatters use. `let`, not `const`: a language override
 // has to move the timestamps too, or the popup reads German with English
 // relative times. Reassigned once, at the top of init().
@@ -125,7 +125,7 @@ function renderReviewAsk(lvl) {
   if (!REVIEW) return;
   if (!REVIEW.shouldShowCard(reviewEligible, lvl)) { $('askcard').hidden = true; return; }
   $('askbody').textContent = T('reviewAskBody', [bidi(String(reviewCount))],
-    `ScamShield has now stopped ${reviewCount} scams for you. If it's earned it, a short review helps other people find it — it's free and always will be.`);
+    `Parry has now stopped ${reviewCount} scams for you. If it's earned it, a short review helps other people find it — it's free and always will be.`);
   $('askcard').hidden = false;
   bindReviewButtonsOnce();
 }
@@ -335,4 +335,4 @@ function wireMessageChecker() {
   });
 }
 wireMessageChecker();
-init().catch((err) => { renderStatus('unknown', '', T('toastExtensionError', null, 'Extension error — try reopening.')); console.error('[ScamShield] popup init failed:', err); });
+init().catch((err) => { renderStatus('unknown', '', T('toastExtensionError', null, 'Extension error — try reopening.')); console.error('[Parry] popup init failed:', err); });

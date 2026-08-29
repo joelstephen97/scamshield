@@ -1,4 +1,4 @@
-/** Build ScamShield zips for Chrome Web Store and Firefox AMO. */
+/** Build Parry zips for Chrome Web Store and Firefox AMO. */
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');

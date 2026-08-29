@@ -1,10 +1,10 @@
-# Contributing to ScamShield
+# Contributing to Parry
 
 Thanks for helping make scam protection better for everyone. This page covers the things that are easy to get wrong; the [README](README.md) covers the architecture.
 
 ## The fastest ways to help
 
-1. **Report a false positive or a missed scam.** In the extension, press **Report a mistake** (popup → status card). If community reporting is off (the default) it opens a pre-filled GitHub issue in a new tab — add a screenshot if you can. Or [open an issue](https://github.com/joelstephen97/scamshield/issues/new) by hand with: the hostname (not the full URL if it contains anything personal), what ScamShield said, what it should have said, extension version and browser.
+1. **Report a false positive or a missed scam.** In the extension, press **Report a mistake** (popup → status card). If community reporting is off (the default) it opens a pre-filled GitHub issue in a new tab — add a screenshot if you can. Or [open an issue](https://github.com/joelstephen97/scamshield/issues/new) by hand with: the hostname (not the full URL if it contains anything personal), what Parry said, what it should have said, extension version and browser.
 2. **Add a brand or a safe domain** (see below) — regional banks, telcos and government portals are the most valuable additions.
 3. **Improve detection** with a unit-tested rule or a model retrain.
 

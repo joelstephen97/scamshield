@@ -11,7 +11,7 @@
 
 ## Name
 
-ScamShield — Scam & Phishing Protection
+Parry — Scam & Phishing Protection
 
 ## Short description
 
@@ -19,7 +19,7 @@ On-device scam & phishing protection: warns you, spots brand look-alikes, checks
 
 ## Full description
 
-ScamShield warns you before a scam or phishing page tricks you — entirely on
+Parry warns you before a scam or phishing page tricks you — entirely on
 your device. It reads more than the address bar: it looks at the page's
 wording, layout and login form, and it recognises when a page is wearing a
 brand's icon or logo on the wrong domain, so it catches convincing look-alikes
@@ -27,7 +27,7 @@ that a URL-only checker would miss. Got a suspicious WhatsApp, SMS or email?
 Paste it into the popup for an instant, private verdict.
 
 One click gets you back to safety: *Leave this page* on a dangerous warning,
-or *Take me to the real site* on a brand-impersonation page. If ScamShield
+or *Take me to the real site* on a brand-impersonation page. If Parry
 gets it wrong, *Trust this site* for an hour, until tomorrow, or always — and
 *Report a mistake* in one tap.
 
@@ -79,7 +79,7 @@ Features:
 • Clipboard-hijack guard: warns when a site copies a command to your clipboard
 • Hides fake prize/giveaway scam content
 • Settings export/import and optional cross-device sync (your browser's own
-  sync — still no ScamShield account or server)
+  sync — still no Parry account or server)
 • Choose your language: all 20 languages, picked from the popup or Settings,
   independent of your browser's language
 • Protection history and stats, stored only on your device; dark mode
@@ -97,9 +97,9 @@ Features:
   30 days, or your totals since install — all counted and stored on your
   device, never sent anywhere.
 - A quiet, dismissible review prompt appears in the popup only after
-  ScamShield has actually blocked something twice — decline it once and it's
+  Parry has actually blocked something twice — decline it once and it's
   gone for good.
-- New language override in Settings: pick ScamShield's own language
+- New language override in Settings: pick Parry's own language
   independently of your browser's, with sync-across-devices support if
   you've turned on your browser's own sync.
 

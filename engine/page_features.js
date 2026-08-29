@@ -2,9 +2,9 @@
 // training crawler (linkedom). DOM-API subset ONLY: querySelectorAll,
 // getAttribute, textContent, document.title — no innerText/getComputedStyle/layout.
 (function (root, factory) {
-  const mod = factory(typeof require === 'function' ? require('./constants') : root.ScamShield);
+  const mod = factory(typeof require === 'function' ? require('./constants') : root.Parry);
   if (typeof module !== 'undefined' && module.exports) module.exports = mod;
-  root.ScamShield = Object.assign(root.ScamShield || {}, mod);
+  root.Parry = Object.assign(root.Parry || {}, mod);
 })(typeof globalThis !== 'undefined' ? globalThis : self, function (C) {
   'use strict';
   const PAGE_BUCKETS = 32768;

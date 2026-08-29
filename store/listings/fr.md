@@ -2,7 +2,7 @@
 
 ## Name
 
-ScamShield — Protection contre les arnaques et le phishing
+Parry — Protection contre les arnaques et le phishing
 
 ## Short description
 
@@ -10,7 +10,7 @@ Protection anti-arnaque et anti-phishing sur l’appareil : alerte, détecte les
 
 ## Full description
 
-ScamShield vous alerte avant qu'une page d'arnaque ou de phishing ne vous
+Parry vous alerte avant qu'une page d'arnaque ou de phishing ne vous
 piège — entièrement sur votre appareil. Il analyse plus que la barre
 d'adresse : il examine le texte, la mise en page et le formulaire de
 connexion de la page, et reconnaît quand une page arbore l'icône ou le logo
@@ -21,7 +21,7 @@ pour un verdict instantané et privé.
 
 Un clic suffit pour revenir en sécurité : *Quitter cette page* sur une alerte
 dangereuse, ou *Aller sur le vrai site* sur une page d'usurpation de marque.
-Si ScamShield se trompe, faites-lui *confiance* pour une heure, jusqu'à
+Si Parry se trompe, faites-lui *confiance* pour une heure, jusqu'à
 demain ou pour toujours — et *signalez une erreur* en un geste.
 
 Privé par conception : rien de ce que vous parcourez, saisissez ou vérifiez
@@ -87,7 +87,7 @@ Fonctionnalités :
 • Masque le faux contenu de prix/cadeaux frauduleux
 • Export/import des paramètres et synchronisation optionnelle entre
   appareils (via la synchronisation propre à votre navigateur — toujours
-  sans compte ni serveur ScamShield)
+  sans compte ni serveur Parry)
 • Choisissez votre langue : les 20 langues sont accessibles depuis la fenêtre
   pop-up ou les paramètres, indépendamment de la langue de votre navigateur
 • Historique et statistiques de protection, stockés uniquement sur votre
@@ -108,10 +108,10 @@ Fonctionnalités :
   jours ou vos totaux depuis l'installation — le tout comptabilisé et stocké
   sur votre appareil, jamais envoyé où que ce soit.
 - Une invite d'évaluation discrète et ignorable apparaît dans le popup
-  seulement après que ScamShield a réellement bloqué quelque chose à deux
+  seulement après que Parry a réellement bloqué quelque chose à deux
   reprises — refusez-la une fois et elle disparaît pour de bon.
 - Nouvelle option de langue dans les paramètres : choisissez la langue
-  propre à ScamShield indépendamment de celle de votre navigateur, avec
+  propre à Parry indépendamment de celle de votre navigateur, avec
   prise en charge de la synchronisation entre appareils si vous avez activé
   la synchronisation de votre navigateur.
 

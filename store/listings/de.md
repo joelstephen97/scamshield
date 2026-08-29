@@ -2,7 +2,7 @@
 
 ## Name
 
-ScamShield — Schutz vor Betrug und Phishing
+Parry — Schutz vor Betrug und Phishing
 
 ## Short description
 
@@ -10,7 +10,7 @@ Schutz vor Betrug & Phishing auf dem Gerät: warnt dich, erkennt Marken-Fälschu
 
 ## Full description
 
-ScamShield warnt dich, bevor dich eine Betrugs- oder Phishing-Seite hereinlegt
+Parry warnt dich, bevor dich eine Betrugs- oder Phishing-Seite hereinlegt
 – vollständig auf deinem Gerät. Es prüft mehr als nur die Adressleiste: Es
 schaut sich Wortlaut, Layout und Login-Formular der Seite an und erkennt,
 wenn eine Seite das Icon oder Logo einer Marke auf der falschen Domain trägt
@@ -20,7 +20,7 @@ sie ins Popup ein für ein sofortiges, privates Urteil.
 
 Ein Klick bringt dich zurück in Sicherheit: *Diese Seite verlassen* bei einer
 gefährlichen Warnung, oder *Zur echten Seite bringen* bei einer
-Marken-Fälschungsseite. Wenn ScamShield sich irrt, kannst du *dieser Seite
+Marken-Fälschungsseite. Wenn Parry sich irrt, kannst du *dieser Seite
 vertrauen* – für eine Stunde, bis morgen oder für immer – und mit einem Tipp
 *einen Fehler melden*.
 
@@ -84,7 +84,7 @@ Funktionen:
 • Blendet gefälschte Preis-/Gewinnspiel-Betrugsinhalte aus
 • Export/Import von Einstellungen und optionale geräteübergreifende
   Synchronisierung (die eigene Synchronisierung deines Browsers – weiterhin
-  kein ScamShield-Konto oder -Server)
+  kein Parry-Konto oder -Server)
 • Wähle deine Sprache: alle 20 Sprachen, direkt im Popup oder in den
   Einstellungen auswählbar – unabhängig von der Sprache deines Browsers
 • Schutzverlauf und Statistiken, nur auf deinem Gerät gespeichert; Dunkelmodus
@@ -104,10 +104,10 @@ Funktionen:
   deine Gesamtwerte seit der Installation an – alles wird auf deinem Gerät
   gezählt und gespeichert, niemals irgendwohin gesendet.
 - Eine dezente, ausblendbare Bewertungsanfrage erscheint im Popup erst,
-  nachdem ScamShield tatsächlich zweimal etwas blockiert hat – lehne sie
+  nachdem Parry tatsächlich zweimal etwas blockiert hat – lehne sie
   einmal ab, und sie ist für immer verschwunden.
 - Neue Sprachüberschreibung in den Einstellungen: Wähle die Sprache von
-  ScamShield unabhängig von der deines Browsers, mit Unterstützung für die
+  Parry unabhängig von der deines Browsers, mit Unterstützung für die
   geräteübergreifende Synchronisierung, wenn du die Synchronisierung deines
   Browsers aktiviert hast.
 

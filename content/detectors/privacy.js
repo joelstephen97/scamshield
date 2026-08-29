@@ -13,7 +13,7 @@
   if (window.__scamshieldPrivacyHook) return;
   window.__scamshieldPrivacyHook = true;
 
-  const P = (window.ScamShield && window.ScamShield.privacy) || null;
+  const P = (window.Parry && window.Parry.privacy) || null;
   if (!P) return; // engine not present in MAIN world — nothing to do
 
   // ---------- shared: attribute the currently-running script origin ----------

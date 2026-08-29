@@ -24,7 +24,7 @@ test('options: picking Deutsch reloads the page in German, and the popup follows
   // The change handler saves and reloads; the reloaded page renders in German.
   await expect(page.locator('nav a[data-tab="protection"]')).toHaveText('Schutz');
   await expect(page.locator('#lang')).toHaveValue('de');
-  await expect(page).toHaveTitle('ScamShield-Einstellungen');
+  await expect(page).toHaveTitle('Parry-Einstellungen');
   await expect(page.locator('html')).toHaveAttribute('dir', 'ltr');
   // Strings this page builds in JavaScript, not from a data-i18n attribute,
   // are German too: the trusted-sites empty state and the network receipt are
@@ -89,7 +89,7 @@ test('options: an RTL language flips the page direction', async ({ context, exte
 
   await page.selectOption('#lang', 'ar');
   await expect(page.locator('html')).toHaveAttribute('dir', 'rtl');
-  await expect(page).toHaveTitle('إعدادات ScamShield');
+  await expect(page).toHaveTitle('إعدادات Parry');
   await expect(page.locator('#lang')).toHaveValue('ar');
 
   // The popup flips with it.

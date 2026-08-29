@@ -200,7 +200,7 @@
     const toast = el('div', NS + '-toast warn');
     toast.setAttribute('role', 'status');
     setDir(toast);
-    const a = el('a', null, t('toastSupportAsk', null, 'ScamShield just protected you — it’s free and runs on your device. Chip in? ❤'));
+    const a = el('a', null, t('toastSupportAsk', null, 'Parry just protected you — it’s free and runs on your device. Chip in? ❤'));
     a.href = 'https://github.com/sponsors/joelstephen97';
     a.target = '_blank'; a.rel = 'noopener';
     const x = el('button', null, t('dismiss', null, 'Dismiss')); x.addEventListener('click', () => toast.remove());
@@ -263,7 +263,7 @@
     blocks.forEach((node) => {
       if (node.classList.contains(NS + '-hidden-block')) return;
       node.classList.add(NS + '-hidden-block');
-      const tag = el('div', NS + '-hidden-tag', t('guardHiddenTag', null, 'Hidden by ScamShield'));
+      const tag = el('div', NS + '-hidden-tag', t('guardHiddenTag', null, 'Hidden by Parry'));
       setDir(tag);
       node.appendChild(tag);
     });
@@ -280,7 +280,7 @@
       toast.setAttribute('role', 'alert');
       setDir(toast);
       toast.append(iconSpan('suspicious'), el('span', 'ss-msg',
-        t('guardWalletCollision', null, 'ScamShield blocked a wallet request while another warning was open. Close it and retry.')));
+        t('guardWalletCollision', null, 'Parry blocked a wallet request while another warning was open. Close it and retry.')));
       (document.body || document.documentElement).appendChild(toast);
       setTimeout(() => toast.remove(), 12000);
       onDecision(false, { collision: true });
@@ -353,6 +353,6 @@
     document.addEventListener('keydown', onKey, true); leave.focus();
   }
 
-  root.ScamShield = root.ScamShield || {};
-  root.ScamShield.actions = { showBanner, guardForms, hideScamBlocks, clearAll, walletConfirmOverlay, clipboardToast, techScamEscapeOverlay, supportToast, dangerInterstitial, armDelayed, privacyToast };
+  root.Parry = root.Parry || {};
+  root.Parry.actions = { showBanner, guardForms, hideScamBlocks, clearAll, walletConfirmOverlay, clipboardToast, techScamEscapeOverlay, supportToast, dangerInterstitial, armDelayed, privacyToast };
 })(typeof globalThis !== 'undefined' ? globalThis : self);

@@ -2,7 +2,7 @@
 
 ## Name
 
-ScamShield — Bảo vệ khỏi lừa đảo & phishing
+Parry — Bảo vệ khỏi lừa đảo & phishing
 
 ## Short description
 
@@ -10,7 +10,7 @@ Chống lừa đảo & phishing ngay trên thiết bị: cảnh báo, phát hi�
 
 ## Full description
 
-ScamShield cảnh báo bạn trước khi một trang lừa đảo hay phishing kịp gài
+Parry cảnh báo bạn trước khi một trang lừa đảo hay phishing kịp gài
 bẫy — hoàn toàn trên thiết bị của bạn. Nó đọc nhiều hơn thanh địa chỉ: nó
 xem câu chữ, bố cục và biểu mẫu đăng nhập của trang, và nhận ra khi một
 trang đang khoác biểu tượng hay logo của một thương hiệu trên tên miền sai.
@@ -20,7 +20,7 @@ ngay một kết luận riêng tư.
 
 Một cú bấm đưa bạn về nơi an toàn: *Rời khỏi trang này* trên cảnh báo nguy
 hiểm, hoặc *Đưa tôi đến trang thật* trên trang mạo danh thương hiệu. Nếu
-ScamShield nhầm, hãy *Tin cậy trang này* trong một giờ, đến ngày mai, hoặc
+Parry nhầm, hãy *Tin cậy trang này* trong một giờ, đến ngày mai, hoặc
 luôn luôn — và *Báo lỗi* chỉ với một chạm.
 
 Riêng tư từ thiết kế: những gì bạn duyệt, nhập hay kiểm tra không bao giờ
@@ -75,7 +75,7 @@ Tính năng:
 • Ẩn nội dung lừa đảo kiểu trúng thưởng/tặng quà
 • Xuất/nhập cài đặt và đồng bộ tùy chọn giữa các thiết bị (dùng chính tính
   năng đồng bộ của trình duyệt — vẫn không có tài khoản hay máy chủ
-  ScamShield)
+  Parry)
 • Chọn ngôn ngữ của bạn: đủ 20 ngôn ngữ, chọn ngay trong popup hoặc Cài đặt,
   không phụ thuộc vào ngôn ngữ trình duyệt
 • Lịch sử bảo vệ và thống kê, chỉ lưu trên thiết bị của bạn; chế độ tối
@@ -94,10 +94,10 @@ Tính năng:
   ngày — xem 7 ngày qua, 30 ngày qua, hoặc tổng số từ khi cài đặt — tất cả
   được đếm và lưu trên thiết bị của bạn, không bao giờ gửi đi đâu cả.
 - Một lời nhắc đánh giá nhẹ nhàng, có thể bỏ qua, xuất hiện trong popup chỉ
-  sau khi ScamShield thực sự đã chặn được điều gì đó hai lần — từ chối một
+  sau khi Parry thực sự đã chặn được điều gì đó hai lần — từ chối một
   lần là nó biến mất vĩnh viễn.
 - Tùy chọn ghi đè ngôn ngữ mới trong Cài đặt: chọn ngôn ngữ riêng của
-  ScamShield độc lập với ngôn ngữ trình duyệt của bạn, có hỗ trợ đồng bộ
+  Parry độc lập với ngôn ngữ trình duyệt của bạn, có hỗ trợ đồng bộ
   giữa các thiết bị nếu bạn đã bật đồng bộ hóa của trình duyệt.
 
 Không có quyền mới nào. Vẫn dùng `storage`, `declarativeNetRequest`,

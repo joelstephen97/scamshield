@@ -206,7 +206,7 @@ test('phishy wording with no URL/rule hits → suspicious (yellow), never red', 
 test('brand icon + password form on a non-brand host → danger banner with rescue link', async ({ context, extensionId }) => {
   // Inject a test brand table whose only hash is our fixture icon's hash.
   const sw = context.serviceWorkers()[0];
-  await sw.evaluate((h) => { globalThis.ScamShield.BRAND_ICONS = { version: 1, brands: [{ key: 'paypal', hashes: [h] }] }; globalThis.__iconCache && globalThis.__iconCache.clear(); }, process.env.SS_TEST_ICON_HASH || '1818181818181818');
+  await sw.evaluate((h) => { globalThis.Parry.BRAND_ICONS = { version: 1, brands: [{ key: 'paypal', hashes: [h] }] }; globalThis.__iconCache && globalThis.__iconCache.clear(); }, process.env.SS_TEST_ICON_HASH || '1818181818181818');
   const page = await context.newPage();
   await page.goto(BASE + '/visual-brand.html');
   await expect(page.locator('.scamshield-banner.danger')).toBeVisible({ timeout: 8000 });
@@ -228,7 +228,7 @@ test('brand icon + password form on a non-brand host → danger banner with resc
 // the URL model so this test isolates the icon-corroboration path cleanly.
 test('on-brand icon match does not corroborate the content model to dangerous', async ({ context }) => {
   const sw = context.serviceWorkers()[0];
-  await sw.evaluate((h) => { globalThis.ScamShield.BRAND_ICONS = { version: 1, brands: [{ key: 'aramex', hashes: [h] }] }; globalThis.__iconCache && globalThis.__iconCache.clear(); }, process.env.SS_TEST_ICON_HASH || '1818181818181818');
+  await sw.evaluate((h) => { globalThis.Parry.BRAND_ICONS = { version: 1, brands: [{ key: 'aramex', hashes: [h] }] }; globalThis.__iconCache && globalThis.__iconCache.clear(); }, process.env.SS_TEST_ICON_HASH || '1818181818181818');
   const page = await context.newPage();
   // Attach CDP before navigating so we capture the extension's isolated-world
   // execution context (window.__ssLastVerdict lives there, not in the page's

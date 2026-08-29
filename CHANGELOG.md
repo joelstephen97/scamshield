@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to ScamShield. Versions are git tags (`vX.Y.Z`); the version on the [Chrome Web Store](https://chromewebstore.google.com/detail/fojjjofjimbfoddafoampojopijnlihl) may lag a tag by a few days while Google reviews it. Privacy-relevant changes are also reflected in the [privacy policy](https://joelstephen97.github.io/scamshield/privacy.html).
+All notable changes to Parry. Versions are git tags (`vX.Y.Z`); the version on the [Chrome Web Store](https://chromewebstore.google.com/detail/fojjjofjimbfoddafoampojopijnlihl) may lag a tag by a few days while Google reviews it. Privacy-relevant changes are also reflected in the [privacy policy](https://joelstephen97.github.io/scamshield/privacy.html).
 
 ## 0.7.1 — 2026-08-28
 
@@ -22,13 +22,13 @@ requests — it reuses the language override shipped in 0.7.0.
   on-device), plus privacy findings and a daily activity chart, toggleable
   between the last 7 days, 30 days, and a since-install lifetime view. Every
   count is computed and stored on-device; nothing here is ever transmitted.
-- **Earned review ask** — after ScamShield has actually blocked something
+- **Earned review ask** — after Parry has actually blocked something
   twice and been installed at least 7 days, the popup shows a quiet,
   in-popup-only ask for a review — never a page warning, and never while a
   page warning is on screen. *Maybe later* snoozes it for 90 days and asks at
   most twice; *No thanks* is permanent. Chrome only (there's no Firefox
   listing to review yet).
-- **Language override** — a Settings dropdown lets you pick ScamShield's
+- **Language override** — a Settings dropdown lets you pick Parry's
   language independently of your browser's, defaulting to "Browser default."
   The choice is stored in one setting (`uiLang`) and syncs across your
   devices only if you've already turned on your own browser's sync — it has
@@ -57,7 +57,7 @@ still leaves your device by default.
 ### New protection
 - **ClickFix / fake-CAPTCHA blocker** — the fastest-growing malware delivery
   trick of 2025 (fake "verify you're human" pages that get you to paste a
-  command into Windows Run). ScamShield now overwrites the malicious clipboard
+  command into Windows Run). Parry now overwrites the malicious clipboard
   payload and blocks the page full-screen.
 - **Fake browser-update blocker** — a browser "update" prompt rendered *by a
   web page* is always fake. Blocked full-screen when the download doesn't go to
@@ -110,9 +110,9 @@ still leaves your device by default.
   formatting via `Intl`. Non-English translations are AI-generated and
   pending native-speaker review (`ur`, `mr`, `te` highest priority).
 - **Settings export/import** and optional **cross-device sync** (your browser's
-  own sync; still no ScamShield account or server).
+  own sync; still no Parry account or server).
 - A **"what leaves your device" receipt** in Settings listing the only three
-  requests ScamShield can make, so you can verify zero-telemetry yourself.
+  requests Parry can make, so you can verify zero-telemetry yourself.
 
 ### Platform
 - Now scans inside **iframes** (`all_frames`) — iframe-hosted phishing forms
@@ -156,7 +156,7 @@ http/https access, exactly as 0.3.1.
 - **Smaller and faster** — about 0.6 MB unpacked / ~170 KB zipped, down from
   14 MB: the ONNX runtime is gone. Both models now run as plain JS, with no
   WebAssembly and no web-accessible resources.
-- **Optional community reporting, off by default** — "Help make ScamShield
+- **Optional community reporting, off by default** — "Help make Parry
   smarter" sends only the site's host name and anonymous risk signals, and
   only for pages flagged dangerous or that you report as a mistake. Never
   URLs, page text, or anything that identifies you. Not sold, and not used

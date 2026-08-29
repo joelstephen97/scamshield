@@ -3,15 +3,15 @@
 (function (root, factory) {
   const mod = factory(root);
   if (typeof module !== 'undefined' && module.exports) module.exports = mod;
-  root.ScamShield = Object.assign(root.ScamShield || {}, mod);
+  root.Parry = Object.assign(root.Parry || {}, mod);
 })(typeof globalThis !== 'undefined' ? globalThis : self, function (root) {
   'use strict';
 
-  let MODEL = null; // set by setUrlModel() or picked up from ScamShield.URL_MODEL (bundle)
+  let MODEL = null; // set by setUrlModel() or picked up from Parry.URL_MODEL (bundle)
 
   function currentModel() {
     if (MODEL) return MODEL;
-    const ss = root.ScamShield;
+    const ss = root.Parry;
     if (ss && ss.URL_MODEL && Array.isArray(ss.URL_MODEL.trees)) MODEL = ss.URL_MODEL;
     return MODEL;
   }

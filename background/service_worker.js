@@ -7,7 +7,7 @@
 try { importScripts('../engine/constants.js', '../engine/trust.js', '../engine/features.js', '../engine/image_hash.js', '../engine/brand_icons.js', '../engine/report_payload.js', '../engine/engagement.js', './stats.js'); } catch (_) { /* deps already loaded by sw.js (Chrome) or the manifest (Firefox) */ }
 const api = globalThis.browser || globalThis.chrome;
 
-// Official ScamShield feed: rebuilt daily by GitHub Actions from OpenPhish +
+// Official Parry feed: rebuilt daily by GitHub Actions from OpenPhish +
 // URLhaus with a Tranco top-10k false-positive guard. Download-only static
 // JSON — no user or browsing data is ever sent. Users can point this at
 // their own feed or clear it in settings to disable updates.
@@ -90,7 +90,7 @@ function recordEngagement(tabUrl) {
     try {
       const u = new URL(tabUrl);
       if (!/^https?:$/.test(u.protocol)) return;
-      const SS = globalThis.ScamShield;
+      const SS = globalThis.Parry;
       const reg = SS.registrableDomain(u.hostname);
       const cur = await api.storage.local.get('engagement');
       const next = SS.engagement.recordVisit(cur.engagement || {}, reg, Date.now());
@@ -367,7 +367,7 @@ async function hashIconUrl(url) {
     const len = Number(res.headers.get('content-length') || 0);
     if (res.ok && len <= ICON_MAX_BYTES && (/^image\//i.test(ct) || /\.ico(\?|$)/i.test(url)) && !/svg/i.test(ct)) {
       const blob = await res.blob();
-      if (blob.size <= ICON_MAX_BYTES) hash = await globalThis.ScamShield.hashImageBlob(blob);
+      if (blob.size <= ICON_MAX_BYTES) hash = await globalThis.Parry.hashImageBlob(blob);
     }
   } catch (_) { hash = null; } finally { clearTimeout(t); }
   iconCache.set(url, { hash, ts: Date.now() });
@@ -376,7 +376,7 @@ async function hashIconUrl(url) {
   return hash;
 }
 async function handleHashIcons(urls) {
-  const SS = globalThis.ScamShield;
+  const SS = globalThis.Parry;
   const table = (SS.BRAND_ICONS && SS.BRAND_ICONS.brands) || [];
   const maxDist = (SS.THRESHOLDS && SS.THRESHOLDS.iconHamming) || 6;
   const entryByHash = new Map();
@@ -417,7 +417,7 @@ async function getSettings() {
   await settingsInitPromise;
   const stored = await api.storage.local.get('settings');
   const merged = Object.assign({}, DEFAULTS, stored.settings || {});
-  merged.pausedSites = globalThis.ScamShield.prunePaused(merged.pausedSites, Date.now());
+  merged.pausedSites = globalThis.Parry.prunePaused(merged.pausedSites, Date.now());
   return merged;
 }
 // All setSettings() callers (onInstalled, runOtaUpdate, message handlers,
@@ -592,7 +592,7 @@ async function maybeAutoReport(tabUrl, verdict, report, detectors) {
   const s = await getSettings();
   if (!s.reportingOptIn || !verdict || verdict.level !== 'dangerous') return;
   let host; try { host = new URL(tabUrl).hostname; } catch (_) { return; }
-  const SS = globalThis.ScamShield;
+  const SS = globalThis.Parry;
   const reg = SS.registrableDomain(host);
   if (SS.isSafeHost(host) || (s.allowlist || []).includes(reg)) return;
   const cur = await api.storage.local.get('reportedHosts');
@@ -640,7 +640,7 @@ async function handleUserReport(msg, sender) {
     try { await api.tabs.create({ url: issueUrl }); } catch (_) {}
     return { ok: true, via: 'github', issueUrl };
   }
-  const SS = globalThis.ScamShield;
+  const SS = globalThis.Parry;
   const input = Object.assign({ url, verdict, detectors: ['page'], urlFeatures: SS.extractUrlFeatures(url) }, lastReportInput.get(tabId) || {});
   const payload = SS.buildReportPayload(Object.assign({ kind: 'user', label: msg.label === 'scam' ? 'scam' : 'false_positive', extVersion: manifestVersion(), now: Date.now() }, input));
   const queued = await queueReport(payload);
@@ -890,7 +890,7 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         sendResponse(await setReviewAsk(msg.action)); break;
       case 'getEngagement': {
         const cur = await api.storage.local.get('engagement');
-        const SS = globalThis.ScamShield;
+        const SS = globalThis.Parry;
         sendResponse({ engaged: SS.engagement.isEngaged(cur.engagement || {}, msg.domain, Date.now()) });
         break;
       }
@@ -956,7 +956,7 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       case 'userReport':
         sendResponse(await handleUserReport(msg, sender)); break;
       case 'pauseSite': {
-        const s = await getSettings(); const SS = globalThis.ScamShield;
+        const s = await getSettings(); const SS = globalThis.Parry;
         const until = SS.pauseUntil(msg.choice, Date.now());
         if (until === null) { if (!s.allowlist.includes(msg.domain)) s.allowlist.push(msg.domain); await setSettings({ allowlist: s.allowlist }); sendResponse({ ok: true, until: null }); break; }
         const ps = Object.assign({}, s.pausedSites, { [msg.domain]: until });
@@ -968,7 +968,7 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       }
       case 'getTabStats': {
         const cur = await api.storage.local.get('history'); const list = Array.isArray(cur.history) ? cur.history : [];
-        const SS = globalThis.ScamShield;
+        const SS = globalThis.Parry;
         sendResponse({ siteCount: list.filter((e) => SS.registrableDomain(e.host) === msg.domain).length }); break;
       }
       case 'leaveTab': {

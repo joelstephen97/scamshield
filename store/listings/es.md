@@ -2,7 +2,7 @@
 
 ## Name
 
-ScamShield — Protección contra estafas y phishing
+Parry — Protección contra estafas y phishing
 
 ## Short description
 
@@ -10,7 +10,7 @@ Protección contra estafas y phishing en el dispositivo: avisa, detecta marcas f
 
 ## Full description
 
-ScamShield te avisa antes de que una página de estafa o phishing te engañe,
+Parry te avisa antes de que una página de estafa o phishing te engañe,
 todo en tu propio dispositivo. Analiza mucho más que la barra de direcciones:
 observa el texto, el diseño y el formulario de inicio de sesión de la
 página, y reconoce cuando una página luce el icono o el logotipo de una marca
@@ -21,7 +21,7 @@ veredicto instantáneo y privado.
 
 Un clic te devuelve a un lugar seguro: *Salir de esta página* ante un aviso
 peligroso, o *Llévame al sitio real* ante una página que suplanta una marca.
-Si ScamShield se equivoca, puedes *confiar en el sitio* durante una hora,
+Si Parry se equivoca, puedes *confiar en el sitio* durante una hora,
 hasta mañana o siempre, e *informar de un error* con un solo toque.
 
 Privado por diseño: nada de lo que navegas, escribes o compruebas sale nunca
@@ -85,7 +85,7 @@ Funciones:
 • Oculta el falso contenido de premios/regalos de estafa
 • Exportación/importación de ajustes y sincronización opcional entre
   dispositivos (la propia sincronización de tu navegador, siguiendo sin
-  cuenta ni servidor de ScamShield)
+  cuenta ni servidor de Parry)
 • Elige tu idioma: los 20 idiomas están disponibles desde la ventana
   emergente o los ajustes, con independencia del idioma de tu navegador
 • Historial y estadísticas de protección, guardados solo en tu dispositivo;
@@ -106,10 +106,10 @@ Funciones:
   totales desde la instalación — todo contado y almacenado en tu
   dispositivo, nunca enviado a ningún sitio.
 - Un aviso de reseña discreto y descartable aparece en el popup solo
-  después de que ScamShield haya bloqueado algo realmente dos veces —
+  después de que Parry haya bloqueado algo realmente dos veces —
   recházalo una vez y desaparece para siempre.
 - Nueva anulación de idioma en los ajustes: elige el idioma propio de
-  ScamShield independientemente del de tu navegador, con compatibilidad de
+  Parry independientemente del de tu navegador, con compatibilidad de
   sincronización entre dispositivos si has activado la sincronización de tu
   navegador.
 

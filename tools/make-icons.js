@@ -1,4 +1,4 @@
-// tools/make-icons.js — generate ScamShield icon PNGs (no deps).
+// tools/make-icons.js — generate Parry icon PNGs (no deps).
 // Draws a green shield with a white check, 3x3 supersampled for smooth edges,
 // on a transparent background. Run: node tools/make-icons.js
 const fs = require('fs'), zlib = require('zlib'), path = require('path');

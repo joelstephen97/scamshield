@@ -1,9 +1,9 @@
 {
   "extName": {
-    "message": "ScamShield — Perlindungan Penipuan & Phishing"
+    "message": "Parry — Perlindungan Penipuan & Phishing"
   },
   "extShortName": {
-    "message": "ScamShield"
+    "message": "Parry"
   },
   "extDescription": {
     "message": "Perlindungan penipuan & phishing di perangkat Anda: memperingatkan Anda, mengenali tiruan merek, dan memeriksa pesan. Tidak ada yang keluar dari perangkat Anda."
@@ -401,7 +401,7 @@
     "message": "Untuk siapa pun yang menginginkan kehati-hatian maksimal: bahkan halaman \"mencurigakan\" diblokir dengan peringatan layar penuh dan kata-kata yang lebih sederhana. Paling baik untuk membantu anggota keluarga yang kurang paham teknologi tetap aman."
   },
   "optReporting": {
-    "message": "Bantu membuat ScamShield lebih pintar"
+    "message": "Bantu membuat Parry lebih pintar"
   },
   "optReportingHint": {
     "message": "Mengirim nama situs (bukan alamat lengkap atau teks halaman) dan sinyal risiko anonim dari halaman yang ditandai berbahaya, serta situs yang Anda laporkan. Nonaktif secara default."
@@ -410,7 +410,7 @@
     "message": "Tersimpan"
   },
   "trustedLead": {
-    "message": "ScamShield tetap diam di situs-situs ini. Hapus salah satu untuk melindunginya lagi."
+    "message": "Parry tetap diam di situs-situs ini. Hapus salah satu untuk melindunginya lagi."
   },
   "trustedAlways": {
     "message": "Selalu"
@@ -437,7 +437,7 @@
     "message": "Daftar ancaman"
   },
   "feedLead": {
-    "message": "Daftar situs penipuan yang dikenal, dibangun ulang setiap hari (OpenPhish + URLhaus, disaring ketat). ScamShield hanya mengunduhnya."
+    "message": "Daftar situs penipuan yang dikenal, dibangun ulang setiap hari (OpenPhish + URLhaus, disaring ketat). Parry hanya mengunduhnya."
   },
   "checkNow": {
     "message": "Periksa sekarang"
@@ -467,10 +467,10 @@
     "message": "Sinkronkan di semua perangkat saya"
   },
   "syncHint": {
-    "message": "Jaga pengaturan dan situs tepercaya Anda tetap sinkron di setiap browser tempat Anda masuk. Menggunakan sinkronisasi bawaan browser Anda — ScamShield tetap tidak memiliki akun atau server. Nonaktif secara default."
+    "message": "Jaga pengaturan dan situs tepercaya Anda tetap sinkron di setiap browser tempat Anda masuk. Menggunakan sinkronisasi bawaan browser Anda — Parry tetap tidak memiliki akun atau server. Nonaktif secara default."
   },
   "optDocTitle": {
-    "message": "Pengaturan ScamShield"
+    "message": "Pengaturan Parry"
   },
   "ariaSettingsSections": {
     "message": "Bagian pengaturan"
@@ -521,7 +521,7 @@
     "message": "Laporkan masalah"
   },
   "supportFreeOnDevice": {
-    "message": "ScamShield gratis dan berjalan sepenuhnya di perangkat Anda."
+    "message": "Parry gratis dan berjalan sepenuhnya di perangkat Anda."
   },
   "supportSponsorGithub": {
     "message": "Sponsori di GitHub"
@@ -530,7 +530,7 @@
     "message": "Donasi via PayPal"
   },
   "netNoTelemetry": {
-    "message": "ScamShield tidak pernah membuat permintaan analitik, telemetri, atau pelacakan. Satu-satunya permintaan yang bisa dibuatnya adalah tiga ini, dan Anda dapat memverifikasinya sendiri: buka DevTools browser Anda → tab Network, gunakan ScamShield seperti biasa, dan Anda tidak akan melihat apa pun selain ketiganya."
+    "message": "Parry tidak pernah membuat permintaan analitik, telemetri, atau pelacakan. Satu-satunya permintaan yang bisa dibuatnya adalah tiga ini, dan Anda dapat memverifikasinya sendiri: buka DevTools browser Anda → tab Network, gunakan Parry seperti biasa, dan Anda tidak akan melihat apa pun selain ketiganya."
   },
   "receiptFeedLabel": {
     "message": "Unduhan daftar ancaman"
@@ -740,7 +740,7 @@
     "message": "Halaman ini cocok dengan pola penipuan yang dikenal."
   },
   "toastSupportAsk": {
-    "message": "ScamShield baru saja melindungi Anda — gratis dan berjalan di perangkat Anda. Mau berkontribusi? ❤"
+    "message": "Parry baru saja melindungi Anda — gratis dan berjalan di perangkat Anda. Mau berkontribusi? ❤"
   },
   "guardFormDestKnown": {
     "message": "Formulir ini mengirim kata sandi Anda ke $DEST$, bukan ke $HOST$. Mengirim kata sandi ke situs web yang berbeda adalah cara penipu mencuri akun.",
@@ -759,10 +759,10 @@
     "message": "Formulir ini mengirim kata sandi Anda ke situs web yang berbeda dari yang sedang Anda kunjungi. Ini adalah cara umum penipu mencuri akun."
   },
   "guardHiddenTag": {
-    "message": "Disembunyikan oleh ScamShield"
+    "message": "Disembunyikan oleh Parry"
   },
   "guardWalletCollision": {
-    "message": "ScamShield memblokir permintaan dompet saat peringatan lain sedang terbuka. Tutup dan coba lagi."
+    "message": "Parry memblokir permintaan dompet saat peringatan lain sedang terbuka. Tutup dan coba lagi."
   },
   "guardWalletFallback": {
     "message": "Situs ini meminta tindakan dompet yang sensitif."
@@ -777,7 +777,7 @@
     "message": "Halaman ini menggunakan taktik menakut-nakuti."
   },
   "guardClipboardBlockedPayload": {
-    "message": "Diblokir oleh ScamShield — situs ini menaruh perintah berbahaya di clipboard Anda. Jangan menempelkannya di mana pun."
+    "message": "Diblokir oleh Parry — situs ini menaruh perintah berbahaya di clipboard Anda. Jangan menempelkannya di mana pun."
   },
   "guardLeakyFormPlain": {
     "message": "Situs ini mengirim email/nomor telepon Anda ke $HOST$ dalam teks biasa — sebelum Anda menekan kirim.",
@@ -805,7 +805,7 @@
     "message": "Situs ini mencoba mendapatkan izin notifikasi menggunakan trik \"klik Izinkan untuk melanjutkan\". Anda dapat dengan aman memilih Blokir."
   },
   "serpAdMismatch": {
-    "message": "⚠ ScamShield: iklan ini menuju ke $ACTUAL$, bukan $SHOWN$",
+    "message": "⚠ Parry: iklan ini menuju ke $ACTUAL$, bukan $SHOWN$",
     "placeholders": {
       "actual": {
         "content": "$1",
@@ -1046,10 +1046,10 @@
     "message": "Tidak ada alamat asli, telepon, atau detail perusahaan — normal untuk toko penipuan sekali pakai."
   },
   "obDocTitle": {
-    "message": "Selamat Datang di ScamShield"
+    "message": "Selamat Datang di Parry"
   },
   "obTitle": {
-    "message": "ScamShield sedang melindungi Anda"
+    "message": "Parry sedang melindungi Anda"
   },
   "obLead": {
     "message": "Ini memantau halaman yang Anda kunjungi dan memperingatkan Anda tentang penipuan — sepenuhnya di perangkat Anda. Aktivitas menjelajah Anda tidak pernah keluar dari komputer Anda."
@@ -1091,21 +1091,21 @@
     "message": "Menghentikan siklus pop-up yang menakutkan dan membantu Anda keluar."
   },
   "obPin": {
-    "message": "Sematkan ScamShield"
+    "message": "Sematkan Parry"
   },
   "obPinBody": {
-    "message": "Klik ikon puzzle di toolbar Anda, lalu klik pin di sebelah ScamShield, agar Anda bisa melihat status setiap halaman sekilas."
+    "message": "Klik ikon puzzle di toolbar Anda, lalu klik pin di sebelah Parry, agar Anda bisa melihat status setiap halaman sekilas."
   },
   "obOpenSettings": {
     "message": "Buka pengaturan"
   },
   "obNote": {
-    "message": "ScamShield gratis. Opsional: di Pengaturan Anda dapat membantu membuatnya lebih pintar dengan membagikan laporan anonim tentang penipuan yang terdeteksi — ini nonaktif kecuali Anda mengaktifkannya. Jika ini membantu Anda, Anda dapat mendukung pengembangannya dari halaman Pengaturan."
+    "message": "Parry gratis. Opsional: di Pengaturan Anda dapat membantu membuatnya lebih pintar dengan membagikan laporan anonim tentang penipuan yang terdeteksi — ini nonaktif kecuali Anda mengaktifkannya. Jika ini membantu Anda, Anda dapat mendukung pengembangannya dari halaman Pengaturan."
   },
   "statsLink": { "message": "Statistik →" },
   "tabStats": { "message": "Statistik" },
   "optLang": { "message": "Bahasa" },
-  "optLangHint": { "message": "Berlaku untuk peringatan, popup, dan pengaturan ScamShield. Disinkronkan dengan perangkat Anda yang lain jika sinkronisasi aktif." },
+  "optLangHint": { "message": "Berlaku untuk peringatan, popup, dan pengaturan Parry. Disinkronkan dengan perangkat Anda yang lain jika sinkronisasi aktif." },
   "optLangAuto": { "message": "Default browser" },
   "fmtStatsSince": { "message": "Melindungi browser ini sejak $DATE$", "placeholders": { "date": { "content": "$1", "example": "12 Jun 2026" } } },
   "stats7d": { "message": "7 hari" },
@@ -1118,7 +1118,7 @@
   "fmtStatsScamsBlocked": { "message": "$COUNT$ penipuan tidak pernah sampai ke Anda", "placeholders": { "count": { "content": "$1", "example": "8" } } },
   "statsPrivacyFindings": { "message": "Temuan privasi" },
   "statsRulesActive": { "message": "Aturan blocklist aktif" },
-  "statsRulesActiveHint": { "message": "Berlaku saat ini, termasuk daftar bawaan ScamShield." },
+  "statsRulesActiveHint": { "message": "Berlaku saat ini, termasuk daftar bawaan Parry." },
   "statsChartTitle7d": { "message": "Halaman diperiksa · 7 hari terakhir" },
   "statsChartTitle30d": { "message": "Halaman diperiksa · 30 hari terakhir" },
   "statsChartTitleAll": { "message": "Halaman diperiksa · sejak dipasang" },
@@ -1142,9 +1142,9 @@
   "statsPillBlocked": { "message": "Diblokir" },
   "statsPillWarned": { "message": "Diperingatkan" },
   "statsFooter": { "message": "Setiap angka dihitung di perangkat Anda. Tidak ada apa pun di halaman ini yang dikirim ke mana pun." },
-  "reviewAskBody": { "message": "ScamShield kini telah menghentikan $COUNT$ penipuan untuk Anda. Jika menurut Anda ini pantas, ulasan singkat membantu orang lain menemukannya — gratis dan akan selalu gratis.", "placeholders": { "count": { "content": "$1", "example": "2" } } },
-  "reviewRate": { "message": "Beri nilai ScamShield" },
+  "reviewAskBody": { "message": "Parry kini telah menghentikan $COUNT$ penipuan untuk Anda. Jika menurut Anda ini pantas, ulasan singkat membantu orang lain menemukannya — gratis dan akan selalu gratis.", "placeholders": { "count": { "content": "$1", "example": "2" } } },
+  "reviewRate": { "message": "Beri nilai Parry" },
   "reviewLater": { "message": "Mungkin nanti" },
   "reviewNo": { "message": "Tidak, terima kasih" },
-  "reviewAboutLink": { "message": "Menyukai ScamShield? Tinggalkan ulasan" }
+  "reviewAboutLink": { "message": "Menyukai Parry? Tinggalkan ulasan" }
 }

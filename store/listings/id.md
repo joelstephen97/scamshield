@@ -2,7 +2,7 @@
 
 ## Name
 
-ScamShield — Perlindungan Penipuan & Phishing
+Parry — Perlindungan Penipuan & Phishing
 
 ## Short description
 
@@ -10,7 +10,7 @@ Perlindungan di perangkat: memperingatkan Anda, mendeteksi tiruan merek, memerik
 
 ## Full description
 
-ScamShield memperingatkan Anda sebelum halaman penipuan atau phishing
+Parry memperingatkan Anda sebelum halaman penipuan atau phishing
 mengelabui Anda — sepenuhnya di perangkat Anda. Ia membaca lebih dari sekadar
 bilah alamat: memeriksa teks, tata letak, dan formulir login halaman, serta
 mengenali saat sebuah halaman menampilkan ikon atau logo merek di domain yang
@@ -21,7 +21,7 @@ pribadi.
 
 Satu klik membawa Anda kembali ke keamanan: *Tinggalkan halaman ini* pada
 peringatan berbahaya, atau *Bawa saya ke situs asli* pada halaman peniruan
-merek. Jika ScamShield salah menilai, gunakan *Percayai situs ini* selama satu
+merek. Jika Parry salah menilai, gunakan *Percayai situs ini* selama satu
 jam, sampai besok, atau selamanya — dan *Laporkan kesalahan* dengan satu
 ketukan.
 
@@ -82,7 +82,7 @@ Fitur:
 • Menyembunyikan konten penipuan hadiah/undian palsu
 • Ekspor/impor pengaturan dan sinkronisasi lintas perangkat opsional
   (sinkronisasi bawaan browser Anda sendiri — tetap tanpa akun atau server
-  ScamShield)
+  Parry)
 • Pilih bahasa Anda: seluruh 20 bahasa tersedia dari popup atau Pengaturan,
   terlepas dari bahasa browser Anda
 • Riwayat dan statistik perlindungan, disimpan hanya di perangkat Anda;
@@ -102,9 +102,9 @@ Fitur:
   terakhir, 30 hari terakhir, atau total Anda sejak dipasang — semuanya
   dihitung dan disimpan di perangkat Anda, tidak pernah dikirim ke mana pun.
 - Prompt ulasan yang tenang dan dapat ditutup muncul di popup hanya setelah
-  ScamShield benar-benar memblokir sesuatu dua kali — tolak sekali dan
+  Parry benar-benar memblokir sesuatu dua kali — tolak sekali dan
   prompt itu akan hilang untuk selamanya.
-- Penggantian bahasa baru di Pengaturan: pilih bahasa ScamShield sendiri
+- Penggantian bahasa baru di Pengaturan: pilih bahasa Parry sendiri
   secara independen dari bahasa browser Anda, dengan dukungan sinkronisasi
   antar perangkat jika Anda telah mengaktifkan sinkronisasi bawaan browser
   Anda.

@@ -2,7 +2,7 @@
 
 ## Name
 
-ScamShield — Dolandırıcılık ve Kimlik Avı Koruması
+Parry — Dolandırıcılık ve Kimlik Avı Koruması
 
 ## Short description
 
@@ -10,7 +10,7 @@ Cihazda dolandırıcılık ve kimlik avı koruması: uyarır, marka taklitlerini
 
 ## Full description
 
-ScamShield, bir dolandırıcılık veya kimlik avı sayfası sizi kandırmadan önce
+Parry, bir dolandırıcılık veya kimlik avı sayfası sizi kandırmadan önce
 sizi uyarır — tamamen cihazınızda. Yalnızca adres çubuğuna bakmaz: sayfanın
 metnini, düzenini ve giriş formunu inceler ve bir sayfanın yanlış bir alan
 adında bir markanın simgesini veya logosunu taşıdığını fark eder, böylece
@@ -19,7 +19,7 @@ yakalar. Şüpheli bir WhatsApp, SMS veya e-posta mı aldınız? Anında, gizli 
 karar için popup'a yapıştırın.
 
 Tek bir tıklama sizi güvene geri götürür: tehlikeli bir uyarıda *Bu sayfadan
-ayrıl*, marka taklidi bir sayfada *Beni gerçek siteye götür*. ScamShield
+ayrıl*, marka taklidi bir sayfada *Beni gerçek siteye götür*. Parry
 yanılırsa, bir saatliğine, yarına kadar veya her zaman için *Bu siteye
 güven* diyebilir, tek dokunuşla *Hata bildir* diyebilirsiniz.
 
@@ -81,7 +81,7 @@ Yalnızca çevrilmiş bir mağaza listesi değil, tam menü, uyarı ve ayar
   uyarır
 • Sahte ödül/hediye dolandırıcılık içeriğini gizler
 • Ayarları dışa/içe aktarma ve isteğe bağlı cihazlar arası senkronizasyon
-  (tarayıcınızın kendi senkronizasyonu — yine de ScamShield hesabı veya
+  (tarayıcınızın kendi senkronizasyonu — yine de Parry hesabı veya
   sunucusu yok)
 • Dilinizi seçin: 20 dilin tümü popup'tan veya Ayarlar'dan seçilebilir —
   tarayıcınızın dilinden bağımsız olarak
@@ -101,10 +101,10 @@ Yalnızca çevrilmiş bir mağaza listesi değil, tam menü, uyarı ve ayar
   durdurulan tehditler, gizlilik bulguları ve günlük etkinlik grafiği — son
   7 günü, son 30 günü veya kurulumdan bu yana toplamlarınızı görüntüleyin —
   hepsi cihazınızda sayılır ve saklanır, hiçbir yere gönderilmez.
-- ScamShield gerçekten iki kez bir şeyi engelledikten sonra açılır
+- Parry gerçekten iki kez bir şeyi engelledikten sonra açılır
   pencerede sessiz, kapatılabilir bir değerlendirme istemi görünür — bir kez
   reddedin, bir daha çıkmaz.
-- Ayarlarda yeni dil geçersiz kılma: ScamShield'ın kendi dilini
+- Ayarlarda yeni dil geçersiz kılma: Parry'ın kendi dilini
   tarayıcınızınkinden bağımsız olarak seçin; tarayıcınızın kendi
   senkronizasyonunu açtıysanız cihazlar arası senkronizasyon desteğiyle.
 

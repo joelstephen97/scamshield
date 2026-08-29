@@ -1,7 +1,7 @@
 (function (root, factory) {
-  const mod = factory(typeof require === 'function' ? require('./constants') : root.ScamShield, root);
+  const mod = factory(typeof require === 'function' ? require('./constants') : root.Parry, root);
   if (typeof module !== 'undefined' && module.exports) module.exports = mod;
-  root.ScamShield = Object.assign(root.ScamShield || {}, mod);
+  root.Parry = Object.assign(root.Parry || {}, mod);
 })(typeof globalThis !== 'undefined' ? globalThis : self, function (C, root) {
   'use strict';
   const { THRESHOLDS } = C;
@@ -28,7 +28,7 @@
     const contentUsed = typeof contentProb === 'number' && !Number.isNaN(contentProb);
     const contentReasons = [];
     if (contentUsed) {
-      const pm = (typeof root !== 'undefined' && root.ScamShield && root.ScamShield.PAGE_MODEL) || null;
+      const pm = (typeof root !== 'undefined' && root.Parry && root.Parry.PAGE_MODEL) || null;
       const t = (pm && pm.thresholds && pm.thresholds.suspicious) || THRESHOLDS.contentSuspicious;
       if (contentProb >= t) {
         // The URL model alone only counts as corroboration when at least one

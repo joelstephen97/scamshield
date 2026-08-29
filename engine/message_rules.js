@@ -1,9 +1,9 @@
 (function (root, factory) {
   const req = typeof require === 'function';
-  const mod = factory(req ? require('./constants') : root.ScamShield,
-                       req ? require('./heuristics') : root.ScamShield);
+  const mod = factory(req ? require('./constants') : root.Parry,
+                       req ? require('./heuristics') : root.Parry);
   if (typeof module !== 'undefined' && module.exports) module.exports = mod;
-  root.ScamShield = Object.assign(root.ScamShield || {}, mod);
+  root.Parry = Object.assign(root.Parry || {}, mod);
 })(typeof globalThis !== 'undefined' ? globalThis : self, function (C, H) {
   'use strict';
   const { THRESHOLDS, SCAM_PHRASES } = C;

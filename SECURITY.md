@@ -1,6 +1,6 @@
 # Security policy
 
-ScamShield is a security product, so we take reports about it seriously. Thank you for looking.
+Parry is a security product, so we take reports about it seriously. Thank you for looking.
 
 ## Supported versions
 
@@ -15,7 +15,7 @@ ScamShield is a security product, so we take reports about it seriously. Thank y
 
 **Please do not open a public issue for security problems.**
 
-Email **jojostev@gmail.com** with the subject `ScamShield security`. Include:
+Email **jojostev@gmail.com** with the subject `Parry security`. Include:
 
 - what the problem is and why it matters (impact),
 - steps or a proof-of-concept to reproduce it (a fixture page or URL pattern is ideal),

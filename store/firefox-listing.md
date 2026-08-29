@@ -1,6 +1,6 @@
 # Firefox AMO Listing
 
-**Name:** ScamShield — Scam & Phishing Protection
+**Name:** Parry — Scam & Phishing Protection
 **Summary:** On-device scam & phishing protection: warns you, spots brand look-alikes, checks messages. Nothing leaves your device.
 **Categories:** Privacy & Security
 **License:** GNU General Public License v3.0 or later (GPL-3.0-or-later) — source: https://github.com/joelstephen97/scamshield

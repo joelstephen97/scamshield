@@ -1,8 +1,8 @@
 # scamshield-relay
 
-Part of [ScamShield](../README.md) — see the README section [Optional community reporting (the relay)](../README.md#optional-community-reporting-the-relay) for the end-to-end data flow and the [privacy policy](https://joelstephen97.github.io/scamshield/privacy.html) §5 for the user-facing promise this service must keep. Live: https://scamshield-relay-seven.vercel.app/api/health · License: GPL-3.0-or-later (same as the extension).
+Part of [Parry](../README.md) — see the README section [Optional community reporting (the relay)](../README.md#optional-community-reporting-the-relay) for the end-to-end data flow and the [privacy policy](https://joelstephen97.github.io/scamshield/privacy.html) §5 for the user-facing promise this service must keep. Live: https://scamshield-relay-seven.vercel.app/api/health · License: GPL-3.0-or-later (same as the extension).
 
-Opt-in report receiver for the ScamShield browser extension. Receives host-level, anonymised risk reports (never URLs, page text, or identifiers), stores them in Postgres, exports NDJSON for model training, purges after 180 days. IPs are used only for in-memory rate limiting and never stored.
+Opt-in report receiver for the Parry browser extension. Receives host-level, anonymised risk reports (never URLs, page text, or identifiers), stores them in Postgres, exports NDJSON for model training, purges after 180 days. IPs are used only for in-memory rate limiting and never stored.
 
 This service lives in the `relay/` folder of the `scamshield` repo (this is not a standalone repo). When deploying on Vercel, set the project's **Root Directory** to `relay`. It has its own `package.json`, dependencies, and test suite, independent of the extension's root `package.json`, so it can be split out into its own repository later without any code changes if desired.
 

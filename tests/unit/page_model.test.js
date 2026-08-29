@@ -40,12 +40,12 @@ test('decoded weight length equals 32768 (full model test via edge case)', () =>
   assert.ok(r2 !== r1, 'last weight bucket should affect prob when present');
 });
 
-test('lazy bundle pickup: ScamShield.PAGE_MODEL available on first call', () => {
+test('lazy bundle pickup: Parry.PAGE_MODEL available on first call', () => {
   PM._resetForTest();
-  globalThis.ScamShield = Object.assign(globalThis.ScamShield || {}, { PAGE_MODEL: MODEL });
+  globalThis.Parry = Object.assign(globalThis.Parry || {}, { PAGE_MODEL: MODEL });
   const r = PM.scorePageContent({ tokens: {}, dense: [0, 0] });
   assert.ok(!Number.isNaN(r.prob), 'should pick up lazily-set PAGE_MODEL on first call');
-  delete globalThis.ScamShield.PAGE_MODEL;
+  delete globalThis.Parry.PAGE_MODEL;
   PM._resetForTest();
 });
 
