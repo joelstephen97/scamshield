@@ -103,10 +103,10 @@
     }
   },
   "copyReportBtn": {
-    "message": "Copy report"
+    "message": "Salin laporan"
   },
   "copyReportHeader": {
-    "message": "⚠ ScamShield flagged this site: $HOST$",
+    "message": "⚠ ScamShield menandai situs ini: $HOST$",
     "placeholders": {
       "host": {
         "content": "$1",
@@ -115,7 +115,7 @@
     }
   },
   "copyReportVerdict": {
-    "message": "Verdict: $LEVEL$",
+    "message": "Vonis: $LEVEL$",
     "placeholders": {
       "level": {
         "content": "$1",
@@ -124,10 +124,10 @@
     }
   },
   "copyReportSignals": {
-    "message": "Signals:"
+    "message": "Sinyal:"
   },
   "copyReportFooter": {
-    "message": "Checked on-device by ScamShield — free, open-source: https://joelstephen97.github.io/scamshield/"
+    "message": "Diperiksa di perangkat oleh ScamShield — gratis, open-source: https://joelstephen97.github.io/scamshield/"
   },
   "reportScam": {
     "message": "Laporkan: ini penipuan"
@@ -211,13 +211,13 @@
     "message": "Perlindungan dilanjutkan"
   },
   "toastCopied": {
-    "message": "Copied"
+    "message": "Disalin"
   },
   "toastExtensionError": {
     "message": "Terjadi kesalahan ekstensi — coba buka kembali."
   },
   "whatsNewBanner": {
-    "message": "Baru di 0.8: ScamShield kini menjadi ScamShield, popup dirancang ulang dengan jeda berbatas waktu dan penghitung penipuan, ikon baru."
+    "message": "Baru di 0.8: popup dirancang ulang dengan jeda berbatas waktu, penghitung penipuan, dan panel mengapa vonis ini."
   },
   "popupBrandDangerSummary": {
     "message": "Tampak seperti $BRAND$, tetapi bukan. Jangan masukkan kata sandi Anda di sini.",
@@ -294,7 +294,7 @@
     "message": "Situs ini mencoba trik notifikasi \"klik Izinkan\"."
   },
   "popupPrivacyCredExfilPassword": {
-    "message": "Sent your password to $HOST$ — a different site than the one you were on.",
+    "message": "Mengirim kata sandi Anda ke $HOST$ — situs yang berbeda dari yang sedang Anda kunjungi.",
     "placeholders": {
       "host": {
         "content": "$1",
@@ -303,7 +303,7 @@
     }
   },
   "popupPrivacyCredExfilCard": {
-    "message": "Sent your card details to $HOST$ — a different site than the one you were on.",
+    "message": "Mengirim detail kartu Anda ke $HOST$ — situs yang berbeda dari yang sedang Anda kunjungi.",
     "placeholders": {
       "host": {
         "content": "$1",
@@ -882,10 +882,10 @@
     }
   },
   "serpBadgeDanger": {
-    "message": "ScamShield: this result is on our threat block list"
+    "message": "ScamShield: hasil ini ada dalam daftar blokir ancaman kami"
   },
   "serpBadgeCaution": {
-    "message": "ScamShield: this result shows scam warning signs"
+    "message": "ScamShield: hasil ini menunjukkan tanda-tanda peringatan penipuan"
   },
   "chipLink": {
     "message": "Tautan"
@@ -1002,7 +1002,7 @@
     }
   },
   "reason_newDomain": {
-    "message": "Domain appears on a newly-registered-domains list — most scam sites are only days old$EXTRA$.",
+    "message": "Domain muncul dalam daftar domain yang baru didaftarkan — sebagian besar situs penipuan hanya berusia beberapa hari$EXTRA$.",
     "placeholders": {
       "extra": {
         "content": "$1",
@@ -1014,7 +1014,7 @@
     "message": "Formulir kata sandi di halaman ini mengirim kredensial Anda ke situs yang berbeda."
   },
   "reason_crossOriginCredPost": {
-    "message": "This form sends your password or card details to $HOST$ — a different site than the one you are on.",
+    "message": "Formulir ini mengirim kata sandi atau detail kartu Anda ke $HOST$ — situs yang berbeda dari yang sedang Anda kunjungi.",
     "placeholders": {
       "host": {
         "content": "$1",

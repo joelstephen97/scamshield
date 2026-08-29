@@ -103,10 +103,10 @@
     }
   },
   "copyReportBtn": {
-    "message": "Copy report"
+    "message": "Copiar relatório"
   },
   "copyReportHeader": {
-    "message": "⚠ ScamShield flagged this site: $HOST$",
+    "message": "⚠ O ScamShield sinalizou este site: $HOST$",
     "placeholders": {
       "host": {
         "content": "$1",
@@ -115,7 +115,7 @@
     }
   },
   "copyReportVerdict": {
-    "message": "Verdict: $LEVEL$",
+    "message": "Veredito: $LEVEL$",
     "placeholders": {
       "level": {
         "content": "$1",
@@ -124,10 +124,10 @@
     }
   },
   "copyReportSignals": {
-    "message": "Signals:"
+    "message": "Sinais:"
   },
   "copyReportFooter": {
-    "message": "Checked on-device by ScamShield — free, open-source: https://joelstephen97.github.io/scamshield/"
+    "message": "Verificado no dispositivo pelo ScamShield — gratuito, código aberto: https://joelstephen97.github.io/scamshield/"
   },
   "reportScam": {
     "message": "Relatar: isto é um golpe"
@@ -211,13 +211,13 @@
     "message": "Proteção retomada"
   },
   "toastCopied": {
-    "message": "Copied"
+    "message": "Copiado"
   },
   "toastExtensionError": {
     "message": "Erro na extensão — tente reabrir."
   },
   "whatsNewBanner": {
-    "message": "Novidades na 0.8: o ScamShield agora é o ScamShield, popup redesenhado com pausa programada e contadores de golpes, novo ícone."
+    "message": "Novidades na 0.8: popup redesenhado com pausa programada, contadores de golpes e um painel de por que este veredito."
   },
   "popupBrandDangerSummary": {
     "message": "Parece com a $BRAND$, mas não é. Não digite sua senha aqui.",
@@ -294,7 +294,7 @@
     "message": "Este site tentou o truque de notificação \"clique em Permitir\"."
   },
   "popupPrivacyCredExfilPassword": {
-    "message": "Sent your password to $HOST$ — a different site than the one you were on.",
+    "message": "Enviou sua senha para $HOST$ — um site diferente daquele em que você estava.",
     "placeholders": {
       "host": {
         "content": "$1",
@@ -303,7 +303,7 @@
     }
   },
   "popupPrivacyCredExfilCard": {
-    "message": "Sent your card details to $HOST$ — a different site than the one you were on.",
+    "message": "Enviou os dados do seu cartão para $HOST$ — um site diferente daquele em que você estava.",
     "placeholders": {
       "host": {
         "content": "$1",
@@ -882,10 +882,10 @@
     }
   },
   "serpBadgeDanger": {
-    "message": "ScamShield: this result is on our threat block list"
+    "message": "ScamShield: este resultado está na nossa lista de bloqueio de ameaças"
   },
   "serpBadgeCaution": {
-    "message": "ScamShield: this result shows scam warning signs"
+    "message": "ScamShield: este resultado mostra sinais de alerta de golpe"
   },
   "chipLink": {
     "message": "Link"
@@ -1002,7 +1002,7 @@
     }
   },
   "reason_newDomain": {
-    "message": "Domain appears on a newly-registered-domains list — most scam sites are only days old$EXTRA$.",
+    "message": "O domínio aparece em uma lista de domínios registrados recentemente — a maioria dos sites de golpe tem apenas alguns dias$EXTRA$.",
     "placeholders": {
       "extra": {
         "content": "$1",
@@ -1014,7 +1014,7 @@
     "message": "Um formulário de senha nesta página envia suas credenciais para um site diferente."
   },
   "reason_crossOriginCredPost": {
-    "message": "This form sends your password or card details to $HOST$ — a different site than the one you are on.",
+    "message": "Este formulário envia sua senha ou os dados do seu cartão para $HOST$ — um site diferente daquele em que você está.",
     "placeholders": {
       "host": {
         "content": "$1",

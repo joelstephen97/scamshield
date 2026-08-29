@@ -56,6 +56,10 @@ sản phẩm chính là sản phẩm miễn phí.
   thoại bạn đã nhập tới một trình theo dõi, *trước khi* bạn nhấn gửi, và
   chỉ rõ riêng các tập lệnh lấy dấu vân tay thiết bị cùng bẫy quyền
   thông báo "nhấp Cho phép để tiếp tục".
+- **Kết quả tìm kiếm rủi ro, được gắn cờ trước khi bạn nhấp** — trên
+  Google, Bing và DuckDuckGo, một chấm đỏ hoặc hổ phách nhỏ đánh dấu kết
+  quả có tên miền đã biết là xấu hoặc rất giống một thương hiệu, để bạn
+  thấy rủi ro trước khi nhấp vào, không phải sau đó.
 
 **Cách hoạt động**
 
@@ -154,34 +158,46 @@ kết trong tiện ích, không bao giờ có bức tường thu phí.
 
 Con số cụ thể, không phải tính từ: có sẵn bằng **20 ngôn ngữ** với bản
 dịch đầy đủ cho menu, cảnh báo và cài đặt (không chỉ là một danh sách cửa
-hàng được dịch); khoảng **630 bài kiểm thử tự động**; danh sách chặn gồm
-hàng nghìn tên miền lừa đảo, liên tục được cập nhật từ nguồn mở; và dung
-lượng cài đặt dưới 1 MB — khoảng 450 KB khi nén, không có runtime nặng.
+hàng được dịch); khoảng **875 bài kiểm thử tự động**; danh sách chặn gồm
+hơn 425.000 tên miền lừa đảo đã xác nhận (cộng thêm danh sách theo dõi một
+triệu tên miền), liên tục được cập nhật từ nguồn mở; và dung lượng cài đặt
+dưới 1 MB — khoảng 450 KB khi nén, không có runtime nặng.
 
-## What's new (0.9.0)
+## What's new (0.10.0)
 
-- **Danh sách mối đe dọa lớn hơn rất nhiều.** Danh sách chặn đã tăng từ
-  vài nghìn tên miền lên **hơn 425.000 tên miền lừa đảo và phishing đã
-  được xác nhận**, cùng với một danh sách theo dõi hơn một triệu tên miền
-  có độ tin cậy thấp hơn — được tổng hợp từ hơn chục cơ sở dữ liệu mối đe
-  dọa mã nguồn mở, đối chiếu chéo với nhau và lọc so với các trang web
-  phổ biến nhất thế giới để giữ cho cảnh báo sai luôn hiếm gặp. Việc đối
-  chiếu vẫn diễn ra hoàn toàn trên thiết bị của bạn: danh sách được tải
-  xuống dưới dạng dấu vân tay gọn nhẹ và được kiểm tra cục bộ, vì vậy
-  không trang nào bạn truy cập từng bị gửi đi bất kỳ đâu. Các bản cập
-  nhật đến dưới dạng các gói khác biệt nhỏ mỗi vài giờ.
-- **Khi ScamShield chặn một trang có trong danh sách, giờ đây ScamShield sẽ cho bạn
-  biết những nguồn độc lập nào đã báo cáo trang đó** — có thể kiểm chứng,
-  không phải một điểm số hộp đen.
-- **Phát hiện giả mạo thông minh hơn**: các kiểm tra giả mạo thương hiệu
-  giờ đây bắt được chữ cái bị hoán đổi, ký tự trông giống nhau, tên
-  thương hiệu ẩn bên trong các tên miền phụ dài và đuôi tên miền bị hoán
-  đổi, với các biện pháp bảo vệ nghiêm ngặt để trang thương hiệu thật
-  không bao giờ bị gắn cờ nhầm.
-- **Các tín hiệu cảnh báo mới**: chuỗi tên miền phụ sâu bất thường, các
-  phần địa chỉ dài bất thường, đích đến của dịch vụ rút gọn liên kết,
-  đuôi tên miền hay bị lạm dụng cho lừa đảo và nhà cung cấp hosting miễn
-  phí giờ đây bổ sung bằng chứng cảnh giác vào kết luận của một trang.
+- **Kết quả tìm kiếm rủi ro, được gắn cờ trước khi bạn nhấp.** Trên
+  Google, Bing và DuckDuckGo, một chấm đỏ hoặc hổ phách nhỏ giờ đây đánh
+  dấu một kết quả tìm kiếm có tên miền đã nằm trong danh sách chặn, danh
+  sách theo dõi, hoặc rất giống một thương hiệu — hiển thị ngay trên
+  trang kết quả, trước khi bạn nhấp vào. Một kết quả sạch sẽ không nhận
+  huy hiệu nào cả.
+- **Cảnh báo trước khi số thẻ hoặc mật khẩu chuyển sang trang khác.** Một
+  biểu mẫu số thẻ hoặc đăng nhập gửi dữ liệu tới tên miền khác với trang
+  bạn đang ở (và không phải bộ xử lý thanh toán hay nhà cung cấp SSO đã
+  biết) giờ đây hiển thị cảnh báo trước khi gửi đi, giống như cách bảo vệ
+  biểu mẫu rò rỉ hiện có đã bắt được các trường biểu mẫu bị gửi ngầm.
+- **Gắn cờ các tên miền hoàn toàn mới.** Việc kiểm tra tên miền mới đăng
+  ký (trên thiết bị, cập nhật hằng tuần, cùng mô hình quyền riêng tư với
+  phần còn lại của danh sách mối đe dọa) thêm một ghi chú thận trọng khi
+  tên miền của một trang mới được đăng ký gần đây — chiêu ưa thích của
+  các trang lừa đảo bị gỡ xuống rồi dựng lại dưới cái tên mới — và giảm
+  bớt sau khi bạn đã ghé thăm tên miền đó an toàn một thời gian.
+- **Báo cáo phát hiện có thể sao chép để chia sẻ.** Mỗi cảnh báo nguy
+  hiểm hoặc đáng ngờ giờ đây có nút "Sao chép báo cáo" đặt vào clipboard
+  của bạn một bản tóm tắt ngắn dạng văn bản thuần — trang, kết luận, các
+  lý do chính — sẵn sàng dán vào một nhóm chat hoặc diễn đàn để cảnh báo
+  người khác.
+- **Kỷ luật chống báo động giả sắc bén hơn.** Các tín hiệu dùng cho rủi ro
+  lưu trữ tên miền (đuôi miền bị lạm dụng, nhà cung cấp hosting miễn phí/
+  DNS động) không còn tự mình đẩy một trang tới kết luận *nguy hiểm* được
+  nữa — chỉ bằng chứng thực sự độc lập mới làm được điều đó. Qua đánh giá
+  chuẩn trên 1,09 triệu URL, tỷ lệ các trang bình thường, an toàn bị gắn
+  cờ nhầm là nguy hiểm giảm từ 0,17% xuống 0,05%, mà không giảm số mối đe
+  dọa thật sự bị bắt.
+- **Một trang phản hồi khi gỡ cài đặt.** Nếu bạn vẫn gỡ ScamShield, một
+  trang tĩnh nhỏ sẽ mở ra với một liên kết để nói cho chúng tôi biết lý do
+  và một liên kết thẳng tới luồng báo cáo báo động giả — không biểu mẫu,
+  không phân tích, không gì bị thu thập.
 
 Không có quyền mới nào. Vẫn là `storage`, `declarativeNetRequest`,
 `alarms` và quyền truy cập http/https, chính xác như phiên bản 0.3.1.

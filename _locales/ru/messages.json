@@ -103,10 +103,10 @@
     }
   },
   "copyReportBtn": {
-    "message": "Copy report"
+    "message": "Копировать отчёт"
   },
   "copyReportHeader": {
-    "message": "⚠ ScamShield flagged this site: $HOST$",
+    "message": "⚠ ScamShield пометил этот сайт: $HOST$",
     "placeholders": {
       "host": {
         "content": "$1",
@@ -115,7 +115,7 @@
     }
   },
   "copyReportVerdict": {
-    "message": "Verdict: $LEVEL$",
+    "message": "Вердикт: $LEVEL$",
     "placeholders": {
       "level": {
         "content": "$1",
@@ -124,10 +124,10 @@
     }
   },
   "copyReportSignals": {
-    "message": "Signals:"
+    "message": "Признаки:"
   },
   "copyReportFooter": {
-    "message": "Checked on-device by ScamShield — free, open-source: https://joelstephen97.github.io/scamshield/"
+    "message": "Проверено на устройстве ScamShield — бесплатно, с открытым исходным кодом: https://joelstephen97.github.io/scamshield/"
   },
   "reportScam": {
     "message": "Сообщить: это мошенничество"
@@ -211,13 +211,13 @@
     "message": "Защита возобновлена"
   },
   "toastCopied": {
-    "message": "Copied"
+    "message": "Скопировано"
   },
   "toastExtensionError": {
     "message": "Ошибка расширения — попробуйте открыть заново."
   },
   "whatsNewBanner": {
-    "message": "Новое в 0.8: ScamShield теперь называется ScamShield, обновлённое всплывающее окно с таймером паузы и счётчиками мошенничества, новая иконка."
+    "message": "Новое в 0.8: обновлённое всплывающее окно с таймером паузы, счётчиками мошенничества и панелью «почему такой вердикт»."
   },
   "popupBrandDangerSummary": {
     "message": "Похоже на $BRAND$, но это не так. Не вводите здесь свой пароль.",
@@ -294,7 +294,7 @@
     "message": "Этот сайт попытался использовать трюк с уведомлением «нажмите Разрешить»."
   },
   "popupPrivacyCredExfilPassword": {
-    "message": "Sent your password to $HOST$ — a different site than the one you were on.",
+    "message": "Отправил ваш пароль на $HOST$ — сайт, отличный от того, на котором вы были.",
     "placeholders": {
       "host": {
         "content": "$1",
@@ -303,7 +303,7 @@
     }
   },
   "popupPrivacyCredExfilCard": {
-    "message": "Sent your card details to $HOST$ — a different site than the one you were on.",
+    "message": "Отправил данные вашей карты на $HOST$ — сайт, отличный от того, на котором вы были.",
     "placeholders": {
       "host": {
         "content": "$1",
@@ -882,10 +882,10 @@
     }
   },
   "serpBadgeDanger": {
-    "message": "ScamShield: this result is on our threat block list"
+    "message": "ScamShield: этот результат находится в нашем списке блокировки угроз"
   },
   "serpBadgeCaution": {
-    "message": "ScamShield: this result shows scam warning signs"
+    "message": "ScamShield: этот результат показывает признаки мошенничества"
   },
   "chipLink": {
     "message": "Ссылка"
@@ -1002,7 +1002,7 @@
     }
   },
   "reason_newDomain": {
-    "message": "Domain appears on a newly-registered-domains list — most scam sites are only days old$EXTRA$.",
+    "message": "Домен есть в списке недавно зарегистрированных доменов — большинству мошеннических сайтов всего несколько дней$EXTRA$.",
     "placeholders": {
       "extra": {
         "content": "$1",
@@ -1014,7 +1014,7 @@
     "message": "Форма ввода пароля на этой странице отправляет ваши учётные данные на другой сайт."
   },
   "reason_crossOriginCredPost": {
-    "message": "This form sends your password or card details to $HOST$ — a different site than the one you are on.",
+    "message": "Эта форма отправляет ваш пароль или данные карты на $HOST$ — сайт, отличный от того, на котором вы находитесь.",
     "placeholders": {
       "host": {
         "content": "$1",

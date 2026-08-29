@@ -60,6 +60,11 @@ protection en temps réel » — le produit entier est le produit gratuit.
   n'appuyiez sur envoyer, et signale séparément les scripts de prise
   d'empreinte et les pièges de permission de notification « cliquez sur
   Autoriser pour continuer ».
+- **Résultats de recherche risqués, signalés avant que vous cliquiez** — sur
+  Google, Bing et DuckDuckGo, un petit point rouge ou orange marque un
+  résultat dont le domaine est déjà connu comme malveillant ou ressemble
+  fortement à une marque, afin que vous voyiez le risque avant de cliquer,
+  pas après.
 
 **Comment ça marche**
 
@@ -168,38 +173,50 @@ développement, il y a un lien dans l'extension, jamais de mur payant.
 
 Des chiffres concrets, pas des adjectifs : disponible en **20 langues** avec
 traductions complètes des menus, alertes et paramètres (pas seulement une
-fiche boutique traduite) ; environ **630 tests automatisés** ; une liste de
-blocage de milliers de domaines d'arnaque, mise à jour en continu depuis un
+fiche boutique traduite) ; environ **875 tests automatisés** ; une liste de
+blocage de plus de 425 000 domaines d'arnaque confirmés (plus une liste de
+surveillance d'un million de domaines), mise à jour en continu depuis un
 flux open source ; et une installation de moins de 1 Mo — environ 450 Ko
 compressés, sans runtime lourd.
 
-## What's new (0.9.0)
+## What's new (0.10.0)
 
-- **Une liste de menaces bien plus vaste.** La liste de blocage est passée
-  de quelques milliers de domaines à **plus de 425 000 domaines de fraude
-  et de phishing confirmés**, plus une liste de surveillance de plus d'un
-  million d'entrées moins fiables — agrégées à partir de plus d'une
-  douzaine de bases de données de menaces open source, recoupées entre
-  elles et filtrées par rapport aux sites les plus populaires au monde pour
-  que les fausses alertes restent rares. La correspondance se fait toujours
-  entièrement sur votre appareil : la liste est téléchargée sous forme
-  d'empreintes compactes et vérifiée localement, si bien qu'aucun site que
-  vous visitez n'est jamais envoyé où que ce soit. Les mises à jour
-  arrivent sous forme de petits diffs toutes les quelques heures.
-- **Quand ScamShield bloque un site figurant dans la liste, il vous indique
-  désormais quelles sources indépendantes l'ont signalé** — vérifiable, pas
-  un score de boîte noire.
-- **Détection d'imitation plus intelligente** : les vérifications
-  d'usurpation de marque détectent désormais les lettres interverties, les
-  caractères ressemblants, les noms de marque cachés dans de longs
-  sous-domaines et les terminaisons de domaine interverties, avec des
-  garde-fous stricts pour que les vrais sites de marque ne soient jamais
-  signalés à tort.
-- **Nouveaux signaux d'alerte** : des chaînes de sous-domaines
-  anormalement profondes, des parties d'adresse anormalement longues, des
-  destinations de raccourcisseurs de liens, des terminaisons de domaine à
-  forte fraude et des fournisseurs d'hébergement gratuit ajoutent
-  désormais des indices de prudence au verdict d'une page.
+- **Résultats de recherche risqués, signalés avant que vous cliquiez.** Sur
+  Google, Bing et DuckDuckGo, un petit point rouge ou orange marque
+  désormais un résultat de recherche dont le domaine figure déjà sur la
+  liste de blocage, la liste de surveillance, ou ressemble fortement à une
+  marque — visible sur la page de résultats elle-même, avant que vous ne
+  cliquiez. Un résultat sain ne reçoit aucun badge.
+- **Avertit avant qu'un numéro de carte ou un mot de passe ne parte vers un
+  autre site.** Un formulaire de numéro de carte ou de connexion qui envoie
+  vers un domaine différent de celui sur lequel vous êtes (et qui n'est pas
+  un prestataire de paiement ou de SSO connu) affiche désormais un
+  avertissement avant l'envoi, de la même façon que le garde-fou existant
+  contre les formulaires qui fuient détecte déjà les champs balisés.
+- **Signale les domaines flambant neufs.** Une vérification des domaines
+  récemment enregistrés (sur l'appareil, mise à jour chaque semaine, même
+  modèle de confidentialité que le reste de la liste des menaces) ajoute
+  une note de prudence lorsque le domaine d'une page a été enregistré très
+  récemment — une astuce prisée des sites d'arnaque qui sont fermés puis
+  relancés sous un nouveau nom — et s'atténue une fois que vous avez visité
+  ce domaine sans problème pendant un moment.
+- **Rapports de détection prêts à partager.** Chaque alerte dangereuse ou
+  suspecte dispose désormais d'un bouton « Copier le rapport » qui place un
+  court résumé en texte brut — site, verdict, principales raisons — dans
+  votre presse-papiers, prêt à coller dans une discussion de groupe ou un
+  forum pour avertir quelqu'un d'autre.
+- **Discipline anti-faux-positifs renforcée.** Les signaux liés au risque
+  d'hébergement de domaine (TLD exploitées, fournisseurs d'hébergement
+  gratuit/DNS dynamique) ne peuvent plus, à eux seuls, pousser une page
+  jusqu'à un verdict *dangereux* — seules des preuves véritablement
+  indépendantes le peuvent désormais. Sur un benchmark de 1,09 million
+  d'URL, le taux de pages ordinaires et sûres signalées à tort comme
+  dangereuses est tombé de 0,17 % à 0,05 %, sans baisse des menaces réelles
+  détectées.
+- **Une page de retour à la désinstallation.** Si vous supprimez ScamShield,
+  une petite page statique s'ouvre avec un lien pour nous dire pourquoi et
+  un lien direct vers le formulaire de signalement de faux positif — pas de
+  formulaire de collecte, pas d'analyse, rien n'est enregistré.
 
 Aucune nouvelle autorisation. Toujours `storage`, `declarativeNetRequest`,
 `alarms` et l'accès http/https, exactement comme en 0.3.1.

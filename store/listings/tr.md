@@ -57,6 +57,10 @@ korumanın kilidini açmak için yükseltin" yoktur — ürünün tamamı ücret
   e-postayı veya telefonu bir izleyiciye gönderdiği anda uyarır ve ayrıca
   parmak izi çıkarma betiklerini ve "devam etmek için İzin Ver'e
   tıklayın" bildirim izni tuzaklarını adlandırır.
+- **Riskli arama sonuçları, siz tıklamadan önce işaretlenir** — Google,
+  Bing ve DuckDuckGo'da, alan adı zaten kötü olarak bilinen veya bir markaya
+  çok benzeyen bir sonucu küçük kırmızı veya turuncu bir nokta işaretler,
+  böylece riski tıklamadan önce görürsünüz, sonra değil.
 
 **Nasıl çalışır**
 
@@ -157,37 +161,47 @@ Geliştirmeyi desteklemek isterseniz, uzantıda bir bağlantı vardır, asla bir
 
 Sıfatlar değil, somut sayılar: menü, uyarı ve ayar çevirilerinin tamamıyla
 **20 dilde** kullanılabilir (yalnızca çevrilmiş bir mağaza listesi değil);
-yaklaşık **630 otomatik test**; açık kaynaklı bir akıştan sürekli
-güncellenen, binlerce dolandırıcılık alan adından oluşan bir engelleme
-listesi; ve 1 MB'ın altında bir kurulum — sıkıştırılmış yaklaşık 450 KB,
-ağır bir çalışma zamanı olmadan.
+yaklaşık **875 otomatik test**; 425.000'den fazla doğrulanmış dolandırıcılık
+alan adından oluşan (artı bir milyon alan adlık bir izleme listesi), açık
+kaynaklı bir akıştan sürekli güncellenen bir engelleme listesi; ve 1 MB'ın
+altında bir kurulum — sıkıştırılmış yaklaşık 450 KB, ağır bir çalışma zamanı
+olmadan.
 
-## What's new (0.9.0)
+## What's new (0.10.0)
 
-- **Çok daha büyük bir tehdit listesi.** Engelleme listesi birkaç bin alan
-  adından **425.000'den fazla doğrulanmış dolandırıcılık ve kimlik avı
-  alan adına** büyüdü, ayrıca bir milyondan fazla daha düşük
-  güvenilirlikte kaydı içeren bir izleme listesi eklendi — bir düzineden
-  fazla açık kaynak tehdit veri tabanından derlenmiş, birbirine karşı
-  çapraz kontrol edilmiş ve yanlış alarmları nadir tutmak için dünyanın en
-  popüler siteleriyle karşılaştırılarak filtrelenmiştir. Eşleştirme hâlâ
-  tamamen cihazınızda gerçekleşir: liste kompakt parmak izleri olarak
-  indirilir ve yerel olarak kontrol edilir, bu yüzden ziyaret ettiğiniz
-  hiçbir site hiçbir yere gönderilmez. Güncellemeler birkaç saatte bir
-  küçük fark (diff) dosyaları olarak gelir.
-- **ScamShield, listede yer alan bir siteyi engellediğinde, artık hangi
-  bağımsız kaynakların onu bildirdiğini de söylüyor** — doğrulanabilir,
-  kara kutu bir puan değil.
-- **Daha akıllı taklit tespiti**: marka taklidi kontrolleri artık yer
-  değiştirilmiş harfleri, benzer görünen karakterleri, uzun alt alan
-  adları içine gizlenmiş marka adlarını ve değiştirilmiş alan adı
-  uzantılarını yakalıyor; gerçek marka sitelerinin asla yanlışlıkla
-  işaretlenmemesi için sıkı güvenlik önlemleriyle birlikte.
-- **Yeni uyarı sinyalleri**: alışılmadık derecede derin alt alan adı
-  zincirleri, anormal derecede uzun adres bölümleri, bağlantı kısaltıcı
-  hedefleri, dolandırıcılıkta sık kullanılan alan adı uzantıları ve
-  ücretsiz barındırma sağlayıcıları artık bir sayfanın kararına dikkat
-  çekici kanıtlar ekliyor.
+- **Riskli arama sonuçları, siz tıklamadan önce işaretlenir.** Google, Bing
+  ve DuckDuckGo'da, alan adı zaten engelleme listesinde, izleme listesinde
+  ya da bir markaya çok benzeyen bir arama sonucunu artık küçük kırmızı
+  veya turuncu bir nokta işaretliyor — siz tıklamadan önce, sonuç
+  sayfasının kendisinde görünür. Temiz bir sonuç hiçbir rozet almaz.
+- **Bir kart numarası veya şifre başka bir siteye gitmeden önce uyarır.**
+  Bulunduğunuz alan adından farklı bir alan adına gönderim yapan (ve bilinen
+  bir ödeme işlemcisi veya SSO sağlayıcısı olmayan) bir kart numarası veya
+  giriş formu, artık gönderilmeden önce bir uyarı gösteriyor — mevcut
+  sızdıran-form korumasının gizlice gönderilen form alanlarını zaten
+  yakaladığı şekilde.
+- **Yepyeni alan adlarını işaretler.** Yakın zamanda kaydedilmiş alan adı
+  kontrolü (cihazda, haftalık güncellenir, tehdit listesinin geri kalanıyla
+  aynı gizlilik modeli), bir sayfanın alan adı çok yakın zamanda kaydedilmiş
+  olduğunda bir dikkat notu ekler — kapatılıp yeni bir isim altında yeniden
+  açılan dolandırıcılık sitelerinin favori hilesi — ve o alan adını bir süre
+  güvenle ziyaret ettikten sonra hafifler.
+- **Paylaşılabilir yakalama raporları.** Artık her tehlikeli veya şüpheli
+  uyarının, panonuza site, karar ve başlıca nedenler içeren kısa, düz
+  metin bir özet koyan bir "Raporu kopyala" düğmesi var — bir grup
+  sohbetine veya foruma yapıştırıp başka birini uyarmaya hazır.
+- **Daha keskin yanlış pozitif disiplini.** Alan adı barındırma riski için
+  kullanılan sinyaller (kötüye kullanılan TLD'ler, ücretsiz barındırma/
+  dinamik DNS sağlayıcıları) artık tek başlarına bir sayfayı *tehlikeli*
+  kararına kadar götüremiyor — bunu yalnızca gerçekten bağımsız kanıtlar
+  yapabilir. 1,09 milyon URL üzerinde yapılan kıyaslamada, sıradan, güvenli
+  sayfaların yanlışlıkla tehlikeli olarak işaretlenme oranı %0,17'den
+  %0,05'e düştü ve gerçek tehditleri yakalama oranında hiçbir düşüş
+  olmadı.
+- **Kaldırmada bir geri bildirim sayfası.** ScamShield'ı kaldırırsanız,
+  bize nedenini söylemeniz için bir bağlantı ve doğrudan yanlış pozitif
+  bildirim akışına giden bir bağlantı içeren küçük, statik bir sayfa
+  açılır — form yok, analitik yok, hiçbir şey toplanmaz.
 
 Yeni izin yok. Hâlâ 0.3.1'deki gibi tam olarak `storage`,
 `declarativeNetRequest`, `alarms` ve http/https erişimi.

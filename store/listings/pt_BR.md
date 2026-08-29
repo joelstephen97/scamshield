@@ -58,6 +58,10 @@ proteção em tempo real" — o produto inteiro é o produto gratuito.
   apertar enviar, e aponta separadamente scripts de fingerprinting e
   armadilhas de permissão de notificação "clique em Permitir para
   continuar".
+- **Resultados de pesquisa arriscados, sinalizados antes de você clicar** —
+  no Google, Bing e DuckDuckGo, um pequeno ponto vermelho ou âmbar marca um
+  resultado cujo domínio já é conhecido como malicioso ou se parece muito
+  com uma marca, para que você veja o risco antes de clicar, não depois.
 
 **Como funciona**
 
@@ -162,37 +166,49 @@ nunca um paywall.
 
 Números concretos, não adjetivos: disponível em **20 idiomas** com
 traduções completas de menus, alertas e configurações (não apenas uma
-página da loja traduzida); cerca de **630 testes automatizados**; uma lista
-de bloqueio com milhares de domínios de golpe, atualizada continuamente a
+página da loja traduzida); cerca de **875 testes automatizados**; uma lista
+de bloqueio com mais de 425.000 domínios de golpe confirmados (além de uma
+lista de observação de um milhão de domínios), atualizada continuamente a
 partir de um feed de código aberto; e uma instalação com menos de 1 MB —
 cerca de 450 KB compactados, sem runtime pesado.
 
-## What's new (0.9.0)
+## What's new (0.10.0)
 
-- **Uma lista de ameaças muito maior.** A lista de bloqueio cresceu de
-  alguns milhares de domínios para **mais de 425.000 domínios de golpe e
-  phishing confirmados**, além de uma lista de observação com mais de um
-  milhão de entradas de confiança mais baixa — reunidas de mais de uma
-  dezena de bancos de dados de ameaças de código aberto, verificadas
-  cruzadamente entre si e filtradas em relação aos sites mais populares do
-  mundo para manter os falsos alarmes raros. A comparação ainda acontece
-  inteiramente no seu dispositivo: a lista é baixada como impressões
-  digitais compactas e verificada localmente, então nenhum site que você
-  visita é enviado a lugar nenhum. As atualizações chegam como pequenos
-  diffs a cada poucas horas.
-- **Quando o ScamShield bloqueia um site presente na lista, agora ele diz quais
-  fontes independentes o reportaram** — verificável, não uma pontuação de
-  caixa-preta.
-- **Detecção de imitação mais inteligente**: as verificações de
-  personificação de marca agora detectam letras trocadas, caracteres
-  parecidos, nomes de marca escondidos dentro de subdomínios longos e
-  finais de domínio trocados, com salvaguardas rígidas para que sites de
-  marcas reais nunca sejam sinalizados por engano.
-- **Novos sinais de alerta**: cadeias de subdomínios incomumente
-  profundas, partes de endereço anormalmente longas, destinos de
-  encurtadores de link, finais de domínio muito usados em golpes e
-  provedores de hospedagem gratuita agora somam evidências de cautela ao
-  veredito de uma página.
+- **Resultados de pesquisa arriscados, sinalizados antes de você clicar.**
+  No Google, Bing e DuckDuckGo, um pequeno ponto vermelho ou âmbar agora
+  marca um resultado de pesquisa cujo domínio já está na lista de bloqueio,
+  na lista de observação, ou se parece muito com uma marca — visível na
+  própria página de resultados, antes de você clicar. Um resultado limpo
+  não recebe nenhum selo.
+- **Avisa antes de um número de cartão ou senha ir para outro site.** Um
+  formulário de número de cartão ou login que envia dados para um domínio
+  diferente daquele em que você está (e que não é um processador de
+  pagamentos ou provedor de SSO conhecido) agora mostra um aviso antes de
+  ser enviado, do mesmo jeito que a proteção existente contra formulários
+  vazadores já detecta campos enviados às escondidas.
+- **Sinaliza domínios recém-criados.** Uma verificação de domínios
+  registrados recentemente (no dispositivo, atualizada semanalmente, com o
+  mesmo modelo de privacidade do restante da lista de ameaças) adiciona uma
+  nota de cautela quando o domínio de uma página foi registrado há muito
+  pouco tempo — um truque preferido de sites de golpe que são derrubados e
+  reerguidos com um nome novo — e diminui depois que você visita aquele
+  domínio com segurança por um tempo.
+- **Relatórios de detecção prontos para compartilhar.** Todo alerta
+  perigoso ou suspeito agora tem um botão "Copiar relatório" que coloca na
+  sua área de transferência um resumo curto em texto simples — site,
+  veredito, principais motivos — pronto para colar em um grupo de bate-papo
+  ou fórum para avisar outra pessoa.
+- **Disciplina mais rígida contra falsos positivos.** Os sinais usados para
+  risco de hospedagem de domínio (TLDs abusados, provedores de hospedagem
+  gratuita/DNS dinâmico) não podem mais, sozinhos, levar uma página até um
+  veredito *perigoso* — só evidências realmente independentes conseguem
+  isso agora. Em um benchmark com 1,09 milhão de URLs, a taxa de páginas
+  normais e seguras sinalizadas erroneamente como perigosas caiu de 0,17%
+  para 0,05%, sem nenhuma queda nas ameaças reais detectadas.
+- **Uma página de feedback na desinstalação.** Se você remover o ScamShield,
+  uma pequena página estática se abre com um link para nos contar o motivo
+  e um link direto para o fluxo de relato de falso positivo — sem
+  formulário, sem análise, nada é coletado.
 
 Nenhuma permissão nova. Continua usando `storage`, `declarativeNetRequest`,
 `alarms` e acesso http/https, exatamente como na 0.3.1.

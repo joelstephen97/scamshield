@@ -58,6 +58,10 @@ Echtzeitschutz freischalten“ – das ganze Produkt ist das kostenlose Produkt.
   eingegebene E-Mail-Adresse oder Telefonnummer an einen Tracker sendet,
   *bevor* du auf Absenden klickst, und benennt separat Fingerprinting-Skripte
   und „Auf Zulassen klicken, um fortzufahren“-Benachrichtigungsfallen.
+- **Riskante Suchergebnisse, markiert bevor du klickst** – bei Google, Bing
+  und DuckDuckGo markiert ein kleiner roter oder gelber Punkt ein Ergebnis,
+  dessen Domain bereits bekanntermaßen bösartig ist oder einer Marke stark
+  ähnelt, sodass du das Risiko siehst, bevor du klickst, nicht danach.
 
 **Wie es funktioniert**
 
@@ -164,35 +168,49 @@ einen Link in der Erweiterung, aber nie eine Bezahlschranke.
 
 Harte Zahlen statt Adjektive: verfügbar in **20 Sprachen** mit vollständigen
 Übersetzungen von Menüs, Warnungen und Einstellungen (nicht nur ein
-übersetzter Store-Eintrag); rund **630 automatisierte Tests**; eine
-Sperrliste mit Tausenden Betrugsdomains, laufend aktualisiert aus einem
+übersetzter Store-Eintrag); rund **875 automatisierte Tests**; eine
+Sperrliste mit über 425.000 bestätigten Betrugsdomains (plus einer
+Beobachtungsliste mit einer Million Domains), laufend aktualisiert aus einem
 Open-Source-Feed; und eine Installation unter 1 MB – etwa 450 KB gepackt,
 keine schwere Laufzeitumgebung.
 
-## What's new (0.9.0)
+## What's new (0.10.0)
 
-- **Eine deutlich größere Bedrohungsliste.** Die Sperrliste ist von wenigen
-  tausend Domains auf **über 425.000 bestätigte Betrugs- und
-  Phishing-Domains** angewachsen, plus eine Beobachtungsliste mit über einer
-  Million weniger sicheren Einträgen – zusammengetragen aus mehr als einem
-  Dutzend Open-Source-Bedrohungsdatenbanken, gegeneinander abgeglichen und
-  gegen die weltweit meistbesuchten Seiten gefiltert, damit Fehlalarme
-  selten bleiben. Der Abgleich findet weiterhin vollständig auf deinem Gerät
-  statt: Die Liste wird als kompakte Fingerabdrücke heruntergeladen und
-  lokal geprüft, sodass keine von dir besuchte Seite jemals irgendwohin
-  gesendet wird. Updates kommen alle paar Stunden als kleine Diffs.
-- **Wenn ScamShield eine in der Liste geführte Seite blockiert, nennt es dir
-  jetzt, welche unabhängigen Quellen sie gemeldet haben** – nachprüfbar
-  statt eine Blackbox-Bewertung.
-- **Klügere Fälschungserkennung**: Marken-Fälschungsprüfungen erkennen jetzt
-  vertauschte Buchstaben, täuschend ähnliche Zeichen, versteckte
-  Markennamen in langen Subdomains und vertauschte Domain-Endungen – mit
-  strengen Sicherungen, damit echte Markenseiten nie fälschlich markiert
-  werden.
-- **Neue Warnsignale**: ungewöhnlich tiefe Subdomain-Ketten, abnorm lange
-  Adressteile, Linkverkürzer-Ziele, betrugsanfällige Domain-Endungen und
-  Gratis-Hosting-Anbieter liefern jetzt zusätzliche Verdachtsmomente für das
-  Urteil einer Seite.
+- **Riskante Suchergebnisse, markiert bevor du klickst.** Bei Google, Bing
+  und DuckDuckGo markiert jetzt ein kleiner roter oder gelber Punkt ein
+  Suchergebnis, dessen Domain bereits auf der Sperrliste, der
+  Beobachtungsliste steht oder einer Marke stark ähnelt – sichtbar direkt
+  auf der Ergebnisseite, bevor du durchklickst. Ein unauffälliges Ergebnis
+  erhält gar kein Abzeichen.
+- **Warnt, bevor eine Kartennummer oder ein Passwort an eine andere Seite
+  geht.** Ein Kartennummern- oder Login-Formular, das an eine andere Domain
+  sendet als die, auf der du dich befindest (und die kein bekannter
+  Zahlungsdienstleister oder SSO-Anbieter ist), zeigt jetzt eine Warnung,
+  bevor es abgeschickt wird – genau wie der bestehende Schutz vor undichten
+  Formularen bereits ausgeleitete Formularfelder erkennt.
+- **Markiert brandneue Domains.** Eine Prüfung auf neu registrierte Domains
+  (auf dem Gerät, wöchentlich aktualisiert, gleiches Datenschutzmodell wie
+  der Rest der Bedrohungsliste) fügt einen Warnhinweis hinzu, wenn die
+  Domain einer Seite erst sehr kürzlich registriert wurde – ein beliebter
+  Trick für Betrugsseiten, die abgeschaltet und unter neuem Namen wieder
+  aufgebaut werden – und lässt nach, sobald du diese Domain eine Weile
+  sicher besucht hast.
+- **Teilbare Kopie von Fundberichten.** Jede gefährlich- oder
+  verdächtig-Warnung hat jetzt eine Schaltfläche „Bericht kopieren“, die
+  eine kurze Klartext-Zusammenfassung – Seite, Urteil, wichtigste Gründe –
+  in deine Zwischenablage legt, bereit zum Einfügen in einen Gruppenchat
+  oder ein Forum, um jemand anderen zu warnen.
+- **Schärfere Fehlalarm-Disziplin.** Die Signale für Hosting-Risiko
+  (missbrauchte TLDs, Gratis-Hosting-/Dynamic-DNS-Anbieter) können eine
+  Seite allein nicht mehr bis zu einem *gefährlich*-Urteil treiben – das
+  schaffen nur wirklich unabhängige Belege. Im Benchmark mit 1,09 Millionen
+  URLs sank die Rate normaler, sicherer Seiten, die fälschlich als
+  gefährlich markiert wurden, von 0,17 % auf 0,05 % – ohne dass echte
+  Bedrohungen seltener erkannt wurden.
+- **Eine Feedback-Seite bei der Deinstallation.** Wenn du ScamShield entfernst,
+  öffnet sich eine kleine statische Seite mit einem Link, um uns den Grund
+  mitzuteilen, und einem Link direkt zum Fehlalarm-Meldeformular – kein
+  Formular, keine Analyse, nichts wird gesammelt.
 
 Keine neuen Berechtigungen. Weiterhin `storage`, `declarativeNetRequest`,
 `alarms` und http/https-Zugriff, genau wie bei 0.3.1.

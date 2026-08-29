@@ -58,6 +58,11 @@ produk gratis.
   atau nomor telepon yang Anda ketik ke pelacak, *sebelum* Anda menekan
   kirim, dan secara terpisah menyebutkan skrip fingerprinting serta
   jebakan izin notifikasi "klik Izinkan untuk melanjutkan".
+- **Hasil pencarian berisiko, ditandai sebelum Anda mengeklik** — di
+  Google, Bing, dan DuckDuckGo, titik merah atau kuning kecil menandai
+  hasil yang domainnya sudah dikenal berbahaya atau sangat mirip dengan
+  sebuah merek, sehingga Anda melihat risikonya sebelum mengeklik, bukan
+  sesudahnya.
 
 **Cara kerjanya**
 
@@ -160,35 +165,48 @@ pengembangan, ada tautan di ekstensi, tidak pernah ada paywall.
 
 Angka pasti, bukan kata sifat: tersedia dalam **20 bahasa** dengan
 terjemahan lengkap menu, peringatan, dan pengaturan (bukan hanya daftar
-toko yang diterjemahkan); sekitar **630 pengujian otomatis**; daftar
-blokir berisi ribuan domain penipuan, diperbarui terus-menerus dari feed
-open-source; dan pemasangan di bawah 1 MB — sekitar 450 KB terkompresi,
-tanpa runtime berat.
+toko yang diterjemahkan); sekitar **875 pengujian otomatis**; daftar
+blokir berisi lebih dari 425.000 domain penipuan yang dikonfirmasi
+(ditambah daftar pantauan sejuta domain), diperbarui terus-menerus dari
+feed open-source; dan pemasangan di bawah 1 MB — sekitar 450 KB
+terkompresi, tanpa runtime berat.
 
-## What's new (0.9.0)
+## What's new (0.10.0)
 
-- **Daftar ancaman yang jauh lebih besar.** Daftar blokir berkembang dari
-  beberapa ribu domain menjadi **lebih dari 425.000 domain penipuan dan
-  phishing yang dikonfirmasi**, ditambah daftar pantauan dengan lebih dari
-  satu juta entri berkepercayaan lebih rendah — dikumpulkan dari lebih
-  dari selusin basis data ancaman open-source, saling diperiksa silang,
-  dan disaring terhadap situs paling populer di dunia agar alarm palsu
-  tetap jarang terjadi. Pencocokan masih sepenuhnya terjadi di perangkat
-  Anda: daftar diunduh sebagai sidik jari ringkas dan diperiksa secara
-  lokal, sehingga tidak ada situs yang Anda kunjungi yang pernah dikirim
-  ke mana pun. Pembaruan datang sebagai diff kecil setiap beberapa jam.
-- **Saat ScamShield memblokir situs yang ada dalam daftar, kini ScamShield memberi
-  tahu Anda sumber independen mana yang melaporkannya** — dapat
-  diverifikasi, bukan skor kotak hitam.
-- **Deteksi peniruan yang lebih cerdas**: pemeriksaan peniruan merek kini
-  menangkap huruf yang ditukar, karakter yang mirip, nama merek
-  tersembunyi di dalam subdomain panjang, dan akhiran domain yang ditukar,
-  dengan pengaman ketat agar situs merek asli tidak pernah salah ditandai.
-- **Sinyal peringatan baru**: rantai subdomain yang tidak biasa dalamnya,
-  bagian alamat yang panjangnya tidak wajar, tujuan pemendek tautan,
-  akhiran domain yang sering disalahgunakan untuk penipuan, dan penyedia
-  hosting gratis kini menambahkan bukti kewaspadaan pada vonis sebuah
-  halaman.
+- **Hasil pencarian berisiko, ditandai sebelum Anda mengeklik.** Di
+  Google, Bing, dan DuckDuckGo, titik merah atau kuning kecil kini
+  menandai hasil pencarian yang domainnya sudah ada di daftar blokir,
+  daftar pantauan, atau sangat mirip dengan sebuah merek — terlihat
+  langsung di halaman hasil, sebelum Anda mengeklik. Hasil yang bersih
+  tidak mendapat lencana sama sekali.
+- **Memperingatkan sebelum nomor kartu atau kata sandi menuju situs lain.**
+  Formulir nomor kartu atau login yang mengirim data ke domain yang
+  berbeda dari yang sedang Anda kunjungi (dan bukan pemroses pembayaran
+  atau penyedia SSO yang dikenal) kini menampilkan peringatan sebelum
+  terkirim, sama seperti perlindungan formulir bocor yang sudah ada
+  menangkap kolom formulir yang dikirim diam-diam.
+- **Menandai domain yang benar-benar baru.** Pemeriksaan domain yang baru
+  didaftarkan (di perangkat, diperbarui mingguan, model privasi yang sama
+  dengan sisa daftar ancaman) menambahkan catatan kewaspadaan saat domain
+  sebuah halaman baru saja didaftarkan — trik favorit situs penipuan yang
+  ditutup lalu dibangun kembali dengan nama baru — dan mengendur setelah
+  Anda mengunjungi domain itu dengan aman selama beberapa waktu.
+- **Laporan temuan yang siap dibagikan.** Setiap peringatan berbahaya atau
+  mencurigakan kini memiliki tombol "Salin laporan" yang menaruh ringkasan
+  singkat berupa teks biasa — situs, vonis, alasan utama — ke clipboard
+  Anda, siap ditempel ke obrolan grup atau forum untuk memperingatkan
+  orang lain.
+- **Disiplin anti-positif-palsu yang lebih tajam.** Sinyal untuk risiko
+  hosting domain (TLD yang disalahgunakan, penyedia hosting gratis/DNS
+  dinamis) tidak lagi bisa sendirian mendorong sebuah halaman sampai ke
+  vonis *berbahaya* — hanya bukti yang benar-benar independen yang bisa.
+  Dalam uji tolok ukur terhadap 1,09 juta URL, tingkat halaman biasa yang
+  aman namun salah ditandai berbahaya turun dari 0,17% menjadi 0,05%,
+  tanpa penurunan pada ancaman nyata yang terdeteksi.
+- **Halaman masukan saat dicopot.** Jika Anda tetap mencopot ScamShield,
+  sebuah halaman statis kecil terbuka dengan tautan untuk memberi tahu
+  kami alasannya dan tautan langsung ke alur laporan positif-palsu — tanpa
+  formulir, tanpa analitik, tidak ada yang dikumpulkan.
 
 Tidak ada izin baru. Tetap `storage`, `declarativeNetRequest`, `alarms`,
 dan akses http/https, persis seperti 0.3.1.

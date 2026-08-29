@@ -103,10 +103,10 @@
     }
   },
   "copyReportBtn": {
-    "message": "Copy report"
+    "message": "Raporu kopyala"
   },
   "copyReportHeader": {
-    "message": "⚠ ScamShield flagged this site: $HOST$",
+    "message": "⚠ ScamShield bu siteyi işaretledi: $HOST$",
     "placeholders": {
       "host": {
         "content": "$1",
@@ -115,7 +115,7 @@
     }
   },
   "copyReportVerdict": {
-    "message": "Verdict: $LEVEL$",
+    "message": "Karar: $LEVEL$",
     "placeholders": {
       "level": {
         "content": "$1",
@@ -124,10 +124,10 @@
     }
   },
   "copyReportSignals": {
-    "message": "Signals:"
+    "message": "Sinyaller:"
   },
   "copyReportFooter": {
-    "message": "Checked on-device by ScamShield — free, open-source: https://joelstephen97.github.io/scamshield/"
+    "message": "ScamShield tarafından cihazda kontrol edildi — ücretsiz, açık kaynak: https://joelstephen97.github.io/scamshield/"
   },
   "reportScam": {
     "message": "Bildir: bu dolandırıcılık"
@@ -211,13 +211,13 @@
     "message": "Koruma devam ettirildi"
   },
   "toastCopied": {
-    "message": "Copied"
+    "message": "Kopyalandı"
   },
   "toastExtensionError": {
     "message": "Uzantı hatası — yeniden açmayı deneyin."
   },
   "whatsNewBanner": {
-    "message": "0.8'deki yenilikler: ScamShield artık ScamShield oldu, zaman sınırlı duraklatma ve dolandırıcılık sayaçlarıyla yeniden tasarlanmış popup, yeni simge."
+    "message": "0.8'deki yenilikler: zaman sınırlı duraklatma, dolandırıcılık sayaçları ve bu karar neden verildi paneliyle yeniden tasarlanmış popup."
   },
   "popupBrandDangerSummary": {
     "message": "$BRAND$ gibi görünüyor ama değil. Buraya şifrenizi girmeyin.",
@@ -294,7 +294,7 @@
     "message": "Bu site \"İzin Ver'e tıklayın\" bildirim hilesini denedi."
   },
   "popupPrivacyCredExfilPassword": {
-    "message": "Sent your password to $HOST$ — a different site than the one you were on.",
+    "message": "Şifrenizi $HOST$ adresine gönderdi — bulunduğunuz siteden farklı bir site.",
     "placeholders": {
       "host": {
         "content": "$1",
@@ -303,7 +303,7 @@
     }
   },
   "popupPrivacyCredExfilCard": {
-    "message": "Sent your card details to $HOST$ — a different site than the one you were on.",
+    "message": "Kart bilgilerinizi $HOST$ adresine gönderdi — bulunduğunuz siteden farklı bir site.",
     "placeholders": {
       "host": {
         "content": "$1",
@@ -882,10 +882,10 @@
     }
   },
   "serpBadgeDanger": {
-    "message": "ScamShield: this result is on our threat block list"
+    "message": "ScamShield: bu sonuç tehdit engelleme listemizde"
   },
   "serpBadgeCaution": {
-    "message": "ScamShield: this result shows scam warning signs"
+    "message": "ScamShield: bu sonuç dolandırıcılık uyarı işaretleri gösteriyor"
   },
   "chipLink": {
     "message": "Bağlantı"
@@ -1002,7 +1002,7 @@
     }
   },
   "reason_newDomain": {
-    "message": "Domain appears on a newly-registered-domains list — most scam sites are only days old$EXTRA$.",
+    "message": "Alan adı yakın zamanda kaydedilmiş alan adları listesinde görünüyor — dolandırıcılık sitelerinin çoğu yalnızca birkaç günlüktür$EXTRA$.",
     "placeholders": {
       "extra": {
         "content": "$1",
@@ -1014,7 +1014,7 @@
     "message": "Bu sayfadaki bir şifre formu, kimlik bilgilerinizi farklı bir siteye gönderiyor."
   },
   "reason_crossOriginCredPost": {
-    "message": "This form sends your password or card details to $HOST$ — a different site than the one you are on.",
+    "message": "Bu form şifrenizi veya kart bilgilerinizi $HOST$ adresine gönderiyor — bulunduğunuz siteden farklı bir site.",
     "placeholders": {
       "host": {
         "content": "$1",
