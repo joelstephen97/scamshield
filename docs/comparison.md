@@ -47,25 +47,17 @@ listings reviewed above.
 
 Every claim above traces to the named product's own Chrome Web Store
 listing, or its own privacy/help-center disclosure, read live on 2026-08-29
-as part of Parry's listing research. Exact listing URLs were not preserved
-in the research notes this table was built from — look each product up by
-name in the Chrome Web Store (Privacy & Security category) to verify current
-text yourself; store listings change over time and figures here reflect only
-that one day.
+as part of Parry's listing research. Store listings change over time and
+figures here reflect only that one day.
 
-- Guardio — Chrome Web Store listing (free-tier vs. paid-tier feature
-  breakdown; user-reported billing complaints on the same listing)
-- Malwarebytes Browser Guard — Chrome Web Store listing (feature list,
-  install/rating counts, extension size, statistics dashboard)
-- Norton Safe Web — Chrome Web Store listing and Norton's own
-  data-collection disclosure (PII, location, web history)
-- McAfee WebAdvisor — Chrome Web Store listing
-- Bitdefender TrafficLight — Chrome Web Store listing
-- Netcraft — Chrome Web Store listing
-- Avast Online Security — Chrome Web Store listing and Avast's own
-  data-collection disclosure (URLs, device GUID, device info); FTC
-  settlement regarding Jumpshot is public record (February 2024)
-- ScamAdviser — Chrome Web Store listing
+- [Guardio — Chrome Web Store](https://chromewebstore.google.com/detail/guardio-protection-for-ch/gjfpmkejnolcfklaaddjnckanhhgegla) · [guard.io/plans](https://guard.io/plans) (free-tier vs. paid-tier feature breakdown and pricing)
+- [Malwarebytes Browser Guard — Chrome Web Store](https://chromewebstore.google.com/detail/malwarebytes-browser-guar/ihcjicgdanjaechkgeegckofjjedodee) · [Browser Guard activity dashboard help page](https://help.malwarebytes.com/hc/en-us/articles/31589246123803-View-Browser-Guard-activity-at-a-glance)
+- [Norton Safe Web — Chrome Web Store](https://chromewebstore.google.com/detail/norton-safe-web/fnpbeacklnhmkkilekogeiekaglbmmka) (its data-collection disclosure lists PII, location, web history)
+- [McAfee WebAdvisor — Chrome Web Store](https://chromewebstore.google.com/detail/fheoggkfdfchfphceeifdbepaooicaho)
+- [Bitdefender TrafficLight — Chrome Web Store](https://chromewebstore.google.com/detail/bitdefender-trafficlight/cfnpidifppmenkapgihekkeednfoenal)
+- [Netcraft Extension — Chrome Web Store](https://chromewebstore.google.com/detail/netcraft-extension/bmejphbfclcpmpohkggcjeibfilpamia)
+- [Avast Online Security & Privacy — Chrome Web Store](https://chromewebstore.google.com/detail/avast-online-security-and/gomekmidlodglbbmalcneegieacbdmki) (its data-collection disclosure lists visited URLs, a GUID, device info) · [Avast's own Jumpshot settlement FAQ](https://support.avast.com/en-us/article/jumpshot-settlement-faqs/) (FTC order, February 2024)
+- [ScamAdviser — Chrome Web Store](https://chromewebstore.google.com/detail/scamadviser/lcmofkcgjjagmhodenahpocfkpopjdci)
 
 Parry's own figures (free, on-device, 20 languages, statistics tab,
 explainable verdicts) reflect the shipped extension as of this release, not
