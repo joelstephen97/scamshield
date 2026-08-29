@@ -2,6 +2,7 @@ node_modules/
 dist/
 test-results/
 playwright-report/
+tests/e2e/feed-fixtures/
 _metadata/
 model/data/full*.csv
 model/data/pages.jsonl

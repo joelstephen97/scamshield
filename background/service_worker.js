@@ -756,8 +756,11 @@ function normalizeFeedHost(h) {
 // (delta chain when meta.prev matches our installed version, else a full,
 // sha256-verified pull) and the warn tier (full pull, at most every 7 days —
 // no delta chain exists for warn per the output contract).
-async function runFeedUpdate() {
-  const meta = await fetchJsonWithTimeout(FEED_META_URL, 10000);
+// `metaUrl` defaults to the hardcoded FEED_META_URL constant; the e2e suite
+// (which cannot reach GitHub/jsDelivr from a sandboxed test run) passes its
+// own local fixture-server URL instead, via worker.evaluate.
+async function runFeedUpdate(metaUrl) {
+  const meta = await fetchJsonWithTimeout(metaUrl || FEED_META_URL, 10000);
   if (!meta || typeof meta.version !== 'string' || !meta.urls) return { ok: false, reason: 'meta-unavailable' };
   const rec = (await globalThis.Blockstore.get()) || { version: null, blockBuf: null, warnBuf: null, warnUpdatedAt: 0 };
   const bases = [meta.urls.cdn, meta.urls.fallback].filter(Boolean);
