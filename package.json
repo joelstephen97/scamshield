@@ -1,6 +1,6 @@
 {
   "name": "parry",
-  "version": "0.7.1",
+  "version": "0.8.0",
   "description": "On-device scam & phishing detection for Chromium and Firefox.",
   "private": true,
   "license": "GPL-3.0-or-later",
