@@ -69,7 +69,9 @@ test.beforeAll(() => {
   // the unavailable-shard fail-caution test. Deterministic: candidates are
   // tried in order until one lands on its own shard byte.
   let unvHash = null;
-  for (let i = 0; i < 64 && !unvHash; i++) {
+  // Candidates 0-7 are all present in fixtures.js's host-resolver-rules; the
+  // odds of every one sharing a shard byte with block/warn/fp are ~(3/256)^8.
+  for (let i = 0; i < 8 && !unvHash; i++) {
     const cand = `unverified-${i}.example`;
     const h = hash40For(cand);
     if (shardHex(h) !== shardHex(blockHash) && shardHex(h) !== shardHex(warnHash) && shardHex(h) !== shardHex(hash40For(FP_DOMAIN))) {

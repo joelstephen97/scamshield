@@ -8,10 +8,15 @@ const HISTORY_031 = [{ ts: Date.now() - 3600000, host: 'old-scam.example', kind:
 test('0.3.1 settings + history load, migrate additively, and the UI works', async ({ context, extensionId }) => {
   const sw = context.serviceWorkers()[0];
   await sw.evaluate(async ({ s, h }) => { await chrome.storage.local.clear(); await chrome.storage.local.set({ settings: s, history: h }); }, { s: SETTINGS_031, h: HISTORY_031 });
-  // simulate the update hook (otaUrl '' → official feed)
-  await sw.evaluate(async () => { const cur = await chrome.storage.local.get('settings'); if (cur.settings.otaUrl === '') await chrome.storage.local.set({ settings: Object.assign({}, cur.settings, { otaUrl: DEFAULT_FEED_URL }) }); });
+  // simulate the update hook (otaUrl '' → official feed) — through the SW's
+  // own chained setter, NOT a raw storage.local.set: the SW's boot-time
+  // writers (e.g. runFeedUpdate's lastFeedAt) serialize on that chain, and a
+  // raw write can be silently clobbered by a chained read-modify-write that
+  // straddles it (lost update, showed up as flake under full-suite load).
+  await sw.evaluate(async () => { const cur = await getSettings(); if (cur.otaUrl === '') await setSettings({ otaUrl: DEFAULT_FEED_URL }); });
   const s = await sw.evaluate(() => getSettings());
-  expect(s.allowlist).toEqual(['trusted-shop.example']); expect(s.threatsBlocked).toBe(7); expect(s.otaUrl).toContain('parry-feed');
+  expect(s.allowlist).toEqual(['trusted-shop.example']); expect(s.threatsBlocked).toBe(7);
+  await expect.poll(() => sw.evaluate(() => getSettings().then((x) => x.otaUrl)), { timeout: 5000 }).toContain('parry-feed');
   expect(s.pageAnalysis).toBe(true); expect(s.theme).toBe('auto'); expect(s.pausedSites).toEqual({}); expect(s.reportingOptIn).toBe(false);
   // 0.6.0 keys arrive with safe defaults on an upgraded profile, old keys intact.
   expect(s.clickFixGuard).toBe(true); expect(s.fakeUpdateGuard).toBe(true); expect(s.walletGuard).toBe(true);
