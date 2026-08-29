@@ -44,6 +44,16 @@ test('hash40FromBytes combines 5 bytes into the big-endian 40-bit value', () => 
   assert.throws(() => B.hash40FromBytes([1, 2, 3]), RangeError);
 });
 
+test('shardByte extracts the top byte of a 40-bit value (the exact-shard index)', () => {
+  assert.equal(B.shardByte(0x00007a48a6), 0x00);
+  assert.equal(B.shardByte(0xffffffffff), 0xff);
+  assert.equal(B.shardByte(0x1200000000), 0x12);
+  assert.equal(B.shardByte(0), 0);
+  // Round-trips with hash40FromBytes: the shard byte must equal the first
+  // digest byte handed in.
+  assert.equal(B.shardByte(B.hash40FromBytes([0xab, 1, 2, 3, 4])), 0xab);
+});
+
 // --- open / has ----------------------------------------------------------
 
 test('open() rejects non-ArrayBuffer input and misaligned lengths', () => {

@@ -430,6 +430,37 @@
     }
     let verdict = SS.fuse({ modelProb, urlRules, domRules, contentProb, iconMatch });
 
+    // v0.9 threat-feed check (Task B2). Full hostname, not the registrable
+    // domain — the feed pipeline deliberately keeps shared-hosting
+    // subdomains distinct (e.g. *.web.app, *.pages.dev), so collapsing here
+    // would defeat that. Every frame runs this (all_frames, like the form
+    // guard): an iframe-hosted phishing form on a feed-listed domain must not
+    // be invisible just because the top frame is clean. A block-tier hit gets
+    // the same dangerous+interstitial treatment as a legacy OTA-blocklist
+    // hit; a warn-tier hit is a suspicious-tier evidence signal. Both carry a
+    // feed-* flag so the engagement gate below (which only ever suppresses a
+    // flag-less "suspicious") can never silently swallow validated feed intel.
+    try {
+      const feedHit = await send('checkFeed', { host: location.hostname });
+      if (feedHit && feedHit.hit === 'block') {
+        const reason = { code: 'feedBlock', kind: 'link', params: [String((feedHit.sources || []).length)] };
+        verdict = Object.assign({}, verdict, {
+          level: 'dangerous', score: Math.max(verdict.score, 0.97),
+          reasons: [reason].concat(verdict.reasons || []),
+          reasonCodes: [reason.code].concat(verdict.reasonCodes || []),
+          flags: ['feed-block'].concat(verdict.flags || [])
+        });
+      } else if (feedHit && feedHit.hit === 'warn' && verdict.level !== 'dangerous') {
+        const reason = { code: 'feedWarn', kind: 'link', params: [String((feedHit.sources || []).length)] };
+        verdict = Object.assign({}, verdict, {
+          level: 'suspicious', score: Math.max(verdict.score, 0.6),
+          reasons: [reason].concat(verdict.reasons || []),
+          reasonCodes: [reason.code].concat(verdict.reasonCodes || []),
+          flags: ['feed-warn'].concat(verdict.flags || [])
+        });
+      }
+    } catch (_) { /* feed check is best-effort — never blocks the rest of the scan */ }
+
     // Fake-shop check (0.6.0) — top frame, storefront pages only. Reported to
     // the popup's shopping card; a strong result nudges the verdict to at most
     // suspicious (never a full-screen block — these signals are probabilistic).
@@ -482,7 +513,7 @@
       // interaction outright; everything else keeps the banner. The
       // credential-form case stays a banner because its ACTIVE moment is the
       // submit guard — the interstitial is for scams with no submit moment.
-      const DECISIVE_INTERSTITIAL = ['seed-phrase-harvest', 'clickfix', 'fake-browser-update', 'delivery-fee-scam'];
+      const DECISIVE_INTERSTITIAL = ['seed-phrase-harvest', 'clickfix', 'fake-browser-update', 'delivery-fee-scam', 'feed-block'];
       const handlers = { onLeave: () => send('leaveTab'), onReport: () => send('userReport', { label: 'false_positive' }) };
       // Strict mode (0.6.0): for a less-confident user, ANY non-safe verdict
       // gets the blocking interstitial, not just decisive flags.

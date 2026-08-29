@@ -46,6 +46,12 @@
     return v;
   }
 
+  // The exact-shard filename the SW must fetch to verify a 40-bit hit: shard
+  // index = the first byte of SHA-256(hostname), i.e. the top 8 bits of a
+  // hash40 value (bits 32-39 of the 40). Pure arithmetic — the fetch+gunzip
+  // that actually reads exact-<hex>.jsonl.gz is chrome/SW territory.
+  function shardByte(hash40) { return Math.floor(hash40 / 0x100000000); }
+
   // Wraps a raw ArrayBuffer of sorted 5-byte records for repeated has()
   // lookups without re-deriving the view/count each call.
   function open(buf) {
@@ -170,7 +176,7 @@
 
   return {
     RECORD_SIZE, DELTA_HEADER_SIZE,
-    hash40FromBytes,
+    hash40FromBytes, shardByte,
     open, has, values, count, isSorted,
     binarySearchValue, parseDelta, applyDelta,
     findExact

@@ -4,7 +4,7 @@
 // a classic-worker context (tests driving this file directly) falls back to
 // importScripts here. In the module SW `importScripts` is undefined — the
 // ReferenceError lands in the catch and the imports from sw.js already won.
-try { importScripts('../engine/constants.js', '../engine/trust.js', '../engine/features.js', '../engine/image_hash.js', '../engine/brand_icons.js', '../engine/report_payload.js', '../engine/engagement.js', './stats.js'); } catch (_) { /* deps already loaded by sw.js (Chrome) or the manifest (Firefox) */ }
+try { importScripts('../engine/constants.js', '../engine/trust.js', '../engine/features.js', '../engine/image_hash.js', '../engine/brand_icons.js', '../engine/report_payload.js', '../engine/engagement.js', '../engine/blockset.js', './stats.js', './blockstore.js'); } catch (_) { /* deps already loaded by sw.js (Chrome) or the manifest (Firefox) */ }
 const api = globalThis.browser || globalThis.chrome;
 
 // Official Parry feed: rebuilt daily by GitHub Actions from OpenPhish +
@@ -17,6 +17,20 @@ const DEFAULT_FEED_URL = 'https://raw.githubusercontent.com/joelstephen97/parry-
 // clear it to disable even when opted in.
 const DEFAULT_RELAY_URL = 'https://scamshield-relay-seven.vercel.app/api/report';
 const PLACEHOLDER_RELAY_URL = 'https://scamshield-relay.vercel.app/api/report';
+
+// v0.9 threat-feed (Task B2): a large, sourced block/warn domain list — a
+// second, additive pipeline alongside the legacy OTA blocklist above (that
+// one keeps shipping DNR-rule updates unchanged; this one populates an
+// IndexedDB-backed typed-array matcher, checked from the content script's
+// verdict path). meta.json is always fetched from the mutable `main` branch
+// via raw.githubusercontent.com — NOT jsDelivr, whose @main tag caches up to
+// 12h and would delay this tiny poll from ever seeing a new version. The big
+// per-version files (set40.bin/warn40.bin/delta-*.bin/exact-*.jsonl.gz) come
+// from meta.json's own `urls.cdn` (jsDelivr pinned to that version's git tag,
+// so it stays cacheable and immutable) with `urls.fallback` (raw, same tag's
+// tree) as a backup — both constants live here, next to DEFAULT_FEED_URL, per
+// the task brief.
+const FEED_META_URL = 'https://raw.githubusercontent.com/joelstephen97/parry-feed/main/v/current/meta.json';
 
 const DEFAULTS = {
   enabled: true,
@@ -49,6 +63,8 @@ const DEFAULTS = {
   whatsNewSeen: '',          // last extension version whose what's-new was acknowledged
   lastOtaAt: 0,              // ms epoch of the last blocklist OTA attempt (success or no-op)
   lastOtaCount: 0,           // number of blocklist rules from the last successful OTA
+  lastFeedVersion: '',       // v0.9 threat-feed: version string of the last block-tier update we installed
+  lastFeedAt: 0,             // ms epoch of the last v0.9 threat-feed OTA attempt (success or no-op)
   lastReportAt: 0,           // ms epoch of the last community report actually sent
   syncEnabled: false,        // mirror settings to chrome.storage.sync (opt-in)
   uiLang: 'auto'             // 'auto' (follow the browser) | one of SSReasons.LOCALES
@@ -681,9 +697,148 @@ async function runOtaUpdate() {
   }
 }
 
+// ---- v0.9 threat-feed: OTA cycle + verdict-path lookup (Task B2) ----------
+// Additive alongside runOtaUpdate() above — belt and braces during 0.9. See
+// research-threat-feeds.md "Output contract" / "B2 extension matcher spec"
+// and the task brief's "Format facts" for the exact byte layouts consumed
+// here (engine/blockset.js owns the pure parsing/searching; this file owns
+// fetch, crypto.subtle, and IndexedDB via background/blockstore.js).
+const WARN_REFRESH_MIN_MS = 7 * 24 * 3600 * 1000; // warn tier: full pull at most every 7 days
+const FEED_NEG_CACHE_TTL = 24 * 3600 * 1000;      // exact-shard-confirmed-absent hosts, per SW lifetime
+const FEED_NEG_CACHE_CAP = 5000;
+const feedNegativeCache = new Map(); // normalized host -> ts of last confirmed-absent check
+
+async function fetchJsonWithTimeout(url, ms) {
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), ms);
+  try {
+    const res = await fetch(url, { cache: 'no-cache', signal: ctl.signal });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (_) { return null; } finally { clearTimeout(timer); }
+}
+// Tries each base in order (cdn first, then the raw fallback), returning the
+// first successful fetch's bytes. `bases` entries may be falsy/missing.
+async function fetchArrayBufferFromBases(bases, filename) {
+  for (const base of bases) {
+    if (!base) continue;
+    try {
+      const res = await fetch(base + filename, { cache: 'no-cache' });
+      if (!res.ok) continue;
+      return await res.arrayBuffer();
+    } catch (_) { /* try the next base */ }
+  }
+  return null;
+}
+async function sha256Hex(buf) {
+  const digest = await crypto.subtle.digest('SHA-256', buf);
+  return Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+// gzip -> parsed {d, s} lines, via the platform's native DecompressionStream
+// (no new dependency, no new permission — Chrome ≥80 / Firefox ≥113, both
+// under our existing minimums).
+async function gunzipJsonl(buf) {
+  const stream = new Blob([buf]).stream().pipeThrough(new DecompressionStream('gzip'));
+  const text = await new Response(stream).text();
+  return text.split('\n').filter(Boolean).map((line) => { try { return JSON.parse(line); } catch (_) { return null; } }).filter(Boolean);
+}
+// NORMALIZE, matching B1's pipeline just enough for a lookup key: lowercase,
+// strip a leading "www.". Everything else (punycode, IP/bare-TLD rejection)
+// happens upstream in parry-feed — a hostname that never made normalization
+// there simply never matches, which is the correct (safe) outcome here.
+function normalizeFeedHost(h) {
+  let s = String(h || '').toLowerCase();
+  if (s.startsWith('www.')) s = s.slice(4);
+  return s;
+}
+
+// The v0.9 OTA cycle: poll meta.json, and if newer, update the block tier
+// (delta chain when meta.prev matches our installed version, else a full,
+// sha256-verified pull) and the warn tier (full pull, at most every 7 days —
+// no delta chain exists for warn per the output contract).
+async function runFeedUpdate() {
+  const meta = await fetchJsonWithTimeout(FEED_META_URL, 10000);
+  if (!meta || typeof meta.version !== 'string' || !meta.urls) return { ok: false, reason: 'meta-unavailable' };
+  const rec = (await globalThis.Blockstore.get()) || { version: null, blockBuf: null, warnBuf: null, warnUpdatedAt: 0 };
+  const bases = [meta.urls.cdn, meta.urls.fallback].filter(Boolean);
+  const Bset = globalThis.Blockset;
+
+  let blockBuf = rec.blockBuf;
+  if (meta.version !== rec.version) {
+    let updated = false;
+    if (rec.blockBuf && meta.prev && meta.prev === rec.version) {
+      const deltaBuf = await fetchArrayBufferFromBases(bases, `delta-${rec.version}.bin`);
+      if (deltaBuf && meta.sha256 && meta.sha256.deltaFromPrev && (await sha256Hex(deltaBuf)) === meta.sha256.deltaFromPrev) {
+        try { blockBuf = Bset.applyDelta(rec.blockBuf, deltaBuf); updated = true; } catch (_) { /* corrupt delta — fall through to a full pull */ }
+      }
+    }
+    if (!updated) {
+      // No usable delta chain (first install, schema change, a version gap,
+      // or the delta above failed to verify) — full pull, sha256-verified.
+      const fullBuf = await fetchArrayBufferFromBases(bases, 'set40.bin');
+      if (fullBuf && meta.sha256 && meta.sha256.set40 && (await sha256Hex(fullBuf)) === meta.sha256.set40) blockBuf = fullBuf;
+    }
+  }
+
+  let warnBuf = rec.warnBuf;
+  let warnUpdatedAt = rec.warnUpdatedAt || 0;
+  if (!warnBuf || Date.now() - warnUpdatedAt >= WARN_REFRESH_MIN_MS) {
+    const fetchedWarn = await fetchArrayBufferFromBases(bases, 'warn40.bin');
+    if (fetchedWarn) { warnBuf = fetchedWarn; warnUpdatedAt = Date.now(); }
+  }
+
+  const blockChanged = blockBuf !== rec.blockBuf;
+  const warnChanged = warnBuf !== rec.warnBuf;
+  if (!blockChanged && !warnChanged) { await setSettings({ lastFeedAt: Date.now() }); return { ok: true, updated: false, version: rec.version || '' }; }
+
+  const nextVersion = blockChanged ? meta.version : (rec.version || '');
+  await globalThis.Blockstore.save({ version: nextVersion, blockBuf, warnBuf, warnUpdatedAt, urls: meta.urls });
+  await setSettings({ lastFeedVersion: nextVersion, lastFeedAt: Date.now() });
+  return { ok: true, updated: true, version: nextVersion, blockUpdated: blockChanged, warnUpdated: warnChanged };
+}
+
+// Verify tier: before trusting a 40-bit hit as real, confirm the hostname
+// actually appears in its exact shard (provenance for the warning page /
+// evidence detail comes from the same lookup). A miss is the 40-bit
+// false-positive case (~1-in-950k) — downgrade to no-hit and cache the
+// negative so the same host doesn't re-trigger a shard fetch all session.
+async function fetchExactShardEntries(urls, hash40) {
+  if (!urls) return null;
+  const hex = globalThis.Blockset.shardByte(hash40).toString(16).padStart(2, '0');
+  const bases = [urls.cdn, urls.fallback].filter(Boolean);
+  const buf = await fetchArrayBufferFromBases(bases, `exact-${hex}.jsonl.gz`);
+  if (!buf) return null;
+  try { return await gunzipJsonl(buf); } catch (_) { return null; }
+}
+async function checkFeedHost(host) {
+  const normalized = normalizeFeedHost(host);
+  if (!normalized) return { hit: null };
+  const negAt = feedNegativeCache.get(normalized);
+  if (negAt && Date.now() - negAt < FEED_NEG_CACHE_TTL) return { hit: null };
+
+  const rec = await globalThis.Blockstore.get();
+  if (!rec || (!rec.blockBuf && !rec.warnBuf)) return { hit: null };
+  const Bset = globalThis.Blockset;
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(normalized));
+  const hash40 = Bset.hash40FromBytes(new Uint8Array(digest));
+
+  const blockHit = !!rec.blockBuf && Bset.has(Bset.open(rec.blockBuf), hash40);
+  const warnHit = !blockHit && !!rec.warnBuf && Bset.has(Bset.open(rec.warnBuf), hash40);
+  if (!blockHit && !warnHit) return { hit: null };
+
+  const entries = await fetchExactShardEntries(rec.urls, hash40);
+  const match = entries ? Bset.findExact(entries, normalized) : null;
+  if (!match) {
+    feedNegativeCache.set(normalized, Date.now());
+    if (feedNegativeCache.size > FEED_NEG_CACHE_CAP) feedNegativeCache.delete(feedNegativeCache.keys().next().value);
+    return { hit: null };
+  }
+  return { hit: blockHit ? 'block' : 'warn', sources: Array.isArray(match.s) ? match.s : [] };
+}
+
 if (api.alarms) {
-  api.alarms.create('ota', { periodInMinutes: 720 }); // every 12h
-  api.alarms.onAlarm.addListener((a) => { if (a.name === 'ota') { runOtaUpdate(); flushReports(); } });
+  api.alarms.create('ota', { periodInMinutes: 720 }); // every 12h — feed OTA rides the same cadence
+  api.alarms.onAlarm.addListener((a) => { if (a.name === 'ota') { runOtaUpdate(); runFeedUpdate(); flushReports(); } });
 }
 
 api.runtime.onInstalled.addListener(async (details) => {
@@ -714,6 +869,7 @@ api.runtime.onInstalled.addListener(async (details) => {
     try { api.tabs.create({ url: api.runtime.getURL('onboarding.html') }); } catch (_) {}
   }
   runOtaUpdate(); // fresh rules right away instead of waiting for the 12h alarm
+  runFeedUpdate(); // same for the v0.9 threat feed
   flushReports();
 });
 
@@ -956,6 +1112,10 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         sendResponse({ ok: true }); break;
       case 'checkForUpdates':
         sendResponse(await runOtaUpdate()); break;
+      case 'checkForFeedUpdates':
+        sendResponse(await runFeedUpdate()); break;
+      case 'checkFeed':
+        sendResponse(await checkFeedHost(msg.host)); break;
       case 'getDefaultFeedUrl':
         sendResponse({ url: DEFAULT_FEED_URL }); break;
       case 'hashIcons':
@@ -994,4 +1154,4 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 // module-scoped. Re-attach the debug/test surface that used to live on the
 // classic worker's global scope — the e2e suite drives these via
 // worker.evaluate, and they're handy in the SW console.
-Object.assign(globalThis, { DEFAULT_FEED_URL, getSettings, setSettings, handleUserReport, runOtaUpdate, flushReports, queueReport, exportSettings, sanitizeImport, pushSync, pullSync, getStats, bumpStat, ensurePrivacyTotal, ensureInstalledAt, getReviewAsk, getReviewAskContext, setReviewAsk, sanitizeReviewAsk, ensureReviewAsk, importReviewAsk, getLangDict, loadLangDict, isValidLang });
+Object.assign(globalThis, { DEFAULT_FEED_URL, FEED_META_URL, getSettings, setSettings, handleUserReport, runOtaUpdate, flushReports, queueReport, exportSettings, sanitizeImport, pushSync, pullSync, getStats, bumpStat, ensurePrivacyTotal, ensureInstalledAt, getReviewAsk, getReviewAskContext, setReviewAsk, sanitizeReviewAsk, ensureReviewAsk, importReviewAsk, getLangDict, loadLangDict, isValidLang, runFeedUpdate, checkFeedHost, normalizeFeedHost });
