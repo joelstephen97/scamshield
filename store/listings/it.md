@@ -167,24 +167,31 @@ domini truffa, aggiornata continuamente da un feed open source; e
 un'installazione sotto 1 MB — circa 450 KB compressi, nessun runtime
 pesante.
 
-## What's new (0.8.0)
+## What's new (0.9.0)
 
-- **ScamShield ora si chiama Parry.** Due prodotti molto noti usano già il
-  nome "ScamShield" — il governo di Singapore gestisce una propria app
-  nazionale anti-truffa chiamata ScamShield, e lo Scam Shield di T-Mobile è
-  un servizio di blocco truffe molto usato da un operatore statunitense —
-  quindi l'estensione è stata rinominata per evitare confusione con
-  entrambi. Non è cambiato nulla nel modo in cui ti protegge, in ciò che
-  raccoglie (niente) o nelle tue impostazioni.
-- **Popup ridisegnato:** un menu *Metti in pausa la protezione* a tempo (1
-  ora, 1 giorno o Sempre) sostituisce la vecchia formulazione basata sulla
-  fiducia, contatori in evidenza mostrano a colpo d'occhio le minacce
-  bloccate dall'installazione e questa settimana, ogni avviso si apre in un
-  pannello *Perché questo verdetto?* con le ragioni esatte, e un piè di
-  pagina rotante più chiaro alterna un promemoria sulla privacy, una
-  richiesta di recensione meritata e un link di supporto.
-- **Nuova icona** — un semplice simbolo di deviazione che si adatta meglio
-  al nuovo nome.
+- **Un elenco minacce molto più ampio.** La blocklist è passata da poche
+  migliaia di domini a **oltre 425.000 domini di truffa e phishing
+  confermati**, più una watchlist di oltre un milione di voci a bassa
+  affidabilità — aggregate da più di una dozzina di database di minacce
+  open source, incrociate tra loro e filtrate rispetto ai siti più
+  popolari al mondo per mantenere rari i falsi allarmi. Il confronto
+  avviene ancora interamente sul tuo dispositivo: l'elenco viene scaricato
+  come impronte compatte e controllato localmente, quindi nessun sito che
+  visiti viene mai inviato altrove. Gli aggiornamenti arrivano come piccoli
+  diff ogni poche ore.
+- **Quando Parry blocca un sito presente nell'elenco, ora ti dice quali
+  fonti indipendenti lo hanno segnalato** — verificabile, non un punteggio
+  a scatola chiusa.
+- **Rilevamento delle imitazioni più intelligente**: i controlli
+  sull'impersonificazione di marchio ora individuano lettere scambiate,
+  caratteri simili, nomi di marchio nascosti in sottodomini lunghi e
+  terminazioni di dominio scambiate, con rigide misure di sicurezza
+  affinché i siti di marchi reali non vengano mai segnalati per errore.
+- **Nuovi segnali di avviso**: catene di sottodomini insolitamente
+  profonde, parti dell'indirizzo anormalmente lunghe, destinazioni di
+  accorciatori di link, terminazioni di dominio ad alto tasso di truffa e
+  provider di hosting gratuito ora aggiungono elementi di cautela al
+  verdetto di una pagina.
 
 Nessun nuovo permesso. Sempre `storage`, `declarativeNetRequest`, `alarms` e
 accesso http/https, esattamente come nella 0.3.1.

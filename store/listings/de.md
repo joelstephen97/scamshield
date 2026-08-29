@@ -169,25 +169,30 @@ Sperrliste mit Tausenden Betrugsdomains, laufend aktualisiert aus einem
 Open-Source-Feed; und eine Installation unter 1 MB – etwa 450 KB gepackt,
 keine schwere Laufzeitumgebung.
 
-## What's new (0.8.0)
+## What's new (0.9.0)
 
-- **ScamShield heißt jetzt Parry.** Zwei sehr bekannte Produkte tragen
-  bereits den Namen „ScamShield“ – Singapurs Regierung betreibt eine eigene
-  nationale Anti-Betrugs-App namens ScamShield, und T-Mobiles Scam Shield
-  ist ein weit verbreiteter US-Mobilfunk-Betrugsschutzdienst –, daher hat
-  sich die Erweiterung umbenannt, um Verwechslungen mit beiden zu vermeiden.
-  An der Art, wie sie dich schützt, was sie sammelt (nichts) oder deinen
-  Einstellungen hat sich nichts geändert.
-- **Neu gestaltetes Popup:** Ein zeitlich begrenztes *Schutz
-  pausieren*-Menü (1 Stunde, 1 Tag oder Immer) ersetzt die alte
-  Vertrauens-Formulierung, Hero-Zähler zeigen auf einen Blick gestoppte
-  Bedrohungen seit der Installation und diese Woche, jede Warnung lässt sich
-  zu einem *Warum dieses Urteil?*-Panel mit den genauen Gründen aufklappen,
-  und eine klarere, rotierende Fußzeile wechselt zwischen einem
-  Datenschutzhinweis, einer verdienten Bewertungsanfrage und einem
-  Unterstützungslink.
-- **Neues Symbol** – ein einfaches Abwehrzeichen, das besser zum neuen Namen
-  passt.
+- **Eine deutlich größere Bedrohungsliste.** Die Sperrliste ist von wenigen
+  tausend Domains auf **über 425.000 bestätigte Betrugs- und
+  Phishing-Domains** angewachsen, plus eine Beobachtungsliste mit über einer
+  Million weniger sicheren Einträgen – zusammengetragen aus mehr als einem
+  Dutzend Open-Source-Bedrohungsdatenbanken, gegeneinander abgeglichen und
+  gegen die weltweit meistbesuchten Seiten gefiltert, damit Fehlalarme
+  selten bleiben. Der Abgleich findet weiterhin vollständig auf deinem Gerät
+  statt: Die Liste wird als kompakte Fingerabdrücke heruntergeladen und
+  lokal geprüft, sodass keine von dir besuchte Seite jemals irgendwohin
+  gesendet wird. Updates kommen alle paar Stunden als kleine Diffs.
+- **Wenn Parry eine in der Liste geführte Seite blockiert, nennt es dir
+  jetzt, welche unabhängigen Quellen sie gemeldet haben** – nachprüfbar
+  statt eine Blackbox-Bewertung.
+- **Klügere Fälschungserkennung**: Marken-Fälschungsprüfungen erkennen jetzt
+  vertauschte Buchstaben, täuschend ähnliche Zeichen, versteckte
+  Markennamen in langen Subdomains und vertauschte Domain-Endungen – mit
+  strengen Sicherungen, damit echte Markenseiten nie fälschlich markiert
+  werden.
+- **Neue Warnsignale**: ungewöhnlich tiefe Subdomain-Ketten, abnorm lange
+  Adressteile, Linkverkürzer-Ziele, betrugsanfällige Domain-Endungen und
+  Gratis-Hosting-Anbieter liefern jetzt zusätzliche Verdachtsmomente für das
+  Urteil einer Seite.
 
 Keine neuen Berechtigungen. Weiterhin `storage`, `declarativeNetRequest`,
 `alarms` und http/https-Zugriff, genau wie bei 0.3.1.

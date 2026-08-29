@@ -893,6 +893,60 @@
   "reason_randomHost": {
     "message": "Nama domain tampak dibuat secara acak."
   },
+  "reason_brandFuzzyMatch": {
+    "message": "Domain ini sangat mirip dengan domain asli $BRAND$ — periksa bilah alamat dengan saksama sebelum memasukkan apa pun.",
+    "placeholders": {
+      "brand": {
+        "content": "$1",
+        "example": "PayPal"
+      }
+    }
+  },
+  "reason_deepSubdomainChain": {
+    "message": "Domain memiliki rantai subdomain yang tidak biasa dalamnya di bawah domain aslinya — trik penyamaran yang umum."
+  },
+  "reason_longHostLabel": {
+    "message": "Domain berisi bagian yang tidak biasa panjangnya, sering digunakan untuk menyembunyikan nama merek palsu atau menyamarkan domain asli."
+  },
+  "reason_shortenerHost": {
+    "message": "Ini adalah domain pemendek tautan ($HOST$) — tujuan sebenarnya disembunyikan sampai Anda mengekliknya.",
+    "placeholders": {
+      "host": {
+        "content": "$1",
+        "example": "bit.ly"
+      }
+    }
+  },
+  "reason_riskAbusedTld": {
+    "message": "TLD ($TLD$) domain ini memiliki tingkat penyalahgunaan penipuan yang tinggi dalam tabel risiko daftar ancaman Parry.",
+    "placeholders": {
+      "tld": {
+        "content": "$1",
+        "example": ".top"
+      }
+    }
+  },
+  "reason_riskDynamicHost": {
+    "message": "Domain di-host di penyedia DNS dinamis atau hosting gratis yang sering disalahgunakan untuk halaman penipuan."
+  },
+  "reason_feedBlock": {
+    "message": "Domain ini cocok dengan daftar ancaman Parry, dikonfirmasi oleh $COUNT$ sumber independen.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "reason_feedWarn": {
+    "message": "Domain ini cocok dengan entri kepercayaan rendah dalam daftar ancaman Parry ($COUNT$ sumber) — lanjutkan dengan hati-hati.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "1"
+      }
+    }
+  },
   "reason_credentialFormForeignDomain": {
     "message": "Formulir kata sandi di halaman ini mengirim kredensial Anda ke situs yang berbeda."
   },

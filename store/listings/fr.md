@@ -173,24 +173,33 @@ blocage de milliers de domaines d'arnaque, mise à jour en continu depuis un
 flux open source ; et une installation de moins de 1 Mo — environ 450 Ko
 compressés, sans runtime lourd.
 
-## What's new (0.8.0)
+## What's new (0.9.0)
 
-- **ScamShield s'appelle désormais Parry.** Deux produits très connus
-  portent déjà le nom « ScamShield » — le gouvernement de Singapour exploite
-  sa propre application nationale anti-arnaque appelée ScamShield, et le
-  Scam Shield de T-Mobile est un service de blocage d'arnaques largement
-  utilisé par un opérateur américain —, l'extension a donc été renommée pour
-  éviter toute confusion avec l'un ou l'autre. Rien n'a changé dans la façon
-  dont elle vous protège, ce qu'elle collecte (rien) ou vos paramètres.
-- **Pop-up repensé :** un menu *Suspendre la protection* programmé (1 heure,
-  1 jour ou Toujours) remplace l'ancienne formulation de confiance, des
-  compteurs en vedette affichent en un coup d'œil les menaces stoppées
-  depuis l'installation et cette semaine, chaque alerte s'ouvre sur un
-  panneau *Pourquoi ce verdict ?* détaillant les raisons exactes, et un pied
-  de page rotatif plus clair alterne un rappel de confidentialité, une
-  demande d'avis méritée et un lien de soutien.
-- **Nouvelle icône** — un symbole de parade simple qui correspond mieux au
-  nouveau nom.
+- **Une liste de menaces bien plus vaste.** La liste de blocage est passée
+  de quelques milliers de domaines à **plus de 425 000 domaines de fraude
+  et de phishing confirmés**, plus une liste de surveillance de plus d'un
+  million d'entrées moins fiables — agrégées à partir de plus d'une
+  douzaine de bases de données de menaces open source, recoupées entre
+  elles et filtrées par rapport aux sites les plus populaires au monde pour
+  que les fausses alertes restent rares. La correspondance se fait toujours
+  entièrement sur votre appareil : la liste est téléchargée sous forme
+  d'empreintes compactes et vérifiée localement, si bien qu'aucun site que
+  vous visitez n'est jamais envoyé où que ce soit. Les mises à jour
+  arrivent sous forme de petits diffs toutes les quelques heures.
+- **Quand Parry bloque un site figurant dans la liste, il vous indique
+  désormais quelles sources indépendantes l'ont signalé** — vérifiable, pas
+  un score de boîte noire.
+- **Détection d'imitation plus intelligente** : les vérifications
+  d'usurpation de marque détectent désormais les lettres interverties, les
+  caractères ressemblants, les noms de marque cachés dans de longs
+  sous-domaines et les terminaisons de domaine interverties, avec des
+  garde-fous stricts pour que les vrais sites de marque ne soient jamais
+  signalés à tort.
+- **Nouveaux signaux d'alerte** : des chaînes de sous-domaines
+  anormalement profondes, des parties d'adresse anormalement longues, des
+  destinations de raccourcisseurs de liens, des terminaisons de domaine à
+  forte fraude et des fournisseurs d'hébergement gratuit ajoutent
+  désormais des indices de prudence au verdict d'une page.
 
 Aucune nouvelle autorisation. Toujours `storage`, `declarativeNetRequest`,
 `alarms` et l'accès http/https, exactement comme en 0.3.1.

@@ -162,23 +162,32 @@ güncellenen, binlerce dolandırıcılık alan adından oluşan bir engelleme
 listesi; ve 1 MB'ın altında bir kurulum — sıkıştırılmış yaklaşık 450 KB,
 ağır bir çalışma zamanı olmadan.
 
-## What's new (0.8.0)
+## What's new (0.9.0)
 
-- **ScamShield artık Parry oldu.** Zaten iki çok tanınmış ürün "ScamShield"
-  adını kullanıyor — Singapur hükümeti ScamShield adlı kendi ulusal
-  dolandırıcılık karşıtı uygulamasını işletiyor ve T-Mobile'ın Scam Shield'i
-  yaygın olarak kullanılan bir ABD operatör dolandırıcılık engelleme
-  hizmeti — bu yüzden uzantı, her ikisiyle de karışıklığı önlemek için adını
-  değiştirdi. Sizi nasıl koruduğu, ne topladığı (hiçbir şey) veya
-  ayarlarınız konusunda hiçbir şey değişmedi.
-- **Yeniden tasarlanan popup:** zaman sınırlı bir *Korumayı duraklat* menüsü
-  (1 saat, 1 gün veya Her zaman) eski güven ifadesinin yerini alıyor, öne
-  çıkan sayaçlar kurulumdan bu yana ve bu hafta durdurulan tehditleri bir
-  bakışta gösteriyor, her uyarı arkasındaki tam nedenlerle bir *Bu karar
-  neden verildi?* paneline açılıyor ve daha temiz, dönen bir alt bilgi bir
-  gizlilik hatırlatması, hak edilmiş bir değerlendirme isteği ve bir destek
-  bağlantısı arasında geçiş yapıyor.
-- **Yeni simge** — yeni isme daha uygun basit bir savuşturma işareti.
+- **Çok daha büyük bir tehdit listesi.** Engelleme listesi birkaç bin alan
+  adından **425.000'den fazla doğrulanmış dolandırıcılık ve kimlik avı
+  alan adına** büyüdü, ayrıca bir milyondan fazla daha düşük
+  güvenilirlikte kaydı içeren bir izleme listesi eklendi — bir düzineden
+  fazla açık kaynak tehdit veri tabanından derlenmiş, birbirine karşı
+  çapraz kontrol edilmiş ve yanlış alarmları nadir tutmak için dünyanın en
+  popüler siteleriyle karşılaştırılarak filtrelenmiştir. Eşleştirme hâlâ
+  tamamen cihazınızda gerçekleşir: liste kompakt parmak izleri olarak
+  indirilir ve yerel olarak kontrol edilir, bu yüzden ziyaret ettiğiniz
+  hiçbir site hiçbir yere gönderilmez. Güncellemeler birkaç saatte bir
+  küçük fark (diff) dosyaları olarak gelir.
+- **Parry, listede yer alan bir siteyi engellediğinde, artık hangi
+  bağımsız kaynakların onu bildirdiğini de söylüyor** — doğrulanabilir,
+  kara kutu bir puan değil.
+- **Daha akıllı taklit tespiti**: marka taklidi kontrolleri artık yer
+  değiştirilmiş harfleri, benzer görünen karakterleri, uzun alt alan
+  adları içine gizlenmiş marka adlarını ve değiştirilmiş alan adı
+  uzantılarını yakalıyor; gerçek marka sitelerinin asla yanlışlıkla
+  işaretlenmemesi için sıkı güvenlik önlemleriyle birlikte.
+- **Yeni uyarı sinyalleri**: alışılmadık derecede derin alt alan adı
+  zincirleri, anormal derecede uzun adres bölümleri, bağlantı kısaltıcı
+  hedefleri, dolandırıcılıkta sık kullanılan alan adı uzantıları ve
+  ücretsiz barındırma sağlayıcıları artık bir sayfanın kararına dikkat
+  çekici kanıtlar ekliyor.
 
 Yeni izin yok. Hâlâ 0.3.1'deki gibi tam olarak `storage`,
 `declarativeNetRequest`, `alarms` ve http/https erişimi.

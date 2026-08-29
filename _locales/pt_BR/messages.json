@@ -893,6 +893,60 @@
   "reason_randomHost": {
     "message": "O nome de domínio parece gerado aleatoriamente."
   },
+  "reason_brandFuzzyMatch": {
+    "message": "Este domínio se parece muito com o domínio real da $BRAND$ — verifique a barra de endereço com cuidado antes de digitar qualquer coisa.",
+    "placeholders": {
+      "brand": {
+        "content": "$1",
+        "example": "PayPal"
+      }
+    }
+  },
+  "reason_deepSubdomainChain": {
+    "message": "O domínio tem uma cadeia de subdomínios incomumente profunda abaixo do seu domínio real — um truque de disfarce comum."
+  },
+  "reason_longHostLabel": {
+    "message": "O domínio contém uma parte incomumente longa, frequentemente usada para esconder um nome de marca falso ou ocultar o domínio real."
+  },
+  "reason_shortenerHost": {
+    "message": "Este é um domínio encurtador de links ($HOST$) — o destino real fica oculto até você clicar.",
+    "placeholders": {
+      "host": {
+        "content": "$1",
+        "example": "bit.ly"
+      }
+    }
+  },
+  "reason_riskAbusedTld": {
+    "message": "O domínio de nível superior ($TLD$) deste site tem alta taxa de abuso por golpes nas tabelas de risco da lista de ameaças do Parry.",
+    "placeholders": {
+      "tld": {
+        "content": "$1",
+        "example": ".top"
+      }
+    }
+  },
+  "reason_riskDynamicHost": {
+    "message": "O domínio está hospedado em um provedor de DNS dinâmico ou hospedagem gratuita, frequentemente usado em páginas de golpe."
+  },
+  "reason_feedBlock": {
+    "message": "Este domínio corresponde à lista de ameaças do Parry, confirmado por $COUNT$ fonte(s) independente(s).",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "reason_feedWarn": {
+    "message": "Este domínio corresponde a uma entrada de baixa confiança na lista de ameaças do Parry ($COUNT$ fonte(s)) — prossiga com cautela.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "1"
+      }
+    }
+  },
   "reason_credentialFormForeignDomain": {
     "message": "Um formulário de senha nesta página envia suas credenciais para um site diferente."
   },

@@ -167,24 +167,32 @@ de bloqueio com milhares de domínios de golpe, atualizada continuamente a
 partir de um feed de código aberto; e uma instalação com menos de 1 MB —
 cerca de 450 KB compactados, sem runtime pesado.
 
-## What's new (0.8.0)
+## What's new (0.9.0)
 
-- **O ScamShield agora é o Parry.** Dois produtos muito conhecidos já usam
-  o nome "ScamShield" — o governo de Cingapura opera seu próprio app
-  nacional antigolpe chamado ScamShield, e o Scam Shield da T-Mobile é um
-  serviço de bloqueio de golpes amplamente usado por uma operadora dos EUA
-  — então a extensão mudou de nome para evitar confusão com qualquer um
-  dos dois. Nada mudou na forma como ele te protege, no que coleta (nada)
-  ou nas suas configurações.
-- **Popup redesenhado:** um menu *Pausar proteção* programado (1 hora, 1
-  dia ou Sempre) substitui a antiga redação de confiança, contadores em
-  destaque mostram de relance as ameaças interrompidas desde a instalação e
-  nesta semana, cada alerta se abre em um painel *Por que esse veredito?*
-  com os motivos exatos, e um rodapé rotativo mais limpo alterna entre um
-  lembrete de privacidade, um pedido de avaliação merecido e um link de
-  apoio.
-- **Novo ícone** — um símbolo de desvio simples que combina melhor com o
-  novo nome.
+- **Uma lista de ameaças muito maior.** A lista de bloqueio cresceu de
+  alguns milhares de domínios para **mais de 425.000 domínios de golpe e
+  phishing confirmados**, além de uma lista de observação com mais de um
+  milhão de entradas de confiança mais baixa — reunidas de mais de uma
+  dezena de bancos de dados de ameaças de código aberto, verificadas
+  cruzadamente entre si e filtradas em relação aos sites mais populares do
+  mundo para manter os falsos alarmes raros. A comparação ainda acontece
+  inteiramente no seu dispositivo: a lista é baixada como impressões
+  digitais compactas e verificada localmente, então nenhum site que você
+  visita é enviado a lugar nenhum. As atualizações chegam como pequenos
+  diffs a cada poucas horas.
+- **Quando o Parry bloqueia um site presente na lista, agora ele diz quais
+  fontes independentes o reportaram** — verificável, não uma pontuação de
+  caixa-preta.
+- **Detecção de imitação mais inteligente**: as verificações de
+  personificação de marca agora detectam letras trocadas, caracteres
+  parecidos, nomes de marca escondidos dentro de subdomínios longos e
+  finais de domínio trocados, com salvaguardas rígidas para que sites de
+  marcas reais nunca sejam sinalizados por engano.
+- **Novos sinais de alerta**: cadeias de subdomínios incomumente
+  profundas, partes de endereço anormalmente longas, destinos de
+  encurtadores de link, finais de domínio muito usados em golpes e
+  provedores de hospedagem gratuita agora somam evidências de cautela ao
+  veredito de uma página.
 
 Nenhuma permissão nova. Continua usando `storage`, `declarativeNetRequest`,
 `alarms` e acesso http/https, exatamente como na 0.3.1.

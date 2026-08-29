@@ -158,23 +158,30 @@ hàng được dịch); khoảng **630 bài kiểm thử tự động**; danh s�
 hàng nghìn tên miền lừa đảo, liên tục được cập nhật từ nguồn mở; và dung
 lượng cài đặt dưới 1 MB — khoảng 450 KB khi nén, không có runtime nặng.
 
-## What's new (0.8.0)
+## What's new (0.9.0)
 
-- **ScamShield giờ đây là Parry.** Đã có hai sản phẩm rất nổi tiếng dùng
-  tên "ScamShield" — chính phủ Singapore vận hành ứng dụng chống lừa đảo
-  quốc gia riêng có tên ScamShield, và Scam Shield của T-Mobile là dịch
-  vụ chặn lừa đảo phổ biến của một nhà mạng Mỹ — nên tiện ích này đã đổi
-  tên để tránh nhầm lẫn với cả hai. Không có gì thay đổi về cách nó bảo vệ
-  bạn, những gì nó thu thập (không gì cả) hay cài đặt của bạn.
-- **Popup được thiết kế lại:** menu *Tạm dừng bảo vệ* có giới hạn thời
-  gian (1 giờ, 1 ngày hoặc Luôn luôn) thay thế cách diễn đạt tin cậy cũ,
-  bộ đếm nổi bật hiển thị nhanh số mối đe dọa đã chặn kể từ khi cài đặt
-  và trong tuần này, mỗi cảnh báo mở ra bảng *Vì sao có kết luận này?*
-  với lý do chính xác, và chân trang xoay vòng gọn gàng hơn luân phiên
-  giữa lời nhắc về quyền riêng tư, lời mời đánh giá xứng đáng và liên kết
-  hỗ trợ.
-- **Biểu tượng mới** — một ký hiệu gạt đỡ đơn giản phù hợp hơn với tên
-  mới.
+- **Danh sách mối đe dọa lớn hơn rất nhiều.** Danh sách chặn đã tăng từ
+  vài nghìn tên miền lên **hơn 425.000 tên miền lừa đảo và phishing đã
+  được xác nhận**, cùng với một danh sách theo dõi hơn một triệu tên miền
+  có độ tin cậy thấp hơn — được tổng hợp từ hơn chục cơ sở dữ liệu mối đe
+  dọa mã nguồn mở, đối chiếu chéo với nhau và lọc so với các trang web
+  phổ biến nhất thế giới để giữ cho cảnh báo sai luôn hiếm gặp. Việc đối
+  chiếu vẫn diễn ra hoàn toàn trên thiết bị của bạn: danh sách được tải
+  xuống dưới dạng dấu vân tay gọn nhẹ và được kiểm tra cục bộ, vì vậy
+  không trang nào bạn truy cập từng bị gửi đi bất kỳ đâu. Các bản cập
+  nhật đến dưới dạng các gói khác biệt nhỏ mỗi vài giờ.
+- **Khi Parry chặn một trang có trong danh sách, giờ đây Parry sẽ cho bạn
+  biết những nguồn độc lập nào đã báo cáo trang đó** — có thể kiểm chứng,
+  không phải một điểm số hộp đen.
+- **Phát hiện giả mạo thông minh hơn**: các kiểm tra giả mạo thương hiệu
+  giờ đây bắt được chữ cái bị hoán đổi, ký tự trông giống nhau, tên
+  thương hiệu ẩn bên trong các tên miền phụ dài và đuôi tên miền bị hoán
+  đổi, với các biện pháp bảo vệ nghiêm ngặt để trang thương hiệu thật
+  không bao giờ bị gắn cờ nhầm.
+- **Các tín hiệu cảnh báo mới**: chuỗi tên miền phụ sâu bất thường, các
+  phần địa chỉ dài bất thường, đích đến của dịch vụ rút gọn liên kết,
+  đuôi tên miền hay bị lạm dụng cho lừa đảo và nhà cung cấp hosting miễn
+  phí giờ đây bổ sung bằng chứng cảnh giác vào kết luận của một trang.
 
 Không có quyền mới nào. Vẫn là `storage`, `declarativeNetRequest`,
 `alarms` và quyền truy cập http/https, chính xác như phiên bản 0.3.1.

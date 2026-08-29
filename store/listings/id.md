@@ -165,24 +165,30 @@ blokir berisi ribuan domain penipuan, diperbarui terus-menerus dari feed
 open-source; dan pemasangan di bawah 1 MB — sekitar 450 KB terkompresi,
 tanpa runtime berat.
 
-## What's new (0.8.0)
+## What's new (0.9.0)
 
-- **ScamShield kini menjadi Parry.** Dua produk yang sudah sangat dikenal
-  memakai nama "ScamShield" — pemerintah Singapura menjalankan aplikasi
-  anti-penipuan nasionalnya sendiri bernama ScamShield, dan Scam Shield
-  dari T-Mobile adalah layanan pemblokiran penipuan operator AS yang
-  banyak digunakan — sehingga ekstensi ini berganti nama untuk menghindari
-  kebingungan dengan keduanya. Tidak ada yang berubah dalam cara
-  melindungi Anda, apa yang dikumpulkan (tidak ada), atau pengaturan Anda.
-- **Popup yang dirancang ulang:** menu *Jeda perlindungan* berbatas waktu
-  (1 jam, 1 hari, atau Selalu) menggantikan kata-kata kepercayaan yang
-  lama, penghitung utama menunjukkan sekilas ancaman yang dihentikan sejak
-  pemasangan dan minggu ini, setiap peringatan terbuka ke panel *Mengapa
-  vonis ini?* dengan alasan pastinya, dan footer berputar yang lebih rapi
-  bergantian antara pengingat privasi, permintaan ulasan yang layak, dan
-  tautan dukungan.
-- **Ikon baru** — tanda tangkisan sederhana yang lebih cocok dengan nama
-  baru.
+- **Daftar ancaman yang jauh lebih besar.** Daftar blokir berkembang dari
+  beberapa ribu domain menjadi **lebih dari 425.000 domain penipuan dan
+  phishing yang dikonfirmasi**, ditambah daftar pantauan dengan lebih dari
+  satu juta entri berkepercayaan lebih rendah — dikumpulkan dari lebih
+  dari selusin basis data ancaman open-source, saling diperiksa silang,
+  dan disaring terhadap situs paling populer di dunia agar alarm palsu
+  tetap jarang terjadi. Pencocokan masih sepenuhnya terjadi di perangkat
+  Anda: daftar diunduh sebagai sidik jari ringkas dan diperiksa secara
+  lokal, sehingga tidak ada situs yang Anda kunjungi yang pernah dikirim
+  ke mana pun. Pembaruan datang sebagai diff kecil setiap beberapa jam.
+- **Saat Parry memblokir situs yang ada dalam daftar, kini Parry memberi
+  tahu Anda sumber independen mana yang melaporkannya** — dapat
+  diverifikasi, bukan skor kotak hitam.
+- **Deteksi peniruan yang lebih cerdas**: pemeriksaan peniruan merek kini
+  menangkap huruf yang ditukar, karakter yang mirip, nama merek
+  tersembunyi di dalam subdomain panjang, dan akhiran domain yang ditukar,
+  dengan pengaman ketat agar situs merek asli tidak pernah salah ditandai.
+- **Sinyal peringatan baru**: rantai subdomain yang tidak biasa dalamnya,
+  bagian alamat yang panjangnya tidak wajar, tujuan pemendek tautan,
+  akhiran domain yang sering disalahgunakan untuk penipuan, dan penyedia
+  hosting gratis kini menambahkan bukti kewaspadaan pada vonis sebuah
+  halaman.
 
 Tidak ada izin baru. Tetap `storage`, `declarativeNetRequest`, `alarms`,
 dan akses http/https, persis seperti 0.3.1.

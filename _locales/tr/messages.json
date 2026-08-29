@@ -893,6 +893,60 @@
   "reason_randomHost": {
     "message": "Alan adı rastgele oluşturulmuş gibi görünüyor."
   },
+  "reason_brandFuzzyMatch": {
+    "message": "Bu alan adı $BRAND$'ın gerçek alan adına çok benziyor — herhangi bir şey girmeden önce adres çubuğunu dikkatle kontrol edin.",
+    "placeholders": {
+      "brand": {
+        "content": "$1",
+        "example": "PayPal"
+      }
+    }
+  },
+  "reason_deepSubdomainChain": {
+    "message": "Alan adının gerçek domainin altında alışılmadık derecede uzun bir alt alan adı zinciri var — yaygın bir gizleme hilesi."
+  },
+  "reason_longHostLabel": {
+    "message": "Alan adı, genellikle sahte bir marka adını gizlemek veya gerçek alan adını saklamak için kullanılan alışılmadık derecede uzun bir bölüm içeriyor."
+  },
+  "reason_shortenerHost": {
+    "message": "Bu bir bağlantı kısaltma alan adıdır ($HOST$) — tıklayana kadar gerçek hedef gizli kalır.",
+    "placeholders": {
+      "host": {
+        "content": "$1",
+        "example": "bit.ly"
+      }
+    }
+  },
+  "reason_riskAbusedTld": {
+    "message": "Bu sitenin üst düzey alan adı ($TLD$), Parry'ın tehdit listesi risk tablolarında yüksek oranda dolandırıcılık amacıyla kötüye kullanılıyor.",
+    "placeholders": {
+      "tld": {
+        "content": "$1",
+        "example": ".top"
+      }
+    }
+  },
+  "reason_riskDynamicHost": {
+    "message": "Alan adı, dolandırıcılık sayfaları için sıkça kötüye kullanılan bir dinamik DNS veya ücretsiz barındırma sağlayıcısında barındırılıyor."
+  },
+  "reason_feedBlock": {
+    "message": "Bu alan adı, Parry'ın tehdit listesiyle eşleşiyor ve $COUNT$ bağımsız kaynak tarafından doğrulandı.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "reason_feedWarn": {
+    "message": "Bu alan adı, Parry'ın tehdit listesinde daha düşük güvenilirlikte bir kayıtla eşleşiyor ($COUNT$ kaynak) — dikkatli ilerleyin.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "1"
+      }
+    }
+  },
   "reason_credentialFormForeignDomain": {
     "message": "Bu sayfadaki bir şifre formu, kimlik bilgilerinizi farklı bir siteye gönderiyor."
   },
