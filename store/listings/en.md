@@ -105,22 +105,27 @@ device, so you can verify zero telemetry rather than take our word for it.
 
 **FAQ**
 
-**How is ScamShield different from Guardio, Malwarebytes or Norton?**
+**How is ScamShield different from Guardio, Malwarebytes, Norton or the new AI scam-checkers?**
 
 Those extensions check the pages you visit by sending information to their
 own servers: Guardio and Bitdefender TrafficLight scan pages in the cloud,
 Norton Safe Web runs a "Remote URL Reputation Service" and, by its own
 disclosure, collects your PII, location and web history, and Avast Online
 Security sends the URLs you visit along with a device ID and device info to
-its servers. ScamShield has no server. Every check — reading the page, matching
-brand icons, scanning a pasted message — runs on your device, and nothing
-you browse, type or check is sent anywhere. Guardio's own listing also
-limits its free tier to website alerts only; real-time blocking, download
+its servers. The newest entrants work the same way: Norton Genie, Trend Micro
+Check and Bitdefender Scamio are AI chatbots — you paste in a message, link or
+screenshot and it's analyzed on their servers, by their own disclosures.
+ScamShield has no server. Every check — reading the page, matching brand
+icons, scanning a pasted message — runs on your device, and nothing you
+browse, type or check is sent anywhere. Guardio's own listing also limits
+its free tier to website alerts only; real-time blocking, download
 protection and leak monitoring are paid features ($9.99–$34.99/mo). ScamShield's
 full feature set — real-time blocking, fake-shop detection, crypto
 wallet-drainer guard, tech-support-scam blocking, clipboard/ClickFix
-protection, a statistics dashboard and a plain-language reason on every
-warning — is free with no premium tier.
+protection, QR/quishing scanning, a statistics dashboard and a plain-language
+reason on every warning — is free with no premium tier. A full sourced
+comparison against the wider 2026 field is in the project's
+docs/comparison.md.
 
 **Is ScamShield really free? What's the catch?**
 
