@@ -85,6 +85,11 @@
     msgScamWording: 'Uses known scam wording ("$1").',
     msgUrgencyDeadline: 'Adds pressure with an artificial deadline — a classic scam tactic.',
     msgDangerousLink: 'Contains a dangerous-looking link ($1).',
+    // content/content_script.js — QR/quishing scan (0.11.0, Task P4). Leads
+    // every QR verdict so the banner reads as "a QR code here leads
+    // somewhere risky" rather than the generic page-level wording, since the
+    // page showing the QR code is not itself the thing being judged.
+    qrCodeDestination: 'This page contains a QR code pointing to $1 — checked automatically before you scan it with your phone.',
     // engine/shop_rules.js — each flag has a short label and a detail sentence.
     shop_countdownReset: 'Fake countdown',
     shop_countdownReset_detail: 'A "hurry, offer ends" timer resets every visit — the urgency is fake.',

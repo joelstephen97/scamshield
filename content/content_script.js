@@ -586,6 +586,218 @@
     });
   }
 
+  // --- QR / quishing scan (0.11.0, Task P4) ----------------------------------
+  // Decodes QR codes shown in the page's own images (e.g. a phishing email
+  // rendered in webmail that tells the user to "scan this QR with your
+  // phone") and runs any http(s) payload through the SAME verdict path
+  // run() below uses for the page's own URL — engine/qr.js (vendored jsQR)
+  // only decodes; it carries no detection logic of its own. Top-frame only,
+  // same as the other page-level checks above (icon hashing, shop check):
+  // webmail QR images live in the document a person is actually reading.
+  const QR_POPUP_MIN_SIZE = 48, QR_POPUP_CAP = 30;
+  const QR_AUTOSCAN_MIN_SIZE = 120, QR_AUTOSCAN_CAP = 10;
+  let qrAutoScanBudget = 30; // lifetime cap for this page load, across every observer tick
+
+  // Scores a URL decoded out of a QR code exactly the way run() scores the
+  // page's own URL below (local heuristics + model, then the feed/risk/NRD
+  // folds) — reused, not reimplemented, per the task brief. The only
+  // difference is there is no page DOM to analyse for the QR's destination
+  // (it was never navigated to), so domRules/contentProb/iconMatch are the
+  // same neutral inputs fuse() already treats as "no evidence".
+  async function scoreDecodedUrl(url, settings) {
+    let host = '';
+    try { host = new URL(url).hostname; } catch (_) { return null; }
+    if (isTrustedHost(host, settings)) return { url, host, level: 'safe', score: 0, reasons: [] };
+    const urlRules = SS.scoreUrl(url, settings.riskTlds);
+    let modelProb = null;
+    if (urlRules.score >= 0.3 && SS.isAvailable && SS.isAvailable()) {
+      try { modelProb = await SS.predict(SS.extractUrlFeatures(url)); } catch (_) {}
+    }
+    let verdict = SS.fuse({ modelProb, urlRules, domRules: { score: 0, reasons: [], flags: [] }, contentProb: null, iconMatch: false });
+    try {
+      const feedHit = await withTimeout(send('checkFeed', { host }), 5000);
+      if (feedHit && feedHit.hit === 'block') {
+        const reason = { code: 'feedBlock', kind: 'link', params: [String((feedHit.sources || []).length)] };
+        verdict = Object.assign({}, verdict, {
+          level: 'dangerous', score: Math.max(verdict.score, 0.97),
+          reasons: [reason].concat(verdict.reasons || []), reasonCodes: [reason.code].concat(verdict.reasonCodes || []),
+          flags: ['feed-block'].concat(verdict.flags || [])
+        });
+      } else if (feedHit && feedHit.hit === 'warn' && verdict.level !== 'dangerous') {
+        const reason = { code: 'feedWarn', kind: 'link', params: [String(Math.max(1, (feedHit.sources || []).length))] };
+        verdict = Object.assign({}, verdict, {
+          level: 'suspicious', score: Math.max(verdict.score, 0.6),
+          reasons: [reason].concat(verdict.reasons || []), reasonCodes: [reason.code].concat(verdict.reasonCodes || []),
+          flags: ['feed-warn'].concat(verdict.flags || [])
+        });
+      }
+    } catch (_) { /* feed check is best-effort */ }
+    try {
+      const riskHit = await withTimeout(send('checkRisk', { host }), 3000);
+      if (riskHit && riskHit.hit) verdict = SS.foldRiskEvidence(verdict, 0.30, { code: 'riskDynamicHost', kind: 'link' }, 'risk-hosting');
+    } catch (_) { /* best-effort */ }
+    try {
+      const nrdHit = await withTimeout(send('checkNrd', { host }), 3000);
+      if (nrdHit && nrdHit.hit) {
+        const extra = nrdHit.strengthen ? ', and you have never visited it before' : '';
+        verdict = SS.foldRiskEvidence(verdict, 0.20, { code: 'newDomain', kind: 'link', params: [extra] }, 'new-domain', { minLevel: 'suspicious' });
+      }
+    } catch (_) { /* best-effort */ }
+    return { url, host, level: verdict.level, score: verdict.score, reasons: verdict.reasons || [], flags: verdict.flags || [] };
+  }
+
+  // Draws one <img> to an offscreen canvas and hands the raw pixels to jsQR.
+  // A cross-origin image taints the canvas — getImageData() then throws
+  // SecurityError — which is the expected, documented outcome for plenty of
+  // real webmail/CDN-hosted images, not a bug: recognise it via
+  // SS.isTaintedCanvasError and skip that one image, never surfacing an
+  // error or spamming the console. Any other failure (odd image state, a
+  // 0-byte decode) is swallowed the same way — this function must never
+  // throw, so one bad image can never abort the rest of the scan.
+  function decodeImageToQr(img) {
+    try {
+      const w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;
+      if (!w || !h) return null;
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      if (!ctx) return null;
+      ctx.drawImage(img, 0, 0, w, h);
+      let data;
+      try { data = ctx.getImageData(0, 0, w, h); }
+      catch (e) { if (SS.isTaintedCanvasError && SS.isTaintedCanvasError(e)) return null; throw e; }
+      if (typeof SS.jsQR !== 'function') return null;
+      const code = SS.jsQR(data.data, w, h);
+      return code && code.data ? code.data : null;
+    } catch (_) { return null; } // never throw from the scan path
+  }
+
+  // Collects up to `cap` images at least `minSize` on a side. `markProp`,
+  // when given, is a per-image marker property (e.g. '__ssQrAutoScanned')
+  // used to skip images this SAME caller already looked at — so the
+  // auto-scan pass's own repeat MutationObserver ticks never redecode a page
+  // full of images over and over. The popup-initiated scan deliberately
+  // passes no marker at all: it is a rare, explicit "check now" the user
+  // just asked for, and must never come back empty just because auto-scan
+  // silently got to an image first.
+  function collectQrCandidates(minSize, cap, markProp) {
+    const out = [];
+    const imgs = document.images || document.querySelectorAll('img');
+    for (const img of imgs) {
+      if (!SS.withinScanBudget(out.length, cap)) break;
+      if (markProp && img[markProp]) continue;
+      // Not finished loading yet: skip WITHOUT marking it scanned, so a still-
+      // loading image (slow remote QR image, exactly the webmail case this
+      // feature targets) gets a fair try on a later pass instead of being
+      // permanently written off because this particular tick was too early.
+      if (!img.complete) continue;
+      const w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;
+      if (!SS.shouldScanImage(w, h, minSize)) continue;
+      out.push(img);
+    }
+    return out;
+  }
+
+  // Shared scan pass for both the popup-initiated scan (section 3) and the
+  // auto-scan pass (section 4) below — only their size/count gates (and the
+  // auto-scan-only `markProp` repeat-guard above) differ.
+  async function scanPageForQr(minSize, cap, settings, markProp) {
+    const candidates = collectQrCandidates(minSize, cap, markProp);
+    const results = [];
+    const seenUrls = new Set();
+    for (const img of candidates) {
+      if (markProp) img[markProp] = true;
+      const payload = decodeImageToQr(img);
+      if (!payload) continue;
+      const url = SS.extractQrUrl(payload);
+      if (!url || seenUrls.has(url)) continue;
+      seenUrls.add(url);
+      try {
+        const scored = await scoreDecodedUrl(url, settings);
+        if (scored) results.push(scored);
+      } catch (_) { /* one bad candidate must never abort the rest of the scan */ }
+    }
+    return { found: results.length, results };
+  }
+
+  // Reuses the EXISTING banner — never a new UI surface, per the task brief.
+  // Deliberately never the blocking full-page interstitial: that tier is
+  // reserved for the page the user is actually ON being dangerous, and a
+  // decoded QR destination is a DIFFERENT site the user hasn't gone to yet.
+  // For the same reason "Leave this page" (which normally navigates the
+  // current tab away) is overridden here to just dismiss the banner instead —
+  // there is nothing on the CURRENT page to leave. "Trust this site" is left
+  // as a plain dismiss too (no onAllow), so a single click can never
+  // allowlist the QR's — possibly scam — destination domain.
+  function surfaceQrVerdict(item) {
+    if (!item || item.level === 'safe' || !SS.actions || !SS.actions.showBanner) return;
+    const verdict = {
+      level: item.level, score: item.score,
+      reasons: [{ code: 'qrCodeDestination', kind: 'link', params: [item.url] }].concat(item.reasons || [])
+    };
+    SS.actions.showBanner(verdict, null, {
+      onLeave: () => { SS.actions.clearAll(); },
+      onReport: () => send('userReport', { label: 'false_positive' })
+    });
+  }
+
+  // Popup-initiated scan (primary surface): popup.js messages the active
+  // tab's content script directly (chrome.tabs.sendMessage needs no
+  // permission beyond the tab id popup.js already has). Only the top frame
+  // answers — an all_frames re-injection into an ad iframe must never race
+  // the real answer or scan content the user never sees.
+  api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+    if (!msg || msg.type !== 'scanQrCodes' || !IS_TOP) return undefined;
+    (async () => {
+      const settings = await send('getSettings');
+      if (!settings || !settings.enabled || isTrustedHost(location.hostname, settings)) { sendResponse({ found: 0, results: [] }); return; }
+      let result;
+      try { result = await scanPageForQr(QR_POPUP_MIN_SIZE, QR_POPUP_CAP, settings); }
+      catch (_) { result = { found: 0, results: [] }; }
+      for (const item of result.results) surfaceQrVerdict(item);
+      sendResponse(result);
+    })();
+    return true; // async sendResponse
+  });
+
+  // Optional auto-scan (secondary, 0.10/0.11 doctrine: default ON, settings-
+  // gated, throttled). Only large standalone images qualify (a much higher
+  // bar than the popup's on-demand scan) and a MutationObserver — the same
+  // debounced-on-DOM-churn pattern the SERP badge pass above uses — catches
+  // images webmail renders in after the initial document_idle pass.
+  let qrAutoScanRunning = false, qrAutoScanObserverStarted = false, qrAutoScanTimer = null;
+  function scheduleIdle(fn) {
+    try { if (typeof root.requestIdleCallback === 'function') { root.requestIdleCallback(fn, { timeout: 3000 }); return; } } catch (_) {}
+    setTimeout(fn, 200);
+  }
+  async function autoScanQr(settings) {
+    if (qrAutoScanRunning || qrAutoScanBudget <= 0) return;
+    qrAutoScanRunning = true;
+    try {
+      const cap = Math.min(QR_AUTOSCAN_CAP, qrAutoScanBudget);
+      const result = await scanPageForQr(QR_AUTOSCAN_MIN_SIZE, cap, settings, '__ssQrAutoScanned');
+      qrAutoScanBudget -= cap;
+      for (const item of result.results) {
+        if (item.level === 'dangerous' || item.level === 'suspicious') {
+          surfaceQrVerdict(item);
+          send('bumpThreats', { kind: 'qr' });
+        }
+      }
+    } catch (_) { /* auto-scan is best-effort — never breaks the page */ }
+    finally { qrAutoScanRunning = false; }
+  }
+  function ensureQrAutoScanObserver(settings) {
+    if (qrAutoScanObserverStarted || !('MutationObserver' in root)) return;
+    qrAutoScanObserverStarted = true;
+    try {
+      const mo = new MutationObserver(() => {
+        clearTimeout(qrAutoScanTimer);
+        qrAutoScanTimer = setTimeout(() => scheduleIdle(() => autoScanQr(settings)), 1500);
+      });
+      mo.observe(document.body, { childList: true, subtree: true });
+    } catch (_) {}
+  }
+
   async function run() {
     if (!SS || typeof SS.scoreUrl !== 'function') return; // engine not loaded
     // Sub-frame gate: only frames a user can actually interact with, and only
@@ -607,6 +819,14 @@
     if (isTrustedHost(location.hostname, settings)) {
       if (IS_TOP) await send('reportVerdict', { verdict: { level: 'safe', score: 0, reasons: [], modelUsed: false } });
       return;
+    }
+    // QR auto-scan (0.11.0, Task P4): default-on, settings-gated, top-frame
+    // only. Fire-and-forget — a QR decode pass must never delay the rest of
+    // this page's own verdict — and scheduled onto idle time so it never
+    // competes with the checks below for the main thread.
+    if (IS_TOP && settings.qrAutoScan !== false && typeof SS.jsQR === 'function') {
+      scheduleIdle(() => autoScanQr(settings));
+      try { ensureQrAutoScanObserver(settings); } catch (_) {}
     }
 
     const { signals, foreignForms, scamBlocks, exfilForms } = collectSignals(settings);

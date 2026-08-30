@@ -57,6 +57,7 @@ const DEFAULTS = {
   notificationGuard: true,   // guard the "click Allow to verify" push lure
   shopGuard: true,           // fake-shop red-flag checks (popup card, note tier)
   serpCheck: true,           // sponsored-search destination mismatch check
+  qrAutoScan: true,          // auto-decode large QR-code images and check their destination (quishing)
   strictMode: false,         // treat "suspicious" as blocking, simpler wording
   theme: 'auto',             // 'auto' | 'light' | 'dark' — extension-page appearance
   pausedSites: {},           // domain -> until (ms epoch); time-boxed "trust this site"
@@ -77,7 +78,7 @@ const DEFAULTS = {
 // never anything that could identify the user. Kept well under sync's 8KB/item.
 const SYNCED_KEYS = ['enabled', 'hideScamContent', 'blockKnownBad', 'pageAnalysis',
   'clickFixGuard', 'fakeUpdateGuard', 'walletGuard', 'clipboardGuard', 'techScamGuard',
-  'leakyFormGuard', 'fingerprintDetect', 'notificationGuard', 'strictMode',
+  'leakyFormGuard', 'fingerprintDetect', 'notificationGuard', 'strictMode', 'qrAutoScan',
   'reportingOptIn', 'allowlist', 'theme', 'otaUrl', 'uiLang'];
 
 // Local-only protection history: ring buffer of { ts, host, kind, level }.

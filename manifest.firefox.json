@@ -15,7 +15,7 @@
       "run_at": "document_idle",
       "all_frames": true,
       "match_about_blank": true,
-      "js": ["engine/constants.js","engine/trust.js","model/url-model.js","engine/features.js","engine/brand_match.js","engine/site_signals.js","engine/risk_rules.js","engine/heuristics.js","engine/techscam_rules.js","engine/clickfix_rules.js","engine/fakeupdate_rules.js","engine/shop_rules.js","engine/verdict.js","ui/reasons.js","engine/url_model.js","engine/page_features.js","model/page-content.js","engine/page_model.js","engine/image_hash.js","content/actions.js","content/content_script.js"],
+      "js": ["engine/constants.js","engine/trust.js","model/url-model.js","engine/features.js","engine/brand_match.js","engine/site_signals.js","engine/risk_rules.js","engine/heuristics.js","engine/techscam_rules.js","engine/clickfix_rules.js","engine/fakeupdate_rules.js","engine/shop_rules.js","engine/verdict.js","ui/reasons.js","engine/url_model.js","engine/page_features.js","model/page-content.js","engine/page_model.js","engine/image_hash.js","engine/qr.js","content/actions.js","content/content_script.js"],
       "css": ["content/content.css"]
     },
     {

@@ -35,6 +35,7 @@
         "model/page-content.js",
         "engine/page_model.js",
         "engine/image_hash.js",
+        "engine/qr.js",
         "content/actions.js",
         "content/content_script.js"
       ],

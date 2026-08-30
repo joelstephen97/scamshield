@@ -367,6 +367,7 @@ async function init() {
   renderVerdictUI(host);
   if (settings.enabled && verdict == null) pollVerdict(host); // fire-and-forget; re-renders when the SW's scan lands
   $('leave').addEventListener('click', async () => { await send('leaveTab', { tabId: tab.id }); window.close(); });
+  wireQrScan();
   $('copyreport').addEventListener('click', () => {
     const text = copyReportText();
     // e2e test hook (mirrors content/actions.js's window.__ssLastCopyReport):
@@ -448,6 +449,41 @@ function renderHistoryList(list) {
 }
 async function renderHistory() {
   const h = await send('getHistory'); renderHistoryList((h && h.history) || []);
+}
+// "Scan this page for QR codes" (0.11.0, Task P4): the primary QR/quishing
+// surface. Only ever wired once — from init()'s http-tab branch, after
+// `tab` is known — chrome.tabs.sendMessage needs no permission beyond the
+// tab id popup.js already has from currentTab(). The content script decodes,
+// scores through the existing verdict engine and (for a non-safe result)
+// surfaces the existing page banner itself; this function only renders the
+// popup's own summary + per-result chips.
+function wireQrScan() {
+  $('qrcheck').hidden = false;
+  const btn = $('qrscanbtn');
+  btn.addEventListener('click', async () => {
+    if (!tab) return;
+    btn.disabled = true;
+    let res = null;
+    try { res = await new Promise((resolve) => { api.tabs.sendMessage(tab.id, { type: 'scanQrCodes' }, (r) => resolve(r)); }); } catch (_) { res = null; }
+    btn.disabled = false;
+    const results = (res && res.results) || [];
+    $('qrresult').hidden = false;
+    const ul = $('qrlist'); ul.replaceChildren();
+    if (!results.length) {
+      $('qrsummary').textContent = T('qrScanNone', null, 'No QR codes found on this page.');
+      return;
+    }
+    $('qrsummary').textContent = results.length === 1
+      ? T('qrScanFoundOne', null, '1 QR code found')
+      : T('fmtQrScanFoundCount', [bidi(String(results.length))], results.length + ' QR codes found');
+    for (const r of results.slice(0, 10)) {
+      const li = document.createElement('li');
+      const chip = document.createElement('span'); chip.className = 'chip' + (r.level === 'dangerous' ? ' brand' : ''); chip.textContent = levelLabel(r.level);
+      let host = r.host; if (!host) { try { host = new URL(r.url).hostname; } catch (_) { host = r.url; } }
+      const span = document.createElement('span'); span.textContent = host;
+      li.append(chip, span); ul.appendChild(li);
+    }
+  });
 }
 function wireMessageChecker() {
   if (!SS || typeof SS.scoreMessage !== 'function') { $('msgcheck').hidden = true; return; }

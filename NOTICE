@@ -32,3 +32,16 @@ graded fuzzy brand-domain matcher (bounded edit distance, homoglyph
 normalisation, subdomain/hyphen brand-token injection, and TLD-swap
 detection). Only the algorithm shape was consulted — brand lists, weights,
 and thresholds are Parry's own.
+
+jsQR (Apache License 2.0)
+--------------------------
+https://github.com/cozmo/jsQR
+
+engine/qr.js vendors jsQR v1.4.0 verbatim (unmodified, pure JavaScript, no
+WASM, no network access) as the on-device QR-code decoder behind
+ScamShield's quishing (QR-phishing) detection — decoded http(s) payloads are
+scored through ScamShield's own existing verdict engine; jsQR itself
+contributes no detection logic of its own.
+
+A copy of the Apache License 2.0 is available at:
+https://www.apache.org/licenses/LICENSE-2.0

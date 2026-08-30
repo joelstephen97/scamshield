@@ -49,6 +49,11 @@
     <span id="reportdone" class="toast-inline" hidden data-i18n="toastThanksNoted">Thanks — noted</span>
   </section>
   <section class="card" id="recent" hidden><ul id="hist" class="hist"></ul></section>
+  <details id="qrcheck" class="card" hidden><summary class="disc" data-i18n="qrScanTitle">Scan this page for QR codes</summary>
+    <p class="hint" data-i18n="qrScanHint">Decodes QR codes in this page's images and checks where they lead — before you scan them with your phone. Checked entirely on your device.</p>
+    <div class="msgrow"><button id="qrscanbtn" class="btn primary" data-i18n="qrScanBtn">Scan now</button><span class="hint" data-i18n="checkedOnDevice">Checked on your device only</span></div>
+    <div id="qrresult" hidden><p id="qrsummary" class="hint"></p><ul id="qrlist" class="evidence"></ul></div>
+  </details>
   <details id="msgcheck" class="card"><summary class="disc" data-i18n="checkMessageTitle">Check a message or link</summary>
     <p class="hint" data-i18n="checkMessageHint">Paste a suspicious SMS, WhatsApp or email text, or a link. Checked entirely on your device.</p>
     <textarea id="msgtext" rows="3" data-i18n-ph="checkMessagePlaceholder" placeholder="Paste the message or link here…"></textarea>
