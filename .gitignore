@@ -9,6 +9,8 @@ model/data/pages.jsonl
 model/data/reports*.jsonl
 model/data/report_urls.csv
 model/data/reports_cursor.txt
+model/data/combined_train.csv
+model/data/*.onnx
 model/.venv/
 __pycache__/
 
