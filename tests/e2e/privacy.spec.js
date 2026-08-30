@@ -85,6 +85,25 @@ test('card form posting to an allowlisted payment processor: no warning', async 
   await expect(page.locator('.scamshield-toast')).toHaveCount(0);
 });
 
+// Programmatic form.submit() bypass (v0.11.0, Task P5): the "Pay" control
+// here is not a real submit button — a click handler calls
+// HTMLFormElement.prototype.submit() directly, the same trick
+// phishing-autosubmit.html uses against guardForms. That call bypasses the
+// native 'submit' event entirely, so guardExfilForms's original submit-only
+// listener never saw it. content/main_world_guard.js hooks .submit() in the
+// MAIN world and re-dispatches a cancelable 'scamshield:formsubmit' event on
+// the form; guardExfilForms now also listens for that event (previously only
+// guardForms did), which is what this test guards against regressing.
+test('cross-origin card form warns even when submitted via form.submit() (bypasses the submit event)', async ({ context }) => {
+  const page = await context.newPage();
+  await page.goto(BASE + '/card-exfil-cross-origin-autosubmit.html');
+  await page.waitForTimeout(1500);
+  await page.fill('#cardnumber', '4111 1111 1111 1111');
+  await page.click('#go');
+  await expect(page.locator('.scamshield-toast')).toContainText(/card-exfil-fixture\.example/, { timeout: 8000 });
+  await expect(page.locator('.scamshield-overlay')).toHaveCount(0);
+});
+
 test('cross-origin card warning respects the leakyFormGuard toggle', async ({ context }) => {
   const sw = context.serviceWorkers()[0];
   await sw.evaluate(() => setSettings({ leakyFormGuard: false }));

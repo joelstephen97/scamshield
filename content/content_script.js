@@ -548,7 +548,7 @@
     forms.forEach((form) => {
       if (form.__scamshieldExfilGuarded) return;
       form.__scamshieldExfilGuarded = true;
-      form.addEventListener('submit', (ev) => {
+      const onSubmit = (ev) => {
         const hasPassword = !!form.querySelector('input[type="password"]');
         let kind = null;
         if (hasPassword) {
@@ -572,7 +572,17 @@
           form.submit(); // never trap the user behind a UI that failed to load
         }
         send('privacyFinding', { finding: { kind: 'cross-origin-cred-post', host: destHost, detail: kind } });
-      }, true);
+      };
+      // Capture-phase 'submit' catches user-initiated submits (click, Enter,
+      // requestSubmit — which fires a real, cancelable submit event per spec).
+      // 'scamshield:formsubmit' is the MAIN-world signal (content/main_world_
+      // guard.js) for HTMLFormElement.prototype.submit() called
+      // programmatically, which bypasses the native submit event entirely —
+      // guardForms above already relies on the same event for its own
+      // bypass coverage; this closes the identical gap for the exfil watch
+      // (Task P5 — this listener previously only covered 'submit').
+      form.addEventListener('submit', onSubmit, true);
+      form.addEventListener('scamshield:formsubmit', onSubmit, true);
     });
   }
 
