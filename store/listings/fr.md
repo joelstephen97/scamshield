@@ -84,7 +84,7 @@ Des chiffres concrets, pas des adjectifs : 20 langues avec traduction complète 
 
 Code source, politique de confidentialité et suivi des problèmes : github.com/joelstephen97/scamshield
 
-## What's new (0.11.0)
+## What's new (0.11.1)
 
 • Analyse des codes QR, sur votre appareil. ScamShield décode désormais les codes QR présents dans les images d'une page et vérifie où ils mènent avant que vous ne les scanniez avec votre téléphone. C'est la réponse embarquée au « quishing » (phishing par code QR) par e-mail. Analysez n'importe quelle page depuis la fenêtre de l'extension, ou laissez l'analyse automatique activée. Rien concernant le code ne quitte votre appareil.
 

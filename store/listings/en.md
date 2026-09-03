@@ -108,7 +108,7 @@ Hard numbers, not adjectives: 20 languages with full menu, warning and settings 
 
 Source code, privacy policy and issue tracker: github.com/joelstephen97/scamshield
 
-## What's new (0.11.0)
+## What's new (0.11.1)
 
 • QR code scanning, on your device. ScamShield now decodes QR codes in a page's images and checks where they lead before you scan them with your phone. This is the on-device answer to "quishing" (QR-code phishing) emails. Scan any page from the popup, or leave the automatic scan on. Nothing about the code leaves your device.
 

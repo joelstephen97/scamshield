@@ -84,7 +84,7 @@ Cifras concretas, no adjetivos: 20 idiomas con traducción completa de menús, a
 
 Código fuente, política de privacidad y seguimiento de incidencias: github.com/joelstephen97/scamshield
 
-## What's new (0.11.0)
+## What's new (0.11.1)
 
 • Escaneo de códigos QR, en tu dispositivo. ScamShield ahora decodifica los códigos QR que aparecen en las imágenes de una página y verifica adónde llevan antes de que los escanees con tu teléfono. Esta es la respuesta local al "quishing" (phishing mediante códigos QR) por correo electrónico. Escanea cualquier página desde la ventana emergente, o deja activado el escaneo automático. Nada sobre el código sale de tu dispositivo.
 

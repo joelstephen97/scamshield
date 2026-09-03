@@ -2,6 +2,21 @@
 
 All notable changes to ScamShield. Versions are git tags (`vX.Y.Z`); the version on the [Chrome Web Store](https://chromewebstore.google.com/detail/fojjjofjimbfoddafoampojopijnlihl) may lag a tag by a few days while Google reviews it. Privacy-relevant changes are also reflected in the [privacy policy](https://joelstephen97.github.io/scamshield/privacy.html).
 
+## 0.11.1 — 2026-09-03
+
+### Fixed
+- **Firefox: built-in data-collection consent declared.** AMO now requires
+  every new extension to declare Firefox's data-collection consent in the
+  manifest; the 0.11.0 Firefox package would have been refused at upload.
+  ScamShield declares `required: ["none"]` (it collects nothing by default)
+  and the opt-in community reporting as an optional `websiteActivity`
+  grant, which Settings now requests from Firefox 140+ the moment you turn
+  the reporting switch on (deny it and the switch stays off). Minimum
+  Firefox is now 142 (the version the consent system needs on Android; 140
+  on desktop). The Chrome build is unchanged apart from the version number.
+- The end-to-end suite can now run against an unpacked release zip
+  (`SCAMSHIELD_EXT_PATH`), which is how this release was verified.
+
 ## 0.11.0 — 2026-09-03
 
 ### Store listing

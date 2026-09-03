@@ -72,7 +72,33 @@ const LEVELKEY = { safe: 'levelSafe', suspicious: 'levelSuspicious', dangerous: 
 const LEVEL = (lvl) => T(LEVELKEY[lvl] || 'levelUnknown', null, F.levelText(lvl));
 function bindSwitch(id, key) {
   const el = $(id); const wrap = el.closest('.switch');
-  el.addEventListener('change', async () => { await send('setSettings', { patch: { [key]: el.checked } }); wrap.classList.toggle('on', el.checked); flash(T('saved', null, 'Saved')); });
+  el.addEventListener('change', async () => {
+    // Firefox 140+ built-in data-collection consent (0.11.1): the Firefox
+    // manifest declares community reporting as an OPTIONAL 'websiteActivity'
+    // data-collection permission, so turning the switch on must first ask
+    // Firefox for it (user gesture: this click). Denied → the switch snaps
+    // back off and nothing is saved. Chrome, and Firefox builds without the
+    // consent system (no data_collection key in permissions.getAll()), go
+    // straight to the save. Off → release the grant so the browser's own
+    // permissions panel matches the setting.
+    if (key === 'reportingOptIn') {
+      const ok = await requestReportingConsent(el.checked);
+      if (!ok) { el.checked = false; wrap.classList.remove('on'); return; }
+    }
+    await send('setSettings', { patch: { [key]: el.checked } }); wrap.classList.toggle('on', el.checked); flash(T('saved', null, 'Saved'));
+  });
+}
+async function requestReportingConsent(turningOn) {
+  try {
+    if (REVIEW && REVIEW.isChromeFromManifest(api.runtime.getManifest())) return true;
+    if (!api.permissions || typeof api.permissions.getAll !== 'function') return true;
+    const all = await api.permissions.getAll();
+    if (!all || !Array.isArray(all.data_collection)) return true; // Firefox < 140: no consent system
+    const dc = { data_collection: ['websiteActivity'] };
+    if (!turningOn) { try { await api.permissions.remove(dc); } catch (_) {} return true; }
+    if (all.data_collection.includes('websiteActivity')) return true;
+    return (await api.permissions.request(dc)) === true;
+  } catch (_) { return !turningOn; }
 }
 function setSwitch(id, on) { $(id).checked = !!on; $(id).closest('.switch').classList.toggle('on', !!on); }
 async function load() {

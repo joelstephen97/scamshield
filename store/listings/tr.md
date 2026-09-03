@@ -84,7 +84,7 @@ Sıfatlar değil somut sayılar: menü, uyarı ve ayarların tamamı çevrilmiş
 
 Kaynak kod, gizlilik politikası ve hata takip sistemi: github.com/joelstephen97/scamshield
 
-## What's new (0.11.0)
+## What's new (0.11.1)
 
 • Cihazınızda QR kodu taraması. ScamShield artık bir sayfanın görsellerindeki QR kodlarını çözüyor ve siz telefonunuzla taramadan önce nereye gittiklerini kontrol ediyor. Bu, "quishing" (QR kod kimlik avı) e-postalarına cihaz üzerinde verilen yanıttır. Herhangi bir sayfayı açılır pencereden tarayabilir veya otomatik taramayı açık bırakabilirsiniz. Kod hakkında hiçbir şey cihazınızdan çıkmaz.
 

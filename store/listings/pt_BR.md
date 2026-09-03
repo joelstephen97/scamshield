@@ -84,7 +84,7 @@ Números concretos, não adjetivos: 20 idiomas com tradução completa de menus,
 
 Código-fonte, política de privacidade e rastreador de problemas: github.com/joelstephen97/scamshield
 
-## What's new (0.11.0)
+## What's new (0.11.1)
 
 • Leitura de códigos QR, no seu dispositivo. O ScamShield agora decodifica códigos QR nas imagens de uma página e verifica para onde eles levam antes de você escaneá-los com o celular. Essa é a resposta feita no dispositivo para e-mails de "quishing" (phishing por código QR). Escaneie qualquer página pelo popup, ou deixe a leitura automática ativada. Nada sobre o código sai do seu dispositivo.
 

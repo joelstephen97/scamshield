@@ -12,13 +12,23 @@ verbatim. It is plain text (no markdown), which is also what AMO's description
 field expects. Do not re-add brand or competitor lists — see the two rules in
 `chrome-listing.md`; the same keyword-spam policy applies on AMO.
 
-**What's new:** paste the `## What's new (0.11.0)` section of `store/listings/en.md`.
+**What's new:** paste the `## What's new (0.11.1)` section of `store/listings/en.md`.
+
+**Data collection (manifest, Firefox 140+ built-in consent):** `required: ["none"]`
+(nothing is collected by default) and `optional: ["websiteActivity"]` for the
+off-by-default community reporting (anonymized host name + numeric risk signal
+of a page flagged dangerous, never URLs or page text). Settings requests that
+grant from Firefox the moment the user turns the reporting switch on; if it
+is denied the switch stays off. `strict_min_version` is 142.0 (the consent
+system's Android minimum; desktop needs 140). `web-ext lint` on the package:
+0 errors; the remaining warnings are the pre-existing UNSAFE_VAR_ASSIGNMENT
+notes on innerHTML writes of our own constant SVG icon strings.
 
 **Localized listings:** AMO supports per-locale descriptions; the 19 files under
 `store/listings/<locale>.md` can be pasted the same way (English-only is fine
 for the first AMO submission).
 
-**Notes for AMO reviewers (0.11.0):**
+**Notes for AMO reviewers (0.11.1):**
 - No remote code. All detection logic is unminified vanilla JS, bundled
   directly in the package under `engine/` and `model/`.
 - No WebAssembly. Both the URL model and the page-content model run as plain

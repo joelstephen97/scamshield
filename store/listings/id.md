@@ -84,7 +84,7 @@ Angka pasti, bukan kata sifat: 20 bahasa dengan terjemahan lengkap untuk menu, p
 
 Kode sumber, kebijakan privasi, dan pelacak masalah: github.com/joelstephen97/scamshield
 
-## What's new (0.11.0)
+## What's new (0.11.1)
 
 • Pemindaian kode QR, di perangkat Anda. ScamShield kini membaca kode QR dalam gambar halaman dan memeriksa ke mana kode itu mengarah sebelum Anda memindainya dengan ponsel. Ini adalah jawaban di perangkat untuk email "quishing" (phishing lewat kode QR). Pindai halaman mana pun dari popup, atau biarkan pemindaian otomatis tetap aktif. Tidak ada apa pun tentang kode itu yang keluar dari perangkat Anda.
 

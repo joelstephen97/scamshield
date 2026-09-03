@@ -84,7 +84,7 @@ Harte Zahlen, keine Werbeversprechen: 20 Sprachen mit vollständig übersetzten 
 
 Quellcode, Datenschutzerklärung und Fehler-Tracker: github.com/joelstephen97/scamshield
 
-## What's new (0.11.0)
+## What's new (0.11.1)
 
 • QR-Code-Scan, direkt auf deinem Gerät. ScamShield entschlüsselt jetzt QR-Codes in den Bildern einer Seite und prüft, wohin sie führen, bevor du sie mit deinem Handy scannst. Das ist die lokale Antwort auf "Quishing" (QR-Code-Phishing)-E-Mails. Scanne jede Seite über das Popup, oder lass den automatischen Scan aktiviert. Nichts vom Code verlässt dein Gerät.
 

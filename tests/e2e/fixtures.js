@@ -1,6 +1,12 @@
 const { test: base, chromium } = require('@playwright/test');
 const path = require('path');
-const EXTENSION_PATH = path.resolve(__dirname, '../..');
+// SCAMSHIELD_EXT_PATH lets the whole suite run against an *unpacked release
+// zip* (dist/scamshield-chrome.zip extracted somewhere) instead of the source
+// tree, so a file the build forgot to package fails a test rather than a
+// user. Default: the repo root (the unpacked source extension).
+const EXTENSION_PATH = process.env.SCAMSHIELD_EXT_PATH
+  ? path.resolve(process.env.SCAMSHIELD_EXT_PATH)
+  : path.resolve(__dirname, '../..');
 
 const test = base.extend({
   context: async ({}, use) => {

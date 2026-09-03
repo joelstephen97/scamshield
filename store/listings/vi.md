@@ -84,7 +84,7 @@ Con số cụ thể, không phải mỹ từ: 20 ngôn ngữ với đầy đủ 
 
 Mã nguồn, chính sách quyền riêng tư và trình theo dõi lỗi: github.com/joelstephen97/scamshield
 
-## What's new (0.11.0)
+## What's new (0.11.1)
 
 • Quét mã QR ngay trên thiết bị. ScamShield giờ đây có thể giải mã các mã QR trong hình ảnh của trang và kiểm tra chúng dẫn đến đâu trước khi bạn quét bằng điện thoại. Đây là giải pháp chạy trên thiết bị cho các email "quishing" (lừa đảo qua mã QR). Bạn có thể quét bất kỳ trang nào từ popup, hoặc để chế độ quét tự động luôn bật. Không có thông tin nào về mã QR rời khỏi thiết bị của bạn.
 

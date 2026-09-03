@@ -84,7 +84,7 @@ ScamShield 真的免费吗？有什么隐藏条件吗？
 
 源代码、隐私政策与问题反馈：github.com/joelstephen97/scamshield
 
-## What's new (0.11.0)
+## What's new (0.11.1)
 
 • 本地 QR 码扫描。ScamShield 现在可以解析页面图片中的 QR 码，并在您用手机扫描之前先检查它们指向的地址。这是针对“quishing”（QR 码钓鱼）邮件的本地解决方案。您可以从弹出窗口手动扫描任意页面，也可以保持自动扫描开启。QR 码相关的任何信息都不会离开您的设备。
 
