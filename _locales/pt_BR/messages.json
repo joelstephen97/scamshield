@@ -189,6 +189,30 @@
   "msgDangerous": {
     "message": "Quase com certeza é um golpe"
   },
+  "qrScanTitle": {
+    "message": "Escanear esta página em busca de códigos QR"
+  },
+  "qrScanHint": {
+    "message": "Decodifica os códigos QR nas imagens desta página e verifica para onde eles levam — antes de você escaneá-los com o celular. Tudo verificado no seu dispositivo."
+  },
+  "qrScanBtn": {
+    "message": "Escanear agora"
+  },
+  "qrScanNone": {
+    "message": "Nenhum código QR encontrado nesta página."
+  },
+  "qrScanFoundOne": {
+    "message": "1 código QR encontrado"
+  },
+  "fmtQrScanFoundCount": {
+    "message": "$COUNT$ códigos QR encontrados",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
   "support": {
     "message": "Apoiar"
   },
@@ -217,7 +241,7 @@
     "message": "Erro na extensão — tente reabrir."
   },
   "whatsNewBanner": {
-    "message": "Novidades na 0.10: selos de segurança nos resultados de pesquisa, avisos de roubo de cartão, avisos de domínios recém-registrados e relatórios de golpe compartilháveis."
+    "message": "Novidades na 0.11: escaneamento de códigos QR no dispositivo detecta golpes de \"quishing\" (phishing por QR code) antes de você escanear com o celular, além de proteção contra roubo de cartão em formulários preenchidos automaticamente."
   },
   "popupBrandDangerSummary": {
     "message": "Parece com a $BRAND$, mas não é. Não digite sua senha aqui.",
@@ -409,6 +433,12 @@
   },
   "optHideHint": {
     "message": "Esmaece os blocos \"você ganhou um prêmio\" dentro de páginas normais."
+  },
+  "optQrScan": {
+    "message": "Escanear códigos QR automaticamente"
+  },
+  "optQrScanHint": {
+    "message": "Decodifica os códigos QR de imagens grandes na página e verifica o destino deles antes de você escaneá-los com o celular — a proteção no dispositivo contra e-mails de \"quishing\" (phishing por QR code). Você também pode escanear qualquer página sob demanda pelo pop-up."
   },
   "optTechscam": {
     "message": "Saída de golpe de suporte técnico"
@@ -1150,6 +1180,15 @@
   },
   "reason_msgDangerousLink": {
     "message": "Contém um link com aparência perigosa ($URL$).",
+    "placeholders": {
+      "url": {
+        "content": "$1",
+        "example": "http://verify-bank.tk/otp"
+      }
+    }
+  },
+  "reason_qrCodeDestination": {
+    "message": "Esta página contém um código QR que aponta para $URL$ — verificado automaticamente antes de você escaneá-lo com o celular.",
     "placeholders": {
       "url": {
         "content": "$1",

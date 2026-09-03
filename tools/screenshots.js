@@ -34,7 +34,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   // dangerous shot either way, but the language-picker shot's popup is short
   // enough to show it, and a stale version banner is not what that shot is
   // about.
-  await sw.evaluate(() => setSettings({ threatsBlocked: 23, whatsNewSeen: '0.10.0' }));
+  await sw.evaluate(() => setSettings({ threatsBlocked: 23, whatsNewSeen: '0.11.0' }));
 
   // Statistics-tab seed. The dashboard is the one surface that looks empty on
   // a fresh profile — a store shot of it has to show a real install's worth of
@@ -181,5 +181,29 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   // 5 wallet overlay
   page = await ctx.newPage(); await page.setViewportSize({ width: 1100, height: 640 }); await page.goto(BASE + '/drainer.html'); await sleep(700); await page.click('#go'); await page.locator('.scamshield-overlay').waitFor({ timeout: 6000 });
   await compose('05-wallet-guard.png', 'Stops wallet drainers and scare pop-ups', await page.screenshot(), 1100, 640); await page.close();
+  // 6 QR / quishing scan (0.11.0). The qr-quishing.html fixture embeds a
+  // real QR PNG encoding a URL that trips local heuristics alone (see
+  // tests/e2e/qr.spec.js). Open the popup's "Scan this page for QR codes"
+  // <details>, press "Scan now" and wait for the per-code result chips.
+  page = await ctx.newPage(); await page.goto(BASE + '/qr-quishing.html'); await sleep(700);
+  s = await popupShot(page, null, async (pp) => {
+    await pp.locator('#qrcheck').waitFor({ state: 'visible' });
+    await pp.evaluate(() => { document.getElementById('qrcheck').open = true; });
+    await pp.click('#qrscanbtn');
+    await pp.locator('#qrresult').waitFor({ state: 'visible', timeout: 8000 });
+    await pp.locator('#qrlist li').first().waitFor({ timeout: 8000 });
+    // The QR card sits below the pause menu, hero counters, quick actions
+    // and recent-history list — well past the 600px fold on a page that has
+    // just logged a catch. This shot is about the QR card, so hide the
+    // in-between sections (shot 1 already shows them) and pin the scroll to
+    // the top so the header, status card and QR card land in one frame.
+    await pp.evaluate(() => {
+      for (const sel of ['#siteacts', '#whypanel', '#actions', '#recent', '#shopcard', '#privacycard']) { const el = document.querySelector(sel); if (el) el.hidden = true; }
+      const tiles = document.getElementById('tile-since'); if (tiles && tiles.parentElement) tiles.parentElement.hidden = true;
+      document.documentElement.scrollTop = 0; document.body.scrollTop = 0;
+    });
+    await sleep(300);
+  });
+  await compose('06-qr-scan.png', 'Checks QR codes before your phone does', s.png, s.w, s.h); await page.close();
   await ctx.close(); server.kill(); console.log('Done →', OUT);
 })().catch((e) => { console.error(e); process.exit(1); });

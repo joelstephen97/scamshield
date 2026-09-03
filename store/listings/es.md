@@ -1,213 +1,97 @@
-<!-- Translated store listing (es). Canonical source: en.md. CWS dashboard locale codes: pt_BR -> pt-BR, zh_CN -> zh-CN. -->
+<!-- Translated store listing (es). Canonical source: en.md. Plain text only: no markdown, no brand/competitor lists (CWS "Yellow Argon" rejection, 2026-09-03). -->
 
 ## Name
 
-Bloqueador de estafas y phishing: ScamShield
+Bloqueador de Estafas y Phishing: ScamShield
 
 ## Short description
 
-Bloquea sitios de estafa, phishing y tiendas falsas. 100% en el dispositivo: tu navegación nunca sale de tu ordenador.
+Bloquea sitios de estafa, phishing y tiendas falsas. 100% en tu dispositivo: tu navegación nunca sale de tu equipo.
 
 ## Full description
 
-No hay servidor. ScamShield lee la página en la que estás, el mensaje que pegas
-y la tienda donde estás pagando — todo dentro de tu navegador — y nunca
-envía a ningún otro sitio lo que navegas, escribes o pegas.
+ScamShield te avisa antes de que un sitio de estafa o phishing te engañe, y hace toda la verificación dentro de tu navegador. No hay servidor. Lo que navegas, escribes o pegas nunca se envía a ningún lugar.
 
-**Por qué ScamShield**
+POR QUÉ SCAMSHIELD
 
-La mayoría de las extensiones antiestafa se conectan a sus servidores:
-envían las páginas que visitas, o un hash de ellas, a los servidores de una
-empresa y reciben un veredicto de vuelta. ScamShield no lo hace, porque no lo
-necesita — la misma detección que se ejecutaría en la nube se ejecuta
-localmente en su lugar. Eso significa sin cuenta, sin una caída del
-servidor que te deje desprotegido, y nada sobre tu navegación que pueda
-filtrarse, ser requerido judicialmente o venderse en silencio más adelante.
-Es gratis, sin nivel premium, sin prueba y sin "actualiza para desbloquear
-la protección en tiempo real" — todo el producto es el producto gratuito.
+La mayoría de los bloqueadores de estafas envían las páginas que visitas a los servidores de una empresa y esperan un veredicto. ScamShield ejecuta la misma detección en tu propio dispositivo. Eso significa que no necesitas una cuenta, no hay interrupciones que te dejen sin protección y no queda un registro de tu navegación que pueda filtrarse o venderse después.
 
-**Qué bloquea**
+Es gratis, sin nivel premium, sin prueba gratuita y sin "actualiza para desbloquear la protección en tiempo real". Todo el producto es el producto gratuito.
 
-- **Inicios de sesión de bancos y marcas falsificados** — ScamShield compara
-  mediante hash el icono y el logo de la página con una tabla de 64 marcas
-  (bancos, operadoras y servicios gubernamentales de los EAU incluidos,
-  junto a PayPal, Microsoft, Google y más) y detecta dominios con
-  homógrafos IDN que deletrean una marca usando caracteres extranjeros
-  parecidos. Un inicio de sesión falso con el logo correcto en el dominio
-  equivocado se detecta incluso cuando la dirección en sí parece familiar.
-- **Tiendas falsas** — cuentas regresivas falsas, presión de "solo quedan
-  2", insignias de confianza enlazadas de forma indebida, solicitudes de
-  pago fuera de la plataforma y datos de contacto ausentes se muestran en
-  una tarjeta de compra emergente antes de que pagues.
-- **Vaciadores de wallets cripto** — avisa antes de aprobaciones riesgosas
-  y firmas a ciegas, incluidas las delegaciones de cuenta EIP-7702 y las
-  solicitudes multi-wallet EIP-6963, y bloquea directamente los intentos de
-  robo de la frase de recuperación.
-- **Estafas de soporte técnico** — un bloqueo a pantalla completa para
-  páginas de "tu PC está infectado, llama a este número ahora", con una
-  salida de un clic que primero desactiva las trampas de bloqueo de
-  pantalla y del botón Atrás de la página.
-- **Ataques ClickFix y del portapapeles** — el truco de malware de más
-  rápido crecimiento de 2025: un falso CAPTCHA de "verifica que eres
-  humano" que te convence de pegar un comando en Ejecutar de Windows. ScamShield
-  sobrescribe la carga maliciosa del portapapeles y bloquea la página a
-  pantalla completa antes de que pueda ejecutarse.
-- **Formularios que filtran datos** — avisa en el momento en que un sitio
-  envía el correo o el teléfono que escribiste a un rastreador, *antes* de
-  que pulses enviar, y señala por separado los scripts de fingerprinting y
-  las trampas de permiso de notificaciones "haz clic en Permitir para
-  continuar".
-- **Resultados de búsqueda riesgosos, marcados antes de que hagas clic** —
-  en Google, Bing y DuckDuckGo, un pequeño punto rojo o ámbar marca un
-  resultado cuyo dominio ya es conocido como dañino o se parece mucho a una
-  marca, para que veas el riesgo antes de hacer clic, no después.
+QUÉ BLOQUEA
 
-**Cómo funciona**
+• Inicios de sesión falsos de bancos y marcas. ScamShield compara el ícono y el logotipo de la página con una tabla de 64 marcas conocidas (entre ellas PayPal, Microsoft y Google, además de bancos regionales y servicios de telecomunicaciones y gobierno) y detecta dominios similares que copian el nombre de una marca con caracteres extranjeros. Un inicio de sesión falso con el logotipo correcto en el dominio equivocado se detecta incluso cuando la dirección parece normal.
 
-1. ScamShield lee la propia página, en tu dispositivo — su texto, diseño,
-   formularios de inicio de sesión e iconos — en el momento en que la
-   abres, o el mensaje que pegas en el popup para una comprobación de
-   mensaje sospechoso.
-2. Un modelo en el dispositivo y un conjunto de reglas puntúan lo que
-   encuentra. Una sola señal débil nunca produce más que una discreta nota
-   de *sospechoso*; un veredicto de *peligroso* necesita que coincidan
-   señales independientes, así que las páginas legítimas rara vez se marcan
-   por error.
-3. Obtienes una razón en lenguaje sencillo, no solo un banner rojo, con una
-   solución en un clic: *Salir de esta página* ante una alerta peligrosa,
-   *Llévame al sitio real* ante una página de suplantación de marca — o, si
-   ScamShield se equivocó, pausa la alerta en ese sitio durante una hora, un día
-   o para siempre.
+• Tiendas falsas. Temporizadores de cuenta regresiva falsos, presión de "solo quedan 2", insignias de confianza copiadas, solicitudes de pago fuera de la plataforma y datos de contacto faltantes se muestran en una tarjeta de compra antes de que pagues.
 
-**Estadísticas y explicabilidad**
+• Vaciadores de billeteras cripto. Avisa antes de aprobaciones riesgosas y firmas a ciegas, incluidas solicitudes de delegación de cuenta y de múltiples billeteras, y bloquea los intentos de robar tu frase de recuperación.
 
-Cada alerta se abre en un panel *¿Por qué este veredicto?* que enumera las
-razones exactas detrás de ella — un icono de marca en el dominio
-equivocado, un dominio similar, un campo de contraseña que envía a un host
-externo — en lugar de una puntuación sin explicar. La pestaña Estadísticas
-de los ajustes muestra páginas comprobadas, amenazas detenidas y hallazgos
-de privacidad, con un gráfico de actividad diaria que puedes alternar entre
-los últimos 7 días, los últimos 30 días o tus totales desde la instalación.
-Cada cifra se calcula y almacena en tu dispositivo; ninguna se envía jamás
-a ningún sitio.
+• Estafas de soporte técnico. Un bloqueo de pantalla completa para páginas de "tu PC está infectada, llama a este número", con una salida de un clic que primero neutraliza las trampas de bloqueo de pantalla y del botón Atrás de la página.
 
-**Privacidad: qué hace y qué no hace ScamShield**
+• ClickFix y ataques al portapapeles. Una falsa verificación de "confirma que eres humano" que te convence de pegar un comando en Windows Run. ScamShield reemplaza el texto malicioso del portapapeles y bloquea la página antes de que pueda ejecutarse.
 
-ScamShield solicita acceso a las páginas que visitas porque así es como el
-análisis en el dispositivo realmente las lee — el texto, el diseño, los
-formularios de inicio de sesión y los iconos — la comprobación ocurre
-localmente, en tu navegador, no en un servidor en algún lugar. Lo único que
-sale de tu dispositivo de forma predeterminada es una simple descarga de
-archivo: la lista pública de amenazas de dominios de estafa conocidos,
-obtenida periódicamente del feed de código abierto de ScamShield para que el
-bloqueo funcione justo después de la instalación y sin conexión. Nada sobre
-ti o tu navegación específica acompaña esa descarga. El envío de reportes
-comunitarios, opcional y desactivado de forma predeterminada, puede enviar
-un nombre de host anonimizado y una señal de riesgo numérica de una página
-marcada como peligrosa — nunca una URL, el texto de la página ni nada que
-hayas escrito — y solo si tú mismo lo activas. Ajustes → Acerca de muestra
-exactamente qué ha salido de tu dispositivo, para que puedas verificar tú
-mismo la telemetría cero en lugar de fiarte de nuestra palabra.
+• Formularios con fugas. Avisa en el momento en que un sitio envía el correo electrónico o el número de teléfono que escribiste a un rastreador, antes de que presiones enviar. También identifica scripts de fingerprinting y trampas de notificaciones de "haz clic en Permitir para continuar".
 
-**Preguntas frecuentes**
+• Resultados de búsqueda riesgosos. En Google, Bing y DuckDuckGo, un pequeño punto rojo o ámbar marca un resultado cuyo dominio es conocido como malicioso o muy similar a una marca, para que veas el riesgo antes de hacer clic.
 
-**¿En qué se diferencia ScamShield de Guardio, Malwarebytes o Norton?**
+• Códigos QR. Decodifica los códigos QR que aparecen en las imágenes de una página y verifica adónde llevan antes de que los escanees con tu teléfono.
 
-Esas extensiones comprueban las páginas que visitas enviando información a
-sus propios servidores: Guardio y Bitdefender TrafficLight analizan páginas
-en la nube, Norton Safe Web ejecuta un "servicio de reputación de URL
-remoto" y, según su propia divulgación, recopila tus datos personales, tu
-ubicación y tu historial web, y Avast Online Security envía las URL que
-visitas junto con un ID de dispositivo e información del dispositivo a sus
-servidores. ScamShield no tiene servidor. Cada comprobación — leer la página,
-cotejar iconos de marca, analizar un mensaje pegado — se ejecuta en tu
-dispositivo, y nada de lo que navegas, escribes o compruebas se envía a
-ningún sitio. La propia ficha de Guardio también limita su nivel gratuito a
-solo alertas de sitios web; el bloqueo en tiempo real, la protección de
-descargas y la monitorización de filtraciones son funciones de pago
-(9,99–34,99 $/mes). El conjunto completo de funciones de ScamShield — bloqueo en
-tiempo real, detección de tiendas falsas, protección contra vaciadores de
-wallets cripto, bloqueo de estafas de soporte técnico, protección de
-portapapeles/ClickFix, un panel de estadísticas y una razón en lenguaje
-sencillo en cada alerta — es gratis, sin nivel premium.
+CÓMO FUNCIONA
 
-**¿ScamShield es realmente gratis? ¿Cuál es la trampa?**
+1. ScamShield lee la página en tu dispositivo en el momento en que la abres: su texto, diseño, formularios de inicio de sesión e íconos. También puede leer un mensaje que pegues en la ventana emergente.
 
-Sí, y no hay ninguna trampa: sin nivel premium, sin prueba, sin "actualiza
-para desbloquear la protección en tiempo real". ScamShield no gestiona un
-servidor por el que cobrarte, así que no hay nada que venderte después — el
-producto entero es el producto gratuito. Eso es distinto de la mayoría de
-la categoría: varios rivales regalan un nivel gratuito limitado y cobran
-mensualmente por su protección real (el nivel gratuito de Guardio es solo
-alertas; el bloqueo completo cuesta 9,99–34,99 $/mes), mientras que otros
-son extensiones gratuitas que venden de forma cruzada una suite de
-seguridad de pago. ScamShield se sostiene de otra manera — manteniéndose
-pequeño, en el dispositivo y lo bastante útil para que lo mantengas
-instalado, más donaciones opcionales. Si quieres apoyar su desarrollo, hay
-un enlace en la extensión, nunca un muro de pago.
+2. Un modelo local y un conjunto de reglas evalúan lo que encuentra. Una sola señal débil solo produce una nota discreta de "sospechoso". Un veredicto de "peligroso" necesita que coincidan varias señales independientes, por lo que las páginas reales casi nunca se marcan por error.
 
-**También incluye**
+3. Recibes una razón en lenguaje sencillo, no solo un aviso rojo, con una solución de un clic: "Salir de esta página" en una advertencia de peligro, o "Llévame al sitio real" en una página que suplanta una marca. Si ScamShield se equivocó, puedes pausar la advertencia en ese sitio por una hora, un día o para siempre.
 
-- Comprobador de mensajes de estafa — pega cualquier texto de SMS/WhatsApp/
-  correo para un veredicto instantáneo y totalmente privado.
-- Comprobación de resultados patrocinados en Google/Bing/DuckDuckGo —
-  señala un anuncio que lleva a un sitio distinto del que muestra.
-- Modo estricto — un interruptor bloquea a pantalla completa incluso las
-  páginas "sospechosas" con un lenguaje más sencillo, para un familiar
-  menos ducho en tecnología.
-- Elige tu idioma: los 20 idiomas, seleccionables desde el popup o los
-  ajustes, independientemente del idioma de tu navegador.
-- Exportación/importación de ajustes y sincronización opcional entre
-  dispositivos — la propia sincronización de tu navegador, aún sin cuenta
-  ni servidor de ScamShield.
-- Modo oscuro, historial de protección y enlaces de rescate en un clic,
-  contenido falso de premios/sorteos oculto.
+ESTADÍSTICAS Y EXPLICACIONES
 
-Cifras concretas, no adjetivos: disponible en **20 idiomas** con
-traducciones completas de menús, alertas y ajustes (no solo una ficha de
-tienda traducida); alrededor de **875 pruebas automatizadas**; una lista de
-bloqueo de más de 425.000 dominios de estafa confirmados (más una lista de
-vigilancia de un millón de dominios), actualizada continuamente desde un
-feed de código abierto; y una instalación de menos de 1 MB — unos 450 KB
-comprimidos, sin runtime pesado.
+Cada advertencia abre un panel de "¿Por qué este veredicto?" que enumera los motivos exactos: un ícono de marca en el dominio equivocado, una dirección similar, un campo de contraseña que envía datos a otro sitio. La pestaña Estadísticas en Configuración muestra las páginas revisadas, las amenazas detenidas y los hallazgos de privacidad, con un gráfico diario de los últimos 7 días, los últimos 30 días o tus totales desde la instalación. Cada número se calcula y se guarda en tu dispositivo.
 
-## What's new (0.10.0)
+PRIVACIDAD
 
-- **Resultados de búsqueda riesgosos, marcados antes de que hagas clic.** En
-  Google, Bing y DuckDuckGo, un pequeño punto rojo o ámbar ahora marca un
-  resultado de búsqueda cuyo dominio ya está en la lista de bloqueo, en la
-  lista de vigilancia, o se parece mucho a una marca — visible en la propia
-  página de resultados, antes de que hagas clic. Un resultado limpio no
-  recibe ninguna insignia.
-- **Avisa antes de que un número de tarjeta o una contraseña vayan a otro
-  sitio.** Un formulario de número de tarjeta o de inicio de sesión que
-  envía datos a un dominio distinto del que estás visitando (y que no es un
-  procesador de pagos o proveedor de inicio de sesión único conocido) ahora
-  muestra un aviso antes de enviarse, igual que la protección existente
-  contra formularios con fugas ya detecta campos que se envían en secreto.
-- **Marca dominios recién nacidos.** Una comprobación de dominios
-  registrados recientemente (en el dispositivo, actualizada semanalmente,
-  con el mismo modelo de privacidad que el resto de la lista de amenazas)
-  añade una nota de precaución cuando el dominio de una página se registró
-  muy recientemente — un truco habitual de los sitios de estafa que se dan
-  de baja y vuelven a levantarse con un nombre nuevo — y se atenúa una vez
-  que has visitado ese dominio sin problemas durante un tiempo.
-- **Informes de detección listos para compartir.** Cada alerta peligrosa o
-  sospechosa tiene ahora un botón "Copiar informe" que pone en tu
-  portapapeles un breve resumen en texto sin formato — sitio, veredicto,
-  motivos principales — listo para pegar en un chat de grupo o un foro y
-  avisar a alguien más.
-- **Disciplina más estricta contra falsos positivos.** Las señales de
-  riesgo por alojamiento de dominio (TLD abusados, proveedores de
-  alojamiento gratuito/DNS dinámico) ya no pueden por sí solas llevar una
-  página hasta un veredicto de *peligroso* — solo pueden hacerlo pruebas
-  realmente independientes. En pruebas con 1,09 millones de URL, la tasa de
-  páginas normales y seguras marcadas por error como peligrosas bajó del
-  0,17% al 0,05%, sin ninguna caída en las amenazas reales detectadas.
-- **Una página de comentarios al desinstalar.** Si desinstalas ScamShield, se
-  abre una pequeña página estática con un enlace para contarnos por qué y
-  un enlace directo al formulario de informe de falsos positivos — sin
-  formulario de recolección, sin analítica, nada se recopila.
+ScamShield solicita acceso a las páginas que visitas porque así es como el análisis local las lee. La verificación ocurre localmente, en tu navegador.
 
-Sin permisos nuevos. Sigue usando `storage`, `declarativeNetRequest`,
-`alarms` y acceso http/https, exactamente igual que en 0.3.1.
+Lo único que sale de tu dispositivo por defecto es una simple descarga de archivo: la lista pública de dominios de estafa conocidos, obtenida del feed de código abierto de ScamShield, para que el bloqueo funcione justo después de instalarlo y también sin conexión. Nada sobre ti ni sobre tu navegación viaja junto con esa descarga.
+
+El reporte comunitario opcional, desactivado por defecto, puede enviar un nombre de host anonimizado y una señal de riesgo numérica de una página marcada como peligrosa. Nunca una URL, texto de la página ni nada de lo que hayas escrito, y solo si tú lo activas. En Configuración > Acerca de puedes ver exactamente qué ha salido de tu dispositivo.
+
+PREGUNTAS FRECUENTES
+
+¿En qué se diferencia ScamShield de otros bloqueadores de estafas y verificadores de estafas con IA?
+
+La mayoría revisa las páginas enviando información a sus propios servidores: las direcciones que visitas, un identificador de dispositivo o el mensaje que pegas en un chatbot. ScamShield no tiene servidor. Leer la página, comparar íconos de marcas, revisar un mensaje pegado y decodificar códigos QR ocurre todo en tu dispositivo. En docs/comparison.md, dentro del repositorio de GitHub del proyecto, hay una comparación con fuentes frente al resto del mercado.
+
+¿ScamShield es realmente gratis? ¿Cuál es el truco?
+
+Sí, y no hay truco. ScamShield no mantiene un servidor que facturarte, así que no hay nada que venderte después. Muchos competidores ofrecen un nivel gratuito limitado y cobran mensualmente por protección real, o te derivan a una suite de seguridad de pago. ScamShield se mantiene pequeño, local y lo bastante útil como para que lo dejes instalado. Si quieres apoyar el desarrollo, hay un enlace de donación dentro de la extensión, nunca un muro de pago.
+
+TAMBIÉN INCLUYE
+
+• Verificador de mensajes de estafa: pega cualquier texto de SMS, WhatsApp o correo electrónico para obtener un veredicto instantáneo y totalmente privado.
+
+• Verificación de resultados patrocinados en páginas de búsqueda: marca un anuncio que lleva a un sitio distinto del que muestra.
+
+• Modo estricto: un solo interruptor bloquea a pantalla completa incluso las páginas "sospechosas", con un lenguaje más simple, ideal para un familiar menos familiarizado con la tecnología.
+
+• Tu idioma: los 20 idiomas disponibles se eligen desde la ventana emergente o desde Configuración, sin depender del idioma de tu navegador.
+
+• Exportación e importación de configuración, y sincronización opcional entre dispositivos mediante la propia sincronización de tu navegador. Sigue sin haber cuenta ni servidor de ScamShield.
+
+• Modo oscuro, historial de protección, enlaces de rescate de un clic y ocultamiento de contenido falso de premios o sorteos.
+
+Cifras concretas, no adjetivos: 20 idiomas con traducción completa de menús, advertencias y configuración; alrededor de 900 pruebas automatizadas; una lista de bloqueo de más de 425.000 dominios de estafa confirmados, más una lista de vigilancia de un millón de dominios, actualizada de forma continua desde un feed de código abierto; y una instalación de menos de 1 MB.
+
+Código fuente, política de privacidad y seguimiento de incidencias: github.com/joelstephen97/scamshield
+
+## What's new (0.11.0)
+
+• Escaneo de códigos QR, en tu dispositivo. ScamShield ahora decodifica los códigos QR que aparecen en las imágenes de una página y verifica adónde llevan antes de que los escanees con tu teléfono. Esta es la respuesta local al "quishing" (phishing mediante códigos QR) por correo electrónico. Escanea cualquier página desde la ventana emergente, o deja activado el escaneo automático. Nada sobre el código sale de tu dispositivo.
+
+• La protección contra robo de tarjetas ahora cubre los formularios que se envían automáticamente. Un formulario de inicio de sesión o de tarjeta que una página envía por sí sola a otro dominio, no solo uno que tú envías, ahora activa la misma advertencia entre sitios.
+
+• Una lista de exclusión más amplia contra falsos positivos en el feed de amenazas, para que más dominios de bancos regionales, gobierno y comercios nunca puedan bloquearse por una fuente comprometida.
+
+• Menos advertencias en la consola en sitios como Gmail.
+
+Sin permisos nuevos. Sigue usando storage, declarativeNetRequest, alarms y acceso a http/https, igual que en cada versión desde la 0.3.1.

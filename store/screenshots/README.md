@@ -21,10 +21,13 @@ Do not hand-edit the PNGs below — re-run the script instead.
    language — 20 of them").
 5. `05-wallet-guard.png` — wallet-drainer overlay blocking a fake "Connect &
    Claim" flow ("Stops wallet drainers and scare pop-ups").
+6. `06-qr-scan.png` — popup on the QR-phishing fixture page with the "Scan
+   this page for QR codes" card open after a scan, showing the decoded
+   destination flagged dangerous ("Checks QR codes before your phone does").
+   New in 0.11.0.
 
-Captured against the 0.8.0 popup/options UI (ScamShield rebrand and icon,
-time-boxed pause menu, hero counters, "Why this verdict?" panel, rotating
-footer). Re-run `npm run screenshots` after any visual change to
+Captured against the 0.11.0 popup/options UI (0.8.0 redesign plus the
+0.10.0 what's-new banner and the 0.11.0 QR card). Re-run `npm run screenshots` after any visual change to
 popup/options/in-page UI and commit the refreshed PNGs. `npm run promo`
 re-crops `01-popup-dangerous.png` into the marquee tile, so run it too when
 that shot changes.

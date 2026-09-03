@@ -189,6 +189,30 @@
   "msgDangerous": {
     "message": "Hampir pasti penipuan"
   },
+  "qrScanTitle": {
+    "message": "Pindai halaman ini untuk kode QR"
+  },
+  "qrScanHint": {
+    "message": "Menguraikan kode QR pada gambar di halaman ini dan memeriksa ke mana tautannya mengarah — sebelum Anda memindainya dengan ponsel. Diperiksa sepenuhnya di perangkat Anda."
+  },
+  "qrScanBtn": {
+    "message": "Pindai sekarang"
+  },
+  "qrScanNone": {
+    "message": "Tidak ditemukan kode QR di halaman ini."
+  },
+  "qrScanFoundOne": {
+    "message": "1 kode QR ditemukan"
+  },
+  "fmtQrScanFoundCount": {
+    "message": "$COUNT$ kode QR ditemukan",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
   "support": {
     "message": "Dukung"
   },
@@ -217,7 +241,7 @@
     "message": "Terjadi kesalahan ekstensi — coba buka kembali."
   },
   "whatsNewBanner": {
-    "message": "Baru di 0.10: lencana keamanan pada hasil pencarian, peringatan pencurian kartu, peringatan domain yang sangat baru, dan laporan penipuan yang dapat dibagikan."
+    "message": "Baru di 0.11: pemindaian kode QR di perangkat mendeteksi penipuan \"quishing\" sebelum Anda memindai dengan ponsel, ditambah perlindungan pencurian kartu untuk formulir yang terkirim otomatis."
   },
   "popupBrandDangerSummary": {
     "message": "Tampak seperti $BRAND$, tetapi bukan. Jangan masukkan kata sandi Anda di sini.",
@@ -409,6 +433,12 @@
   },
   "optHideHint": {
     "message": "Meredupkan blok \"Anda memenangkan hadiah\" di dalam halaman yang tampak normal."
+  },
+  "optQrScan": {
+    "message": "Pindai kode QR secara otomatis"
+  },
+  "optQrScanHint": {
+    "message": "Menguraikan kode QR pada gambar besar di halaman dan memeriksa tujuannya sebelum Anda memindainya dengan ponsel — perlindungan di perangkat terhadap \"quishing\" (penipuan phishing lewat kode QR). Anda juga dapat memindai halaman mana pun kapan saja dari popup."
   },
   "optTechscam": {
     "message": "Jalan keluar dari penipuan dukungan teknis"
@@ -1150,6 +1180,15 @@
   },
   "reason_msgDangerousLink": {
     "message": "Berisi tautan yang terlihat berbahaya ($URL$).",
+    "placeholders": {
+      "url": {
+        "content": "$1",
+        "example": "http://verify-bank.tk/otp"
+      }
+    }
+  },
+  "reason_qrCodeDestination": {
+    "message": "Halaman ini berisi kode QR yang mengarah ke $URL$ — diperiksa secara otomatis sebelum Anda memindainya dengan ponsel.",
     "placeholders": {
       "url": {
         "content": "$1",

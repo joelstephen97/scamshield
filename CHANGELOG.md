@@ -2,6 +2,51 @@
 
 All notable changes to ScamShield. Versions are git tags (`vX.Y.Z`); the version on the [Chrome Web Store](https://chromewebstore.google.com/detail/fojjjofjimbfoddafoampojopijnlihl) may lag a tag by a few days while Google reviews it. Privacy-relevant changes are also reflected in the [privacy policy](https://joelstephen97.github.io/scamshield/privacy.html).
 
+## 0.11.0 — 2026-09-03
+
+### Store listing
+- **Rewritten in response to a Chrome Web Store keyword-spam rejection**
+  ("Yellow Argon", 2026-09-03). The description that was live on the item
+  still named ten UAE banks and agencies in one breath; Google flagged the
+  list as excessive metadata. The whole listing is now plain text (the
+  store never rendered the old `**bold**`, it showed the asterisks), names
+  no more than three brands in any one place, drops competitor names from
+  the FAQ, and is retranslated into all 19 other languages from the new
+  canon. `tests/unit/listings.test.js` now fails on markdown, the flagged
+  names, competitor names or any comma-run of five or more capitalised
+  names, in any locale. Sixth store screenshot added for the QR scan.
+- The nine QR-scan UI strings and the what's-new banner are translated into
+  all 19 locales (they had shipped in English only in the 0.11.0-dev build).
+
+### New
+- **QR-code ("quishing") scanning — on your device.** ScamShield can now
+  decode QR codes shown in a page's images and check where they lead *before*
+  you scan them with your phone. Open the popup and press "Scan now" on any
+  page, or leave the default-on automatic scan to catch QR-phishing in webmail
+  without a click. Every code is decoded and checked locally — nothing about
+  the QR or the page leaves your device. New "Scan QR codes automatically"
+  toggle under Settings → Scams.
+
+### Improved
+- **Card-theft protection now covers auto-submitted forms.** The cross-origin
+  credential/card-exfil warning previously fired only on forms you submit
+  yourself; it now also catches forms a page submits *programmatically* to a
+  different domain — a path scam scripts used to slip past the warning.
+- **Refreshed competitor comparison.** The "how ScamShield compares" page now
+  covers the full 2026 field, including the new cloud AI scam-checkers (Norton
+  Genie, Trend Micro, Bitdefender Scamio), and states the contrast plainly:
+  those send your messages to a server; ScamShield checks everything on your
+  device.
+- **Wider false-positive allowlist** in the threat feed — more regional bank,
+  government and marketplace domains (UAE, South-East Asia, India), so a
+  poisoned source can never cause one of them to be blocked.
+
+### Fixed
+- Silenced a console warning flood on sites (such as Gmail) whose
+  Permissions-Policy disallows `unload`: the tech-support-scam detector's event
+  hook no longer forwards those already-blocked registrations through its own
+  frame, so the browser stops attributing the policy warning to ScamShield.
+
 ## 0.10.0 — 2026-08-30
 
 ### New

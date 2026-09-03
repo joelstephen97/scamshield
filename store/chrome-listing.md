@@ -3,68 +3,51 @@
 **Live listing:** https://chromewebstore.google.com/detail/fojjjofjimbfoddafoampojopijnlihl (item ID `fojjjofjimbfoddafoampojopijnlihl`)
 **Homepage URL:** https://joelstephen97.github.io/scamshield/
 **Support URL:** https://github.com/joelstephen97/scamshield/issues
-
-**Name:** ScamShield — Scam & Phishing Protection
-**Summary (132 chars max):** On-device scam & phishing protection: warns you, spots brand look-alikes, checks messages. Nothing leaves your device.
-**Category:** Productivity (or Privacy & Security)
-**Language:** English
-
-**Description:**
-ScamShield warns you before a scam or phishing page tricks you — entirely on
-your device. It reads more than the address bar: it looks at the page's
-wording, layout and login form, and it recognises when a page is wearing a
-brand's icon or logo on the wrong domain, so it catches convincing look-alikes
-that a URL-only checker would miss. Got a suspicious WhatsApp, SMS or email?
-Paste it into the popup for an instant, private verdict.
-
-One click gets you back to safety: *Leave this page* on a dangerous warning,
-or *Take me to the real site* on a brand-impersonation page. If ScamShield
-gets it wrong, *Trust this site* for an hour, until tomorrow, or always — and
-*Report a mistake* in one tap.
-
-Private by design: nothing you browse, type or check ever leaves your
-device. The only network activity is downloading the public threat-feed
-file, and — only if you opt in — sending an anonymized host name and risk
-signal for a flagged page. About 0.6 MB, with no heavy runtime bundled in.
-
-Features:
-• Real-time phishing & scam warnings with plain-language reasons
-• Page analysis: an on-device model reads the page itself — wording, layout,
-  login forms — to catch brand-new phishing pages, not just known-bad URLs
-• Brand look-alike detection: icons and logos hash-matched against a
-  64-brand table (49 with icon hashes), including UAE banks, telcos and
-  government services (Emirates NBD, ADCB, FAB, Mashreq, e&, du, Noon,
-  UAE PASS, MOHRE, Dubai Police…)
-• Scam message checker: paste any SMS/WhatsApp/email text for an instant,
-  fully-private verdict
-• Detects fake login forms that send your password to another site
-  (single-sign-on logins via Google/Microsoft/Okta are recognized as safe)
-• One-click rescue: *Take me to the real site* on brand-impersonation pages,
-  *Leave this page* on any dangerous warning
-• Trust a site for 1 hour, until tomorrow, or always — and report a mistake
-  in one tap
-• Blocks known scam domains — refreshed daily from an open-source feed
-  (OpenPhish + URLhaus, heavily filtered against false positives)
-• Crypto-wallet guard: warns before risky approvals & blind signatures; blocks
-  recovery-phrase theft
-• Clipboard-hijack guard: warns when a site copies a command to your clipboard
-• Tech-support scam guard: breaks the "your PC is infected, call this number"
-  pop-up trap and helps you escape
-• Hides fake prize/giveaway scam content
-• Protection history and stats, stored only on your device; dark mode
-• Optional community reporting, off by default — never URLs or page text
-• Smaller and faster: ~0.6 MB unpacked, no heavy runtime
-• 100% on-device analysis — no tracking, no data collection
-
-**What's new in 0.5.0 (since the 0.3.1 store version):**
-Page analysis (an on-device model reads the page itself), brand look-alike
-detection by icon (64-brand table, 49 with icon hashes, incl. UAE
-banks/telcos/government), a real threat feed on by default, the scam
-message checker, protection history and
-a "Take me to the real site" rescue button, a redesigned popup and settings
-with dark mode, a ~0.6 MB package (was 14 MB — the ONNX runtime is gone), and
-optional off-by-default community reporting. No new permissions; your
-settings, trusted sites and history carry over.
-
 **Privacy policy URL:** https://joelstephen97.github.io/scamshield/privacy.html
-**Screenshots:** see store/screenshots/README.md
+**Category:** Privacy & Security (Productivity → Tools also acceptable)
+**Default language:** English
+
+## Where the copy lives
+
+All listing text is in **`store/listings/en.md`** (English canon) and
+`store/listings/<locale>.md` (19 translations). Paste each file's four
+sections into the dashboard field of the same name:
+
+| File section | Dashboard field |
+|---|---|
+| `## Name` | Store listing → Title (must match `extName` in `_locales/en/messages.json`: *Scam & Phishing Blocker: ScamShield*) |
+| `## Short description` | Store listing → Summary (132 chars max; `tests/unit/listings.test.js` enforces it per locale) |
+| `## Full description` | Store listing → Description |
+| `## What's new (X.Y.Z)` | Bottom of Description (the CWS has no separate what's-new field) |
+
+Localized listings: Store listing tab → language selector → add each
+language and paste from its file. `pt_BR` is entered as `pt-BR` and `zh_CN` as
+`zh-CN`; every other code matches the filename.
+
+## Two rules the store enforced on us (rejection "Yellow Argon", 2026-09-03)
+
+1. **Plain text only.** The dashboard does not render markdown. The pre-0.11
+   listings pasted `**Why ScamShield**` and `*Leave this page*` and the store
+   showed the asterisks literally. Section titles inside the description are
+   plain uppercase lines, bullets are `•`, emphasis is done with wording.
+   The listing test fails on any `**`, `*x*`, backtick, markdown link or `- `
+   bullet in any locale.
+2. **No entity lists.** Google rejected the 0.5-era description for keyword
+   spam over "Emirates NBD, ADCB, FAB, Mashreq, e&, du, Noon, UAE PASS, MOHRE,
+   Dubai Police" (">5 entities"). Name categories ("regional banks, telecom
+   and government services"), keep any list of real brands to three or four
+   (PayPal, Microsoft and Google; Google, Bing and DuckDuckGo), and never name
+   a competitor product in the description. The listing test bans the flagged
+   names and any comma-run of five or more capitalised names.
+
+## Graphics
+
+- Icon: `assets/icons/icon128.png`
+- Screenshots (1280×800): `store/screenshots/01–06` — see `store/screenshots/README.md`; regenerate with `npm run screenshots`.
+- Small promo tile: `store/promo-small-440x280.png`; marquee: `store/promo-marquee-1400x560.png` (`npm run promo`).
+
+## History
+
+- **0.5.0** — first listing overhaul; the description carried the UAE brand list that was later flagged.
+- **0.8.0** — title changed to *Scam & Phishing Blocker: ScamShield*; 20-locale listings added under `store/listings/`.
+- **0.11.0** — rejected 2026-09-03 (keyword spam, "Yellow Argon", on the old 0.5-era description still live on the item). Whole listing rewritten as plain text without entity lists or competitor names, all 20 locales retranslated, sixth screenshot (QR scan) added.

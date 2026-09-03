@@ -189,6 +189,30 @@
   "msgDangerous": {
     "message": "Neredeyse kesinlikle dolandırıcılık"
   },
+  "qrScanTitle": {
+    "message": "Bu sayfada QR kod tara"
+  },
+  "qrScanHint": {
+    "message": "Bu sayfadaki görsellerdeki QR kodlarını çözer ve telefonunuzla taramadan önce nereye yönlendirdiklerini kontrol eder. Tamamen cihazınızda denetlenir."
+  },
+  "qrScanBtn": {
+    "message": "Şimdi tara"
+  },
+  "qrScanNone": {
+    "message": "Bu sayfada QR kod bulunamadı."
+  },
+  "qrScanFoundOne": {
+    "message": "1 QR kod bulundu"
+  },
+  "fmtQrScanFoundCount": {
+    "message": "$COUNT$ QR kod bulundu",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
   "support": {
     "message": "Destekle"
   },
@@ -217,7 +241,7 @@
     "message": "Uzantı hatası — yeniden açmayı deneyin."
   },
   "whatsNewBanner": {
-    "message": "0.10'daki yenilikler: arama sonuçlarında güvenlik rozetleri, kart hırsızlığı uyarıları, yepyeni alan adı uyarıları ve paylaşılabilir dolandırıcılık raporları."
+    "message": "0.11'deki yenilikler: cihaz üzerinde QR kod tarama, telefonunuzla taramadan önce \"quishing\" dolandırıcılıklarını tespit eder; ayrıca otomatik gönderilen formlar için kart hırsızlığı koruması."
   },
   "popupBrandDangerSummary": {
     "message": "$BRAND$ gibi görünüyor ama değil. Buraya şifrenizi girmeyin.",
@@ -409,6 +433,12 @@
   },
   "optHideHint": {
     "message": "Normal görünen sayfalar içindeki \"bir ödül kazandınız\" bloklarını griye boyar."
+  },
+  "optQrScan": {
+    "message": "QR kodlarını otomatik tara"
+  },
+  "optQrScanHint": {
+    "message": "Sayfadaki büyük görsellerdeki QR kodlarını çözer ve telefonunuzla taramadan önce nereye yönlendirdiklerini kontrol eder — \"quishing\" (QR kod kimlik avı) e-postalarına karşı cihaz üzerinde çalışan bir önlem. Ayrıca herhangi bir sayfayı istediğiniz zaman popup'tan da tarayabilirsiniz."
   },
   "optTechscam": {
     "message": "Teknik destek dolandırıcılığından kaçış"
@@ -1150,6 +1180,15 @@
   },
   "reason_msgDangerousLink": {
     "message": "Tehlikeli görünen bir bağlantı içeriyor ($URL$).",
+    "placeholders": {
+      "url": {
+        "content": "$1",
+        "example": "http://verify-bank.tk/otp"
+      }
+    }
+  },
+  "reason_qrCodeDestination": {
+    "message": "Bu sayfa, $URL$ adresine yönlendiren bir QR kod içeriyor — telefonunuzla taramadan önce otomatik olarak kontrol edildi.",
     "placeholders": {
       "url": {
         "content": "$1",
