@@ -84,7 +84,9 @@ Numeri concreti, non aggettivi: 20 lingue con traduzione completa di menu, avvis
 
 Codice sorgente, informativa sulla privacy e tracciamento dei problemi: github.com/joelstephen97/scamshield
 
-## What's new (0.11.1)
+## What's new (0.12.0)
+
+• I siti di truffa conosciuti ora aprono una pagina di blocco di ScamShield. Quando un sito presente nell'elenco di blocco viene fermato prima che si carichi, non vedi più un errore vuoto del browser. ScamShield ti spiega perché il sito è stato bloccato, conta il blocco nelle tue statistiche e ti permette di mettere in pausa il blocco per un'ora se pensi che sia un errore.
 
 • Scansione dei codici QR, sul tuo dispositivo. ScamShield ora decodifica i codici QR nelle immagini di una pagina e controlla dove portano prima che tu li scansioni con il telefono. È la risposta sul dispositivo alle email di "quishing" (phishing tramite QR). Scansiona qualsiasi pagina dal popup, oppure lascia attiva la scansione automatica. Niente sul codice lascia il tuo dispositivo.
 

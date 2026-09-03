@@ -241,7 +241,7 @@
     "message": "Erro na extensão — tente reabrir."
   },
   "whatsNewBanner": {
-    "message": "Novidades na 0.11: escaneamento de códigos QR no dispositivo detecta golpes de \"quishing\" (phishing por QR code) antes de você escanear com o celular, além de proteção contra roubo de cartão em formulários preenchidos automaticamente."
+    "message": "Novidades na 0.12: sites de golpe conhecidos agora abrem uma página de bloqueio do ScamShield que explica o motivo, conta o bloqueio e permite pausar o bloqueio se for um erro. Além da leitura de códigos QR no dispositivo."
   },
   "popupBrandDangerSummary": {
     "message": "Parece com a $BRAND$, mas não é. Não digite sua senha aqui.",
@@ -1279,6 +1279,51 @@
   },
   "obOpenSettings": {
     "message": "Abrir configurações"
+  },
+  "blockedDocTitle": {
+    "message": "Site bloqueado pelo ScamShield"
+  },
+  "blockedTitle": {
+    "message": "O ScamShield bloqueou este site"
+  },
+  "blockedLead": {
+    "message": "$HOST$ está na lista do ScamShield de sites de golpe e maliciosos conhecidos, por isso a página foi interrompida antes de carregar. Nada foi executado e nada que você digitou foi enviado.",
+    "placeholders": {
+      "host": {
+        "content": "$1",
+        "example": "secure-paypa1-login.com"
+      }
+    }
+  },
+  "blockedAddress": {
+    "message": "Endereço bloqueado"
+  },
+  "blockedListedBy": {
+    "message": "Listado por $SOURCES$",
+    "placeholders": {
+      "sources": {
+        "content": "$1",
+        "example": "Phishing.Database, ScamSniffer"
+      }
+    }
+  },
+  "blockedListedGeneric": {
+    "message": "Listado na lista de bloqueio do ScamShield de domínios de golpe confirmados."
+  },
+  "blockedGoBack": {
+    "message": "Voltar para um lugar seguro"
+  },
+  "blockedVisitAnyway": {
+    "message": "Visitar mesmo assim (não recomendado)"
+  },
+  "blockedVisitHint": {
+    "message": "Abre o site com o ScamShield pausado nele por 1 hora."
+  },
+  "blockedFooter": {
+    "message": "Bloqueado no seu dispositivo. Nada sobre esta página foi enviado a lugar nenhum."
+  },
+  "chipBlocklist": {
+    "message": "Site bloqueado"
   },
   "obNote": {
     "message": "O ScamShield é gratuito. Opcional: nas Configurações, você pode ajudar a torná-lo mais inteligente compartilhando relatórios anônimos dos golpes que ele detecta — está desativado a menos que você o ative. Se ele te ajudou, você pode apoiar o desenvolvimento na página de Configurações."

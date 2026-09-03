@@ -84,7 +84,9 @@ Sıfatlar değil somut sayılar: menü, uyarı ve ayarların tamamı çevrilmiş
 
 Kaynak kod, gizlilik politikası ve hata takip sistemi: github.com/joelstephen97/scamshield
 
-## What's new (0.11.1)
+## What's new (0.12.0)
+
+• Bilinen dolandırıcılık siteleri artık bir ScamShield engelleme sayfası açıyor. Engelleme listesindeki bir site yüklenmeden durdurulduğunda, artık boş bir tarayıcı hatası görmüyorsunuz. ScamShield, sitenin neden engellendiğini açıklıyor, yakalamayı istatistiklerinize ekliyor ve bunun bir hata olduğunu düşünüyorsanız engellemeyi bir saatliğine duraklatmanıza olanak tanıyor.
 
 • Cihazınızda QR kodu taraması. ScamShield artık bir sayfanın görsellerindeki QR kodlarını çözüyor ve siz telefonunuzla taramadan önce nereye gittiklerini kontrol ediyor. Bu, "quishing" (QR kod kimlik avı) e-postalarına cihaz üzerinde verilen yanıttır. Herhangi bir sayfayı açılır pencereden tarayabilir veya otomatik taramayı açık bırakabilirsiniz. Kod hakkında hiçbir şey cihazınızdan çıkmaz.
 

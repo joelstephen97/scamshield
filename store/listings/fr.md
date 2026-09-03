@@ -84,7 +84,9 @@ Des chiffres concrets, pas des adjectifs : 20 langues avec traduction complète 
 
 Code source, politique de confidentialité et suivi des problèmes : github.com/joelstephen97/scamshield
 
-## What's new (0.11.1)
+## What's new (0.12.0)
+
+• Les sites d'arnaque connus ouvrent désormais une page de blocage ScamShield. Lorsqu'un site figurant sur la liste de blocage est arrêté avant de se charger, vous ne voyez plus une erreur de navigateur vierge. ScamShield vous explique pourquoi le site a été bloqué, comptabilise l'interception dans vos statistiques et vous permet de suspendre le blocage pendant une heure si vous pensez qu'il s'agit d'une erreur.
 
 • Analyse des codes QR, sur votre appareil. ScamShield décode désormais les codes QR présents dans les images d'une page et vérifie où ils mènent avant que vous ne les scanniez avec votre téléphone. C'est la réponse embarquée au « quishing » (phishing par code QR) par e-mail. Analysez n'importe quelle page depuis la fenêtre de l'extension, ou laissez l'analyse automatique activée. Rien concernant le code ne quitte votre appareil.
 

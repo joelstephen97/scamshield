@@ -43,7 +43,7 @@ language and paste from its file. `pt_BR` is entered as `pt-BR` and `zh_CN` as
 ## Graphics
 
 - Icon: `assets/icons/icon128.png`
-- Screenshots (1280×800): `store/screenshots/01–06` — see `store/screenshots/README.md`; regenerate with `npm run screenshots`.
+- Screenshots (1280×800): `store/screenshots/01–07` — see `store/screenshots/README.md`; regenerate with `npm run screenshots`.
 - Small promo tile: `store/promo-small-440x280.png`; marquee: `store/promo-marquee-1400x560.png` (`npm run promo`).
 
 ## History

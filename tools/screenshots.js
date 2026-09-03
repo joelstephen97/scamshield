@@ -34,7 +34,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   // dangerous shot either way, but the language-picker shot's popup is short
   // enough to show it, and a stale version banner is not what that shot is
   // about.
-  await sw.evaluate(() => setSettings({ threatsBlocked: 23, whatsNewSeen: '0.11.0' }));
+  await sw.evaluate(() => setSettings({ threatsBlocked: 23, whatsNewSeen: '0.12.0' }));
 
   // Statistics-tab seed. The dashboard is the one surface that looks empty on
   // a fresh profile — a store shot of it has to show a real install's worth of
@@ -205,5 +205,13 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
     await sleep(300);
   });
   await compose('06-qr-scan.png', 'Checks QR codes before your phone does', s.png, s.w, s.h); await page.close();
+  // 7 the network-level block page (0.12.0). Install a dynamic block rule for
+  // the mapped secure-paypa1-login.com fixture host through the worker's own
+  // applyNetworkRules() (block + redirect rules, exactly as an OTA would),
+  // then navigate: the redirect rule lands on blocked.html#<url>.
+  await sw.evaluate(async () => { await applyNetworkRules(['||secure-paypa1-login.com^'], true); });
+  page = await ctx.newPage(); await page.setViewportSize({ width: 900, height: 560 });
+  await page.goto('https://secure-paypa1-login.com:5600/brand-visual.html'); await page.waitForURL(/blocked\.html#/, { timeout: 8000 }); await sleep(900);
+  await compose('07-blocked-page.png', 'Known scam sites never even load', await page.screenshot(), 900, 560); await page.close();
   await ctx.close(); server.kill(); console.log('Done →', OUT);
 })().catch((e) => { console.error(e); process.exit(1); });

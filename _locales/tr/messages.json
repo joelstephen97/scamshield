@@ -241,7 +241,7 @@
     "message": "Uzantı hatası — yeniden açmayı deneyin."
   },
   "whatsNewBanner": {
-    "message": "0.11'deki yenilikler: cihaz üzerinde QR kod tarama, telefonunuzla taramadan önce \"quishing\" dolandırıcılıklarını tespit eder; ayrıca otomatik gönderilen formlar için kart hırsızlığı koruması."
+    "message": "0.12'deki yenilikler: bilinen dolandırıcılık siteleri artık nedenini açıklayan, yakalamayı sayan ve bir hata olduğunu düşünüyorsanız engellemeyi duraklatmanıza olanak tanıyan bir ScamShield engelleme sayfası açıyor. Ayrıca cihaz üzerinde QR kod tarama."
   },
   "popupBrandDangerSummary": {
     "message": "$BRAND$ gibi görünüyor ama değil. Buraya şifrenizi girmeyin.",
@@ -1279,6 +1279,51 @@
   },
   "obOpenSettings": {
     "message": "Ayarları aç"
+  },
+  "blockedDocTitle": {
+    "message": "Site ScamShield tarafından engellendi"
+  },
+  "blockedTitle": {
+    "message": "ScamShield bu siteyi engelledi"
+  },
+  "blockedLead": {
+    "message": "$HOST$, ScamShield'ın bilinen dolandırıcılık ve zararlı site listesinde yer alıyor, bu yüzden sayfa yüklenmeden durduruldu. Hiçbir şey çalışmadı ve yazdığınız hiçbir şey gönderilmedi.",
+    "placeholders": {
+      "host": {
+        "content": "$1",
+        "example": "secure-paypa1-login.com"
+      }
+    }
+  },
+  "blockedAddress": {
+    "message": "Engellenen adres"
+  },
+  "blockedListedBy": {
+    "message": "$SOURCES$ tarafından listelendi",
+    "placeholders": {
+      "sources": {
+        "content": "$1",
+        "example": "Phishing.Database, ScamSniffer"
+      }
+    }
+  },
+  "blockedListedGeneric": {
+    "message": "ScamShield'ın onaylanmış dolandırıcılık alan adları engelleme listesinde yer alıyor."
+  },
+  "blockedGoBack": {
+    "message": "Güvenliğe geri dön"
+  },
+  "blockedVisitAnyway": {
+    "message": "Yine de ziyaret et (önerilmez)"
+  },
+  "blockedVisitHint": {
+    "message": "Siteyi, ScamShield 1 saatliğine bu sitede duraklatılmış olarak açar."
+  },
+  "blockedFooter": {
+    "message": "Cihazınızda engellendi. Bu sayfayla ilgili hiçbir şey herhangi bir yere gönderilmedi."
+  },
+  "chipBlocklist": {
+    "message": "Engellenen site"
   },
   "obNote": {
     "message": "ScamShield ücretsizdir. İsteğe bağlı: Ayarlar'da, yakaladığı dolandırıcılıkların anonim raporlarını paylaşarak onu daha akıllı hale getirmeye yardımcı olabilirsiniz — siz açmadığınız sürece kapalıdır. Size yardımcı olduysa, Ayarlar sayfasından geliştirmeyi destekleyebilirsiniz."

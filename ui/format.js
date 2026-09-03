@@ -27,7 +27,7 @@
   // English fallback table; the localized labels live under the chip* keys.
   // UI code now prefers T('chip'+Kind) / T('level'+Level) — these remain only
   // as the English fallback when the i18n layer is unavailable.
-  const LABELS = { page: 'Page', brand: 'Brand', wallet: 'Wallet', clipboard: 'Clipboard', techscam: 'Scare page', link: 'Link', shop: 'Shop', message: 'Message' };
+  const LABELS = { page: 'Page', brand: 'Brand', wallet: 'Wallet', clipboard: 'Clipboard', techscam: 'Scare page', link: 'Link', shop: 'Shop', message: 'Message', blocklist: 'Blocked site' };
   function detectorLabel(kind) { return LABELS[kind] || 'Page'; }
   function levelText(level) {
     return level === 'dangerous' ? 'Dangerous page' : level === 'suspicious' ? 'Suspicious page' : level === 'safe' ? 'Nothing suspicious here' : "Can't check this page";

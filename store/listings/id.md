@@ -84,7 +84,9 @@ Angka pasti, bukan kata sifat: 20 bahasa dengan terjemahan lengkap untuk menu, p
 
 Kode sumber, kebijakan privasi, dan pelacak masalah: github.com/joelstephen97/scamshield
 
-## What's new (0.11.1)
+## What's new (0.12.0)
+
+• Situs penipuan yang dikenal kini membuka halaman blokir ScamShield. Saat sebuah situs dalam daftar blokir dihentikan sebelum sempat dimuat, Anda tidak lagi melihat kesalahan browser yang kosong. ScamShield memberi tahu Anda alasan situs itu diblokir, mencatat tangkapan ini dalam statistik Anda, dan memungkinkan Anda menjeda blokir selama satu jam jika Anda merasa ini kesalahan.
 
 • Pemindaian kode QR, di perangkat Anda. ScamShield kini membaca kode QR dalam gambar halaman dan memeriksa ke mana kode itu mengarah sebelum Anda memindainya dengan ponsel. Ini adalah jawaban di perangkat untuk email "quishing" (phishing lewat kode QR). Pindai halaman mana pun dari popup, atau biarkan pemindaian otomatis tetap aktif. Tidak ada apa pun tentang kode itu yang keluar dari perangkat Anda.
 

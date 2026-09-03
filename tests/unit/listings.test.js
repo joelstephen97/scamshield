@@ -33,7 +33,7 @@ const EXPECTED = ['en', 'zh_CN', 'hi', 'es', 'ar', 'fr', 'bn', 'pt_BR', 'ru', 'u
 // formed "## What's new (X.Y.Z)" heading, not the current one.
 const HEADINGS = ['## Name', '## Short description', '## Full description'];
 const WHATS_NEW_RE = /## What's new \(\d+\.\d+\.\d+\)/;
-const EN_WHATS_NEW_HEADING = "## What's new (0.11.1)";
+const EN_WHATS_NEW_HEADING = "## What's new (0.12.0)";
 
 // Names Google's reviewer quoted in the keyword-spam rejection, plus the
 // competitor products the old FAQ name-dropped. None of them may appear in
@@ -58,7 +58,7 @@ test('all 20 locales have a store listing file', () => {
   }
 });
 
-test('store listing (en): "What\'s new" heading is pinned to the current version (0.11.1)', () => {
+test('store listing (en): "What\'s new" heading is pinned to the current version (0.12.0)', () => {
   const p = path.join(LISTINGS_DIR, 'en.md');
   const content = fs.readFileSync(p, 'utf8');
   assert.ok(

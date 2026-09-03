@@ -14,6 +14,7 @@ import '../engine/engagement.js';
 import '../engine/blockset.js';
 import '../engine/bloom.js';
 import '../engine/first_seen.js';
+import '../engine/dnr_rules.js';
 import '../ui/reasons.js';
 import './stats.js';
 import './blockstore.js';

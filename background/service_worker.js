@@ -460,6 +460,11 @@ async function setSettings(patch) {
         });
       } catch (e) { /* ruleset toggle is best-effort */ }
     }
+    // 0.12.0: the dynamic block + redirect rules follow the same switch (they
+    // used to linger until the next 12h OTA), and pause/allowlist changes
+    // keep the network allow rules in step.
+    if ('blockKnownBad' in patch) { try { await applyNetworkRules(await currentOtaFilters(), !!patch.blockKnownBad); } catch (_) {} }
+    if ('pausedSites' in patch || 'allowlist' in patch) await syncAllowRules(next);
     if ('reportingOptIn' in patch && !patch.reportingOptIn) await api.storage.local.set({ reportQueue: [] });
     // Mirror preference changes to sync when enabled (best-effort).
     if (next.syncEnabled && Object.keys(patch).some((k) => SYNCED_KEYS.includes(k))) pushSync(next);
@@ -683,21 +688,132 @@ async function runOtaUpdate() {
     // runtime constant sizes the feed correctly on both without hardcoding.
     const dnrCap = (api.declarativeNetRequest && typeof api.declarativeNetRequest.MAX_NUMBER_OF_DYNAMIC_RULES === 'number')
       ? api.declarativeNetRequest.MAX_NUMBER_OF_DYNAMIC_RULES : 5000;
-    const rules = data.rules.slice(0, dnrCap).map((r, i) => ({
-      id: 100000 + i, priority: 1, action: { type: 'block' },
-      condition: { urlFilter: String(r.urlFilter || r), resourceTypes: ['main_frame', 'sub_frame'] }
-    }));
-    if (api.declarativeNetRequest && api.declarativeNetRequest.updateDynamicRules) {
-      const existing = await api.declarativeNetRequest.getDynamicRules();
-      await api.declarativeNetRequest.updateDynamicRules({
-        removeRuleIds: existing.map((r) => r.id), addRules: s.blockKnownBad ? rules : []
-      });
-    }
-    await setSettings({ lastBlocklistVersion: data.version, lastOtaAt: Date.now(), lastOtaCount: rules.length });
-    return { ok: true, version: data.version, updated: true, count: rules.length };
+    // 0.12.0: leave headroom under the cap for the redirect rules
+    // (engine/dnr_rules.js CHUNK-sized) and up to MAX_ALLOW allow rules.
+    const filters = data.rules.slice(0, Math.max(0, dnrCap - 1100)).map((r) => String(r.urlFilter || r));
+    await applyNetworkRules(filters, s.blockKnownBad);
+    await setSettings({ lastBlocklistVersion: data.version, lastOtaAt: Date.now(), lastOtaCount: filters.length });
+    return { ok: true, version: data.version, updated: true, count: filters.length };
   } catch (e) {
     return { ok: false, reason: 'fetch-failed' };
   }
+}
+
+// ---- Network rules (0.12.0): block + redirect-to-block-page + allow ----------
+// Three dynamic-rule ranges, shaped by engine/dnr_rules.js (SSDnr):
+//   block     — one per feed urlFilter (unchanged pre-0.12 behaviour);
+//   redirect  — a handful of main-frame rules that send a navigation to ANY
+//               listed domain (feed + the packaged static ruleset) to
+//               blocked.html#<url> instead of Chrome's bare error page. The
+//               block page then reports the catch ('dnrBlocked' below) so it
+//               counts like an in-page dangerous verdict;
+//   allow     — one per paused/trusted site, priority above both, so the
+//               popup's pause menu and the block page's "Visit anyway" really
+//               let the site load. Kept in sync from setSettings().
+// All best-effort: a browser that rejects the redirect rule (Firefox builds
+// that predate regexSubstitution to extension pages) keeps plain blocking.
+let staticBlockDomainsCache = null;
+async function staticBlockDomains() {
+  if (staticBlockDomainsCache) return staticBlockDomainsCache;
+  try {
+    const res = await fetch(api.runtime.getURL('rules/blocklist.json'));
+    const rules = await res.json();
+    const D = globalThis.SSDnr;
+    staticBlockDomainsCache = (Array.isArray(rules) ? rules : []).map((r) => D.domainOfFilter(r && r.condition && r.condition.urlFilter)).filter(Boolean);
+  } catch (_) { staticBlockDomainsCache = []; }
+  return staticBlockDomainsCache;
+}
+// The last downloaded filter list, kept in storage.local (NOT settings — it
+// is ~150 KB and must never ride along with sync/export) so that turning
+// "block known scam sites" off and back on restores the rules without
+// waiting for the next OTA. Falls back to whatever block rules are installed
+// (an install that predates 0.12).
+async function currentOtaFilters() {
+  try {
+    const cur = await api.storage.local.get('otaFilters');
+    if (Array.isArray(cur.otaFilters) && cur.otaFilters.length) return cur.otaFilters.map(String);
+  } catch (_) {}
+  try {
+    const D = globalThis.SSDnr;
+    const rules = await api.declarativeNetRequest.getDynamicRules();
+    return rules.filter((r) => D.inRange(r.id, D.BLOCK_BASE)).sort((a, b) => a.id - b.id).map((r) => r.condition.urlFilter);
+  } catch (_) { return []; }
+}
+// Replaces the block + redirect ranges. `enabled` false (blockKnownBad off)
+// removes both — the static ruleset is disabled separately in setSettings().
+async function applyNetworkRules(filters, enabled) {
+  if (!api.declarativeNetRequest || !api.declarativeNetRequest.updateDynamicRules) return { ok: false };
+  const D = globalThis.SSDnr;
+  if (enabled && Array.isArray(filters) && filters.length) { try { await api.storage.local.set({ otaFilters: filters.map(String) }); } catch (_) {} }
+  const existing = await api.declarativeNetRequest.getDynamicRules();
+  const removeRuleIds = existing.filter((r) => D.inRange(r.id, D.BLOCK_BASE) || D.inRange(r.id, D.REDIRECT_BASE)).map((r) => r.id);
+  const blockRules = enabled ? D.buildBlockRules(filters) : [];
+  let redirectRules = [];
+  if (enabled) {
+    const domains = [...(await staticBlockDomains()), ...filters.map((f) => D.domainOfFilter(f)).filter(Boolean)];
+    redirectRules = D.buildRedirectRules(domains, api.runtime.getURL('blocked.html'));
+  }
+  try {
+    await api.declarativeNetRequest.updateDynamicRules({ removeRuleIds, addRules: [...blockRules, ...redirectRules] });
+  } catch (e) {
+    // Redirect rules refused (older Firefox): fall back to block-only.
+    try { await api.declarativeNetRequest.updateDynamicRules({ removeRuleIds, addRules: blockRules }); } catch (_) {}
+    return { ok: true, redirect: false, count: blockRules.length };
+  }
+  return { ok: true, redirect: redirectRules.length > 0, count: blockRules.length };
+}
+async function syncAllowRules(settings) {
+  if (!api.declarativeNetRequest || !api.declarativeNetRequest.updateDynamicRules) return;
+  const D = globalThis.SSDnr;
+  try {
+    const s = settings || await getSettings();
+    const existing = await api.declarativeNetRequest.getDynamicRules();
+    const removeRuleIds = existing.filter((r) => D.inRange(r.id, D.ALLOW_BASE)).map((r) => r.id);
+    await api.declarativeNetRequest.updateDynamicRules({ removeRuleIds, addRules: D.buildAllowRules(D.exemptDomains(s, Date.now())) });
+  } catch (_) { /* best-effort */ }
+}
+// Every SW boot: make sure the redirect rules exist for whatever block rules
+// are installed (an install that predates 0.12 has block rules but no
+// redirects until its next OTA), and that the allow rules match the current
+// pauses. Cheap — a dozen rules at most.
+let networkRulesEnsured = false;
+async function ensureNetworkRules() {
+  if (networkRulesEnsured) return; networkRulesEnsured = true;
+  try {
+    const s = await getSettings();
+    const D = globalThis.SSDnr;
+    const existing = await api.declarativeNetRequest.getDynamicRules();
+    const hasRedirect = existing.some((r) => D.inRange(r.id, D.REDIRECT_BASE));
+    if (s.blockKnownBad && !hasRedirect) {
+      const filters = existing.filter((r) => D.inRange(r.id, D.BLOCK_BASE)).sort((a, b) => a.id - b.id).map((r) => r.condition.urlFilter);
+      await applyNetworkRules(filters, true);
+    }
+    await syncAllowRules(s);
+  } catch (_) {}
+}
+// The block page reporting a catch. Sender must be our own extension page.
+const dnrBlockedSeen = new Map(); // host -> ts, collapses reloads within a minute
+async function handleDnrBlocked(msg, sender) {
+  if (!sender || sender.id !== api.runtime.id) return { ok: false };
+  let u = null; try { u = new URL(String(msg.url || '')); } catch (_) { return { ok: false }; }
+  if (!/^https?:$/.test(u.protocol)) return { ok: false };
+  const host = u.hostname.toLowerCase();
+  const now = Date.now();
+  const last = dnrBlockedSeen.get(host) || 0;
+  let counted = false;
+  if (now - last > 60000) {
+    dnrBlockedSeen.set(host, now);
+    if (dnrBlockedSeen.size > 500) { const oldest = [...dnrBlockedSeen.keys()][0]; dnrBlockedSeen.delete(oldest); }
+    const s = await getSettings();
+    await setSettings({ threatsBlocked: (s.threatsBlocked || 0) + 1 });
+    bumpStat('threats', { kind: 'blocklist', verdict: { level: 'dangerous' } });
+    await recordEvent({ host, kind: 'blocklist', level: 'dangerous' });
+    counted = true;
+  }
+  let sources = [];
+  try { const hit = await checkFeedHost(host); if (hit && Array.isArray(hit.sources)) sources = hit.sources; } catch (_) {}
+  const SS = globalThis.ScamShield;
+  return { ok: true, host, domain: SS && SS.registrableDomain ? SS.registrableDomain(host) : host, counted, sources };
 }
 
 // ---- v0.9 threat-feed: OTA cycle + verdict-path lookup (Task B2) ----------
@@ -1038,6 +1154,7 @@ if (api.alarms) {
 // is supported by both Chrome and Firefox. Guarded because a handful of test
 // harnesses stub `api.runtime` without it.
 try {
+  ensureNetworkRules();
   if (api.runtime && typeof api.runtime.setUninstallURL === 'function') {
     api.runtime.setUninstallURL('https://joelstephen97.github.io/scamshield/goodbye.html?v=' + manifestVersion());
   }
@@ -1298,6 +1415,8 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         sendResponse(await getLangDict()); break;
       case 'getStats':
         sendResponse(await getStats()); break;
+      case 'dnrBlocked':
+        sendResponse(await handleDnrBlocked(msg, sender)); break;
       case 'getHistory': {
         const cur = await api.storage.local.get('history');
         sendResponse({ history: Array.isArray(cur.history) ? cur.history : [] }); break;
@@ -1355,4 +1474,4 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 // module-scoped. Re-attach the debug/test surface that used to live on the
 // classic worker's global scope — the e2e suite drives these via
 // worker.evaluate, and they're handy in the SW console.
-Object.assign(globalThis, { DEFAULT_FEED_URL, FEED_META_URL, getSettings, setSettings, handleUserReport, runOtaUpdate, flushReports, queueReport, exportSettings, sanitizeImport, pushSync, pullSync, getStats, bumpStat, ensurePrivacyTotal, ensureInstalledAt, getReviewAsk, getReviewAskContext, setReviewAsk, sanitizeReviewAsk, ensureReviewAsk, importReviewAsk, getLangDict, loadLangDict, isValidLang, runFeedUpdate, checkFeedHost, checkFeedBatchHosts, normalizeFeedHost, checkRiskHosting, checkNrdHost });
+Object.assign(globalThis, { DEFAULT_FEED_URL, FEED_META_URL, getSettings, setSettings, handleUserReport, runOtaUpdate, flushReports, queueReport, exportSettings, sanitizeImport, pushSync, pullSync, getStats, bumpStat, ensurePrivacyTotal, ensureInstalledAt, getReviewAsk, getReviewAskContext, setReviewAsk, sanitizeReviewAsk, ensureReviewAsk, importReviewAsk, getLangDict, loadLangDict, isValidLang, runFeedUpdate, checkFeedHost, checkFeedBatchHosts, normalizeFeedHost, checkRiskHosting, checkNrdHost, applyNetworkRules, syncAllowRules, ensureNetworkRules, handleDnrBlocked });

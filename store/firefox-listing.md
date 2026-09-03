@@ -12,7 +12,7 @@ verbatim. It is plain text (no markdown), which is also what AMO's description
 field expects. Do not re-add brand or competitor lists — see the two rules in
 `chrome-listing.md`; the same keyword-spam policy applies on AMO.
 
-**What's new:** paste the `## What's new (0.11.1)` section of `store/listings/en.md`.
+**What's new:** paste the `## What's new (0.12.0)` section of `store/listings/en.md`.
 
 **Data collection (manifest, Firefox 140+ built-in consent):** `required: ["none"]`
 (nothing is collected by default) and `optional: ["websiteActivity"]` for the
@@ -28,7 +28,13 @@ notes on innerHTML writes of our own constant SVG icon strings.
 `store/listings/<locale>.md` can be pasted the same way (English-only is fine
 for the first AMO submission).
 
-**Notes for AMO reviewers (0.11.1):**
+**Notes for AMO reviewers (0.12.0):**
+- 0.12.0 block page: a few declarativeNetRequest dynamic redirect rules
+  (main_frame only, `requestDomains` + `regexSubstitution`) send a navigation
+  to a block-listed domain to the extension's own `blocked.html` with the
+  blocked address in the fragment; paused/trusted sites get a higher-priority
+  allow rule. If the browser rejects the redirect rule the worker falls back
+  to plain block rules. No web-accessible resources, no new permission.
 - No remote code. All detection logic is unminified vanilla JS, bundled
   directly in the package under `engine/` and `model/`.
 - No WebAssembly. Both the URL model and the page-content model run as plain

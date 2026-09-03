@@ -2,6 +2,33 @@
 
 All notable changes to ScamShield. Versions are git tags (`vX.Y.Z`); the version on the [Chrome Web Store](https://chromewebstore.google.com/detail/fojjjofjimbfoddafoampojopijnlihl) may lag a tag by a few days while Google reviews it. Privacy-relevant changes are also reflected in the [privacy policy](https://joelstephen97.github.io/scamshield/privacy.html).
 
+## 0.12.0 — 2026-09-03
+
+### New
+- **A ScamShield block page for known scam sites.** Domains on the block
+  list have always been stopped at the network level, but until now that
+  showed Chrome's bare "blocked by client" error and left no trace: the
+  catch was not counted, not in history, and there was no way to get
+  through if the list was wrong. A main-frame navigation to a listed domain
+  (threat feed or the packaged ruleset) now lands on `blocked.html`, which
+  names the site, says why it was blocked (with the feed sources when the
+  domain is in the 0.9 feed), offers "Go back to safety" and "Copy report",
+  and a "Visit anyway" link that pauses ScamShield on that site for an hour.
+  Each block counts once toward threats blocked (so it also feeds the
+  earned review ask), the statistics ring, and the protection history
+  ("Blocked site" chip). Implemented as a declarativeNetRequest redirect
+  rule (up to 2,500 domains per rule) — no new permissions, no
+  web-accessible resources, nothing leaves the device.
+
+### Fixed
+- **Pausing or trusting a site now works at the network level too.** Every
+  paused or trusted site gets a higher-priority allow rule, so the popup's
+  pause menu (and the new block page's "Visit anyway") can actually let a
+  block-listed site load. Previously a network-blocked site could never be
+  paused because its page never loaded.
+- **"Block known scam sites" off now removes the downloaded block rules at
+  once** instead of leaving them active until the next 12-hour refresh.
+
 ## 0.11.1 — 2026-09-03
 
 ### Fixed

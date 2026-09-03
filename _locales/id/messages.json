@@ -241,7 +241,7 @@
     "message": "Terjadi kesalahan ekstensi — coba buka kembali."
   },
   "whatsNewBanner": {
-    "message": "Baru di 0.11: pemindaian kode QR di perangkat mendeteksi penipuan \"quishing\" sebelum Anda memindai dengan ponsel, ditambah perlindungan pencurian kartu untuk formulir yang terkirim otomatis."
+    "message": "Baru di 0.12: situs penipuan yang dikenal kini membuka halaman blokir ScamShield yang menjelaskan alasannya, mencatatnya dalam statistik Anda, dan memungkinkan Anda menjeda blokir jika ini kesalahan. Ditambah pemindaian kode QR di perangkat."
   },
   "popupBrandDangerSummary": {
     "message": "Tampak seperti $BRAND$, tetapi bukan. Jangan masukkan kata sandi Anda di sini.",
@@ -1279,6 +1279,51 @@
   },
   "obOpenSettings": {
     "message": "Buka pengaturan"
+  },
+  "blockedDocTitle": {
+    "message": "Situs diblokir oleh ScamShield"
+  },
+  "blockedTitle": {
+    "message": "ScamShield memblokir situs ini"
+  },
+  "blockedLead": {
+    "message": "$HOST$ ada dalam daftar situs penipuan dan berbahaya yang dikenal oleh ScamShield, sehingga halaman ini dihentikan sebelum sempat dimuat. Tidak ada yang dijalankan dan tidak ada yang Anda ketik yang terkirim.",
+    "placeholders": {
+      "host": {
+        "content": "$1",
+        "example": "secure-paypa1-login.com"
+      }
+    }
+  },
+  "blockedAddress": {
+    "message": "Alamat yang diblokir"
+  },
+  "blockedListedBy": {
+    "message": "Terdaftar oleh $SOURCES$",
+    "placeholders": {
+      "sources": {
+        "content": "$1",
+        "example": "Phishing.Database, ScamSniffer"
+      }
+    }
+  },
+  "blockedListedGeneric": {
+    "message": "Terdaftar dalam daftar blokir ScamShield untuk domain penipuan yang telah dikonfirmasi."
+  },
+  "blockedGoBack": {
+    "message": "Kembali ke tempat aman"
+  },
+  "blockedVisitAnyway": {
+    "message": "Tetap kunjungi (tidak disarankan)"
+  },
+  "blockedVisitHint": {
+    "message": "Membuka situs dengan ScamShield dijeda di situs ini selama 1 jam."
+  },
+  "blockedFooter": {
+    "message": "Diblokir di perangkat Anda. Tidak ada informasi tentang halaman ini yang dikirim ke mana pun."
+  },
+  "chipBlocklist": {
+    "message": "Situs diblokir"
   },
   "obNote": {
     "message": "ScamShield gratis. Opsional: di Pengaturan Anda dapat membantu membuatnya lebih pintar dengan membagikan laporan anonim tentang penipuan yang terdeteksi — ini nonaktif kecuali Anda mengaktifkannya. Jika ini membantu Anda, Anda dapat mendukung pengembangannya dari halaman Pengaturan."

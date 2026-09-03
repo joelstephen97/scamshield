@@ -2,8 +2,14 @@
 
 - **storage** — save user settings and the trusted-sites allowlist locally.
 - **declarativeNetRequest** — block known scam/phishing domains using a static
-  ruleset. The extension does not read or intercept the user's network traffic;
-  blocking is rule-based and privacy-preserving.
+  ruleset plus a downloaded dynamic ruleset. The extension does not read or
+  intercept the user's network traffic; blocking is rule-based and
+  privacy-preserving. Since 0.12.0 a small number of dynamic *redirect* rules
+  send a top-level navigation to a listed domain to the extension's own
+  `blocked.html` page (with the blocked address in the URL fragment) so the
+  user sees an explanation instead of a bare browser error; dynamic *allow*
+  rules mirror the sites the user has paused or trusted. No web-accessible
+  resources are declared; the redirect target is the extension's own page.
 - **alarms** — schedule an optional, periodic (12h) download-only refresh of the
   scam-domain blocklist. Only runs if the user sets an update URL; nothing is uploaded.
 - **content scripts on http(s)** — statically declared in the manifest (the

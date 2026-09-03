@@ -101,7 +101,9 @@
     // — or a history event carrying one of these kinds — files itself correctly.
     clickfix: 'clickfix',
     fakeupdate: 'fakeUpdate',
-    fakeUpdate: 'fakeUpdate'
+    fakeUpdate: 'fakeUpdate',
+    // 0.12.0: a network-level block of a feed-listed domain (blocked.html).
+    blocklist: 'phishing'
   };
   const BY_FLAG = {
     'seed-phrase-harvest': 'wallet',

@@ -25,8 +25,12 @@ Do not hand-edit the PNGs below — re-run the script instead.
    this page for QR codes" card open after a scan, showing the decoded
    destination flagged dangerous ("Checks QR codes before your phone does").
    New in 0.11.0.
+7. `07-blocked-page.png` — the network-level block page a block-listed domain
+   lands on (`blocked.html#<url>`), with the blocked address, "Go back to
+   safety", "Copy report" and the one-hour "Visit anyway" pause ("Known scam
+   sites never even load"). New in 0.12.0.
 
-Captured against the 0.11.0 popup/options UI (0.8.0 redesign plus the
+Captured against the 0.12.0 popup/options UI (0.8.0 redesign plus the
 0.10.0 what's-new banner and the 0.11.0 QR card). Re-run `npm run screenshots` after any visual change to
 popup/options/in-page UI and commit the refreshed PNGs. `npm run promo`
 re-crops `01-popup-dangerous.png` into the marquee tile, so run it too when

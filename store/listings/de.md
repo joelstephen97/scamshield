@@ -84,7 +84,9 @@ Harte Zahlen, keine Werbeversprechen: 20 Sprachen mit vollständig übersetzten 
 
 Quellcode, Datenschutzerklärung und Fehler-Tracker: github.com/joelstephen97/scamshield
 
-## What's new (0.11.1)
+## What's new (0.12.0)
+
+• Bekannte Betrugsseiten öffnen jetzt eine ScamShield-Blockseite. Wenn eine Seite auf der Blockliste gestoppt wird, bevor sie lädt, siehst du keinen leeren Browserfehler mehr. ScamShield sagt dir, warum die Seite blockiert wurde, zählt den Fund in deiner Statistik und lässt dich die Blockierung für eine Stunde pausieren, wenn du denkst, dass es sich um einen Irrtum handelt.
 
 • QR-Code-Scan, direkt auf deinem Gerät. ScamShield entschlüsselt jetzt QR-Codes in den Bildern einer Seite und prüft, wohin sie führen, bevor du sie mit deinem Handy scannst. Das ist die lokale Antwort auf "Quishing" (QR-Code-Phishing)-E-Mails. Scanne jede Seite über das Popup, oder lass den automatischen Scan aktiviert. Nichts vom Code verlässt dein Gerät.
 
