@@ -6,17 +6,22 @@
  * Run: npm run promo  → store/promo-small-440x280.png, store/promo-marquee-1400x560.png */
 const { chromium } = require('@playwright/test'); const path = require('path'); const fs = require('fs');
 
-// ScamShield motif fallback: a diagonal blade with a dart deflecting off it
-// (matches tools/make-icons.js), used when the popup screenshot can't be
-// cropped for the marquee tile.
-const SHIELD_SVG = (big) => `<svg viewBox="0 0 24 24" style="position:absolute;right:${big ? 120 : 28}px;top:50%;transform:translateY(-50%);width:${big ? 300 : 130}px;height:${big ? 300 : 130}px;stroke:#fff;fill:rgba(255,255,255,.12);stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round"><path d="M6 20L20 6"/><path d="M2.5 3.5l9 9 5-2"/></svg>`;
+// The real store icon (assets/icons/icon128.png — the ScamShield check-shield
+// from tools/make-icons.js), inlined as a data URL. Used next to the wordmark
+// on both tiles and, large, as the small tile's artwork. The pre-0.12 tiles
+// still drew the retired Parry blade-and-dart motif here.
+const ICON = 'data:image/png;base64,' + fs.readFileSync(path.join(__dirname, '../assets/icons/icon128.png')).toString('base64');
+const BIG_ICON = (big) => `<img src="${ICON}" alt="" style="position:absolute;right:${big ? 140 : 26}px;top:50%;transform:translateY(-50%);width:${big ? 300 : 118}px;height:${big ? 300 : 118}px;filter:drop-shadow(0 18px 40px rgba(0,0,0,.35))">`;
 
 const html = (w, h, big, shotDataUrl) => `<!doctype html><html><body style="margin:0;width:${w}px;height:${h}px;background:#0B6E4F;font:${big ? 44 : 22}px/1.15 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;color:#fff;position:relative;overflow:hidden">
 <div style="position:absolute;inset:0;background:radial-gradient(120% 80% at 100% 100%,rgba(255,255,255,.12),transparent 60%)"></div>
-<div style="position:absolute;left:${big ? 64 : 24}px;top:${big ? 150 : 70}px;max-width:${big && shotDataUrl ? 600 : big ? 640 : 280}px"><div style="font-weight:600;letter-spacing:-.01em">ScamShield</div><div style="opacity:.9;font-size:${big ? 26 : 15}px;margin-top:${big ? 14 : 8}px">Scam &amp; phishing protection that runs on your device.</div></div>
+<div style="position:absolute;left:${big ? 64 : 24}px;top:${big ? 150 : 70}px;max-width:${big && shotDataUrl ? 600 : big ? 640 : 236}px">
+  <div style="display:flex;align-items:center;gap:${big ? 16 : 9}px;font-weight:600;letter-spacing:-.01em"><img src="${ICON}" alt="" style="width:${big ? 56 : 30}px;height:${big ? 56 : 30}px">ScamShield</div>
+  <div style="opacity:.9;font-size:${big ? 26 : 15}px;margin-top:${big ? 14 : 8}px">Scam &amp; phishing protection that runs on your device.</div>
+</div>
 ${shotDataUrl
   ? `<img src="${shotDataUrl}" style="position:absolute;right:40px;top:50%;transform:translateY(-50%);width:560px;height:auto;border-radius:16px;box-shadow:0 24px 64px rgba(0,0,0,.4)">`
-  : SHIELD_SVG(big)}
+  : BIG_ICON(big)}
 </body></html>`;
 
 // Crop store/screenshots/01-popup-dangerous.png down to just the popup card
