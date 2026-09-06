@@ -4,7 +4,7 @@
 // a classic-worker context (tests driving this file directly) falls back to
 // importScripts here. In the module SW `importScripts` is undefined — the
 // ReferenceError lands in the catch and the imports from sw.js already won.
-try { importScripts('../engine/constants.js', '../engine/trust.js', '../engine/features.js', '../engine/risk_rules.js', '../engine/image_hash.js', '../engine/brand_icons.js', '../engine/report_payload.js', '../engine/engagement.js', '../engine/blockset.js', '../engine/bloom.js', '../engine/first_seen.js', './stats.js', './blockstore.js'); } catch (_) { /* deps already loaded by sw.js (Chrome) or the manifest (Firefox) */ }
+try { importScripts('../engine/constants.js', '../engine/trust.js', '../engine/features.js', '../engine/risk_rules.js', '../engine/image_hash.js', '../engine/brand_icons.js', '../engine/report_payload.js', '../engine/engagement.js', '../engine/blockset.js', '../engine/bloom.js', '../engine/first_seen.js', './stats.js', './blockstore.js', './update.js'); } catch (_) { /* deps already loaded by sw.js (Chrome) or the manifest (Firefox) */ }
 const api = globalThis.browser || globalThis.chrome;
 
 // Official ScamShield feed: rebuilt daily by GitHub Actions from OpenPhish +
@@ -1141,9 +1141,74 @@ async function checkFeedBatchHosts(hosts) {
   return { results: out };
 }
 
+// Store updates (0.12.1). The browser downloads a new version on its own
+// schedule (Chrome polls roughly every 5 h) but only swaps it in once the
+// extension is idle — usually the next browser restart, which can be days.
+// runtime.onUpdateAvailable fires the moment the download is ready; we reload
+// as soon as no popup/settings/block page is open and no feed, OTA or report
+// job is mid-write (background/update.js decides; a 1-minute alarm re-checks
+// while deferring, with a 30-minute cap). No new permission, no network call.
+let busyJobs = 0;
+function trackedJob(fn) {
+  return async function () { busyJobs++; try { return await fn.apply(this, arguments); } finally { busyJobs--; } };
+}
+// Function declarations are plain bindings, so wrapping them in place keeps
+// every existing caller (alarms, onInstalled, the e2e harness's
+// worker.evaluate(() => runFeedUpdate(url))) pointed at the tracked version.
+runOtaUpdate = trackedJob(runOtaUpdate); // eslint-disable-line no-func-assign
+runFeedUpdate = trackedJob(runFeedUpdate); // eslint-disable-line no-func-assign
+flushReports = trackedJob(flushReports); // eslint-disable-line no-func-assign
+
+let updatePendingSince = 0;
+async function openExtensionContexts() {
+  try {
+    if (api.runtime && typeof api.runtime.getContexts === 'function') return await api.runtime.getContexts({});
+    if (api.extension && typeof api.extension.getViews === 'function') return api.extension.getViews();
+  } catch (_) { /* fall through — treat as no pages open */ }
+  return [];
+}
+async function applyPendingUpdate() {
+  if (!updatePendingSince) return;
+  const contexts = await openExtensionContexts();
+  const d = globalThis.SSUpdate.decide({ contexts, busy: busyJobs, pendingSince: updatePendingSince, now: Date.now() });
+  if (!d.apply) {
+    if (api.alarms) { try { api.alarms.create('applyUpdate', { periodInMinutes: globalThis.SSUpdate.RECHECK_MINUTES }); } catch (_) {} }
+    return;
+  }
+  if (api.alarms) { try { api.alarms.clear('applyUpdate'); } catch (_) {} }
+  updatePendingSince = 0;
+  try { api.runtime.reload(); } catch (_) { /* the browser applies it on its next idle window instead */ }
+}
+if (api.runtime && api.runtime.onUpdateAvailable) {
+  api.runtime.onUpdateAvailable.addListener(() => {
+    if (!updatePendingSince) updatePendingSince = Date.now();
+    applyPendingUpdate();
+  });
+}
+// Ask the browser to look for a store update now rather than waiting for its
+// own poll. Chrome-only API (Firefox has no equivalent); 'throttled' just
+// means it checked recently. Rides the 12 h OTA alarm.
+// Test hooks (module-scoped state is unreachable from worker.evaluate).
+function getUpdateState() { return { pendingSince: updatePendingSince, busy: busyJobs }; }
+function setUpdateState(p) {
+  if (p && typeof p.pendingSince === 'number') updatePendingSince = p.pendingSince;
+  if (p && typeof p.busy === 'number') busyJobs = p.busy;
+}
+function requestStoreUpdateCheck() {
+  try {
+    if (api.runtime && typeof api.runtime.requestUpdateCheck === 'function') {
+      const r = api.runtime.requestUpdateCheck();
+      if (r && typeof r.catch === 'function') r.catch(() => {});
+    }
+  } catch (_) { /* best-effort */ }
+}
+
 if (api.alarms) {
   api.alarms.create('ota', { periodInMinutes: 720 }); // every 12h — feed OTA rides the same cadence
-  api.alarms.onAlarm.addListener((a) => { if (a.name === 'ota') { runOtaUpdate(); runFeedUpdate(); flushReports(); } });
+  api.alarms.onAlarm.addListener((a) => {
+    if (a.name === 'ota') { runOtaUpdate(); runFeedUpdate(); flushReports(); requestStoreUpdateCheck(); }
+    if (a.name === 'applyUpdate') applyPendingUpdate();
+  });
 }
 
 // Uninstall feedback survey (0.10.0, Task C5): the browser opens this static
@@ -1474,4 +1539,4 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 // module-scoped. Re-attach the debug/test surface that used to live on the
 // classic worker's global scope — the e2e suite drives these via
 // worker.evaluate, and they're handy in the SW console.
-Object.assign(globalThis, { DEFAULT_FEED_URL, FEED_META_URL, getSettings, setSettings, handleUserReport, runOtaUpdate, flushReports, queueReport, exportSettings, sanitizeImport, pushSync, pullSync, getStats, bumpStat, ensurePrivacyTotal, ensureInstalledAt, getReviewAsk, getReviewAskContext, setReviewAsk, sanitizeReviewAsk, ensureReviewAsk, importReviewAsk, getLangDict, loadLangDict, isValidLang, runFeedUpdate, checkFeedHost, checkFeedBatchHosts, normalizeFeedHost, checkRiskHosting, checkNrdHost, applyNetworkRules, syncAllowRules, ensureNetworkRules, handleDnrBlocked });
+Object.assign(globalThis, { DEFAULT_FEED_URL, FEED_META_URL, getSettings, setSettings, handleUserReport, runOtaUpdate, flushReports, queueReport, exportSettings, sanitizeImport, pushSync, pullSync, getStats, bumpStat, ensurePrivacyTotal, ensureInstalledAt, getReviewAsk, getReviewAskContext, setReviewAsk, sanitizeReviewAsk, ensureReviewAsk, importReviewAsk, getLangDict, loadLangDict, isValidLang, runFeedUpdate, checkFeedHost, checkFeedBatchHosts, normalizeFeedHost, checkRiskHosting, checkNrdHost, applyNetworkRules, syncAllowRules, ensureNetworkRules, handleDnrBlocked, applyPendingUpdate, requestStoreUpdateCheck, getUpdateState, setUpdateState });

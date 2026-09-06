@@ -18,4 +18,5 @@ import '../engine/dnr_rules.js';
 import '../ui/reasons.js';
 import './stats.js';
 import './blockstore.js';
+import './update.js';
 import './service_worker.js';

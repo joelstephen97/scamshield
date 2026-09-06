@@ -2,13 +2,13 @@
   "manifest_version": 3,
   "name": "__MSG_extName__",
   "short_name": "__MSG_extShortName__",
-  "version": "0.12.0",
+  "version": "0.12.1",
   "description": "__MSG_extDescription__",
   "default_locale": "en",
   "permissions": ["storage", "declarativeNetRequest", "alarms"],
   "host_permissions": ["http://*/*", "https://*/*"],
   "browser_specific_settings": { "gecko": { "id": "scamshield@joel.dev", "strict_min_version": "142.0", "data_collection_permissions": { "required": ["none"], "optional": ["websiteActivity"] } } },
-  "background": { "scripts": ["engine/constants.js","engine/trust.js","engine/features.js","engine/risk_rules.js","engine/image_hash.js","engine/brand_icons.js","engine/report_payload.js","engine/engagement.js","engine/blockset.js","engine/bloom.js","engine/first_seen.js","engine/dnr_rules.js","ui/reasons.js","background/stats.js","background/blockstore.js","background/service_worker.js"] },
+  "background": { "scripts": ["engine/constants.js","engine/trust.js","engine/features.js","engine/risk_rules.js","engine/image_hash.js","engine/brand_icons.js","engine/report_payload.js","engine/engagement.js","engine/blockset.js","engine/bloom.js","engine/first_seen.js","engine/dnr_rules.js","ui/reasons.js","background/stats.js","background/blockstore.js","background/update.js","background/service_worker.js"] },
   "content_scripts": [
     {
       "matches": ["http://*/*", "https://*/*"],

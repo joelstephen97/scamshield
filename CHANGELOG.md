@@ -2,6 +2,23 @@
 
 All notable changes to ScamShield. Versions are git tags (`vX.Y.Z`); the version on the [Chrome Web Store](https://chromewebstore.google.com/detail/fojjjofjimbfoddafoampojopijnlihl) may lag a tag by a few days while Google reviews it. Privacy-relevant changes are also reflected in the [privacy policy](https://joelstephen97.github.io/scamshield/privacy.html).
 
+## 0.12.1 — 2026-09-06
+
+### Changed
+- **Store updates now apply as soon as they arrive.** Chrome and Firefox
+  download a new ScamShield version in the background but only switch to it
+  once the extension is idle, which in practice meant the next browser
+  restart, sometimes days later. ScamShield now listens for the downloaded
+  update and reloads itself the moment no popup, settings page or block page
+  is open and no threat-feed, rule or report job is mid-write; while any of
+  those is busy it re-checks every minute and applies the update regardless
+  after 30 minutes. On Chrome it also asks the browser to look for a new
+  version alongside the 12-hour feed refresh. No new permissions, no new
+  network requests, nothing leaves the device. Your settings, allowlist,
+  pauses and statistics are all in storage and survive the reload.
+- Chrome Web Store promo tiles use the real ScamShield icon; the Bangla
+  listing was re-aligned with the English canon.
+
 ## 0.12.0 — 2026-09-03
 
 ### New
