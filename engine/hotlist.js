@@ -8,11 +8,13 @@
   root.SSHot = mod;
 })(typeof globalThis !== 'undefined' ? globalThis : self, function (D, C) {
   'use strict';
-  // 12,000 (0.13.0 fix round 3): the feed's hot cap was raised to 12k so
-  // tenant hosts under shared-hosting apexes (vercel.app, pages.dev, ...)
-  // fit alongside the bulk threat-intel source. At dnr_rules CHUNK=2500
-  // that is 5 redirect rules in the HOT_BASE range.
-  const MAX_DOMAINS = 12000;
+  // 20,000 (0.13.0 fix round 5): matches the feed's HOT_CAP. Round 3 raised
+  // it to 12k so tenant hosts under shared-hosting apexes (vercel.app,
+  // pages.dev, ...) fit alongside the bulk threat-intel source; round 5
+  // raised it again after the bench showed the cap was still cutting the
+  // hosts users actually hit. At dnr_rules CHUNK=2500 that is 8 redirect
+  // rules in the HOT_BASE range.
+  const MAX_DOMAINS = 20000;
   const WINDOW_MS = 48 * 3600 * 1000;
   const HOST_RE = /^[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?$/;
 

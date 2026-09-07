@@ -18,13 +18,13 @@ test('parseHot: rejects bad shapes, lower-cases hosts, drops entries outside the
   assert.deepStrictEqual(hot.removed, ['gone.example']);
 });
 
-test('parseHot: caps at MAX_DOMAINS (12,000) newest-first', () => {
-  assert.strictEqual(H.MAX_DOMAINS, 12000);
+test('parseHot: caps at MAX_DOMAINS (20,000) newest-first', () => {
+  assert.strictEqual(H.MAX_DOMAINS, 20000);
   // Offsets must stay inside the 48 h (2880-minute) window or the window
-  // filter — not the cap — would be what trims the list; dividing `i` by 5
-  // keeps all 12,500 entries within the window (max offset 2499 min) while
+  // filter — not the cap — would be what trims the list; dividing `i` by 10
+  // keeps all 21,000 entries within the window (max offset 2099 min) while
   // preserving newest-first order.
-  const g = good(); g.domains = Array.from({ length: 12500 }, (_, i) => ({ h: `h${i}.example`, s: 'pd', t: MIN(NOW) - Math.floor(i / 5) }));
+  const g = good(); g.domains = Array.from({ length: 21000 }, (_, i) => ({ h: `h${i}.example`, s: 'pd', t: MIN(NOW) - Math.floor(i / 10) }));
   const hot = H.parseHot(g, NOW);
   assert.strictEqual(hot.domains.length, H.MAX_DOMAINS);
   assert.strictEqual(hot.domains[0].h, 'h0.example');
