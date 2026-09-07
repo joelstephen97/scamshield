@@ -31,3 +31,15 @@ www.statuspage.io
 youtu.be
 twbs.github.io
 docs.github.io
+# 0.13.0 final review: nine ordinary tenant-platform app names whose labels
+# contain a brand key that is also a bare English word. Every one of these was
+# a live brand-impersonation false positive before the fix wave.
+trust-portal.pages.dev
+wish-list-app.vercel.app
+hot-line-support.pages.dev
+back-ups-manager.vercel.app
+grab-a-coffee.vercel.app
+mobile-account.pages.dev
+wise-words.vercel.app
+zoom-lens-store.netlify.app
+general-ledger-app.vercel.app

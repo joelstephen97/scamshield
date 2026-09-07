@@ -53,17 +53,37 @@
   // both a verified .bank.in namespace AND HDFC's own brand-registrable
   // domain) — each host is attributed to exactly one reason, checked in
   // this fixed priority order, so the counts always sum to the number of
-  // guarded-out hosts. Verified namespaces are checked first because that
-  // signal (registry-vetted) is the strongest of the four.
+  // guarded-out hosts. The structural `apex` reject runs first (it is about
+  // the SHAPE of the entry, not who owns it); among the trust-based reasons
+  // verified namespaces come first, because that signal (registry-vetted) is
+  // the strongest of the four.
   function guardHot(hot, settings, now) {
     const t = typeof now === 'number' ? now : Date.now();
-    const dropped = { exempt: 0, safe: 0, brand: 0, verified: 0, expired: 0 };
+    const dropped = { apex: 0, exempt: 0, safe: 0, brand: 0, verified: 0, expired: 0 };
     if (isStale(hot, t)) { dropped.expired = (hot ? hot.domains.length + hot.paths.length : 0); return { domains: [], paths: [], dropped }; }
     const exempt = new Set(D.exemptDomains(settings || {}, t));
     const brands = new Set(C.KNOWN_BRAND_REGISTRABLES || []);
     const verified = typeof C.isVerifiedNamespace === 'function' ? C.isVerifiedNamespace : () => false;
+    const platforms = new Set(C.TENANT_PLATFORMS || []);
+    const suffixes = new Set(C.MULTI_LABEL_SUFFIXES || []);
+    // 0.13.0 final review: a poisoned (or merely sloppy) feed entry that names
+    // a whole namespace rather than a host — 'com', 'app', 'co.uk',
+    // 'vercel.app', 'duckdns.org' — would install ONE redirect rule that
+    // blocks every site under it. Structural, so it is checked before the
+    // trust-based reasons below: these entries are malformed regardless of
+    // who owns them. A real tenant under such an apex ('foo.vercel.app') is
+    // still perfectly blockable; only the apex itself is refused.
+    const isApex = (h) => {
+      const labels = h.split('.').filter(Boolean);
+      if (labels.length < 2) return true;                       // (a) 'com', 'app'
+      if (platforms.has(h)) return true;                        // (b)+(d) 'vercel.app', 'duckdns.org'
+      if (suffixes.has(h)) return true;                         // (c) 'co.uk'
+      const parts = C.registrableParts(h);
+      return h === parts.suffix;                                // (c) bare public suffix
+    };
     const keep = (h) => {
       const reg = C.registrableDomain(h);
+      if (isApex(h)) { dropped.apex++; return false; }
       if (exempt.has(h) || exempt.has(reg)) { dropped.exempt++; return false; }
       if (verified(h)) { dropped.verified++; return false; }
       if (brands.has(reg) || brands.has(h)) { dropped.brand++; return false; }

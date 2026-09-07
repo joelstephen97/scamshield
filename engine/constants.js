@@ -58,7 +58,9 @@
     B('usps', ['usps'], ['usps.com'], { display: 'USPS' }),
     B('ups', ['ups'], ['ups.com'], { nameMatch: false, display: 'UPS' }),
     B('docusign', ['docusign'], ['docusign.com', 'docusign.net'], { display: 'DocuSign', ccPolicy: 'closed', suffixes: ['com', 'net'] }),
-    B('dropbox', ['dropbox'], ['dropbox.com'], { ccPolicy: 'closed', suffixes: ['com'] }),
+    // dropbox.co.jp 301s to www.dropbox.com/ja/ (curl-verified 2026-09-07) —
+    // Dropbox's own JP storefront, so 'co.jp' is not a foreign suffix here.
+    B('dropbox', ['dropbox'], ['dropbox.com'], { ccPolicy: 'closed', suffixes: ['com', 'co.jp'] }),
     B('adobe', ['adobe'], ['adobe.com', 'adobelogin.com']),
     B('spotify', ['spotify'], ['spotify.com', 'scdn.co']),
     // fuzzy:false 2026-09-07 fix round: 'chase' is an ordinary English verb
@@ -115,11 +117,11 @@
   // BEGIN GENERATED BRANDS
   const BRANDS_GENERATED = [
     B('discord', ['discord chat', 'discord app'], ['discord.com', 'discordapp.com', 'discord.gg', 'discord.media'], { display: 'Discord', ccPolicy: 'closed', suffixes: ['com', 'gg', 'media'], fuzzy: false }),
-    B('ledger', ['ledger', 'ledger wallet'], ['ledger.com'], { display: 'Ledger', ccPolicy: 'closed', suffixes: ['com'] }),
+    B('ledger', ['ledger wallet', 'ledger live'], ['ledger.com'], { display: 'Ledger', ccPolicy: 'closed', suffixes: ['com', 'fr'] }),
     B('trezor', ['trezor'], ['trezor.io'], { display: 'Trezor', ccPolicy: 'closed', suffixes: ['io'] }),
     B('phantom', ['phantom wallet'], ['phantom.app'], { display: 'Phantom', ccPolicy: 'closed', suffixes: ['app'] }),
     B('kraken', ['kraken exchange', 'kraken crypto'], ['kraken.com'], { display: 'Kraken', ccPolicy: 'closed', suffixes: ['com'], fuzzy: false }),
-    B('zoom', ['zoom'], ['zoom.us', 'zoom.com'], { display: 'Zoom', ccPolicy: 'closed', suffixes: ['us', 'com'] }),
+    B('zoom', ['zoom meetings', 'zoom video'], ['zoom.us', 'zoom.com'], { display: 'Zoom', ccPolicy: 'closed', suffixes: ['us', 'com'] }),
     B('okta', ['okta'], ['okta.com'], { display: 'Okta', ccPolicy: 'closed', suffixes: ['com'] }),
     B('bbva', ['bbva'], ['bbva.com', 'bbva.es', 'bbva.mx'], { display: 'BBVA' }),
     B('caixabank', ['caixabank'], ['caixabank.es', 'caixabank.com'], { display: 'CaixaBank' }),

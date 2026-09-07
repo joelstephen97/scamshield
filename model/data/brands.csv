@@ -1,10 +1,10 @@
 key,display,names,domains,ccPolicy,suffixes,fuzzy,category,source
 discord,Discord,discord chat|discord app,discord.com|discordapp.com|discord.gg|discord.media,closed,com|gg|media,false,,curl-verified 2026-09-07 (FP-gate fix: discord.gg/media are Discord-owned)
-ledger,Ledger,ledger|ledger wallet,ledger.com,closed,com,true,,curl-verified 2026-09-07 (kept fuzzy=true: tenant_host.test.js requires tenantBrandToken DL-1 match on 'ledgerr-lliv')
+ledger,Ledger,ledger wallet|ledger live,ledger.com,closed,com|fr,true,,curl-verified 2026-09-07 (ledger.fr + www.ledger.fr 301 -> www.ledger.com: Ledger SAS; bare word 'ledger' dropped from names)
 trezor,Trezor,trezor,trezor.io,closed,io,true,,curl-verified 2026-09-07
 phantom,Phantom,phantom wallet,phantom.app,closed,app,true,,curl-verified 2026-09-07
 kraken,Kraken,kraken exchange|kraken crypto,kraken.com,closed,com,false,,curl-verified 2026-09-07
-zoom,Zoom,zoom,zoom.us|zoom.com,closed,us|com,true,,"curl-verified 2026-09-07 (FP-gate fix: zoom.com is Zoom-owned, Server: zoom header)"
+zoom,Zoom,zoom meetings|zoom video,zoom.us|zoom.com,closed,us|com,true,,"curl-verified 2026-09-07 (FP-gate fix: zoom.com is Zoom-owned, Server: zoom header; bare word zoom dropped from names)"
 okta,Okta,okta,okta.com,closed,com,true,,curl-verified 2026-09-07
 bbva,BBVA,bbva,bbva.com|bbva.es|bbva.mx,open,,true,,curl-verified 2026-09-07
 caixabank,CaixaBank,caixabank,caixabank.es|caixabank.com,open,,true,,curl-verified 2026-09-07

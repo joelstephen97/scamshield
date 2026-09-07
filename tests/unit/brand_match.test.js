@@ -229,3 +229,41 @@ test('fuzzy:false does not touch unrelated brand matching', () => {
   assert.ok(BM.fuzzyBrandMatch('secure-paypa1-login.com'));
   assert.equal(BM.tenantBrandToken('signin-att-verifier'), 'att');
 });
+
+// --- 0.13.0 final review (C2) ------------------------------------------------
+// gradeAgainst rules (a)/(b) match the raw brand KEY as a whole token, so a
+// 2-3 letter key hit any hyphenated host containing those letters as a word.
+// The >=4 gate lives in gradeAgainst only: tenantBrandToken's exact-token
+// path still resolves 3-letter keys that are NOT English words ('att').
+test('short brand keys no longer match as an injected hyphen token', () => {
+  assert.equal(BM.fuzzyBrandMatch('my-fab-store.com'), null);
+  assert.equal(BM.fuzzyBrandMatch('my-icp-thing.com'), null);
+  assert.equal(BM.fuzzyBrandMatch('back-ups-manager.com'), null);
+  assert.equal(BM.tenantBrandToken('signin-att-verifier'), 'att'); // 3 letters, not a word
+});
+
+test('common-word brand keys are excluded from tenant-label token matching', () => {
+  assert.equal(BM.tenantBrandToken('trust-portal'), null);
+  assert.equal(BM.tenantBrandToken('wish-list-app'), null);
+  assert.equal(BM.tenantBrandToken('mobile-account'), null);
+  assert.equal(BM.tenantBrandToken('back-ups-manager'), null);
+  assert.equal(BM.tenantBrandToken('grab-a-coffee'), null);
+  assert.equal(BM.tenantBrandToken('bancaribe'), 'bancaribe');
+});
+
+// gradeAgainst now reports WHICH rule fired so engine/heuristics.js can
+// avoid double-counting rules c/d/e against brandForeignSuffix (I3).
+test('fuzzyBrandMatch reports the rule that produced the grade', () => {
+  assert.equal(BM.fuzzyBrandMatch('paypal.attacker-example.com').rule, 'a');
+  assert.equal(BM.fuzzyBrandMatch('secure-paypa1-login.com').rule, 'b');
+  assert.equal(BM.fuzzyBrandMatch('metamask.tk').rule, 'c');
+  assert.equal(BM.fuzzyBrandMatch('paypa1.com').rule, 'd');
+  assert.equal(BM.fuzzyBrandMatch('netfli.com').rule, 'e');
+});
+
+// 'ledger' is a bare English word, so it is out of the injection rules
+// (a)/(b) — but the registrable-name rules c/d/e still catch a typosquat.
+test('INJECTION_TOKEN_EXCLUDE drops token injection but keeps typosquat rules', () => {
+  assert.equal(BM.fuzzyBrandMatch('general-ledger-app.vercel.app'), null);
+  assert.equal(BM.fuzzyBrandMatch('ledgerr.com').brand, 'ledger');
+});

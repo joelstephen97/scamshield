@@ -12,10 +12,25 @@ test('tenantLabel: leftmost label of a platform tenant; null for the apex, www, 
 test('tenantBrandToken: hyphen/dot tokens of the tenant label against the brand pack, homoglyph-aware', () => {
   assert.strictEqual(BM.tenantBrandToken('signin-att-verifier'), 'att');
   assert.strictEqual(BM.tenantBrandToken('bellsouth-att-signing-83d69c'), 'bellsouth');
-  assert.strictEqual(BM.tenantBrandToken('ledgerr-lliv'), 'ledger');   // DL-1 on a ≥6-char brand
   assert.strictEqual(BM.tenantBrandToken('bancaribe'), 'bancaribe');
   assert.strictEqual(BM.tenantBrandToken('my-portfolio-2026'), null);
   assert.strictEqual(BM.tenantBrandToken('docs'), null);
+});
+// 0.13.0 final review (C2): the DL-1 pass is gone — it turned every
+// near-miss word into a brand — and bare-English-word keys are excluded.
+test('tenantBrandToken: no DL-1 pass, and common-word brand keys never match', () => {
+  assert.strictEqual(BM.tenantBrandToken('ledgerr-lliv'), null);   // was DL-1 -> ledger
+  assert.strictEqual(BM.tenantBrandToken('trust-portal'), null);   // was DL-1 -> truist
+  assert.strictEqual(BM.tenantBrandToken('mobile-account'), null); // was DL-1 -> tmobile
+  assert.strictEqual(BM.tenantBrandToken('wish-list-app'), null);
+  assert.strictEqual(BM.tenantBrandToken('back-ups-manager'), null);
+  assert.strictEqual(BM.tenantBrandToken('grab-a-coffee'), null);
+  assert.strictEqual(BM.tenantBrandToken('hot-line-support'), null);
+  assert.strictEqual(BM.tenantBrandToken('zoom-lens-store'), null);
+  assert.strictEqual(BM.tenantBrandToken('general-ledger-app'), null);
+  // ...while a genuinely distinctive token still resolves.
+  assert.strictEqual(BM.tenantBrandToken('signin-att-verifier'), 'att');
+  assert.strictEqual(BM.tenantBrandToken('bancaribe'), 'bancaribe');
 });
 test('scoreDom: password form on a tenant host is +0.45; with a brand token it is dangerous', () => {
   const plain = H.scoreDom({ pageHost: 'my-portfolio-2026.vercel.app', hasPasswordField: true });
@@ -29,5 +44,9 @@ test('scoreDom: password form on a tenant host is +0.45; with a brand token it i
 });
 test('platform_legit hosts with a password field never reach dangerous on this signal alone', () => {
   const hosts = fs.readFileSync(path.join(__dirname, 'fixtures/platform_legit.txt'), 'utf8').split('\n').map((l) => l.trim()).filter((l) => l && !l.startsWith('#'));
-  for (const h of hosts) assert.ok(H.scoreDom({ pageHost: h, hasPasswordField: true }).score < 0.8, h);
+  for (const h of hosts) {
+    const d = H.scoreDom({ pageHost: h, hasPasswordField: true });
+    assert.ok(d.score < 0.8, h + ' score ' + d.score);
+    assert.ok(!d.flags.some((f) => f.startsWith('brand-impersonation-')), h + ' flags ' + JSON.stringify(d.flags));
+  }
 });

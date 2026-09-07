@@ -41,6 +41,33 @@
 
   const { BRAND_DOMAINS, BRANDS_BY_KEY, registrableParts, isVerifiedNamespace } = C;
   const MIN_BRAND_LEN = 5;
+  // Brand keys that are ALSO ordinary English words (or bare abbreviations
+  // that read as one). A tenant label is arbitrary user-chosen text —
+  // "trust-portal", "wish-list-app", "back-ups-manager", "grab-a-coffee" —
+  // so matching these keys as a hyphen token there is a false-positive
+  // machine, and the 2026-09-07 final review found every one of them firing
+  // on ordinary demo/app hosts. Excluded from tenantBrandToken ONLY: content
+  // impersonation (brandNameIn, via a distinctive multi-word `names` entry)
+  // and the feed/hot block paths still cover these brands.
+  const TENANT_TOKEN_EXCLUDE = new Set([
+    // named in the 0.13.0 final review
+    'apple', 'amazon', 'outlook', 'steam', 'wise', 'grab', 'noon', 'emirates',
+    'ups', 'ing', 'fab', 'dib', 'du', 'icp', 'dbs', 'line', 'wish', 'mobile', 'trust',
+    // found by scanning Object.keys(BRAND_DOMAINS) for bare English words
+    'affirm', 'chase', 'chime', 'concur', 'digi', 'discover', 'exodus', 'gemini',
+    'greenhouse', 'indeed', 'indigo', 'kraken', 'ledger', 'lever', 'nab', 'notion',
+    'orange', 'popular', 'regions', 'scoot', 'slack', 'smart', 'southwest',
+    'square', 'stripe', 'target', 'three', 'twitch', 'united', 'zoom'
+  ]);
+  // The subset of the above that must ALSO be excluded from gradeAgainst's
+  // token-injection rules (a)/(b), where the same bare word turns up inside
+  // an ordinary compound hostname ("general-ledger-app.vercel.app"). Kept
+  // deliberately tiny: apple/amazon/steam/outlook stay eligible there
+  // because hyphen-injection ("secure-apple-verify.com") is the dominant
+  // phishing shape for them and the FP cost is worth paying. Rules c/d/e
+  // (TLD swap, homoglyph, DL-1 on the registrable name itself) still apply
+  // to every brand here, so "ledgerr.com" is still caught.
+  const INJECTION_TOKEN_EXCLUDE = new Set(['ledger']);
 
   // ---- 1. allowlist-first suffix trie ---------------------------------------
 
@@ -189,21 +216,30 @@
   // Grades `host` against one brand candidate. `hostForm` is the whole
   // host's fuzzy form; `subLabels` are the labels strictly below the
   // registrable domain (true subdomains); `sld` is the registrable domain's
-  // own label. Returns a grade string or null.
+  // own label. Returns `{ grade, rule }` (rule 'a'..'e') or null — callers
+  // that need to know WHICH rule fired (engine/heuristics.js dedupes rules
+  // c/d/e against brandForeignSuffix, which is the same evidence) read it.
   function gradeAgainst(brand, form, hostForm, subLabels, sld) {
+    // Rules (a)/(b) match the raw brand KEY as a whole token, so they need a
+    // key long enough to be distinctive: a 2-3 letter key (fab, icp, ups,
+    // ing, dib, du) hits every hyphenated host that happens to contain those
+    // letters as a word ("my-fab-store.com", "back-ups-manager"). Ordinary
+    // English-word keys are excluded for the same reason — see
+    // INJECTION_TOKEN_EXCLUDE. Rules c/d/e below are unaffected.
+    const injectable = brand.length >= 4 && !INJECTION_TOKEN_EXCLUDE.has(brand);
     // a) brand token as its own whole subdomain label, homoglyph-aware
     // ("paypal.attacker.com", "rnetamask.attacker.com").
-    for (const lab of subLabels) {
-      if (tokenMatchesBrand(lab, brand)) return 'strongest';
+    if (injectable) for (const lab of subLabels) {
+      if (tokenMatchesBrand(lab, brand)) return { grade: 'strongest', rule: 'a' };
     }
     // b) brand token as a hyphen-delimited piece of a label — subdomain OR
     // the SLD itself ("secure-paypal-login.attacker.com",
     // "secure-paypa1-login.com"). A bare (non-hyphenated) label match is
     // TLD-swap/homoglyph territory below, not injection.
     const hyphenCandidates = subLabels.concat(sld ? [sld] : []);
-    for (const lab of hyphenCandidates) {
+    if (injectable) for (const lab of hyphenCandidates) {
       const tokens = lab.split('-');
-      if (tokens.length > 1 && tokens.some((t) => tokenMatchesBrand(t, brand))) return 'strongest';
+      if (tokens.length > 1 && tokens.some((t) => tokenMatchesBrand(t, brand))) return { grade: 'strongest', rule: 'b' };
     }
     // Rules c/d/e judge the registrable name ITSELF, so they compare the
     // bare SLD — not the subdomain-inclusive fuzzy form, which would let any
@@ -215,15 +251,15 @@
     // c) TLD-swap of the exact brand: SLD matches exactly (distance 0) —
     // only the suffix differs, and the allowlist gate the caller already ran
     // ruled out that suffix being one the brand controls.
-    if (sld === form) return 'strong';
+    if (sld === form) return { grade: 'strong', rule: 'c' };
     // d) homoglyph substitution match (exact, after normalising).
     for (const variant of homoglyphVariants(sld)) {
-      if (variant === form) return 'strong';
+      if (variant === form) return { grade: 'strong', rule: 'd' };
     }
     // e) generic edit distance.
     const dist = damerauLevenshtein(sld, form);
-    if (dist === 1) return 'strong';
-    if (dist === 2 && form.length >= 8) return 'weak'; // long brand names only
+    if (dist === 1) return { grade: 'strong', rule: 'e' };
+    if (dist === 2 && form.length >= 8) return { grade: 'weak', rule: 'e' }; // long brand names only
     return null;
   }
 
@@ -244,9 +280,9 @@
     const subLabels = labels.slice(0, Math.max(0, labels.length - domainLabelCount));
     let best = null;
     for (const { brand, form } of candidates()) {
-      const grade = gradeAgainst(brand, form, hostForm, subLabels, parts.sld);
-      if (!grade) continue;
-      if (!best || GRADE_RANK[grade] > GRADE_RANK[best.grade]) best = { brand, grade };
+      const g = gradeAgainst(brand, form, hostForm, subLabels, parts.sld);
+      if (!g) continue;
+      if (!best || GRADE_RANK[g.grade] > GRADE_RANK[best.grade]) best = { brand, grade: g.grade, rule: g.rule };
     }
     return best;
   }
@@ -266,26 +302,38 @@
   }
 
   // ---- 4. tenant-host brand token (0.13.0, Task 9) ---------------------------
-  // Brand token inside a tenant label ("signin-att-verifier" -> att). Exact
-  // token, homoglyph variant, or DL-1 for brands >= 6 chars. Short keys
-  // (att, bhd, td) match only as exact tokens.
+  // Brand token inside a tenant label ("signin-att-verifier" -> att). EXACT
+  // token or homoglyph variant only.
   //
-  // `fuzzy: false` keys are excluded here too (0.13.0 fix round): a tenant
-  // label token is matched against the raw KEY exactly the same way
-  // gradeAgainst's rules (a)/(b) are, so a common-word key ("smart",
-  // "regions", ...) would turn an ordinary tenant subdomain
-  // ("smart-home-devices.vercel.app") into a false brand-impersonation hit.
+  // Excluded keys (0.13.0 final review):
+  //   - `fuzzy: false` — a tenant label token is matched against the raw KEY
+  //     exactly the way gradeAgainst's rules (a)/(b) are, so a common-word
+  //     key ("smart", "regions", ...) would turn an ordinary tenant subdomain
+  //     ("smart-home-devices.vercel.app") into a false impersonation hit;
+  //   - `nameMatch: false` — the hand-written flag already saying "this key
+  //     is too generic to word-match in page text"; a tenant label is even
+  //     more arbitrary than page text, so the same verdict applies;
+  //   - TENANT_TOKEN_EXCLUDE — bare English words that survive both flags.
+  //
+  // The old DL-1 pass is GONE. It was the single biggest FP source in the
+  // 2026-09-07 review: "trust-portal" -> truist, "mobile-account" -> tmobile,
+  // "ledgerr-lliv" -> ledger. A tenant kit that misspells the brand it
+  // impersonates still carries credentialFormOnTenantHost (+0.45) plus,
+  // almost always, the brand's name in the page content.
   function tenantBrandToken(label) {
     const tokens = String(label || '').toLowerCase().split(/[-_.]+/).filter((t) => t.length >= 3);
     if (!tokens.length) return null;
-    const keys = Object.keys(BRAND_DOMAINS).filter((k) => !(BRANDS_BY_KEY && BRANDS_BY_KEY[k] && BRANDS_BY_KEY[k].fuzzy === false));
+    const keys = Object.keys(BRAND_DOMAINS).filter((k) => {
+      if (TENANT_TOKEN_EXCLUDE.has(k)) return false;
+      const b = BRANDS_BY_KEY && BRANDS_BY_KEY[k];
+      return !(b && (b.fuzzy === false || b.nameMatch === false));
+    });
     for (const t of tokens) for (const k of keys) if (t === k || homoglyphVariants(t).includes(k)) return k;
-    for (const t of tokens) for (const k of keys) if (k.length >= 6 && t.length >= 5 && damerauLevenshtein(t, k) === 1) return k;
     return null;
   }
 
   return {
-    MIN_BRAND_LEN, GRADE_RANK,
+    MIN_BRAND_LEN, GRADE_RANK, TENANT_TOKEN_EXCLUDE, INJECTION_TOKEN_EXCLUDE,
     allowlistBrandMatch, fuzzyForm, damerauLevenshtein, homoglyphVariants, fuzzyBrandMatch,
     brandForeignSuffix, tenantBrandToken,
     _resetTrieForTest, _resetCandidatesForTest

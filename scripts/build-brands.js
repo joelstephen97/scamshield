@@ -38,6 +38,20 @@ const BEGIN_MARKER = '// BEGIN GENERATED BRANDS';
 const END_MARKER = '// END GENERATED BRANDS';
 const KEY_RE = /^[a-z0-9.]+$/;
 const DOMAIN_RE = /^[a-z0-9.-]+\.[a-z]+$/;
+// Brand keys that are also a single ordinary English word. `names` drives
+// brandNameIn(), the CONTENT impersonation signal — a bare common word there
+// fires "this page claims to be <brand>" on any page that happens to use the
+// word ("Zoom Lens Store", "General Ledger"), which the 2026-09-07 final
+// review caught in the wild. Such a row must carry a distinctive name
+// instead ("zoom meetings", "ledger live"). Keep this list in step with
+// engine/brand_match.js's TENANT_TOKEN_EXCLUDE.
+const COMMON_WORDS = new Set([
+  'zoom', 'ledger', 'square', 'discover', 'target', 'orange', 'smart', 'regions',
+  'greenhouse', 'lever', 'gemini', 'southwest', 'indigo', 'united', 'three',
+  'popular', 'stripe', 'slack', 'twitch', 'notion', 'asana', 'concur', 'indeed',
+  'chase', 'wish', 'line', 'trust', 'mobile', 'wise', 'grab', 'noon', 'steam',
+  'apple', 'amazon', 'outlook'
+]);
 const CONSTANTS_PATH = path.join(__dirname, '../engine/constants.js');
 const DEFAULT_CSV = path.join(__dirname, '../model/data/brands.csv');
 
@@ -147,6 +161,12 @@ function validate(rows, existingKeys) {
     // impersonation (brandNameIn) reintroduces the identical ambiguity.
     if (!row.fuzzy && row.names.some((n) => n.trim().toLowerCase() === row.key.toLowerCase())) {
       throw new Error(`${where}: fuzzy=false but names contains the bare key "${row.key}" — names must be distinctive (multi-word or a qualified product name)`);
+    }
+    // 0.13.0 final review: same rule, but keyed on the word itself rather
+    // than the fuzzy opt-out — a common-word key must never ship the bare
+    // word as a content `names` entry, whatever its `fuzzy` setting is.
+    if (COMMON_WORDS.has(row.key.toLowerCase()) && row.names.some((n) => n.trim().toLowerCase() === row.key.toLowerCase())) {
+      throw new Error(`${where}: "${row.key}" is a common English word — names must not contain the bare word (use a qualified product name, e.g. "${row.key} live")`);
     }
     // A key under 4 characters (olx, okx, td, ...) needs at least one
     // sufficiently long or multi-word name, or brandNameIn's word-boundary

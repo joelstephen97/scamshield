@@ -47,13 +47,27 @@ test('guardHot: drops user exemptions, SAFE_DOMAINS, known brand registrables, v
   const out = H.guardHot(hot, { allowlist: ['trusted.example'], pausedSites: { 'paused.example': NOW + 3600000 } }, NOW);
   assert.deepStrictEqual(out.domains, ['signin-att-verifier.webflow.io']);
   assert.deepStrictEqual(out.paths, [{ h: 'rb.gy', p: '/88c5r3' }]);
-  assert.deepStrictEqual(out.dropped, { exempt: 2, safe: 1, brand: 1, verified: 1, expired: 0 });
+  assert.deepStrictEqual(out.dropped, { apex: 0, exempt: 2, safe: 1, brand: 1, verified: 1, expired: 0 });
 });
 
 test('guardHot: a path entry on an exempt host is dropped too; stale file yields nothing', () => {
   const hot = H.parseHot(good(), NOW);
   assert.deepStrictEqual(H.guardHot(hot, { allowlist: ['rb.gy'] }, NOW).paths, []);
-  assert.deepStrictEqual(H.guardHot(hot, {}, NOW + 7 * 3600000), { domains: [], paths: [], dropped: { exempt: 0, safe: 0, brand: 0, verified: 0, expired: 2 } });
+  assert.deepStrictEqual(H.guardHot(hot, {}, NOW + 7 * 3600000), { domains: [], paths: [], dropped: { apex: 0, exempt: 0, safe: 0, brand: 0, verified: 0, expired: 2 } });
+});
+
+// 0.13.0 final review (C1): a feed row naming a whole namespace rather than a
+// host would install ONE redirect rule that blocks every site under it.
+test('guardHot: apexes, tenant platforms and bare public suffixes are dropped as `apex`', () => {
+  const g = good();
+  const bad = ['com', 'co.uk', 'vercel.app', 'duckdns.org', 'app'];
+  g.domains = bad.map((h) => ({ h, s: 'pd', t: MIN(NOW) })).concat([{ h: 'foo.vercel.app', s: 'pd', t: MIN(NOW) }]);
+  g.paths = [{ h: 'pages.dev', p: '/x', s: 'pd', t: MIN(NOW) }];
+  const out = H.guardHot(H.parseHot(g, NOW), {}, NOW);
+  assert.deepStrictEqual(out.domains, ['foo.vercel.app']);   // a real tenant stays blockable
+  assert.deepStrictEqual(out.paths, []);
+  assert.strictEqual(out.dropped.apex, bad.length + 1);      // 5 domains + 1 path host
+  assert.strictEqual(out.dropped.safe + out.dropped.brand + out.dropped.verified + out.dropped.exempt, 0);
 });
 
 test('hotRules + hotRuleIds: HOT_BASE redirect chunks then PATH_BASE regex rules', () => {

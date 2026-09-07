@@ -26,6 +26,17 @@ test('scoreUrl emits brandForeignSuffix (+0.6) and isOnBrand no longer trusts a 
   const u = H.scoreUrl('https://www.roblox.com.do/users/1/profile');
   assert.ok(u.reasons.some((r) => r.code === 'brandForeignSuffix'));
   assert.ok(u.score >= 0.6);
+  // 0.13.0 final review (I3): the fuzzy TLD-swap grade and brandForeignSuffix
+  // are the SAME observation for this host, so only one of them is counted —
+  // the URL alone stays "suspicious" (0.60) instead of being pinned at 1.0.
+  const bare = H.scoreUrl('https://roblox.com.do/');
+  assert.ok(Math.abs(bare.score - 0.6) < 1e-9, 'score ' + bare.score);
+  assert.ok(!bare.reasons.some((r) => r.code === 'brandFuzzyMatch'), JSON.stringify(bare.reasons));
+  // A brand's own regional storefront is untouched.
+  assert.strictEqual(H.scoreUrl('https://www.amazon.com.tr/').score, 0);
+  // ...and one corroborating DOM signal still reaches dangerous.
+  const dom = H.scoreDom({ pageHost: 'roblox.com.do', hasPasswordField: true, titleBrand: 'Roblox' });
+  assert.ok(dom.score >= 0.8, 'dom ' + dom.score);
   const d = H.scoreDom({ pageHost: 'www.roblox.com.do', hasPasswordField: true, titleBrand: 'Roblox' });
   assert.ok(d.flags.includes('brand-impersonation-content'));
   const ok = H.scoreDom({ pageHost: 'www.amazon.com.tr', hasPasswordField: true, titleBrand: 'Amazon' });
@@ -49,5 +60,26 @@ test('platform_legit fixtures: no brand evidence on legit tenant/regional hosts'
   for (const host of lines('platform_legit.txt')) {
     const u = H.scoreUrl('https://' + host + '/');
     assert.ok(u.score < 0.5, host + ' ' + JSON.stringify(u.reasons));
+    // 0.13.0 final review (C2): a credential form on these hosts is warn-tier
+    // evidence at most — never a brand-impersonation flag.
+    const d = H.scoreDom({ pageHost: host, hasPasswordField: true });
+    assert.ok(!d.flags.some((f) => f.startsWith('brand-impersonation-')), host + ' ' + JSON.stringify(d.flags));
+    assert.ok(d.score < 0.8, host + ' dom ' + d.score);
   }
+});
+
+// C3: a brand key that is also a bare English word must not carry that word
+// as a content `names` entry, or brandNameIn fires on any page using it.
+test('common-word brands only match content by their qualified product name', () => {
+  const fp = H.scoreDom({ pageHost: 'zoomlens.example.com', hasPasswordField: true, titleBrand: 'Zoom Lens Store' });
+  assert.ok(!fp.flags.includes('brand-impersonation-content'), JSON.stringify(fp.flags));
+  const tp = H.scoreDom({ pageHost: 'zoomlens.example.com', hasPasswordField: true, titleBrand: 'Zoom Meetings sign in' });
+  assert.ok(tp.flags.includes('brand-impersonation-content'), JSON.stringify(tp.flags));
+});
+
+test('build-brands.js rejects a common-word key that keeps the bare word as a name', () => {
+  const { validate } = require('../../scripts/build-brands.js');
+  assert.throws(() => validate([{ key: 'zoom', display: 'Zoom', names: ['zoom'], domains: ['zoom.us'], ccPolicy: 'open', suffixes: [], fuzzy: true, _line: 1 }], []),
+    /common English word/);
+  assert.doesNotThrow(() => validate([{ key: 'zoom', display: 'Zoom', names: ['zoom meetings'], domains: ['zoom.us'], ccPolicy: 'open', suffixes: [], fuzzy: true, _line: 1 }], []));
 });

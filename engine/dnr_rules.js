@@ -87,13 +87,23 @@
 
   // entries: [{ h: hostname, p: '/path' }]. One regex rule each, anchored to the
   // host and the path prefix, so `rb.gy/88c5r3` never touches `rb.gy/other`.
+  //
+  // The host filter below is deliberately strict: declarativeNetRequest
+  // validates `requestDomains` per rule, and ONE malformed entry (a bare
+  // '.', 'foo-', an empty label) makes Chrome reject the ENTIRE
+  // updateDynamicRules batch — which is why a single bad hot-list row would
+  // otherwise cost the whole path tier. applyHotRulesNow()'s attempt 2
+  // (domains-only) is the safety net that keeps the domain tier installed
+  // when that happens; keeping junk out here is what stops it being needed.
   function buildPathRedirectRules(entries, targetUrl) {
     const out = []; const seen = new Set();
     for (const e of entries || []) {
       if (out.length >= MAX_PATH_RULES) break;
       const h = e && typeof e.h === 'string' ? e.h.trim().toLowerCase() : '';
       const p = e && typeof e.p === 'string' ? e.p.trim() : '';
-      if (!h || !/^[a-z0-9.-]+$/.test(h) || !p.startsWith('/') || p.length > 200) continue;
+      // At least one alphanumeric, and at least one dot with a non-empty
+      // label on each side — 'a.b' passes, '.', '---', 'foo' do not.
+      if (!h || !/^(?=.*[a-z0-9])[a-z0-9.-]+\.[a-z0-9-]+$/.test(h) || !p.startsWith('/') || p.length > 200) continue;
       const key = h + p; if (seen.has(key)) continue; seen.add(key);
       out.push({
         id: PATH_BASE + out.length, priority: 2,

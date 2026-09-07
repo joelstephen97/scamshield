@@ -67,19 +67,30 @@
     // domain is short-circuited out of fuzzy matching entirely — it can
     // never be flagged as impersonating any brand. Only when that gate
     // clears do we grade the host against the fuzzy brand candidate list.
+    // Brand-foreign-suffix (0.13.0): an exact brand SLD under a public suffix
+    // that brand provably never uses (ccPolicy 'closed' — roblox.com.do class).
+    // Ordinary evidence, not risk-table, so it can reach "dangerous" with one
+    // corroborating signal (a password field, brand content match, etc.).
+    // Computed BEFORE the fuzzy step so the fuzzy step can decline to
+    // double-count it (see below).
+    const fsx = BM && BM.brandForeignSuffix && BM.brandForeignSuffix(host);
     if (BM && BM.allowlistBrandMatch && !BM.allowlistBrandMatch(host)) {
       const fuzzy = BM.fuzzyBrandMatch(host);
-      if (fuzzy) {
+      // 0.13.0 final review: for "roblox.com.do" the fuzzy TLD-swap grade
+      // (rule c) and brandForeignSuffix are the SAME observation — an exact
+      // brand SLD under a suffix the brand doesn't use — and stacking
+      // 0.50 + 0.60 pinned the URL score at 1.0 with no corroboration at all.
+      // Rules c/d/e (TLD swap, homoglyph, edit distance on the registrable
+      // name) are suppressed when they name the same brand; the injection
+      // grades (rules a/b) describe a genuinely different shape and stay.
+      const duplicatesForeignSuffix = fuzzy && fsx && fuzzy.brand === fsx.brand &&
+        ['c', 'd', 'e'].includes(fuzzy.rule);
+      if (fuzzy && !duplicatesForeignSuffix) {
         score += FUZZY_BRAND_WEIGHT[fuzzy.grade] || 0;
         reasons.push({ code: 'brandFuzzyMatch', kind: 'brand', params: [C.brandDisplayName(fuzzy.brand)] });
       }
     }
 
-    // Brand-foreign-suffix (0.13.0): an exact brand SLD under a public suffix
-    // that brand provably never uses (ccPolicy 'closed' — roblox.com.do class).
-    // Ordinary evidence, not risk-table, so it can reach "dangerous" with one
-    // corroborating signal (a password field, brand content match, etc.).
-    const fsx = BM && BM.brandForeignSuffix && BM.brandForeignSuffix(host);
     if (fsx) {
       score += 0.60;
       reasons.push({ code: 'brandForeignSuffix', kind: 'brand', params: [C.brandDisplayName(fsx.brand), fsx.suffix] });
