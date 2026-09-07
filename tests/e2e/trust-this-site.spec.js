@@ -24,6 +24,10 @@ test('banner: Trust this site -> allowlisted, acknowledgement with Undo restores
   const page = await context.newPage();
   await page.goto(BANNER_URL);
   await expect(page.locator('.scamshield-banner.danger')).toBeVisible({ timeout: 8000 });
+  // The trust button ignores any click within 300ms of render (fix round 1,
+  // anti-synthetic-click arming — see the dedicated test below); wait past it
+  // before this real, intentional click.
+  await page.waitForTimeout(350);
   await page.locator('.scamshield-banner .ss-trust').click();
   await expect(page.locator('.scamshield-ack')).toContainText(/won't flag/i);
   const s1 = await sw.evaluate(() => getSettings());
@@ -33,16 +37,48 @@ test('banner: Trust this site -> allowlisted, acknowledgement with Undo restores
   await expect.poll(async () => (await sw.evaluate(() => getSettings())).allowlist.includes(HOST), { timeout: 5000 }).toBe(false);
 });
 
+test('banner: synthetic (untrusted) clicks on Trust this site do nothing, even after the arm delay; a real click still works', async ({ context }) => {
+  const sw = context.serviceWorkers()[0];
+  const page = await context.newPage();
+  await page.goto(BANNER_URL);
+  await expect(page.locator('.scamshield-banner.danger')).toBeVisible({ timeout: 8000 });
+  // Wait past the trust button's 300ms arm delay first, so these synthetic
+  // clicks are proven to be rejected by the event.isTrusted check itself —
+  // not merely still inside the arm window. A scam page's own script can run
+  // .click() or dispatch a MouseEvent on the injected button the instant it
+  // renders; neither is a real user gesture, so both must be no-ops.
+  await page.waitForTimeout(400);
+  await page.evaluate(() => document.querySelector('.scamshield-banner .ss-trust').click());
+  await page.evaluate(() => {
+    document.querySelector('.scamshield-banner .ss-trust').dispatchEvent(new MouseEvent('click', { bubbles: true }));
+  });
+  await page.waitForTimeout(200); // let a wrongly-fired async trust round trip settle, if any
+  expect((await sw.evaluate(() => getSettings())).allowlist).not.toContain(HOST);
+  await expect(page.locator('.scamshield-banner.danger')).toBeVisible();
+  await expect(page.locator('.scamshield-ack')).toHaveCount(0);
+  // A real click — Playwright's locator.click() drives it via CDP input
+  // simulation, which sets isTrusted:true, same as a genuine user click —
+  // still works normally.
+  await page.locator('.scamshield-banner .ss-trust').click();
+  await expect(page.locator('.scamshield-ack')).toContainText(/won't flag/i);
+  expect((await sw.evaluate(() => getSettings())).allowlist).toContain(HOST);
+});
+
 test('blocked.html: Trust this site -> allow rule wins over the hot rule and the site loads', async ({ context }) => {
   const sw = context.serviceWorkers()[0];
-  // The SW's own cold-boot sequence (ensureNetworkRules, called fire-and-
-  // forget at module top level) runs its own applyHotRules(undefined) against
-  // whatever hotList happens to be in storage — on a brand-new persistent
-  // context that's null, so it installs an EMPTY hot-rule set. If that boot
-  // call resolves after the one below, it clobbers hotHostSet right back to
-  // empty. Give it a moment to settle first; it does no network I/O (reads
-  // storage.local + one declarativeNetRequest call), so this is generous.
-  await new Promise((r) => setTimeout(r, 500));
+  // The SW's own cold-boot sequence (ensureNetworkRules, fired fire-and-
+  // forget at module top level) runs its own applyHotRules(undefined)
+  // against whatever hotList happens to be in storage — on a brand-new
+  // persistent context that's null, so it installs an EMPTY hot-rule set.
+  // applyHotRules calls are serialized (hotApplyChain, fix round 1) so they
+  // can no longer collide on dynamic-rule ids, but that alone doesn't order
+  // them: without waiting for boot first, this test's own applyHotRules call
+  // below could still get queued (and win) BEFORE boot's later one, which
+  // would then silently overwrite it with the empty set. awaitBootReady()
+  // deterministically waits for the whole cold-boot sequence — including its
+  // hot apply — to finish, so this test's own call is guaranteed to be
+  // queued after it and is the one that sticks. No fixed timeout needed.
+  await sw.evaluate(() => awaitBootReady());
   await sw.evaluate(async () => {
     await applyHotRules({
       v: 1, generatedAt: Date.now(), ttlMinutes: 60,

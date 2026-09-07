@@ -76,6 +76,21 @@
     if (text != null) e.textContent = text;
     return e;
   }
+  // Security fix (0.13.0, Task 11 review round 1): every state-changing
+  // control the banner/interstitial expose (trust, undo, dismiss, "Leave
+  // this page", "Continue anyway", "Report a mistake", the real-site rescue
+  // link) lives in the page's own DOM, injected by a content script that
+  // runs in the SAME document as whatever the scam page's own script can
+  // reach. Without this guard, that script can call
+  // `document.querySelector('.scamshield-banner .ss-trust').click()` (or
+  // dispatch a synthetic MouseEvent) the instant the UI renders and silently
+  // allowlist itself, dismiss the warning, or otherwise act on the user's
+  // behalf. `Event.isTrusted` is set by the browser itself and cannot be
+  // spoofed by page script — only a real user input (mouse/keyboard/CDP,
+  // which is how Playwright's locator.click() drives it too) sets it true.
+  function onTrustedClick(node, fn) {
+    node.addEventListener('click', (e) => { if (!e.isTrusted) return; fn(e); });
+  }
 
   // "Copy report" (0.10.0, Task C4) — Privacy Badger's popup Share button,
   // adapted for organic distribution: a plain-text summary of the CURRENT
@@ -188,7 +203,7 @@
     setDir(bar);
     bar.append(el('span', null, t('ackTrusted', [bidi(domain)], "ScamShield won't flag " + domain + ' again.')));
     const undo = el('button', 'ss-undo', t('undo', null, 'Undo'));
-    undo.addEventListener('click', async () => {
+    onTrustedClick(undo, async () => {
       await send('untrustSite', { domain });
       bar.remove();
       restore && restore();
@@ -198,13 +213,25 @@
     return bar;
   }
   // `onAllow` null/undefined → a plain button with no click behaviour of its
-  // own (the caller wires its own dismiss-only listener). Used by the QR-scan
-  // banner (surfaceQrVerdict in content_script.js), where the current page and
-  // the flagged (decoded) destination are different domains, so a single click
-  // must never allowlist the QR's — possibly scam — destination.
+  // own (the caller wires its own dismiss-only listener, also trusted-click
+  // guarded). Used by the QR-scan banner (surfaceQrVerdict in
+  // content_script.js), where the current page and the flagged (decoded)
+  // destination are different domains, so a single click must never
+  // allowlist the QR's — possibly scam — destination.
+  //
+  // Two defences against a scam page self-trusting via its own script
+  // (review round 1, Critical): the click must be `isTrusted` (real user
+  // input — see onTrustedClick above), AND the button must have been on
+  // screen for at least 300ms before it accepts a click, in case a page ever
+  // finds a way to forward/synthesize a trusted event onto it the instant it
+  // renders (e.g. a click already in flight on an element it then covers).
+  const TRUST_ARM_MS = 300;
   function trustButton(onAllow) {
     const btn = el('button', 'ss-trust', t('trustThisSite', null, 'Trust this site'));
-    if (onAllow) btn.addEventListener('click', onAllow);
+    if (onAllow) {
+      const armedAt = performance.now();
+      onTrustedClick(btn, (e) => { if (performance.now() < armedAt + TRUST_ARM_MS) return; onAllow(e); });
+    }
     return btn;
   }
   function showBanner(verdict, extra) {
@@ -225,18 +252,23 @@
       if (cmp) text.appendChild(cmp);
     }
     const acts = el('div', 'ss-acts');
-    if (danger) { const leave = el('button', 'ss-leave', t('leaveThisPage', null, 'Leave this page')); leave.addEventListener('click', () => { x.onLeave ? x.onLeave() : history.back(); }); acts.appendChild(leave); }
-    if (verdict.brandUrl) { const rescue = el('button', 'ss-rescue', t('takeMeToReal', [bidi(verdict.brandLabel || 'site')], 'Take me to the real ' + (verdict.brandLabel || 'site'))); rescue.addEventListener('click', () => { location.href = verdict.brandUrl; }); acts.appendChild(rescue); }
-    if (!danger) { const why = el('button', 'ss-why', t('showWhy', null, 'Show why')); why.addEventListener('click', () => { text.querySelector('span').textContent = verdict.reasons.slice(0, 3).map(reasonText).join(' · '); why.remove(); }); acts.appendChild(why); }
+    if (danger) { const leave = el('button', 'ss-leave', t('leaveThisPage', null, 'Leave this page')); onTrustedClick(leave, () => { x.onLeave ? x.onLeave() : history.back(); }); acts.appendChild(leave); }
+    if (verdict.brandUrl) { const rescue = el('button', 'ss-rescue', t('takeMeToReal', [bidi(verdict.brandLabel || 'site')], 'Take me to the real ' + (verdict.brandLabel || 'site'))); onTrustedClick(rescue, () => { location.href = verdict.brandUrl; }); acts.appendChild(rescue); }
+    if (!danger) { const why = el('button', 'ss-why', t('showWhy', null, 'Show why')); onTrustedClick(why, () => { text.querySelector('span').textContent = verdict.reasons.slice(0, 3).map(reasonText).join(' · '); why.remove(); }); acts.appendChild(why); }
+    // Single guarded listener (not two): bar.remove() lives inside onAllow
+    // itself, right before the await, so the banner still disappears the
+    // instant a real trusted click lands — same UX as before, one fewer
+    // unguarded listener to audit.
     const trust = trustButton(x.noTrust ? null : async () => {
+      bar.remove();
       const domain = regDomain();
       await send('trustSite', { domain, via: x.trustVia || 'banner' });
       ackSurface(domain, () => showBanner(verdict, extra));
     });
-    trust.addEventListener('click', () => { bar.remove(); });
-    const report = el('button', 'ss-report', t('reportMistake', null, 'Report a mistake')); report.addEventListener('click', () => { report.textContent = t('thanks', null, 'Thanks'); report.disabled = true; x.onReport && x.onReport(); });
+    if (x.noTrust) onTrustedClick(trust, () => { bar.remove(); });
+    const report = el('button', 'ss-report', t('reportMistake', null, 'Report a mistake')); onTrustedClick(report, () => { report.textContent = t('thanks', null, 'Thanks'); report.disabled = true; x.onReport && x.onReport(); });
     const copyBtn = copyReportButton(verdict);
-    const close = el('button', 'ss-x', '✕'); close.setAttribute('aria-label', t('ariaDismiss', null, 'Dismiss')); close.addEventListener('click', () => bar.remove());
+    const close = el('button', 'ss-x', '✕'); close.setAttribute('aria-label', t('ariaDismiss', null, 'Dismiss')); onTrustedClick(close, () => bar.remove());
     acts.append(trust, report, copyBtn, close);
     bar.append(ico, text, acts);
     (document.body || document.documentElement).appendChild(bar);
@@ -278,31 +310,34 @@
     card.append(el('p', 'ss-sub', t('interstitialReassure', null, 'Nothing you typed has been sent yet. Leaving now is safe.')));
     const actions = el('div', 'ss-actions');
     const leave = el('button', 'ss-primary', t('leaveThisPage', null, 'Leave this page'));
-    leave.addEventListener('click', () => { x.onLeave ? x.onLeave() : history.back(); });
+    onTrustedClick(leave, () => { x.onLeave ? x.onLeave() : history.back(); });
     actions.append(leave);
     // Secondary link right under "Leave this page" (0.13.0, Task 11): the
     // interstitial used to offer no permanent trust at all, only "Continue
     // anyway" (which just dismisses this one showing). Styled as a plain
     // link, not a button, so it never competes visually with Leave/Continue.
+    // Single guarded listener: ov.remove() lives inside onAllow itself (see
+    // showBanner's trust button for the same pattern/rationale).
     const trust = trustButton(x.noTrust ? null : async () => {
+      ov.remove();
       const domain = regDomain();
       await send('trustSite', { domain, via: x.trustVia || 'interstitial' });
       ackSurface(domain, () => dangerInterstitial(verdict, x));
     });
     trust.classList.add('ss-trust-link');
-    trust.addEventListener('click', () => { ov.remove(); });
+    if (x.noTrust) onTrustedClick(trust, () => { ov.remove(); });
     actions.append(trust);
     if (verdict.brandUrl) {
       const rescue = el('button', 'ss-rescue-ghost', t('takeMeToReal', [bidi(verdict.brandLabel || 'site')], 'Go to the real ' + (verdict.brandLabel || 'site')));
-      rescue.addEventListener('click', () => { location.href = verdict.brandUrl; });
+      onTrustedClick(rescue, () => { location.href = verdict.brandUrl; });
       actions.append(rescue);
     }
     const stay = el('button', 'ss-danger-ghost', t('continueAnyway', null, 'Continue anyway'));
     armDelayed(stay, 3);
-    stay.addEventListener('click', () => { ov.remove(); if (x.onDismiss) x.onDismiss(); });
+    onTrustedClick(stay, () => { ov.remove(); if (x.onDismiss) x.onDismiss(); });
     actions.append(stay);
     const rep = el('button', 'ss-report', t('reportMistake', null, 'Report a mistake'));
-    rep.addEventListener('click', () => { rep.textContent = t('thanks', null, 'Thanks'); rep.disabled = true; x.onReport && x.onReport(); });
+    onTrustedClick(rep, () => { rep.textContent = t('thanks', null, 'Thanks'); rep.disabled = true; x.onReport && x.onReport(); });
     actions.prepend(rep);
     const copyBtn = copyReportButton(verdict);
     rep.insertAdjacentElement('afterend', copyBtn);

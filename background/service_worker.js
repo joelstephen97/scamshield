@@ -879,6 +879,17 @@ async function ensureNetworkRules() {
     if (Date.now() - hotAt > HOT_PERIOD_MINUTES * 60000) runHotUpdate();
   } catch (_) {}
 }
+// Deterministic "cold boot has fully settled" signal (fix round 1) — the
+// module-top-level `bootReadyPromise = ensureNetworkRules()` call further
+// down this file resolves this once boot's own applyNetworkRules/
+// syncAllowRules/applyHotRules(undefined) sequence is completely done. A
+// caller (an e2e spec, or any future code) that awaits this before making
+// its OWN applyHotRules call is guaranteed that call is queued after boot's
+// on hotApplyChain, not racing to land before it and get silently
+// overwritten. `bootReadyPromise` is declared later in the file (module
+// top-level, after all functions) but this is only ever CALLED — never
+// evaluated — before that assignment has happened, so there is no TDZ risk.
+async function awaitBootReady() { try { await bootReadyPromise; } catch (_) {} }
 
 // ---- Hot list (0.13.0): hourly, licence-vetted redirect rules ----------
 // Additive alongside the daily OTA blocklist and the v0.9 threat feed above:
@@ -950,7 +961,7 @@ async function runHotUpdate(urlOverride) {
 // branch below either installs a rule set and reports exactly what got
 // installed, or (the last-resort case) leaves hotHostSet/hotStatus untouched
 // rather than describe a rule set that DNR never actually accepted.
-async function applyHotRules(hotIn, settingsIn) {
+async function applyHotRulesNow(hotIn, settingsIn) {
   if (!api.declarativeNetRequest || !api.declarativeNetRequest.updateDynamicRules) return { ok: false, rules: 0 };
   const SSHot = globalThis.SSHot;
   try {
@@ -1004,6 +1015,25 @@ async function applyHotRules(hotIn, settingsIn) {
     }
   } catch (_) { return { ok: false, rules: 0 }; }
 }
+// Serializes every applyHotRulesNow() call (review round 1, controller
+// ruling): boot's ensureNetworkRules(), runHotUpdate(), setSettings()'s
+// allowlist/pausedSites hook, and the hourly 'hot' alarm can all call
+// applyHotRules concurrently. Each call snapshots getDynamicRules() then
+// calls updateDynamicRules() with a removeRuleIds list computed from that
+// snapshot — two overlapping calls race, the second's removeRuleIds is
+// stale by the time it lands, and updateDynamicRules can reject on an id
+// collision, falling through to the domains-only/empty fallback chain and
+// silently degrading protection. Queuing every call onto one promise chain
+// makes them run strictly in order instead. Every call site still assigns
+// its own return value to hotReadyPromise, and since applyHotRules always
+// returns the (now-queued) result of the specific call just made, that
+// still resolves to "this call's own apply finished" — not some other
+// caller's — once its turn in the chain comes up.
+let hotApplyChain = Promise.resolve();
+const applyHotRules = (hotIn, settingsIn) => {
+  hotApplyChain = hotApplyChain.catch(() => {}).then(() => applyHotRulesNow(hotIn, settingsIn));
+  return hotApplyChain;
+};
 
 async function getHotStatus() {
   const s = await getSettings();
@@ -1463,8 +1493,15 @@ if (api.alarms) {
 // so it stays current if the version changes between installs; setUninstallURL
 // is supported by both Chrome and Firefox. Guarded because a handful of test
 // harnesses stub `api.runtime` without it.
+// Captured so a test can deterministically wait for the ENTIRE cold-boot
+// network-rules bootstrap (including its own applyHotRules(undefined) call)
+// to finish, instead of racing it with a fixed timeout — see awaitBootReady
+// below (fix round 1: the trust-this-site e2e spec installs a hot rule and
+// needs to know its own applyHotRules call is guaranteed to run after this
+// one, not just "not colliding with" it).
+let bootReadyPromise = null;
 try {
-  ensureNetworkRules();
+  bootReadyPromise = ensureNetworkRules();
   if (api.runtime && typeof api.runtime.setUninstallURL === 'function') {
     api.runtime.setUninstallURL('https://joelstephen97.github.io/scamshield/goodbye.html?v=' + manifestVersion());
   }
@@ -1840,4 +1877,4 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 // module-scoped. Re-attach the debug/test surface that used to live on the
 // classic worker's global scope — the e2e suite drives these via
 // worker.evaluate, and they're handy in the SW console.
-Object.assign(globalThis, { DEFAULT_FEED_URL, FEED_META_URL, getSettings, setSettings, handleUserReport, runOtaUpdate, flushReports, queueReport, exportSettings, sanitizeImport, pushSync, pullSync, getStats, bumpStat, ensurePrivacyTotal, ensureInstalledAt, getReviewAsk, getReviewAskContext, setReviewAsk, sanitizeReviewAsk, ensureReviewAsk, importReviewAsk, getLangDict, loadLangDict, isValidLang, runFeedUpdate, checkFeedHost, checkFeedBatchHosts, normalizeFeedHost, checkRiskHosting, checkNrdHost, applyNetworkRules, syncAllowRules, ensureNetworkRules, handleDnrBlocked, applyPendingUpdate, requestStoreUpdateCheck, getUpdateState, setUpdateState, runHotUpdate, applyHotRules, getHotStatus, addTrust, removeTrust });
+Object.assign(globalThis, { DEFAULT_FEED_URL, FEED_META_URL, getSettings, setSettings, handleUserReport, runOtaUpdate, flushReports, queueReport, exportSettings, sanitizeImport, pushSync, pullSync, getStats, bumpStat, ensurePrivacyTotal, ensureInstalledAt, getReviewAsk, getReviewAskContext, setReviewAsk, sanitizeReviewAsk, ensureReviewAsk, importReviewAsk, getLangDict, loadLangDict, isValidLang, runFeedUpdate, checkFeedHost, checkFeedBatchHosts, normalizeFeedHost, checkRiskHosting, checkNrdHost, applyNetworkRules, syncAllowRules, ensureNetworkRules, handleDnrBlocked, applyPendingUpdate, requestStoreUpdateCheck, getUpdateState, setUpdateState, runHotUpdate, applyHotRules, getHotStatus, addTrust, removeTrust, awaitBootReady });

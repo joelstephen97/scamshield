@@ -44,9 +44,23 @@ test('review round 1: hot-set readiness is awaited on cold boot before every fee
   assert.ok(/awaitHotReady\(\)/.test(functionBody('checkFeedBatchHosts')), 'checkFeedBatchHosts awaits hot-set readiness');
 });
 
-test('review round 1: applyHotRules has an honest three-step fallback', () => {
-  const body = functionBody('applyHotRules');
+test('review round 1: applyHotRulesNow has an honest three-step fallback', () => {
+  const body = functionBody('applyHotRulesNow');
   const attempts = body.match(/updateDynamicRules\(\{ removeRuleIds, addRules: /g) || [];
   assert.ok(attempts.length >= 3, 'three updateDynamicRules attempts (full, domains-only, empty)');
   assert.ok(/updateDynamicRules\(\{ removeRuleIds, addRules: \[\] \}\)/.test(body), 'third attempt installs an empty rule set');
+});
+
+// Fix round 1 (controller ruling): concurrent applyHotRules callers (boot's
+// ensureNetworkRules, runHotUpdate, setSettings's allowlist/pausedSites hook,
+// and the hourly 'hot' alarm) used to each snapshot getDynamicRules() and
+// race updateDynamicRules() against each other, which can collide on ids and
+// fall through to the degraded fallback chain. applyHotRules is now a thin
+// serializing wrapper around the real implementation (applyHotRulesNow),
+// queued onto one module-level promise chain so calls run strictly in order.
+test('fix round 1: applyHotRules calls are serialized through hotApplyChain', () => {
+  assert.ok(/let hotApplyChain = Promise\.resolve\(\);/.test(src), 'hotApplyChain declared');
+  assert.ok(/const applyHotRules = \(hotIn, settingsIn\) => \{/.test(src), 'applyHotRules is the serializing wrapper, not the real implementation');
+  assert.ok(/hotApplyChain = hotApplyChain\.catch\(\(\) => \{\}\)\.then\(\(\) => applyHotRulesNow\(hotIn, settingsIn\)\);\s*\n\s*return hotApplyChain;/.test(src), 'applyHotRules chains each call onto hotApplyChain and returns that call’s own chained promise');
+  assert.ok(/async function applyHotRulesNow\(hotIn, settingsIn\)/.test(src), 'applyHotRulesNow holds the real (unserialized) implementation applyHotRules wraps');
 });
