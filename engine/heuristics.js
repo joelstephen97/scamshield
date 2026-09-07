@@ -179,6 +179,7 @@
     const BRAND_DOMAINS = C.BRAND_DOMAINS || {};
     const matchedBrand = C.brandNameIn([s.titleBrand, s.ogSiteName, ...(s.logoAltBrands || [])].join(' | '));
     function isOnBrand(brandKey) {
+      if (C.isVerifiedNamespace && C.isVerifiedNamespace(String(s.pageHost || ''))) return true;
       const legit = BRAND_DOMAINS[brandKey] || [];
       const host = String(s.pageHost || '').toLowerCase();
       const parts = C.registrableParts(host);

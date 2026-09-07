@@ -39,7 +39,7 @@
 })(typeof globalThis !== 'undefined' ? globalThis : self, function (C) {
   'use strict';
 
-  const { BRAND_DOMAINS, registrableParts } = C;
+  const { BRAND_DOMAINS, registrableParts, isVerifiedNamespace } = C;
   const MIN_BRAND_LEN = 5;
 
   // ---- 1. allowlist-first suffix trie ---------------------------------------
@@ -72,7 +72,8 @@
   // and the walk dies at the very first label ("tk" has no trie branch), so
   // the classic prefix-trick bypass never fools it.
   function allowlistBrandMatch(host) {
-    const labels = String(host || '').toLowerCase().replace(/\.+$/, '').split('.').filter(Boolean).reverse();
+    const h = String(host || '').toLowerCase().replace(/\.+$/, '');
+    const labels = h.split('.').filter(Boolean).reverse();
     let node = trie();
     let hit = null;
     for (const label of labels) {
@@ -80,6 +81,19 @@
       if (!children || !children[label]) break;
       node = children[label];
       if (node.brand) hit = node.brand; // deepest terminal seen so far wins
+    }
+    // Registry-verified namespaces (0.13.0): every registrant here is
+    // licence-checked by the registry itself (e.g. only a licensed Indian
+    // bank can hold a *.bank.in name), so a host inside one is never brand
+    // impersonation even when it isn't a hardcoded BRAND_DOMAINS entry yet.
+    // Prefer an actual brand-key label match (hdfc.bank.in -> 'hdfc') so
+    // callers get a real brand for display; otherwise short-circuit with a
+    // sentinel that just means "don't fuzzy-match this host".
+    if (!hit && isVerifiedNamespace && isVerifiedNamespace(h)) {
+      const hostLabels = h.split('.').filter(Boolean);
+      const brandKeys = Object.keys(BRAND_DOMAINS);
+      const labelHit = hostLabels.find((lab) => brandKeys.includes(lab));
+      return labelHit || '__verified__';
     }
     return hit;
   }

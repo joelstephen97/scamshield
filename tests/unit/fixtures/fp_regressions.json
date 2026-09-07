@@ -1,0 +1,5 @@
+[
+  { "url": "https://www.hdfc.bank.in/", "observed": ["brandFuzzyMatch"], "expected": "safe" },
+  { "url": "https://www.icici.bank.in/", "observed": ["brandFuzzyMatch", "brandIconMismatch"], "expected": "safe" },
+  { "url": "https://www.doi.org/", "observed": ["newDomain"], "expected": "safe" }
+]

@@ -66,9 +66,13 @@
     B('barclays', ['barclays'], ['barclays.co.uk', 'barclays.com']),
     B('santander', ['santander'], ['santander.com', 'santander.co.uk', 'santander.es']),
     B('ing', ['ing bank'], ['ing.com', 'ing.nl', 'ing.be'], false),
-    B('sbi', ['state bank of india', 'onlinesbi'], ['sbi.co.in', 'onlinesbi.sbi', 'onlinesbi.com'], true, 'SBI'),
-    B('hdfc', ['hdfc'], ['hdfcbank.com', 'hdfc.com'], true, 'HDFC Bank'),
-    B('icici', ['icici'], ['icicibank.com'], true, 'ICICI Bank'),
+    // domains[0] drives brand_match.js's fuzzy-candidate "form" (its own
+    // fuzzyForm must clear MIN_BRAND_LEN=5); 'sbi' alone is 3 chars on either
+    // ccTLD domain, so 'onlinesbi.com' leads the list to keep SBI a fuzzy
+    // candidate (catches e.g. "sbi-bank-in.com") — verified live 2026-09-07.
+    B('sbi', ['state bank of india', 'onlinesbi'], ['onlinesbi.com', 'sbi.co.in', 'onlinesbi.sbi', 'sbi.bank.in'], true, 'SBI'),
+    B('hdfc', ['hdfc'], ['hdfcbank.com', 'hdfc.com', 'hdfc.bank.in'], true, 'HDFC Bank'),
+    B('icici', ['icici'], ['icicibank.com', 'icici.bank.in'], true, 'ICICI Bank'),
     B('emiratesnbd', ['emirates nbd'], ['emiratesnbd.com'], true, 'Emirates NBD'),
     B('adcb', ['adcb'], ['adcb.com'], true, 'ADCB'),
     B('fab', ['first abu dhabi bank'], ['bankfab.com', 'fab.ae'], false, 'FAB'),
@@ -146,10 +150,32 @@
     'com.ua', 'com.co', 'com.pe', 'com.cl', 'com.ec', 'com.uy',
     'com.ve', 'co.ve', 'com.do', 'com.gt', 'co.cr', 'com.pa', 'com.py', 'com.bo',
     'com.kw', 'com.qa', 'com.bh', 'com.om', 'com.jo', 'com.lb',
-    'com.lk', 'com.np', 'com.kh', 'com.mm'
+    'com.lk', 'com.np', 'com.kh', 'com.mm',
+    // 0.13.0: RBI moved every Indian bank to <bank>.bank.in (registrations
+    // are licence-checked by IDRBT), so 'bank.in' is a suffix for us even
+    // though the PSL does not list it yet. Fixes the hdfc/icici banner.
+    'bank.in'
   ];
   const MULTI_LABEL_SUFFIX_SET = new Set(MULTI_LABEL_SUFFIXES);
   const IP4_RE = /^(\d{1,3}\.){3}\d{1,3}$/;
+
+  // Registry-verified namespaces (0.13.0). Only entities the registry has
+  // vetted can register here, so a brand token in the host is the brand,
+  // not an impersonation. Consulted ONLY by brand-impersonation evidence
+  // (fuzzy/icon/content) and by the hot-list client guard — never by the
+  // feed block path or any DOM/behaviour detector (R14). No .edu: student
+  // sub-sites get compromised.
+  const VERIFIED_NAMESPACES = [
+    'bank', 'insurance', 'bank.in', 'gov', 'mil',
+    'gov.uk', 'nhs.uk', 'police.uk', 'gov.ae', 'u.ae', 'gov.sg', 'gov.my', 'gov.in', 'nic.in', 'gov.au', 'gov.ca', 'gc.ca',
+    'gov.sa', 'gov.qa', 'gov.bh', 'gov.om', 'gov.kw', 'gov.hk', 'gov.tw', 'go.jp', 'go.kr', 'gov.br', 'gob.mx', 'gob.es', 'gouv.fr',
+    'gov.it', 'gov.pl', 'gov.za', 'gov.ng', 'gov.ph', 'gov.vn', 'go.th', 'gov.tr', 'gov.eg', 'gov.pk', 'gov.bd', 'gov.lk', 'gov.np',
+    'admin.ch', 'gv.at', 'belgium.be', 'overheid.nl', 'gov.ie', 'gov.pt', 'gov.gr', 'gov.il', 'gov.nz'
+  ];
+  function isVerifiedNamespace(host) {
+    const h = String(host || '').toLowerCase().replace(/\.+$/, '');
+    return VERIFIED_NAMESPACES.some((s) => h === s || h.endsWith('.' + s));
+  }
 
   // Canonical approximate eTLD+1 split. The single implementation shared by
   // engine, content scripts, and popup — do not re-implement elsewhere.
@@ -374,6 +400,7 @@
     FEATURE_NAMES, THRESHOLDS, BRANDS, POPULAR_BRANDS, SUSPICIOUS_TLDS, SUSPICIOUS_TOKENS,
     SCAM_PHRASES, SAFE_DOMAINS, BRAND_DOMAINS, SEED_PHRASE_HINTS, CARRIER_BRANDS,
     MULTI_LABEL_SUFFIXES, KNOWN_AUTH_PROVIDERS, KNOWN_BRAND_REGISTRABLES,
+    VERIFIED_NAMESPACES, isVerifiedNamespace,
     registrableParts, registrableDomain, isSafeHost, brandNameIn, brandDisplayName,
     unwrapSerpRedirect, dedupeCapped,
     luhnValid, isPanShaped, CRED_EXFIL_ALLOWLIST, isCredExfilAllowlisted, crossOriginCredPostHost
