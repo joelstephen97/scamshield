@@ -40,6 +40,8 @@
     riskDynamicHost: 'Domain is hosted on a dynamic-DNS or free-hosting provider frequently abused for scam pages.',
     // engine/brand_match.js brandForeignSuffix — generated brand pack (0.13.0, Task 8)
     brandForeignSuffix: "Uses $1's name on a .$2 address the real $1 never uses.",
+    // engine/site_signals.js gatewaySignal — unlisted gateway/redirect signal (0.13.0, Task 10)
+    gatewayRedirect: 'This page was reached through a short redirect link on $1 that led to a completely different site — a common scam-gateway pattern.',
     // background/service_worker.js — v0.9 threat-feed matcher (Task B2)
     feedBlock: "This domain matches ScamShield's threat feed, confirmed by $1 independent source(s).",
     feedWarn: "This domain matches a lower-confidence entry in ScamShield's threat feed ($1 source(s)) — proceed carefully.",

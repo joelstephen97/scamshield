@@ -1437,6 +1437,46 @@ const frameVerdicts = new Map();
 const privacyFindings = new Map();
 // Per-tab fake-shop findings (0.6.0), in-memory only (cheap to recompute).
 const shopFindings = new Map();
+// Per-tab pre-navigation URL (0.13.0, Task 10): { first, ts }, the FIRST
+// changeInfo.url seen for the current top-level navigation cycle — i.e. the
+// gateway link itself, before any server-side redirect moved the tab
+// elsewhere. Fed to content/content_script.js's gatewaySignal() via
+// getLastNavigation below, alongside the landing page's own
+// performance.getEntriesByType('navigation') redirectCount, to reconstruct a
+// same-tab redirect with no webNavigation permission. `tabs.onUpdated`
+// reports changeInfo.url with no `tabs` permission needed because this
+// extension already holds host_permissions for http(s)://*/* (manifest.json).
+const lastNavigation = new Map();
+const LAST_NAVIGATION_MAX = 500;
+const LAST_NAVIGATION_GRACE_MS = 2000;
+if (api.tabs && api.tabs.onUpdated) {
+  api.tabs.onUpdated.addListener((tabId, changeInfo) => {
+    if (changeInfo.status === 'loading') {
+      // A fresh navigation cycle is starting — drop the previous cycle's
+      // captured URL (if the grace-period timeout below hasn't already) so
+      // the next changeInfo.url is captured as *this* cycle's first hop,
+      // even if the old cycle's own delayed clear hasn't fired yet.
+      lastNavigation.delete(tabId);
+    }
+    if (changeInfo.url && !lastNavigation.has(tabId)) {
+      const entry = { first: changeInfo.url, ts: Date.now() };
+      lastNavigation.set(tabId, entry);
+      if (lastNavigation.size > LAST_NAVIGATION_MAX) {
+        lastNavigation.delete(lastNavigation.keys().next().value);
+      }
+    }
+    if (changeInfo.status === 'complete') {
+      // Keep the entry around briefly so content_script.js's post-load
+      // getLastNavigation query (sent right before fuse()) can still read it,
+      // then let it expire — guarded against a fresher navigation's entry
+      // being deleted by an older cycle's own delayed clear.
+      const snapshot = lastNavigation.get(tabId);
+      setTimeout(() => {
+        if (lastNavigation.get(tabId) === snapshot) lastNavigation.delete(tabId);
+      }, LAST_NAVIGATION_GRACE_MS);
+    }
+  });
+}
 function sessionPrivacyKey(tabId) { return 'privacy:' + tabId; }
 async function persistPrivacy(tabId, list) {
   if (!hasSessionStorage) return;
@@ -1465,6 +1505,7 @@ if (api.tabs && api.tabs.onRemoved) {
     frameVerdicts.delete(tabId);
     privacyFindings.delete(tabId);
     shopFindings.delete(tabId);
+    lastNavigation.delete(tabId);
     if (hasSessionStorage) { try { api.storage.session.remove(sessionPrivacyKey(tabId)); } catch (_) {} }
     clearPersistedVerdict(tabId);
   });
@@ -1475,6 +1516,11 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     switch (msg && msg.type) {
       case 'getSettings':
         sendResponse(await getSettings()); break;
+      case 'getLastNavigation': {
+        const tabId = sender.tab && sender.tab.id;
+        const entry = tabId != null ? lastNavigation.get(tabId) : null;
+        sendResponse({ url: entry ? entry.first : null }); break;
+      }
       case 'setSettings':
         sendResponse(await setSettings(msg.patch || {})); break;
       case 'allowSite': {

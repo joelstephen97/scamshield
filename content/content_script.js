@@ -840,7 +840,7 @@
     // riskTlds (0.9.0, Task B3): risk.json's abused-TLD weight table, mirrored
     // into settings by background/service_worker.js's runFeedUpdate() — no new
     // message round-trip needed since `settings` is already fetched above.
-    const urlRules = SS.scoreUrl(location.href, settings.riskTlds);
+    let urlRules = SS.scoreUrl(location.href, settings.riskTlds);
     let domRules = SS.scoreDom(signals);
     let modelProb = null, contentProb = null, iconMatch = false, pf = null;
     const borderline = Math.max(urlRules.score, domRules.score) >= 0.3 || signals.hasPasswordField;
@@ -860,6 +860,23 @@
           iconMatch = (domRules.flags || []).includes('brand-impersonation-visual');
         }
       } catch (_) { /* page analysis is best-effort */ }
+    }
+    // Gateway/redirect signal (0.13.0, Task 10): an unlisted short-path
+    // gateway that redirected same-tab to a foreign registrable domain. No
+    // webNavigation permission exists (and never will) — redirectCount comes
+    // from the Navigation Timing API every page already exposes, and the
+    // pre-redirect URL comes from background/service_worker.js's
+    // lastNavigation map (fed by the existing `tabs`-permission-free
+    // tabs.onUpdated callback). Ordinary URL-rule evidence, folded into
+    // urlRules exactly like scoreUrl()'s own rules — warn-tier only, fails
+    // open on any missing/timed-out piece.
+    const navEntry = performance.getEntriesByType('navigation')[0];
+    if (navEntry && navEntry.redirectCount > 0) {
+      const ln = await withTimeout(send('getLastNavigation'), 500);
+      const g = SS.gatewaySignal({ redirectCount: navEntry.redirectCount, originalUrl: ln && ln.url, landingHost: location.hostname });
+      if (g.score) {
+        urlRules = Object.assign({}, urlRules, { score: Math.min(1, urlRules.score + g.score), reasons: urlRules.reasons.concat(g.reasons) });
+      }
     }
     let verdict = SS.fuse({ modelProb, urlRules, domRules, contentProb, iconMatch });
 

@@ -331,6 +331,7 @@
   "reason_riskAbusedTld": { "message": "এই ডোমেনের টপ-লেভেল ডোমেনে ($TLD$) ScamShield-এর হুমকি-তালিকা ঝুঁকি সারণিতে প্রতারণার অপব্যবহারের উচ্চ হার আছে।", "placeholders": { "tld": { "content": "$1", "example": ".top" } } },
   "reason_riskDynamicHost": { "message": "ডোমেনটি একটি ডায়নামিক-DNS বা ফ্রি হোস্টিং প্রদানকারীতে হোস্ট করা, যার অপব্যবহার প্রতারণার পেজের জন্য প্রায়ই হয়।" },
   "reason_brandForeignSuffix": { "message": "Uses $BRAND$'s name on a .$SUFFIX$ address the real $BRAND$ never uses.", "placeholders": { "brand": { "content": "$1", "example": "Roblox" }, "suffix": { "content": "$2", "example": "com.do" } } },
+  "reason_gatewayRedirect": { "message": "This page was reached through a short redirect link on $HOST$ that led to a completely different site — a common scam-gateway pattern.", "placeholders": { "host": { "content": "$1", "example": "mgpxq.com" } } },
   "reason_feedBlock": { "message": "এই ডোমেন ScamShield-এর হুমকি-তালিকার সাথে মেলে, যা $COUNT$টি স্বাধীন উৎস দ্বারা নিশ্চিত।", "placeholders": { "count": { "content": "$1", "example": "3" } } },
   "reason_feedWarn": { "message": "এই ডোমেন ScamShield-এর হুমকি-তালিকার একটি কম-নিশ্চিত এন্ট্রির সাথে মেলে ($COUNT$টি উৎস) — সাবধানে এগিয়ে যান।", "placeholders": { "count": { "content": "$1", "example": "1" } } },
   "reason_newDomain": { "message": "ডোমেনটি সদ্য-নিবন্ধিত ডোমেনের তালিকায় দেখা যাচ্ছে — বেশিরভাগ প্রতারণার সাইট মাত্র কয়েক দিনের পুরনো$EXTRA$।", "placeholders": { "extra": { "content": "$1", "example": ", and you have never visited it before" } } },

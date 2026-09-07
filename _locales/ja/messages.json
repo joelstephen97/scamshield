@@ -286,6 +286,7 @@
   "reason_riskAbusedTld": { "message": "このドメインのトップレベルドメイン（$TLD$）は、ScamShieldの脅威フィードのリスクテーブルで詐欺への悪用率が高いものです。", "placeholders": { "tld": { "content": "$1", "example": ".top" } } },
   "reason_riskDynamicHost": { "message": "このドメインは、詐欺ページに頻繁に悪用されるダイナミックDNSまたは無料ホスティングのプロバイダーでホストされています。" },
   "reason_brandForeignSuffix": { "message": "Uses $BRAND$'s name on a .$SUFFIX$ address the real $BRAND$ never uses.", "placeholders": { "brand": { "content": "$1", "example": "Roblox" }, "suffix": { "content": "$2", "example": "com.do" } } },
+  "reason_gatewayRedirect": { "message": "This page was reached through a short redirect link on $HOST$ that led to a completely different site — a common scam-gateway pattern.", "placeholders": { "host": { "content": "$1", "example": "mgpxq.com" } } },
   "reason_feedBlock": { "message": "このドメインはScamShieldの脅威フィードに一致しており、$COUNT$件の独立した情報源で確認されています。", "placeholders": { "count": { "content": "$1", "example": "3" } } },
   "reason_feedWarn": { "message": "このドメインはScamShieldの脅威フィード内の信頼度が低いエントリ（$COUNT$件の情報源）に一致しています — 慎重に進めてください。", "placeholders": { "count": { "content": "$1", "example": "1" } } },
   "reason_newDomain": { "message": "このドメインは新規登録ドメインリストに載っています — 詐欺サイトの多くは登録からわずか数日です$EXTRA$。", "placeholders": { "extra": { "content": "$1", "example": ", and you have never visited it before" } } },

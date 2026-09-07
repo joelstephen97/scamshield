@@ -20,6 +20,15 @@
 // scoreMessage() already does for every link found in SMS/WhatsApp/email
 // text. A shortener link pasted into a message is judged as shortener
 // evidence the moment it's extracted, with zero new wiring.
+//
+// gatewaySignal (0.13.0, Task 10) is the one exception on the browsed-page
+// path: it still adds no new permission, but reconstructs a same-tab
+// redirect from two things already visible without webNavigation — the
+// Navigation Timing API's redirectCount (exposed to any page) and the tab's
+// pre-navigation URL, which background/service_worker.js now tracks off a
+// tabs.onUpdated callback — no `tabs` permission needed since the existing
+// host_permissions (http(s)://*/*) already expose changeInfo.url. See its
+// doc comment below for the full picture.
 (function (root, factory) {
   const req = typeof require === 'function';
   const mod = factory(req ? require('./constants') : root.ScamShield);
@@ -66,6 +75,34 @@
     return SHORTENER_HOSTS.find((d) => h === d || h.endsWith('.' + d)) || null;
   }
 
+  // gatewaySignal (0.13.0, Task 10) — the unlisted-gateway counterpart to the
+  // hot-list redirect rules built in Tasks 2-4: a short random-looking path on
+  // one registrable domain that redirects to a completely different
+  // registrable domain. This extension holds no webNavigation permission (and
+  // never will), so the "chain" here is reconstructed from two things a
+  // content script/service worker can already see without one: the tab's
+  // pre-navigation URL (background/service_worker.js's lastNavigation map,
+  // sourced from tabs.onUpdated's changeInfo.url — visible without a `tabs`
+  // permission because the existing host_permissions already cover it) and
+  // performance.getEntriesByType('navigation') redirectCount from the
+  // Navigation Timing API the landing page itself exposes. Warn-tier
+  // evidence only — see the module doctrine below.
+  const RANDOM_PATH_RE = /^\/[A-Za-z0-9_-]{5,12}\/?$/;
+  const RANDOM_QUERY_RE = /^\/?\?[A-Za-z0-9]{5,10}$/;
+  function gatewaySignal(nav) {
+    const n = nav || {};
+    const none = { score: 0, reasons: [] };
+    if (!(n.redirectCount > 0) || typeof n.originalUrl !== 'string' || !n.landingHost) return none;
+    let u;
+    try { u = new URL(n.originalUrl); } catch (_) { return none; }
+    const from = u.hostname.toLowerCase();
+    const to = String(n.landingHost).toLowerCase();
+    if (registrableParts(from).domain === registrableParts(to).domain) return none;
+    if (C.isSafeHost && C.isSafeHost(from)) return none;
+    if (!(RANDOM_PATH_RE.test(u.pathname) || RANDOM_QUERY_RE.test(u.pathname + (u.search || '')))) return none;
+    return { score: 0.25, reasons: [{ code: 'gatewayRedirect', kind: 'link', params: [from] }] };
+  }
+
   // Combined warn-tier evidence for one host. Pure, synchronous, additive —
   // callers (engine/heuristics.js scoreUrl) fold this into the existing URL
   // rule score exactly like any other rule below.
@@ -90,6 +127,7 @@
 
   return {
     LONG_LABEL_MIN, DEEP_CHAIN_MIN, SHORTENER_HOSTS,
-    labelsBelowRegistrable, hasLongLabel, shortenerHost, scoreSiteSignals
+    labelsBelowRegistrable, hasLongLabel, shortenerHost, scoreSiteSignals,
+    gatewaySignal
   };
 });

@@ -1011,6 +1011,7 @@
     }
   },
   "reason_brandForeignSuffix": { "message": "Uses $BRAND$'s name on a .$SUFFIX$ address the real $BRAND$ never uses.", "placeholders": { "brand": { "content": "$1", "example": "Roblox" }, "suffix": { "content": "$2", "example": "com.do" } } },
+  "reason_gatewayRedirect": { "message": "This page was reached through a short redirect link on $HOST$ that led to a completely different site — a common scam-gateway pattern.", "placeholders": { "host": { "content": "$1", "example": "mgpxq.com" } } },
   "reason_riskDynamicHost": {
     "message": "Domain di-host di penyedia DNS dinamis atau hosting gratis yang sering disalahgunakan untuk halaman penipuan."
   },
