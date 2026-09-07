@@ -1,0 +1,33 @@
+# 30 legit hosts on tenant platforms or regional ccTLDs (0.13.0). Bank/gov
+# rows are from scamshield-research/bench/corpus/hard-benign.jsonl; the
+# tenant-platform demo/doc sites are curl-verified real project pages.
+www.emiratesnbd.com
+www.adcb.com
+www.bankfab.com
+www.mashreqbank.com
+www.rakbank.ae
+www.dbs.com.sg
+www.ocbc.com
+www.uob.com.sg
+www.cimbclicks.com.my
+www.pbebank.com
+www.onlinesbi.sbi
+www.hdfcbank.com
+www.icicibank.com
+www.scb.co.th
+www.vietcombank.com.vn
+uaepass.ae
+www.singpass.gov.sg
+www.mygov.in
+www.gov.uk
+login.microsoftonline.com
+id.atlassian.com
+auth0.com
+accounts.shopify.com
+app.hubspot.com
+expo.dev
+railway.app
+www.statuspage.io
+youtu.be
+twbs.github.io
+docs.github.io

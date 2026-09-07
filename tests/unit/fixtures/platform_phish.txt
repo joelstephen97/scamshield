@@ -1,0 +1,21 @@
+# 0.13.0 bench misses (2026-09-06/07): 18 live tenant-hosted kits + roblox.com.do.
+# Hostnames only — no page content copied. See scamshield-research/synthesis/0130-risk-research.md.
+signin-att-verifier.webflow.io
+shp-entregas.vercel.app
+bellsouth-att-signing-83d69c.webflow.io
+bancaribe.pages.dev
+ledgerr-lliv.pages.dev
+yagomouro.github.io
+ultramaisnu.s3.us-east-005.backblazeb2.com
+1584515557149.duckdns.org
+urlshort-linkmteklac81e1x.s2908sytem4.workers.dev
+xvmsgateway.azurewebsites.net
+activarcuentabhd-acceso.zya.me
+bn-cr.eu.cc
+pochecorp.eu.cc
+pinec72378.systeme.io
+formulario-cita-digital-apjsh-2026.cr-web.workers.dev
+pub-67c6e4237e334032a7d31a6027ae5f29.r2.dev
+clientebhdactivar2026.zya.me
+www.roblox.com.do
+my-new-bnb-bsccoin.surge.sh

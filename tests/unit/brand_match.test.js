@@ -180,7 +180,9 @@ test('fuzzyBrandMatch returns null for a short hostForm (below MIN_BRAND_LEN)', 
 
 test('fuzzyBrandMatch returns null for an ordinary, unrelated domain', () => {
   assert.equal(BM.fuzzyBrandMatch('wikipedia.org'), null);
-  assert.equal(BM.fuzzyBrandMatch('github.com'), null);
+  // github.com became a brand's own real domain in the 0.13.0 pack (300+
+  // brands) — no longer "unrelated"; stackoverflow.com stays outside it.
+  assert.equal(BM.fuzzyBrandMatch('stackoverflow.com'), null);
 });
 
 test('picks the single best (highest-ranked) grade when multiple would match', () => {

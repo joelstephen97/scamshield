@@ -239,9 +239,37 @@
     return best;
   }
 
+  // ---- 3. brand-foreign-suffix (0.13.0) --------------------------------------
+  // Exact brand SLD under a public suffix the brand provably never uses
+  // (ccPolicy 'closed'). Ordinary evidence (not risk-table) so it can reach
+  // "dangerous" with one corroborating signal. Open brands keep the
+  // permissive regional-storefront behaviour (R11).
+  function brandForeignSuffix(host) {
+    const h = String(host || '').toLowerCase().replace(/\.+$/, '');
+    if (allowlistBrandMatch(h)) return null;
+    const parts = registrableParts(h);
+    const b = C.BRANDS_BY_KEY && C.BRANDS_BY_KEY[parts.sld];
+    if (!b || b.ccPolicy !== 'closed' || !Array.isArray(b.suffixes)) return null;
+    return b.suffixes.includes(parts.suffix) ? null : { brand: b.key, suffix: parts.suffix };
+  }
+
+  // ---- 4. tenant-host brand token (0.13.0, Task 9) ---------------------------
+  // Brand token inside a tenant label ("signin-att-verifier" -> att). Exact
+  // token, homoglyph variant, or DL-1 for brands >= 6 chars. Short keys
+  // (att, bhd, td) match only as exact tokens.
+  function tenantBrandToken(label) {
+    const tokens = String(label || '').toLowerCase().split(/[-_.]+/).filter((t) => t.length >= 3);
+    if (!tokens.length) return null;
+    const keys = Object.keys(BRAND_DOMAINS);
+    for (const t of tokens) for (const k of keys) if (t === k || homoglyphVariants(t).includes(k)) return k;
+    for (const t of tokens) for (const k of keys) if (k.length >= 6 && t.length >= 5 && damerauLevenshtein(t, k) === 1) return k;
+    return null;
+  }
+
   return {
     MIN_BRAND_LEN, GRADE_RANK,
     allowlistBrandMatch, fuzzyForm, damerauLevenshtein, homoglyphVariants, fuzzyBrandMatch,
+    brandForeignSuffix, tenantBrandToken,
     _resetTrieForTest, _resetCandidatesForTest
   };
 });

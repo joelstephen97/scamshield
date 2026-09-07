@@ -1,0 +1,259 @@
+key,display,names,domains,ccPolicy,suffixes,category,source
+discord,Discord,discord,discord.com|discordapp.com|discord.gg|discord.media,closed,com|gg|media,,curl-verified 2026-09-07 (FP-gate fix: discord.gg/media are Discord-owned)
+ledger,Ledger,ledger|ledger wallet,ledger.com,closed,com,,curl-verified 2026-09-07
+trezor,Trezor,trezor,trezor.io,closed,io,,curl-verified 2026-09-07
+phantom,Phantom,phantom wallet,phantom.app,closed,app,,curl-verified 2026-09-07
+kraken,Kraken,kraken,kraken.com,closed,com,,curl-verified 2026-09-07
+zoom,Zoom,zoom,zoom.us|zoom.com,closed,us|com,,curl-verified 2026-09-07 (FP-gate fix: zoom.com is Zoom-owned, Server: zoom header)
+okta,Okta,okta,okta.com,closed,com,,curl-verified 2026-09-07
+bbva,BBVA,bbva,bbva.com|bbva.es|bbva.mx,open,,,curl-verified 2026-09-07
+caixabank,CaixaBank,caixabank,caixabank.es|caixabank.com,open,,,curl-verified 2026-09-07
+sabadell,Banco Sabadell,banco sabadell,bancosabadell.com|grupobancosabadell.com,open,,,curl-verified 2026-09-07
+bankinter,Bankinter,bankinter,bankinter.com,open,,,curl-verified 2026-09-07
+unicredit,UniCredit,unicredit,unicredit.eu|unicreditgroup.eu,open,,,curl-verified 2026-09-07
+intesasanpaolo,Intesa Sanpaolo,intesa sanpaolo,intesasanpaolo.com|group.intesasanpaolo.com,open,,,curl-verified 2026-09-07
+posteitaliane,Poste Italiane,poste italiane,poste.it,open,,,curl-verified 2026-09-07
+deutschebank,Deutsche Bank,deutsche bank,db.com,open,,,curl-verified 2026-09-07
+commerzbank,Commerzbank,commerzbank,commerzbank.de,open,,,curl-verified 2026-09-07
+dkb,DKB,deutsche kreditbank,dkb.de,open,,,curl-verified 2026-09-07
+sparkasse,Sparkasse,sparkasse,sparkasse.de,open,,,curl-verified 2026-09-07
+postbank,Postbank,postbank,postbank.de,open,,,curl-verified 2026-09-07
+abnamro,ABN AMRO,abn amro,abnamro.nl|abnamro.com,open,,,curl-verified 2026-09-07
+rabobank,Rabobank,rabobank,rabobank.nl|rabobank.com,open,,,curl-verified 2026-09-07
+bnpparibas,BNP Paribas,bnp paribas,bnpparibas.com,open,,,curl-verified 2026-09-07
+societegenerale,Societe Generale,societe generale,societegenerale.com,open,,,curl-verified 2026-09-07
+creditagricole,Credit Agricole,credit agricole,credit-agricole.com,open,,,curl-verified 2026-09-07
+creditsuisse,Credit Suisse,credit suisse,credit-suisse.com,open,,,curl-verified 2026-09-07
+ubs,UBS,ubs bank,ubs.com,open,,,curl-verified 2026-09-07
+swisscom,Swisscom,swisscom,swisscom.ch,open,,,curl-verified 2026-09-07
+scotiabank,Scotiabank,scotiabank,scotiabank.com,open,,,curl-verified 2026-09-07
+rbc,RBC,royal bank of canada,rbc.com|rbcroyalbank.com,open,,,curl-verified 2026-09-07
+td,TD Bank,td bank,td.com|tdbank.com,open,,,curl-verified 2026-09-07
+bmo,BMO,bmo bank,bmo.com,open,,,curl-verified 2026-09-07
+cibc,CIBC,cibc bank,cibc.com,open,,,curl-verified 2026-09-07
+desjardins,Desjardins,desjardins,desjardins.com,open,,,curl-verified 2026-09-07
+canadapost,Canada Post,canada post,canadapost.ca,open,,,curl-verified 2026-09-07
+interac,Interac,interac,interac.ca,open,,,curl-verified 2026-09-07
+usaa,USAA,usaa,usaa.com,open,,,curl-verified 2026-09-07
+capitalone,Capital One,capital one,capitalone.com,open,,,curl-verified 2026-09-07
+navyfederal,Navy Federal,navy federal,navyfederal.org,open,,,curl-verified 2026-09-07
+pnc,PNC Bank,pnc bank,pnc.com,open,,,curl-verified 2026-09-07
+truist,Truist,truist bank,truist.com,open,,,curl-verified 2026-09-07
+regions,Regions Bank,regions bank,regions.com,open,,,curl-verified 2026-09-07
+fifththird,Fifth Third Bank,fifth third,53.com,open,,,curl-verified 2026-09-07
+keybank,KeyBank,keybank,key.com,open,,,curl-verified 2026-09-07
+discover,Discover,discover card,discover.com,open,,,curl-verified 2026-09-07
+amex,American Express,american express,americanexpress.com,open,,,curl-verified 2026-09-07
+venmo,Venmo,venmo,venmo.com,open,,,curl-verified 2026-09-07
+zelle,Zelle,zelle,zellepay.com,open,,,curl-verified 2026-09-07
+westernunion,Western Union,western union,westernunion.com,open,,,curl-verified 2026-09-07
+moneygram,MoneyGram,moneygram,moneygram.com,open,,,curl-verified 2026-09-07
+n26,N26,n26 bank,n26.com,open,,,curl-verified 2026-09-07
+monzo,Monzo,monzo bank,monzo.com,open,,,curl-verified 2026-09-07
+starlingbank,Starling Bank,starling bank,starlingbank.com,open,,,curl-verified 2026-09-07
+chime,Chime,chime bank,chime.com,open,,,curl-verified 2026-09-07
+nab,NAB,national australia bank,nab.com.au,open,,,curl-verified 2026-09-07
+anz,ANZ,anz bank,anz.com,open,,,curl-verified 2026-09-07
+westpac,Westpac,westpac bank,westpac.com.au,open,,,curl-verified 2026-09-07
+commbank,CommBank,commonwealth bank,commbank.com.au,open,,,curl-verified 2026-09-07
+auspost,Australia Post,australia post,auspost.com.au,open,,,curl-verified 2026-09-07
+nzpost,NZ Post,nz post,nzpost.co.nz,open,,,curl-verified 2026-09-07
+standardchartered,Standard Chartered,standard chartered,sc.com,open,,,curl-verified 2026-09-07
+ocbc,OCBC,ocbc bank,ocbc.com,open,,,curl-verified 2026-09-07
+uob,UOB,uob bank,uob.com.sg,open,,,curl-verified 2026-09-07
+cimb,CIMB,cimb bank,cimb.com,open,,,curl-verified 2026-09-07
+publicbank,Public Bank,public bank berhad,pbebank.com,open,,,curl-verified 2026-09-07
+rhbbank,RHB Bank,rhb bank,rhbgroup.com,open,,,curl-verified 2026-09-07
+bhd,Banco BHD,banco bhd,bhd.com.do,open,,,curl-verified 2026-09-07
+banreservas,Banreservas,banreservas,banreservas.com,open,,,curl-verified 2026-09-07
+bancaribe,Bancaribe,bancaribe,bancaribe.com,open,,,curl-verified 2026-09-07
+popular,Banco Popular,banco popular,popular.com,open,,,curl-verified 2026-09-07
+itau,Itau,itau unibanco,itau.com.br,open,,,curl-verified 2026-09-07
+bradesco,Bradesco,banco bradesco,bradesco.com.br,open,,,curl-verified 2026-09-07
+vietcombank,Vietcombank,vietcombank,vietcombank.com.vn,open,,,curl-verified 2026-09-07
+bidv,BIDV,bidv bank,bidv.com.vn,open,,,curl-verified 2026-09-07
+vpbank,VPBank,vpbank,vpbank.com.vn,open,,,curl-verified 2026-09-07
+acbbank,ACB Bank,acb bank,acb.com.vn,open,,,curl-verified 2026-09-07
+bdo,BDO Unibank,bdo unibank,bdo.com.ph,open,,,curl-verified 2026-09-07
+metrobank,Metrobank,metrobank,metrobank.com.ph,open,,,curl-verified 2026-09-07
+bpi,BPI,bank of the philippine islands,bpi.com.ph,open,,,curl-verified 2026-09-07
+rcbc,RCBC,rcbc bank,rcbc.com,open,,,curl-verified 2026-09-07
+unionbankph,UnionBank,unionbank philippines,unionbankph.com,open,,,curl-verified 2026-09-07
+bca,Bank Central Asia,bank central asia,bca.co.id,open,,,curl-verified 2026-09-07
+bri,Bank Rakyat Indonesia,bank rakyat indonesia,bri.co.id,open,,,curl-verified 2026-09-07
+bankmandiri,Bank Mandiri,bank mandiri,bankmandiri.co.id,open,,,curl-verified 2026-09-07
+bni,BNI,bank negara indonesia,bni.co.id,open,,,curl-verified 2026-09-07
+scbthailand,SCB Thailand,siam commercial bank,scb.co.th,open,,,curl-verified 2026-09-07
+krungsri,Krungsri,krungsri bank,krungsri.com,open,,,curl-verified 2026-09-07
+ttbbank,TTB Bank,ttb bank,ttbbank.com,open,,,curl-verified 2026-09-07
+allianz,Allianz,allianz insurance,allianz.com,open,,,curl-verified 2026-09-07
+axa,AXA,axa insurance,axa.com,open,,,curl-verified 2026-09-07
+zurich,Zurich Insurance,zurich insurance,zurich.com,open,,,curl-verified 2026-09-07
+metlife,MetLife,metlife insurance,metlife.com,open,,,curl-verified 2026-09-07
+ebay,eBay,ebay,ebay.com,open,,,curl-verified 2026-09-07
+etsy,Etsy,etsy,etsy.com,open,,,curl-verified 2026-09-07
+walmart,Walmart,walmart,walmart.com,open,,,curl-verified 2026-09-07
+target,Target,target stores,target.com,open,,,curl-verified 2026-09-07
+bestbuy,Best Buy,best buy,bestbuy.com,open,,,curl-verified 2026-09-07
+aliexpress,AliExpress,aliexpress,aliexpress.com,open,,,curl-verified 2026-09-07
+alibaba,Alibaba,alibaba,alibaba.com,open,,,curl-verified 2026-09-07
+taobao,Taobao,taobao,taobao.com,open,,,curl-verified 2026-09-07
+jd,JD.com,jd.com,jd.com,open,,,curl-verified 2026-09-07
+zalando,Zalando,zalando,zalando.com,open,,,curl-verified 2026-09-07
+asos,ASOS,asos,asos.com,open,,,curl-verified 2026-09-07
+otto,OTTO,otto.de,otto.de,open,,,curl-verified 2026-09-07
+wish,Wish,wish shopping,wish.com,open,,,curl-verified 2026-09-07
+temu,Temu,temu,temu.com,open,,,curl-verified 2026-09-07
+shein,SHEIN,shein,shein.com,open,,,curl-verified 2026-09-07
+mercadolivre,Mercado Livre,mercado livre,mercadolivre.com.br,open,,,curl-verified 2026-09-07
+mercadolibre,Mercado Libre,mercado libre,mercadolibre.com|mercadolibre.com.ar|mercadolibre.com.mx|mercadolibre.com.co|mercadolibre.cl|mercadolibre.com.uy,open,,,curl-verified 2026-09-07 (FP-gate fix: regional storefronts)
+rakuten,Rakuten,rakuten,rakuten.co.jp|rakuten.com,open,,,curl-verified 2026-09-07
+olx,OLX,olx,olx.com|olx.pl,open,,,curl-verified 2026-09-07
+vinted,Vinted,vinted,vinted.com,open,,,curl-verified 2026-09-07
+shopify,Shopify,shopify,shopify.com,open,,,curl-verified 2026-09-07
+flipkart,Flipkart,flipkart,flipkart.com,open,,,curl-verified 2026-09-07
+myntra,Myntra,myntra,myntra.com,open,,,curl-verified 2026-09-07
+tokopedia,Tokopedia,tokopedia,tokopedia.com,open,,,curl-verified 2026-09-07
+bukalapak,Bukalapak,bukalapak,bukalapak.com,open,,,curl-verified 2026-09-07
+tiki,Tiki,tiki.vn,tiki.vn,open,,,curl-verified 2026-09-07
+correios,Correios,correios brasil,correios.com.br,open,,,curl-verified 2026-09-07
+correos,Correos,correos espana,correos.es,open,,,curl-verified 2026-09-07
+laposte,La Poste,la poste,laposte.fr,open,,,curl-verified 2026-09-07
+ctt,CTT,ctt correios,ctt.pt,open,,,curl-verified 2026-09-07
+anpost,An Post,an post,anpost.com,open,,,curl-verified 2026-09-07
+bpost,Bpost,bpost belgium,bpost.be,open,,,curl-verified 2026-09-07
+postnl,PostNL,postnl,postnl.nl,open,,,curl-verified 2026-09-07
+deutschepost,Deutsche Post,deutsche post,deutschepost.de,open,,,curl-verified 2026-09-07
+japanpost,Japan Post,japan post,post.japanpost.jp,open,,,curl-verified 2026-09-07
+indiapost,India Post,india post,indiapost.gov.in,open,,,curl-verified 2026-09-07
+att,AT&T,at&t|att wireless,att.com|att.net,open,,,curl-verified 2026-09-07
+bellsouth,BellSouth,bellsouth,bellsouth.net,open,,,DNS-verified 2026-09-07 (resolves to AT&T-owned IP; sandbox TCP timeout not treated as dead domain)
+verizon,Verizon,verizon wireless,verizon.com,open,,,curl-verified 2026-09-07
+tmobile,T-Mobile,t-mobile,t-mobile.com,open,,,curl-verified 2026-09-07
+vodafone,Vodafone,vodafone,vodafone.com,open,,,curl-verified 2026-09-07
+orange,Orange,orange telecom,orange.fr,open,,,curl-verified 2026-09-07
+sfr,SFR,sfr telecom,sfr.fr,open,,,curl-verified 2026-09-07
+deutschetelekom,Deutsche Telekom,deutsche telekom,telekom.de|telekom.net,open,,,curl-verified 2026-09-07 (FP-gate fix: telekom.net redirects to telekom.com)
+o2,O2,o2 mobile,o2.co.uk,open,,,curl-verified 2026-09-07
+ee,EE,ee mobile,ee.co.uk,open,,,curl-verified 2026-09-07
+three,Three,three mobile,three.co.uk,open,,,curl-verified 2026-09-07
+telstra,Telstra,telstra,telstra.com.au,open,,,curl-verified 2026-09-07
+optus,Optus,optus,optus.com.au,open,,,curl-verified 2026-09-07
+singtel,Singtel,singtel,singtel.com,open,,,curl-verified 2026-09-07
+starhub,StarHub,starhub,starhub.com,open,,,curl-verified 2026-09-07
+smart,Smart Communications,smart communications,smart.com.ph,open,,,curl-verified 2026-09-07
+pldt,PLDT,pldt,pldt.com,open,,,curl-verified 2026-09-07
+airtel,Airtel,airtel,airtel.in,open,,,curl-verified 2026-09-07
+jio,Jio,reliance jio,jio.com,open,,,curl-verified 2026-09-07
+ooredoo,Ooredoo,ooredoo,ooredoo.com,open,,,curl-verified 2026-09-07
+stc,STC,saudi telecom,stc.com.sa,open,,,curl-verified 2026-09-07
+digi,Digi Telco,digi telco,digi.com.my,open,,,curl-verified 2026-09-07
+celcom,Celcom,celcom,celcom.com.my,open,,,curl-verified 2026-09-07
+umobile,U Mobile,u mobile,u.com.my,open,,,curl-verified 2026-09-07
+maxis,Maxis,maxis,maxis.com.my,open,,,curl-verified 2026-09-07
+dtac,dtac,dtac mobile,dtac.co.th,open,,,curl-verified 2026-09-07
+viettel,Viettel,viettel,viettel.com.vn,open,,,curl-verified 2026-09-07
+slack,Slack,slack,slack.com,open,,,curl-verified 2026-09-07
+salesforce,Salesforce,salesforce,salesforce.com,open,,,curl-verified 2026-09-07
+workday,Workday,workday,workday.com,open,,,curl-verified 2026-09-07
+atlassian,Atlassian,atlassian,atlassian.com|atlassian.net,open,,,curl-verified 2026-09-07 (FP-gate fix: atlassian.net is the Jira/Confluence Cloud hosting domain)
+github,GitHub,github,github.com|github.io,open,,,curl-verified 2026-09-07
+gitlab,GitLab,gitlab,gitlab.com|gitlab.io,open,,,curl-verified 2026-09-07
+notion,Notion,notion,notion.so,open,,,curl-verified 2026-09-07
+airtable,Airtable,airtable,airtable.com,open,,,curl-verified 2026-09-07
+figma,Figma,figma,figma.com,open,,,curl-verified 2026-09-07
+canva,Canva,canva,canva.com,open,,,curl-verified 2026-09-07
+squarespace,Squarespace,squarespace,squarespace.com,open,,,curl-verified 2026-09-07
+wix,Wix,wix.com,wix.com,open,,,curl-verified 2026-09-07
+stripe,Stripe,stripe,stripe.com,open,,,curl-verified 2026-09-07
+square,Square,square inc,squareup.com,open,,,curl-verified 2026-09-07
+wetransfer,WeTransfer,wetransfer,wetransfer.com,open,,,curl-verified 2026-09-07
+twitch,Twitch,twitch,twitch.tv,open,,,curl-verified 2026-09-07
+epicgames,Epic Games,epic games,epicgames.com,open,,,curl-verified 2026-09-07
+ea,Electronic Arts,electronic arts,ea.com,open,,,curl-verified 2026-09-07
+ubisoft,Ubisoft,ubisoft,ubisoft.com,open,,,curl-verified 2026-09-07
+riotgames,Riot Games,riot games,riotgames.com,open,,,curl-verified 2026-09-07
+nintendo,Nintendo,nintendo,nintendo.com,open,,,curl-verified 2026-09-07
+playstation,PlayStation,playstation,playstation.com,open,,,curl-verified 2026-09-07
+xbox,Xbox,xbox,xbox.com,open,,,curl-verified 2026-09-07
+klarna,Klarna,klarna,klarna.com,open,,,curl-verified 2026-09-07
+afterpay,Afterpay,afterpay,afterpay.com,open,,,curl-verified 2026-09-07
+affirm,Affirm,affirm pay,affirm.com,open,,,curl-verified 2026-09-07
+opensea,OpenSea,opensea,opensea.io,open,,,curl-verified 2026-09-07
+twitter,Twitter (X),twitter,twitter.com|x.com,open,,,curl-verified 2026-09-07
+tiktok,TikTok,tiktok,tiktok.com|tiktokv.com,open,,,curl-verified 2026-09-07 (FP-gate fix: tiktokv.com is ByteDance/TikTok CDN, x-tt-* headers)
+snapchat,Snapchat,snapchat,snapchat.com,open,,,curl-verified 2026-09-07
+pinterest,Pinterest,pinterest,pinterest.com,open,,,curl-verified 2026-09-07
+reddit,Reddit,reddit,reddit.com,open,,,curl-verified 2026-09-07
+disneyplus,Disney+,disney plus,disneyplus.com,open,,,curl-verified 2026-09-07
+hulu,Hulu,hulu,hulu.com,open,,,curl-verified 2026-09-07
+line,LINE,line messenger,line.me,open,,,curl-verified 2026-09-07
+viber,Viber,viber,viber.com,open,,,curl-verified 2026-09-07
+bybit,Bybit,bybit,bybit.com,open,,,curl-verified 2026-09-07
+okx,OKX,okx,okx.com,open,,,curl-verified 2026-09-07
+kucoin,KuCoin,kucoin,kucoin.com,open,,,curl-verified 2026-09-07
+cryptocom,Crypto.com,crypto.com,crypto.com,open,,,curl-verified 2026-09-07
+blockchaincom,Blockchain.com,blockchain.com,blockchain.com,open,,,curl-verified 2026-09-07
+exodus,Exodus Wallet,exodus wallet,exodus.com,open,,,curl-verified 2026-09-07
+trustwallet,Trust Wallet,trust wallet,trustwallet.com,open,,,curl-verified 2026-09-07
+uniswap,Uniswap,uniswap,uniswap.org,open,,,curl-verified 2026-09-07
+gemini,Gemini Exchange,gemini exchange,gemini.com,open,,,curl-verified 2026-09-07
+bitfinex,Bitfinex,bitfinex,bitfinex.com,open,,,curl-verified 2026-09-07
+htx,HTX,htx exchange,htx.com,open,,,curl-verified 2026-09-07
+gateio,Gate.io,gate.io,gate.io,open,,,curl-verified 2026-09-07
+luno,Luno,luno,luno.com,open,,,curl-verified 2026-09-07
+bitso,Bitso,bitso,bitso.com,open,,,curl-verified 2026-09-07
+paytm,Paytm,paytm,paytm.com,open,,,curl-verified 2026-09-07
+gcash,GCash,gcash,gcash.com,open,,,curl-verified 2026-09-07
+alipay,Alipay,alipay,alipay.com,open,,,curl-verified 2026-09-07
+wechatpay,WeChat Pay,wechat pay,pay.weixin.qq.com,open,,,curl-verified 2026-09-07
+unionpay,UnionPay,unionpay,unionpayintl.com,open,,,curl-verified 2026-09-07
+qatarairways,Qatar Airways,qatar airways,qatarairways.com,open,,,curl-verified 2026-09-07
+saudia,Saudia,saudia airlines,saudia.com,open,,,curl-verified 2026-09-07
+turkishairlines,Turkish Airlines,turkish airlines,turkishairlines.com,open,,,curl-verified 2026-09-07
+britishairways,British Airways,british airways,britishairways.com,open,,,curl-verified 2026-09-07
+lufthansa,Lufthansa,lufthansa,lufthansa.com,open,,,curl-verified 2026-09-07
+united,United Airlines,united airlines,united.com,open,,,curl-verified 2026-09-07
+americanairlines,American Airlines,american airlines,aa.com,open,,,curl-verified 2026-09-07
+southwest,Southwest Airlines,southwest airlines,southwest.com,open,,,curl-verified 2026-09-07
+singaporeairlines,Singapore Airlines,singapore airlines,singaporeair.com,open,,,curl-verified 2026-09-07
+cathaypacific,Cathay Pacific,cathay pacific,cathaypacific.com,open,,,curl-verified 2026-09-07
+qantas,Qantas,qantas,qantas.com,open,,,curl-verified 2026-09-07
+airindia,Air India,air india,airindia.com,open,,,curl-verified 2026-09-07
+malaysiaairlines,Malaysia Airlines,malaysia airlines,malaysiaairlines.com,open,,,curl-verified 2026-09-07
+thaiairways,Thai Airways,thai airways,thaiairways.com,open,,,curl-verified 2026-09-07
+vietnamairlines,Vietnam Airlines,vietnam airlines,vietnamairlines.com,open,,,curl-verified 2026-09-07
+philippineairlines,Philippine Airlines,philippine airlines,philippineairlines.com,open,,,curl-verified 2026-09-07
+garuda,Garuda Indonesia,garuda indonesia,garuda-indonesia.com,open,,,curl-verified 2026-09-07
+airasia,AirAsia,airasia,airasia.com,open,,,curl-verified 2026-09-07
+scoot,Scoot,scoot airlines,flyscoot.com,open,,,curl-verified 2026-09-07
+vistara,Vistara,vistara,airvistara.com,open,,,curl-verified 2026-09-07
+indigo,IndiGo,indigo airlines,goindigo.in,open,,,curl-verified 2026-09-07
+indeed,Indeed,indeed jobs,indeed.com,open,,,curl-verified 2026-09-07
+glassdoor,Glassdoor,glassdoor,glassdoor.com,open,,,curl-verified 2026-09-07
+coursera,Coursera,coursera,coursera.org,open,,,curl-verified 2026-09-07
+udemy,Udemy,udemy,udemy.com,open,,,curl-verified 2026-09-07
+duolingo,Duolingo,duolingo,duolingo.com,open,,,curl-verified 2026-09-07
+grammarly,Grammarly,grammarly,grammarly.com,open,,,curl-verified 2026-09-07
+evernote,Evernote,evernote,evernote.com,open,,,curl-verified 2026-09-07
+trello,Trello,trello,trello.com,open,,,curl-verified 2026-09-07
+asana,Asana,asana,asana.com,open,,,curl-verified 2026-09-07
+mondaycom,monday.com,monday.com,monday.com,open,,,curl-verified 2026-09-07
+zendesk,Zendesk,zendesk,zendesk.com,open,,,curl-verified 2026-09-07
+hubspot,HubSpot,hubspot,hubspot.com,open,,,curl-verified 2026-09-07
+mailchimp,Mailchimp,mailchimp,mailchimp.com,open,,,curl-verified 2026-09-07
+surveymonkey,SurveyMonkey,surveymonkey,surveymonkey.com,open,,,curl-verified 2026-09-07
+typeform,Typeform,typeform,typeform.com,open,,,curl-verified 2026-09-07
+calendly,Calendly,calendly,calendly.com,open,,,curl-verified 2026-09-07
+adp,ADP,adp payroll,adp.com,open,,,curl-verified 2026-09-07
+concur,SAP Concur,sap concur,concur.com,open,,,curl-verified 2026-09-07
+expensify,Expensify,expensify,expensify.com,open,,,curl-verified 2026-09-07
+greenhouse,Greenhouse,greenhouse.io,greenhouse.io,open,,,curl-verified 2026-09-07
+lever,Lever,lever.co,lever.co,open,,,curl-verified 2026-09-07
+ziprecruiter,ZipRecruiter,ziprecruiter,ziprecruiter.com,open,,,curl-verified 2026-09-07
+naukri,Naukri,naukri.com,naukri.com,open,,,curl-verified 2026-09-07
+bayt,Bayt,bayt.com,bayt.com,open,,,curl-verified 2026-09-07
+gulftalent,GulfTalent,gulftalent,gulftalent.com,open,,,curl-verified 2026-09-07
+xing,XING,xing.com,xing.com,open,,,curl-verified 2026-09-07
+coinmarketcap,CoinMarketCap,coinmarketcap,coinmarketcap.com,open,,,curl-verified 2026-09-07
+coingecko,CoinGecko,coingecko,coingecko.com,open,,,curl-verified 2026-09-07

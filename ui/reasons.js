@@ -38,6 +38,8 @@
     shortenerHost: 'This is a link-shortener domain ($1) — the real destination is hidden until you click it.',
     riskAbusedTld: "Domain's top-level domain ($1) has a high rate of scam abuse in ScamShield's threat-feed risk tables.",
     riskDynamicHost: 'Domain is hosted on a dynamic-DNS or free-hosting provider frequently abused for scam pages.',
+    // engine/brand_match.js brandForeignSuffix — generated brand pack (0.13.0, Task 8)
+    brandForeignSuffix: "Uses $1's name on a .$2 address the real $1 never uses.",
     // background/service_worker.js — v0.9 threat-feed matcher (Task B2)
     feedBlock: "This domain matches ScamShield's threat feed, confirmed by $1 independent source(s).",
     feedWarn: "This domain matches a lower-confidence entry in ScamShield's threat feed ($1 source(s)) — proceed carefully.",
@@ -53,6 +55,9 @@
     brandImpersonationContent: 'This page looks like "$1" but is not on its real website.',
     deliveryFeeScam: 'This page pretends to be $1 and asks for card details to release a package. Carriers never collect fees through pages like this.',
     brandIconMismatch: "This page uses $1's icon but is not $1's website.",
+    // engine/heuristics.js scoreDom — tenant-host credential signal (0.13.0, Task 9)
+    credentialFormOnTenantHost: "Asks for a password on a free hosting site ($1) — real services don't live there.",
+    brandInTenantHost: "$1's name is in the address of a free-hosting page that asks for a password.",
     // engine/verdict.js — page-content model
     contentPhishingPattern: 'Page wording and layout resemble known phishing pages.',
     // engine/techscam_rules.js

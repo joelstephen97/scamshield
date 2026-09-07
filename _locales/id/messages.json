@@ -1010,6 +1010,7 @@
       }
     }
   },
+  "reason_brandForeignSuffix": { "message": "Uses $BRAND$'s name on a .$SUFFIX$ address the real $BRAND$ never uses.", "placeholders": { "brand": { "content": "$1", "example": "Roblox" }, "suffix": { "content": "$2", "example": "com.do" } } },
   "reason_riskDynamicHost": {
     "message": "Domain di-host di penyedia DNS dinamis atau hosting gratis yang sering disalahgunakan untuk halaman penipuan."
   },
@@ -1085,6 +1086,8 @@
       }
     }
   },
+  "reason_credentialFormOnTenantHost": { "message": "Asks for a password on a free hosting site ($HOST$) — real services don't live there.", "placeholders": { "host": { "content": "$1", "example": "webflow.io" } } },
+  "reason_brandInTenantHost": { "message": "$BRAND$'s name is in the address of a free-hosting page that asks for a password.", "placeholders": { "brand": { "content": "$1", "example": "AT&T" } } },
   "reason_brandIconMismatch": {
     "message": "Halaman ini menggunakan ikon $BRAND$ tetapi bukan situs web $BRAND$.",
     "placeholders": {

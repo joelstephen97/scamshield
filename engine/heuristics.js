@@ -75,6 +75,16 @@
       }
     }
 
+    // Brand-foreign-suffix (0.13.0): an exact brand SLD under a public suffix
+    // that brand provably never uses (ccPolicy 'closed' — roblox.com.do class).
+    // Ordinary evidence, not risk-table, so it can reach "dangerous" with one
+    // corroborating signal (a password field, brand content match, etc.).
+    const fsx = BM && BM.brandForeignSuffix && BM.brandForeignSuffix(host);
+    if (fsx) {
+      score += 0.60;
+      reasons.push({ code: 'brandForeignSuffix', kind: 'brand', params: [C.brandDisplayName(fsx.brand), fsx.suffix] });
+    }
+
     // suspicious-site-reporter-inspired structural signals (0.9.0,
     // engine/site_signals.js): deep subdomain chains, over-long labels, and
     // known link-shortener/redirect hosts. See /NOTICE.
@@ -125,6 +135,54 @@
       }
     }
 
+    // Allowlist-first short-circuit (0.9.0, Task B3 requirement 2, verified):
+    // `legit.some((d) => pageDomain === d || host.endsWith('.' + d))` below IS
+    // suffix matching — the same semantics engine/brand_match.js's
+    // allowlistBrandMatch() trie implements — so a page on (or a subdomain
+    // of) `brandKey`'s real domain always short-circuits every heuristic that
+    // calls isOnBrand() before it can fire. `exactBrandCc` additionally
+    // treats an exact-brand SLD on an ordinary ccTLD as trusted (regional
+    // storefronts not in the hardcoded list, e.g. a hypothetical
+    // "amazon.jp") — deliberately more permissive than brand_match.js's
+    // fuzzy TLD-swap grade, which DOES flag that same shape as evidence; the
+    // two signals disagreeing there is intentional defense-in-depth (content
+    // impersonation demands higher precision since it reaches "dangerous"
+    // directly, fuzzy URL evidence is capped at "suspicious"). Declared here,
+    // ahead of the tenant-host block below, so both can call isOnBrand().
+    const BRAND_DOMAINS = C.BRAND_DOMAINS || {};
+    function isOnBrand(brandKey) {
+      if (C.isVerifiedNamespace && C.isVerifiedNamespace(String(s.pageHost || ''))) return true;
+      const legit = BRAND_DOMAINS[brandKey] || [];
+      const host = String(s.pageHost || '').toLowerCase();
+      const parts = C.registrableParts(host);
+      const tld = parts.suffix.split('.').pop();
+      const ccShaped = (C.MULTI_LABEL_SUFFIXES || []).includes(parts.suffix) || tld.length === 2;
+      // 0.13.0: a ccPolicy 'closed' brand (roblox, steam, ...) provably never
+      // runs a ccTLD storefront, so an exact-SLD-on-a-ccTLD host is trusted
+      // ONLY when that suffix is one of the brand's own declared suffixes —
+      // everything else is impersonation (brandForeignSuffix's DOM-side twin).
+      // Open brands (the default) keep the old permissive behaviour.
+      const b = (C.BRANDS_BY_KEY || {})[brandKey];
+      const exactBrandCc = parts.sld === brandKey && ccShaped && !(C.SUSPICIOUS_TLDS || []).includes(tld) &&
+        (!b || b.ccPolicy !== 'closed' || (b.suffixes || []).includes(parts.suffix));
+      return exactBrandCc || legit.some((d) => pageDomain === d || host.endsWith('.' + d));
+    }
+
+    // 0.13.0: credential form on a free-hosting tenant. Alone it is warn-tier
+    // evidence (+0.45): plenty of demo apps have logins. With a brand token
+    // in the tenant label it is the AT&T/Bancaribe/Ledger kit shape the
+    // 2026-09-06 bench missed 18 times — dangerous, brand set for the UI.
+    const tenant = C.tenantLabel ? C.tenantLabel(s.pageHost) : null;
+    if (tenant && s.hasPasswordField) {
+      score += 0.45;
+      reasons.push({ code: 'credentialFormOnTenantHost', kind: 'page', params: [String(s.pageHost || '').slice(String(tenant).length + 1)] });
+      const tb = BM && BM.tenantBrandToken ? BM.tenantBrandToken(tenant) : null;
+      if (tb && !isOnBrand(tb)) {
+        score = Math.max(score, 0.9); flags.push('brand-impersonation-tenant'); brand = brand || tb;
+        reasons.push({ code: 'brandInTenantHost', kind: 'brand', params: [displayName(tb)] });
+      }
+    }
+
     if ((s.hiddenIframeCount || 0) > 0) {
       score += 0.2;
       reasons.push({ code: 'hiddenIframes', kind: 'page' });
@@ -161,33 +219,10 @@
     }
 
     // Content-based brand impersonation: page *names* a brand but is not on that
-    // brand's real domain, and collects a password.
-    //
-    // Allowlist-first short-circuit (0.9.0, Task B3 requirement 2, verified):
-    // `legit.some((d) => pageDomain === d || host.endsWith('.' + d))` below IS
-    // suffix matching — the same semantics engine/brand_match.js's
-    // allowlistBrandMatch() trie implements — so a page on (or a subdomain
-    // of) `brandKey`'s real domain always short-circuits every heuristic that
-    // calls isOnBrand() before it can fire. `exactBrandCc` additionally
-    // treats an exact-brand SLD on an ordinary ccTLD as trusted (regional
-    // storefronts not in the hardcoded list, e.g. a hypothetical
-    // "amazon.jp") — deliberately more permissive than brand_match.js's
-    // fuzzy TLD-swap grade, which DOES flag that same shape as evidence; the
-    // two signals disagreeing there is intentional defense-in-depth (content
-    // impersonation demands higher precision since it reaches "dangerous"
-    // directly, fuzzy URL evidence is capped at "suspicious").
-    const BRAND_DOMAINS = C.BRAND_DOMAINS || {};
+    // brand's real domain, and collects a password. (BRAND_DOMAINS and
+    // isOnBrand are declared above, ahead of the tenant-host block, which
+    // also needs them.)
     const matchedBrand = C.brandNameIn([s.titleBrand, s.ogSiteName, ...(s.logoAltBrands || [])].join(' | '));
-    function isOnBrand(brandKey) {
-      if (C.isVerifiedNamespace && C.isVerifiedNamespace(String(s.pageHost || ''))) return true;
-      const legit = BRAND_DOMAINS[brandKey] || [];
-      const host = String(s.pageHost || '').toLowerCase();
-      const parts = C.registrableParts(host);
-      const tld = parts.suffix.split('.').pop();
-      const ccShaped = (C.MULTI_LABEL_SUFFIXES || []).includes(parts.suffix) || tld.length === 2;
-      const exactBrandCc = parts.sld === brandKey && ccShaped && !(C.SUSPICIOUS_TLDS || []).includes(tld);
-      return exactBrandCc || legit.some((d) => pageDomain === d || host.endsWith('.' + d));
-    }
     if (matchedBrand && s.hasPasswordField && !isOnBrand(matchedBrand)) {
       score = Math.max(score, 0.85); flags.push('brand-impersonation-content'); brand = matchedBrand;
       reasons.push({ code: 'brandImpersonationContent', kind: 'brand', params: [matchedBrand] });
