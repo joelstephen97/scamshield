@@ -767,9 +767,15 @@ async function runOtaUpdate() {
     // runtime constant sizes the feed correctly on both without hardcoding.
     const dnrCap = (api.declarativeNetRequest && typeof api.declarativeNetRequest.MAX_NUMBER_OF_DYNAMIC_RULES === 'number')
       ? api.declarativeNetRequest.MAX_NUMBER_OF_DYNAMIC_RULES : 5000;
-    // 0.12.0: leave headroom under the cap for the redirect rules
-    // (engine/dnr_rules.js CHUNK-sized) and up to MAX_ALLOW allow rules.
-    const filters = data.rules.slice(0, Math.max(0, dnrCap - 1100)).map((r) => String(r.urlFilter || r));
+    // Headroom reserved under the cap for every non-block range this
+    // extension installs (0.13.0 final review — 1100 predated the hot list
+    // and the path tier, so a full feed could crowd them out):
+    //   feed redirect chunks   <=   12  (engine/dnr_rules.js REDIRECT_BASE)
+    //   MAX_ALLOW              = 1000  (paused/trusted sites)
+    //   hot redirect chunks    <=    5  (12,000 hosts at CHUNK=2500)
+    //   MAX_PATH_RULES         =  300  (hot path tier)
+    //   slack                  ~  183
+    const filters = data.rules.slice(0, Math.max(0, dnrCap - 1500)).map((r) => String(r.urlFilter || r));
     await applyNetworkRules(filters, s.blockKnownBad);
     await setSettings({ lastBlocklistVersion: data.version, lastOtaAt: Date.now(), lastOtaCount: filters.length });
     return { ok: true, version: data.version, updated: true, count: filters.length };
@@ -874,8 +880,12 @@ async function ensureNetworkRules() {
     // message that lands mid-boot wait for this instead of reading an empty set.
     hotReadyPromise = applyHotRules(undefined).catch(() => {});
     await hotReadyPromise;
+    // Backoff (0.13.0 final review): keyed on hotAttemptAt — when the LAST
+    // ATTEMPT was — not hotUpdatedAt, which only advances on a SUCCESSFUL
+    // fetch. With a dead feed URL or an offline device, hotUpdatedAt stays
+    // frozen forever and every single SW wake re-fired a doomed fetch.
     let hotAt = 0;
-    try { hotAt = (await api.storage.local.get('hotUpdatedAt')).hotUpdatedAt || 0; } catch (_) {}
+    try { hotAt = (await api.storage.local.get('hotAttemptAt')).hotAttemptAt || 0; } catch (_) {}
     if (Date.now() - hotAt > HOT_PERIOD_MINUTES * 60000) runHotUpdate();
   } catch (_) {}
 }
@@ -915,7 +925,11 @@ let hotStatus = { count: 0, paths: 0, dropped: null, generatedAt: 0 };
 let hotReadyPromise = null;
 const HOT_READY_TIMEOUT_MS = 3000;
 async function awaitHotReady() {
-  if (!hotReadyPromise) return;
+  // Nothing has kicked off an apply yet: the SW woke and this reader beat
+  // ensureNetworkRules() to the punch. Returning immediately would read an
+  // empty hotHostSet and under-report. Waiting on boot instead is bounded by
+  // the same fallible-then-continue contract awaitBootReady() already has.
+  if (!hotReadyPromise) { await awaitBootReady(); if (!hotReadyPromise) return; }
   await Promise.race([
     hotReadyPromise.catch(() => {}),
     new Promise((resolve) => setTimeout(resolve, HOT_READY_TIMEOUT_MS))
@@ -924,10 +938,22 @@ async function awaitHotReady() {
 
 async function runHotUpdate(urlOverride) {
   const s = await getSettings();
+  // Every attempt is stamped, successful or not, so ensureNetworkRules()'s
+  // hourly top-up backs off on failures instead of retrying on every wake.
+  try { await api.storage.local.set({ hotAttemptAt: Date.now() }); } catch (_) {}
   if (!s.blockKnownBad || s.hotListEnabled === false) {
     hotReadyPromise = applyHotRules(null, s).catch(() => {});
     await hotReadyPromise;
     return { ok: true, updated: false, reason: 'disabled' };
+  }
+  // The user cleared the feed URL in options: that is an explicit opt-out of
+  // every remote list, so tear the hot ranges down instead of quietly
+  // carrying on against the built-in default (0.13.0 final review — the
+  // privacy paperwork says no network call happens once the URL is empty).
+  if (!s.otaUrl) {
+    hotReadyPromise = applyHotRules(null, s).catch(() => {});
+    await hotReadyPromise;
+    return { ok: false, updated: false, reason: 'no-url' };
   }
   const url = urlOverride || DEFAULT_HOT_URL;
   let prev = {};

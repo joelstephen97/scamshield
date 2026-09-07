@@ -79,6 +79,40 @@ test('review round 1: applyHotRulesNow has an honest three-step fallback', () =>
 test('fix round 1: applyHotRules calls are serialized through hotApplyChain', () => {
   assert.ok(/let hotApplyChain = Promise\.resolve\(\);/.test(src), 'hotApplyChain declared');
   assert.ok(/const applyHotRules = \(hotIn, settingsIn\) => \{/.test(src), 'applyHotRules is the serializing wrapper, not the real implementation');
-  assert.ok(/hotApplyChain = hotApplyChain\.catch\(\(\) => \{\}\)\.then\(\(\) => applyHotRulesNow\(hotIn, settingsIn\)\);\s*\n\s*return hotApplyChain;/.test(src), 'applyHotRules chains each call onto hotApplyChain and returns that call’s own chained promise');
+  // Structural tokens, not exact whitespace (0.13.0 final review): the claim
+  // is "the wrapper chains onto hotApplyChain and returns that chained
+  // promise", which a reformat or a wrapped line must not be able to break.
+  const wrapper = src.slice(src.indexOf('const applyHotRules = (hotIn, settingsIn)'), src.indexOf('async function getHotStatus'));
+  for (const token of ['hotApplyChain', '.then(', 'applyHotRulesNow(', 'return hotApplyChain']) {
+    assert.ok(wrapper.includes(token), 'applyHotRules wrapper is missing ' + token);
+  }
   assert.ok(/async function applyHotRulesNow\(hotIn, settingsIn\)/.test(src), 'applyHotRulesNow holds the real (unserialized) implementation applyHotRules wraps');
+});
+
+// ---- 0.13.0 final review ----------------------------------------------------
+
+test('I1: runHotUpdate refuses to fetch once the user has cleared the feed URL', () => {
+  const body = functionBody('runHotUpdate');
+  assert.ok(/if \(!s\.otaUrl\)/.test(body), 'runHotUpdate checks s.otaUrl');
+  assert.ok(/reason: 'no-url'/.test(body), "runHotUpdate returns reason 'no-url'");
+  assert.ok(body.indexOf("reason: 'no-url'") < body.indexOf('await fetch('), 'the no-url return comes before any fetch');
+  assert.ok(/applyHotRules\(null, s\)/.test(body.slice(0, body.indexOf("reason: 'no-url'"))), 'the hot ranges are torn down before returning');
+});
+
+test('I2: every attempt stamps hotAttemptAt, and the hourly top-up backs off on it', () => {
+  assert.ok(/hotAttemptAt: Date\.now\(\)/.test(functionBody('runHotUpdate')), 'runHotUpdate stamps hotAttemptAt');
+  const boot = functionBody('ensureNetworkRules');
+  assert.ok(/storage\.local\.get\('hotAttemptAt'\)/.test(boot), 'ensureNetworkRules reads hotAttemptAt');
+  assert.ok(!/storage\.local\.get\('hotUpdatedAt'\)/.test(boot), 'ensureNetworkRules no longer backs off on hotUpdatedAt');
+  assert.ok(/Date\.now\(\) - hotAt > HOT_PERIOD_MINUTES \* 60000/.test(boot), 'the 60-minute backoff window is unchanged');
+});
+
+test('I4: the OTA feed leaves 1500 rules of headroom for the other DNR ranges', () => {
+  const body = functionBody('runOtaUpdate');
+  assert.ok(/dnrCap - 1500/.test(body), 'headroom is dnrCap - 1500');
+  assert.ok(/MAX_ALLOW/.test(body) && /MAX_PATH_RULES/.test(body), 'the reserve is itemised in a comment');
+});
+
+test('M1: awaitHotReady falls back to boot readiness instead of returning empty', () => {
+  assert.ok(/await awaitBootReady\(\)/.test(functionBody('awaitHotReady')), 'awaitHotReady awaits boot when no apply has started yet');
 });

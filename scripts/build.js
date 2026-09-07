@@ -88,6 +88,10 @@ function build(target, manifestFile, zipName) {
   fs.rmSync(staging, { recursive: true });
   console.log('✅', zipName, '(' + (fs.statSync(zipPath).size / 1024).toFixed(1) + ' KB)');
   const mb = fs.statSync(zipPath).size / (1024 * 1024);
+  // The 0.13.0 plan's constraint is a 2.0 MB target with a 2.5 MB hard cap:
+  // warn as soon as the target is crossed so a creeping bundle is visible
+  // long before a release actually fails.
+  if (mb > 2.0 && mb <= 2.5) console.warn(`⚠ ${zipName} is ${mb.toFixed(2)} MB (> 2.0 MB target, hard cap 2.5 MB)`);
   if (mb > 2.5) { console.error(`✗ ${zipName} is ${mb.toFixed(2)} MB (> 2.5 MB budget)`); process.exit(1); }
 }
 
