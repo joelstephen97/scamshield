@@ -35,6 +35,9 @@ All notable changes to ScamShield. Versions are git tags (`vX.Y.Z`); the version
   bank, government and company sites on a national domain (hdfc.bank.in and
   icici.bank.in were the reported cases) were being flagged as brand
   look-alikes by their own name. They are not any more.
+- Registry-verified namespaces (.gov*, .bank, .bank.in) suppress
+  brand-impersonation warnings; feed blocks and behaviour detectors still
+  apply there.
 - The hot-list, allowlist and pause paths that install network rules are now
   serialised, so two of them arriving at once can no longer collide and drop
   the block rules.

@@ -58,7 +58,7 @@
     deliveryFeeScam: 'This page pretends to be $1 and asks for card details to release a package. Carriers never collect fees through pages like this.',
     brandIconMismatch: "This page uses $1's icon but is not $1's website.",
     // engine/heuristics.js scoreDom — tenant-host credential signal (0.13.0, Task 9)
-    credentialFormOnTenantHost: "Asks for a password on a free hosting site ($1) — real services don't live there.",
+    credentialFormOnTenantHost: 'Asks for a password on a shared hosting platform ($1) where anyone can publish a page in seconds.',
     brandInTenantHost: "$1's name is in the address of a free-hosting page that asks for a password.",
     // engine/verdict.js — page-content model
     contentPhishingPattern: 'Page wording and layout resemble known phishing pages.',

@@ -1145,7 +1145,7 @@
     }
   },
   "reason_credentialFormOnTenantHost": {
-    "message": "Ücretsiz bir barındırma sitesinde ($HOST$) parola istiyor — gerçek hizmetler orada barınmaz.",
+    "message": "Herkesin saniyeler içinde sayfa yayımlayabildiği paylaşımlı bir barındırma platformunda ($HOST$) parola istiyor.",
     "placeholders": {
       "host": {
         "content": "$1",

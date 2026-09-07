@@ -350,7 +350,7 @@
   "reason_brandImpersonationContent": { "message": "இந்தப் பக்கம் \"$BRAND$\" போலத் தெரிகிறது, ஆனால் அதன் உண்மையான இணையதளத்தில் இல்லை.", "placeholders": { "brand": { "content": "$1", "example": "paypal" } } },
   "reason_deliveryFeeScam": { "message": "இந்தப் பக்கம் $BRAND$ போல நடித்து, பார்சலை விடுவிக்க கார்டு விவரங்களைக் கேட்கிறது. கூரியர் நிறுவனங்கள் இதுபோன்ற பக்கங்கள் மூலம் கட்டணம் வசூலிப்பதில்லை.", "placeholders": { "brand": { "content": "$1", "example": "DHL" } } },
   "reason_brandIconMismatch": { "message": "இந்தப் பக்கம் $BRAND$-இன் சின்னத்தைப் பயன்படுத்துகிறது, ஆனால் இது $BRAND$-இன் இணையதளம் அல்ல.", "placeholders": { "brand": { "content": "$1", "example": "PayPal" } } },
-  "reason_credentialFormOnTenantHost": { "message": "இலவச ஹோஸ்டிங் தளத்தில் ($HOST$) கடவுச்சொல் கேட்கிறது — உண்மையான சேவைகள் அங்கு இருக்காது.", "placeholders": { "host": { "content": "$1", "example": "webflow.io" } } },
+  "reason_credentialFormOnTenantHost": { "message": "பகிரப்பட்ட ஹோஸ்டிங் தளத்தில் ($HOST$) கடவுச்சொல் கேட்கிறது; அங்கு யார் வேண்டுமானாலும் சில வினாடிகளில் பக்கத்தை வெளியிட முடியும்.", "placeholders": { "host": { "content": "$1", "example": "webflow.io" } } },
   "reason_brandInTenantHost": { "message": "கடவுச்சொல் கேட்கும் இலவச ஹோஸ்டிங் பக்கத்தின் முகவரியில் $BRAND$-இன் பெயர் உள்ளது.", "placeholders": { "brand": { "content": "$1", "example": "AT&T" } } },
   "reason_contentPhishingPattern": { "message": "பக்கத்தின் வாசகமும் அமைப்பும் அறியப்பட்ட ஃபிஷிங் பக்கங்களை ஒத்திருக்கின்றன." },
   "reason_techScamScareText": { "message": "பக்கம் போலி பாதுகாப்பு எச்சரிக்கை மொழியைப் பயன்படுத்துகிறது (\"$PHRASE$\").", "placeholders": { "phrase": { "content": "$1", "example": "virus detected" } } },

@@ -1145,7 +1145,7 @@
     }
   },
   "reason_credentialFormOnTenantHost": {
-    "message": "Meminta kata sandi di situs hosting gratis ($HOST$) — layanan sungguhan tidak berada di sana.",
+    "message": "Meminta kata sandi di platform hosting bersama ($HOST$) tempat siapa pun bisa menerbitkan halaman dalam hitungan detik.",
     "placeholders": {
       "host": {
         "content": "$1",

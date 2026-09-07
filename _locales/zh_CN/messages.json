@@ -305,7 +305,7 @@
   "reason_brandImpersonationContent": { "message": "此页面看起来像\"$BRAND$\"，但并非其官方网站。", "placeholders": { "brand": { "content": "$1", "example": "paypal" } } },
   "reason_deliveryFeeScam": { "message": "此页面冒充 $BRAND$，并索要银行卡信息以\"放行包裹\"。快递公司绝不会通过此类页面收取费用。", "placeholders": { "brand": { "content": "$1", "example": "DHL" } } },
   "reason_brandIconMismatch": { "message": "此页面使用了 $BRAND$ 的图标，但并非 $BRAND$ 的官方网站。", "placeholders": { "brand": { "content": "$1", "example": "PayPal" } } },
-  "reason_credentialFormOnTenantHost": { "message": "在免费托管站点（$HOST$）上索要密码——真正的服务不会放在那里。", "placeholders": { "host": { "content": "$1", "example": "webflow.io" } } },
+  "reason_credentialFormOnTenantHost": { "message": "在共享托管平台（$HOST$）上索要密码，任何人都能在几秒内在那里发布网页。", "placeholders": { "host": { "content": "$1", "example": "webflow.io" } } },
   "reason_brandInTenantHost": { "message": "一个索要密码的免费托管页面，其网址中含有 $BRAND$ 的名称。", "placeholders": { "brand": { "content": "$1", "example": "AT&T" } } },
   "reason_contentPhishingPattern": { "message": "页面文字和布局与已知钓鱼页面相似。" },
   "reason_techScamScareText": { "message": "页面使用了虚假的安全警报话术（\"$PHRASE$\"）。", "placeholders": { "phrase": { "content": "$1", "example": "virus detected" } } },

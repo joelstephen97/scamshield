@@ -350,7 +350,7 @@
   "reason_brandImpersonationContent": { "message": "हे पृष्ठ \"$BRAND$\" सारखे दिसते, पण ते त्यांच्या खऱ्या वेबसाइटवर नाही.", "placeholders": { "brand": { "content": "$1", "example": "paypal" } } },
   "reason_deliveryFeeScam": { "message": "हे पृष्ठ $BRAND$ असल्याचे भासवते आणि पार्सल सोडवण्यासाठी कार्ड तपशील मागते. कुरिअर कंपन्या अशा पृष्ठांतून कधीही शुल्क घेत नाहीत.", "placeholders": { "brand": { "content": "$1", "example": "DHL" } } },
   "reason_brandIconMismatch": { "message": "हे पृष्ठ $BRAND$ चे चिन्ह वापरते, पण ही $BRAND$ ची वेबसाइट नाही.", "placeholders": { "brand": { "content": "$1", "example": "PayPal" } } },
-  "reason_credentialFormOnTenantHost": { "message": "मोफत होस्टिंग साइटवर ($HOST$) पासवर्ड मागते — खऱ्या सेवा तिथे नसतात.", "placeholders": { "host": { "content": "$1", "example": "webflow.io" } } },
+  "reason_credentialFormOnTenantHost": { "message": "सामायिक होस्टिंग प्लॅटफॉर्मवर ($HOST$) पासवर्ड मागते, जिथे कोणीही काही सेकंदांत पेज प्रकाशित करू शकते.", "placeholders": { "host": { "content": "$1", "example": "webflow.io" } } },
   "reason_brandInTenantHost": { "message": "पासवर्ड मागणाऱ्या मोफत होस्टिंग पानाच्या पत्त्यात $BRAND$ चे नाव आहे.", "placeholders": { "brand": { "content": "$1", "example": "AT&T" } } },
   "reason_contentPhishingPattern": { "message": "पृष्ठाचे शब्द आणि मांडणी ज्ञात फिशिंग पृष्ठांसारखी आहे." },
   "reason_techScamScareText": { "message": "पृष्ठ बनावट सुरक्षा-इशाऱ्याची भाषा वापरते (\"$PHRASE$\").", "placeholders": { "phrase": { "content": "$1", "example": "virus detected" } } },

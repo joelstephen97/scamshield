@@ -125,7 +125,10 @@
   }
   function copyReportButton(verdict) {
     const btn = el('button', 'ss-copy', t('copyReportBtn', null, 'Copy report'));
-    btn.addEventListener('click', () => {
+    // Guarded like every other in-page control (0.13.0 final review): page
+    // script could otherwise synthesise a click and read the composed report
+    // text out of the clipboard.
+    onTrustedClick(btn, () => {
       const text = buildReportText(verdict);
       // e2e test hook (same pattern as content_script.js's window.__ssLastVerdict):
       // lets a spec assert the exact composed string without depending on
@@ -259,17 +262,21 @@
     // itself, right before the await, so the banner still disappears the
     // instant a real trusted click lands — same UX as before, one fewer
     // unguarded listener to audit.
-    const trust = trustButton(x.noTrust ? null : async () => {
+    // 0.13.0 final review: `noTrust` (the QR-scan surface) used to render a
+    // "Trust this site" button that merely dismissed the banner — a label
+    // that lied about what the click did. The button is simply not rendered
+    // there now; "Dismiss" (the ✕) is the honest control for that surface.
+    const trust = x.noTrust ? null : trustButton(async () => {
       bar.remove();
       const domain = regDomain();
       await send('trustSite', { domain, via: x.trustVia || 'banner' });
       ackSurface(domain, () => showBanner(verdict, extra));
     });
-    if (x.noTrust) onTrustedClick(trust, () => { bar.remove(); });
     const report = el('button', 'ss-report', t('reportMistake', null, 'Report a mistake')); onTrustedClick(report, () => { report.textContent = t('thanks', null, 'Thanks'); report.disabled = true; x.onReport && x.onReport(); });
     const copyBtn = copyReportButton(verdict);
     const close = el('button', 'ss-x', '✕'); close.setAttribute('aria-label', t('ariaDismiss', null, 'Dismiss')); onTrustedClick(close, () => bar.remove());
-    acts.append(trust, report, copyBtn, close);
+    if (trust) acts.appendChild(trust);
+    acts.append(report, copyBtn, close);
     bar.append(ico, text, acts);
     (document.body || document.documentElement).appendChild(bar);
   }
@@ -318,15 +325,14 @@
     // link, not a button, so it never competes visually with Leave/Continue.
     // Single guarded listener: ov.remove() lives inside onAllow itself (see
     // showBanner's trust button for the same pattern/rationale).
-    const trust = trustButton(x.noTrust ? null : async () => {
+    // Not rendered at all on a `noTrust` surface — see showBanner above.
+    const trust = x.noTrust ? null : trustButton(async () => {
       ov.remove();
       const domain = regDomain();
       await send('trustSite', { domain, via: x.trustVia || 'interstitial' });
       ackSurface(domain, () => dangerInterstitial(verdict, x));
     });
-    trust.classList.add('ss-trust-link');
-    if (x.noTrust) onTrustedClick(trust, () => { ov.remove(); });
-    actions.append(trust);
+    if (trust) { trust.classList.add('ss-trust-link'); actions.append(trust); }
     if (verdict.brandUrl) {
       const rescue = el('button', 'ss-rescue-ghost', t('takeMeToReal', [bidi(verdict.brandLabel || 'site')], 'Go to the real ' + (verdict.brandLabel || 'site')));
       onTrustedClick(rescue, () => { location.href = verdict.brandUrl; });

@@ -1145,7 +1145,7 @@
     }
   },
   "reason_credentialFormOnTenantHost": {
-    "message": "Pede uma senha em um serviço de hospedagem gratuita ($HOST$): serviços de verdade não ficam lá.",
+    "message": "Pede uma senha em uma plataforma de hospedagem compartilhada ($HOST$) onde qualquer pessoa pode publicar uma página em segundos.",
     "placeholders": {
       "host": {
         "content": "$1",

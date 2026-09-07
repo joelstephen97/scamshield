@@ -350,7 +350,7 @@
   "reason_brandImpersonationContent": { "message": "تبدو هذه الصفحة مثل «$BRAND$» لكنها ليست على موقعه الحقيقي.", "placeholders": { "brand": { "content": "$1", "example": "paypal" } } },
   "reason_deliveryFeeScam": { "message": "تتظاهر هذه الصفحة بأنها $BRAND$ وتطلب بيانات بطاقتك للإفراج عن طرد. شركات الشحن لا تحصّل رسومًا عبر صفحات كهذه أبدًا.", "placeholders": { "brand": { "content": "$1", "example": "DHL" } } },
   "reason_brandIconMismatch": { "message": "تستخدم هذه الصفحة أيقونة $BRAND$ لكنها ليست موقع $BRAND$ الحقيقي.", "placeholders": { "brand": { "content": "$1", "example": "PayPal" } } },
-  "reason_credentialFormOnTenantHost": { "message": "يطلب كلمة مرور على موقع استضافة مجانية ($HOST$) — الخدمات الحقيقية لا توجد هناك.", "placeholders": { "host": { "content": "$1", "example": "webflow.io" } } },
+  "reason_credentialFormOnTenantHost": { "message": "يطلب كلمة مرور على منصة استضافة مشتركة ($HOST$) يمكن لأي شخص أن ينشر عليها صفحة في ثوانٍ.", "placeholders": { "host": { "content": "$1", "example": "webflow.io" } } },
   "reason_brandInTenantHost": { "message": "اسم $BRAND$ موجود في عنوان صفحة على استضافة مجانية تطلب كلمة مرور.", "placeholders": { "brand": { "content": "$1", "example": "AT&T" } } },
   "reason_contentPhishingPattern": { "message": "صياغة الصفحة وتخطيطها يشبهان صفحات تصيّد معروفة." },
   "reason_techScamScareText": { "message": "تستخدم الصفحة لغة تنبيه أمني مزيّف («$PHRASE$»).", "placeholders": { "phrase": { "content": "$1", "example": "virus detected" } } },
