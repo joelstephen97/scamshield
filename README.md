@@ -89,7 +89,7 @@ ScamShield watches every page you open and steps in only when something looks wr
 - Redesigned popup and settings, dark mode, first-run onboarding, accessible warnings (`role=alert`/`role=dialog`, Escape-to-cancel, focus management).
 - Re-scans single-page apps on route changes.
 
-**Measured** — on 149 fresh live phishing pages, ScamShield 0.13.0 blocked 57 % before they loaded and stopped 66 % in total, with zero hard false positives on the benign controls and no request to any ScamShield server (there isn't one). Sampling method, per-bucket numbers and the definitions behind "blocked"/"stopped"/"warned": [docs/benchmark.md](docs/benchmark.md).
+**Measured** — on 134 fresh live phishing pages, ScamShield 0.13.0 blocked 56 % before they loaded and stopped 69 % in total, with zero hard false positives on the benign controls and no request to any ScamShield server (there isn't one). Sampling method, per-bucket numbers and the definitions behind "blocked"/"stopped"/"warned": [docs/benchmark.md](docs/benchmark.md).
 
 ## How it works
 

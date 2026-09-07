@@ -94,6 +94,6 @@ Mã nguồn, chính sách quyền riêng tư và trình theo dõi lỗi: github.
 
 • Ít báo động nhầm hơn trên trang thật. Các trang thật của ngân hàng, cơ quan nhà nước và doanh nghiệp dùng địa chỉ theo kiểu quốc gia (chẳng hạn tên miền .bank.in của chính một ngân hàng) không còn hiện thanh cảnh báo nữa.
 
-• Đo đạc, không phải tuyên bố: trên 149 trang lừa đảo mới, ScamShield 0.13.0 đã chặn 57 % trước khi chúng kịp tải và ngăn lại 66 % tổng cộng, không gửi một yêu cầu nào tới bất kỳ máy chủ ScamShield nào — phương pháp có trong docs/benchmark.md.
+• Đo đạc, không phải tuyên bố: trên 134 trang lừa đảo mới, ScamShield 0.13.0 đã chặn 56 % trước khi chúng kịp tải và ngăn lại 69 % tổng cộng, không gửi một yêu cầu nào tới bất kỳ máy chủ ScamShield nào — phương pháp có trong docs/benchmark.md.
 
 Không thêm quyền mới. Vẫn là storage, declarativeNetRequest, alarms và quyền truy cập http/https, giống mọi phiên bản kể từ 0.3.1.

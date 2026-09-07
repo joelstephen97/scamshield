@@ -94,6 +94,6 @@ Código-fonte, política de privacidade e rastreador de problemas: github.com/jo
 
 • Menos alarmes falsos em sites reais. Sites legítimos de bancos, órgãos públicos e empresas que usam um endereço de tipo nacional (por exemplo o domínio .bank.in do próprio banco) não recebem mais um aviso.
 
-• Medido, não prometido: em 149 páginas de phishing recentes, o ScamShield 0.13.0 bloqueou 57 % antes de carregarem e interrompeu 66 % no total, sem uma única requisição a qualquer servidor do ScamShield. Método em docs/benchmark.md.
+• Medido, não prometido: em 134 páginas de phishing recentes, o ScamShield 0.13.0 bloqueou 56 % antes de carregarem e interrompeu 69 % no total, sem uma única requisição a qualquer servidor do ScamShield. Método em docs/benchmark.md.
 
 Nenhuma permissão nova. Continuam sendo storage, declarativeNetRequest, alarms e acesso http/https, os mesmos de todas as versões desde a 0.3.1.

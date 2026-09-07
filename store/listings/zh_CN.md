@@ -94,6 +94,6 @@ ScamShield 真的免费吗？有什么隐藏条件吗？
 
 • 真实网站的误报更少。使用国家或地区式网址的真实银行、政府和企业网站（例如某家银行自有的 .bank.in 域名）不会再显示警告横幅。
 
-• 用测量说话，而不是空口承诺：在 149 个新出现的钓鱼页面中，ScamShield 0.13.0 在页面加载前拦截了 57 %，总计阻止了 66 %，全程未向任何 ScamShield 服务器发出请求 —— 方法见 docs/benchmark.md。
+• 用测量说话，而不是空口承诺：在 134 个新出现的钓鱼页面中，ScamShield 0.13.0 在页面加载前拦截了 56 %，总计阻止了 69 %，全程未向任何 ScamShield 服务器发出请求 —— 方法见 docs/benchmark.md。
 
 没有新增权限。仍然只是 storage、declarativeNetRequest、alarms 和 http/https 访问权限，与 0.3.1 以来的每个版本相同。

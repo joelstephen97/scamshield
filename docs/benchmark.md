@@ -32,33 +32,37 @@ page never loaded at all.
 
 Run 2026-09-07. Corpus: 400 URLs built that morning from PhishTank, OpenPhish
 and URLhaus plus Tranco and the hard-benign set, liveness-checked immediately
-before the run; 22 were already unreachable and are excluded, leaving 294 live
-phishing pages and 86 live benign controls. Both builds were driven through
-the same corpus in one harness invocation, each in its own throwaway profile
-with a 90 s warm-up and a 12 s navigation budget, so the comparison is
-like-for-like.
+before each pass. The two builds were driven through the same corpus with the
+same harness (throwaway profile, 90 s warm-up, 12 s navigation budget). The
+0.12.1 pass ran in the afternoon; the 0.13.0 pass — the exact build that is
+tagged v0.13.0 — ran about six hours later, after two feed-side fixes the first
+0.13.0 pass had exposed. Only URLs that were still live in **both** passes are
+counted below (279 phishing pages, 86 benign controls), so every row compares
+the two builds on identical pages.
 
 | version | bucket | n | blocked | stopped | warned |
 |---|---|---|---|---|---|
-| 0.13.0 | < 24 h | 149 | **57.0 %** (85) | **65.8 %** (98) | 10.1 % (15) |
-| 0.13.0 | 1–7 d | 98 | 10.2 % (10) | 36.7 % (36) | 16.3 % (16) |
-| 0.13.0 | 7–30 d | 47 | 23.4 % (11) | 66.0 % (31) | 4.3 % (2) |
-| 0.13.0 | all phishing | 294 | 36.1 % (106) | 56.1 % (165) | 11.2 % (33) |
-| 0.12.1 | < 24 h | 149 | 6.7 % (10) | 24.8 % (37) | 24.8 % (37) |
+| 0.13.0 | < 24 h | 134 | **56.0 %** (75) | **68.7 %** (92) | 7.5 % (10) |
+| 0.13.0 | 1–7 d | 98 | 10.2 % (10) | 40.8 % (40) | 18.4 % (18) |
+| 0.13.0 | 7–30 d | 47 | 21.3 % (10) | 66.0 % (31) | 17.0 % (8) |
+| 0.13.0 | all phishing | 279 | 34.1 % (95) | 58.4 % (163) | 12.9 % (36) |
+| 0.12.1 | < 24 h | 134 | 5.2 % (7) | 25.4 % (34) | 21.6 % (29) |
 | 0.12.1 | 1–7 d | 98 | 8.2 % (8) | 34.7 % (34) | 15.3 % (15) |
 | 0.12.1 | 7–30 d | 47 | 23.4 % (11) | 68.1 % (32) | 4.3 % (2) |
-| 0.12.1 | all phishing | 294 | 9.9 % (29) | 35.0 % (103) | 18.4 % (54) |
+| 0.12.1 | all phishing | 279 | 9.3 % (26) | 35.8 % (100) | 16.5 % (46) |
 
-The 0.13.0 row and the 0.12.1 row on each line are the same URLs on the same
-morning, so the difference is the release, not the sample. The gain is
-concentrated in the < 24 h bucket, which is what the hourly hot list was built
-for: pages blocked before they loaded went from 6.7 % to 57.0 %, and pages
-stopped from 24.8 % to 65.8 %. The two older buckets barely move, which is what
-you would expect — a list that refreshes hourly helps most where the pages are
-newest.
+The gain is concentrated in the < 24 h bucket, which is what the hourly hot
+list was built for: pages blocked before they loaded went from 5.2 % to
+56.0 %, and pages stopped from 25.4 % to 68.7 %. The two older buckets barely
+move, which is what you would expect — a list that refreshes hourly helps most
+where the pages are newest. The release's own targets for this bucket were
+60 % blocked and 80 % stopped; it missed both. Every < 24 h page 0.13.0 did not
+stop was absent from every threat list we are licensed to use at the time of
+the run — the remaining gap is how fast those public sources learn about a new
+page, not how the extension applies what they publish.
 
-The headline figure quoted in the store listing and the README — 149 fresh
-phishing pages, 57 % blocked before they loaded, 66 % stopped in total — is
+The headline figure quoted in the store listing and the README — 134 fresh
+phishing pages, 56 % blocked before they loaded, 69 % stopped in total — is
 the 0.13.0 < 24 h row of this table, rounded to whole percent.
 
 Benign controls, both builds: **0 hard false positives** out of 86 (0 of 56

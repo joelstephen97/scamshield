@@ -94,6 +94,6 @@ Kaynak kod, gizlilik politikası ve hata takip sistemi: github.com/joelstephen97
 
 • Gerçek sitelerde daha az yanlış alarm. Ülkeye özgü bir adres kullanan gerçek banka, kamu kurumu ve şirket siteleri (örneğin bir bankanın kendi .bank.in alan adı) artık uyarı şeridi almıyor.
 
-• İddia değil, ölçüm: 149 taze kimlik avı sayfasının 57 %'ini ScamShield 0.13.0 daha yüklenmeden engelledi, toplamda 66 %'ini durdurdu; herhangi bir ScamShield sunucusuna tek bir istek bile gitmedi. Yöntem docs/benchmark.md dosyasında.
+• İddia değil, ölçüm: 134 taze kimlik avı sayfasının 56 %'ini ScamShield 0.13.0 daha yüklenmeden engelledi, toplamda 69 %'ini durdurdu; herhangi bir ScamShield sunucusuna tek bir istek bile gitmedi. Yöntem docs/benchmark.md dosyasında.
 
 Yeni izin yok. Yine storage, declarativeNetRequest, alarms ve http/https erişimi; 0.3.1'den bu yana her sürümdeki gibi.

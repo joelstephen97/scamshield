@@ -94,6 +94,6 @@ Quellcode, Datenschutzerklärung und Fehler-Tracker: github.com/joelstephen97/sc
 
 • Weniger Fehlalarme auf echten Seiten. Echte Seiten von Banken, Behörden und Unternehmen mit einer länderspezifischen Adresse (etwa der eigenen .bank.in-Domain einer Bank) bekommen kein Warnbanner mehr.
 
-• Gemessen statt behauptet: Bei 149 frischen Phishing-Seiten hat ScamShield 0.13.0 57 % blockiert, bevor sie geladen wurden, und insgesamt 66 % gestoppt — ohne eine einzige Anfrage an irgendeinen ScamShield-Server. Methode: docs/benchmark.md.
+• Gemessen statt behauptet: Bei 134 frischen Phishing-Seiten hat ScamShield 0.13.0 56 % blockiert, bevor sie geladen wurden, und insgesamt 69 % gestoppt — ohne eine einzige Anfrage an irgendeinen ScamShield-Server. Methode: docs/benchmark.md.
 
 Keine neuen Berechtigungen. Weiterhin storage, declarativeNetRequest, alarms und http/https-Zugriff, wie in jeder Version seit 0.3.1.

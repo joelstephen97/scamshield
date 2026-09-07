@@ -94,6 +94,6 @@ Codice sorgente, informativa sulla privacy e tracciamento dei problemi: github.c
 
 • Meno falsi allarmi sui siti veri. I siti autentici di banche, enti pubblici e aziende che usano un indirizzo di tipo nazionale (per esempio il dominio .bank.in di una banca) non ricevono più un banner di avviso.
 
-• Misurato, non dichiarato: su 149 pagine di phishing recenti ScamShield 0.13.0 ne ha bloccate il 57 % prima del caricamento e ne ha fermate il 66 % in totale, senza una sola richiesta a un server ScamShield. Metodo: docs/benchmark.md.
+• Misurato, non dichiarato: su 134 pagine di phishing recenti ScamShield 0.13.0 ne ha bloccate il 56 % prima del caricamento e ne ha fermate il 69 % in totale, senza una sola richiesta a un server ScamShield. Metodo: docs/benchmark.md.
 
 Nessun nuovo permesso. Sempre storage, declarativeNetRequest, alarms e accesso http/https, come in ogni versione dalla 0.3.1.
