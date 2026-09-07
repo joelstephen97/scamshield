@@ -1,0 +1,19 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>HDFC Bank – NetBanking login</title>
+<!-- Hand-authored minimal stand-in for a real bank's login page (0.13.0,
+     Task 12 hard-benign regressions). Nothing here is copied from
+     hdfc.bank.in: it carries only the shape that matters to the detector —
+     the brand name in the title and an <h1>, and a same-origin password
+     form on the brand's own licence-vetted .bank.in domain. -->
+<header><nav><a href="/">Home</a><a href="/personal">Personal</a><a href="/business">Business</a><a href="/support">Support</a></nav></header>
+<main>
+<h1>HDFC Bank</h1>
+<h2>NetBanking login</h2>
+<form action="/netbanking/login" method="post">
+<label>Customer ID <input type="text" name="customerId" autocomplete="username"></label>
+<label>Password <input type="password" name="password" autocomplete="current-password"></label>
+<button type="submit">Continue</button>
+</form>
+<p><a href="/netbanking/forgot">Forgot your password?</a></p>
+</main>
+<footer><a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/branches">Branch locator</a></footer>
+</html>

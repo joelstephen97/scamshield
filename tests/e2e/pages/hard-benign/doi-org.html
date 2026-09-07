@@ -1,0 +1,18 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>Resolve a DOI</title>
+<!-- Hand-authored minimal stand-in for an old, plain, entirely benign
+     reference page (0.13.0, Task 12): one text input, no password field, no
+     brand, no urgency. Its only "signal" in the e2e run is that the host is
+     a member of the NRD bloom fixture — a real ~1% Bloom collision on a
+     decades-old domain, which must not be enough to warn on its own. -->
+<header><nav><a href="/">Home</a><a href="/about">About</a><a href="/documentation">Documentation</a></nav></header>
+<main>
+<h1>Resolve a DOI name</h1>
+<p>Type or paste a DOI name into the box below and select Submit.</p>
+<form action="/resolve" method="get">
+<label>DOI <input type="text" name="doi" size="40"></label>
+<button type="submit">Submit</button>
+</form>
+<p>A DOI name is a persistent identifier for an object on a digital network.</p>
+</main>
+<footer><a href="/privacy">Privacy</a> · <a href="/handbook">Handbook</a></footer>
+</html>

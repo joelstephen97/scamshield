@@ -1,23 +1,73 @@
 const http = require('http');
 const https = require('https');
 const fs = require('fs');
+const crypto = require('crypto');
 const path = require('path');
 const dir = path.join(__dirname, 'pages');
 // v0.9 threat-feed fixtures (Task B2 e2e): meta.json/set40.bin/warn40.bin/
 // exact-*.jsonl.gz built by tests/e2e/feed.spec.js at module-load time and
-// served flat under /feed/<name> — the existing `dir` route above only ever
+// served under /feed/<name> — the existing `dir` route above only ever
 // serves .html/.png/.ico fixture pages, so this is the "tiny static file
-// route" the task brief allows adding for binary feed formats.
+// route" the task brief allows adding for binary feed formats. Sub-paths
+// (/feed/hard-benign/nrd.bloom) are allowed too, so a spec that needs its own
+// independent feed can point meta.urls at its own directory: runFeedUpdate()
+// always fetches the companion files by fixed NAME relative to that base.
 const feedDir = path.join(__dirname, 'feed-fixtures');
 const relay = { bodies: [] }; // mock relay memory, shared by the HTTP and HTTPS listeners
+// Request log, shared by both listeners: lets a spec assert that a navigation
+// never actually reached a fixture host (tests/e2e/hot-list.spec.js — a
+// declarativeNetRequest redirect must stop the request before the network).
+const hits = [];
+
+// Resolves a URL path under `root`, refusing anything that escapes it.
+// Returns null for a traversal attempt. Single files keep working exactly as
+// before (a bare '/clean.html' resolves to pages/clean.html).
+function safeJoin(root, rel) {
+  const decoded = decodeURIComponent(rel).replace(/^\/+/, '');
+  const file = path.resolve(root, decoded);
+  const rootWithSep = path.resolve(root) + path.sep;
+  return file.startsWith(rootWithSep) ? file : null;
+}
+
+function contentTypeFor(file) {
+  const ext = path.extname(file).toLowerCase();
+  if (ext === '.png') return 'image/png';
+  if (ext === '.ico') return 'image/x-icon';
+  if (ext === '.json') return 'application/json';
+  if (ext === '.html') return 'text/html';
+  return 'application/octet-stream';
+}
 
 function handler(req, res) {
   const url = req.url.split('?')[0];
+  if (!url.startsWith('/hits')) {
+    hits.push({ host: String(req.headers.host || '').toLowerCase(), url, method: req.method });
+    // Bounded: a dev server reused across many runs (reuseExistingServer)
+    // would otherwise grow forever. Specs reset the log before the window
+    // they assert on, so the cap can never truncate a live assertion.
+    if (hits.length > 2000) hits.splice(0, hits.length - 2000);
+  }
+  if (url === '/hits') {
+    res.writeHead(200, { 'content-type': 'application/json' });
+    res.end(JSON.stringify(hits));
+    return;
+  }
+  if (url === '/hits/reset') { hits.length = 0; res.writeHead(204); res.end(); return; }
   if (url.startsWith('/feed/')) {
-    const file = path.join(feedDir, path.basename(url.slice('/feed/'.length)));
+    const file = safeJoin(feedDir, url.slice('/feed'.length));
+    if (!file) { res.writeHead(403); res.end('no'); return; }
     fs.readFile(file, (err, buf) => {
       if (err) { res.writeHead(404); res.end('nf'); return; }
-      res.writeHead(200, { 'content-type': 'application/octet-stream' });
+      const headers = { 'content-type': contentTypeFor(file) };
+      // The hot list (and any future JSON feed file) is fetched with an
+      // If-None-Match header in production, so the fixture server has to
+      // supply an ETag for that path to be exercised at all. Derived from the
+      // bytes, so a rewritten fixture always gets a new one.
+      if (path.extname(file).toLowerCase() === '.json') {
+        headers.ETag = '"' + crypto.createHash('sha1').update(buf).digest('hex') + '"';
+        headers['cache-control'] = 'no-cache';
+      }
+      res.writeHead(200, headers);
       res.end(buf);
     });
     return;
@@ -35,12 +85,13 @@ function handler(req, res) {
   }
   if (url === '/relay/reset') { relay.bodies = []; res.writeHead(204); res.end(); return; }
   const name = (url === '/' ? '/clean.html' : url);
-  const file = path.join(dir, path.basename(name));
+  // Fixture pages live flat in pages/, except the hand-authored hard-benign
+  // look-alikes in pages/hard-benign/ (tests/e2e/hard-benign.spec.js).
+  const file = safeJoin(dir, name);
+  if (!file) { res.writeHead(403); res.end('no'); return; }
   fs.readFile(file, (err, buf) => {
     if (err) { res.writeHead(404); res.end('nf'); return; }
-    const ext = path.extname(file).toLowerCase();
-    const type = ext === '.png' ? 'image/png' : ext === '.ico' ? 'image/x-icon' : 'text/html';
-    res.writeHead(200, { 'content-type': type }); res.end(buf);
+    res.writeHead(200, { 'content-type': contentTypeFor(file) }); res.end(buf);
   });
 }
 
