@@ -936,6 +936,12 @@
       }
     } catch (_) { /* NRD check is best-effort — never blocks the rest of the scan */ }
 
+    // 0.13.0 feed-warn corroboration (Task 9): a single tier-B feed source hit
+    // floors the verdict at "suspicious" above — promote to "dangerous" when
+    // the page also shows a credential form together with a second
+    // independent signal (brand evidence or the NRD "new site" flag).
+    verdict = SS.promoteFeedWarn(verdict, signals, urlRules, domRules);
+
     // Fake-shop check (0.6.0) — top frame, storefront pages only. Reported to
     // the popup's shopping card; a strong result nudges the verdict to at most
     // suspicious (never a full-screen block — these signals are probabilistic).

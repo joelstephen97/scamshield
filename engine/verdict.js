@@ -166,5 +166,21 @@
     });
   }
 
-  return { fuse, foldRiskEvidence };
+  // 0.13.0 feed-warn corroboration: a single tier-B source hit floors the
+  // verdict at "suspicious" (content_script.js). When the page ALSO shows a
+  // credential form together with a second independent signal — brand
+  // evidence from the URL/DOM rules, or the NRD "new site" flag — it is
+  // promoted to dangerous. Two signals, neither risk-table-only.
+  function promoteFeedWarn(verdict, signals, urlRules, domRules) {
+    const v = verdict || {}; const flags = v.flags || [];
+    if (!flags.includes('feed-warn') || v.level === 'dangerous') return verdict;
+    const pw = !!(signals && signals.hasPasswordField);
+    const brandEvidence = (urlRules && (urlRules.reasons || []).some((r) => ['brandFuzzyMatch', 'brandLookalike', 'brandForeignSuffix', 'idnHomograph'].includes(r.code)))
+      || (domRules && (domRules.flags || []).some((f) => f.startsWith('brand-impersonation')));
+    const nrd = flags.includes('new-domain');
+    if (!(pw && (brandEvidence || nrd))) return verdict;
+    return Object.assign({}, v, { level: 'dangerous', score: Math.max(v.score || 0, 0.9), flags: ['feed-warn-corroborated'].concat(flags) });
+  }
+
+  return { fuse, foldRiskEvidence, promoteFeedWarn };
 });
