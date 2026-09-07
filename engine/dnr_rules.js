@@ -22,6 +22,13 @@
 //                          block page — and the popup's pause menu — really
 //                          lets the site load. Priority wins over both the
 //                          dynamic block rules and the static ruleset.
+//   HOT_BASE      400000+  redirect rules for the hourly hot list, same
+//                          shape as REDIRECT_BASE (buildRedirectRules takes
+//                          an explicit base so the two ranges never clash).
+//   PATH_BASE     500000+  one anchored regex `redirect` rule per path-only
+//                          listing (e.g. `rb.gy/88c5r3`), so a shortener or
+//                          free-hosting host only redirects on the exact
+//                          reported path, not the whole domain.
 //
 // UMD like the rest of engine/: attaches SSDnr to globalThis for the worker
 // and exports for Node.
@@ -35,9 +42,14 @@
   const BLOCK_BASE = 100000;
   const REDIRECT_BASE = 200000;
   const ALLOW_BASE = 300000;
+  const HOT_BASE = 400000;     // hourly hot list, redirect rules, same shape as REDIRECT_BASE
+  const PATH_BASE = 500000;    // per-URL regex redirect rules for path-only listings
   const RANGE = 100000;
   const CHUNK = 2500;          // domains per redirect rule (5,000 installed fine in Chrome 140; halved for headroom)
   const MAX_ALLOW = 1000;      // paused/trusted domains that get a network-level allow
+  const MAX_PATH_RULES = 300;  // regex rules are capped at 1,000 across ALL rulesets in Chrome
+
+  function escapeRegex(s) { return String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
 
   // '||example.com^' → 'example.com'; anything else (paths, wildcards, IPs
   // are fine — they are still hosts) → null. Lower-cased, no trailing dot.
@@ -58,17 +70,38 @@
 
   // domains: any iterable of hostnames (duplicates and nulls tolerated).
   // targetUrl: the absolute extension URL of blocked.html.
-  function buildRedirectRules(domains, targetUrl) {
+  // base: id range to build into (defaults to REDIRECT_BASE, the feed path).
+  function buildRedirectRules(domains, targetUrl, base) {
+    const b = typeof base === 'number' ? base : REDIRECT_BASE;
     const uniq = [...new Set([...(domains || [])].filter(Boolean).map((d) => String(d).toLowerCase()))];
     const rules = [];
     for (let i = 0; i < uniq.length; i += CHUNK) {
       rules.push({
-        id: REDIRECT_BASE + rules.length, priority: 2,
+        id: b + rules.length, priority: 2,
         action: { type: 'redirect', redirect: { regexSubstitution: targetUrl + '#\\0' } },
         condition: { regexFilter: '^https?://.*', requestDomains: uniq.slice(i, i + CHUNK), resourceTypes: ['main_frame'] }
       });
     }
     return rules;
+  }
+
+  // entries: [{ h: hostname, p: '/path' }]. One regex rule each, anchored to the
+  // host and the path prefix, so `rb.gy/88c5r3` never touches `rb.gy/other`.
+  function buildPathRedirectRules(entries, targetUrl) {
+    const out = []; const seen = new Set();
+    for (const e of entries || []) {
+      if (out.length >= MAX_PATH_RULES) break;
+      const h = e && typeof e.h === 'string' ? e.h.trim().toLowerCase() : '';
+      const p = e && typeof e.p === 'string' ? e.p.trim() : '';
+      if (!h || !/^[a-z0-9.-]+$/.test(h) || !p.startsWith('/') || p.length > 200) continue;
+      const key = h + p; if (seen.has(key)) continue; seen.add(key);
+      out.push({
+        id: PATH_BASE + out.length, priority: 2,
+        action: { type: 'redirect', redirect: { regexSubstitution: targetUrl + '#\\0' } },
+        condition: { regexFilter: '^https?://' + escapeRegex(h) + escapeRegex(p) + '(?:[/?#]|$)', requestDomains: [h], resourceTypes: ['main_frame'] }
+      });
+    }
+    return out;
   }
 
   function buildAllowRules(domains) {
@@ -89,5 +122,8 @@
     return [...new Set(out.map((d) => d.toLowerCase()))];
   }
 
-  return { BLOCK_BASE, REDIRECT_BASE, ALLOW_BASE, RANGE, CHUNK, MAX_ALLOW, domainOfFilter, inRange, buildBlockRules, buildRedirectRules, buildAllowRules, exemptDomains };
+  return {
+    BLOCK_BASE, REDIRECT_BASE, ALLOW_BASE, HOT_BASE, PATH_BASE, RANGE, CHUNK, MAX_ALLOW, MAX_PATH_RULES,
+    domainOfFilter, inRange, escapeRegex, buildBlockRules, buildRedirectRules, buildPathRedirectRules, buildAllowRules, exemptDomains
+  };
 });
