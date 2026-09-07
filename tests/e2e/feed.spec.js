@@ -354,11 +354,32 @@ test('checkNrd reports no hit for a clean (non-bloom-listed) host', async ({ con
   expect(result).toEqual({ hit: false });
 });
 
-test('an NRD-listed, first-time-visited domain gets a suspicious evidence chip with the strengthened wording', async ({ context }) => {
+test('an NRD-listed, first-time-visited domain with no other signal stays quiet (0.13.0: NRD alone can no longer banner)', async ({ context }) => {
   const sw = context.serviceWorkers()[0];
   await installFeed(sw);
   const page = await context.newPage();
-  await page.goto(`http://${NRD_DOMAIN}:5599/clean.html`);
+  // https (port 5600), not the plain-http fixture server: over http, scoreUrl's
+  // own noHttps rule (+0.15) would itself clear the corroboration bar below,
+  // which isn't the scenario this asserts — a bloom-positive hit on an
+  // otherwise-unremarkable HTTPS page (doi.org, bench 2026-09-06) must stay
+  // quiet on NRD evidence alone.
+  await page.goto(`https://${NRD_DOMAIN}:5600/clean.html`);
+  await page.waitForTimeout(1000);
+  await expect(page.locator('.scamshield-interstitial')).toHaveCount(0);
+  await expect(page.locator('.scamshield-banner')).toHaveCount(0);
+});
+
+test('an NRD-listed, first-time-visited domain WITH a password field (corroborated) gets a suspicious evidence chip with the strengthened wording', async ({ context }) => {
+  const sw = context.serviceWorkers()[0];
+  await installFeed(sw);
+  const page = await context.newPage();
+  // 0.13.0: NRD's bloom-positive "new site" signal is no longer a lone
+  // banner floor (a Bloom collision on an old site, e.g. doi.org, would
+  // otherwise banner it) — it needs page corroboration. clean-login.html
+  // (also used by detection.spec.js / popup.spec.js as a documented "safe
+  // on its own" fixture) supplies exactly that: a same-origin password
+  // form, no other malicious signal.
+  await page.goto(`http://${NRD_DOMAIN}:5599/clean-login.html`);
   await expect(page.locator('.scamshield-interstitial')).toHaveCount(0); // never escalates past suspicious alone
   const banner = page.locator('.scamshield-banner.suspicious');
   await expect(banner).toBeVisible({ timeout: 8000 });

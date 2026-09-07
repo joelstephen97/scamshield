@@ -133,14 +133,22 @@
   // that already reached "dangerous" on non-risk grounds (a no-op in that
   // case, matching every call site's own `level !== 'dangerous'` gate).
   //
-  // `opts.minLevel === 'suspicious'` preserves the NRD "new site" signal's
-  // pre-existing floor (0.10.0, Task C3): unlike the dyndns/hoster combo
-  // (whose +0.30 must clear the ordinary 0.5 suspicious threshold like any
-  // other evidence), a bloom-positive first-ever visit was always meant to
-  // surface as suspicious the moment it fires, even when its modest +0.20
-  // alone doesn't cross 0.5 from a near-zero base. The floor only ever lifts
-  // "safe" to "suspicious" — it's checked strictly after the dangerous
-  // choke point above, so it can never be the thing that reaches dangerous.
+  // `opts.minLevel === 'suspicious'` is the NRD "new site" signal's floor
+  // (0.10.0, Task C3): unlike the dyndns/hoster combo (whose +0.30 must
+  // clear the ordinary 0.5 suspicious threshold like any other evidence), a
+  // bloom-positive first-ever visit was meant to surface as suspicious the
+  // moment it fires, even when its modest +0.20 alone doesn't cross 0.5 from
+  // a near-zero base. As of 0.13.0 this floor is CONDITIONAL, not automatic:
+  // a Bloom filter targets a 0.5% false-positive rate, so on its own a
+  // bloom-positive hit is not reliable enough to banner a page (reproduced
+  // on doi.org, bench 2026-09-06). The content script now only passes
+  // `{ minLevel: 'suspicious' }` when something else on the page
+  // corroborates the "new site" signal — a credential/card form, or other
+  // URL-rule/DOM-rule evidence — deciding this itself before calling in;
+  // this function still just applies whatever floor it's given. The floor
+  // only ever lifts "safe" to "suspicious" — it's checked strictly after the
+  // dangerous choke point above, so it can never be the thing that reaches
+  // dangerous.
   function foldRiskEvidence(verdict, delta, reason, flag, opts) {
     const v = verdict || { level: 'safe', score: 0, riskScore: 0, reasons: [], reasonCodes: [], flags: [] };
     if (v.level === 'dangerous') return v; // never touches an already-dangerous verdict
