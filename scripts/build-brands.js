@@ -7,15 +7,29 @@
 //   node scripts/build-brands.js            # print the generated block
 //   node scripts/build-brands.js --write     # replace the block in constants.js
 //
-// The CSV's columns are `key,display,names,domains,ccPolicy,suffixes,category,source`
-// (names/domains/suffixes are `|`-separated). Validation is strict and fails
-// loudly rather than silently dropping or overriding a bad row:
+// The CSV's columns are
+// `key,display,names,domains,ccPolicy,suffixes,fuzzy,category,source`
+// (names/domains/suffixes are `|`-separated; `fuzzy` is `true`/`false`,
+// default `true` when blank). Parsing is RFC-4180 quote-aware (a field may
+// be `"quoted, with an embedded comma"`, doubled `""` = a literal `"`) —
+// any `source` value that itself contains a comma MUST be quoted. Validation
+// is strict and fails loudly rather than silently dropping or overriding a
+// bad row:
+//   - every row's column count must match the header's, exactly
 //   - key: lowercase [a-z0-9.]+, unique within the CSV
 //   - key MUST NOT collide with a hand-written brand key already in
 //     constants.js (the rows above `// BEGIN GENERATED BRANDS`) — the CSV
 //     never silently overrides a hand-curated row.
 //   - every domain matches /^[a-z0-9.-]+\.[a-z]+$/
 //   - ccPolicy is 'open' or 'closed'; 'closed' requires >=1 suffix
+//   - fuzzy=false rows: `names` must not contain the bare key itself
+//     (0.13.0 fix round — a fuzzy candidate list built straight from
+//     BRAND_DOMAINS can be reordered/renamed, but the ENGLISH content name
+//     must never be the same ambiguous word that made fuzzy matching unsafe
+//     in the first place)
+//   - any key under 4 characters needs at least one name that is either
+//     >=4 characters or multi-word (so brandNameIn/nameMatch stays precise
+//     even for abbreviation-shaped keys like "olx"/"okx")
 'use strict';
 const fs = require('fs');
 const path = require('path');
@@ -27,14 +41,40 @@ const DOMAIN_RE = /^[a-z0-9.-]+\.[a-z]+$/;
 const CONSTANTS_PATH = path.join(__dirname, '../engine/constants.js');
 const DEFAULT_CSV = path.join(__dirname, '../model/data/brands.csv');
 
+// RFC-4180 quote-aware single-line CSV split: "..." fields may contain
+// literal commas, and "" inside a quoted field is an escaped literal quote.
+// Deliberately per-line (no embedded-newline-in-a-quoted-field support) —
+// every value this file actually stores is a single short line, and a
+// quoted newline would fail the (required) column-count check below anyway
+// rather than being silently misparsed.
 function parseCsvLine(line) {
-  return line.split(',').map((c) => c.trim());
+  const cells = [];
+  let cur = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (inQuotes) {
+      if (c === '"') {
+        if (line[i + 1] === '"') { cur += '"'; i++; } else { inQuotes = false; }
+      } else {
+        cur += c;
+      }
+    } else if (c === '"') {
+      inQuotes = true;
+    } else if (c === ',') {
+      cells.push(cur); cur = '';
+    } else {
+      cur += c;
+    }
+  }
+  cells.push(cur);
+  return cells.map((c) => c.trim());
 }
 
 function parseCsv(csvPath) {
   const text = fs.readFileSync(csvPath, 'utf8');
-  const lines = text.split(/\r?\n/).filter((l) => l.trim().length && !l.trim().startsWith('#'));
-  const header = parseCsvLine(lines[0]);
+  const rawLines = text.split(/\r?\n/);
+  const header = parseCsvLine(rawLines[0]);
   const idx = (name) => {
     const i = header.indexOf(name);
     if (i < 0) throw new Error(`brands.csv: missing required column "${name}"`);
@@ -42,20 +82,32 @@ function parseCsv(csvPath) {
   };
   const cols = {
     key: idx('key'), display: idx('display'), names: idx('names'), domains: idx('domains'),
-    ccPolicy: idx('ccPolicy'), suffixes: idx('suffixes')
+    ccPolicy: idx('ccPolicy'), suffixes: idx('suffixes'), fuzzy: idx('fuzzy')
   };
-  return lines.slice(1).map((line, i) => {
-    const c = parseCsvLine(line);
+  const rows = [];
+  for (let i = 1; i < rawLines.length; i++) {
+    const raw = rawLines[i];
+    if (!raw.trim().length || raw.trim().startsWith('#')) continue;
+    const c = parseCsvLine(raw);
+    if (c.length !== header.length) {
+      throw new Error(`brands.csv:${i + 1}: expected ${header.length} columns (header has ${header.length}), got ${c.length}: ${raw}`);
+    }
+    const fuzzyRaw = (c[cols.fuzzy] || '').trim().toLowerCase();
+    if (fuzzyRaw && fuzzyRaw !== 'true' && fuzzyRaw !== 'false') {
+      throw new Error(`brands.csv:${i + 1} (key "${c[cols.key]}"): fuzzy column must be "true", "false", or blank, got "${c[cols.fuzzy]}"`);
+    }
     const row = {
       key: c[cols.key] || '', display: c[cols.display] || '',
       names: (c[cols.names] || '').split('|').filter(Boolean),
       domains: (c[cols.domains] || '').split('|').filter(Boolean),
       ccPolicy: (c[cols.ccPolicy] || 'open').trim() || 'open',
-      suffixes: (c[cols.suffixes] || '').split('|').filter(Boolean)
+      suffixes: (c[cols.suffixes] || '').split('|').filter(Boolean),
+      fuzzy: fuzzyRaw !== 'false'
     };
-    row._line = i + 2; // 1-based, +1 for header
-    return row;
-  });
+    row._line = i + 1; // 1-based
+    rows.push(row);
+  }
+  return rows;
 }
 
 // Hand-written brand keys are every `B('key', ...)` call in constants.js
@@ -88,19 +140,33 @@ function validate(rows, existingKeys) {
     if (row.ccPolicy === 'closed' && !row.suffixes.length) {
       throw new Error(`${where}: ccPolicy 'closed' requires >=1 suffix`);
     }
+    // 0.13.0 fix round: a fuzzy=false brand is opted out because its bare KEY
+    // is an ordinary word/token (gradeAgainst rules a/b match the raw key as
+    // a label/hyphen token, independent of ccPolicy or domains[0]'s fuzzy
+    // form) — so `names` must never repeat that same bare word, or content
+    // impersonation (brandNameIn) reintroduces the identical ambiguity.
+    if (!row.fuzzy && row.names.some((n) => n.trim().toLowerCase() === row.key.toLowerCase())) {
+      throw new Error(`${where}: fuzzy=false but names contains the bare key "${row.key}" — names must be distinctive (multi-word or a qualified product name)`);
+    }
+    // A key under 4 characters (olx, okx, td, ...) needs at least one
+    // sufficiently long or multi-word name, or brandNameIn's word-boundary
+    // match becomes as imprecise as the short key itself.
+    if (row.key.length < 4 && !row.names.some((n) => n.length >= 4 || /\s/.test(n))) {
+      throw new Error(`${where}: key is under 4 characters but has no name >=4 chars or multi-word`);
+    }
   }
 }
 
 function jsStringArray(arr) { return '[' + arr.map((s) => `'${s.replace(/'/g, "\\'")}'`).join(', ') + ']'; }
 
 function renderRow(row) {
-  const opts = {};
-  if (row.display) opts.display = row.display;
-  if (row.ccPolicy === 'closed') { opts.ccPolicy = 'closed'; opts.suffixes = row.suffixes; }
   const optsParts = [];
-  if (opts.display) optsParts.push(`display: '${opts.display.replace(/'/g, "\\'")}'`);
-  if (opts.ccPolicy) optsParts.push(`ccPolicy: 'closed'`);
-  if (opts.suffixes) optsParts.push(`suffixes: ${jsStringArray(opts.suffixes)}`);
+  if (row.display) optsParts.push(`display: '${row.display.replace(/'/g, "\\'")}'`);
+  if (row.ccPolicy === 'closed') {
+    optsParts.push(`ccPolicy: 'closed'`);
+    optsParts.push(`suffixes: ${jsStringArray(row.suffixes)}`);
+  }
+  if (!row.fuzzy) optsParts.push(`fuzzy: false`);
   const optsStr = optsParts.length ? `, { ${optsParts.join(', ')} }` : '';
   return `    B('${row.key}', ${jsStringArray(row.names)}, ${jsStringArray(row.domains)}${optsStr}),`;
 }

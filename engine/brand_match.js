@@ -39,7 +39,7 @@
 })(typeof globalThis !== 'undefined' ? globalThis : self, function (C) {
   'use strict';
 
-  const { BRAND_DOMAINS, registrableParts, isVerifiedNamespace } = C;
+  const { BRAND_DOMAINS, BRANDS_BY_KEY, registrableParts, isVerifiedNamespace } = C;
   const MIN_BRAND_LEN = 5;
 
   // ---- 1. allowlist-first suffix trie ---------------------------------------
@@ -157,9 +157,21 @@
   // The ~45-entry fuzzy candidate list: every brand whose fuzzy form (from
   // its first/primary domain) is at least MIN_BRAND_LEN characters. Computed
   // once and cached, same lifetime rationale as the trie above.
+  //
+  // `fuzzy: false` opt-out (0.13.0 fix round): gradeAgainst's rules (a)/(b)
+  // match a host's bare label/hyphen token against the raw brand KEY —
+  // independent of MIN_BRAND_LEN, which only gates on domains[0]'s fuzzy
+  // FORM. A brand whose key is an ordinary word ("square", "discover",
+  // "chase", ...) therefore false-positives on any unrelated hyphenated
+  // host that happens to use that word ("square-dance-club.org"). Those
+  // brands are excluded from the candidate list entirely; content
+  // impersonation (brandNameIn) still covers them via a distinctive,
+  // non-bare-word `names` entry (enforced by scripts/build-brands.js).
   function buildCandidates() {
     const out = [];
     for (const brand of Object.keys(BRAND_DOMAINS)) {
+      const b = BRANDS_BY_KEY && BRANDS_BY_KEY[brand];
+      if (b && b.fuzzy === false) continue;
       const domains = BRAND_DOMAINS[brand];
       if (!domains || !domains.length) continue;
       const form = fuzzyForm(domains[0]);
@@ -257,10 +269,16 @@
   // Brand token inside a tenant label ("signin-att-verifier" -> att). Exact
   // token, homoglyph variant, or DL-1 for brands >= 6 chars. Short keys
   // (att, bhd, td) match only as exact tokens.
+  //
+  // `fuzzy: false` keys are excluded here too (0.13.0 fix round): a tenant
+  // label token is matched against the raw KEY exactly the same way
+  // gradeAgainst's rules (a)/(b) are, so a common-word key ("smart",
+  // "regions", ...) would turn an ordinary tenant subdomain
+  // ("smart-home-devices.vercel.app") into a false brand-impersonation hit.
   function tenantBrandToken(label) {
     const tokens = String(label || '').toLowerCase().split(/[-_.]+/).filter((t) => t.length >= 3);
     if (!tokens.length) return null;
-    const keys = Object.keys(BRAND_DOMAINS);
+    const keys = Object.keys(BRAND_DOMAINS).filter((k) => !(BRANDS_BY_KEY && BRANDS_BY_KEY[k] && BRANDS_BY_KEY[k].fuzzy === false));
     for (const t of tokens) for (const k of keys) if (t === k || homoglyphVariants(t).includes(k)) return k;
     for (const t of tokens) for (const k of keys) if (k.length >= 6 && t.length >= 5 && damerauLevenshtein(t, k) === 1) return k;
     return null;

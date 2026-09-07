@@ -209,3 +209,23 @@ test('short registrable names still get subdomain-injection checks', () => {
 test('benign hosts with common prefixes stay clean', () => {
   assert.equal(BM.fuzzyBrandMatch('www.example.com'), null);
 });
+
+// --- fuzzy:false common-word opt-out (0.13.0 fix round, code review) ------
+// gradeAgainst rules (a)/(b) match a host's bare label/hyphen token against
+// the raw brand KEY, independent of MIN_BRAND_LEN (which only gates
+// candidacy on domains[0]'s fuzzy FORM) — so an ordinary-word key like
+// "square" or "discover" false-positives on any unrelated hyphenated host
+// that happens to contain that word. `fuzzy: false` brands are dropped from
+// the candidate list entirely (both buildCandidates() and
+// tenantBrandToken()'s key list), while a corroborating URL/DOM signal (a
+// genuine typosquat of a brand that IS still fuzzy-eligible, or a tenant
+// label token for a brand that stayed fuzzy-eligible) keeps working.
+test('fuzzy:false common-word brands never fire via label/hyphen token match', () => {
+  assert.equal(BM.fuzzyBrandMatch('square-dance-club.org'), null);
+  assert.equal(BM.fuzzyBrandMatch('discover-thailand.com'), null);
+  assert.equal(BM.tenantBrandToken('smart-home-devices'), null);
+});
+test('fuzzy:false does not touch unrelated brand matching', () => {
+  assert.ok(BM.fuzzyBrandMatch('secure-paypa1-login.com'));
+  assert.equal(BM.tenantBrandToken('signin-att-verifier'), 'att');
+});
