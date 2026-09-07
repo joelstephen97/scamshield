@@ -35,6 +35,8 @@
   "trustThisSite": {
     "message": "Confiar neste site"
   },
+  "ackTrusted": { "message": "ScamShield won't flag $HOST$ again.", "placeholders": { "host": { "content": "$1", "example": "secure-paypa1-login.com" } } },
+  "undo": { "message": "Undo" },
   "popupPauseMenu": {
     "message": "Pausar proteção ▾"
   },
@@ -515,6 +517,7 @@
   "remove": {
     "message": "Remover"
   },
+  "trustedViaWarning": { "message": "Trusted via warning" },
   "historyTitle": {
     "message": "Histórico de proteção"
   },
@@ -1299,6 +1302,7 @@
       }
     }
   },
+  "blockedLeadHot": { "message": "$HOST$ was reported for phishing in the last two days, so the page was stopped before it could load. Nothing ran and nothing you typed was sent.", "placeholders": { "host": { "content": "$1", "example": "secure-paypa1-login.com" } } },
   "blockedAddress": {
     "message": "Endereço bloqueado"
   },
@@ -1317,6 +1321,7 @@
   "blockedGoBack": {
     "message": "Voltar para um lugar seguro"
   },
+  "blockedTrustSite": { "message": "Not a scam? Trust this site" },
   "blockedVisitAnyway": {
     "message": "Visitar mesmo assim (não recomendado)"
   },

@@ -1,7 +1,7 @@
-.scamshield-banner,.scamshield-overlay,.scamshield-toast{--ss-surface:#fff;--ss-text:#15211B;--ss-muted:#5E6F67;--ss-hair:#DFE7E2;--ss-accent:#0B6E4F;--ss-danger:#B42318;--ss-warn:#9A5B00;--ss-warn-bg:#FFF1D6;--ss-radius:10px;--ss-chip:6px;
+.scamshield-banner,.scamshield-overlay,.scamshield-toast,.scamshield-ack{--ss-surface:#fff;--ss-text:#15211B;--ss-muted:#5E6F67;--ss-hair:#DFE7E2;--ss-accent:#0B6E4F;--ss-danger:#B42318;--ss-warn:#9A5B00;--ss-warn-bg:#FFF1D6;--ss-radius:10px;--ss-chip:6px;
   font:13px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ss-text);box-sizing:border-box}
-.scamshield-banner *,.scamshield-overlay *,.scamshield-toast *{box-sizing:border-box;font:inherit}
-@media (prefers-color-scheme: dark){.scamshield-banner,.scamshield-overlay,.scamshield-toast{--ss-surface:#171F1B;--ss-text:#E7EEEA;--ss-muted:#9AAAA2;--ss-hair:#27342D;--ss-accent:#3FB489;--ss-danger:#F87171;--ss-warn:#FBBF24;--ss-warn-bg:#2A2110}}
+.scamshield-banner *,.scamshield-overlay *,.scamshield-toast *,.scamshield-ack *{box-sizing:border-box;font:inherit}
+@media (prefers-color-scheme: dark){.scamshield-banner,.scamshield-overlay,.scamshield-toast,.scamshield-ack{--ss-surface:#171F1B;--ss-text:#E7EEEA;--ss-muted:#9AAAA2;--ss-hair:#27342D;--ss-accent:#3FB489;--ss-danger:#F87171;--ss-warn:#FBBF24;--ss-warn-bg:#2A2110}}
 .scamshield-banner{position:fixed;top:8px;left:8px;right:8px;z-index:2147483647;border-radius:var(--ss-radius);padding:10px 12px;display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;box-shadow:0 8px 28px rgba(0,0,0,.25)}
 .scamshield-banner.danger{background:var(--ss-danger);color:#fff}
 .scamshield-banner.suspicious{background:var(--ss-warn-bg);color:var(--ss-text);border:1px solid var(--ss-warn)}
@@ -39,6 +39,15 @@
 .scamshield-interstitial{background:rgba(10,16,13,.78);z-index:2147483647}
 .scamshield-interstitial .ss-card{width:420px;border-top:4px solid var(--ss-danger)}
 .scamshield-interstitial .ss-actions{flex-wrap:wrap}
+/* "Trust this site" secondary link on the interstitial (0.13.0, Task 11) —
+   plain text-link styling so it never competes visually with Leave/Continue. */
+.scamshield-interstitial .ss-trust-link{border-color:transparent;background:transparent;color:var(--ss-muted);text-decoration:underline;padding:6px 2px}
+/* Trust acknowledgement ("won't flag again" + Undo) — same visual family as
+   .scamshield-toast (fixed, bottom-right), shown after the banner/
+   interstitial/block-page trust click removes the original surface. */
+.scamshield-ack{position:fixed;right:16px;bottom:16px;z-index:2147483647;max-width:360px;background:var(--ss-surface);color:var(--ss-text);border-left:4px solid var(--ss-accent);box-shadow:0 8px 28px rgba(0,0,0,.25);border-radius:var(--ss-radius);padding:12px 14px;display:flex;gap:8px;align-items:center}
+.scamshield-ack span{flex:1}
+.scamshield-ack .ss-undo{margin-left:8px;border:1px solid var(--ss-hair);background:var(--ss-surface);color:var(--ss-accent);border-radius:var(--ss-chip);padding:4px 10px;cursor:pointer;font-weight:600}
 .scamshield-overlay button:disabled{opacity:.55;cursor:not-allowed}
 .scamshield-overlay .ss-rescue-ghost{background:transparent;color:var(--ss-accent);border-color:var(--ss-accent);font-weight:600}
 .ss-compare{display:flex;gap:8px;align-items:center;margin-top:8px;padding:8px 10px;border:1px solid var(--ss-hair);border-radius:var(--ss-chip);background:var(--ss-surface);color:var(--ss-text);max-width:100%;overflow:hidden}

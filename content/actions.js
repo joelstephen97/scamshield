@@ -2,6 +2,15 @@
   'use strict';
   const NS = 'scamshield';
   const api = root.browser || root.chrome;
+  // Fire-and-forget message to the service worker, same shape as
+  // content_script.js's own send() — used only by the trust/undo flow below,
+  // which this file owns end-to-end (registrableDomain(location.hostname) +
+  // the trustSite/untrustSite round trip) so every warning surface shares
+  // ONE implementation instead of each caller wiring its own.
+  const send = (type, data) => new Promise((resolve) => {
+    try { api.runtime.sendMessage(Object.assign({ type }, data || {}), (r) => resolve(r || null)); }
+    catch (_) { resolve(null); }
+  });
   // Localised string with English fallback. Content scripts can call
   // chrome.i18n.getMessage; getMessage itself falls back to en per-key. The
   // user's language override (0.7.0), when one has arrived, wins over both.
@@ -155,7 +164,50 @@
     row.append(fake, el('span', 'ss-cmp-vs', '≠'), real);
     return row;
   }
-  function showBanner(verdict, onAllow, extra) {
+  // "Trust this site" parity, undo, and origin tag (0.13.0, Task 11) — the #1
+  // feature ask across rival reviews (a permanent allowlist) plus a real
+  // escape hatch (R3) on every warning surface, not just the banner. All
+  // three surfaces (banner, interstitial, block page) end up calling
+  // trustSite the same way, so the click-through and the undo affordance
+  // live here once instead of in each caller.
+  function regDomain() {
+    try {
+      const SS = root.ScamShield;
+      return (SS && typeof SS.registrableDomain === 'function') ? SS.registrableDomain(location.hostname) : location.hostname;
+    } catch (_) { return location.hostname; }
+  }
+  // A small standalone status bar, same visual family as the toasts above —
+  // deliberately NOT nested inside the banner/interstitial it replaces, since
+  // those are already gone (bar.remove()/ov.remove() already ran) by the time
+  // this shows. `restore` re-opens the original surface fresh (a real Undo,
+  // not a resurrected stale DOM node) with the exact verdict it was called with.
+  function ackSurface(domain, restore) {
+    const old = document.querySelector('.' + NS + '-ack'); if (old) old.remove();
+    const bar = el('div', NS + '-ack');
+    bar.setAttribute('role', 'status');
+    setDir(bar);
+    bar.append(el('span', null, t('ackTrusted', [bidi(domain)], "ScamShield won't flag " + domain + ' again.')));
+    const undo = el('button', 'ss-undo', t('undo', null, 'Undo'));
+    undo.addEventListener('click', async () => {
+      await send('untrustSite', { domain });
+      bar.remove();
+      restore && restore();
+    });
+    bar.appendChild(undo);
+    (document.body || document.documentElement).appendChild(bar);
+    return bar;
+  }
+  // `onAllow` null/undefined → a plain button with no click behaviour of its
+  // own (the caller wires its own dismiss-only listener). Used by the QR-scan
+  // banner (surfaceQrVerdict in content_script.js), where the current page and
+  // the flagged (decoded) destination are different domains, so a single click
+  // must never allowlist the QR's — possibly scam — destination.
+  function trustButton(onAllow) {
+    const btn = el('button', 'ss-trust', t('trustThisSite', null, 'Trust this site'));
+    if (onAllow) btn.addEventListener('click', onAllow);
+    return btn;
+  }
+  function showBanner(verdict, extra) {
     if (document.querySelector('.' + NS + '-banner')) return;
     const x = extra || {};
     const danger = verdict.level === 'dangerous';
@@ -176,7 +228,12 @@
     if (danger) { const leave = el('button', 'ss-leave', t('leaveThisPage', null, 'Leave this page')); leave.addEventListener('click', () => { x.onLeave ? x.onLeave() : history.back(); }); acts.appendChild(leave); }
     if (verdict.brandUrl) { const rescue = el('button', 'ss-rescue', t('takeMeToReal', [bidi(verdict.brandLabel || 'site')], 'Take me to the real ' + (verdict.brandLabel || 'site'))); rescue.addEventListener('click', () => { location.href = verdict.brandUrl; }); acts.appendChild(rescue); }
     if (!danger) { const why = el('button', 'ss-why', t('showWhy', null, 'Show why')); why.addEventListener('click', () => { text.querySelector('span').textContent = verdict.reasons.slice(0, 3).map(reasonText).join(' · '); why.remove(); }); acts.appendChild(why); }
-    const trust = el('button', 'ss-trust', t('trustThisSite', null, 'Trust this site')); trust.addEventListener('click', () => { onAllow && onAllow(); bar.remove(); });
+    const trust = trustButton(x.noTrust ? null : async () => {
+      const domain = regDomain();
+      await send('trustSite', { domain, via: x.trustVia || 'banner' });
+      ackSurface(domain, () => showBanner(verdict, extra));
+    });
+    trust.addEventListener('click', () => { bar.remove(); });
     const report = el('button', 'ss-report', t('reportMistake', null, 'Report a mistake')); report.addEventListener('click', () => { report.textContent = t('thanks', null, 'Thanks'); report.disabled = true; x.onReport && x.onReport(); });
     const copyBtn = copyReportButton(verdict);
     const close = el('button', 'ss-x', '✕'); close.setAttribute('aria-label', t('ariaDismiss', null, 'Dismiss')); close.addEventListener('click', () => bar.remove());
@@ -223,6 +280,18 @@
     const leave = el('button', 'ss-primary', t('leaveThisPage', null, 'Leave this page'));
     leave.addEventListener('click', () => { x.onLeave ? x.onLeave() : history.back(); });
     actions.append(leave);
+    // Secondary link right under "Leave this page" (0.13.0, Task 11): the
+    // interstitial used to offer no permanent trust at all, only "Continue
+    // anyway" (which just dismisses this one showing). Styled as a plain
+    // link, not a button, so it never competes visually with Leave/Continue.
+    const trust = trustButton(x.noTrust ? null : async () => {
+      const domain = regDomain();
+      await send('trustSite', { domain, via: x.trustVia || 'interstitial' });
+      ackSurface(domain, () => dangerInterstitial(verdict, x));
+    });
+    trust.classList.add('ss-trust-link');
+    trust.addEventListener('click', () => { ov.remove(); });
+    actions.append(trust);
     if (verdict.brandUrl) {
       const rescue = el('button', 'ss-rescue-ghost', t('takeMeToReal', [bidi(verdict.brandLabel || 'site')], 'Go to the real ' + (verdict.brandLabel || 'site')));
       rescue.addEventListener('click', () => { location.href = verdict.brandUrl; });

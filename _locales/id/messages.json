@@ -35,6 +35,8 @@
   "trustThisSite": {
     "message": "Percayai situs ini"
   },
+  "ackTrusted": { "message": "ScamShield won't flag $HOST$ again.", "placeholders": { "host": { "content": "$1", "example": "secure-paypa1-login.com" } } },
+  "undo": { "message": "Undo" },
   "popupPauseMenu": {
     "message": "Jeda perlindungan ▾"
   },
@@ -515,6 +517,7 @@
   "remove": {
     "message": "Hapus"
   },
+  "trustedViaWarning": { "message": "Trusted via warning" },
   "historyTitle": {
     "message": "Riwayat perlindungan"
   },
@@ -1299,6 +1302,7 @@
       }
     }
   },
+  "blockedLeadHot": { "message": "$HOST$ was reported for phishing in the last two days, so the page was stopped before it could load. Nothing ran and nothing you typed was sent.", "placeholders": { "host": { "content": "$1", "example": "secure-paypa1-login.com" } } },
   "blockedAddress": {
     "message": "Alamat yang diblokir"
   },
@@ -1317,6 +1321,7 @@
   "blockedGoBack": {
     "message": "Kembali ke tempat aman"
   },
+  "blockedTrustSite": { "message": "Not a scam? Trust this site" },
   "blockedVisitAnyway": {
     "message": "Tetap kunjungi (tidak disarankan)"
   },

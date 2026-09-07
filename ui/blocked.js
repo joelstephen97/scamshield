@@ -32,7 +32,16 @@ const domain = host ? registrable(host) : '';
 function render(info) {
   try { $('hico').innerHTML = I && I.shield ? I.shield('dangerous') : ''; } catch (_) {}
   $('url').textContent = target ? target.href : '';
-  if (host) $('lead').textContent = T('blockedLead', [bidi(host)], host + " is on ScamShield's list of known scam and malicious sites, so the page was stopped before it could load. Nothing ran and nothing you typed was sent.");
+  if (host) {
+    // 0.13.0 (Task 11): a hot-list catch (freshly reported, <48h) gets its
+    // own lead copy — handleDnrBlocked() tells us via info.kind whether the
+    // host came from the hourly hot list rather than the daily feed/static
+    // ruleset. Defaults to the original wording until the 'dnrBlocked' round
+    // trip resolves (render(null) on first paint).
+    $('lead').textContent = (info && info.kind === 'hot')
+      ? T('blockedLeadHot', [bidi(host)], host + ' was reported for phishing in the last two days, so the page was stopped before it could load. Nothing ran and nothing you typed was sent.')
+      : T('blockedLead', [bidi(host)], host + " is on ScamShield's list of known scam and malicious sites, so the page was stopped before it could load. Nothing ran and nothing you typed was sent.");
+  }
   const sources = info && Array.isArray(info.sources) ? info.sources.filter((s) => typeof s === 'string' && s) : [];
   if (sources.length) { $('src').removeAttribute('data-i18n'); $('src').textContent = T('blockedListedBy', [bidi(sources.slice(0, 4).join(', '))], 'Listed by ' + sources.slice(0, 4).join(', ')); }
   const fp = 'https://github.com/joelstephen97/scamshield/issues/new?title=' + encodeURIComponent('False positive: ' + host) +
@@ -62,6 +71,19 @@ $('visit').addEventListener('click', async (e) => {
   // Same path as the popup's "Pause protection → 1 hour": the worker records
   // the pause and installs the matching network allow rule before we go.
   await send('pauseSite', { domain, choice: '1h' });
+  location.replace(target.href);
+});
+// "Trust this site" (0.13.0, Task 11): unlike #visit's 1-hour pause, this
+// permanently allowlists the domain (same trustSite path the banner and the
+// interstitial use) — the block/redirect rule stays, but the allow rule
+// (priority 3) wins on every future load, and the hot-list rule for this
+// domain, if any, is dropped by the same setSettings() call. Best-effort:
+// on failure `send` resolves null and we just navigate anyway, exactly like
+// #visit does today (no error surface on this page).
+$('trust').addEventListener('click', async (e) => {
+  e.preventDefault();
+  if (!target || !domain) return;
+  await send('trustSite', { domain, via: 'blocked' });
   location.replace(target.href);
 });
 

@@ -15,6 +15,8 @@ main h2{font-size:18px;font-weight:600;margin:0 0 4px} main h3{font-size:13px;co
 .hint{color:var(--muted);font-size:12px;margin-top:6px;max-width:60ch}
 .list{list-style:none;padding:0;margin:0} .list li{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 12px;background:var(--surface);border:1px solid var(--hair);border-radius:var(--radius);margin-bottom:6px;font-size:13px}
 .list li .meta{color:var(--muted);font-size:12px}
+.list li .tag{color:var(--accent);background:var(--accent-soft);font-size:11px;padding:2px 8px;border-radius:var(--chip);white-space:nowrap}
+.list li>span:first-child{flex:1;min-width:0;overflow-wrap:break-word}
 .feedline{display:flex;align-items:center;gap:8px;font-size:13px;margin:0 0 12px} .feedline .dot{width:8px;height:8px;border-radius:50%;background:var(--unknown)} .feedline .dot.ok{background:var(--safe)}
 .adv summary{cursor:pointer;color:var(--accent);font-size:13px} .row{display:flex;gap:8px;align-items:center;margin:10px 0} .row input{flex:1;font:inherit;border:1px solid var(--hair);border-radius:var(--chip);background:var(--surface);color:var(--text);padding:6px 8px}
 select{font:inherit;border:1px solid var(--hair);border-radius:var(--chip);background:var(--surface);color:var(--text);padding:5px 8px}

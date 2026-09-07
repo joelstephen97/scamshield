@@ -46,6 +46,9 @@ const DEFAULTS = {
   blockKnownBad: true,
   reportingOptIn: false,     // anonymized reporting, OFF by default
   allowlist: [],             // array of registrable domains the user trusts
+  allowlistMeta: {},         // domain -> { via, at }: where a trust came from (banner/interstitial/
+                             // blocked page/strict-mode continue) — options shows it as a tag,
+                             // 0.13.0 "Trust this site" parity (Task 11)
   blocklistVersion: 1,
   modelVersion: 2,
   otaUrl: DEFAULT_FEED_URL,  // static JSON URL for blocklist updates; '' = disabled
@@ -88,7 +91,7 @@ const DEFAULTS = {
 const SYNCED_KEYS = ['enabled', 'hideScamContent', 'blockKnownBad', 'pageAnalysis',
   'clickFixGuard', 'fakeUpdateGuard', 'walletGuard', 'clipboardGuard', 'techScamGuard',
   'leakyFormGuard', 'fingerprintDetect', 'notificationGuard', 'strictMode', 'qrAutoScan',
-  'reportingOptIn', 'allowlist', 'theme', 'otaUrl', 'uiLang'];
+  'reportingOptIn', 'allowlist', 'allowlistMeta', 'theme', 'otaUrl', 'uiLang'];
 
 // Local-only protection history: ring buffer of { ts, host, kind, level }.
 // Hostnames only, never full URLs; capped; user-clearable. Never transmitted.
@@ -535,6 +538,16 @@ function sanitizeImport(obj) {
     if (!(k in src)) continue;
     const v = src[k];
     if (k === 'allowlist') { if (Array.isArray(v)) patch[k] = v.filter((d) => typeof d === 'string').slice(0, 2000); }
+    else if (k === 'allowlistMeta') {
+      if (v && typeof v === 'object' && !Array.isArray(v)) {
+        const out = {};
+        for (const [d, meta] of Object.entries(v)) {
+          if (typeof d !== 'string' || !meta || typeof meta !== 'object') continue;
+          out[d] = { via: typeof meta.via === 'string' ? meta.via : 'unknown', at: Number.isFinite(meta.at) ? meta.at : 0 };
+        }
+        patch[k] = out;
+      }
+    }
     else if (k === 'theme') { if (['auto', 'light', 'dark'].includes(v)) patch[k] = v; }
     else if (k === 'otaUrl') { if (typeof v === 'string' && (v === '' || /^https:\/\//i.test(v))) patch[k] = v; }
     else if (k === 'uiLang') { if (isValidLang(v)) patch[k] = v; }
@@ -685,6 +698,57 @@ async function handleUserReport(msg, sender) {
   const queued = await queueReport(payload);
   if (!queued) return { ok: false, via: 'off' };
   return { ok: true, via: 'relay' };
+}
+
+// ---- "Trust this site" parity, undo, and origin tag (0.13.0, Task 11) ----
+// One code path for every "add a domain to the allowlist" action a content
+// script or extension page can trigger — the banner, the danger interstitial,
+// the network block page, and strict mode's "Continue anyway" all funnel
+// through here instead of each carrying its own allowlist-push logic. Every
+// trust records WHERE it came from (allowlistMeta[domain].via) so the options
+// page can show a "Trusted via warning" tag and a one-click remove — the #1
+// feature ask across rival reviews (a permanent allowlist) plus a visible,
+// undoable origin instead of a silent one-way trust.
+async function addTrust(domain, via, tabId) {
+  const d = typeof domain === 'string' ? domain.trim().toLowerCase() : '';
+  if (!d) return { ok: false };
+  const s = await getSettings();
+  const allowlist = s.allowlist.includes(d) ? s.allowlist.slice() : [...s.allowlist, d];
+  const allowlistMeta = Object.assign({}, s.allowlistMeta, { [d]: { via: typeof via === 'string' && via ? via : 'unknown', at: Date.now() } });
+  const next = await setSettings({ allowlist, allowlistMeta }); // already runs syncAllowRules + applyHotRules (setSettings)
+  // Trusting a flagged site is a strong false-positive signal — auto-queue it
+  // the same way "Report a mistake" does, but only when the user has opted
+  // in to community reporting, and never block the trust itself on it.
+  if (tabId != null) reportTrustMistake(tabId).catch(() => {});
+  return { ok: true, allowlist: next.allowlist, domain: d };
+}
+async function removeTrust(domain) {
+  const d = typeof domain === 'string' ? domain.trim().toLowerCase() : '';
+  const s = await getSettings();
+  const allowlist = s.allowlist.filter((x) => x !== d);
+  const allowlistMeta = Object.assign({}, s.allowlistMeta);
+  delete allowlistMeta[d];
+  await setSettings({ allowlist, allowlistMeta });
+  return { ok: true };
+}
+// Best-effort, fire-and-forget from the caller's point of view (addTrust
+// above never awaits this before responding) — reuses the exact same
+// queueReport/lastReportInput plumbing as the explicit "Report a mistake"
+// button, so nothing new ever leaves the device: still gated on
+// reportingOptIn + reportUrl inside queueReport()/flushReports().
+async function reportTrustMistake(tabId) {
+  try {
+    const s = await getSettings();
+    if (!s.reportingOptIn || !s.reportUrl) return;
+    let tab = null; try { tab = await api.tabs.get(tabId); } catch (_) {}
+    const url = tab && tab.url;
+    if (!url || !/^https?:/.test(url)) return;
+    const SS = globalThis.ScamShield;
+    const verdict = lastVerdict.get(tabId) || { level: 'suspicious', score: 0, reasons: [] };
+    const input = Object.assign({ url, verdict, detectors: ['page'], urlFeatures: SS.extractUrlFeatures(url) }, lastReportInput.get(tabId) || {});
+    const payload = SS.buildReportPayload(Object.assign({ kind: 'user', label: 'false_positive', extVersion: manifestVersion(), now: Date.now() }, input));
+    if (payload) await queueReport(payload);
+  } catch (_) { /* best-effort — trust must never fail because of this */ }
 }
 
 // Download-only over-the-air blocklist update. Fetches a user-configured JSON
@@ -968,9 +1032,18 @@ async function handleDnrBlocked(msg, sender) {
     counted = true;
   }
   let sources = [];
-  try { const hit = await checkFeedHost(host); if (hit && Array.isArray(hit.sources)) sources = hit.sources; } catch (_) {}
+  // 0.13.0 (Task 11): the block page swaps its lead copy when the catch came
+  // from the hourly hot list (freshly-reported, not yet on any published
+  // list) rather than the daily feed/static ruleset — checkFeedHost() already
+  // checks hotHostSet first and flags a hit as `hot`, so this is free.
+  let kind = 'listed';
+  try {
+    const hit = await checkFeedHost(host);
+    if (hit && Array.isArray(hit.sources)) sources = hit.sources;
+    if (hit && hit.hot) kind = 'hot';
+  } catch (_) {}
   const SS = globalThis.ScamShield;
-  return { ok: true, host, domain: SS && SS.registrableDomain ? SS.registrableDomain(host) : host, counted, sources };
+  return { ok: true, host, domain: SS && SS.registrableDomain ? SS.registrableDomain(host) : host, counted, sources, kind };
 }
 
 // ---- v0.9 threat-feed: OTA cycle + verdict-path lookup (Task B2) ----------
@@ -1529,17 +1602,18 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       }
       case 'setSettings':
         sendResponse(await setSettings(msg.patch || {})); break;
-      case 'allowSite': {
-        const s = await getSettings();
-        if (!s.allowlist.includes(msg.domain)) s.allowlist.push(msg.domain);
-        await setSettings({ allowlist: s.allowlist });
-        sendResponse({ ok: true, allowlist: s.allowlist }); break;
-      }
-      case 'removeAllow': {
-        const s = await getSettings();
-        await setSettings({ allowlist: s.allowlist.filter((d) => d !== msg.domain) });
-        sendResponse({ ok: true }); break;
-      }
+      // 0.13.0 (Task 11): trustSite/untrustSite are the ONE allowlist-add/
+      // remove path every surface now shares (banner, interstitial, block
+      // page, strict-mode "Continue anyway", and the options page's own
+      // Remove) — see addTrust/removeTrust above. The old 'allowSite'
+      // message (which never recorded a `via`) is gone; nothing sent it but
+      // the banner's trust button, replaced below.
+      case 'trustSite':
+        sendResponse(await addTrust(msg.domain, msg.via, sender.tab && sender.tab.id)); break;
+      case 'untrustSite':
+        sendResponse(await removeTrust(msg.domain)); break;
+      case 'removeAllow':
+        sendResponse(await removeTrust(msg.domain)); break;
       case 'reportVerdict': {
         const tabId = sender.tab && sender.tab.id;
         if (tabId != null) {
@@ -1766,4 +1840,4 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 // module-scoped. Re-attach the debug/test surface that used to live on the
 // classic worker's global scope — the e2e suite drives these via
 // worker.evaluate, and they're handy in the SW console.
-Object.assign(globalThis, { DEFAULT_FEED_URL, FEED_META_URL, getSettings, setSettings, handleUserReport, runOtaUpdate, flushReports, queueReport, exportSettings, sanitizeImport, pushSync, pullSync, getStats, bumpStat, ensurePrivacyTotal, ensureInstalledAt, getReviewAsk, getReviewAskContext, setReviewAsk, sanitizeReviewAsk, ensureReviewAsk, importReviewAsk, getLangDict, loadLangDict, isValidLang, runFeedUpdate, checkFeedHost, checkFeedBatchHosts, normalizeFeedHost, checkRiskHosting, checkNrdHost, applyNetworkRules, syncAllowRules, ensureNetworkRules, handleDnrBlocked, applyPendingUpdate, requestStoreUpdateCheck, getUpdateState, setUpdateState, runHotUpdate, applyHotRules, getHotStatus });
+Object.assign(globalThis, { DEFAULT_FEED_URL, FEED_META_URL, getSettings, setSettings, handleUserReport, runOtaUpdate, flushReports, queueReport, exportSettings, sanitizeImport, pushSync, pullSync, getStats, bumpStat, ensurePrivacyTotal, ensureInstalledAt, getReviewAsk, getReviewAskContext, setReviewAsk, sanitizeReviewAsk, ensureReviewAsk, importReviewAsk, getLangDict, loadLangDict, isValidLang, runFeedUpdate, checkFeedHost, checkFeedBatchHosts, normalizeFeedHost, checkRiskHosting, checkNrdHost, applyNetworkRules, syncAllowRules, ensureNetworkRules, handleDnrBlocked, applyPendingUpdate, requestStoreUpdateCheck, getUpdateState, setUpdateState, runHotUpdate, applyHotRules, getHotStatus, addTrust, removeTrust });

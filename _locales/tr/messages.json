@@ -35,6 +35,8 @@
   "trustThisSite": {
     "message": "Bu siteye güven"
   },
+  "ackTrusted": { "message": "ScamShield won't flag $HOST$ again.", "placeholders": { "host": { "content": "$1", "example": "secure-paypa1-login.com" } } },
+  "undo": { "message": "Undo" },
   "popupPauseMenu": {
     "message": "Korumayı duraklat ▾"
   },
@@ -515,6 +517,7 @@
   "remove": {
     "message": "Kaldır"
   },
+  "trustedViaWarning": { "message": "Trusted via warning" },
   "historyTitle": {
     "message": "Koruma geçmişi"
   },
@@ -1299,6 +1302,7 @@
       }
     }
   },
+  "blockedLeadHot": { "message": "$HOST$ was reported for phishing in the last two days, so the page was stopped before it could load. Nothing ran and nothing you typed was sent.", "placeholders": { "host": { "content": "$1", "example": "secure-paypa1-login.com" } } },
   "blockedAddress": {
     "message": "Engellenen adres"
   },
@@ -1317,6 +1321,7 @@
   "blockedGoBack": {
     "message": "Güvenliğe geri dön"
   },
+  "blockedTrustSite": { "message": "Not a scam? Trust this site" },
   "blockedVisitAnyway": {
     "message": "Yine de ziyaret et (önerilmez)"
   },

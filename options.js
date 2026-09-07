@@ -127,7 +127,7 @@ async function load() {
     $('feedstatus').textContent = T('feedNeverUpdated', null, 'Never updated');
   }
   $('feeddot').classList.toggle('ok', !!s.lastOtaAt);
-  renderAllow(s.allowlist || [], s.pausedSites || {});
+  renderAllow(s.allowlist || [], s.pausedSites || {}, s.allowlistMeta || {});
   const h = await send('getHistory'); renderHistory((h && h.history) || []);
 }
 function li(text, meta, btnText, onClick) {
@@ -136,10 +136,29 @@ function li(text, meta, btnText, onClick) {
   if (btnText) { const b = document.createElement('button'); b.className = 'btn'; b.textContent = btnText; b.addEventListener('click', onClick); el.appendChild(b); }
   return el;
 }
-function renderAllow(list, paused) {
+// One allowlist row (0.13.0, Task 11): same shape as li() above, plus a
+// data-domain attribute and — when the trust carries an origin (banner/
+// interstitial/block page, via allowlistMeta[d].via) — a small "Trusted via
+// warning" tag, so a domain the user allowlisted from a warning isn't
+// indistinguishable from one they added by hand. `.remove` sends
+// 'removeAllow', which also clears allowlistMeta for the domain.
+function allowLi(d, meta) {
+  const el = document.createElement('li');
+  el.dataset.domain = d;
+  const t = document.createElement('span'); t.textContent = d; el.appendChild(t);
+  if (meta && meta.via) {
+    const tag = document.createElement('span'); tag.className = 'tag'; tag.textContent = T('trustedViaWarning', null, 'Trusted via warning');
+    el.appendChild(tag);
+  }
+  const b = document.createElement('button'); b.className = 'btn remove'; b.textContent = T('remove', null, 'Remove');
+  b.addEventListener('click', async () => { await send('removeAllow', { domain: d }); load(); });
+  el.appendChild(b);
+  return el;
+}
+function renderAllow(list, paused, meta) {
   $('allowlist').replaceChildren(); $('pausedlist').replaceChildren();
   if (!list.length) $('allowlist').appendChild(li(T('optNoneYet', null, 'None yet')));
-  for (const d of list) $('allowlist').appendChild(li(d, '', T('remove', null, 'Remove'), async () => { await send('removeAllow', { domain: d }); load(); }));
+  for (const d of list) $('allowlist').appendChild(allowLi(d, (meta || {})[d]));
   const entries = Object.entries(paused);
   if (!entries.length) $('pausedlist').appendChild(li(T('optNoneRightNow', null, 'None right now')));
   for (const [d, until] of entries) {

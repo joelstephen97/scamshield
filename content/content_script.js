@@ -742,9 +742,10 @@
       level: item.level, score: item.score,
       reasons: [{ code: 'qrCodeDestination', kind: 'link', params: [item.url] }].concat(item.reasons || [])
     };
-    SS.actions.showBanner(verdict, null, {
+    SS.actions.showBanner(verdict, {
       onLeave: () => { SS.actions.clearAll(); },
-      onReport: () => send('userReport', { label: 'false_positive' })
+      onReport: () => send('userReport', { label: 'false_positive' }),
+      noTrust: true
     });
   }
 
@@ -1027,17 +1028,16 @@
       // gets the blocking interstitial, not just decisive flags.
       const decisive = verdict.level === 'dangerous' && (verdict.flags || []).some((f) => DECISIVE_INTERSTITIAL.includes(f));
       if ((decisive || settings.strictMode === true) && SS.actions.dangerInterstitial) {
-        // "Continue anyway" on a decisive scam just dismisses (no trust granted —
-        // one click must never permanently trust a seed-phrase harvester). In
-        // strict mode on a merely-suspicious page it trusts, so the user isn't
-        // re-blocked every load.
-        const extra = decisive ? handlers : Object.assign({}, handlers, { onDismiss: () => send('allowSite', { domain: pageDomain }) });
+        // "Continue anyway" on a decisive scam just dismisses (no trust granted
+        // by merely dismissing — one click must never permanently trust a
+        // seed-phrase harvester). In strict mode on a merely-suspicious page it
+        // trusts, so the user isn't re-blocked every load. Either way, the
+        // interstitial's own explicit "Trust this site" link (0.13.0, Task 11)
+        // is a separate, deliberate action and stays available on both.
+        const extra = decisive ? handlers : Object.assign({}, handlers, { onDismiss: () => send('trustSite', { domain: pageDomain, via: 'strict-continue' }) });
         SS.actions.dangerInterstitial(verdict, extra);
       } else {
-        SS.actions.showBanner(verdict, async () => {
-          await send('allowSite', { domain: pageDomain });
-          SS.actions.clearAll();
-        }, handlers);
+        SS.actions.showBanner(verdict, handlers);
       }
       // One-time-ever support ask, only after ScamShield visibly earned it.
       if (verdict.level === 'dangerous' && !settings.supportAskShown && SS.actions.supportToast) {
