@@ -84,16 +84,16 @@ Harte Zahlen, keine Werbeversprechen: 20 Sprachen mit vollständig übersetzten 
 
 Quellcode, Datenschutzerklärung und Fehler-Tracker: github.com/joelstephen97/scamshield
 
-## What's new (0.12.0)
+## What's new (0.13.0)
 
-• Bekannte Betrugsseiten öffnen jetzt eine ScamShield-Blockseite. Wenn eine Seite auf der Blockliste gestoppt wird, bevor sie lädt, siehst du keinen leeren Browserfehler mehr. ScamShield sagt dir, warum die Seite blockiert wurde, zählt den Fund in deiner Statistik und lässt dich die Blockierung für eine Stunde pausieren, wenn du denkst, dass es sich um einen Irrtum handelt.
+• Eine stündliche Hot-Liste. Neben der täglich neu erstellten Bedrohungsliste lädt ScamShield jetzt einmal pro Stunde eine kleine Liste von Seiten herunter, die in den letzten 48 Stunden gemeldet wurden. Eine Betrugsseite, die heute Morgen aufgetaucht ist, wird meist schon rund eine Stunde nach der Meldung gestoppt, bevor sie laden kann. Es ist dieselbe öffentliche Datei für alle, geladen wie jeder andere Download: kein Konto, und nichts über dich oder dein Surfverhalten geht irgendwohin.
 
-• QR-Code-Scan, direkt auf deinem Gerät. ScamShield entschlüsselt jetzt QR-Codes in den Bildern einer Seite und prüft, wohin sie führen, bevor du sie mit deinem Handy scannst. Das ist die lokale Antwort auf "Quishing" (QR-Code-Phishing)-E-Mails. Scanne jede Seite über das Popup, oder lass den automatischen Scan aktiviert. Nichts vom Code verlässt dein Gerät.
+• Dieser Seite vertrauen, aus jeder Warnung heraus. Das Banner, die ganzseitige Warnung und die Blockseite haben jetzt alle ein "Kein Betrug? Dieser Seite vertrauen" mit einem Klick, samt Rückgängig, falls du es versehentlich drückst. Seiten, denen du aus einer Warnung heraus vertraut hast, sind in den Einstellungen entsprechend markiert, sodass du immer siehst, wie jede einzelne dorthin gelangt ist.
 
-• Der Kartenbetrug-Schutz deckt jetzt auch automatisch übermittelte Formulare ab. Ein Login- oder Kartenformular, das eine Seite von sich aus an eine andere Domain sendet, nicht nur eines, das du selbst absendest, löst jetzt dieselbe Cross-Site-Warnung aus.
+• Mehr abgedeckte Marken. Die Nachahmer-Prüfung kennt jetzt über 300 Marken, sodass mehr gefälschte Anmeldeseiten von Banken, Zustelldiensten und Spieleanbietern nicht nur am Logo, sondern auch am Namen erkannt werden.
 
-• Eine breitere Fehlalarm-Positivliste im Bedrohungs-Feed, sodass mehr regionale Banken-, Behörden- und Marktplatz-Domains niemals durch eine vergiftete Quelle blockiert werden können.
+• Weniger Fehlalarme auf echten Seiten. Echte Seiten von Banken, Behörden und Unternehmen mit einer länderspezifischen Adresse (etwa der eigenen .bank.in-Domain einer Bank) bekommen kein Warnbanner mehr.
 
-• Weniger Konsolenwarnungen auf Seiten wie Gmail.
+• Gemessen statt behauptet. Bei einer Stichprobe von [[N]] aktiven Phishing-Seiten aus öffentlichen Quellen, die ScamShield selbst nicht nutzt, wurden [[BLOCKED]] % blockiert, bevor die Seite laden konnte, und [[STOPPED]] % auf die eine oder andere Weise gestoppt. Methode, Definitionen und die vollständige Tabelle stehen in docs/benchmark.md im GitHub-Repository des Projekts.
 
 Keine neuen Berechtigungen. Weiterhin storage, declarativeNetRequest, alarms und http/https-Zugriff, wie in jeder Version seit 0.3.1.

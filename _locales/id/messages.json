@@ -35,8 +35,18 @@
   "trustThisSite": {
     "message": "Percayai situs ini"
   },
-  "ackTrusted": { "message": "ScamShield won't flag $HOST$ again.", "placeholders": { "host": { "content": "$1", "example": "secure-paypa1-login.com" } } },
-  "undo": { "message": "Undo" },
+  "ackTrusted": {
+    "message": "ScamShield tidak akan menandai $HOST$ lagi.",
+    "placeholders": {
+      "host": {
+        "content": "$1",
+        "example": "secure-paypa1-login.com"
+      }
+    }
+  },
+  "undo": {
+    "message": "Urungkan"
+  },
   "popupPauseMenu": {
     "message": "Jeda perlindungan ▾"
   },
@@ -517,7 +527,9 @@
   "remove": {
     "message": "Hapus"
   },
-  "trustedViaWarning": { "message": "Trusted via warning" },
+  "trustedViaWarning": {
+    "message": "Dipercaya lewat peringatan"
+  },
   "historyTitle": {
     "message": "Riwayat perlindungan"
   },
@@ -580,6 +592,28 @@
   },
   "feedNeverUpdated": {
     "message": "Belum pernah diperbarui"
+  },
+  "hotListPending": {
+    "message": "Daftar terkini: belum diunduh"
+  },
+  "hotListStatus": {
+    "message": "Daftar terkini: $COUNT$ situs, diperbarui $AGO$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "1,204"
+      },
+      "ago": {
+        "content": "$2",
+        "example": "12 minutes ago"
+      }
+    }
+  },
+  "hotListOff": {
+    "message": "Daftar terkini: nonaktif"
+  },
+  "hotListSub": {
+    "message": "…dan daftar terkini 48 jam terakhir, disegarkan tiap jam."
   },
   "optAdvancedFeedUrl": {
     "message": "Lanjutan: URL daftar"
@@ -1013,8 +1047,28 @@
       }
     }
   },
-  "reason_brandForeignSuffix": { "message": "Uses $BRAND$'s name on a .$SUFFIX$ address the real $BRAND$ never uses.", "placeholders": { "brand": { "content": "$1", "example": "Roblox" }, "suffix": { "content": "$2", "example": "com.do" } } },
-  "reason_gatewayRedirect": { "message": "This page was reached through a short redirect link on $HOST$ that led to a completely different site — a common scam-gateway pattern.", "placeholders": { "host": { "content": "$1", "example": "mgpxq.com" } } },
+  "reason_brandForeignSuffix": {
+    "message": "Memakai nama $BRAND$ pada alamat .$SUFFIX$ yang tidak pernah dipakai $BRAND$ asli.",
+    "placeholders": {
+      "brand": {
+        "content": "$1",
+        "example": "Roblox"
+      },
+      "suffix": {
+        "content": "$2",
+        "example": "com.do"
+      }
+    }
+  },
+  "reason_gatewayRedirect": {
+    "message": "Halaman ini dicapai lewat tautan pengalihan singkat di $HOST$ yang menuju situs yang sama sekali berbeda — pola gerbang penipuan yang umum.",
+    "placeholders": {
+      "host": {
+        "content": "$1",
+        "example": "mgpxq.com"
+      }
+    }
+  },
   "reason_riskDynamicHost": {
     "message": "Domain di-host di penyedia DNS dinamis atau hosting gratis yang sering disalahgunakan untuk halaman penipuan."
   },
@@ -1090,8 +1144,24 @@
       }
     }
   },
-  "reason_credentialFormOnTenantHost": { "message": "Asks for a password on a free hosting site ($HOST$) — real services don't live there.", "placeholders": { "host": { "content": "$1", "example": "webflow.io" } } },
-  "reason_brandInTenantHost": { "message": "$BRAND$'s name is in the address of a free-hosting page that asks for a password.", "placeholders": { "brand": { "content": "$1", "example": "AT&T" } } },
+  "reason_credentialFormOnTenantHost": {
+    "message": "Meminta kata sandi di situs hosting gratis ($HOST$) — layanan sungguhan tidak berada di sana.",
+    "placeholders": {
+      "host": {
+        "content": "$1",
+        "example": "webflow.io"
+      }
+    }
+  },
+  "reason_brandInTenantHost": {
+    "message": "Nama $BRAND$ ada di alamat halaman hosting gratis yang meminta kata sandi.",
+    "placeholders": {
+      "brand": {
+        "content": "$1",
+        "example": "AT&T"
+      }
+    }
+  },
   "reason_brandIconMismatch": {
     "message": "Halaman ini menggunakan ikon $BRAND$ tetapi bukan situs web $BRAND$.",
     "placeholders": {
@@ -1302,7 +1372,15 @@
       }
     }
   },
-  "blockedLeadHot": { "message": "$HOST$ was reported for phishing in the last two days, so the page was stopped before it could load. Nothing ran and nothing you typed was sent.", "placeholders": { "host": { "content": "$1", "example": "secure-paypa1-login.com" } } },
+  "blockedLeadHot": {
+    "message": "$HOST$ dilaporkan sebagai phishing dalam dua hari terakhir, sehingga halaman ini dihentikan sebelum sempat dimuat. Tidak ada yang dijalankan dan tidak ada yang Anda ketik yang terkirim.",
+    "placeholders": {
+      "host": {
+        "content": "$1",
+        "example": "secure-paypa1-login.com"
+      }
+    }
+  },
   "blockedAddress": {
     "message": "Alamat yang diblokir"
   },
@@ -1321,7 +1399,9 @@
   "blockedGoBack": {
     "message": "Kembali ke tempat aman"
   },
-  "blockedTrustSite": { "message": "Not a scam? Trust this site" },
+  "blockedTrustSite": {
+    "message": "Bukan penipuan? Percayai situs ini"
+  },
   "blockedVisitAnyway": {
     "message": "Tetap kunjungi (tidak disarankan)"
   },

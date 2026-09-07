@@ -34,7 +34,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   // dangerous shot either way, but the language-picker shot's popup is short
   // enough to show it, and a stale version banner is not what that shot is
   // about.
-  await sw.evaluate(() => setSettings({ threatsBlocked: 23, whatsNewSeen: '0.12.0' }));
+  await sw.evaluate(() => setSettings({ threatsBlocked: 23, whatsNewSeen: '0.13.0' }));
 
   // Statistics-tab seed. The dashboard is the one surface that looks empty on
   // a fresh profile — a store shot of it has to show a real install's worth of

@@ -70,7 +70,7 @@ ScamShield watches every page you open and steps in only when something looks wr
 - **Page analysis** — an on-device model reads the page itself (wording, layout, login-form structure), catching brand-new phishing pages that a URL-only check would miss.
 - **Brand look-alike detection by icon** — favicons and logos are perceptually hashed and matched against a 64-brand table (49 with icon hashes) including UAE banks, telcos and government services (Emirates NBD, ADCB, FAB, Mashreq, RAKBANK, e&, du, Noon, Aramex, Talabat, Careem, ADNOC, DEWA, ICP, MOHRE, Dubai Police, UAE PASS, Emirates, Etihad) plus PayPal, Microsoft, Google, Apple, DHL and more. A page using a brand's icon with a password form on the wrong domain is flagged even if the brand's name never appears.
 - **URL model + heuristics** — a gradient-boosted URL classifier and hand-written rules (look-alike domains, punycode, suspicious tokens, IP hosts, deep-path tricks, brand-in-subdomain, …), with a built-in safe-domain allowlist for top sites.
-- **Known-bad domain blocking** — a `declarativeNetRequest` ruleset refreshed daily from the open-source [scamshield-feed](https://github.com/joelstephen97/scamshield-feed) (14 aggregated open-source threat databases, ~425k confirmed-bad domains + ~1M watchlist, heavily false-positive filtered).
+- **Known-bad domain blocking** — a `declarativeNetRequest` ruleset refreshed daily from the open-source [scamshield-feed](https://github.com/joelstephen97/scamshield-feed) (14 aggregated open-source threat databases, ~425k confirmed-bad domains + ~1M watchlist, heavily false-positive filtered), plus an **hourly hot list** of the last 48 hours' reports so a site that appeared this morning is blocked within about an hour.
 
 **Intervention**
 
@@ -88,6 +88,8 @@ ScamShield watches every page you open and steps in only when something looks wr
 - **Protection history and stats** — a local-only log of what was blocked or flagged (hostnames and event types only).
 - Redesigned popup and settings, dark mode, first-run onboarding, accessible warnings (`role=alert`/`role=dialog`, Escape-to-cancel, focus management).
 - Re-scans single-page apps on route changes.
+
+**Measured** — what ScamShield actually catches on live phishing pages, with the sampling method, the definitions behind "blocked"/"stopped"/"warned", and the benign-control false-positive count: [docs/benchmark.md](docs/benchmark.md).
 
 ## How it works
 

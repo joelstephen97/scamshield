@@ -35,8 +35,18 @@
   "trustThisSite": {
     "message": "Доверять этому сайту"
   },
-  "ackTrusted": { "message": "ScamShield won't flag $HOST$ again.", "placeholders": { "host": { "content": "$1", "example": "secure-paypa1-login.com" } } },
-  "undo": { "message": "Undo" },
+  "ackTrusted": {
+    "message": "ScamShield больше не будет помечать $HOST$.",
+    "placeholders": {
+      "host": {
+        "content": "$1",
+        "example": "secure-paypa1-login.com"
+      }
+    }
+  },
+  "undo": {
+    "message": "Отменить"
+  },
   "popupPauseMenu": {
     "message": "Приостановить защиту ▾"
   },
@@ -517,7 +527,9 @@
   "remove": {
     "message": "Удалить"
   },
-  "trustedViaWarning": { "message": "Trusted via warning" },
+  "trustedViaWarning": {
+    "message": "Доверено из предупреждения"
+  },
   "historyTitle": {
     "message": "История защиты"
   },
@@ -580,6 +592,28 @@
   },
   "feedNeverUpdated": {
     "message": "Никогда не обновлялось"
+  },
+  "hotListPending": {
+    "message": "Срочный список: ещё не загружен"
+  },
+  "hotListStatus": {
+    "message": "Срочный список: сайтов — $COUNT$, обновлён $AGO$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "1,204"
+      },
+      "ago": {
+        "content": "$2",
+        "example": "12 minutes ago"
+      }
+    }
+  },
+  "hotListOff": {
+    "message": "Срочный список: выключен"
+  },
+  "hotListSub": {
+    "message": "…и срочный список за последние 48 часов, обновляемый каждый час."
   },
   "optAdvancedFeedUrl": {
     "message": "Дополнительно: URL списка"
@@ -1013,8 +1047,28 @@
       }
     }
   },
-  "reason_brandForeignSuffix": { "message": "Uses $BRAND$'s name on a .$SUFFIX$ address the real $BRAND$ never uses.", "placeholders": { "brand": { "content": "$1", "example": "Roblox" }, "suffix": { "content": "$2", "example": "com.do" } } },
-  "reason_gatewayRedirect": { "message": "This page was reached through a short redirect link on $HOST$ that led to a completely different site — a common scam-gateway pattern.", "placeholders": { "host": { "content": "$1", "example": "mgpxq.com" } } },
+  "reason_brandForeignSuffix": {
+    "message": "Использует имя $BRAND$ в адресе .$SUFFIX$, который настоящий $BRAND$ никогда не использует.",
+    "placeholders": {
+      "brand": {
+        "content": "$1",
+        "example": "Roblox"
+      },
+      "suffix": {
+        "content": "$2",
+        "example": "com.do"
+      }
+    }
+  },
+  "reason_gatewayRedirect": {
+    "message": "На эту страницу привела короткая ссылка-переадресация на $HOST$, которая вела на совершенно другой сайт — типичный приём мошеннических шлюзов.",
+    "placeholders": {
+      "host": {
+        "content": "$1",
+        "example": "mgpxq.com"
+      }
+    }
+  },
   "reason_riskDynamicHost": {
     "message": "Домен размещён у провайдера динамического DNS или бесплатного хостинга, часто используемого для мошеннических страниц."
   },
@@ -1090,8 +1144,24 @@
       }
     }
   },
-  "reason_credentialFormOnTenantHost": { "message": "Asks for a password on a free hosting site ($HOST$) — real services don't live there.", "placeholders": { "host": { "content": "$1", "example": "webflow.io" } } },
-  "reason_brandInTenantHost": { "message": "$BRAND$'s name is in the address of a free-hosting page that asks for a password.", "placeholders": { "brand": { "content": "$1", "example": "AT&T" } } },
+  "reason_credentialFormOnTenantHost": {
+    "message": "Запрашивает пароль на бесплатном хостинге ($HOST$) — настоящие сервисы там не размещаются.",
+    "placeholders": {
+      "host": {
+        "content": "$1",
+        "example": "webflow.io"
+      }
+    }
+  },
+  "reason_brandInTenantHost": {
+    "message": "Имя $BRAND$ есть в адресе страницы на бесплатном хостинге, которая запрашивает пароль.",
+    "placeholders": {
+      "brand": {
+        "content": "$1",
+        "example": "AT&T"
+      }
+    }
+  },
   "reason_brandIconMismatch": {
     "message": "Эта страница использует значок $BRAND$, но не является сайтом $BRAND$.",
     "placeholders": {
@@ -1302,7 +1372,15 @@
       }
     }
   },
-  "blockedLeadHot": { "message": "$HOST$ was reported for phishing in the last two days, so the page was stopped before it could load. Nothing ran and nothing you typed was sent.", "placeholders": { "host": { "content": "$1", "example": "secure-paypa1-login.com" } } },
+  "blockedLeadHot": {
+    "message": "$HOST$ был отмечен как фишинговый за последние два дня, поэтому загрузка страницы была остановлена. Ничего не было запущено, и ничего из введённого вами не было отправлено.",
+    "placeholders": {
+      "host": {
+        "content": "$1",
+        "example": "secure-paypa1-login.com"
+      }
+    }
+  },
   "blockedAddress": {
     "message": "Заблокированный адрес"
   },
@@ -1321,7 +1399,9 @@
   "blockedGoBack": {
     "message": "Вернуться в безопасное место"
   },
-  "blockedTrustSite": { "message": "Not a scam? Trust this site" },
+  "blockedTrustSite": {
+    "message": "Это не мошенники? Доверять этому сайту"
+  },
   "blockedVisitAnyway": {
     "message": "Всё равно перейти (не рекомендуется)"
   },

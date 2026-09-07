@@ -84,16 +84,16 @@ Con số cụ thể, không phải mỹ từ: 20 ngôn ngữ với đầy đủ 
 
 Mã nguồn, chính sách quyền riêng tư và trình theo dõi lỗi: github.com/joelstephen97/scamshield
 
-## What's new (0.12.0)
+## What's new (0.13.0)
 
-• Các trang lừa đảo đã biết giờ đây sẽ mở trang chặn của ScamShield. Khi một trang trong danh sách chặn bị dừng trước khi tải xong, bạn sẽ không còn thấy màn hình lỗi trống của trình duyệt nữa. ScamShield cho bạn biết lý do trang bị chặn, đếm số lần bắt được vào thống kê của bạn, và cho phép bạn tạm dừng việc chặn trong một giờ nếu bạn nghĩ đó là nhầm lẫn.
+• Danh sách khẩn mỗi giờ. Bên cạnh danh sách mối đe dọa được dựng lại hằng ngày, ScamShield nay tải về mỗi giờ một danh sách ngắn các trang bị báo cáo trong 48 giờ qua. Một trang lừa đảo xuất hiện sáng nay thường đã bị chặn trước khi kịp tải, trong khoảng một giờ sau khi bị báo cáo. Đó là cùng một tệp công khai cho mọi người, tải về như mọi tệp khác: không cần tài khoản, và không có gì về bạn hay việc duyệt web của bạn đi đâu cả.
 
-• Quét mã QR ngay trên thiết bị. ScamShield giờ đây có thể giải mã các mã QR trong hình ảnh của trang và kiểm tra chúng dẫn đến đâu trước khi bạn quét bằng điện thoại. Đây là giải pháp chạy trên thiết bị cho các email "quishing" (lừa đảo qua mã QR). Bạn có thể quét bất kỳ trang nào từ popup, hoặc để chế độ quét tự động luôn bật. Không có thông tin nào về mã QR rời khỏi thiết bị của bạn.
+• Tin cậy trang này, từ mọi cảnh báo. Thanh cảnh báo, cảnh báo toàn màn hình và trang chặn nay đều có nút "Không phải lừa đảo? Tin cậy trang này" chỉ một lần bấm, kèm hoàn tác nếu bạn lỡ tay. Những trang bạn đã tin cậy từ một cảnh báo được gắn nhãn như vậy trong Cài đặt, nên bạn luôn thấy được từng trang đã vào danh sách bằng cách nào.
 
-• Bảo vệ chống đánh cắp thẻ giờ bao phủ cả biểu mẫu tự động gửi. Một biểu mẫu đăng nhập hoặc thẻ mà trang tự động gửi sang tên miền khác, không chỉ biểu mẫu do chính bạn gửi, giờ cũng kích hoạt cảnh báo liên trang tương tự.
+• Phủ nhiều thương hiệu hơn. Bộ kiểm tra trang nhái nay biết hơn 300 thương hiệu, nên nhiều trang đăng nhập giả mạo của ngân hàng, dịch vụ giao hàng và trò chơi bị phát hiện qua tên chứ không chỉ qua logo.
 
-• Danh sách miễn trừ báo động giả trong nguồn dữ liệu mối đe dọa được mở rộng, để nhiều tên miền ngân hàng khu vực, cơ quan nhà nước và sàn thương mại điện tử hơn không bao giờ bị chặn nhầm do một nguồn dữ liệu bị nhiễm độc.
+• Ít báo động nhầm hơn trên trang thật. Các trang thật của ngân hàng, cơ quan nhà nước và doanh nghiệp dùng địa chỉ theo kiểu quốc gia (chẳng hạn tên miền .bank.in của chính một ngân hàng) không còn hiện thanh cảnh báo nữa.
 
-• Giảm bớt cảnh báo trong bảng điều khiển (console) trên các trang như Gmail.
+• Đo đạc, không phải tuyên bố. Trên mẫu gồm [[N]] trang lừa đảo đang hoạt động lấy từ các nguồn công khai mà ScamShield không dùng, [[BLOCKED]] % bị chặn trước khi trang kịp tải và [[STOPPED]] % bị ngăn lại bằng cách này hay cách khác. Phương pháp, định nghĩa và bảng đầy đủ nằm trong docs/benchmark.md ở kho GitHub của dự án.
 
-Không có quyền mới nào. Vẫn chỉ gồm storage, declarativeNetRequest, alarms và quyền truy cập http/https, giống như mọi phiên bản kể từ 0.3.1.
+Không thêm quyền mới. Vẫn là storage, declarativeNetRequest, alarms và quyền truy cập http/https, giống mọi phiên bản kể từ 0.3.1.

@@ -18,6 +18,8 @@ __pycache__/
 docs/*
 # ...except the public, linked-from-Pages/store competitor comparison
 !docs/comparison.md
+# ...and the public benchmark the store listing and README point at
+!docs/benchmark.md
 
 # local git worktrees
 .worktrees/

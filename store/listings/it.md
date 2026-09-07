@@ -84,16 +84,16 @@ Numeri concreti, non aggettivi: 20 lingue con traduzione completa di menu, avvis
 
 Codice sorgente, informativa sulla privacy e tracciamento dei problemi: github.com/joelstephen97/scamshield
 
-## What's new (0.12.0)
+## What's new (0.13.0)
 
-• I siti di truffa conosciuti ora aprono una pagina di blocco di ScamShield. Quando un sito presente nell'elenco di blocco viene fermato prima che si carichi, non vedi più un errore vuoto del browser. ScamShield ti spiega perché il sito è stato bloccato, conta il blocco nelle tue statistiche e ti permette di mettere in pausa il blocco per un'ora se pensi che sia un errore.
+• Un elenco urgente ogni ora. Oltre all'elenco delle minacce ricostruito ogni giorno, ScamShield scarica ora una volta all'ora un breve elenco dei siti segnalati nelle ultime 48 ore. Un sito truffa comparso stamattina viene di solito bloccato prima di potersi caricare, entro circa un'ora dalla segnalazione. È lo stesso file pubblico per tutti, scaricato come qualsiasi altro file: nessun account, e nulla che riguardi te o la tua navigazione va da qualche parte.
 
-• Scansione dei codici QR, sul tuo dispositivo. ScamShield ora decodifica i codici QR nelle immagini di una pagina e controlla dove portano prima che tu li scansioni con il telefono. È la risposta sul dispositivo alle email di "quishing" (phishing tramite QR). Scansiona qualsiasi pagina dal popup, oppure lascia attiva la scansione automatica. Niente sul codice lascia il tuo dispositivo.
+• Considera affidabile questo sito, da qualsiasi avviso. Il banner, l'avviso a schermo intero e la pagina di blocco offrono ora tutti un "Non è una truffa? Considera affidabile questo sito" in un clic, con annullamento se lo premi per sbaglio. I siti resi affidabili da un avviso sono contrassegnati come tali nelle impostazioni, così vedi sempre come ciascuno è finito nell'elenco.
 
-• La protezione dal furto di carte ora copre anche i moduli inviati automaticamente. Un modulo di accesso o di pagamento che una pagina invia da sola a un altro dominio, non solo quello che invii tu, ora attiva lo stesso avviso tra siti diversi.
+• Più marchi coperti. Il controllo dei sosia conosce ora oltre 300 marchi, quindi vengono riconosciute più pagine di accesso false di banche, corrieri e giochi, sia dal nome sia dal logo.
 
-• Una lista di eccezioni per i falsi positivi più ampia nel feed delle minacce, così più domini di banche regionali, enti pubblici e negozi online non possono mai essere bloccati da una fonte compromessa.
+• Meno falsi allarmi sui siti veri. I siti autentici di banche, enti pubblici e aziende che usano un indirizzo di tipo nazionale (per esempio il dominio .bank.in di una banca) non ricevono più un banner di avviso.
 
-• Meno avvisi in console su siti come Gmail.
+• Misurato, non dichiarato. Su un campione di [[N]] pagine di phishing attive prese da fonti pubbliche che ScamShield non utilizza, il [[BLOCKED]] % è stato bloccato prima che la pagina potesse caricarsi e il [[STOPPED]] % è stato fermato in un modo o nell'altro. Metodo, definizioni e tabella completa si trovano in docs/benchmark.md, nel repository GitHub del progetto.
 
 Nessun nuovo permesso. Sempre storage, declarativeNetRequest, alarms e accesso http/https, come in ogni versione dalla 0.3.1.

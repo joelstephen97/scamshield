@@ -35,8 +35,18 @@
   "trustThisSite": {
     "message": "Bu siteye güven"
   },
-  "ackTrusted": { "message": "ScamShield won't flag $HOST$ again.", "placeholders": { "host": { "content": "$1", "example": "secure-paypa1-login.com" } } },
-  "undo": { "message": "Undo" },
+  "ackTrusted": {
+    "message": "ScamShield $HOST$ adresini bir daha işaretlemeyecek.",
+    "placeholders": {
+      "host": {
+        "content": "$1",
+        "example": "secure-paypa1-login.com"
+      }
+    }
+  },
+  "undo": {
+    "message": "Geri al"
+  },
   "popupPauseMenu": {
     "message": "Korumayı duraklat ▾"
   },
@@ -517,7 +527,9 @@
   "remove": {
     "message": "Kaldır"
   },
-  "trustedViaWarning": { "message": "Trusted via warning" },
+  "trustedViaWarning": {
+    "message": "Uyarı üzerinden güvenildi"
+  },
   "historyTitle": {
     "message": "Koruma geçmişi"
   },
@@ -580,6 +592,28 @@
   },
   "feedNeverUpdated": {
     "message": "Hiç güncellenmedi"
+  },
+  "hotListPending": {
+    "message": "Acil liste: henüz indirilmedi"
+  },
+  "hotListStatus": {
+    "message": "Acil liste: $COUNT$ site, $AGO$ güncellendi",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "1,204"
+      },
+      "ago": {
+        "content": "$2",
+        "example": "12 minutes ago"
+      }
+    }
+  },
+  "hotListOff": {
+    "message": "Acil liste: kapalı"
+  },
+  "hotListSub": {
+    "message": "…ve son 48 saatin acil listesi, saatlik yenilenir."
   },
   "optAdvancedFeedUrl": {
     "message": "Gelişmiş: besleme URL'si"
@@ -1013,8 +1047,28 @@
       }
     }
   },
-  "reason_brandForeignSuffix": { "message": "Uses $BRAND$'s name on a .$SUFFIX$ address the real $BRAND$ never uses.", "placeholders": { "brand": { "content": "$1", "example": "Roblox" }, "suffix": { "content": "$2", "example": "com.do" } } },
-  "reason_gatewayRedirect": { "message": "This page was reached through a short redirect link on $HOST$ that led to a completely different site — a common scam-gateway pattern.", "placeholders": { "host": { "content": "$1", "example": "mgpxq.com" } } },
+  "reason_brandForeignSuffix": {
+    "message": "Gerçek $BRAND$ markasının hiç kullanmadığı bir .$SUFFIX$ adresinde $BRAND$ adını kullanıyor.",
+    "placeholders": {
+      "brand": {
+        "content": "$1",
+        "example": "Roblox"
+      },
+      "suffix": {
+        "content": "$2",
+        "example": "com.do"
+      }
+    }
+  },
+  "reason_gatewayRedirect": {
+    "message": "Bu sayfaya $HOST$ üzerindeki kısa bir yönlendirme bağlantısıyla ulaşıldı ve bağlantı tamamen farklı bir siteye götürdü — dolandırıcılık geçitlerinin bilinen bir yöntemi.",
+    "placeholders": {
+      "host": {
+        "content": "$1",
+        "example": "mgpxq.com"
+      }
+    }
+  },
   "reason_riskDynamicHost": {
     "message": "Alan adı, dolandırıcılık sayfaları için sıkça kötüye kullanılan bir dinamik DNS veya ücretsiz barındırma sağlayıcısında barındırılıyor."
   },
@@ -1090,8 +1144,24 @@
       }
     }
   },
-  "reason_credentialFormOnTenantHost": { "message": "Asks for a password on a free hosting site ($HOST$) — real services don't live there.", "placeholders": { "host": { "content": "$1", "example": "webflow.io" } } },
-  "reason_brandInTenantHost": { "message": "$BRAND$'s name is in the address of a free-hosting page that asks for a password.", "placeholders": { "brand": { "content": "$1", "example": "AT&T" } } },
+  "reason_credentialFormOnTenantHost": {
+    "message": "Ücretsiz bir barındırma sitesinde ($HOST$) parola istiyor — gerçek hizmetler orada barınmaz.",
+    "placeholders": {
+      "host": {
+        "content": "$1",
+        "example": "webflow.io"
+      }
+    }
+  },
+  "reason_brandInTenantHost": {
+    "message": "Parola isteyen ücretsiz barındırma sayfasının adresinde $BRAND$ adı geçiyor.",
+    "placeholders": {
+      "brand": {
+        "content": "$1",
+        "example": "AT&T"
+      }
+    }
+  },
   "reason_brandIconMismatch": {
     "message": "Bu sayfa $BRAND$'ın simgesini kullanıyor ama $BRAND$'ın web sitesi değil.",
     "placeholders": {
@@ -1302,7 +1372,15 @@
       }
     }
   },
-  "blockedLeadHot": { "message": "$HOST$ was reported for phishing in the last two days, so the page was stopped before it could load. Nothing ran and nothing you typed was sent.", "placeholders": { "host": { "content": "$1", "example": "secure-paypa1-login.com" } } },
+  "blockedLeadHot": {
+    "message": "$HOST$ son iki gün içinde kimlik avı nedeniyle bildirildi, bu yüzden sayfa yüklenmeden durduruldu. Hiçbir şey çalışmadı ve yazdığınız hiçbir şey gönderilmedi.",
+    "placeholders": {
+      "host": {
+        "content": "$1",
+        "example": "secure-paypa1-login.com"
+      }
+    }
+  },
   "blockedAddress": {
     "message": "Engellenen adres"
   },
@@ -1321,7 +1399,9 @@
   "blockedGoBack": {
     "message": "Güvenliğe geri dön"
   },
-  "blockedTrustSite": { "message": "Not a scam? Trust this site" },
+  "blockedTrustSite": {
+    "message": "Dolandırıcılık değil mi? Bu siteye güven"
+  },
   "blockedVisitAnyway": {
     "message": "Yine de ziyaret et (önerilmez)"
   },

@@ -84,16 +84,16 @@ Des chiffres concrets, pas des adjectifs : 20 langues avec traduction complète 
 
 Code source, politique de confidentialité et suivi des problèmes : github.com/joelstephen97/scamshield
 
-## What's new (0.12.0)
+## What's new (0.13.0)
 
-• Les sites d'arnaque connus ouvrent désormais une page de blocage ScamShield. Lorsqu'un site figurant sur la liste de blocage est arrêté avant de se charger, vous ne voyez plus une erreur de navigateur vierge. ScamShield vous explique pourquoi le site a été bloqué, comptabilise l'interception dans vos statistiques et vous permet de suspendre le blocage pendant une heure si vous pensez qu'il s'agit d'une erreur.
+• Une liste urgente toutes les heures. En plus de la liste des menaces reconstruite chaque jour, ScamShield télécharge désormais, une fois par heure, une courte liste des sites signalés au cours des 48 dernières heures. Un site frauduleux apparu ce matin est généralement bloqué avant de pouvoir se charger, environ une heure après son signalement. C'est le même fichier public pour tout le monde, téléchargé comme n'importe quel fichier : aucun compte, et rien vous concernant ni concernant votre navigation ne part où que ce soit.
 
-• Analyse des codes QR, sur votre appareil. ScamShield décode désormais les codes QR présents dans les images d'une page et vérifie où ils mènent avant que vous ne les scanniez avec votre téléphone. C'est la réponse embarquée au « quishing » (phishing par code QR) par e-mail. Analysez n'importe quelle page depuis la fenêtre de l'extension, ou laissez l'analyse automatique activée. Rien concernant le code ne quitte votre appareil.
+• Faire confiance à ce site, depuis n'importe quel avertissement. La bannière, l'avertissement plein écran et la page de blocage proposent maintenant tous un « Ce n'est pas une arnaque ? Faire confiance à ce site » en un clic, avec annulation si vous appuyez dessus par erreur. Les sites approuvés depuis un avertissement sont signalés comme tels dans les paramètres, pour que vous voyiez toujours comment chacun est arrivé dans la liste.
 
-• La protection contre le vol de carte couvre désormais les formulaires envoyés automatiquement. Un formulaire de connexion ou de carte qu'une page envoie elle-même vers un autre domaine, pas seulement celui que vous envoyez, déclenche désormais le même avertissement de site croisé.
+• Plus de marques couvertes. Le détecteur de sosies connaît désormais plus de 300 marques : davantage de fausses pages de connexion bancaires, de livraison ou de jeu sont repérées par le nom autant que par le logo.
 
-• Une liste blanche anti-faux positifs élargie dans le flux de menaces, pour que davantage de domaines de banques régionales, d'administrations et de places de marché ne puissent jamais être bloqués par une source corrompue.
+• Moins de fausses alertes sur les vrais sites. Les sites authentiques de banques, d'administrations et d'entreprises qui utilisent une adresse de type national (par exemple le domaine .bank.in propre à une banque) ne déclenchent plus de bannière.
 
-• Moins d'avertissements dans la console sur des sites comme Gmail.
+• Mesuré, pas affirmé. Sur un échantillon de [[N]] pages d'hameçonnage actives issues de sources publiques que ScamShield n'utilise pas, [[BLOCKED]] % ont été bloquées avant que la page puisse se charger et [[STOPPED]] % ont été arrêtées d'une manière ou d'une autre. La méthode, les définitions et le tableau complet se trouvent dans docs/benchmark.md, dans le dépôt GitHub du projet.
 
-Aucune nouvelle permission. Toujours storage, declarativeNetRequest, alarms et l'accès http/https, comme dans chaque version depuis la 0.3.1.
+Aucune nouvelle autorisation. Toujours storage, declarativeNetRequest, alarms et l'accès http/https, comme dans chaque version depuis la 0.3.1.

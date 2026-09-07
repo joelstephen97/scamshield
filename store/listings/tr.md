@@ -84,16 +84,16 @@ Sıfatlar değil somut sayılar: menü, uyarı ve ayarların tamamı çevrilmiş
 
 Kaynak kod, gizlilik politikası ve hata takip sistemi: github.com/joelstephen97/scamshield
 
-## What's new (0.12.0)
+## What's new (0.13.0)
 
-• Bilinen dolandırıcılık siteleri artık bir ScamShield engelleme sayfası açıyor. Engelleme listesindeki bir site yüklenmeden durdurulduğunda, artık boş bir tarayıcı hatası görmüyorsunuz. ScamShield, sitenin neden engellendiğini açıklıyor, yakalamayı istatistiklerinize ekliyor ve bunun bir hata olduğunu düşünüyorsanız engellemeyi bir saatliğine duraklatmanıza olanak tanıyor.
+• Saatlik acil liste. Her gün yeniden oluşturulan tehdit listesinin yanı sıra ScamShield artık saatte bir, son 48 saat içinde bildirilen sitelerin kısa bir listesini indiriyor. Bu sabah ortaya çıkan bir dolandırıcılık sitesi, bildirilmesinden yaklaşık bir saat sonra genellikle yüklenemeden durduruluyor. Herkes için aynı olan açık bir dosya, herhangi bir dosya indirmesi gibi alınıyor: hesap yok ve sizinle ya da gezinmenizle ilgili hiçbir şey hiçbir yere gitmiyor.
 
-• Cihazınızda QR kodu taraması. ScamShield artık bir sayfanın görsellerindeki QR kodlarını çözüyor ve siz telefonunuzla taramadan önce nereye gittiklerini kontrol ediyor. Bu, "quishing" (QR kod kimlik avı) e-postalarına cihaz üzerinde verilen yanıttır. Herhangi bir sayfayı açılır pencereden tarayabilir veya otomatik taramayı açık bırakabilirsiniz. Kod hakkında hiçbir şey cihazınızdan çıkmaz.
+• Her uyarıdan bu siteye güvenme. Şerit uyarı, tam sayfa uyarı ve engelleme sayfası artık tek tıkla "Dolandırıcılık değil mi? Bu siteye güven" seçeneği sunuyor; yanlışlıkla bastıysanız geri alabiliyorsunuz. Bir uyarıdan güvendiğiniz siteler ayarlarda böyle etiketleniyor, böylece her birinin listeye nasıl girdiğini her zaman görebiliyorsunuz.
 
-• Kart hırsızlığı koruması artık otomatik gönderilen formları da kapsıyor. Bir sayfanın kendiliğinden başka bir alan adına gönderdiği bir giriş veya kart formu, yalnızca sizin gönderdiğiniz değil, artık aynı siteler arası uyarıyı tetikliyor.
+• Daha geniş marka kapsamı. Benzer görünüm denetimi artık 300'den fazla markayı tanıyor; sahte banka, kargo ve oyun giriş sayfaları yalnızca logodan değil addan da yakalanıyor.
 
-• Tehdit akışında daha geniş bir yanlış pozitif izin listesi, böylece daha fazla bölgesel banka, devlet ve pazar yeri alan adı, zehirlenmiş bir kaynak tarafından asla engellenemez.
+• Gerçek sitelerde daha az yanlış alarm. Ülkeye özgü bir adres kullanan gerçek banka, kamu kurumu ve şirket siteleri (örneğin bir bankanın kendi .bank.in alan adı) artık uyarı şeridi almıyor.
 
-• Gmail gibi sitelerde daha az konsol uyarısı.
+• İddia değil, ölçüm. ScamShield'ın kullanmadığı açık kaynaklardan alınan [[N]] canlı kimlik avı sayfasından oluşan bir örneklemde, sayfaların % [[BLOCKED]] kadarı yüklenemeden engellendi ve % [[STOPPED]] kadarı şu ya da bu şekilde durduruldu. Yöntem, tanımlar ve tam tablo, projenin GitHub deposundaki docs/benchmark.md dosyasında.
 
-Yeni izin yok. 0.3.1'den bu yana her sürümde olduğu gibi hâlâ storage, declarativeNetRequest, alarms ve http/https erişimi.
+Yeni izin yok. Yine storage, declarativeNetRequest, alarms ve http/https erişimi; 0.3.1'den bu yana her sürümdeki gibi.

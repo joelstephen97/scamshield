@@ -84,16 +84,16 @@ Cifras concretas, no adjetivos: 20 idiomas con traducción completa de menús, a
 
 Código fuente, política de privacidad y seguimiento de incidencias: github.com/joelstephen97/scamshield
 
-## What's new (0.12.0)
+## What's new (0.13.0)
 
-• Los sitios fraudulentos conocidos ahora abren una página de bloqueo de ScamShield. Cuando se detiene un sitio de la lista de bloqueo antes de que cargue, ya no ves un error en blanco del navegador. ScamShield te explica por qué se bloqueó el sitio, cuenta la detección en tus estadísticas y te deja pausar el bloqueo durante una hora si crees que es un error.
+• Una lista urgente cada hora. Además de la lista de amenazas que se reconstruye a diario, ScamShield descarga ahora, una vez por hora, una lista corta de sitios denunciados en las últimas 48 horas. Un sitio fraudulento que apareció esta mañana suele quedar bloqueado antes de cargarse, alrededor de una hora después de la denuncia. Es el mismo archivo público para todo el mundo, descargado como cualquier otro archivo: sin cuenta, y sin que nada sobre ti o tu navegación salga a ninguna parte.
 
-• Escaneo de códigos QR, en tu dispositivo. ScamShield ahora decodifica los códigos QR que aparecen en las imágenes de una página y verifica adónde llevan antes de que los escanees con tu teléfono. Esta es la respuesta local al "quishing" (phishing mediante códigos QR) por correo electrónico. Escanea cualquier página desde la ventana emergente, o deja activado el escaneo automático. Nada sobre el código sale de tu dispositivo.
+• Confiar en este sitio, desde cualquier aviso. El banner, el aviso a pantalla completa y la página de bloqueo incluyen ahora un "¿No es una estafa? Confiar en este sitio" de un solo clic, con opción de deshacer si lo pulsas sin querer. Los sitios en los que confiaste desde un aviso quedan marcados como tales en Ajustes, así que siempre ves cómo llegó cada uno a la lista.
 
-• La protección contra robo de tarjetas ahora cubre los formularios que se envían automáticamente. Un formulario de inicio de sesión o de tarjeta que una página envía por sí sola a otro dominio, no solo uno que tú envías, ahora activa la misma advertencia entre sitios.
+• Más marcas cubiertas. El detector de imitaciones conoce ahora más de 300 marcas, así que se detectan más inicios de sesión falsos de bancos, mensajería y videojuegos tanto por el nombre como por el logotipo.
 
-• Una lista de exclusión más amplia contra falsos positivos en el feed de amenazas, para que más dominios de bancos regionales, gobierno y comercios nunca puedan bloquearse por una fuente comprometida.
+• Menos falsas alarmas en sitios reales. Los sitios auténticos de bancos, administraciones y empresas que usan una dirección de tipo nacional (por ejemplo el dominio .bank.in propio de un banco) ya no reciben un aviso.
 
-• Menos advertencias en la consola en sitios como Gmail.
+• Medido, no prometido. En una muestra de [[N]] páginas de phishing activas tomadas de fuentes públicas que ScamShield no utiliza, se bloqueó el [[BLOCKED]] % antes de que la página pudiera cargarse y se detuvo de un modo u otro el [[STOPPED]] %. El método, las definiciones y la tabla completa están en docs/benchmark.md, en el repositorio de GitHub del proyecto.
 
-Sin permisos nuevos. Sigue usando storage, declarativeNetRequest, alarms y acceso a http/https, igual que en cada versión desde la 0.3.1.
+Sin permisos nuevos. Siguen siendo storage, declarativeNetRequest, alarms y acceso http/https, los mismos que en todas las versiones desde la 0.3.1.

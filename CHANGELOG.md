@@ -2,6 +2,46 @@
 
 All notable changes to ScamShield. Versions are git tags (`vX.Y.Z`); the version on the [Chrome Web Store](https://chromewebstore.google.com/detail/fojjjofjimbfoddafoampojopijnlihl) may lag a tag by a few days while Google reviews it. Privacy-relevant changes are also reflected in the [privacy policy](https://joelstephen97.github.io/scamshield/privacy.html).
 
+## 0.13.0 — 2026-09-07
+
+### New
+- **An hourly hot list: new scam sites blocked within about an hour.** The
+  threat list is rebuilt daily, which is fast for a blocklist and slow for
+  phishing — most phishing pages do their damage in the first day. ScamShield
+  now also downloads a small "hot" list of domains reported in the last 48
+  hours, once an hour, and turns them into the same network-level block rules
+  as the main list (so they land on the ScamShield block page, count in your
+  statistics, and can be paused or trusted like anything else). It is one
+  static file, the same for every user, fetched from the open-source feed the
+  way the daily list already is: no account, no request that says anything
+  about you, and still zero requests to us. Turning off "Block known scam
+  sites" turns the hot list off with it.
+- **"Trust this site" on every warning.** The banner, the full-page warning
+  and the block page now all carry a one-click "Not a scam? Trust this site",
+  with an undo if you hit it by accident. Sites trusted that way are tagged
+  "Trusted via warning" in Settings, so a domain you allowed from a scary page
+  is never indistinguishable from one you added deliberately.
+- **Wider brand coverage.** The look-alike checker now knows over 300 brands
+  (up from 64), so more fake bank, delivery, telecom and gaming logins are
+  caught by name as well as by logo — including brand names hiding inside a
+  free-hosting address, and brand names on a country suffix the real brand
+  never uses.
+- **A published benchmark.** `docs/benchmark.md` states what we measure, how
+  the sample is drawn, what "blocked", "stopped" and "warned" mean, and what
+  the numbers do not show. The store listing and README point at it.
+
+### Fixed
+- **No more banner on real banks with a country-style address.** Legitimate
+  bank, government and company sites on a national domain (hdfc.bank.in and
+  icici.bank.in were the reported cases) were being flagged as brand
+  look-alikes by their own name. They are not any more.
+- The hot-list, allowlist and pause paths that install network rules are now
+  serialised, so two of them arriving at once can no longer collide and drop
+  the block rules.
+
+No new permissions. Still storage, declarativeNetRequest, alarms and
+http/https access, the same as every version since 0.3.1.
+
 ## 0.12.1 — 2026-09-06
 
 ### Changed

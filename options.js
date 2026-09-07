@@ -128,6 +128,27 @@ async function load() {
   }
   $('feeddot').classList.toggle('ok', !!s.lastOtaAt);
   renderAllow(s.allowlist || [], s.pausedSites || {}, s.allowlistMeta || {});
+  // 0.13.0: the hourly hot list sits under the 12-hourly feed line. It is a
+  // separate download with its own freshness, so it gets its own dot/status
+  // rather than folding into the feed line above. `getHotStatus` answers
+  // { enabled, count, paths, updatedAt, generatedAt, dropped }; `enabled` is
+  // false when either "Block known scam sites" or the hot list itself is off.
+  // Queried after renderAllow so a slow service worker can't hold up the
+  // allowlist, which is the part of this page people actually come to edit.
+  const hot = await send('getHotStatus');
+  if (!hot || !hot.enabled) {
+    $('hotstatus').textContent = T('hotListOff', null, 'Hot list: off');
+    $('hotdot').classList.remove('ok');
+  } else if (!hot.updatedAt) {
+    // On since install but the first hourly fetch hasn't landed yet.
+    $('hotstatus').textContent = T('hotListPending', null, 'Hot list: not downloaded yet');
+    $('hotdot').classList.remove('ok');
+  } else {
+    const hotAgo = F.relTime(hot.updatedAt, undefined, UI_LANG);
+    const hotCount = num(hot.count);
+    $('hotstatus').textContent = T('hotListStatus', [bidi(hotCount), bidi(hotAgo)], `Hot list: ${hotCount} sites, updated ${hotAgo}`);
+    $('hotdot').classList.add('ok');
+  }
   const h = await send('getHistory'); renderHistory((h && h.history) || []);
 }
 function li(text, meta, btnText, onClick) {

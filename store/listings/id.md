@@ -84,16 +84,16 @@ Angka pasti, bukan kata sifat: 20 bahasa dengan terjemahan lengkap untuk menu, p
 
 Kode sumber, kebijakan privasi, dan pelacak masalah: github.com/joelstephen97/scamshield
 
-## What's new (0.12.0)
+## What's new (0.13.0)
 
-• Situs penipuan yang dikenal kini membuka halaman blokir ScamShield. Saat sebuah situs dalam daftar blokir dihentikan sebelum sempat dimuat, Anda tidak lagi melihat kesalahan browser yang kosong. ScamShield memberi tahu Anda alasan situs itu diblokir, mencatat tangkapan ini dalam statistik Anda, dan memungkinkan Anda menjeda blokir selama satu jam jika Anda merasa ini kesalahan.
+• Daftar terkini setiap jam. Selain daftar ancaman yang disusun ulang setiap hari, ScamShield kini mengunduh daftar pendek berisi situs yang dilaporkan dalam 48 jam terakhir, sekali tiap jam. Situs penipuan yang muncul pagi ini biasanya sudah dihentikan sebelum sempat dimuat, sekitar satu jam setelah dilaporkan. Berkasnya bersifat publik dan sama untuk semua orang, diunduh seperti unduhan berkas biasa: tanpa akun, dan tidak ada apa pun tentang Anda atau penjelajahan Anda yang dikirim ke mana pun.
 
-• Pemindaian kode QR, di perangkat Anda. ScamShield kini membaca kode QR dalam gambar halaman dan memeriksa ke mana kode itu mengarah sebelum Anda memindainya dengan ponsel. Ini adalah jawaban di perangkat untuk email "quishing" (phishing lewat kode QR). Pindai halaman mana pun dari popup, atau biarkan pemindaian otomatis tetap aktif. Tidak ada apa pun tentang kode itu yang keluar dari perangkat Anda.
+• Percayai situs ini, dari peringatan mana pun. Spanduk, peringatan satu layar penuh, dan halaman pemblokiran kini sama-sama menyediakan "Bukan penipuan? Percayai situs ini" dalam satu klik, lengkap dengan urungkan bila Anda menekannya tanpa sengaja. Situs yang Anda percayai lewat peringatan diberi tanda di Pengaturan, jadi Anda selalu tahu bagaimana masing-masing bisa masuk daftar.
 
-• Perlindungan pencurian kartu kini mencakup formulir yang terkirim otomatis. Formulir login atau kartu yang dikirim sendiri oleh sebuah halaman ke domain lain, tidak hanya yang Anda kirim sendiri, kini memicu peringatan lintas situs yang sama.
+• Cakupan merek lebih luas. Pemeriksa tiruan kini mengenal lebih dari 300 merek, sehingga makin banyak halaman masuk palsu bank, jasa kirim, dan gim yang tertangkap lewat nama, bukan cuma lewat logo.
 
-• Daftar putih anti-positif-palsu yang lebih luas dalam feed ancaman, sehingga lebih banyak domain bank regional, pemerintah, dan marketplace tidak akan pernah bisa diblokir oleh sumber yang tercemar.
+• Lebih sedikit alarm palsu di situs asli. Situs asli bank, instansi pemerintah, dan perusahaan yang memakai alamat bergaya negara (misalnya domain .bank.in milik sebuah bank) tidak lagi memunculkan spanduk peringatan.
 
-• Lebih sedikit peringatan konsol di situs seperti Gmail.
+• Diukur, bukan diklaim. Dari sampel [[N]] halaman phishing aktif yang diambil dari sumber publik yang tidak dipakai ScamShield, [[BLOCKED]] % diblokir sebelum halaman sempat dimuat dan [[STOPPED]] % dihentikan dengan satu atau lain cara. Metode, definisi, dan tabel lengkapnya ada di docs/benchmark.md pada repositori GitHub proyek ini.
 
 Tidak ada izin baru. Tetap storage, declarativeNetRequest, alarms, dan akses http/https, sama seperti setiap versi sejak 0.3.1.
