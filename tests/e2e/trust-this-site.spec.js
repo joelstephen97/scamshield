@@ -33,6 +33,18 @@ test('banner: Trust this site -> allowlisted, acknowledgement with Undo restores
   const s1 = await sw.evaluate(() => getSettings());
   expect(s1.allowlist).toContain(HOST);
   expect(s1.allowlistMeta[HOST].via).toBe('banner');
+  // In a full-batch run an earlier spec can leave the one-time support toast
+  // on screen; it is bottom-anchored and lands on top of the acknowledgement's
+  // Undo button, so Playwright's actionability check reports the toast's own
+  // Dismiss button as intercepting the click. Clear it with a real click and
+  // wait for it to detach, then click Undo normally — `force: true` would
+  // bypass the very trusted-click path this suite exists to prove.
+  const toast = page.locator('.scamshield-toast');
+  const toastDismiss = toast.locator('button');
+  if (await toastDismiss.first().isVisible().catch(() => false)) {
+    await toastDismiss.first().click();
+    await expect(toast).toHaveCount(0);
+  }
   await page.locator('.scamshield-ack .ss-undo').click();
   await expect.poll(async () => (await sw.evaluate(() => getSettings())).allowlist.includes(HOST), { timeout: 5000 }).toBe(false);
 });

@@ -48,6 +48,10 @@
   const CHUNK = 2500;          // domains per redirect rule (5,000 installed fine in Chrome 140; halved for headroom)
   const MAX_ALLOW = 1000;      // paused/trusted domains that get a network-level allow
   const MAX_PATH_RULES = 300;  // regex rules are capped at 1,000 across ALL rulesets in Chrome
+  // A syntactically valid hostname, label by label: 1-63 chars of [a-z0-9-],
+  // never starting or ending in a hyphen, two labels minimum. Used to keep
+  // junk out of `requestDomains` — see buildPathRedirectRules below.
+  const HOST_LABELS_RE = /^(?!-)[a-z0-9-]{1,63}(?<!-)(?:\.(?!-)[a-z0-9-]{1,63}(?<!-))+$/;
 
   function escapeRegex(s) { return String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
 
@@ -101,9 +105,10 @@
       if (out.length >= MAX_PATH_RULES) break;
       const h = e && typeof e.h === 'string' ? e.h.trim().toLowerCase() : '';
       const p = e && typeof e.p === 'string' ? e.p.trim() : '';
-      // At least one alphanumeric, and at least one dot with a non-empty
-      // label on each side — 'a.b' passes, '.', '---', 'foo' do not.
-      if (!h || !/^(?=.*[a-z0-9])[a-z0-9.-]+\.[a-z0-9-]+$/.test(h) || !p.startsWith('/') || p.length > 200) continue;
+      // Per-label DNS shape: every label is 1-63 chars of [a-z0-9-] with no
+      // leading or trailing hyphen, and there are at least two of them.
+      // Rejects 'foo-.com', '-foo.com', 'a..b', '.', '---' and bare 'foo'.
+      if (!h || !HOST_LABELS_RE.test(h) || !p.startsWith('/') || p.length > 200) continue;
       const key = h + p; if (seen.has(key)) continue; seen.add(key);
       out.push({
         id: PATH_BASE + out.length, priority: 2,

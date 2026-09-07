@@ -59,8 +59,12 @@
     B('ups', ['ups'], ['ups.com'], { nameMatch: false, display: 'UPS' }),
     B('docusign', ['docusign'], ['docusign.com', 'docusign.net'], { display: 'DocuSign', ccPolicy: 'closed', suffixes: ['com', 'net'] }),
     // dropbox.co.jp 301s to www.dropbox.com/ja/ (curl-verified 2026-09-07) —
-    // Dropbox's own JP storefront, so 'co.jp' is not a foreign suffix here.
-    B('dropbox', ['dropbox'], ['dropbox.com'], { ccPolicy: 'closed', suffixes: ['com', 'co.jp'] }),
+    // Dropbox's own JP storefront. Listed as an owned DOMAIN (appended, so
+    // domains[0] and therefore the fuzzy form stay 'dropbox'), not merely an
+    // allowed suffix: the suffix list only silences brandForeignSuffix, while
+    // the allowlist gate is what also stops fuzzy rule (c) grading Dropbox's
+    // own site as a TLD swap of itself.
+    B('dropbox', ['dropbox'], ['dropbox.com', 'dropbox.co.jp'], { ccPolicy: 'closed', suffixes: ['com', 'co.jp'] }),
     B('adobe', ['adobe'], ['adobe.com', 'adobelogin.com']),
     B('spotify', ['spotify'], ['spotify.com', 'scdn.co']),
     // fuzzy:false 2026-09-07 fix round: 'chase' is an ordinary English verb
@@ -117,7 +121,7 @@
   // BEGIN GENERATED BRANDS
   const BRANDS_GENERATED = [
     B('discord', ['discord chat', 'discord app'], ['discord.com', 'discordapp.com', 'discord.gg', 'discord.media'], { display: 'Discord', ccPolicy: 'closed', suffixes: ['com', 'gg', 'media'], fuzzy: false }),
-    B('ledger', ['ledger wallet', 'ledger live'], ['ledger.com'], { display: 'Ledger', ccPolicy: 'closed', suffixes: ['com', 'fr'] }),
+    B('ledger', ['ledger wallet', 'ledger live'], ['ledger.com', 'ledger.fr'], { display: 'Ledger', ccPolicy: 'closed', suffixes: ['com', 'fr'] }),
     B('trezor', ['trezor'], ['trezor.io'], { display: 'Trezor', ccPolicy: 'closed', suffixes: ['io'] }),
     B('phantom', ['phantom wallet'], ['phantom.app'], { display: 'Phantom', ccPolicy: 'closed', suffixes: ['app'] }),
     B('kraken', ['kraken exchange', 'kraken crypto'], ['kraken.com'], { display: 'Kraken', ccPolicy: 'closed', suffixes: ['com'], fuzzy: false }),

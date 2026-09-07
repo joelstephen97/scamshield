@@ -42,6 +42,23 @@ test('scoreUrl emits brandForeignSuffix (+0.6) and isOnBrand no longer trusts a 
   const ok = H.scoreDom({ pageHost: 'www.amazon.com.tr', hasPasswordField: true, titleBrand: 'Amazon' });
   assert.ok(!ok.flags.includes('brand-impersonation-content'));
 });
+// Re-review of the 0.13.0 fix wave: listing a brand-owned regional host in
+// `suffixes` only silences brandForeignSuffix — fuzzy rule (c) still graded
+// ledger.fr / dropbox.co.jp as a TLD swap of the brand's own name and put a
+// suspicious banner on the brand's own site. They are owned DOMAINS now, so
+// the allowlist gate short-circuits every brand heuristic.
+test('a brand-owned regional host scores clean, not "suspicious"', () => {
+  for (const url of ['https://ledger.fr/', 'https://www.ledger.fr/', 'https://dropbox.co.jp/', 'https://www.dropbox.co.jp/']) {
+    const u = H.scoreUrl(url);
+    assert.ok(u.score < 0.5, url + ' ' + JSON.stringify(u.reasons));
+    assert.ok(!u.reasons.some((r) => r.code === 'brandFuzzyMatch'), url + ' ' + JSON.stringify(u.reasons));
+    assert.ok(!u.reasons.some((r) => r.code === 'brandForeignSuffix'), url + ' ' + JSON.stringify(u.reasons));
+  }
+  // domains[0] is untouched, so the fuzzy form (and the MIN_BRAND_LEN gate
+  // that depends on it) is unchanged and typosquats are still caught.
+  assert.strictEqual(BM.fuzzyBrandMatch('ledgerr.com').brand, 'ledger');
+});
+
 test('platform_phish fixtures: every bench tenant miss now carries brand evidence', () => {
   for (const host of lines('platform_phish.txt')) {
     const u = H.scoreUrl('https://' + host + '/');

@@ -114,5 +114,12 @@ test('I4: the OTA feed leaves 1500 rules of headroom for the other DNR ranges', 
 });
 
 test('M1: awaitHotReady falls back to boot readiness instead of returning empty', () => {
-  assert.ok(/await awaitBootReady\(\)/.test(functionBody('awaitHotReady')), 'awaitHotReady awaits boot when no apply has started yet');
+  const body = functionBody('awaitHotReady');
+  assert.ok(/awaitBootReady\(\)/.test(body), 'awaitHotReady awaits boot when no apply has started yet');
+  // Re-review: awaitBootReady() swallows failures but never times out, so the
+  // fallback must carry the same bound the apply wait below it does.
+  const fallback = body.slice(0, body.indexOf('if (!hotReadyPromise) return;'));
+  assert.ok(/Promise\.race\(\[/.test(fallback), 'the boot fallback is raced, not awaited unbounded');
+  assert.ok(/setTimeout\(resolve, HOT_READY_TIMEOUT_MS\)/.test(fallback), 'the boot fallback is bounded by HOT_READY_TIMEOUT_MS');
+  assert.strictEqual((body.match(/Promise\.race\(\[/g) || []).length, 2, 'both the boot fallback and the apply wait are bounded');
 });

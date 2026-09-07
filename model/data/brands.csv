@@ -1,6 +1,6 @@
 key,display,names,domains,ccPolicy,suffixes,fuzzy,category,source
 discord,Discord,discord chat|discord app,discord.com|discordapp.com|discord.gg|discord.media,closed,com|gg|media,false,,curl-verified 2026-09-07 (FP-gate fix: discord.gg/media are Discord-owned)
-ledger,Ledger,ledger wallet|ledger live,ledger.com,closed,com|fr,true,,curl-verified 2026-09-07 (ledger.fr + www.ledger.fr 301 -> www.ledger.com: Ledger SAS; bare word 'ledger' dropped from names)
+ledger,Ledger,ledger wallet|ledger live,ledger.com|ledger.fr,closed,com|fr,true,,curl-verified 2026-09-07 (ledger.fr + www.ledger.fr 301 -> www.ledger.com: Ledger SAS - listed as an owned domain so the allowlist gate short-circuits fuzzy rule (c) too; bare word 'ledger' dropped from names)
 trezor,Trezor,trezor,trezor.io,closed,io,true,,curl-verified 2026-09-07
 phantom,Phantom,phantom wallet,phantom.app,closed,app,true,,curl-verified 2026-09-07
 kraken,Kraken,kraken exchange|kraken crypto,kraken.com,closed,com,false,,curl-verified 2026-09-07

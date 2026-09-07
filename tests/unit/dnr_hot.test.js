@@ -44,6 +44,17 @@ test('buildPathRedirectRules: rejects junk (no leading slash, empty host, path >
   assert.deepStrictEqual(r[0].condition.requestDomains, ['x.example']);
 });
 
+// One invalid requestDomains entry makes Chrome reject the WHOLE
+// updateDynamicRules batch, so a malformed hot-list row must never reach it.
+test('buildPathRedirectRules: rejects malformed host labels', () => {
+  const junk = ['foo-.com', '-foo.com', 'a..b', '.', '---', 'foo'];
+  for (const h of junk) {
+    assert.deepStrictEqual(D.buildPathRedirectRules([{ h, p: '/a' }], target), [], h);
+  }
+  const ok = D.buildPathRedirectRules([{ h: 'a-b.c-d.example', p: '/a' }], target);
+  assert.deepStrictEqual(ok[0].condition.requestDomains, ['a-b.c-d.example']);
+});
+
 test('escapeRegex escapes RE2 metacharacters', () => {
   assert.strictEqual(D.escapeRegex('a.b/c?d=1&e[2]'), 'a\\.b/c\\?d=1&e\\[2\\]');
 });

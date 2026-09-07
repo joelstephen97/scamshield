@@ -927,9 +927,17 @@ const HOT_READY_TIMEOUT_MS = 3000;
 async function awaitHotReady() {
   // Nothing has kicked off an apply yet: the SW woke and this reader beat
   // ensureNetworkRules() to the punch. Returning immediately would read an
-  // empty hotHostSet and under-report. Waiting on boot instead is bounded by
-  // the same fallible-then-continue contract awaitBootReady() already has.
-  if (!hotReadyPromise) { await awaitBootReady(); if (!hotReadyPromise) return; }
+  // empty hotHostSet and under-report. Wait on boot instead — under the SAME
+  // HOT_READY_TIMEOUT_MS bound as the apply wait below, since awaitBootReady()
+  // swallows failures but never times out on its own, and a wedged boot must
+  // not be able to stall a page verdict.
+  if (!hotReadyPromise) {
+    await Promise.race([
+      awaitBootReady(),
+      new Promise((resolve) => setTimeout(resolve, HOT_READY_TIMEOUT_MS))
+    ]);
+    if (!hotReadyPromise) return;
+  }
   await Promise.race([
     hotReadyPromise.catch(() => {}),
     new Promise((resolve) => setTimeout(resolve, HOT_READY_TIMEOUT_MS))
