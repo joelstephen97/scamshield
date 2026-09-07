@@ -10,8 +10,15 @@
   user sees an explanation instead of a bare browser error; dynamic *allow*
   rules mirror the sites the user has paused or trusted. No web-accessible
   resources are declared; the redirect target is the extension's own page.
-- **alarms** — schedule an optional, periodic (12h) download-only refresh of the
-  scam-domain blocklist. Only runs if the user sets an update URL; nothing is uploaded.
+- **alarms** — schedule two optional, periodic, **download-only** refreshes of the
+  scam-domain block list: the main feed every 12 hours, and (since 0.13.0) an
+  hourly "hot list" of domains reported in the last 48 hours, so a phishing site
+  that appeared this morning is blocked within about an hour instead of at the
+  next daily rebuild. Both fetch the same static files every other user fetches,
+  from the project's public open-source feed; the request carries no query, no
+  identifier and nothing about the user or their browsing, and the hourly one is
+  conditional (ETag), so it is usually a 304. Both stop entirely when the user
+  turns "Block known scam sites" off or clears the feed URL. Nothing is uploaded.
 - **content scripts on http(s)** — statically declared in the manifest (the
   `chrome.scripting` API is not used and not requested). They read the current
   page's URL and DOM to detect phishing forms and scam content. Analysis is

@@ -75,7 +75,7 @@
   "toastResumed": { "message": "Protección reanudada" },
   "toastCopied": { "message": "Copiado" },
   "toastExtensionError": { "message": "Error de la extensión; prueba a volver a abrirla." },
-  "whatsNewBanner": { "message": "Novedades de la 0.12: ahora los sitios fraudulentos conocidos abren una página de bloqueo de ScamShield que te explica por qué, cuenta la detección en tus estadísticas y te deja pausar el bloqueo si es un error. Además, escaneo de códigos QR en tu dispositivo." },
+  "whatsNewBanner": { "message": "Novedades de la 0.13: una lista urgente cada hora bloquea sitios fraudulentos recién aparecidos alrededor de una hora después de la denuncia, y sigue sin enviarnos ninguna petición. Además, «Confiar en este sitio» en cada aviso." },
   "popupBrandDangerSummary": { "message": "Parece $BRAND$, pero no lo es. No introduzcas tu contraseña aquí.", "placeholders": { "brand": { "content": "$1", "example": "PayPal" } } },
   "pausedUntil": { "message": "Pausado hasta las $TIME$", "placeholders": { "time": { "content": "$1", "example": "3:45 PM" } } },
   "fmtProtocolPage": { "message": "Página $PROTOCOL$", "placeholders": { "protocol": { "content": "$1", "example": "chrome" } } },

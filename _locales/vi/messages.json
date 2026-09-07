@@ -75,7 +75,7 @@
   "toastResumed": { "message": "Đã tiếp tục bảo vệ" },
   "toastCopied": { "message": "Đã sao chép" },
   "toastExtensionError": { "message": "Lỗi tiện ích — hãy thử mở lại." },
-  "whatsNewBanner": { "message": "Mới trong 0.12: các trang lừa đảo đã biết giờ đây sẽ mở trang chặn của ScamShield giải thích lý do, đếm số lần bắt được, và cho phép bạn tạm dừng việc chặn nếu đó là nhầm lẫn. Ngoài ra còn có quét mã QR ngay trên thiết bị." },
+  "whatsNewBanner": { "message": "Mới trong 0.13: danh sách khẩn mỗi giờ chặn những trang lừa đảo vừa xuất hiện trong khoảng một giờ sau khi bị báo cáo, vẫn không gửi yêu cầu nào về phía chúng tôi. Thêm nút „Tin cậy trang này“ ở mọi cảnh báo." },
   "popupBrandDangerSummary": { "message": "Trông giống $BRAND$ nhưng không phải. Đừng nhập mật khẩu ở đây.", "placeholders": { "brand": { "content": "$1", "example": "PayPal" } } },
   "pausedUntil": { "message": "Tạm dừng đến $TIME$", "placeholders": { "time": { "content": "$1", "example": "3:45 PM" } } },
   "fmtProtocolPage": { "message": "Trang $PROTOCOL$", "placeholders": { "protocol": { "content": "$1", "example": "chrome" } } },

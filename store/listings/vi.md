@@ -20,7 +20,7 @@ Hầu hết các trình chặn lừa đảo khác gửi những trang bạn truy
 
 SCAMSHIELD CHẶN NHỮNG GÌ
 
-• Trang đăng nhập giả mạo ngân hàng và thương hiệu. ScamShield so sánh biểu tượng và logo của trang với danh sách 64 thương hiệu nổi tiếng (trong đó có PayPal, Microsoft và Google, cùng với các ngân hàng khu vực, dịch vụ viễn thông và cơ quan nhà nước) và phát hiện các tên miền giả mạo sao chép tên thương hiệu bằng ký tự nước ngoài. Một trang đăng nhập giả có logo đúng nhưng tên miền sai vẫn bị phát hiện, ngay cả khi địa chỉ trông có vẻ lạ.
+• Trang đăng nhập giả mạo ngân hàng và thương hiệu. ScamShield so sánh biểu tượng và logo của trang với dấu vân của 49 thương hiệu nổi tiếng (trong đó có PayPal, Microsoft và Google, cùng với các ngân hàng khu vực, dịch vụ viễn thông và cơ quan nhà nước) và đối chiếu địa chỉ với bảng hơn 300 tên thương hiệu để phát hiện các tên miền nhái sao chép tên thương hiệu bằng ký tự nước ngoài. Một trang đăng nhập giả có logo đúng nhưng tên miền sai vẫn bị phát hiện, ngay cả khi địa chỉ trông có vẻ lạ.
 
 • Cửa hàng giả. Đồng hồ đếm ngược giả, chiêu tạo áp lực kiểu "chỉ còn 2 sản phẩm", huy hiệu uy tín bị sao chép, yêu cầu thanh toán ngoài nền tảng và thiếu thông tin liên hệ đều được hiển thị trong thẻ mua sắm trước khi bạn thanh toán.
 
@@ -94,6 +94,6 @@ Mã nguồn, chính sách quyền riêng tư và trình theo dõi lỗi: github.
 
 • Ít báo động nhầm hơn trên trang thật. Các trang thật của ngân hàng, cơ quan nhà nước và doanh nghiệp dùng địa chỉ theo kiểu quốc gia (chẳng hạn tên miền .bank.in của chính một ngân hàng) không còn hiện thanh cảnh báo nữa.
 
-• Đo đạc, không phải tuyên bố. Trên mẫu gồm [[N]] trang lừa đảo đang hoạt động lấy từ các nguồn công khai mà ScamShield không dùng, [[BLOCKED]] % bị chặn trước khi trang kịp tải và [[STOPPED]] % bị ngăn lại bằng cách này hay cách khác. Phương pháp, định nghĩa và bảng đầy đủ nằm trong docs/benchmark.md ở kho GitHub của dự án.
+• Đo đạc, không phải tuyên bố. Các con số đo được của bản phát hành này được công bố trong docs/benchmark.md ở kho mã nguồn, kèm phương pháp lấy mẫu và định nghĩa của bị chặn, bị ngăn lại và được cảnh báo.
 
 Không thêm quyền mới. Vẫn là storage, declarativeNetRequest, alarms và quyền truy cập http/https, giống mọi phiên bản kể từ 0.3.1.

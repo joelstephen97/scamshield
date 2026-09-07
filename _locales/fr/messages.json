@@ -75,7 +75,7 @@
   "toastResumed": { "message": "Protection reprise" },
   "toastCopied": { "message": "Copié" },
   "toastExtensionError": { "message": "Erreur de l'extension — essayez de la rouvrir." },
-  "whatsNewBanner": { "message": "Nouveautés de la 0.12 : les sites d'arnaque connus ouvrent désormais une page de blocage ScamShield qui explique pourquoi, comptabilise l'interception et vous permet de suspendre le blocage en cas d'erreur. Plus le scan de codes QR sur votre appareil." },
+  "whatsNewBanner": { "message": "Nouveautés de la 0.13 : une liste urgente horaire bloque les sites frauduleux tout neufs environ une heure après leur signalement, toujours sans la moindre requête vers nous. Et « Faire confiance à ce site » sur chaque avertissement." },
   "popupBrandDangerSummary": { "message": "Ressemble à $BRAND$, mais ce n'est pas le cas. Ne saisissez pas votre mot de passe ici.", "placeholders": { "brand": { "content": "$1", "example": "PayPal" } } },
   "pausedUntil": { "message": "Suspendu jusqu'à $TIME$", "placeholders": { "time": { "content": "$1", "example": "3:45 PM" } } },
   "fmtProtocolPage": { "message": "Page $PROTOCOL$", "placeholders": { "protocol": { "content": "$1", "example": "chrome" } } },

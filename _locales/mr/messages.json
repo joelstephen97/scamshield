@@ -76,7 +76,7 @@
   "toastResumed": { "message": "संरक्षण पुन्हा सुरू झाले" },
   "toastCopied": { "message": "कॉपी झाले" },
   "toastExtensionError": { "message": "एक्स्टेंशनमध्ये अडचण — पुन्हा उघडून पाहा." },
-  "whatsNewBanner": { "message": "0.12 मधील नवीन: ज्ञात फसवणूक साइट्स आता ScamShield चे ब्लॉक पान उघडतात, जे कारण सांगते, पकड मोजते आणि चूक वाटल्यास ब्लॉक थांबवण्याचा पर्याय देते. शिवाय, डिव्हाइसवरच QR-कोड स्कॅनिंग." },
+  "whatsNewBanner": { "message": "0.13 मधील नवीन: दर तासाची तातडीची यादी अगदी नव्या फसवणुकीच्या साइट्स तक्रारीनंतर साधारण एका तासातच अडवते, आणि आमच्याकडे अजूनही एकही विनंती येत नाही. शिवाय प्रत्येक इशाऱ्यावर «या साइटवर विश्वास ठेवा»." },
   "popupBrandDangerSummary": { "message": "$BRAND$ सारखे दिसते, पण ते नाही. इथे तुमचा पासवर्ड टाकू नका.", "placeholders": { "brand": { "content": "$1", "example": "PayPal" } } },
   "pausedUntil": { "message": "$TIME$ पर्यंत थांबवले", "placeholders": { "time": { "content": "$1", "example": "3:45 PM" } } },
   "fmtProtocolPage": { "message": "$PROTOCOL$ पृष्ठ", "placeholders": { "protocol": { "content": "$1", "example": "chrome" } } },

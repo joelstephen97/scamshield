@@ -20,7 +20,7 @@ Es gratis, sin nivel premium, sin prueba gratuita y sin "actualiza para desbloqu
 
 QUÉ BLOQUEA
 
-• Inicios de sesión falsos de bancos y marcas. ScamShield compara el ícono y el logotipo de la página con una tabla de 64 marcas conocidas (entre ellas PayPal, Microsoft y Google, además de bancos regionales y servicios de telecomunicaciones y gobierno) y detecta dominios similares que copian el nombre de una marca con caracteres extranjeros. Un inicio de sesión falso con el logotipo correcto en el dominio equivocado se detecta incluso cuando la dirección parece normal.
+• Inicios de sesión falsos de bancos y marcas. ScamShield compara el ícono y el logotipo de la página con las huellas de 49 marcas conocidas (entre ellas PayPal, Microsoft y Google, además de bancos regionales y servicios de telecomunicaciones y gobierno) y coteja la dirección con una tabla de más de 300 nombres de marca para detectar imitaciones que copian el nombre de una marca con caracteres extranjeros. Un inicio de sesión falso con el logotipo correcto en el dominio equivocado se detecta incluso cuando la dirección parece normal.
 
 • Tiendas falsas. Temporizadores de cuenta regresiva falsos, presión de "solo quedan 2", insignias de confianza copiadas, solicitudes de pago fuera de la plataforma y datos de contacto faltantes se muestran en una tarjeta de compra antes de que pagues.
 
@@ -94,6 +94,6 @@ Código fuente, política de privacidad y seguimiento de incidencias: github.com
 
 • Menos falsas alarmas en sitios reales. Los sitios auténticos de bancos, administraciones y empresas que usan una dirección de tipo nacional (por ejemplo el dominio .bank.in propio de un banco) ya no reciben un aviso.
 
-• Medido, no prometido. En una muestra de [[N]] páginas de phishing activas tomadas de fuentes públicas que ScamShield no utiliza, se bloqueó el [[BLOCKED]] % antes de que la página pudiera cargarse y se detuvo de un modo u otro el [[STOPPED]] %. El método, las definiciones y la tabla completa están en docs/benchmark.md, en el repositorio de GitHub del proyecto.
+• Medido, no prometido. Las cifras medidas de esta versión se publican en docs/benchmark.md, en el repositorio, junto con el método de muestreo y las definiciones de bloqueado, detenido y advertido.
 
 Sin permisos nuevos. Siguen siendo storage, declarativeNetRequest, alarms y acceso http/https, los mismos que en todas las versiones desde la 0.3.1.

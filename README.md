@@ -58,7 +58,7 @@
 | **Firefox 128+** | Download `scamshield-firefox.zip` from the **[latest GitHub Release](https://github.com/joelstephen97/scamshield/releases/latest)**, unzip it, and load it via `about:debugging#/runtime/this-firefox → Load Temporary Add-on → manifest.json` (temporary add-ons are removed on restart). An [addons.mozilla.org](https://addons.mozilla.org/) listing is pending; this row will link to it once live. |
 | **From source** | `chrome://extensions → Developer mode → Load unpacked → select this folder`. See [Development](#development). |
 
-Current release: **0.8.0** (the Chrome Web Store and Firefox Add-ons listings may lag a release by a few days while they clear review) — see the [changelog](CHANGELOG.md) for what changed. The package is about **450 KB zipped**.
+Current release: **0.13.0** (the Chrome Web Store and Firefox Add-ons listings may lag a release by a few days while they clear review) — see the [changelog](CHANGELOG.md) for what changed. The package is about **635 KB zipped**.
 
 ## What it does
 
@@ -68,7 +68,7 @@ ScamShield watches every page you open and steps in only when something looks wr
 
 - **Phishing & scam warnings with plain-language reasons** — a banner on suspicious/dangerous pages and a one-click *Leave this page*.
 - **Page analysis** — an on-device model reads the page itself (wording, layout, login-form structure), catching brand-new phishing pages that a URL-only check would miss.
-- **Brand look-alike detection by icon** — favicons and logos are perceptually hashed and matched against a 64-brand table (49 with icon hashes) including UAE banks, telcos and government services (Emirates NBD, ADCB, FAB, Mashreq, RAKBANK, e&, du, Noon, Aramex, Talabat, Careem, ADNOC, DEWA, ICP, MOHRE, Dubai Police, UAE PASS, Emirates, Etihad) plus PayPal, Microsoft, Google, Apple, DHL and more. A page using a brand's icon with a password form on the wrong domain is flagged even if the brand's name never appears.
+- **Brand look-alike detection by icon** — favicons and logos are perceptually hashed and matched against **49** icon fingerprints (`engine/brand_icons.json`); the name/domain look-alike checks run against the full **326-brand** table in `engine/constants.js` (`BRANDS`). Between them they cover UAE banks, telcos and government services (Emirates NBD, ADCB, FAB, Mashreq, RAKBANK, e&, du, Noon, Aramex, Talabat, Careem, ADNOC, DEWA, ICP, MOHRE, Dubai Police, UAE PASS, Emirates, Etihad) plus PayPal, Microsoft, Google, Apple, DHL and more. A page using a brand's icon with a password form on the wrong domain is flagged even if the brand's name never appears.
 - **URL model + heuristics** — a gradient-boosted URL classifier and hand-written rules (look-alike domains, punycode, suspicious tokens, IP hosts, deep-path tricks, brand-in-subdomain, …), with a built-in safe-domain allowlist for top sites.
 - **Known-bad domain blocking** — a `declarativeNetRequest` ruleset refreshed daily from the open-source [scamshield-feed](https://github.com/joelstephen97/scamshield-feed) (14 aggregated open-source threat databases, ~425k confirmed-bad domains + ~1M watchlist, heavily false-positive filtered), plus an **hourly hot list** of the last 48 hours' reports so a site that appeared this morning is blocked within about an hour.
 

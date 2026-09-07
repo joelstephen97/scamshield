@@ -20,7 +20,7 @@ NEDEN SCAMSHIELD
 
 NELERİ ENGELLER
 
-• Sahte banka ve marka girişleri. ScamShield, sayfanın simgesini ve logosunu 64 tanınmış markadan oluşan bir tabloyla karşılaştırır (aralarında PayPal, Microsoft ve Google de olan; ayrıca bölgesel bankalar, telekom ve devlet hizmetleri) ve bir marka adını yabancı karakterlerle taklit eden benzer alan adlarını tespit eder. Doğru logoyu yanlış alan adında taşıyan sahte bir giriş sayfası, adres tanıdık görünmese bile yakalanır.
+• Sahte banka ve marka girişleri. ScamShield, sayfanın simgesini ve logosunu 49 tanınmış markanın parmak iziyle karşılaştırır (aralarında PayPal, Microsoft ve Google de olan; ayrıca bölgesel bankalar, telekom ve devlet hizmetleri) ve adresi 300'den fazla marka adından oluşan bir tabloyla denetleyerek bir marka adını yabancı karakterlerle taklit eden benzer alan adlarını tespit eder. Doğru logoyu yanlış alan adında taşıyan sahte bir giriş sayfası, adres tanıdık görünmese bile yakalanır.
 
 • Sahte mağazalar. Sahte geri sayım sayaçları, "sadece 2 tane kaldı" baskısı, kopyalanmış güven rozetleri, platform dışında ödeme talepleri ve eksik iletişim bilgileri, siz ödeme yapmadan önce bir alışveriş kartında gösterilir.
 
@@ -94,6 +94,6 @@ Kaynak kod, gizlilik politikası ve hata takip sistemi: github.com/joelstephen97
 
 • Gerçek sitelerde daha az yanlış alarm. Ülkeye özgü bir adres kullanan gerçek banka, kamu kurumu ve şirket siteleri (örneğin bir bankanın kendi .bank.in alan adı) artık uyarı şeridi almıyor.
 
-• İddia değil, ölçüm. ScamShield'ın kullanmadığı açık kaynaklardan alınan [[N]] canlı kimlik avı sayfasından oluşan bir örneklemde, sayfaların % [[BLOCKED]] kadarı yüklenemeden engellendi ve % [[STOPPED]] kadarı şu ya da bu şekilde durduruldu. Yöntem, tanımlar ve tam tablo, projenin GitHub deposundaki docs/benchmark.md dosyasında.
+• İddia değil, ölçüm. Bu sürümün ölçüm sonuçları, örnekleme yöntemi ve engellendi, durduruldu, uyarıldı tanımlarıyla birlikte depodaki docs/benchmark.md dosyasında yayımlanıyor.
 
 Yeni izin yok. Yine storage, declarativeNetRequest, alarms ve http/https erişimi; 0.3.1'den bu yana her sürümdeki gibi.

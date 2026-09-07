@@ -75,7 +75,7 @@
   "toastResumed": { "message": "防护已恢复" },
   "toastCopied": { "message": "已复制" },
   "toastExtensionError": { "message": "扩展程序出错——请重新打开。" },
-  "whatsNewBanner": { "message": "0.12 版新增：已知诈骗网站现会打开 ScamShield 拦截页面，说明拦截原因、计入拦截次数，并允许您在误判时暂停拦截。此外还新增了设备端二维码扫描功能。" },
+  "whatsNewBanner": { "message": "0.13 版新增：每小时更新的紧急列表可在举报约一小时后拦截刚出现的诈骗网站，且依然不会向我们发出任何请求。另外，每条警告都新增了“信任此网站”。" },
   "popupBrandDangerSummary": { "message": "看起来像 $BRAND$，但并不是。请勿在此输入密码。", "placeholders": { "brand": { "content": "$1", "example": "PayPal" } } },
   "pausedUntil": { "message": "暂停至 $TIME$", "placeholders": { "time": { "content": "$1", "example": "3:45 PM" } } },
   "fmtProtocolPage": { "message": "$PROTOCOL$ 页面", "placeholders": { "protocol": { "content": "$1", "example": "chrome" } } },

@@ -20,7 +20,7 @@ A maioria dos bloqueadores de golpe envia as páginas que você visita para os s
 
 O QUE ELE BLOQUEIA
 
-• Logins falsos de bancos e marcas. O ScamShield compara o ícone e o logotipo da página com uma tabela de 64 marcas conhecidas (PayPal, Microsoft e Google entre elas, além de bancos, operadoras de telecomunicações e serviços governamentais regionais) e identifica domínios parecidos que copiam o nome de uma marca usando caracteres estrangeiros. Um login falso com o logotipo certo no domínio errado é detectado mesmo quando o endereço em si parece estranho.
+• Logins falsos de bancos e marcas. O ScamShield compara o ícone e o logotipo da página com as impressões de 49 marcas conhecidas (PayPal, Microsoft e Google entre elas, além de bancos, operadoras de telecomunicações e serviços governamentais regionais) e confere o endereço com uma tabela de mais de 300 nomes de marca para identificar imitações que copiam o nome de uma marca usando caracteres estrangeiros. Um login falso com o logotipo certo no domínio errado é detectado mesmo quando o endereço em si parece estranho.
 
 • Lojas falsas. Contagens regressivas falsas, pressão de "só restam 2", selos de confiança copiados, pedidos de pagamento fora da plataforma e falta de dados de contato aparecem em um cartão de compras antes de você fechar o pedido.
 
@@ -94,6 +94,6 @@ Código-fonte, política de privacidade e rastreador de problemas: github.com/jo
 
 • Menos alarmes falsos em sites reais. Sites legítimos de bancos, órgãos públicos e empresas que usam um endereço de tipo nacional (por exemplo o domínio .bank.in do próprio banco) não recebem mais um aviso.
 
-• Medido, não prometido. Em uma amostra de [[N]] páginas de phishing ativas tiradas de fontes públicas que o ScamShield não usa, [[BLOCKED]] % foram bloqueadas antes que a página pudesse carregar e [[STOPPED]] % foram interrompidas de um jeito ou de outro. O método, as definições e a tabela completa estão em docs/benchmark.md, no repositório do projeto no GitHub.
+• Medido, não prometido. Os números medidos desta versão são publicados em docs/benchmark.md no repositório, junto com o método de amostragem e as definições de bloqueado, interrompido e avisado.
 
 Nenhuma permissão nova. Continuam sendo storage, declarativeNetRequest, alarms e acesso http/https, os mesmos de todas as versões desde a 0.3.1.

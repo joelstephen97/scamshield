@@ -44,7 +44,7 @@ It is free, with no premium tier, no trial and no "upgrade to unlock real-time p
 
 WHAT IT BLOCKS
 
-• Fake bank and brand logins. ScamShield compares the page's icon and logo against a table of 64 well-known brands (PayPal, Microsoft and Google among them, plus regional banks, telecom and government services) and spots look-alike domains that copy a brand name with foreign characters. A fake login with the right logo on the wrong domain is caught even when the address looks unfamiliar.
+• Fake bank and brand logins. ScamShield compares the page's icon and logo against fingerprints for 49 well-known brands (PayPal, Microsoft and Google among them, plus regional banks, telecom and government services), and checks the address itself against a table of more than 300 brand names for look-alikes that copy a brand with foreign characters. A fake login with the right logo on the wrong domain is caught even when the address looks unfamiliar.
 
 • Fake shops. Fake countdown timers, "only 2 left" pressure, copied trust badges, requests to pay outside the platform and missing contact details are shown in a shopping card before you check out.
 
@@ -118,6 +118,6 @@ Source code, privacy policy and issue tracker: github.com/joelstephen97/scamshie
 
 • Fewer false alarms on real sites. Genuine bank, government and company sites that use a country-style address (a bank's own .bank.in domain, for example) no longer get a warning banner.
 
-• Measured, not claimed. On a sample of [[N]] live phishing pages taken from public feeds ScamShield does not use, [[BLOCKED]] % were blocked before the page could load and [[STOPPED]] % were stopped one way or another. The method, the definitions and the full table are in docs/benchmark.md in the project's GitHub repository.
+• Measured, not claimed. Benchmark numbers for this release are published in docs/benchmark.md in the repository, together with the sampling method and the definitions behind blocked, stopped and warned.
 
 No new permissions. Still storage, declarativeNetRequest, alarms and http/https access, the same as every version since 0.3.1.

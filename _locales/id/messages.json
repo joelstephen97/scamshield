@@ -253,7 +253,7 @@
     "message": "Terjadi kesalahan ekstensi — coba buka kembali."
   },
   "whatsNewBanner": {
-    "message": "Baru di 0.12: situs penipuan yang dikenal kini membuka halaman blokir ScamShield yang menjelaskan alasannya, mencatatnya dalam statistik Anda, dan memungkinkan Anda menjeda blokir jika ini kesalahan. Ditambah pemindaian kode QR di perangkat."
+    "message": "Baru di 0.13: daftar terkini tiap jam memblokir situs penipuan yang baru muncul sekitar satu jam setelah dilaporkan, dan tetap tanpa satu pun permintaan ke kami. Plus „Percayai situs ini“ di setiap peringatan."
   },
   "popupBrandDangerSummary": {
     "message": "Tampak seperti $BRAND$, tetapi bukan. Jangan masukkan kata sandi Anda di sini.",

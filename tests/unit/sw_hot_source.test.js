@@ -44,6 +44,24 @@ test('review round 1: hot-set readiness is awaited on cold boot before every fee
   assert.ok(/awaitHotReady\(\)/.test(functionBody('checkFeedBatchHosts')), 'checkFeedBatchHosts awaits hot-set readiness');
 });
 
+// Fix round 1 (Task 13 review): getHotStatus reads the module-level hotStatus
+// (count/paths/generatedAt) alongside hotUpdatedAt from storage. On a cold SW
+// wake the timestamp is already persisted but hotStatus is still the initial
+// { count: 0 } until the boot apply lands, so an options page that woke the
+// worker rendered "Hot list: 0 sites, updated 3 minutes ago". It now waits on
+// the same readiness gate the feed checks use.
+test('fix round 1: getHotStatus awaits hot-set readiness before reading hotStatus', () => {
+  // Comment lines dropped first: the explanatory comment above the await
+  // names hotUpdatedAt, which would otherwise win the ordering check below.
+  const body = functionBody('getHotStatus')
+    .split('\n').filter((l) => !/^\s*\/\//.test(l)).join('\n');
+  assert.ok(/await awaitHotReady\(\)/.test(body), 'getHotStatus awaits hot-set readiness');
+  assert.ok(
+    body.indexOf('await awaitHotReady()') < body.indexOf('hotUpdatedAt'),
+    'the await comes before hotUpdatedAt/hotStatus are read'
+  );
+});
+
 test('review round 1: applyHotRulesNow has an honest three-step fallback', () => {
   const body = functionBody('applyHotRulesNow');
   const attempts = body.match(/updateDynamicRules\(\{ removeRuleIds, addRules: /g) || [];

@@ -20,7 +20,7 @@ C'est gratuit, sans offre premium, sans essai et sans « passez à la version su
 
 CE QU'IL BLOQUE
 
-• Fausses pages de connexion bancaires et de grandes marques. ScamShield compare l'icône et le logo de la page à une liste de 64 marques connues (dont PayPal, Microsoft et Google, ainsi que des banques régionales, des opérateurs télécoms et des services publics) et repère les domaines imitateurs qui copient un nom de marque avec des caractères étrangers. Une fausse page de connexion avec le bon logo sur le mauvais domaine est détectée même quand l'adresse semble inconnue.
+• Fausses pages de connexion bancaires et de grandes marques. ScamShield compare l'icône et le logo de la page aux empreintes de 49 marques connues (dont PayPal, Microsoft et Google, ainsi que des banques régionales, des opérateurs télécoms et des services publics) et confronte l'adresse à une liste de plus de 300 noms de marque pour repérer les imitations qui copient un nom de marque avec des caractères étrangers. Une fausse page de connexion avec le bon logo sur le mauvais domaine est détectée même quand l'adresse semble inconnue.
 
 • Faux magasins. Les faux comptes à rebours, la pression du « plus que 2 en stock », les badges de confiance copiés, les demandes de paiement en dehors de la plateforme et l'absence de coordonnées sont signalés dans une fiche avant votre paiement.
 
@@ -94,6 +94,6 @@ Code source, politique de confidentialité et suivi des problèmes : github.com/
 
 • Moins de fausses alertes sur les vrais sites. Les sites authentiques de banques, d'administrations et d'entreprises qui utilisent une adresse de type national (par exemple le domaine .bank.in propre à une banque) ne déclenchent plus de bannière.
 
-• Mesuré, pas affirmé. Sur un échantillon de [[N]] pages d'hameçonnage actives issues de sources publiques que ScamShield n'utilise pas, [[BLOCKED]] % ont été bloquées avant que la page puisse se charger et [[STOPPED]] % ont été arrêtées d'une manière ou d'une autre. La méthode, les définitions et le tableau complet se trouvent dans docs/benchmark.md, dans le dépôt GitHub du projet.
+• Mesuré, pas affirmé. Les chiffres mesurés de cette version sont publiés dans docs/benchmark.md, dans le dépôt, avec la méthode d'échantillonnage et les définitions de bloqué, arrêté et signalé.
 
 Aucune nouvelle autorisation. Toujours storage, declarativeNetRequest, alarms et l'accès http/https, comme dans chaque version depuis la 0.3.1.

@@ -88,7 +88,13 @@ for (const loc of EXPECTED) {
     // listings are plain prose, not chrome.i18n messages, so nothing should
     // still look like an unresolved substitution token from the translation
     // pass or a copy/paste from messages.json.
-    const strayTokens = content.match(/\$[A-Z0-9_]+\$/g) || [];
+    // Two placeholder shapes, one guard. `$NAME$` is chrome.i18n substitution
+    // syntax that must never reach a listing; `[[NAME]]` is the shape 0.13.0's
+    // benchmark copy used for numbers a later task was to fill in. Both are
+    // invisible to every other check in this file (neither is markdown), so
+    // without this they would paste into the store dashboard verbatim.
+    const strayTokens = (content.match(/\$[A-Z0-9_]+\$/g) || [])
+      .concat(content.match(/\[\[[A-Z0-9_]+\]\]/g) || []);
     assert.strictEqual(
       strayTokens.length,
       0,

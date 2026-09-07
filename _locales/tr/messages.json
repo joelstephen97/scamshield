@@ -253,7 +253,7 @@
     "message": "Uzantı hatası — yeniden açmayı deneyin."
   },
   "whatsNewBanner": {
-    "message": "0.12'deki yenilikler: bilinen dolandırıcılık siteleri artık nedenini açıklayan, yakalamayı sayan ve bir hata olduğunu düşünüyorsanız engellemeyi duraklatmanıza olanak tanıyan bir ScamShield engelleme sayfası açıyor. Ayrıca cihaz üzerinde QR kod tarama."
+    "message": "0.13'teki yenilikler: saatlik acil liste, yepyeni dolandırıcılık sitelerini bildirimden yaklaşık bir saat sonra engelliyor; bize hâlâ tek bir istek bile gitmiyor. Ayrıca her uyarıda „Bu siteye güven“."
   },
   "popupBrandDangerSummary": {
     "message": "$BRAND$ gibi görünüyor ama değil. Buraya şifrenizi girmeyin.",

@@ -1037,6 +1037,13 @@ const applyHotRules = (hotIn, settingsIn) => {
 
 async function getHotStatus() {
   const s = await getSettings();
+  // A cold-waked service worker still has the initial hotStatus ({ count: 0 })
+  // while ensureNetworkRules()'s fire-and-forget applyHotRules() rebuilds the
+  // set from storage — but hotUpdatedAt is already in storage from the last
+  // fetch. Reading both without waiting reports the honest-looking nonsense
+  // "0 sites, updated 3 minutes ago" to an options page that woke the worker.
+  // Same readiness gate checkFeedHost/checkFeedBatchHosts use, same 3 s cap.
+  await awaitHotReady();
   let l = {};
   try { l = await api.storage.local.get(['hotUpdatedAt']); } catch (_) {}
   return Object.assign({ enabled: !!s.blockKnownBad && s.hotListEnabled !== false, updatedAt: l.hotUpdatedAt || 0 }, hotStatus);

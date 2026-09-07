@@ -76,7 +76,7 @@
   "toastResumed": { "message": "تحفظ دوبارہ شروع ہو گیا" },
   "toastCopied": { "message": "کاپی ہو گیا" },
   "toastExtensionError": { "message": "ایکسٹینشن میں خرابی — دوبارہ کھول کر دیکھیں۔" },
-  "whatsNewBanner": { "message": "0.12 میں نیا: معلوم دھوکہ دہی والی سائٹس اب ScamShield کا بلاک پیج کھولتی ہیں جو وجہ بتاتا ہے، پکڑی گئی سائٹس کو شمار کرتا ہے، اور غلطی ہونے کی صورت میں بلاک روکنے دیتا ہے۔ ساتھ ہی آلے پر QR کوڈ اسکیننگ بھی۔" },
+  "whatsNewBanner": { "message": "0.13 میں نیا: ہر گھنٹے کی فوری فہرست بالکل نئی دھوکہ دہی کی سائٹس کو شکایت کے تقریباً ایک گھنٹے بعد ہی بلاک کر دیتی ہے، اور ہماری طرف اب بھی کوئی درخواست نہیں جاتی۔ ساتھ ہی ہر انتباہ پر «اس سائٹ پر بھروسا کریں»۔" },
   "popupBrandDangerSummary": { "message": "$BRAND$ جیسا لگتا ہے، مگر ہے نہیں۔ یہاں اپنا پاس ورڈ درج نہ کریں۔", "placeholders": { "brand": { "content": "$1", "example": "PayPal" } } },
   "pausedUntil": { "message": "$TIME$ تک روکا گیا", "placeholders": { "time": { "content": "$1", "example": "3:45 PM" } } },
   "fmtProtocolPage": { "message": "$PROTOCOL$ صفحہ", "placeholders": { "protocol": { "content": "$1", "example": "chrome" } } },

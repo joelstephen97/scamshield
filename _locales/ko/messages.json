@@ -75,7 +75,7 @@
   "toastResumed": { "message": "보호 재개됨" },
   "toastCopied": { "message": "복사됨" },
   "toastExtensionError": { "message": "확장 프로그램 오류 — 다시 열어 보세요." },
-  "whatsNewBanner": { "message": "0.12 버전 신규 기능: 이제 알려진 사기 사이트에 들어가면 ScamShield 차단 페이지가 열려 이유를 설명하고, 차단 건수를 기록하며, 실수라고 생각되면 차단을 일시중지할 수 있습니다. 여기에 기기 내 QR 코드 스캔 기능도 추가되었습니다." },
+  "whatsNewBanner": { "message": "0.13 버전 신규 기능: 매시간 갱신되는 긴급 목록이 방금 나타난 사기 사이트를 신고 약 한 시간 만에 차단합니다. 저희 쪽으로 가는 요청은 여전히 없습니다. 또한 모든 경고에 「이 사이트 신뢰하기」가 생겼습니다." },
   "popupBrandDangerSummary": { "message": "$BRAND$처럼 보이지만 아닙니다. 여기에 비밀번호를 입력하지 마세요.", "placeholders": { "brand": { "content": "$1", "example": "PayPal" } } },
   "pausedUntil": { "message": "$TIME$까지 일시 중지", "placeholders": { "time": { "content": "$1", "example": "3:45 PM" } } },
   "fmtProtocolPage": { "message": "$PROTOCOL$ 페이지", "placeholders": { "protocol": { "content": "$1", "example": "chrome" } } },

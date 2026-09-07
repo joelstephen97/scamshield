@@ -20,7 +20,7 @@ ScamShield gratis, tanpa tingkat premium, tanpa uji coba, dan tanpa "tingkatkan 
 
 APA YANG DIBLOKIR
 
-• Login bank dan merek palsu. ScamShield membandingkan ikon dan logo halaman dengan tabel berisi 64 merek terkenal (termasuk PayPal, Microsoft, dan Google, ditambah bank, operator telekomunikasi, dan layanan pemerintah regional), serta mengenali domain mirip yang meniru nama merek menggunakan karakter asing. Login palsu dengan logo yang benar di domain yang salah tetap terdeteksi, meski alamatnya terlihat asing.
+• Login bank dan merek palsu. ScamShield membandingkan ikon dan logo halaman dengan sidik jari 49 merek terkenal (termasuk PayPal, Microsoft, dan Google, ditambah bank, operator telekomunikasi, dan layanan pemerintah regional), lalu mencocokkan alamatnya dengan tabel berisi lebih dari 300 nama merek untuk mengenali tiruan yang meniru nama merek menggunakan karakter asing. Login palsu dengan logo yang benar di domain yang salah tetap terdeteksi, meski alamatnya terlihat asing.
 
 • Toko palsu. Hitung mundur palsu, tekanan "tinggal 2 lagi", lencana kepercayaan tiruan, permintaan membayar di luar platform, dan informasi kontak yang hilang ditampilkan dalam kartu belanja sebelum Anda checkout.
 
@@ -94,6 +94,6 @@ Kode sumber, kebijakan privasi, dan pelacak masalah: github.com/joelstephen97/sc
 
 • Lebih sedikit alarm palsu di situs asli. Situs asli bank, instansi pemerintah, dan perusahaan yang memakai alamat bergaya negara (misalnya domain .bank.in milik sebuah bank) tidak lagi memunculkan spanduk peringatan.
 
-• Diukur, bukan diklaim. Dari sampel [[N]] halaman phishing aktif yang diambil dari sumber publik yang tidak dipakai ScamShield, [[BLOCKED]] % diblokir sebelum halaman sempat dimuat dan [[STOPPED]] % dihentikan dengan satu atau lain cara. Metode, definisi, dan tabel lengkapnya ada di docs/benchmark.md pada repositori GitHub proyek ini.
+• Diukur, bukan diklaim. Angka hasil pengukuran untuk rilis ini diterbitkan di docs/benchmark.md pada repositori, lengkap dengan metode pengambilan sampel dan definisi diblokir, dihentikan, dan diperingatkan.
 
 Tidak ada izin baru. Tetap storage, declarativeNetRequest, alarms, dan akses http/https, sama seperti setiap versi sejak 0.3.1.

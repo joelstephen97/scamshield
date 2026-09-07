@@ -101,6 +101,11 @@ async function requestReportingConsent(turningOn) {
   } catch (_) { return !turningOn; }
 }
 function setSwitch(id, on) { $(id).checked = !!on; $(id).closest('.switch').classList.toggle('on', !!on); }
+// The hot list rides on "Block known scam sites" — turning that switch off
+// stops the hourly fetch and drops the rules — so its sub-line is a claim that
+// stops being true the moment the switch goes off. Hide it rather than leave a
+// promise of hourly blocking under a disabled control.
+function syncHotSub() { $('hotsub').hidden = !$('block').checked; }
 async function load() {
   const s = await send('getSettings');
   if (!s) { flash(T('toastExtensionError', null, 'Extension error — try reopening.')); return; }
@@ -112,6 +117,7 @@ async function load() {
   setSwitch('shop', s.shopGuard !== false); setSwitch('serp', s.serpCheck !== false);
   setSwitch('qrscan', s.qrAutoScan !== false);
   setSwitch('sync', s.syncEnabled === true);
+  syncHotSub();
   $('net-feed').textContent = s.otaUrl ? (s.lastOtaAt ? F.relTime(s.lastOtaAt, undefined, UI_LANG) : T('receiptOnInstall12h', null, 'on install + every 12h')) : T('receiptDisabled', null, 'disabled');
   $('net-report').textContent = s.reportingOptIn ? (s.lastReportAt ? F.relTime(s.lastReportAt, undefined, UI_LANG) : T('receiptWhenFlagged', null, 'when flagged')) : T('receiptOffDefault', null, 'off (default)');
   $('otaurl').value = s.otaUrl || ''; $('theme').value = s.theme || 'auto';
@@ -136,11 +142,14 @@ async function load() {
   // Queried after renderAllow so a slow service worker can't hold up the
   // allowlist, which is the part of this page people actually come to edit.
   const hot = await send('getHotStatus');
-  if (!hot || !hot.enabled) {
+  if (hot && !hot.enabled) {
     $('hotstatus').textContent = T('hotListOff', null, 'Hot list: off');
     $('hotdot').classList.remove('ok');
-  } else if (!hot.updatedAt) {
-    // On since install but the first hourly fetch hasn't landed yet.
+  } else if (!hot || !hot.updatedAt) {
+    // On since install but the first hourly fetch hasn't landed yet — or the
+    // service worker never answered, in which case the state is unknown, not
+    // off. Claiming "off" for a dropped message would be a lie about whether
+    // the user is protected; "not downloaded yet" is true either way.
     $('hotstatus').textContent = T('hotListPending', null, 'Hot list: not downloaded yet');
     $('hotdot').classList.remove('ok');
   } else {
@@ -192,6 +201,7 @@ function renderHistory(list) {
   if (!list.length) { $('history').appendChild(li(T('optNothingYetGood', null, 'Nothing yet — that’s a good thing.'))); return; }
   for (const e of list.slice(0, 200)) $('history').appendChild(li(`${KIND(e.kind)} · ${e.host || T('unknownSite', null, 'unknown site')}`, `${LEVEL(e.level)} · ${stamp(e.ts)}`, T('markMistake', null, 'Mark as mistake'), async () => { const r = await send('userReport', { host: e.host, level: e.level }); flash(r && r.via === 'relay' ? T('toastThanksSent', null, 'Thanks — sent') : T('toastOpenedReport', null, 'Opened a report')); }));
 }
+$('block').addEventListener('change', syncHotSub);
 bindSwitch('enabled', 'enabled'); bindSwitch('block', 'blockKnownBad'); bindSwitch('hide', 'hideScamContent'); bindSwitch('pageanalysis', 'pageAnalysis'); bindSwitch('report', 'reportingOptIn');
 bindSwitch('clickfix', 'clickFixGuard'); bindSwitch('fakeupdate', 'fakeUpdateGuard'); bindSwitch('techscam', 'techScamGuard'); bindSwitch('clipboard', 'clipboardGuard'); bindSwitch('wallet', 'walletGuard'); bindSwitch('strict', 'strictMode');
 bindSwitch('leakyform', 'leakyFormGuard'); bindSwitch('fingerprint', 'fingerprintDetect'); bindSwitch('notifyguard', 'notificationGuard');

@@ -20,7 +20,7 @@ Es ist kostenlos, ohne Premium-Stufe, ohne Testphase und ohne "Upgrade freischal
 
 WAS BLOCKIERT WIRD
 
-• Gefälschte Bank- und Marken-Logins. ScamShield vergleicht das Icon und Logo einer Seite mit einer Tabelle von 64 bekannten Marken (darunter PayPal, Microsoft und Google, dazu regionale Banken, Telekom- und Behördendienste) und erkennt Fake-Domains, die einen Markennamen mit fremden Schriftzeichen nachahmen. Ein gefälschter Login mit dem richtigen Logo auf der falschen Domain wird erkannt, selbst wenn die Adresse unbekannt wirkt.
+• Gefälschte Bank- und Marken-Logins. ScamShield vergleicht Icon und Logo einer Seite mit den Fingerabdrücken von 49 bekannten Marken (darunter PayPal, Microsoft und Google, dazu regionale Banken, Telekom- und Behördendienste) und prüft die Adresse zusätzlich gegen eine Tabelle von über 300 Markennamen auf Nachahmer, die einen Markennamen mit fremden Schriftzeichen kopieren. Ein gefälschter Login mit dem richtigen Logo auf der falschen Domain wird erkannt, selbst wenn die Adresse unbekannt wirkt.
 
 • Fake-Shops. Gefälschte Countdown-Timer, Druck durch "nur noch 2 verfügbar", kopierte Vertrauenssiegel, Aufforderungen zur Zahlung außerhalb der Plattform und fehlende Kontaktdaten werden dir vor dem Checkout in einer Einkaufs-Karte angezeigt.
 
@@ -86,7 +86,7 @@ Quellcode, Datenschutzerklärung und Fehler-Tracker: github.com/joelstephen97/sc
 
 ## What's new (0.13.0)
 
-• Eine stündliche Hot-Liste. Neben der täglich neu erstellten Bedrohungsliste lädt ScamShield jetzt einmal pro Stunde eine kleine Liste von Seiten herunter, die in den letzten 48 Stunden gemeldet wurden. Eine Betrugsseite, die heute Morgen aufgetaucht ist, wird meist schon rund eine Stunde nach der Meldung gestoppt, bevor sie laden kann. Es ist dieselbe öffentliche Datei für alle, geladen wie jeder andere Download: kein Konto, und nichts über dich oder dein Surfverhalten geht irgendwohin.
+• Eine stündlich aktualisierte Kurzliste. Neben der täglich neu erstellten Bedrohungsliste lädt ScamShield jetzt einmal pro Stunde eine kleine Liste von Seiten herunter, die in den letzten 48 Stunden gemeldet wurden. Eine Betrugsseite, die heute Morgen aufgetaucht ist, wird meist schon rund eine Stunde nach der Meldung gestoppt, bevor sie laden kann. Es ist dieselbe öffentliche Datei für alle, geladen wie jeder andere Download: kein Konto, und nichts über dich oder dein Surfverhalten geht irgendwohin.
 
 • Dieser Seite vertrauen, aus jeder Warnung heraus. Das Banner, die ganzseitige Warnung und die Blockseite haben jetzt alle ein "Kein Betrug? Dieser Seite vertrauen" mit einem Klick, samt Rückgängig, falls du es versehentlich drückst. Seiten, denen du aus einer Warnung heraus vertraut hast, sind in den Einstellungen entsprechend markiert, sodass du immer siehst, wie jede einzelne dorthin gelangt ist.
 
@@ -94,6 +94,6 @@ Quellcode, Datenschutzerklärung und Fehler-Tracker: github.com/joelstephen97/sc
 
 • Weniger Fehlalarme auf echten Seiten. Echte Seiten von Banken, Behörden und Unternehmen mit einer länderspezifischen Adresse (etwa der eigenen .bank.in-Domain einer Bank) bekommen kein Warnbanner mehr.
 
-• Gemessen statt behauptet. Bei einer Stichprobe von [[N]] aktiven Phishing-Seiten aus öffentlichen Quellen, die ScamShield selbst nicht nutzt, wurden [[BLOCKED]] % blockiert, bevor die Seite laden konnte, und [[STOPPED]] % auf die eine oder andere Weise gestoppt. Methode, Definitionen und die vollständige Tabelle stehen in docs/benchmark.md im GitHub-Repository des Projekts.
+• Gemessen statt behauptet. Die Messwerte dieser Version stehen in docs/benchmark.md im Repository, zusammen mit dem Stichprobenverfahren und den Definitionen hinter blockiert, gestoppt und gewarnt.
 
 Keine neuen Berechtigungen. Weiterhin storage, declarativeNetRequest, alarms und http/https-Zugriff, wie in jeder Version seit 0.3.1.

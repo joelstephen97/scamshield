@@ -253,7 +253,7 @@
     "message": "Erro na extensão — tente reabrir."
   },
   "whatsNewBanner": {
-    "message": "Novidades na 0.12: sites de golpe conhecidos agora abrem uma página de bloqueio do ScamShield que explica o motivo, conta o bloqueio e permite pausar o bloqueio se for um erro. Além da leitura de códigos QR no dispositivo."
+    "message": "Novidades na 0.13: uma lista urgente a cada hora bloqueia sites de golpe recém-criados cerca de uma hora depois da denúncia, e continua sem nenhuma requisição para nós. Além disso, “Confiar neste site” em todo aviso."
   },
   "popupBrandDangerSummary": {
     "message": "Parece com a $BRAND$, mas não é. Não digite sua senha aqui.",

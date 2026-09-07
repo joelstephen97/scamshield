@@ -76,7 +76,7 @@
   "toastResumed": { "message": "সুরক্ষা আবার চালু হয়েছে" },
   "toastCopied": { "message": "কপি হয়েছে" },
   "toastExtensionError": { "message": "এক্সটেনশনে সমস্যা — আবার খুলে দেখুন।" },
-  "whatsNewBanner": { "message": "0.12-এ নতুন: পরিচিত প্রতারণার সাইট এখন খুললে ScamShield-এর একটি ব্লক পেজ দেখাবে, যা কারণ জানায়, ধরা পড়ার সংখ্যা গণনা করে এবং ভুল মনে হলে ব্লক সাময়িকভাবে বন্ধ করার সুযোগ দেয়। সঙ্গে ডিভাইসেই QR কোড স্ক্যান করার সুবিধা।" },
+  "whatsNewBanner": { "message": "0.13-এ নতুন: প্রতি ঘণ্টার জরুরি তালিকা একদম নতুন প্রতারণামূলক সাইটকে অভিযোগের প্রায় এক ঘণ্টার মধ্যেই আটকে দেয়, আর আমাদের কাছে এখনও কোনো অনুরোধ যায় না। সেই সঙ্গে প্রতিটি সতর্কতায় «এই সাইটকে বিশ্বাস করুন»।" },
   "popupBrandDangerSummary": { "message": "$BRAND$-এর মতো দেখায়, কিন্তু নয়। এখানে আপনার পাসওয়ার্ড দেবেন না।", "placeholders": { "brand": { "content": "$1", "example": "PayPal" } } },
   "pausedUntil": { "message": "$TIME$ পর্যন্ত থামানো", "placeholders": { "time": { "content": "$1", "example": "3:45 PM" } } },
   "fmtProtocolPage": { "message": "$PROTOCOL$ পেজ", "placeholders": { "protocol": { "content": "$1", "example": "chrome" } } },

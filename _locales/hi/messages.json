@@ -76,7 +76,7 @@
   "toastResumed": { "message": "सुरक्षा फिर से शुरू हुई" },
   "toastCopied": { "message": "कॉपी हो गया" },
   "toastExtensionError": { "message": "एक्सटेंशन में गड़बड़ी — दोबारा खोलकर देखें।" },
-  "whatsNewBanner": { "message": "0.12 में नया: ज्ञात घोटाला साइटें अब एक ScamShield ब्लॉक पेज खोलती हैं, जो बताता है क्यों रोका गया, पकड़ को गिनता है, और अगर यह गलती हो तो ब्लॉक को रोकने (पॉज़) की सुविधा देता है। साथ ही, डिवाइस पर ही QR-कोड स्कैनिंग।" },
+  "whatsNewBanner": { "message": "0.13 में नया: हर घंटे की ताज़ा सूची बिलकुल नई ठगी वाली साइटों को शिकायत के करीब एक घंटे बाद ही रोक देती है, और हमारे पास अब भी कोई अनुरोध नहीं जाता। साथ ही हर चेतावनी पर «इस साइट पर भरोसा करें»।" },
   "popupBrandDangerSummary": { "message": "$BRAND$ जैसा दिखता है, पर है नहीं। यहाँ अपना पासवर्ड न डालें।", "placeholders": { "brand": { "content": "$1", "example": "PayPal" } } },
   "pausedUntil": { "message": "$TIME$ तक रोका गया", "placeholders": { "time": { "content": "$1", "example": "3:45 PM" } } },
   "fmtProtocolPage": { "message": "$PROTOCOL$ पेज", "placeholders": { "protocol": { "content": "$1", "example": "chrome" } } },
