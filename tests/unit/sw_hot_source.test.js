@@ -23,3 +23,30 @@ test('checkFeedHost consults the hot set before hashing', () => {
 test('exports for e2e', () => {
   assert.ok(/runHotUpdate, applyHotRules, getHotStatus/.test(src));
 });
+
+// Slices out one top-level `function`/`async function` declaration's body, up
+// to the next top-level function declaration (or EOF) — good enough to scope
+// an assertion to a single function without a full parser.
+function functionBody(fnName) {
+  const startRe = new RegExp('\\n(?:async )?function ' + fnName + '\\(');
+  const m = startRe.exec(src);
+  assert.ok(m, `function ${fnName} not found in source`);
+  const rest = src.slice(m.index + 1);
+  const nextRe = /\n(?:async )?function [A-Za-z_$][\w$]*\(/;
+  const nm = nextRe.exec(rest);
+  return nm ? rest.slice(0, nm.index) : rest;
+}
+
+test('review round 1: hot-set readiness is awaited on cold boot before every feed check', () => {
+  assert.ok(/let hotReadyPromise = null;/.test(src), 'hotReadyPromise declared');
+  assert.ok(/async function awaitHotReady\(\)/.test(src), 'awaitHotReady() helper defined');
+  assert.ok(/awaitHotReady\(\)/.test(functionBody('checkFeedHost')), 'checkFeedHost awaits hot-set readiness');
+  assert.ok(/awaitHotReady\(\)/.test(functionBody('checkFeedBatchHosts')), 'checkFeedBatchHosts awaits hot-set readiness');
+});
+
+test('review round 1: applyHotRules has an honest three-step fallback', () => {
+  const body = functionBody('applyHotRules');
+  const attempts = body.match(/updateDynamicRules\(\{ removeRuleIds, addRules: /g) || [];
+  assert.ok(attempts.length >= 3, 'three updateDynamicRules attempts (full, domains-only, empty)');
+  assert.ok(/updateDynamicRules\(\{ removeRuleIds, addRules: \[\] \}\)/.test(body), 'third attempt installs an empty rule set');
+});

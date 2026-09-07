@@ -476,7 +476,10 @@ async function setSettings(patch) {
     if ('pausedSites' in patch || 'allowlist' in patch) await syncAllowRules(next);
     // 0.13.0: keep the hot-list redirect rules in step with the same toggles —
     // a newly trusted site's hot rule must go away, not just be out-prioritised.
-    if ('blockKnownBad' in patch || 'hotListEnabled' in patch || 'pausedSites' in patch || 'allowlist' in patch) { try { await applyHotRules(undefined, next); } catch (_) {} }
+    if ('blockKnownBad' in patch || 'hotListEnabled' in patch || 'pausedSites' in patch || 'allowlist' in patch) {
+      hotReadyPromise = applyHotRules(undefined, next).catch(() => {});
+      await hotReadyPromise;
+    }
     if ('reportingOptIn' in patch && !patch.reportingOptIn) await api.storage.local.set({ reportQueue: [] });
     // Mirror preference changes to sync when enabled (best-effort).
     if (next.syncEnabled && Object.keys(patch).some((k) => SYNCED_KEYS.includes(k))) pushSync(next);
@@ -803,8 +806,10 @@ async function ensureNetworkRules() {
     await syncAllowRules(s);
     // 0.13.0: rebuild the in-memory hot set from storage.local on every boot,
     // then top it up if it's more than an hour stale (SW eviction can easily
-    // outlast the alarm's own period).
-    await applyHotRules(undefined);
+    // outlast the alarm's own period). hotReadyPromise lets a checkFeed(Batch)
+    // message that lands mid-boot wait for this instead of reading an empty set.
+    hotReadyPromise = applyHotRules(undefined).catch(() => {});
+    await hotReadyPromise;
     let hotAt = 0;
     try { hotAt = (await api.storage.local.get('hotUpdatedAt')).hotUpdatedAt || 0; } catch (_) {}
     if (Date.now() - hotAt > HOT_PERIOD_MINUTES * 60000) runHotUpdate();
@@ -823,10 +828,32 @@ async function ensureNetworkRules() {
 // SERP badge path see a hot host within the hour, not only the DNR layer.
 let hotHostSet = new Set();
 let hotStatus = { count: 0, paths: 0, dropped: null, generatedAt: 0 };
+// Cold-boot readiness: ensureNetworkRules() kicks off a fire-and-forget
+// applyHotRules() on every SW wake to rebuild hotHostSet from storage, but a
+// checkFeed/checkFeedBatch message can land before that finishes — same
+// TOCTOU shape settingsInitPromise guards against for settings. Every call
+// site that runs applyHotRules() (boot, runHotUpdate, setSettings) points
+// this at its own promise so a reader always waits on the LATEST apply, not
+// a stale one. Bounded by HOT_READY_TIMEOUT_MS so a wedged DNR call can never
+// stall a page verdict — the reader just falls back to whatever hotHostSet
+// already holds.
+let hotReadyPromise = null;
+const HOT_READY_TIMEOUT_MS = 3000;
+async function awaitHotReady() {
+  if (!hotReadyPromise) return;
+  await Promise.race([
+    hotReadyPromise.catch(() => {}),
+    new Promise((resolve) => setTimeout(resolve, HOT_READY_TIMEOUT_MS))
+  ]);
+}
 
 async function runHotUpdate(urlOverride) {
   const s = await getSettings();
-  if (!s.blockKnownBad || s.hotListEnabled === false) { await applyHotRules(null, s); return { ok: true, updated: false, reason: 'disabled' }; }
+  if (!s.blockKnownBad || s.hotListEnabled === false) {
+    hotReadyPromise = applyHotRules(null, s).catch(() => {});
+    await hotReadyPromise;
+    return { ok: true, updated: false, reason: 'disabled' };
+  }
   const url = urlOverride || DEFAULT_HOT_URL;
   let prev = {};
   try { prev = await api.storage.local.get(['hotList', 'hotEtag', 'hotUpdatedAt']); } catch (_) {}
@@ -837,44 +864,81 @@ async function runHotUpdate(urlOverride) {
     const ctrl = new AbortController(); const timer = setTimeout(() => ctrl.abort(), HOT_FETCH_TIMEOUT_MS);
     res = await fetch(url, { method: 'GET', cache: 'no-store', headers, signal: ctrl.signal });
     clearTimeout(timer);
-  } catch (_) { return { ok: false, reason: 'fetch-failed' }; }
-  if (res.status === 304) { await api.storage.local.set({ hotUpdatedAt: Date.now() }); await applyHotRules(prev.hotList || null, s); return { ok: true, updated: false }; }
-  if (!res.ok) return { ok: false, reason: 'http-' + res.status };
-  let json; try { json = await res.json(); } catch (_) { return { ok: false, reason: 'bad-json' }; }
+  } catch (_) { return { ok: false, updated: false, reason: 'fetch-failed' }; }
+  if (res.status === 304) {
+    await api.storage.local.set({ hotUpdatedAt: Date.now() });
+    hotReadyPromise = applyHotRules(prev.hotList || null, s).catch(() => {});
+    await hotReadyPromise;
+    return { ok: true, updated: false };
+  }
+  if (!res.ok) return { ok: false, updated: false, reason: 'http-' + res.status };
+  let json; try { json = await res.json(); } catch (_) { return { ok: false, updated: false, reason: 'bad-json' }; }
   const hot = globalThis.SSHot.parseHot(json, Date.now());
-  if (!hot) return { ok: false, reason: 'bad-shape' };
+  if (!hot) return { ok: false, updated: false, reason: 'bad-shape' };
   try { await api.storage.local.set({ hotList: hot, hotEtag: res.headers.get('ETag') || '', hotUpdatedAt: Date.now() }); } catch (_) {}
-  const r = await applyHotRules(hot, s);
+  hotReadyPromise = applyHotRules(hot, s);
+  let r; try { r = await hotReadyPromise; } catch (_) { r = { rules: 0 }; }
   return { ok: true, updated: true, count: r.rules };
 }
 
 // Replaces the HOT_BASE + PATH_BASE ranges atomically. `hot` null/stale or
-// the feature off → the ranges are simply emptied. Never throws.
+// the feature off → the ranges are simply emptied. Never throws — every
+// branch below either installs a rule set and reports exactly what got
+// installed, or (the last-resort case) leaves hotHostSet/hotStatus untouched
+// rather than describe a rule set that DNR never actually accepted.
 async function applyHotRules(hotIn, settingsIn) {
   if (!api.declarativeNetRequest || !api.declarativeNetRequest.updateDynamicRules) return { ok: false, rules: 0 };
-  const SSHot = globalThis.SSHot; const D = globalThis.SSDnr;
-  const s = settingsIn || await getSettings();
-  let hot = hotIn;
-  if (hot === undefined) { try { hot = (await api.storage.local.get('hotList')).hotList || null; } catch (_) { hot = null; } }
-  const enabled = !!s.blockKnownBad && s.hotListEnabled !== false && hot;
-  const guarded = enabled ? SSHot.guardHot(hot, s, Date.now()) : { domains: [], paths: [], dropped: null };
-  // Firefox / older Chrome: a small regex budget means no path tier (R17).
-  const regexCap = (api.declarativeNetRequest && typeof api.declarativeNetRequest.MAX_NUMBER_OF_REGEX_RULES === 'number') ? api.declarativeNetRequest.MAX_NUMBER_OF_REGEX_RULES : 1000;
-  if (regexCap < 400) guarded.paths = [];
-  let rules = SSHot.hotRules(guarded, api.runtime.getURL('blocked.html'));
+  const SSHot = globalThis.SSHot;
   try {
-    const existing = await api.declarativeNetRequest.getDynamicRules();
-    const removeRuleIds = SSHot.hotRuleIds(existing);
-    try { await api.declarativeNetRequest.updateDynamicRules({ removeRuleIds, addRules: rules }); }
-    catch (e) {
-      // R5: budget refused — retry without the path tier, then with nothing.
-      rules = SSHot.hotRules({ domains: guarded.domains, paths: [] }, api.runtime.getURL('blocked.html'));
-      try { await api.declarativeNetRequest.updateDynamicRules({ removeRuleIds, addRules: rules }); } catch (_) { rules = []; }
+    const s = settingsIn || await getSettings();
+    let hot = hotIn;
+    if (hot === undefined) { try { hot = (await api.storage.local.get('hotList')).hotList || null; } catch (_) { hot = null; } }
+    const enabled = !!s.blockKnownBad && s.hotListEnabled !== false && hot;
+    const guarded = enabled ? SSHot.guardHot(hot, s, Date.now()) : { domains: [], paths: [], dropped: null };
+    // Firefox / older Chrome: a small regex budget means no path tier (R17).
+    const regexCap = (api.declarativeNetRequest && typeof api.declarativeNetRequest.MAX_NUMBER_OF_REGEX_RULES === 'number') ? api.declarativeNetRequest.MAX_NUMBER_OF_REGEX_RULES : 1000;
+    if (regexCap < 400) guarded.paths = [];
+    const targetUrl = api.runtime.getURL('blocked.html');
+    const generatedAt = hot ? hot.generatedAt : 0;
+    let existing, removeRuleIds;
+    try {
+      existing = await api.declarativeNetRequest.getDynamicRules();
+      removeRuleIds = SSHot.hotRuleIds(existing);
+    } catch (_) { return { ok: false, rules: 0 }; }
+
+    // Attempt 1: the full guarded set — domains + paths.
+    const fullRules = SSHot.hotRules(guarded, targetUrl);
+    try {
+      await api.declarativeNetRequest.updateDynamicRules({ removeRuleIds, addRules: fullRules });
+      hotHostSet = new Set(enabled ? guarded.domains : []);
+      hotStatus = { count: guarded.domains.length, paths: guarded.paths.length, dropped: guarded.dropped, generatedAt };
+      return { ok: true, rules: fullRules.length };
+    } catch (_) { /* R5: budget refused — fall through to the domains-only retry */ }
+
+    // Attempt 2: domains only, no path tier.
+    const domainRules = SSHot.hotRules({ domains: guarded.domains, paths: [] }, targetUrl);
+    try {
+      await api.declarativeNetRequest.updateDynamicRules({ removeRuleIds, addRules: domainRules });
+      hotHostSet = new Set(enabled ? guarded.domains : []);
+      hotStatus = { count: guarded.domains.length, paths: 0, dropped: guarded.dropped, generatedAt };
+      return { ok: true, rules: domainRules.length };
+    } catch (_) { /* still refused — fall through to clearing the range */ }
+
+    // Attempt 3: nothing. Even a rejected rule set must not leave stale HOT/
+    // PATH rules installed, so at minimum clear the range.
+    try {
+      await api.declarativeNetRequest.updateDynamicRules({ removeRuleIds, addRules: [] });
+      hotHostSet = new Set();
+      hotStatus = { count: 0, paths: 0, dropped: guarded.dropped, generatedAt };
+      return { ok: true, rules: 0 };
+    } catch (_) {
+      // Even the empty install failed — DNR still holds whatever it had
+      // before this call. Leave hotHostSet/hotStatus exactly as they were;
+      // reporting anything else would describe a rule set that was never
+      // actually installed.
+      return { ok: false, rules: -1 };
     }
   } catch (_) { return { ok: false, rules: 0 }; }
-  hotHostSet = new Set(enabled ? guarded.domains : []);
-  hotStatus = { count: guarded.domains.length, paths: guarded.paths.length, dropped: guarded.dropped, generatedAt: hot ? hot.generatedAt : 0 };
-  return { ok: true, rules: rules.length };
 }
 
 async function getHotStatus() {
@@ -1155,6 +1219,9 @@ async function checkFeedHost(host) {
   if (!normalized) return { hit: null };
   // 0.13.0: the hourly hot list is checked first — it is a much fresher
   // signal than the daily feed and doesn't need the exact-shard round trip.
+  // A cold SW wake may still be rebuilding hotHostSet from storage; wait for
+  // that (bounded — never blocks a verdict more than HOT_READY_TIMEOUT_MS).
+  await awaitHotReady();
   if (hotHostSet.has(normalized) || hotHostSet.has(normalizeFeedHost(globalThis.ScamShield.registrableDomain(normalized)))) return { hit: 'block', sources: ['hot'], hot: true };
   const negAt = feedNegativeCache.get(normalized);
   if (negAt && Date.now() - negAt < FEED_NEG_CACHE_TTL) return { hit: null };
@@ -1203,6 +1270,9 @@ async function checkFeedBatchHosts(hosts) {
   const list = globalThis.ScamShield.dedupeCapped(Array.isArray(hosts) ? hosts.filter((h) => typeof h === 'string') : [], 50);
   const out = {};
   if (!list.length) return { results: out };
+  // 0.13.0: same bounded wait as checkFeedHost — a cold SW wake may still be
+  // rebuilding hotHostSet from storage.
+  await awaitHotReady();
 
   const rec = await globalThis.Blockstore.get();
   const Bset = globalThis.Blockset;
