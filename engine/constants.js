@@ -66,11 +66,14 @@
     B('barclays', ['barclays'], ['barclays.co.uk', 'barclays.com']),
     B('santander', ['santander'], ['santander.com', 'santander.co.uk', 'santander.es']),
     B('ing', ['ing bank'], ['ing.com', 'ing.nl', 'ing.be'], false),
-    // domains[0] drives brand_match.js's fuzzy-candidate "form" (its own
-    // fuzzyForm must clear MIN_BRAND_LEN=5); 'sbi' alone is 3 chars on either
-    // ccTLD domain, so 'onlinesbi.com' leads the list to keep SBI a fuzzy
-    // candidate (catches e.g. "sbi-bank-in.com") — verified live 2026-09-07.
-    B('sbi', ['state bank of india', 'onlinesbi'], ['onlinesbi.com', 'sbi.co.in', 'onlinesbi.sbi', 'sbi.bank.in'], true, 'SBI'),
+    // domains[0] MUST stay 'sbi.co.in': its fuzzyForm ('sbi', 3 chars) is
+    // under brand_match.js's MIN_BRAND_LEN=5, which deliberately keeps the
+    // 3-letter key 'sbi' OUT of the fuzzy candidate list — promoting a
+    // longer domains[0] (e.g. onlinesbi.com) would admit 'sbi' as a fuzzy
+    // candidate and flag ordinary hosts with an incidental "sbi" hyphen
+    // token (my-sbi-jobs.net, sbi-loan-advisors.com) as brandFuzzyMatch.
+    // sbi.bank.in is additive only (curl-verified live 2026-09-07).
+    B('sbi', ['state bank of india', 'onlinesbi'], ['sbi.co.in', 'onlinesbi.sbi', 'onlinesbi.com', 'sbi.bank.in'], true, 'SBI'),
     B('hdfc', ['hdfc'], ['hdfcbank.com', 'hdfc.com', 'hdfc.bank.in'], true, 'HDFC Bank'),
     B('icici', ['icici'], ['icicibank.com', 'icici.bank.in'], true, 'ICICI Bank'),
     B('emiratesnbd', ['emirates nbd'], ['emiratesnbd.com'], true, 'Emirates NBD'),

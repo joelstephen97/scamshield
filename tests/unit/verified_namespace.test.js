@@ -17,7 +17,10 @@ test('fuzzy brand match never fires inside a verified namespace', () => {
   assert.strictEqual(BM.allowlistBrandMatch('hdfc.bank.in'), 'hdfc');
   assert.strictEqual(BM.allowlistBrandMatch('www.icici.bank.in'), 'icici');
   assert.strictEqual(H.scoreUrl('https://www.hdfc.bank.in/').reasons.some((r) => r.code === 'brandFuzzyMatch'), false);
-  assert.strictEqual(H.scoreUrl('https://sbi-bank-in.com/').reasons.some((r) => r.code === 'brandFuzzyMatch' || r.code === 'brandLookalike'), true);
+  assert.strictEqual(H.scoreUrl('https://hdfc-bank-in.com/').reasons.some((r) => r.code === 'brandFuzzyMatch' || r.code === 'brandLookalike'), true);
+});
+test('sbi stays out of the fuzzy candidate list (3-letter key, MIN_BRAND_LEN=5 regression)', () => {
+  assert.strictEqual(BM.fuzzyBrandMatch('my-sbi-jobs.net'), null);
 });
 test('icon mismatch never fires for a brand icon on its verified-namespace site', () => {
   const d = H.scoreDom({ pageHost: 'www.icici.bank.in', hasPasswordField: true, iconMatches: [{ brand: 'icici', kind: 'favicon' }] });
