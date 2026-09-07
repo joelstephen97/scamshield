@@ -4,7 +4,7 @@
 // a classic-worker context (tests driving this file directly) falls back to
 // importScripts here. In the module SW `importScripts` is undefined — the
 // ReferenceError lands in the catch and the imports from sw.js already won.
-try { importScripts('../engine/constants.js', '../engine/trust.js', '../engine/features.js', '../engine/risk_rules.js', '../engine/image_hash.js', '../engine/brand_icons.js', '../engine/report_payload.js', '../engine/engagement.js', '../engine/blockset.js', '../engine/bloom.js', '../engine/first_seen.js', '../engine/hotlist.js', './stats.js', './blockstore.js', './update.js'); } catch (_) { /* deps already loaded by sw.js (Chrome) or the manifest (Firefox) */ }
+try { importScripts('../engine/constants.js', '../engine/trust.js', '../engine/features.js', '../engine/risk_rules.js', '../engine/image_hash.js', '../engine/brand_icons.js', '../engine/report_payload.js', '../engine/engagement.js', '../engine/blockset.js', '../engine/bloom.js', '../engine/first_seen.js', '../engine/dnr_rules.js', '../engine/hotlist.js', './stats.js', './blockstore.js', './update.js'); } catch (_) { /* deps already loaded by sw.js (Chrome) or the manifest (Firefox) */ }
 const api = globalThis.browser || globalThis.chrome;
 
 // Official ScamShield feed: rebuilt daily by GitHub Actions from OpenPhish +
@@ -31,6 +31,14 @@ const PLACEHOLDER_RELAY_URL = 'https://scamshield-relay.vercel.app/api/report';
 // tree) as a backup — both constants live here, next to DEFAULT_FEED_URL, per
 // the task brief.
 const FEED_META_URL = 'https://raw.githubusercontent.com/joelstephen97/scamshield-feed/main/v/current/meta.json';
+
+// 0.13.0 hot list: an hourly, licence-vetted list of the last 48 h of phishing
+// hosts, published by scamshield-feed on the orphan branch `hot` (single
+// commit, force-pushed each run, so main's history never grows). Static file,
+// identical for everyone, fetched with If-None-Match — a 304 costs nothing.
+const DEFAULT_HOT_URL = 'https://raw.githubusercontent.com/joelstephen97/scamshield-feed/hot/hot.json';
+const HOT_PERIOD_MINUTES = 60;
+const HOT_FETCH_TIMEOUT_MS = 10000;
 
 const DEFAULTS = {
   enabled: true,
@@ -70,7 +78,8 @@ const DEFAULTS = {
                              // content_script.js's getSettings() can pass it straight into scoreUrl()
   lastReportAt: 0,           // ms epoch of the last community report actually sent
   syncEnabled: false,        // mirror settings to chrome.storage.sync (opt-in)
-  uiLang: 'auto'             // 'auto' (follow the browser) | one of SSReasons.LOCALES
+  uiLang: 'auto',            // 'auto' (follow the browser) | one of SSReasons.LOCALES
+  hotListEnabled: true       // 0.13.0: hourly hot-list redirect rules (block tier only)
 };
 
 // Settings mirrored to chrome.storage.sync when syncEnabled (0.6.0). Only
@@ -465,6 +474,9 @@ async function setSettings(patch) {
     // keep the network allow rules in step.
     if ('blockKnownBad' in patch) { try { await applyNetworkRules(await currentOtaFilters(), !!patch.blockKnownBad); } catch (_) {} }
     if ('pausedSites' in patch || 'allowlist' in patch) await syncAllowRules(next);
+    // 0.13.0: keep the hot-list redirect rules in step with the same toggles —
+    // a newly trusted site's hot rule must go away, not just be out-prioritised.
+    if ('blockKnownBad' in patch || 'hotListEnabled' in patch || 'pausedSites' in patch || 'allowlist' in patch) { try { await applyHotRules(undefined, next); } catch (_) {} }
     if ('reportingOptIn' in patch && !patch.reportingOptIn) await api.storage.local.set({ reportQueue: [] });
     // Mirror preference changes to sync when enabled (best-effort).
     if (next.syncEnabled && Object.keys(patch).some((k) => SYNCED_KEYS.includes(k))) pushSync(next);
@@ -789,8 +801,89 @@ async function ensureNetworkRules() {
       await applyNetworkRules(filters, true);
     }
     await syncAllowRules(s);
+    // 0.13.0: rebuild the in-memory hot set from storage.local on every boot,
+    // then top it up if it's more than an hour stale (SW eviction can easily
+    // outlast the alarm's own period).
+    await applyHotRules(undefined);
+    let hotAt = 0;
+    try { hotAt = (await api.storage.local.get('hotUpdatedAt')).hotUpdatedAt || 0; } catch (_) {}
+    if (Date.now() - hotAt > HOT_PERIOD_MINUTES * 60000) runHotUpdate();
   } catch (_) {}
 }
+
+// ---- Hot list (0.13.0): hourly, licence-vetted redirect rules ----------
+// Additive alongside the daily OTA blocklist and the v0.9 threat feed above:
+// a much shorter (48h) rolling window of freshly-reported phishing hosts,
+// applied as its own atomic HOT_BASE/PATH_BASE dynamic-rule range so a stale
+// or disabled hot list never disturbs the block/redirect/allow ranges. Fails
+// open on every path — a bad fetch, a bad shape, or a rule-budget rejection
+// all leave the extension exactly as protected as it was a moment before.
+//
+// In-memory mirror of the guarded hot hostnames so checkFeedHost() and the
+// SERP badge path see a hot host within the hour, not only the DNR layer.
+let hotHostSet = new Set();
+let hotStatus = { count: 0, paths: 0, dropped: null, generatedAt: 0 };
+
+async function runHotUpdate(urlOverride) {
+  const s = await getSettings();
+  if (!s.blockKnownBad || s.hotListEnabled === false) { await applyHotRules(null, s); return { ok: true, updated: false, reason: 'disabled' }; }
+  const url = urlOverride || DEFAULT_HOT_URL;
+  let prev = {};
+  try { prev = await api.storage.local.get(['hotList', 'hotEtag', 'hotUpdatedAt']); } catch (_) {}
+  const headers = {};
+  if (!urlOverride && prev.hotEtag) headers['If-None-Match'] = prev.hotEtag;
+  let res;
+  try {
+    const ctrl = new AbortController(); const timer = setTimeout(() => ctrl.abort(), HOT_FETCH_TIMEOUT_MS);
+    res = await fetch(url, { method: 'GET', cache: 'no-store', headers, signal: ctrl.signal });
+    clearTimeout(timer);
+  } catch (_) { return { ok: false, reason: 'fetch-failed' }; }
+  if (res.status === 304) { await api.storage.local.set({ hotUpdatedAt: Date.now() }); await applyHotRules(prev.hotList || null, s); return { ok: true, updated: false }; }
+  if (!res.ok) return { ok: false, reason: 'http-' + res.status };
+  let json; try { json = await res.json(); } catch (_) { return { ok: false, reason: 'bad-json' }; }
+  const hot = globalThis.SSHot.parseHot(json, Date.now());
+  if (!hot) return { ok: false, reason: 'bad-shape' };
+  try { await api.storage.local.set({ hotList: hot, hotEtag: res.headers.get('ETag') || '', hotUpdatedAt: Date.now() }); } catch (_) {}
+  const r = await applyHotRules(hot, s);
+  return { ok: true, updated: true, count: r.rules };
+}
+
+// Replaces the HOT_BASE + PATH_BASE ranges atomically. `hot` null/stale or
+// the feature off → the ranges are simply emptied. Never throws.
+async function applyHotRules(hotIn, settingsIn) {
+  if (!api.declarativeNetRequest || !api.declarativeNetRequest.updateDynamicRules) return { ok: false, rules: 0 };
+  const SSHot = globalThis.SSHot; const D = globalThis.SSDnr;
+  const s = settingsIn || await getSettings();
+  let hot = hotIn;
+  if (hot === undefined) { try { hot = (await api.storage.local.get('hotList')).hotList || null; } catch (_) { hot = null; } }
+  const enabled = !!s.blockKnownBad && s.hotListEnabled !== false && hot;
+  const guarded = enabled ? SSHot.guardHot(hot, s, Date.now()) : { domains: [], paths: [], dropped: null };
+  // Firefox / older Chrome: a small regex budget means no path tier (R17).
+  const regexCap = (api.declarativeNetRequest && typeof api.declarativeNetRequest.MAX_NUMBER_OF_REGEX_RULES === 'number') ? api.declarativeNetRequest.MAX_NUMBER_OF_REGEX_RULES : 1000;
+  if (regexCap < 400) guarded.paths = [];
+  let rules = SSHot.hotRules(guarded, api.runtime.getURL('blocked.html'));
+  try {
+    const existing = await api.declarativeNetRequest.getDynamicRules();
+    const removeRuleIds = SSHot.hotRuleIds(existing);
+    try { await api.declarativeNetRequest.updateDynamicRules({ removeRuleIds, addRules: rules }); }
+    catch (e) {
+      // R5: budget refused — retry without the path tier, then with nothing.
+      rules = SSHot.hotRules({ domains: guarded.domains, paths: [] }, api.runtime.getURL('blocked.html'));
+      try { await api.declarativeNetRequest.updateDynamicRules({ removeRuleIds, addRules: rules }); } catch (_) { rules = []; }
+    }
+  } catch (_) { return { ok: false, rules: 0 }; }
+  hotHostSet = new Set(enabled ? guarded.domains : []);
+  hotStatus = { count: guarded.domains.length, paths: guarded.paths.length, dropped: guarded.dropped, generatedAt: hot ? hot.generatedAt : 0 };
+  return { ok: true, rules: rules.length };
+}
+
+async function getHotStatus() {
+  const s = await getSettings();
+  let l = {};
+  try { l = await api.storage.local.get(['hotUpdatedAt']); } catch (_) {}
+  return Object.assign({ enabled: !!s.blockKnownBad && s.hotListEnabled !== false, updatedAt: l.hotUpdatedAt || 0 }, hotStatus);
+}
+
 // The block page reporting a catch. Sender must be our own extension page.
 const dnrBlockedSeen = new Map(); // host -> ts, collapses reloads within a minute
 async function handleDnrBlocked(msg, sender) {
@@ -1060,6 +1153,9 @@ async function fetchExactShardEntries(urls, hash40) {
 async function checkFeedHost(host) {
   const normalized = normalizeFeedHost(host);
   if (!normalized) return { hit: null };
+  // 0.13.0: the hourly hot list is checked first — it is a much fresher
+  // signal than the daily feed and doesn't need the exact-shard round trip.
+  if (hotHostSet.has(normalized) || hotHostSet.has(normalizeFeedHost(globalThis.ScamShield.registrableDomain(normalized)))) return { hit: 'block', sources: ['hot'], hot: true };
   const negAt = feedNegativeCache.get(normalized);
   if (negAt && Date.now() - negAt < FEED_NEG_CACHE_TTL) return { hit: null };
 
@@ -1120,6 +1216,9 @@ async function checkFeedBatchHosts(hosts) {
   for (const raw of list) {
     const normalized = normalizeFeedHost(raw);
     let category = null;
+    if (normalized && (hotHostSet.has(normalized) || hotHostSet.has(normalizeFeedHost(SS.registrableDomain(normalized))))) {
+      out[raw] = 'block'; continue;
+    }
     if (normalized && (blockSet || warnSet || dyndnsSet || hostersSet)) {
       try {
         const hostBytes = new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(normalized)));
@@ -1158,6 +1257,7 @@ function trackedJob(fn) {
 runOtaUpdate = trackedJob(runOtaUpdate); // eslint-disable-line no-func-assign
 runFeedUpdate = trackedJob(runFeedUpdate); // eslint-disable-line no-func-assign
 flushReports = trackedJob(flushReports); // eslint-disable-line no-func-assign
+runHotUpdate = trackedJob(runHotUpdate); // eslint-disable-line no-func-assign
 
 let updatePendingSince = 0;
 async function openExtensionContexts() {
@@ -1205,8 +1305,10 @@ function requestStoreUpdateCheck() {
 
 if (api.alarms) {
   api.alarms.create('ota', { periodInMinutes: 720 }); // every 12h — feed OTA rides the same cadence
+  api.alarms.create('hot', { periodInMinutes: HOT_PERIOD_MINUTES }); // every 60m — the hourly hot list
   api.alarms.onAlarm.addListener((a) => {
-    if (a.name === 'ota') { runOtaUpdate(); runFeedUpdate(); flushReports(); requestStoreUpdateCheck(); }
+    if (a.name === 'ota') { runOtaUpdate(); runFeedUpdate(); flushReports(); runHotUpdate(); requestStoreUpdateCheck(); }
+    if (a.name === 'hot') runHotUpdate();
     if (a.name === 'applyUpdate') applyPendingUpdate();
   });
 }
@@ -1247,6 +1349,7 @@ api.runtime.onInstalled.addListener(async (details) => {
   }
   runOtaUpdate(); // fresh rules right away instead of waiting for the 12h alarm
   runFeedUpdate(); // same for the v0.9 threat feed
+  runHotUpdate(); // and the hourly hot list
   flushReports();
 });
 
@@ -1497,6 +1600,8 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         sendResponse(await checkFeedHost(msg.host)); break;
       case 'checkFeedBatch':
         sendResponse(await checkFeedBatchHosts(msg.hosts)); break;
+      case 'getHotStatus':
+        sendResponse(await getHotStatus()); break;
       case 'checkRisk':
         sendResponse(await checkRiskHosting(msg.host)); break;
       case 'checkNrd':
@@ -1539,4 +1644,4 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 // module-scoped. Re-attach the debug/test surface that used to live on the
 // classic worker's global scope — the e2e suite drives these via
 // worker.evaluate, and they're handy in the SW console.
-Object.assign(globalThis, { DEFAULT_FEED_URL, FEED_META_URL, getSettings, setSettings, handleUserReport, runOtaUpdate, flushReports, queueReport, exportSettings, sanitizeImport, pushSync, pullSync, getStats, bumpStat, ensurePrivacyTotal, ensureInstalledAt, getReviewAsk, getReviewAskContext, setReviewAsk, sanitizeReviewAsk, ensureReviewAsk, importReviewAsk, getLangDict, loadLangDict, isValidLang, runFeedUpdate, checkFeedHost, checkFeedBatchHosts, normalizeFeedHost, checkRiskHosting, checkNrdHost, applyNetworkRules, syncAllowRules, ensureNetworkRules, handleDnrBlocked, applyPendingUpdate, requestStoreUpdateCheck, getUpdateState, setUpdateState });
+Object.assign(globalThis, { DEFAULT_FEED_URL, FEED_META_URL, getSettings, setSettings, handleUserReport, runOtaUpdate, flushReports, queueReport, exportSettings, sanitizeImport, pushSync, pullSync, getStats, bumpStat, ensurePrivacyTotal, ensureInstalledAt, getReviewAsk, getReviewAskContext, setReviewAsk, sanitizeReviewAsk, ensureReviewAsk, importReviewAsk, getLangDict, loadLangDict, isValidLang, runFeedUpdate, checkFeedHost, checkFeedBatchHosts, normalizeFeedHost, checkRiskHosting, checkNrdHost, applyNetworkRules, syncAllowRules, ensureNetworkRules, handleDnrBlocked, applyPendingUpdate, requestStoreUpdateCheck, getUpdateState, setUpdateState, runHotUpdate, applyHotRules, getHotStatus });

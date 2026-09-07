@@ -27,6 +27,10 @@
     };
     const domains = json.domains.map(norm).filter(Boolean).sort((a, b) => b.t - a.t).slice(0, MAX_DOMAINS);
     const paths = (Array.isArray(json.paths) ? json.paths : []).map((e) => { const n = norm(e); return n && typeof e.p === 'string' && e.p.startsWith('/') ? Object.assign(n, { p: e.p }) : null; }).filter(Boolean);
+    // `removed` is informational only — the SW honours removals by
+    // construction, since applyHotRules() replaces the whole HOT/PATH id
+    // range from the current file's `domains`/`paths` on every run rather
+    // than diffing against the previous one.
     const removed = (Array.isArray(json.removed) ? json.removed : []).filter((h) => typeof h === 'string').map((h) => h.toLowerCase());
     return { v: 1, generatedAt: json.generatedAt, ttlMinutes: typeof json.ttlMinutes === 'number' ? json.ttlMinutes : 360, domains, paths, removed };
   }
