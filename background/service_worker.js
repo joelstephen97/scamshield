@@ -1448,7 +1448,13 @@ const shopFindings = new Map();
 // extension already holds host_permissions for http(s)://*/* (manifest.json).
 const lastNavigation = new Map();
 const LAST_NAVIGATION_MAX = 500;
-const LAST_NAVIGATION_GRACE_MS = 2000;
+// 5s, not 2s (fix round 1): the main scan can spend up to ~1.7s on icon
+// hashing + page-content scoring before it even sends getLastNavigation
+// (itself capped at a further 500ms wait) on a fast-load/slow-analysis page
+// — 2s left too thin a margin. The map stays bounded regardless (capped at
+// LAST_NAVIGATION_MAX, and each tab's entry is deleted well before it can
+// accumulate stale rows via tabs.onRemoved).
+const LAST_NAVIGATION_GRACE_MS = 5000;
 if (api.tabs && api.tabs.onUpdated) {
   api.tabs.onUpdated.addListener((tabId, changeInfo) => {
     if (changeInfo.status === 'loading') {

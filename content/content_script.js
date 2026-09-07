@@ -870,12 +870,22 @@
     // tabs.onUpdated callback). Ordinary URL-rule evidence, folded into
     // urlRules exactly like scoreUrl()'s own rules — warn-tier only, fails
     // open on any missing/timed-out piece.
-    const navEntry = performance.getEntriesByType('navigation')[0];
-    if (navEntry && navEntry.redirectCount > 0) {
-      const ln = await withTimeout(send('getLastNavigation'), 500);
-      const g = SS.gatewaySignal({ redirectCount: navEntry.redirectCount, originalUrl: ln && ln.url, landingHost: location.hostname });
-      if (g.score) {
-        urlRules = Object.assign({}, urlRules, { score: Math.min(1, urlRules.score + g.score), reasons: urlRules.reasons.concat(g.reasons) });
+    // IS_TOP-gated (document-level check, same as the icon/page-content block
+    // above): lastNavigation is keyed by tabId, so it only ever holds the
+    // TOP page's pre-redirect URL. A sub-frame (ad iframes routinely have
+    // their own redirectCount > 0) would otherwise compare the top page's
+    // original host against its own hostname and could inject a false
+    // gatewayRedirect reason into a sub-frame verdict — which frameVerdicts'
+    // merge in background/service_worker.js can promote to the tab's
+    // effective verdict.
+    if (IS_TOP) {
+      const navEntry = performance.getEntriesByType('navigation')[0];
+      if (navEntry && navEntry.redirectCount > 0) {
+        const ln = await withTimeout(send('getLastNavigation'), 500);
+        const g = SS.gatewaySignal({ redirectCount: navEntry.redirectCount, originalUrl: ln && ln.url, landingHost: location.hostname });
+        if (g.score) {
+          urlRules = Object.assign({}, urlRules, { score: Math.min(1, urlRules.score + g.score), reasons: urlRules.reasons.concat(g.reasons) });
+        }
       }
     }
     let verdict = SS.fuse({ modelProb, urlRules, domRules, contentProb, iconMatch });
