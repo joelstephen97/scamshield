@@ -64,7 +64,8 @@ for the first AMO submission).
   and only fires for pages flagged dangerous or reported as a mistake.
 - The only default network activity is downloading the public threat-feed
   files (block/warn lists, the hourly 48-hour hot list, and the weekly
-  new-domain Bloom filter) from the open-source feed's CDN.
+  new-domain Bloom filter) from the open-source feed's repository on
+  raw.githubusercontent.com.
 - Icon/logo fetches for brand look-alike matching are same-site requests to
   the page you're already on (no cookies/credentials sent, nothing shared
   with a third party).

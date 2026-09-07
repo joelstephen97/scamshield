@@ -118,6 +118,6 @@ Source code, privacy policy and issue tracker: github.com/joelstephen97/scamshie
 
 • Fewer false alarms on real sites. Genuine bank, government and company sites that use a country-style address (a bank's own .bank.in domain, for example) no longer get a warning banner.
 
-• Measured, not claimed. Benchmark numbers for this release are published in docs/benchmark.md in the repository, together with the sampling method and the definitions behind blocked, stopped and warned.
+• Measured, not claimed: on 149 fresh phishing pages ScamShield 0.13.0 blocked 57 % before they loaded and stopped 66 % in total, with zero requests to any ScamShield server — method in docs/benchmark.md.
 
 No new permissions. Still storage, declarativeNetRequest, alarms and http/https access, the same as every version since 0.3.1.

@@ -94,6 +94,6 @@ Kode sumber, kebijakan privasi, dan pelacak masalah: github.com/joelstephen97/sc
 
 • Lebih sedikit alarm palsu di situs asli. Situs asli bank, instansi pemerintah, dan perusahaan yang memakai alamat bergaya negara (misalnya domain .bank.in milik sebuah bank) tidak lagi memunculkan spanduk peringatan.
 
-• Diukur, bukan diklaim. Angka hasil pengukuran untuk rilis ini diterbitkan di docs/benchmark.md pada repositori, lengkap dengan metode pengambilan sampel dan definisi diblokir, dihentikan, dan diperingatkan.
+• Diukur, bukan diklaim: dari 149 halaman phishing baru, ScamShield 0.13.0 memblokir 57 % sebelum halaman termuat dan menghentikan 66 % secara keseluruhan, tanpa satu pun permintaan ke server ScamShield mana pun — metode ada di docs/benchmark.md.
 
 Tidak ada izin baru. Tetap storage, declarativeNetRequest, alarms, dan akses http/https, sama seperti setiap versi sejak 0.3.1.

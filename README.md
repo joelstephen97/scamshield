@@ -89,7 +89,7 @@ ScamShield watches every page you open and steps in only when something looks wr
 - Redesigned popup and settings, dark mode, first-run onboarding, accessible warnings (`role=alert`/`role=dialog`, Escape-to-cancel, focus management).
 - Re-scans single-page apps on route changes.
 
-**Measured** — what ScamShield actually catches on live phishing pages, with the sampling method, the definitions behind "blocked"/"stopped"/"warned", and the benign-control false-positive count: [docs/benchmark.md](docs/benchmark.md).
+**Measured** — on 149 fresh live phishing pages, ScamShield 0.13.0 blocked 57 % before they loaded and stopped 66 % in total, with zero hard false positives on the benign controls and no request to any ScamShield server (there isn't one). Sampling method, per-bucket numbers and the definitions behind "blocked"/"stopped"/"warned": [docs/benchmark.md](docs/benchmark.md).
 
 ## How it works
 
@@ -244,7 +244,7 @@ model/.venv/Scripts/python model/train_page.py       # page model → page-conte
 npm run bundle:models && npm run test:unit           # parity tests assert JS == Python to 1e-4
 ```
 
-Known limits (honest): the page model is data-limited (few live positives on any given day) — recall will improve as opt-in reports accumulate; 15 of the 64 brands have no icon hash yet (`npm run build:brands` re-run); Firefox ICO decoding is unverified.
+Known limits (honest): the page model is data-limited (few live positives on any given day) — recall will improve as opt-in reports accumulate; icon fingerprints exist for 49 brands, so the other 277 entries in the 326-brand name/domain table are matched by name and look-alike domain only (`npm run build:brands` adds more); Firefox ICO decoding is unverified.
 
 ## Releasing
 

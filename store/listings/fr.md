@@ -94,6 +94,6 @@ Code source, politique de confidentialité et suivi des problèmes : github.com/
 
 • Moins de fausses alertes sur les vrais sites. Les sites authentiques de banques, d'administrations et d'entreprises qui utilisent une adresse de type national (par exemple le domaine .bank.in propre à une banque) ne déclenchent plus de bannière.
 
-• Mesuré, pas affirmé. Les chiffres mesurés de cette version sont publiés dans docs/benchmark.md, dans le dépôt, avec la méthode d'échantillonnage et les définitions de bloqué, arrêté et signalé.
+• Mesuré, pas affirmé : sur 149 pages d'hameçonnage récentes, ScamShield 0.13.0 en a bloqué 57 % avant leur chargement et en a arrêté 66 % au total, sans une seule requête vers un serveur ScamShield. Méthode : docs/benchmark.md.
 
 Aucune nouvelle autorisation. Toujours storage, declarativeNetRequest, alarms et l'accès http/https, comme dans chaque version depuis la 0.3.1.
