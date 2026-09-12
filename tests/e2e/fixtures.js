@@ -47,4 +47,11 @@ const test = base.extend({
   }
 });
 const BASE_HTTPS = 'https://localhost:5600';
-module.exports = { test, EXTENSION_PATH, BASE_HTTPS };
+// 0.14.0, Task 5: report/trust/copy live inside the ⋯ menu now (visible row
+// caps at 3 controls). A no-op when no menu is present (e.g. a surface with
+// no ⋯ button at all), so existing callers that don't need it are unaffected.
+async function openMore(scope) {
+  const m = scope.locator('.ss-more');
+  if (await m.count()) await m.first().click();
+}
+module.exports = { test, EXTENSION_PATH, BASE_HTTPS, openMore };

@@ -1,4 +1,4 @@
-const { test, EXTENSION_PATH, BASE_HTTPS } = require('./fixtures');
+const { test, EXTENSION_PATH, BASE_HTTPS, openMore } = require('./fixtures');
 const { expect } = require('@playwright/test');
 const BASE = 'http://localhost:5599';
 
@@ -315,9 +315,29 @@ test('wallet drainer request is intercepted and rejected on cancel', async ({ co
 test('banner has Leave + Report actions and the overlay has evidence rows', async ({ context }) => {
   const page = await context.newPage(); await page.goto(BASE + '/phishing-login.html');
   await expect(page.locator('.scamshield-banner.danger .ss-leave')).toBeVisible({ timeout: 8000 });
+  await openMore(page.locator('.scamshield-banner'));
   await expect(page.locator('.scamshield-banner .ss-report')).toBeVisible();
   await page.fill('input[name="pw"]', 'x'); await page.click('button[type="submit"]');
   await expect(page.locator('.scamshield-overlay .ss-evidence li')).not.toHaveCount(0);
   await page.click('.scamshield-banner .ss-leave');
   await expect.poll(() => page.url(), { timeout: 5000 }).not.toContain('phishing-login');
+});
+
+test('banner: at most three visible controls, the rest in a menu; ✕ pauses the site for a day', async ({ context }) => {
+  const page = await context.newPage(); const sw = context.serviceWorkers()[0];
+  // BASE_HTTPS (localhost:5600, TLS), not BASE (localhost:5599, plain http):
+  // this fixture's URL model gets a +0.15 noHttps rule hit over plain http
+  // (engine/heuristics.js), which corroborates the content-model flag into
+  // "dangerous" instead of "suspicious" — the https origin is what keeps this
+  // a suspicious-tier verdict, same as the other content-suspicious.html
+  // specs in this file. Both origins resolve to hostname 'localhost', so the
+  // pausedSites key asserted below is unaffected.
+  await page.goto(BASE_HTTPS + '/content-suspicious.html'); const banner = page.locator('.scamshield-banner.suspicious');
+  await expect(banner).toBeVisible({ timeout: 8000 }); await expect(banner).toHaveAttribute('role', 'status');
+  expect(await banner.locator('.ss-acts > button:visible').count()).toBeLessThanOrEqual(3);
+  await banner.locator('.ss-more').click(); await expect(banner.locator('.ss-menu .ss-report')).toBeVisible();
+  await page.keyboard.press('Escape'); await expect(banner.locator('.ss-menu')).toBeHidden();
+  await banner.locator('.ss-x').click(); await expect(banner).toHaveCount(0);
+  const s = await sw.evaluate(() => getSettings()); expect(s.pausedSites['localhost']).toBeGreaterThan(Date.now() + 23 * 3600e3);
+  await page.reload(); await page.waitForTimeout(1500); await expect(page.locator('.scamshield-banner')).toHaveCount(0); await page.close();
 });

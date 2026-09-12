@@ -11,7 +11,7 @@
 // fixture copy-report.spec.js and detection.spec.js already use (mapped to
 // 127.0.0.1 by fixtures.js). hot-fixture.example is newly mapped there too
 // (Step 1 of the brief) for the block-page/hot-list flow.
-const { test } = require('./fixtures');
+const { test, openMore } = require('./fixtures');
 const { expect } = require('@playwright/test');
 
 const HOST = 'secure-paypa1-login.com';
@@ -28,6 +28,7 @@ test('banner: Trust this site -> allowlisted, acknowledgement with Undo restores
   // anti-synthetic-click arming — see the dedicated test below); wait past it
   // before this real, intentional click.
   await page.waitForTimeout(350);
+  await openMore(page.locator('.scamshield-banner'));
   await page.locator('.scamshield-banner .ss-trust').click();
   await expect(page.locator('.scamshield-ack')).toContainText(/won't flag/i);
   const s1 = await sw.evaluate(() => getSettings());
@@ -66,6 +67,11 @@ test('banner: synthetic (untrusted) clicks on Trust this site do nothing, even a
   // .click() or dispatch a MouseEvent on the injected button the instant it
   // renders; neither is a real user gesture, so both must be no-ops.
   await page.waitForTimeout(400);
+  // Real click on ⋯ opens the menu (the trust button now lives there); the
+  // synthetic events below then target that now-visible menu item. The
+  // arming guard lives on the trust button itself, not the menu, so opening
+  // the menu with a real click changes nothing about what's under test.
+  await page.locator('.scamshield-banner .ss-more').click();
   await page.evaluate(() => document.querySelector('.scamshield-banner .ss-trust').click());
   await page.evaluate(() => {
     document.querySelector('.scamshield-banner .ss-trust').dispatchEvent(new MouseEvent('click', { bubbles: true }));

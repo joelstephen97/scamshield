@@ -1042,7 +1042,7 @@
       // credential-form case stays a banner because its ACTIVE moment is the
       // submit guard — the interstitial is for scams with no submit moment.
       const DECISIVE_INTERSTITIAL = ['seed-phrase-harvest', 'clickfix', 'fake-browser-update', 'delivery-fee-scam', 'feed-block'];
-      const handlers = { onLeave: () => send('leaveTab'), onReport: () => send('userReport', { label: 'false_positive' }) };
+      const handlers = { onLeave: () => send('leaveTab'), onReport: () => send('userReport', { label: 'false_positive' }), onHide: (choice) => send('pauseSite', { domain: pageDomain, choice }) };
       // Strict mode (0.6.0): for a less-confident user, ANY non-safe verdict
       // gets the blocking interstitial, not just decisive flags.
       const decisive = verdict.level === 'dangerous' && (verdict.flags || []).some((f) => DECISIVE_INTERSTITIAL.includes(f));

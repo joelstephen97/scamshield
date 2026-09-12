@@ -294,7 +294,7 @@
   // renders (e.g. a click already in flight on an element it then covers).
   const TRUST_ARM_MS = 300;
   function trustButton(onAllow) {
-    const btn = el('button', 'ss-trust', t('trustThisSite', null, 'Trust this site'));
+    const btn = button('ss-trust', t('trustThisSite', null, 'Trust this site'));
     if (onAllow) {
       const armedAt = performance.now();
       onTrustedClick(btn, (e) => { if (performance.now() < armedAt + TRUST_ARM_MS) return; onAllow(e); });
@@ -303,25 +303,20 @@
   }
   function showBanner(verdict, extra) {
     if (document.querySelector('.' + NS + '-banner')) return;
-    const x = extra || {};
-    const danger = verdict.level === 'dangerous';
+    const x = extra || {}; const danger = verdict.level === 'dangerous';
     const bar = el('div', NS + '-banner ' + (danger ? 'danger' : 'suspicious'));
-    bar.setAttribute('role', 'alert');
-    setDir(bar);
-    const ico = el('span', 'ss-ico'); ico.innerHTML = ICON[danger ? 'dangerous' : 'suspicious'];
+    bar.setAttribute('role', danger ? 'alert' : 'status'); setDir(bar);
     const text = el('div', 'ss-text');
-    const head = verdict.brandLabel
-      ? (danger ? t('bannerDangerBrand', [bidi(verdict.brandLabel)], 'Dangerous page — looks like ' + verdict.brandLabel + ", but isn't") : t('bannerSuspicious', null, 'Suspicious page'))
-      : (danger ? t('bannerDanger', null, 'Dangerous page') : t('bannerSuspicious', null, 'Suspicious page'));
-    text.append(el('b', null, head), el('span', null, reasonText(verdict.reasons[0]) || (danger ? t('popupDangerSummary', null, "Don't enter passwords or card details here.") : t('popupSuspiciousSummary', null, 'Take care before typing anything here.'))));
-    if (verdict.brandLabel && verdict.brandUrl) {
-      const cmp = compareRow(verdict.brandLabel, verdict.brandUrl);
-      if (cmp) text.appendChild(cmp);
-    }
-    const acts = el('div', 'ss-acts');
-    if (danger) { const leave = el('button', 'ss-leave', t('leaveThisPage', null, 'Leave this page')); onTrustedClick(leave, () => { x.onLeave ? x.onLeave() : history.back(); }); acts.appendChild(leave); }
-    if (verdict.brandUrl) { const rescue = el('button', 'ss-rescue', t('takeMeToReal', [bidi(verdict.brandLabel || 'site')], 'Take me to the real ' + (verdict.brandLabel || 'site'))); onTrustedClick(rescue, () => { location.href = verdict.brandUrl; }); acts.appendChild(rescue); }
-    if (!danger) { const why = el('button', 'ss-why', t('showWhy', null, 'Show why')); onTrustedClick(why, () => { text.querySelector('span').textContent = verdict.reasons.slice(0, 3).map(reasonText).join(' · '); why.remove(); }); acts.appendChild(why); }
+    const head = verdict.brandLabel ? (danger ? t('bannerDangerBrand', [bidi(verdict.brandLabel)], 'Dangerous page — looks like ' + verdict.brandLabel + ", but isn't") : t('bannerTakeCare', null, 'Take care on this site')) : (danger ? t('bannerDanger', null, 'Dangerous page') : t('bannerTakeCare', null, 'Take care on this site'));
+    const reason = el('span', 'ss-reason', reasonText(verdict.reasons[0]) || (danger ? t('popupDangerSummary', null, "Don't enter passwords or card details here.") : t('popupSuspiciousSummary', null, 'Take care before typing anything here.')));
+    text.append(el('b', null, head), reason);
+    const more = (verdict.reasons || []).slice(1, 4);
+    if (more.length) { const why = el('button', 'ss-why', t('whyShort', null, 'Why?')); why.type = 'button'; why.setAttribute('aria-expanded', 'false'); onTrustedClick(why, () => { const ul = el('ul', 'ss-why-list'); for (const r of more) ul.appendChild(el('li', null, reasonText(r))); reason.after(ul); why.remove(); }); reason.appendChild(why); }
+    bar.append(tile(danger ? 'danger' : 'warn'), text);
+    const acts = el('div', 'ss-acts'); const menu = el('div', 'ss-menu'); menu.setAttribute('role', 'menu'); menu.hidden = true;
+    const leave = button('ss-leave', t('leaveThisPage', null, 'Leave this page')); onTrustedClick(leave, () => { x.onLeave ? x.onLeave() : history.back(); });
+    const rescue = verdict.brandUrl ? button('ss-rescue', t('takeMeToReal', [bidi(verdict.brandLabel || 'site')], 'Take me to the real ' + (verdict.brandLabel || 'site')), { primary: true }) : null;
+    if (rescue) onTrustedClick(rescue, () => { location.href = verdict.brandUrl; });
     // Single guarded listener (not two): bar.remove() lives inside onAllow
     // itself, right before the await, so the banner still disappears the
     // instant a real trusted click lands — same UX as before, one fewer
@@ -330,18 +325,28 @@
     // "Trust this site" button that merely dismissed the banner — a label
     // that lied about what the click did. The button is simply not rendered
     // there now; "Dismiss" (the ✕) is the honest control for that surface.
-    const trust = x.noTrust ? null : trustButton(async () => {
-      bar.remove();
-      const domain = regDomain();
-      await send('trustSite', { domain, via: x.trustVia || 'banner' });
-      ackSurface(domain, () => showBanner(verdict, extra));
-    });
-    const report = el('button', 'ss-report', t('reportMistake', null, 'Report a mistake')); onTrustedClick(report, () => { report.textContent = t('thanks', null, 'Thanks'); report.disabled = true; x.onReport && x.onReport(); });
-    const copyBtn = copyReportButton(verdict);
-    const close = el('button', 'ss-x', '✕'); close.setAttribute('aria-label', t('ariaDismiss', null, 'Dismiss')); onTrustedClick(close, () => bar.remove());
-    if (trust) acts.appendChild(trust);
-    acts.append(report, copyBtn, close);
-    bar.append(ico, text, acts);
+    const trust = x.noTrust ? null : trustButton(async () => { bar.remove(); const domain = regDomain(); await send('trustSite', { domain, via: x.trustVia || 'banner' }); ackSurface({ text: t('ackTrusted', [bidi(domain)], "ScamShield won't flag " + domain + ' again.'), onUndo: () => send('untrustSite', { domain }), restore: () => showBanner(verdict, extra) }); });
+    const report = button('ss-report', t('reportMistake', null, 'Report a mistake')); onTrustedClick(report, () => { report.textContent = t('thanks', null, 'Thanks'); report.disabled = true; x.onReport && x.onReport(); });
+    const copyBtn = copyReportButton(verdict); copyBtn.classList.add('ss-btn');
+    // Visible row (Hick): danger = filled primary (rescue, else Leave) + outlined Leave (when rescue is primary) + ⋯ + ✕;
+    // suspicious = outlined Trust + ⋯ + ✕ (nothing filled on a suspicious page). Trust (danger), Report, Copy live in the menu.
+    if (danger) { if (rescue) { acts.append(rescue, leave); } else { leave.classList.add('primary'); acts.appendChild(leave); } if (trust) menu.appendChild(trust); }
+    else if (trust) acts.appendChild(trust);
+    menu.append(report, copyBtn);
+    // The brand comparison sits INSIDE .ss-text under the reason (second line only when a brand is known).
+    if (verdict.brandLabel && verdict.brandUrl) { const cmp = compareRow(verdict.brandLabel, verdict.brandUrl); if (cmp) text.appendChild(cmp); }
+    const moreBtn = button('ss-more', '⋯'); moreBtn.setAttribute('aria-label', t('moreActions', null, 'More actions')); moreBtn.setAttribute('aria-haspopup', 'menu'); moreBtn.setAttribute('aria-expanded', 'false');
+    const closeMenu = () => { menu.hidden = true; moreBtn.setAttribute('aria-expanded', 'false'); document.removeEventListener('click', onDoc, true); document.removeEventListener('keydown', onKey, true); };
+    const onDoc = (e) => { if (!acts.contains(e.target)) closeMenu(); }; const onKey = (e) => { if (e.key === 'Escape') closeMenu(); };
+    // Escape must close the menu the instant it's open, so its listener
+    // attaches synchronously here. Only the outside-click listener is
+    // deferred a tick — otherwise the very click that opened the menu would
+    // immediately bubble to document and close it right back.
+    onTrustedClick(moreBtn, () => { if (menu.hidden) { menu.hidden = false; moreBtn.setAttribute('aria-expanded', 'true'); document.addEventListener('keydown', onKey, true); setTimeout(() => { document.addEventListener('click', onDoc, true); }, 0); } else closeMenu(); });
+    const close = button('ss-x', '✕'); const choice = danger ? '1h' : '1d';
+    close.setAttribute('aria-label', danger ? t('hideForAnHour', null, 'Hide for an hour') : t('hideForToday', null, 'Hide for today')); close.title = close.getAttribute('aria-label');
+    onTrustedClick(close, () => { closeMenu(); bar.remove(); if (!x.noTrust && x.onHide) x.onHide(choice); });
+    acts.append(moreBtn, close, menu); bar.appendChild(acts);
     (document.body || document.documentElement).appendChild(bar);
   }
 

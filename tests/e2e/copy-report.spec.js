@@ -11,7 +11,7 @@
 // The toast/visual side is still asserted for real: execCommand('copy')'s
 // fallback path is reliable enough headless that the success toast should
 // still render.
-const { test, EXTENSION_PATH, BASE_HTTPS } = require('./fixtures');
+const { test, EXTENSION_PATH, BASE_HTTPS, openMore } = require('./fixtures');
 const { expect } = require('@playwright/test');
 const BASE = 'http://localhost:5599';
 
@@ -32,6 +32,7 @@ test('Copy report on a dangerous banner composes and copies a shareable, defange
   await cdp.send('Runtime.enable');
   await page.goto(PAYPAL_LOOKALIKE);
   await expect(page.locator('.scamshield-banner.danger')).toBeVisible({ timeout: 8000 });
+  await openMore(page.locator('.scamshield-banner'));
   const copyBtn = page.locator('.scamshield-banner .ss-copy');
   await expect(copyBtn).toBeVisible();
   await copyBtn.click();
@@ -60,6 +61,7 @@ test('Copy report also appears on a suspicious banner', async ({ context }) => {
   const page = await context.newPage();
   await page.goto(BASE_HTTPS + '/content-suspicious.html');
   await expect(page.locator('.scamshield-banner.suspicious')).toBeVisible({ timeout: 8000 });
+  await openMore(page.locator('.scamshield-banner'));
   await expect(page.locator('.scamshield-banner .ss-copy')).toBeVisible();
 });
 
