@@ -1,1607 +1,438 @@
 {
-  "extName": {
-    "message": "Защита от мошенничества и фишинга: ScamShield"
-  },
-  "extShortName": {
-    "message": "ScamShield"
-  },
-  "extDescription": {
-    "message": "Защита от мошенничества и фишинга на вашем устройстве: предупреждает вас, распознаёт подделки брендов и проверяет сообщения. Ничто не покидает ваше устройство."
-  },
-  "on": {
-    "message": "Вкл."
-  },
-  "paused": {
-    "message": "Приостановлено"
-  },
-  "settings": {
-    "message": "Настройки"
-  },
-  "dismiss": {
-    "message": "Скрыть"
-  },
-  "ariaDismiss": {
-    "message": "Скрыть"
-  },
-  "cancel": {
-    "message": "Отмена"
-  },
-  "reportMistake": {
-    "message": "Сообщить об ошибке"
-  },
-  "thanks": {
-    "message": "Спасибо"
-  },
-  "trustThisSite": {
-    "message": "Доверять этому сайту"
-  },
-  "ackTrusted": {
-    "message": "ScamShield больше не будет помечать $HOST$.",
-    "placeholders": {
-      "host": {
-        "content": "$1",
-        "example": "secure-paypa1-login.com"
-      }
-    }
-  },
-  "undo": {
-    "message": "Отменить"
-  },
-  "popupPauseMenu": {
-    "message": "Приостановить защиту ▾"
-  },
-  "privacyPolicyLink": {
-    "message": "Политика конфиденциальности"
-  },
-  "whatsNewLink": {
-    "message": "Что нового"
-  },
-  "unknownSite": {
-    "message": "неизвестный сайт"
-  },
-  "popupChecking": {
-    "message": "Проверка…"
-  },
-  "popupSafe": {
-    "message": "Ничего подозрительного"
-  },
-  "popupSuspicious": {
-    "message": "Подозрительная страница"
-  },
-  "popupDangerous": {
-    "message": "Опасная страница"
-  },
-  "popupUnknown": {
-    "message": "Не проверено"
-  },
-  "popupPausedSummary": {
-    "message": "Защита приостановлена — включите её, чтобы продолжить."
-  },
-  "popupNotHttp": {
-    "message": "Страницы браузера и магазин не проверяются."
-  },
-  "popupDangerSummary": {
-    "message": "Не вводите здесь пароли или данные карты."
-  },
-  "popupSuspiciousSummary": {
-    "message": "Будьте осторожны, прежде чем что-либо вводить здесь."
-  },
-  "leaveThisPage": {
-    "message": "Покинуть страницу"
-  },
-  "showWhy": {
-    "message": "Показать причину"
-  },
-  "whyVerdict": {
-    "message": "Почему такой вердикт?"
-  },
-  "whyVerdictCountOne": {
-    "message": "· 1 признак"
-  },
-  "fmtWhyVerdictCount": {
-    "message": "· $COUNT$ признаков",
-    "placeholders": {
-      "count": {
-        "content": "$1"
-      }
-    }
-  },
-  "takeMeToReal": {
-    "message": "Перейти на настоящий сайт $BRAND$",
-    "placeholders": {
-      "brand": {
-        "content": "$1"
-      }
-    }
-  },
-  "copyReportBtn": {
-    "message": "Копировать отчёт"
-  },
-  "copyReportHeader": {
-    "message": "⚠ ScamShield пометил этот сайт: $HOST$",
-    "placeholders": {
-      "host": {
-        "content": "$1",
-        "example": "evil[.]example"
-      }
-    }
-  },
-  "copyReportVerdict": {
-    "message": "Вердикт: $LEVEL$",
-    "placeholders": {
-      "level": {
-        "content": "$1",
-        "example": "Dangerous page"
-      }
-    }
-  },
-  "copyReportSignals": {
-    "message": "Признаки:"
-  },
-  "copyReportFooter": {
-    "message": "Проверено на устройстве ScamShield — бесплатно, с открытым исходным кодом: https://joelstephen97.github.io/scamshield/"
-  },
-  "reportScam": {
-    "message": "Сообщить: это мошенничество"
-  },
-  "reportSafe": {
-    "message": "Сообщить: это безопасно"
-  },
-  "pause1h": {
-    "message": "1 час"
-  },
-  "pause1d": {
-    "message": "1 день"
-  },
-  "pauseAlways": {
-    "message": "Всегда"
-  },
-  "resumeNow": {
-    "message": "Возобновить сейчас"
-  },
-  "blockedOnSite": {
-    "message": "Заблокировано на сайте"
-  },
-  "blockedAllTime": {
-    "message": "Заблокировано всего"
-  },
-  "sinceInstall": {
-    "message": "С момента установки"
-  },
-  "thisWeek": {
-    "message": "На этой неделе"
-  },
-  "privacyOnPage": {
-    "message": "Конфиденциальность на странице"
-  },
-  "shoppingCheck": {
-    "message": "Проверка покупок"
-  },
-  "checkMessageTitle": {
-    "message": "Проверить сообщение или ссылку"
-  },
-  "checkMessageHint": {
-    "message": "Вставьте подозрительное SMS, сообщение WhatsApp, письмо или ссылку. Проверка выполняется полностью на вашем устройстве."
-  },
-  "checkMessagePlaceholder": {
-    "message": "Вставьте сообщение или ссылку сюда…"
-  },
-  "check": {
-    "message": "Проверить"
-  },
-  "checkedOnDevice": {
-    "message": "Проверено только на вашем устройстве"
-  },
-  "msgSafe": {
-    "message": "Выглядит безопасно: признаков мошенничества нет"
-  },
-  "msgSuspicious": {
-    "message": "Подозрительно: будьте осторожны"
-  },
-  "msgDangerous": {
-    "message": "Почти наверняка мошенничество"
-  },
-  "qrScanTitle": {
-    "message": "Сканировать эту страницу на QR-коды"
-  },
-  "qrScanHint": {
-    "message": "Распознаёт QR-коды на изображениях этой страницы и проверяет, куда они ведут, — ещё до того как вы отсканируете их телефоном. Проверка выполняется полностью на вашем устройстве."
-  },
-  "qrScanBtn": {
-    "message": "Сканировать"
-  },
-  "qrScanNone": {
-    "message": "На этой странице QR-коды не найдены."
-  },
-  "qrScanFoundOne": {
-    "message": "Найден 1 QR-код"
-  },
-  "fmtQrScanFoundCount": {
-    "message": "Найдено QR-кодов: $COUNT$",
-    "placeholders": {
-      "count": {
-        "content": "$1",
-        "example": "3"
-      }
-    }
-  },
-  "support": {
-    "message": "Поддержать"
-  },
-  "footerTrustLine": {
-    "message": "Работает на вашем устройстве. Никакие данные не покидают ваш браузер."
-  },
-  "takeMeToRealSite": {
-    "message": "Перейти на настоящий сайт"
-  },
-  "toastThanksNoted": {
-    "message": "Спасибо — учтено"
-  },
-  "toastThanksSent": {
-    "message": "Спасибо — отправлено"
-  },
-  "toastPausedForNow": {
-    "message": "Пока приостановлено"
-  },
-  "toastResumed": {
-    "message": "Защита возобновлена"
-  },
-  "toastCopied": {
-    "message": "Скопировано"
-  },
-  "toastExtensionError": {
-    "message": "Ошибка расширения — попробуйте открыть заново."
-  },
-  "whatsNewBanner": {
-    "message": "Новое в 0.13: срочный список, обновляемый каждый час, блокирует только что появившиеся мошеннические сайты примерно через час после жалобы — и по-прежнему без единого запроса к нам. Плюс «Доверять этому сайту» в каждом предупреждении."
-  },
-  "popupBrandDangerSummary": {
-    "message": "Похоже на $BRAND$, но это не так. Не вводите здесь свой пароль.",
-    "placeholders": {
-      "brand": {
-        "content": "$1",
-        "example": "PayPal"
-      }
-    }
-  },
-  "pausedUntil": {
-    "message": "Приостановлено до $TIME$",
-    "placeholders": {
-      "time": {
-        "content": "$1"
-      }
-    }
-  },
-  "fmtProtocolPage": {
-    "message": "Страница $PROTOCOL$",
-    "placeholders": {
-      "protocol": {
-        "content": "$1",
-        "example": "chrome"
-      }
-    }
-  },
-  "popupShopFlagFallback": {
-    "message": "Пометка"
-  },
-  "chipWhy": {
-    "message": "Почему"
-  },
-  "chipDataLeak": {
-    "message": "Утечка данных"
-  },
-  "chipTracking": {
-    "message": "Слежение"
-  },
-  "chipPopups": {
-    "message": "Всплывающие окна"
-  },
-  "chipPrivacy": {
-    "message": "Конфиденциальность"
-  },
-  "popupPrivacyLeakPlain": {
-    "message": "Отправил ваш email/телефон на $HOST$ до того, как вы отправили форму.",
-    "placeholders": {
-      "host": {
-        "content": "$1",
-        "example": "tracker.example"
-      }
-    }
-  },
-  "popupPrivacyLeakHashed": {
-    "message": "Отправил ваш email/телефон (в хешированном виде) на $HOST$ до того, как вы отправили форму.",
-    "placeholders": {
-      "host": {
-        "content": "$1",
-        "example": "tracker.example"
-      }
-    }
-  },
-  "popupPrivacyFingerprint": {
-    "message": "$HOST$ снимает цифровой отпечаток вашего устройства, чтобы отслеживать вас.",
-    "placeholders": {
-      "host": {
-        "content": "$1",
-        "example": "tracker.example"
-      }
-    }
-  },
-  "popupPrivacyNotifyLure": {
-    "message": "Этот сайт попытался использовать трюк с уведомлением «нажмите Разрешить»."
-  },
-  "popupPrivacyCredExfilPassword": {
-    "message": "Отправил ваш пароль на $HOST$ — сайт, отличный от того, на котором вы были.",
-    "placeholders": {
-      "host": {
-        "content": "$1",
-        "example": "collector.example"
-      }
-    }
-  },
-  "popupPrivacyCredExfilCard": {
-    "message": "Отправил данные вашей карты на $HOST$ — сайт, отличный от того, на котором вы были.",
-    "placeholders": {
-      "host": {
-        "content": "$1",
-        "example": "collector.example"
-      }
-    }
-  },
-  "popupPrivacyDefaultText": {
-    "message": "Обнаружена проблема конфиденциальности."
-  },
-  "levelDangerous": {
-    "message": "Опасная страница"
-  },
-  "levelSuspicious": {
-    "message": "Подозрительная страница"
-  },
-  "levelSafe": {
-    "message": "Ничего подозрительного"
-  },
-  "levelUnknown": {
-    "message": "Не удаётся проверить эту страницу"
-  },
-  "tabProtection": {
-    "message": "Защита"
-  },
-  "tabTrusted": {
-    "message": "Сайты на паузе"
-  },
-  "tabHistory": {
-    "message": "История"
-  },
-  "tabFeed": {
-    "message": "Список угроз"
-  },
-  "tabAbout": {
-    "message": "О программе"
-  },
-  "protectionLead": {
-    "message": "Всё здесь работает на вашем устройстве. Ничего никуда не отправляется, если вы не включите отчёты сообщества внизу."
-  },
-  "protectionOn": {
-    "message": "Защита включена"
-  },
-  "protectionOnHint": {
-    "message": "Проверяет страницы на мошенничество и предупреждает вас. Отключите, чтобы приостановить всё."
-  },
-  "grpScams": {
-    "message": "Мошенничество и фишинг"
-  },
-  "grpScamsHint": {
-    "message": "Блокирует известные вредоносные сайты и выявляет новый фишинг на вашем устройстве."
-  },
-  "grpPopups": {
-    "message": "Всплывающие окна и фальшивые системные предупреждения"
-  },
-  "grpPopupsHint": {
-    "message": "Фальшивые предупреждения о вирусах, блокировщики экрана и захват буфера обмена."
-  },
-  "grpShopping": {
-    "message": "Покупки"
-  },
-  "grpShoppingHint": {
-    "message": "Обнаруживает поддельные интернет-магазины и настоящие адреса поисковой рекламы."
-  },
-  "grpCrypto": {
-    "message": "Криптовалюта и кошельки"
-  },
-  "grpCryptoHint": {
-    "message": "Предупреждения перед рискованными подписями кошелька."
-  },
-  "grpPrivacy": {
-    "message": "Конфиденциальность"
-  },
-  "grpPrivacyHint": {
-    "message": "Обнаруживает сайты, которые раскрывают ваши данные или отслеживают устройство — всё на вашем устройстве."
-  },
-  "optBlockKnown": {
-    "message": "Блокировать известные мошеннические сайты"
-  },
-  "optBlockKnownHint": {
-    "message": "Блокирует страницы из ежедневно обновляемого списка угроз до их загрузки."
-  },
-  "optPageAnalysis": {
-    "message": "Анализ страницы"
-  },
-  "optPageAnalysisHint": {
-    "message": "Анализирует текст, макет и значки страницы на вашем устройстве, чтобы выявлять мошенничество, которого ещё нет в списках."
-  },
-  "optClickfix": {
-    "message": "Блокировка фальшивой CAPTCHA / трюка «вставьте это»"
-  },
-  "optClickfixHint": {
-    "message": "Блокирует страницы, которые просят нажать Win+R и вставить команду (вредоносное ПО ClickFix)."
-  },
-  "optFakeupdate": {
-    "message": "Блокировка фальшивых обновлений браузера"
-  },
-  "optFakeupdateHint": {
-    "message": "Блокирует страницы, которые притворяются, что вашему браузеру нужно обновление, чтобы заставить вас скачать вредоносное ПО."
-  },
-  "optHide": {
-    "message": "Скрывать мошеннический контент"
-  },
-  "optHideHint": {
-    "message": "Затемняет блоки «вы выиграли приз» внутри обычных страниц."
-  },
-  "optQrScan": {
-    "message": "Автоматически сканировать QR-коды"
-  },
-  "optQrScanHint": {
-    "message": "Распознаёт QR-коды на крупных изображениях страницы и проверяет, куда они ведут, ещё до того как вы отсканируете их телефоном, — защита на устройстве от «quishing» (QR-фишинга) в письмах. Вы также можете в любой момент отсканировать страницу вручную из всплывающего окна."
-  },
-  "optTechscam": {
-    "message": "Выход из мошенничества с техподдержкой"
-  },
-  "optTechscamHint": {
-    "message": "Обнаруживает фальшивые страницы «ваш ПК заражён, позвоните по этому номеру» и даёт возможность выйти."
-  },
-  "optClipboard": {
-    "message": "Предупреждение о захвате буфера обмена"
-  },
-  "optClipboardHint": {
-    "message": "Предупреждает, когда сайт незаметно помещает команду или крипто-адрес в буфер обмена."
-  },
-  "optShop": {
-    "message": "Проверка поддельных магазинов"
-  },
-  "optShopHint": {
-    "message": "Ищет фальшивые таймеры обратного отсчёта, давление в духе «осталось всего 2», отсутствие контактных данных и оплату вне платформы (Zelle/перевод/крипто) и показывает это во всплывающем окне."
-  },
-  "optSerp": {
-    "message": "Проверка спонсируемых результатов"
-  },
-  "optSerpHint": {
-    "message": "В Google/Bing/DuckDuckGo помечает спонсируемый результат, реклама которого ведёт не на тот сайт, что указан."
-  },
-  "optWallet": {
-    "message": "Защита от опустошения кошелька"
-  },
-  "optWalletHint": {
-    "message": "Предупреждает перед подтверждением расходования токенов, подписей «Permit» или делегирования аккаунта, которыми злоупотребляют дрейнеры."
-  },
-  "optLeakyForm": {
-    "message": "Предупреждение об утечке из формы"
-  },
-  "optLeakyFormHint": {
-    "message": "Предупреждает, когда сайт отправляет введённый вами email или телефон трекеру до нажатия кнопки отправки."
-  },
-  "optFingerprint": {
-    "message": "Обнаружение цифрового отпечатка"
-  },
-  "optFingerprintHint": {
-    "message": "Показывает, какой скрипт снимает отпечаток вашего устройства, чтобы отслеживать вас на разных сайтах."
-  },
-  "optNotify": {
-    "message": "Предупреждение о ловушке уведомлений"
-  },
-  "optNotifyHint": {
-    "message": "Отмечает трюк «нажмите Разрешить, чтобы продолжить», которым сайты забрасывают вас всплывающими окнами."
-  },
-  "optStrict": {
-    "message": "Строгий режим"
-  },
-  "optStrictHint": {
-    "message": "Для тех, кто хочет максимальной осторожности: даже «подозрительные» страницы блокируются полноэкранным предупреждением с более простой формулировкой. Лучше всего подходит, чтобы помочь менее уверенному члену семьи оставаться в безопасности."
-  },
-  "optReporting": {
-    "message": "Помогите сделать ScamShield умнее"
-  },
-  "optReportingHint": {
-    "message": "Отправляет название сайта (никогда полный адрес или текст страницы) и анонимные сигналы риска для страниц, помеченных как опасные, и сайтов, о которых вы сообщаете. По умолчанию отключено."
-  },
-  "saved": {
-    "message": "Сохранено"
-  },
-  "trustedLead": {
-    "message": "Защита приостановлена на этих сайтах. Возобновите её для сайта, чтобы снова его защищать."
-  },
-  "trustedAlways": {
-    "message": "Всегда"
-  },
-  "trustedForAWhile": {
-    "message": "На некоторое время"
-  },
-  "remove": {
-    "message": "Удалить"
-  },
-  "trustedViaWarning": {
-    "message": "Доверено из предупреждения"
-  },
-  "historyTitle": {
-    "message": "История защиты"
-  },
-  "historyLead": {
-    "message": "Хранится только на этом устройстве (названия сайтов, никогда полные адреса)."
-  },
-  "clearHistory": {
-    "message": "Очистить историю"
-  },
-  "markMistake": {
-    "message": "Отметить как ошибку"
-  },
-  "feedTitle": {
-    "message": "Список угроз"
-  },
-  "feedLead": {
-    "message": "Ежедневно обновляемый список известных мошеннических сайтов (OpenPhish + URLhaus, тщательно отфильтрованный). ScamShield только скачивает его."
-  },
-  "checkNow": {
-    "message": "Проверить сейчас"
-  },
-  "aboutVersion": {
-    "message": "Версия"
-  },
-  "appearance": {
-    "message": "Внешний вид"
-  },
-  "whatLeaves": {
-    "message": "Что покидает ваше устройство"
-  },
-  "backupSettings": {
-    "message": "Резервное копирование настроек"
-  },
-  "backupHint": {
-    "message": "Сохраните настройки и сайты на паузе в файл или загрузите их на другом компьютере."
-  },
-  "exportBtn": {
-    "message": "Экспорт"
-  },
-  "importBtn": {
-    "message": "Импорт"
-  },
-  "syncTitle": {
-    "message": "Синхронизация между моими устройствами"
-  },
-  "syncHint": {
-    "message": "Синхронизируйте настройки и сайты на паузе во всех браузерах, где вы вошли в аккаунт. Использует встроенную синхронизацию браузера — у ScamShield по-прежнему нет ни аккаунта, ни сервера. По умолчанию отключено."
-  },
-  "optDocTitle": {
-    "message": "Настройки ScamShield"
-  },
-  "ariaSettingsSections": {
-    "message": "Разделы настроек"
-  },
-  "optWhatSentToggle": {
-    "message": "Что именно отправляется ▾"
-  },
-  "optWhatSentBody": {
-    "message": "Отчёт содержит только: имя сайта (имя хоста), вердикт и внутренние коды причин, числовые сигналы риска, полученные из адреса и макета страницы (хешированное количество слов и число форм, полей ввода и ссылок — никогда сам текст), совпавшие названия брендов, версию расширения и час. Никогда — полный адрес (путь или запрос), текст страницы, что-либо введённое вами, куки или любой идентификатор вас или вашего устройства. Отчёты удаляются через 180 дней."
-  },
-  "feedNeverUpdated": {
-    "message": "Никогда не обновлялось"
-  },
-  "hotListPending": {
-    "message": "Срочный список: ещё не загружен"
-  },
-  "hotListStatus": {
-    "message": "Срочный список: сайтов — $COUNT$, обновлён $AGO$",
-    "placeholders": {
-      "count": {
-        "content": "$1",
-        "example": "1,204"
-      },
-      "ago": {
-        "content": "$2",
-        "example": "12 minutes ago"
-      }
-    }
-  },
-  "hotListOff": {
-    "message": "Срочный список: выключен"
-  },
-  "hotListSub": {
-    "message": "…и срочный список за последние 48 часов, обновляемый каждый час."
-  },
-  "optAdvancedFeedUrl": {
-    "message": "Дополнительно: URL списка"
-  },
-  "optFeedUrlLabel": {
-    "message": "URL списка"
-  },
-  "optFeedUrlPlaceholder": {
-    "message": "https://…/blocklist.json"
-  },
-  "resetToOfficialFeed": {
-    "message": "Сбросить к официальному списку"
-  },
-  "optFeedUrlHint": {
-    "message": "Укажите здесь свой JSON для самостоятельного хостинга или оставьте поле пустым, чтобы отключить обновления."
-  },
-  "optThemeHint": {
-    "message": "Следовать системе или выбрать вручную."
-  },
-  "optThemeAuto": {
-    "message": "Авто"
-  },
-  "optThemeLight": {
-    "message": "Светлая"
-  },
-  "optThemeDark": {
-    "message": "Тёмная"
-  },
-  "optLinksTitle": {
-    "message": "Ссылки"
-  },
-  "optLinkGithub": {
-    "message": "GitHub"
-  },
-  "optLinkReportIssue": {
-    "message": "Сообщить о проблеме"
-  },
-  "supportFreeOnDevice": {
-    "message": "ScamShield бесплатен и полностью работает на вашем устройстве."
-  },
-  "supportSponsorGithub": {
-    "message": "Спонсировать на GitHub"
-  },
-  "supportDonatePaypal": {
-    "message": "Пожертвовать через PayPal"
-  },
-  "netNoTelemetry": {
-    "message": "ScamShield никогда не отправляет запросы аналитики, телеметрии или отслеживания. Единственные запросы, которые он может делать, — вот эти три, и вы можете сами это проверить: откройте вкладку «Сеть» в DevTools браузера, пользуйтесь ScamShield как обычно, и вы не увидите ничего, кроме них."
-  },
-  "receiptFeedLabel": {
-    "message": "Загрузка списка угроз"
-  },
-  "receiptFeedDetail": {
-    "message": "Публичный файл списка блокировки — одинаковый для всех, никакие данные о вас не отправляются."
-  },
-  "receiptReportLabel": {
-    "message": "Отчёты сообщества"
-  },
-  "receiptReportDetail": {
-    "message": "Только если вы включили отчёты. Название сайта + числовые сигналы, никогда URL-адреса или текст страницы."
-  },
-  "receiptIconLabel": {
-    "message": "Проверка значка страницы"
-  },
-  "receiptIconDetail": {
-    "message": "Загружает собственный favicon страницы, чтобы обнаружить подделки брендов. Без третьих сторон, без куки."
-  },
-  "receiptPerPage": {
-    "message": "на страницу"
-  },
-  "receiptOnInstall12h": {
-    "message": "при установке + каждые 12 ч"
-  },
-  "receiptDisabled": {
-    "message": "отключено"
-  },
-  "receiptWhenFlagged": {
-    "message": "при пометке"
-  },
-  "receiptOffDefault": {
-    "message": "выключено (по умолчанию)"
-  },
-  "optExportSyncHint": {
-    "message": "Настройки можно экспортировать/импортировать ниже и (по желанию) синхронизировать между вашими устройствами."
-  },
-  "toastSyncOn": {
-    "message": "Синхронизация включена"
-  },
-  "toastSyncUnavailable": {
-    "message": "Синхронизация недоступна"
-  },
-  "toastSyncOff": {
-    "message": "Синхронизация выключена"
-  },
-  "toastExported": {
-    "message": "Экспортировано"
-  },
-  "toastImported": {
-    "message": "Импортировано"
-  },
-  "toastInvalidFile": {
-    "message": "Недопустимый файл"
-  },
-  "toastCheckingUpdates": {
-    "message": "Проверка…"
-  },
-  "fmtUpdatedToVersion": {
-    "message": "Обновлено до v$VERSION$",
-    "placeholders": {
-      "version": {
-        "content": "$1",
-        "example": "0.6.1"
-      }
-    }
-  },
-  "toastAlreadyUpToDate": {
-    "message": "Уже обновлено"
-  },
-  "toastUpdateFailed": {
-    "message": "Ошибка обновления"
-  },
-  "toastHistoryCleared": {
-    "message": "История очищена"
-  },
-  "toastOpenedReport": {
-    "message": "Отчёт открыт"
-  },
-  "optNoneYet": {
-    "message": "Пока ничего"
-  },
-  "optNoneRightNow": {
-    "message": "Сейчас ничего нет"
-  },
-  "optNothingYetGood": {
-    "message": "Пока ничего — и это хорошо."
-  },
-  "fmtVersion": {
-    "message": "Версия $VERSION$",
-    "placeholders": {
-      "version": {
-        "content": "$1",
-        "example": "0.6.0"
-      }
-    }
-  },
-  "fmtUntilTime": {
-    "message": "до $TIME$",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "22 Aug, 3:45 PM"
-      }
-    }
-  },
-  "fmtUpdatedRules": {
-    "message": "Обновлено $TIME$ · правил: $COUNT$",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "2 h ago"
-      },
-      "count": {
-        "content": "$2",
-        "example": "12,345"
-      }
-    }
-  },
-  "bannerDangerBrand": {
-    "message": "Опасная страница — похожа на $BRAND$, но это подделка",
-    "placeholders": {
-      "brand": {
-        "content": "$1"
-      }
-    }
-  },
-  "bannerDanger": {
-    "message": "Опасная страница"
-  },
-  "bannerSuspicious": {
-    "message": "Подозрительная страница"
-  },
-  "interstitialHead1": {
-    "message": "Стоп — эта страница пытается вас обмануть"
-  },
-  "interstitialHead2": {
-    "message": "Подождите — похоже на мошенническую страницу"
-  },
-  "interstitialHead3": {
-    "message": "Не продолжайте — предупреждение о мошенничестве"
-  },
-  "interstitialReassure": {
-    "message": "Ничего из введённого вами ещё не отправлено. Уйти сейчас безопасно."
-  },
-  "continueAnyway": {
-    "message": "Всё равно продолжить"
-  },
-  "submitAnyway": {
-    "message": "Всё равно отправить"
-  },
-  "proceedAnyway": {
-    "message": "Всё равно продолжить"
-  },
-  "cancelRecommended": {
-    "message": "Отмена (рекомендуется)"
-  },
-  "phishingStop": {
-    "message": "Стоп — возможный фишинг"
-  },
-  "techScamTitle": {
-    "message": "Возможное мошенничество техподдержки"
-  },
-  "techScamBody": {
-    "message": "Это веб-страница, а не ваш компьютер — с компьютером всё в порядке. Настоящие предупреждения безопасности никогда не блокируют экран и не показывают номер телефона. Не звоните и не платите."
-  },
-  "getMeOut": {
-    "message": "Выведите меня отсюда (закрыть страницу)"
-  },
-  "walletRiskyTitle": {
-    "message": "Рискованный запрос кошелька"
-  },
-  "walletRiskyBody": {
-    "message": "Если вы этого не ожидали, отмените. Мошенники используют такие запросы, чтобы похитить вашу криптовалюту."
-  },
-  "compareThisSite": {
-    "message": "Этот сайт"
-  },
-  "compareRealSite": {
-    "message": "Настоящий $BRAND$",
-    "placeholders": {
-      "brand": {
-        "content": "$1"
-      }
-    }
-  },
-  "guardCountdown": {
-    "message": "$LABEL$ ($COUNT$)",
-    "placeholders": {
-      "label": {
-        "content": "$1",
-        "example": "Continue anyway"
-      },
-      "count": {
-        "content": "$2",
-        "example": "3"
-      }
-    }
-  },
-  "ariaScamWarning": {
-    "message": "Предупреждение о мошенничестве"
-  },
-  "ariaPhishingWarning": {
-    "message": "Предупреждение о возможном фишинге"
-  },
-  "interstitialFallback": {
-    "message": "Эта страница соответствует шаблону известного мошенничества."
-  },
-  "toastSupportAsk": {
-    "message": "ScamShield только что защитил вас — он бесплатный и работает на вашем устройстве. Поддержите проект? ❤"
-  },
-  "guardFormDestKnown": {
-    "message": "Эта форма отправляет ваш пароль на $DEST$, а не на $HOST$. Отправка пароля на другой сайт — так мошенники крадут учётные данные.",
-    "placeholders": {
-      "dest": {
-        "content": "$1",
-        "example": "evil.example"
-      },
-      "host": {
-        "content": "$2",
-        "example": "your-bank.example"
-      }
-    }
-  },
-  "guardFormDestUnknown": {
-    "message": "Эта форма отправляет ваш пароль на другой сайт, отличный от того, который вы посещаете. Так мошенники часто крадут учётные данные."
-  },
-  "guardHiddenTag": {
-    "message": "Скрыто ScamShield"
-  },
-  "guardWalletCollision": {
-    "message": "ScamShield заблокировал запрос кошелька, пока было открыто другое предупреждение. Закройте его и повторите попытку."
-  },
-  "guardWalletFallback": {
-    "message": "Этот сайт запрашивает конфиденциальное действие с кошельком."
-  },
-  "guardPrivacyFallback": {
-    "message": "На этой странице обнаружена проблема конфиденциальности."
-  },
-  "guardClipboardFallback": {
-    "message": "Сайт изменил содержимое вашего буфера обмена."
-  },
-  "guardTechScamFallback": {
-    "message": "Эта страница использует тактики запугивания."
-  },
-  "guardClipboardBlockedPayload": {
-    "message": "Заблокировано ScamShield — этот сайт поместил опасную команду в ваш буфер обмена. Не вставляйте её никуда."
-  },
-  "guardLeakyFormPlain": {
-    "message": "Этот сайт отправил ваш email/телефон на $HOST$ в открытом виде — ещё до того, как вы нажали отправить.",
-    "placeholders": {
-      "host": {
-        "content": "$1",
-        "example": "tracker.example"
-      }
-    }
-  },
-  "guardLeakyFormHashed": {
-    "message": "Этот сайт отправил ваш email/телефон на $HOST$ в виде хешированного ($ALGO$) идентификатора — ещё до того, как вы нажали отправить.",
-    "placeholders": {
-      "host": {
-        "content": "$1",
-        "example": "tracker.example"
-      },
-      "algo": {
-        "content": "$2",
-        "example": "MD5"
-      }
-    }
-  },
-  "guardNotifyLure": {
-    "message": "Этот сайт пытается получить разрешение на уведомления с помощью трюка «нажмите Разрешить, чтобы продолжить». Вы можете спокойно нажать Заблокировать."
-  },
-  "serpAdMismatch": {
-    "message": "⚠ ScamShield: эта реклама ведёт на $ACTUAL$, а не на $SHOWN$",
-    "placeholders": {
-      "actual": {
-        "content": "$1",
-        "example": "malicious-download.example"
-      },
-      "shown": {
-        "content": "$2",
-        "example": "trusted-brand.example"
-      }
-    }
-  },
-  "serpBadgeDanger": {
-    "message": "ScamShield: этот результат находится в нашем списке блокировки угроз"
-  },
-  "serpBadgeCaution": {
-    "message": "ScamShield: этот результат показывает признаки мошенничества"
-  },
-  "chipLink": {
-    "message": "Ссылка"
-  },
-  "chipBrand": {
-    "message": "Бренд"
-  },
-  "chipPage": {
-    "message": "Страница"
-  },
-  "chipWallet": {
-    "message": "Кошелёк"
-  },
-  "chipClipboard": {
-    "message": "Буфер обмена"
-  },
-  "chipTechscam": {
-    "message": "Страница запугивания"
-  },
-  "chipShop": {
-    "message": "Магазин"
-  },
-  "chipMessage": {
-    "message": "Сообщение"
-  },
-  "reason_ipHost": {
-    "message": "Использует прямой IP-адрес вместо доменного имени."
-  },
-  "reason_atSymbol": {
-    "message": "URL содержит символ «@», который может скрывать настоящий адрес назначения."
-  },
-  "reason_punycodeHost": {
-    "message": "Домен использует punycode, который часто применяют для имитации настоящих брендов."
-  },
-  "reason_idnHomograph": {
-    "message": "Этот домен имитирует «$BRAND$», используя похожие иностранные символы.",
-    "placeholders": {
-      "brand": {
-        "content": "$1",
-        "example": "paypal"
-      }
-    }
-  },
-  "reason_brandLookalike": {
-    "message": "Домен выглядит как имитация известного бренда."
-  },
-  "reason_suspiciousTld": {
-    "message": "Домен использует домен верхнего уровня, часто используемый мошенниками."
-  },
-  "reason_noHttps": {
-    "message": "Соединение небезопасно (нет HTTPS)."
-  },
-  "reason_manySubdomains": {
-    "message": "Необычно много поддоменов."
-  },
-  "reason_urgencyKeywords": {
-    "message": "URL содержит несколько ключевых слов, связанных со срочностью/безопасностью."
-  },
-  "reason_randomHost": {
-    "message": "Доменное имя выглядит сгенерированным случайным образом."
-  },
-  "reason_brandFuzzyMatch": {
-    "message": "Этот домен очень похож на настоящий домен $BRAND$ — внимательно проверьте адресную строку, прежде чем что-либо вводить.",
-    "placeholders": {
-      "brand": {
-        "content": "$1",
-        "example": "PayPal"
-      }
-    }
-  },
-  "reason_deepSubdomainChain": {
-    "message": "У домена необычно глубокая цепочка поддоменов под его настоящим доменом — распространённый приём маскировки."
-  },
-  "reason_longHostLabel": {
-    "message": "Домен содержит необычно длинную часть, которую часто используют, чтобы скрыть поддельное название бренда или настоящий домен."
-  },
-  "reason_shortenerHost": {
-    "message": "Это домен сервиса сокращения ссылок ($HOST$) — настоящий адрес назначения скрыт, пока вы не перейдёте по ссылке.",
-    "placeholders": {
-      "host": {
-        "content": "$1",
-        "example": "bit.ly"
-      }
-    }
-  },
-  "reason_riskAbusedTld": {
-    "message": "Домен верхнего уровня ($TLD$) этого сайта имеет высокий уровень использования в мошеннических целях по данным таблиц риска в списке угроз ScamShield.",
-    "placeholders": {
-      "tld": {
-        "content": "$1",
-        "example": ".top"
-      }
-    }
-  },
-  "reason_brandForeignSuffix": {
-    "message": "Использует имя $BRAND$ в адресе .$SUFFIX$, который настоящий $BRAND$ никогда не использует.",
-    "placeholders": {
-      "brand": {
-        "content": "$1",
-        "example": "Roblox"
-      },
-      "suffix": {
-        "content": "$2",
-        "example": "com.do"
-      }
-    }
-  },
-  "reason_gatewayRedirect": {
-    "message": "На эту страницу привела короткая ссылка-переадресация на $HOST$, которая вела на совершенно другой сайт — типичный приём мошеннических шлюзов.",
-    "placeholders": {
-      "host": {
-        "content": "$1",
-        "example": "mgpxq.com"
-      }
-    }
-  },
-  "reason_riskDynamicHost": {
-    "message": "Домен размещён у провайдера динамического DNS или бесплатного хостинга, часто используемого для мошеннических страниц."
-  },
-  "reason_feedBlock": {
-    "message": "Этот домен совпадает со списком угроз ScamShield, подтверждён $COUNT$ независимым(и) источником(ами).",
-    "placeholders": {
-      "count": {
-        "content": "$1",
-        "example": "3"
-      }
-    }
-  },
-  "reason_feedWarn": {
-    "message": "Этот домен совпадает с записью с низкой достоверностью в списке угроз ScamShield ($COUNT$ источник(ов)) — действуйте осторожно.",
-    "placeholders": {
-      "count": {
-        "content": "$1",
-        "example": "1"
-      }
-    }
-  },
-  "reason_newDomain": {
-    "message": "Домен есть в списке недавно зарегистрированных доменов — большинству мошеннических сайтов всего несколько дней$EXTRA$.",
-    "placeholders": {
-      "extra": {
-        "content": "$1",
-        "example": ", and you have never visited it before"
-      }
-    }
-  },
-  "reason_credentialFormForeignDomain": {
-    "message": "Форма ввода пароля на этой странице отправляет ваши учётные данные на другой сайт."
-  },
-  "reason_crossOriginCredPost": {
-    "message": "Эта форма отправляет ваш пароль или данные карты на $HOST$ — сайт, отличный от того, на котором вы находитесь.",
-    "placeholders": {
-      "host": {
-        "content": "$1",
-        "example": "collector.example"
-      }
-    }
-  },
-  "reason_hiddenIframes": {
-    "message": "Страница содержит скрытые фреймы, которые могут перехватывать ввод."
-  },
-  "reason_scamPhrase": {
-    "message": "Страница содержит классические формулировки мошенничества/розыгрыша («$PHRASE$»).",
-    "placeholders": {
-      "phrase": {
-        "content": "$1",
-        "example": "you won"
-      }
-    }
-  },
-  "reason_seedPhraseAsk": {
-    "message": "Эта страница запрашивает вашу seed-фразу восстановления кошелька — никогда не вводите её; это украдёт ваши средства."
-  },
-  "reason_brandImpersonationContent": {
-    "message": "Эта страница выглядит как «$BRAND$», но не находится на её настоящем сайте.",
-    "placeholders": {
-      "brand": {
-        "content": "$1",
-        "example": "paypal"
-      }
-    }
-  },
-  "reason_deliveryFeeScam": {
-    "message": "Эта страница притворяется $BRAND$ и запрашивает данные карты, чтобы «выпустить» посылку. Перевозчики никогда не собирают сборы через подобные страницы.",
-    "placeholders": {
-      "brand": {
-        "content": "$1",
-        "example": "DHL"
-      }
-    }
-  },
-  "reason_credentialFormOnTenantHost": {
-    "message": "Запрашивает пароль на общей хостинг-платформе ($HOST$), где любой может опубликовать страницу за секунды.",
-    "placeholders": {
-      "host": {
-        "content": "$1",
-        "example": "webflow.io"
-      }
-    }
-  },
-  "reason_brandInTenantHost": {
-    "message": "Имя $BRAND$ есть в адресе страницы на бесплатном хостинге, которая запрашивает пароль.",
-    "placeholders": {
-      "brand": {
-        "content": "$1",
-        "example": "AT&T"
-      }
-    }
-  },
-  "reason_brandIconMismatch": {
-    "message": "Эта страница использует значок $BRAND$, но не является сайтом $BRAND$.",
-    "placeholders": {
-      "brand": {
-        "content": "$1",
-        "example": "PayPal"
-      }
-    }
-  },
-  "reason_contentPhishingPattern": {
-    "message": "Формулировки и оформление страницы напоминают известные фишинговые страницы."
-  },
-  "reason_techScamScareText": {
-    "message": "Страница использует поддельную формулировку предупреждения безопасности («$PHRASE$»).",
-    "placeholders": {
-      "phrase": {
-        "content": "$1",
-        "example": "virus detected"
-      }
-    }
-  },
-  "reason_techScamPhoneAsk": {
-    "message": "Страница настойчиво просит позвонить по номеру «поддержки» — характерный признак мошенничества с техподдержкой."
-  },
-  "reason_techScamFakeAlert": {
-    "message": "Это веб-страница, притворяющаяся системным предупреждением — с вашим компьютером всё в порядке. Настоящие предупреждения Microsoft/Apple никогда не показывают номера телефонов."
-  },
-  "reason_techScamFullscreen": {
-    "message": "Страница принудительно перешла в полноэкранный режим, чтобы её было сложнее закрыть."
-  },
-  "reason_techScamAlarmAudio": {
-    "message": "Страница воспроизводит звук тревоги, чтобы вызвать у вас панику."
-  },
-  "reason_techScamDialogFlood": {
-    "message": "Страница завалила экран всплывающими диалогами, чтобы удержать вас."
-  },
-  "reason_techScamHistoryTrap": {
-    "message": "Страница перехватывает кнопку «Назад»."
-  },
-  "reason_walletBlindSign": {
-    "message": "Сайт попросил ваш кошелёк «слепо» подписать произвольные данные — распространённый приём дрейнеров."
-  },
-  "reason_walletPermitApproval": {
-    "message": "Эта подпись является разрешением на токен («Permit»). Подписав её, вы позволяете этому сайту позже перемещать ваши токены или NFT без повторного запроса — самая распространённая подпись дрейнеров кошельков."
-  },
-  "reason_walletDelegation7702": {
-    "message": "Эта транзакция передаст управление вашим аккаунтом контракту (делегирование EIP-7702) — техника, которую дрейнеры используют для опустошения кошельков."
-  },
-  "reason_walletSetApprovalAll": {
-    "message": "Эта транзакция предоставляет сайту контроль над ВСЕМИ вашими NFT в коллекции."
-  },
-  "reason_walletUnlimitedApprove": {
-    "message": "Эта транзакция даёт сайту НЕОГРАНИЧЕННОЕ разрешение тратить ваши токены."
-  },
-  "reason_walletTokenApprove": {
-    "message": "Эта транзакция позволяет сайту потратить часть ваших токенов."
-  },
-  "reason_clickfixPasteRun": {
-    "message": "Эта страница поместила системную команду в ваш буфер обмена и просит вставить и выполнить её. Настоящие сайты никогда так не делают — выполнение заразит ваш компьютер."
-  },
-  "reason_clickfixFakeCaptcha": {
-    "message": "Эта «проверка» просит вас нажать Win+R и вставить команду. Настоящие CAPTCHA никогда не просят что-либо запускать — это устанавливает вредоносное ПО."
-  },
-  "reason_clickfixWinR": {
-    "message": "Эта страница просит вас открыть окно «Выполнить» Windows и что-то вставить — приём, используемый, чтобы заставить людей запустить вредоносное ПО."
-  },
-  "reason_clickfixCaptchaDisguise": {
-    "message": "Инструкции замаскированы под этап проверки «я не робот»."
-  },
-  "reason_clipboardCommand": {
-    "message": "Сайт скопировал системную команду в ваш буфер обмена. НЕ вставляйте её в терминал или окно «Выполнить»."
-  },
-  "reason_clipboardCryptoAddress": {
-    "message": "Сайт поместил адрес криптовалюты в ваш буфер обмена — проверьте его перед вставкой."
-  },
-  "reason_fakeUpdatePrompt": {
-    "message": "Эта страница притворяется, что вашему браузеру нужно обновление, и предлагает загрузку. Настоящие уведомления об обновлении приходят от самого браузера — никогда со страницы. Загрузка почти наверняка является вредоносным ПО."
-  },
-  "reason_msgOtpAsk": {
-    "message": "Просит поделиться одноразовым кодом (OTP), PIN-кодом или паролем — ни один легитимный сервис никогда так не делает."
-  },
-  "reason_msgScamWording": {
-    "message": "Использует известную мошенническую формулировку («$PHRASE$»).",
-    "placeholders": {
-      "phrase": {
-        "content": "$1",
-        "example": "delivery fee"
-      }
-    }
-  },
-  "reason_msgUrgencyDeadline": {
-    "message": "Создаёт давление с помощью искусственного дедлайна — классическая тактика мошенников."
-  },
-  "reason_msgDangerousLink": {
-    "message": "Содержит подозрительно опасную ссылку ($URL$).",
-    "placeholders": {
-      "url": {
-        "content": "$1",
-        "example": "http://verify-bank.tk/otp"
-      }
-    }
-  },
-  "reason_qrCodeDestination": {
-    "message": "Эта страница содержит QR-код, ведущий на $URL$, — проверено автоматически, ещё до того как вы отсканируете его телефоном.",
-    "placeholders": {
-      "url": {
-        "content": "$1",
-        "example": "http://verify-bank.tk/otp"
-      }
-    }
-  },
-  "reason_shop_countdownReset": {
-    "message": "Фальшивый таймер"
-  },
-  "reason_shop_countdownReset_detail": {
-    "message": "Таймер «спешите, акция заканчивается» сбрасывается при каждом посещении — срочность фальшивая."
-  },
-  "reason_shop_offPlatformPay": {
-    "message": "Рискованная оплата"
-  },
-  "reason_shop_offPlatformPay_detail": {
-    "message": "Оформление заказа подталкивает вас к оплате через Zelle/Venmo/CashApp/перевод/крипто — если это мошенничество, вернуть деньги не получится."
-  },
-  "reason_shop_fakeScarcity": {
-    "message": "Фальшивый дефицит"
-  },
-  "reason_shop_fakeScarcity_detail": {
-    "message": "Внедрённые виджеты давления типа «осталось всего немного / просматривают N человек»."
-  },
-  "reason_shop_badgeHotlink": {
-    "message": "Фальшивый значок доверия"
-  },
-  "reason_shop_badgeHotlink_detail": {
-    "message": "Значок «безопасно»/«проверено», который является просто изображением и никуда не ведёт."
-  },
-  "reason_shop_missingContact": {
-    "message": "Нет контактной информации"
-  },
-  "reason_shop_missingContact_detail": {
-    "message": "Нет настоящего адреса, телефона или данных компании — типично для одноразового мошеннического магазина."
-  },
-  "obDocTitle": {
-    "message": "Добро пожаловать в ScamShield"
-  },
-  "obTitle": {
-    "message": "ScamShield защищает вас"
-  },
-  "obLead": {
-    "message": "Он следит за страницами, которые вы посещаете, и предупреждает о мошенничестве — полностью на вашем устройстве. Ваш просмотр никогда не покидает ваш компьютер."
-  },
-  "obPhishing": {
-    "message": "Фишинг и поддельные логины"
-  },
-  "obPhishingBody": {
-    "message": "Предупреждает, когда страница отправляет ваш пароль не на тот сайт."
-  },
-  "obBrand": {
-    "message": "Подделки брендов"
-  },
-  "obBrandBody": {
-    "message": "Распознаёт скопированный значок PayPal, банка или оператора связи на сайте, который им не принадлежит — более 60 брендов, включая банки и государственные службы ОАЭ."
-  },
-  "obPage": {
-    "message": "Анализ страницы"
-  },
-  "obPageBody": {
-    "message": "Анализирует текст и оформление страниц входа на вашем устройстве, чтобы выявлять мошенничество, которого ещё нет ни в одном списке."
-  },
-  "obWallet": {
-    "message": "Защита крипто-кошелька"
-  },
-  "obWalletBody": {
-    "message": "Останавливает одобрения дрейнеров и кражу seed-фразы восстановления до того, как их увидит ваш кошелёк."
-  },
-  "obClipboard": {
-    "message": "Мошенничество с буфером обмена и трюком «вставьте это»"
-  },
-  "obClipboardBody": {
-    "message": "Предупреждает вас, когда сайт незаметно копирует команду в ваш буфер обмена."
-  },
-  "obPopups": {
-    "message": "Фальшивые всплывающие окна о вирусах"
-  },
-  "obPopupsBody": {
-    "message": "Прерывает пугающий цикл всплывающих окон и помогает вам уйти."
-  },
-  "obPin": {
-    "message": "Закрепить ScamShield"
-  },
-  "obPinBody": {
-    "message": "Нажмите на значок пазла на панели инструментов, затем на булавку рядом с ScamShield, чтобы видеть статус каждой страницы с первого взгляда."
-  },
-  "obOpenSettings": {
-    "message": "Открыть настройки"
-  },
-  "blockedDocTitle": {
-    "message": "Сайт заблокирован ScamShield"
-  },
-  "blockedTitle": {
-    "message": "ScamShield заблокировал этот сайт"
-  },
-  "blockedLead": {
-    "message": "$HOST$ находится в списке известных мошеннических и вредоносных сайтов ScamShield, поэтому загрузка страницы была остановлена. Ничего не было запущено, и ничего из введённого вами не было отправлено.",
-    "placeholders": {
-      "host": {
-        "content": "$1",
-        "example": "secure-paypa1-login.com"
-      }
-    }
-  },
-  "blockedLeadHot": {
-    "message": "$HOST$ был отмечен как фишинговый за последние два дня, поэтому загрузка страницы была остановлена. Ничего не было запущено, и ничего из введённого вами не было отправлено.",
-    "placeholders": {
-      "host": {
-        "content": "$1",
-        "example": "secure-paypa1-login.com"
-      }
-    }
-  },
-  "blockedAddress": {
-    "message": "Заблокированный адрес"
-  },
-  "blockedListedBy": {
-    "message": "Внесён в список источниками: $SOURCES$",
-    "placeholders": {
-      "sources": {
-        "content": "$1",
-        "example": "Phishing.Database, ScamSniffer"
-      }
-    }
-  },
-  "blockedListedGeneric": {
-    "message": "Внесён в список заблокированных доменов ScamShield с подтверждённым мошенничеством."
-  },
-  "blockedGoBack": {
-    "message": "Вернуться в безопасное место"
-  },
-  "blockedTrustSite": {
-    "message": "Это не мошенники? Доверять этому сайту"
-  },
-  "blockedVisitAnyway": {
-    "message": "Всё равно перейти (не рекомендуется)"
-  },
-  "blockedVisitHint": {
-    "message": "Откроет сайт с приостановленной на 1 час защитой ScamShield."
-  },
-  "blockedFooter": {
-    "message": "Заблокировано на вашем устройстве. Информация об этой странице никуда не отправлялась."
-  },
-  "chipBlocklist": {
-    "message": "Заблокирован"
-  },
-  "obNote": {
-    "message": "ScamShield бесплатен. Необязательно: в Настройках вы можете помочь сделать его умнее, делясь анонимными отчётами о выявленном мошенничестве — по умолчанию отключено, если вы сами не включите. Если он вам помог, вы можете поддержать разработку на странице Настроек."
-  },
-  "statsLink": {
-    "message": "Статистика →"
-  },
-  "tabStats": {
-    "message": "Статистика"
-  },
-  "optLang": {
-    "message": "Язык"
-  },
-  "optLangHint": {
-    "message": "Применяется к предупреждениям, всплывающему окну и настройкам ScamShield. Синхронизируется с другими вашими устройствами, если синхронизация включена."
-  },
-  "optLangAuto": {
-    "message": "По умолчанию в браузере"
-  },
-  "fmtStatsSince": {
-    "message": "Защищает этот браузер с $DATE$",
-    "placeholders": {
-      "date": {
-        "content": "$1",
-        "example": "12 Jun 2026"
-      }
-    }
-  },
-  "stats7d": {
-    "message": "7 дней"
-  },
-  "stats30d": {
-    "message": "30 дней"
-  },
-  "statsAll": {
-    "message": "За всё время"
-  },
-  "statsPagesChecked": {
-    "message": "Страниц проверено на устройстве"
-  },
-  "statsThreatsStopped": {
-    "message": "Угроз остановлено"
-  },
-  "statsThreatsNone": {
-    "message": "Всё чисто — ничего не проскочило"
-  },
-  "statsScamsBlockedOne": {
-    "message": "1 мошенничество не добралось до вас"
-  },
-  "fmtStatsScamsBlocked": {
-    "message": "$COUNT$ мошеннических схем не добрались до вас",
-    "placeholders": {
-      "count": {
-        "content": "$1",
-        "example": "8"
-      }
-    }
-  },
-  "statsPrivacyFindings": {
-    "message": "Находки по приватности"
-  },
-  "statsRulesActive": {
-    "message": "Активных правил блокировки"
-  },
-  "statsRulesActiveHint": {
-    "message": "Действуют прямо сейчас, включая список, встроенный в ScamShield."
-  },
-  "statsChartTitle7d": {
-    "message": "Проверено страниц · последние 7 дней"
-  },
-  "statsChartTitle30d": {
-    "message": "Проверено страниц · последние 30 дней"
-  },
-  "statsChartTitleAll": {
-    "message": "Проверено страниц · с момента установки"
-  },
-  "statsChartTitle90d": {
-    "message": "Проверено страниц · последние 90 дней"
-  },
-  "statsAxisToday": {
-    "message": "Сегодня"
-  },
-  "statsLegendChecked": {
-    "message": "Проверено страниц"
-  },
-  "statsLegendThreat": {
-    "message": "Угроза остановлена в этот день"
-  },
-  "fmtStatsBarTip": {
-    "message": "$DATE$ · $COUNT$ страниц проверено",
-    "placeholders": {
-      "date": {
-        "content": "$1",
-        "example": "21 Aug"
-      },
-      "count": {
-        "content": "$2",
-        "example": "63"
-      }
-    }
-  },
-  "fmtStatsBarTipThreat": {
-    "message": "$DATE$ · $COUNT$ страниц проверено · остановлена 1 угроза",
-    "placeholders": {
-      "date": {
-        "content": "$1",
-        "example": "21 Aug"
-      },
-      "count": {
-        "content": "$2",
-        "example": "63"
-      }
-    }
-  },
-  "fmtStatsBarTipThreats": {
-    "message": "$DATE$ · $COUNT$ страниц проверено · остановлено угроз: $THREATS$",
-    "placeholders": {
-      "date": {
-        "content": "$1",
-        "example": "21 Aug"
-      },
-      "count": {
-        "content": "$2",
-        "example": "63"
-      },
-      "threats": {
-        "content": "$3",
-        "example": "2"
-      }
-    }
-  },
-  "statsByType": {
-    "message": "Угрозы по типу · за всё время"
-  },
-  "statsCatPhishing": {
-    "message": "Фишинг"
-  },
-  "statsCatFakeShop": {
-    "message": "Поддельный магазин"
-  },
-  "statsCatWallet": {
-    "message": "Опустошение кошелька"
-  },
-  "statsCatTechSupport": {
-    "message": "Техподдержка"
-  },
-  "statsCatClipboard": {
-    "message": "Буфер обмена"
-  },
-  "statsCatClickfix": {
-    "message": "Фальшивая CAPTCHA"
-  },
-  "statsCatFakeUpdate": {
-    "message": "Фальшивое обновление"
-  },
-  "statsCatOther": {
-    "message": "Другое"
-  },
-  "statsRecent": {
-    "message": "Недавние"
-  },
-  "statsPillBlocked": {
-    "message": "Заблокировано"
-  },
-  "statsPillWarned": {
-    "message": "Предупреждено"
-  },
-  "statsFooter": {
-    "message": "Каждое число подсчитывается на вашем устройстве. Ничто на этой странице никуда не отправляется."
-  },
-  "reviewAskBody": {
-    "message": "ScamShield уже остановил для вас $COUNT$ мошеннических попыток. Если считаете, что он это заслужил, короткий отзыв поможет другим людям его найти — это бесплатно и всегда будет бесплатно.",
-    "placeholders": {
-      "count": {
-        "content": "$1",
-        "example": "2"
-      }
-    }
-  },
-  "reviewRate": {
-    "message": "Оценить ScamShield"
-  },
-  "reviewLater": {
-    "message": "Может быть, позже"
-  },
-  "reviewNo": {
-    "message": "Нет, спасибо"
-  },
-  "reviewAboutLink": {
-    "message": "Нравится ScamShield? Оставьте отзыв"
-  }
+  "extName": { "message": "Защита от мошенничества и фишинга: ScamShield" },
+  "extShortName": { "message": "ScamShield" },
+  "extDescription": { "message": "Защита от мошенничества и фишинга на вашем устройстве: предупреждает вас, распознаёт подделки брендов и проверяет сообщения. Ничто не покидает ваше устройство." },
+  "on": { "message": "Вкл." },
+  "paused": { "message": "Приостановлено" },
+  "settings": { "message": "Настройки" },
+  "dismiss": { "message": "Скрыть" },
+  "ariaDismiss": { "message": "Скрыть" },
+  "cancel": { "message": "Отмена" },
+  "reportMistake": { "message": "Сообщить об ошибке" },
+  "thanks": { "message": "Спасибо" },
+  "trustThisSite": { "message": "Доверять этому сайту" },
+  "ackTrusted": { "message": "ScamShield больше не будет помечать $HOST$.", "placeholders": { "host": { "content": "$1", "example": "secure-paypa1-login.com" } } },
+  "undo": { "message": "Отменить" },
+  "popupPauseMenu": { "message": "Приостановить защиту ▾" },
+  "privacyPolicyLink": { "message": "Политика конфиденциальности" },
+  "whatsNewLink": { "message": "Что нового" },
+  "unknownSite": { "message": "неизвестный сайт" },
+  "popupChecking": { "message": "Проверка…" },
+  "popupSafe": { "message": "Ничего подозрительного" },
+  "popupSuspicious": { "message": "Подозрительная страница" },
+  "popupDangerous": { "message": "Опасная страница" },
+  "popupUnknown": { "message": "Не проверено" },
+  "popupPausedSummary": { "message": "Защита приостановлена — включите её, чтобы продолжить." },
+  "popupNotHttp": { "message": "Страницы браузера и магазин не проверяются." },
+  "popupDangerSummary": { "message": "Не вводите здесь пароли или данные карты." },
+  "popupSuspiciousSummary": { "message": "Будьте осторожны, прежде чем что-либо вводить здесь." },
+  "leaveThisPage": { "message": "Покинуть страницу" },
+  "whyVerdict": { "message": "Почему такой вердикт?" },
+  "whyVerdictCountOne": { "message": "· 1 признак" },
+  "fmtWhyVerdictCount": { "message": "· $COUNT$ признаков", "placeholders": { "count": { "content": "$1" } } },
+  "takeMeToReal": { "message": "Перейти на настоящий сайт $BRAND$", "placeholders": { "brand": { "content": "$1" } } },
+  "copyReportBtn": { "message": "Копировать отчёт" },
+  "copyReportHeader": { "message": "⚠ ScamShield пометил этот сайт: $HOST$", "placeholders": { "host": { "content": "$1", "example": "evil[.]example" } } },
+  "copyReportVerdict": { "message": "Вердикт: $LEVEL$", "placeholders": { "level": { "content": "$1", "example": "Dangerous page" } } },
+  "copyReportSignals": { "message": "Признаки:" },
+  "copyReportFooter": { "message": "Проверено на устройстве ScamShield — бесплатно, с открытым исходным кодом: https://joelstephen97.github.io/scamshield/" },
+  "reportScam": { "message": "Сообщить: это мошенничество" },
+  "reportSafe": { "message": "Сообщить: это безопасно" },
+  "pause1h": { "message": "1 час" },
+  "pause1d": { "message": "1 день" },
+  "pauseAlways": { "message": "Всегда" },
+  "resumeNow": { "message": "Возобновить сейчас" },
+  "blockedOnSite": { "message": "Заблокировано на сайте" },
+  "blockedAllTime": { "message": "Заблокировано всего" },
+  "sinceInstall": { "message": "С момента установки" },
+  "thisWeek": { "message": "На этой неделе" },
+  "privacyOnPage": { "message": "Конфиденциальность на странице" },
+  "shoppingCheck": { "message": "Проверка покупок" },
+  "checkMessageTitle": { "message": "Проверить сообщение или ссылку" },
+  "checkMessageHint": { "message": "Вставьте подозрительное SMS, сообщение WhatsApp, письмо или ссылку. Проверка выполняется полностью на вашем устройстве." },
+  "checkMessagePlaceholder": { "message": "Вставьте сообщение или ссылку сюда…" },
+  "check": { "message": "Проверить" },
+  "checkedOnDevice": { "message": "Проверено только на вашем устройстве" },
+  "msgSafe": { "message": "Выглядит безопасно: признаков мошенничества нет" },
+  "msgSuspicious": { "message": "Подозрительно: будьте осторожны" },
+  "msgDangerous": { "message": "Почти наверняка мошенничество" },
+  "qrScanTitle": { "message": "Сканировать эту страницу на QR-коды" },
+  "qrScanHint": { "message": "Распознаёт QR-коды на изображениях этой страницы и проверяет, куда они ведут, — ещё до того как вы отсканируете их телефоном. Проверка выполняется полностью на вашем устройстве." },
+  "qrScanBtn": { "message": "Сканировать" },
+  "qrScanNone": { "message": "На этой странице QR-коды не найдены." },
+  "qrScanFoundOne": { "message": "Найден 1 QR-код" },
+  "fmtQrScanFoundCount": { "message": "Найдено QR-кодов: $COUNT$", "placeholders": { "count": { "content": "$1", "example": "3" } } },
+  "support": { "message": "Поддержать" },
+  "footerTrustLine": { "message": "Работает на вашем устройстве. Никакие данные не покидают ваш браузер." },
+  "takeMeToRealSite": { "message": "Перейти на настоящий сайт" },
+  "toastThanksNoted": { "message": "Спасибо — учтено" },
+  "toastThanksSent": { "message": "Спасибо — отправлено" },
+  "toastPausedForNow": { "message": "Пока приостановлено" },
+  "toastResumed": { "message": "Защита возобновлена" },
+  "toastCopied": { "message": "Скопировано" },
+  "toastExtensionError": { "message": "Ошибка расширения — попробуйте открыть заново." },
+  "whatsNewBanner": { "message": "Новое в 0.13: срочный список, обновляемый каждый час, блокирует только что появившиеся мошеннические сайты примерно через час после жалобы — и по-прежнему без единого запроса к нам. Плюс «Доверять этому сайту» в каждом предупреждении." },
+  "popupBrandDangerSummary": { "message": "Похоже на $BRAND$, но это не так. Не вводите здесь свой пароль.", "placeholders": { "brand": { "content": "$1", "example": "PayPal" } } },
+  "pausedUntil": { "message": "Приостановлено до $TIME$", "placeholders": { "time": { "content": "$1" } } },
+  "fmtProtocolPage": { "message": "Страница $PROTOCOL$", "placeholders": { "protocol": { "content": "$1", "example": "chrome" } } },
+  "popupShopFlagFallback": { "message": "Пометка" },
+  "chipWhy": { "message": "Почему" },
+  "chipDataLeak": { "message": "Утечка данных" },
+  "chipTracking": { "message": "Слежение" },
+  "chipPopups": { "message": "Всплывающие окна" },
+  "chipPrivacy": { "message": "Конфиденциальность" },
+  "popupPrivacyLeakPlain": { "message": "Отправил ваш email/телефон на $HOST$ до того, как вы отправили форму.", "placeholders": { "host": { "content": "$1", "example": "tracker.example" } } },
+  "popupPrivacyLeakHashed": { "message": "Отправил ваш email/телефон (в хешированном виде) на $HOST$ до того, как вы отправили форму.", "placeholders": { "host": { "content": "$1", "example": "tracker.example" } } },
+  "popupPrivacyFingerprint": { "message": "$HOST$ снимает цифровой отпечаток вашего устройства, чтобы отслеживать вас.", "placeholders": { "host": { "content": "$1", "example": "tracker.example" } } },
+  "popupPrivacyNotifyLure": { "message": "Этот сайт попытался использовать трюк с уведомлением «нажмите Разрешить»." },
+  "popupPrivacyCredExfilPassword": { "message": "Отправил ваш пароль на $HOST$ — сайт, отличный от того, на котором вы были.", "placeholders": { "host": { "content": "$1", "example": "collector.example" } } },
+  "popupPrivacyCredExfilCard": { "message": "Отправил данные вашей карты на $HOST$ — сайт, отличный от того, на котором вы были.", "placeholders": { "host": { "content": "$1", "example": "collector.example" } } },
+  "popupPrivacyDefaultText": { "message": "Обнаружена проблема конфиденциальности." },
+  "levelDangerous": { "message": "Опасная страница" },
+  "levelSuspicious": { "message": "Подозрительная страница" },
+  "levelSafe": { "message": "Ничего подозрительного" },
+  "levelUnknown": { "message": "Не удаётся проверить эту страницу" },
+  "tabProtection": { "message": "Защита" },
+  "tabTrusted": { "message": "Сайты на паузе" },
+  "tabHistory": { "message": "История" },
+  "tabFeed": { "message": "Список угроз" },
+  "tabAbout": { "message": "О программе" },
+  "protectionLead": { "message": "Всё здесь работает на вашем устройстве. Ничего никуда не отправляется, если вы не включите отчёты сообщества внизу." },
+  "protectionOn": { "message": "Защита включена" },
+  "protectionOnHint": { "message": "Проверяет страницы на мошенничество и предупреждает вас. Отключите, чтобы приостановить всё." },
+  "grpScams": { "message": "Мошенничество и фишинг" },
+  "grpScamsHint": { "message": "Блокирует известные вредоносные сайты и выявляет новый фишинг на вашем устройстве." },
+  "grpPopups": { "message": "Всплывающие окна и фальшивые системные предупреждения" },
+  "grpPopupsHint": { "message": "Фальшивые предупреждения о вирусах, блокировщики экрана и захват буфера обмена." },
+  "grpShopping": { "message": "Покупки" },
+  "grpShoppingHint": { "message": "Обнаруживает поддельные интернет-магазины и настоящие адреса поисковой рекламы." },
+  "grpCrypto": { "message": "Криптовалюта и кошельки" },
+  "grpCryptoHint": { "message": "Предупреждения перед рискованными подписями кошелька." },
+  "grpPrivacy": { "message": "Конфиденциальность" },
+  "grpPrivacyHint": { "message": "Обнаруживает сайты, которые раскрывают ваши данные или отслеживают устройство — всё на вашем устройстве." },
+  "optBlockKnown": { "message": "Блокировать известные мошеннические сайты" },
+  "optBlockKnownHint": { "message": "Блокирует страницы из ежедневно обновляемого списка угроз до их загрузки." },
+  "optPageAnalysis": { "message": "Анализ страницы" },
+  "optPageAnalysisHint": { "message": "Анализирует текст, макет и значки страницы на вашем устройстве, чтобы выявлять мошенничество, которого ещё нет в списках." },
+  "optClickfix": { "message": "Блокировка фальшивой CAPTCHA / трюка «вставьте это»" },
+  "optClickfixHint": { "message": "Блокирует страницы, которые просят нажать Win+R и вставить команду (вредоносное ПО ClickFix)." },
+  "optFakeupdate": { "message": "Блокировка фальшивых обновлений браузера" },
+  "optFakeupdateHint": { "message": "Блокирует страницы, которые притворяются, что вашему браузеру нужно обновление, чтобы заставить вас скачать вредоносное ПО." },
+  "optHide": { "message": "Скрывать мошеннический контент" },
+  "optHideHint": { "message": "Затемняет блоки «вы выиграли приз» внутри обычных страниц." },
+  "optQrScan": { "message": "Автоматически сканировать QR-коды" },
+  "optQrScanHint": { "message": "Распознаёт QR-коды на крупных изображениях страницы и проверяет, куда они ведут, ещё до того как вы отсканируете их телефоном, — защита на устройстве от «quishing» (QR-фишинга) в письмах. Вы также можете в любой момент отсканировать страницу вручную из всплывающего окна." },
+  "optTechscam": { "message": "Выход из мошенничества с техподдержкой" },
+  "optTechscamHint": { "message": "Обнаруживает фальшивые страницы «ваш ПК заражён, позвоните по этому номеру» и даёт возможность выйти." },
+  "optClipboard": { "message": "Предупреждение о захвате буфера обмена" },
+  "optClipboardHint": { "message": "Предупреждает, когда сайт незаметно помещает команду или крипто-адрес в буфер обмена." },
+  "optShop": { "message": "Проверка поддельных магазинов" },
+  "optShopHint": { "message": "Ищет фальшивые таймеры обратного отсчёта, давление в духе «осталось всего 2», отсутствие контактных данных и оплату вне платформы (Zelle/перевод/крипто) и показывает это во всплывающем окне." },
+  "optSerp": { "message": "Проверка спонсируемых результатов" },
+  "optSerpHint": { "message": "В Google/Bing/DuckDuckGo помечает спонсируемый результат, реклама которого ведёт не на тот сайт, что указан." },
+  "optWallet": { "message": "Защита от опустошения кошелька" },
+  "optWalletHint": { "message": "Предупреждает перед подтверждением расходования токенов, подписей «Permit» или делегирования аккаунта, которыми злоупотребляют дрейнеры." },
+  "optLeakyForm": { "message": "Предупреждение об утечке из формы" },
+  "optLeakyFormHint": { "message": "Предупреждает, когда сайт отправляет введённый вами email или телефон трекеру до нажатия кнопки отправки." },
+  "optFingerprint": { "message": "Обнаружение цифрового отпечатка" },
+  "optFingerprintHint": { "message": "Показывает, какой скрипт снимает отпечаток вашего устройства, чтобы отслеживать вас на разных сайтах." },
+  "optNotify": { "message": "Предупреждение о ловушке уведомлений" },
+  "optNotifyHint": { "message": "Отмечает трюк «нажмите Разрешить, чтобы продолжить», которым сайты забрасывают вас всплывающими окнами." },
+  "optStrict": { "message": "Строгий режим" },
+  "optStrictHint": { "message": "Для тех, кто хочет максимальной осторожности: даже «подозрительные» страницы блокируются полноэкранным предупреждением с более простой формулировкой. Лучше всего подходит, чтобы помочь менее уверенному члену семьи оставаться в безопасности." },
+  "optReporting": { "message": "Помогите сделать ScamShield умнее" },
+  "optReportingHint": { "message": "Отправляет название сайта (никогда полный адрес или текст страницы) и анонимные сигналы риска для страниц, помеченных как опасные, и сайтов, о которых вы сообщаете. По умолчанию отключено." },
+  "saved": { "message": "Сохранено" },
+  "trustedLead": { "message": "Защита приостановлена на этих сайтах. Возобновите её для сайта, чтобы снова его защищать." },
+  "trustedAlways": { "message": "Всегда" },
+  "trustedForAWhile": { "message": "На некоторое время" },
+  "remove": { "message": "Удалить" },
+  "trustedViaWarning": { "message": "Доверено из предупреждения" },
+  "mutedWarnings": { "message": "Отключённые предупреждения" },
+  "warnAgain": { "message": "Предупреждать снова" },
+  "muteKind_clipboard": { "message": "Уведомления о буфере обмена" },
+  "muteKind_leak": { "message": "Предупреждения об утечке из формы" },
+  "muteKind_notify": { "message": "Предупреждения о ловушке уведомлений" },
+  "muteKind_credpost": { "message": "Предупреждения о формах с картой и паролем" },
+  "historyTitle": { "message": "История защиты" },
+  "historyLead": { "message": "Хранится только на этом устройстве (названия сайтов, никогда полные адреса)." },
+  "clearHistory": { "message": "Очистить историю" },
+  "markMistake": { "message": "Отметить как ошибку" },
+  "feedTitle": { "message": "Список угроз" },
+  "feedLead": { "message": "Ежедневно обновляемый список известных мошеннических сайтов (OpenPhish + URLhaus, тщательно отфильтрованный). ScamShield только скачивает его." },
+  "checkNow": { "message": "Проверить сейчас" },
+  "aboutVersion": { "message": "Версия" },
+  "appearance": { "message": "Внешний вид" },
+  "whatLeaves": { "message": "Что покидает ваше устройство" },
+  "backupSettings": { "message": "Резервное копирование настроек" },
+  "backupHint": { "message": "Сохраните настройки и сайты на паузе в файл или загрузите их на другом компьютере." },
+  "exportBtn": { "message": "Экспорт" },
+  "importBtn": { "message": "Импорт" },
+  "syncTitle": { "message": "Синхронизация между моими устройствами" },
+  "syncHint": { "message": "Синхронизируйте настройки и сайты на паузе во всех браузерах, где вы вошли в аккаунт. Использует встроенную синхронизацию браузера — у ScamShield по-прежнему нет ни аккаунта, ни сервера. По умолчанию отключено." },
+  "optDocTitle": { "message": "Настройки ScamShield" },
+  "ariaSettingsSections": { "message": "Разделы настроек" },
+  "optWhatSentToggle": { "message": "Что именно отправляется ▾" },
+  "optWhatSentBody": { "message": "Отчёт содержит только: имя сайта (имя хоста), вердикт и внутренние коды причин, числовые сигналы риска, полученные из адреса и макета страницы (хешированное количество слов и число форм, полей ввода и ссылок — никогда сам текст), совпавшие названия брендов, версию расширения и час. Никогда — полный адрес (путь или запрос), текст страницы, что-либо введённое вами, куки или любой идентификатор вас или вашего устройства. Отчёты удаляются через 180 дней." },
+  "feedNeverUpdated": { "message": "Никогда не обновлялось" },
+  "hotListPending": { "message": "Срочный список: ещё не загружен" },
+  "hotListStatus": { "message": "Срочный список: сайтов — $COUNT$, обновлён $AGO$", "placeholders": { "count": { "content": "$1", "example": "1,204" }, "ago": { "content": "$2", "example": "12 minutes ago" } } },
+  "hotListOff": { "message": "Срочный список: выключен" },
+  "hotListSub": { "message": "…и срочный список за последние 48 часов, обновляемый каждый час." },
+  "optAdvancedFeedUrl": { "message": "Дополнительно: URL списка" },
+  "optFeedUrlLabel": { "message": "URL списка" },
+  "optFeedUrlPlaceholder": { "message": "https://…/blocklist.json" },
+  "resetToOfficialFeed": { "message": "Сбросить к официальному списку" },
+  "optFeedUrlHint": { "message": "Укажите здесь свой JSON для самостоятельного хостинга или оставьте поле пустым, чтобы отключить обновления." },
+  "optThemeHint": { "message": "Следовать системе или выбрать вручную." },
+  "optThemeAuto": { "message": "Авто" },
+  "optThemeLight": { "message": "Светлая" },
+  "optThemeDark": { "message": "Тёмная" },
+  "optLinksTitle": { "message": "Ссылки" },
+  "optLinkGithub": { "message": "GitHub" },
+  "optLinkReportIssue": { "message": "Сообщить о проблеме" },
+  "supportFreeOnDevice": { "message": "ScamShield бесплатен и полностью работает на вашем устройстве." },
+  "supportSponsorGithub": { "message": "Спонсировать на GitHub" },
+  "supportDonatePaypal": { "message": "Пожертвовать через PayPal" },
+  "netNoTelemetry": { "message": "ScamShield никогда не отправляет запросы аналитики, телеметрии или отслеживания. Единственные запросы, которые он может делать, — вот эти три, и вы можете сами это проверить: откройте вкладку «Сеть» в DevTools браузера, пользуйтесь ScamShield как обычно, и вы не увидите ничего, кроме них." },
+  "receiptFeedLabel": { "message": "Загрузка списка угроз" },
+  "receiptFeedDetail": { "message": "Публичный файл списка блокировки — одинаковый для всех, никакие данные о вас не отправляются." },
+  "receiptReportLabel": { "message": "Отчёты сообщества" },
+  "receiptReportDetail": { "message": "Только если вы включили отчёты. Название сайта + числовые сигналы, никогда URL-адреса или текст страницы." },
+  "receiptIconLabel": { "message": "Проверка значка страницы" },
+  "receiptIconDetail": { "message": "Загружает собственный favicon страницы, чтобы обнаружить подделки брендов. Без третьих сторон, без куки." },
+  "receiptPerPage": { "message": "на страницу" },
+  "receiptOnInstall12h": { "message": "при установке + каждые 12 ч" },
+  "receiptDisabled": { "message": "отключено" },
+  "receiptWhenFlagged": { "message": "при пометке" },
+  "receiptOffDefault": { "message": "выключено (по умолчанию)" },
+  "optExportSyncHint": { "message": "Настройки можно экспортировать/импортировать ниже и (по желанию) синхронизировать между вашими устройствами." },
+  "toastSyncOn": { "message": "Синхронизация включена" },
+  "toastSyncUnavailable": { "message": "Синхронизация недоступна" },
+  "toastSyncOff": { "message": "Синхронизация выключена" },
+  "toastExported": { "message": "Экспортировано" },
+  "toastImported": { "message": "Импортировано" },
+  "toastInvalidFile": { "message": "Недопустимый файл" },
+  "toastCheckingUpdates": { "message": "Проверка…" },
+  "fmtUpdatedToVersion": { "message": "Обновлено до v$VERSION$", "placeholders": { "version": { "content": "$1", "example": "0.6.1" } } },
+  "toastAlreadyUpToDate": { "message": "Уже обновлено" },
+  "toastUpdateFailed": { "message": "Ошибка обновления" },
+  "toastHistoryCleared": { "message": "История очищена" },
+  "toastOpenedReport": { "message": "Отчёт открыт" },
+  "optNoneYet": { "message": "Пока ничего" },
+  "optNoneRightNow": { "message": "Сейчас ничего нет" },
+  "optNothingYetGood": { "message": "Пока ничего — и это хорошо." },
+  "fmtVersion": { "message": "Версия $VERSION$", "placeholders": { "version": { "content": "$1", "example": "0.6.0" } } },
+  "fmtUntilTime": { "message": "до $TIME$", "placeholders": { "time": { "content": "$1", "example": "22 Aug, 3:45 PM" } } },
+  "fmtUpdatedRules": { "message": "Обновлено $TIME$ · правил: $COUNT$", "placeholders": { "time": { "content": "$1", "example": "2 h ago" }, "count": { "content": "$2", "example": "12,345" } } },
+  "bannerDangerBrand": { "message": "Опасная страница — похожа на $BRAND$, но это подделка", "placeholders": { "brand": { "content": "$1" } } },
+  "bannerDanger": { "message": "Опасная страница" },
+  "bannerTakeCare": { "message": "Будьте осторожны на этом сайте" },
+  "whyShort": { "message": "Почему?" },
+  "moreActions": { "message": "Другие действия" },
+  "hideForToday": { "message": "Скрыть на сегодня" },
+  "hideForAnHour": { "message": "Скрыть на час" },
+  "interstitialHead1": { "message": "Стоп — эта страница пытается вас обмануть" },
+  "interstitialHead2": { "message": "Подождите — похоже на мошенническую страницу" },
+  "interstitialHead3": { "message": "Не продолжайте — предупреждение о мошенничестве" },
+  "interstitialReassure": { "message": "Ничего из введённого вами ещё не отправлено. Уйти сейчас безопасно." },
+  "continueAnyway": { "message": "Всё равно продолжить" },
+  "submitAnyway": { "message": "Всё равно отправить" },
+  "proceedAnyway": { "message": "Всё равно продолжить" },
+  "cancelRecommended": { "message": "Отмена (рекомендуется)" },
+  "phishingStop": { "message": "Стоп — возможный фишинг" },
+  "techScamTitle": { "message": "Возможное мошенничество техподдержки" },
+  "techScamBody": { "message": "Это веб-страница, а не ваш компьютер — с компьютером всё в порядке. Настоящие предупреждения безопасности никогда не блокируют экран и не показывают номер телефона. Не звоните и не платите." },
+  "getMeOut": { "message": "Выведите меня отсюда (закрыть страницу)" },
+  "walletRiskyTitle": { "message": "Рискованный запрос кошелька" },
+  "walletRiskyBody": { "message": "Если вы этого не ожидали, отмените. Мошенники используют такие запросы, чтобы похитить вашу криптовалюту." },
+  "compareThisSite": { "message": "Этот сайт" },
+  "compareRealSite": { "message": "Настоящий $BRAND$", "placeholders": { "brand": { "content": "$1" } } },
+  "guardCountdown": { "message": "$LABEL$ ($COUNT$)", "placeholders": { "label": { "content": "$1", "example": "Continue anyway" }, "count": { "content": "$2", "example": "3" } } },
+  "ariaScamWarning": { "message": "Предупреждение о мошенничестве" },
+  "ariaPhishingWarning": { "message": "Предупреждение о возможном фишинге" },
+  "interstitialFallback": { "message": "Эта страница соответствует шаблону известного мошенничества." },
+  "toastSupportAsk": { "message": "ScamShield только что защитил вас — он бесплатный и работает на вашем устройстве. Поддержите проект? ❤" },
+  "guardFormDestKnown": { "message": "Эта форма отправляет ваш пароль на $DEST$, а не на $HOST$. Отправка пароля на другой сайт — так мошенники крадут учётные данные.", "placeholders": { "dest": { "content": "$1", "example": "evil.example" }, "host": { "content": "$2", "example": "your-bank.example" } } },
+  "guardFormDestUnknown": { "message": "Эта форма отправляет ваш пароль на другой сайт, отличный от того, который вы посещаете. Так мошенники часто крадут учётные данные." },
+  "guardHiddenTag": { "message": "Скрыто ScamShield" },
+  "guardWalletCollision": { "message": "ScamShield заблокировал запрос кошелька, пока было открыто другое предупреждение. Закройте его и повторите попытку." },
+  "guardWalletFallback": { "message": "Этот сайт запрашивает конфиденциальное действие с кошельком." },
+  "guardPrivacyFallback": { "message": "На этой странице обнаружена проблема конфиденциальности." },
+  "guardClipboardFallback": { "message": "Сайт изменил содержимое вашего буфера обмена." },
+  "guardTechScamFallback": { "message": "Эта страница использует тактики запугивания." },
+  "guardClipboardBlockedPayload": { "message": "Заблокировано ScamShield — этот сайт поместил опасную команду в ваш буфер обмена. Не вставляйте её никуда." },
+  "clipboardNoticeCmdTitle": { "message": "Вы скопировали команду терминала с $HOST$", "placeholders": { "host": { "content": "$1", "example": "ollama.com" } } },
+  "clipboardNoticeCmdBody": { "message": "Запускайте её только если доверяете этому сайту. Настоящие сайты никогда не просят вставлять команды, чтобы что-то «подтвердить»." },
+  "clipboardNoticeAddrTitle": { "message": "Вы скопировали крипто-адрес с $HOST$", "placeholders": { "host": { "content": "$1", "example": "example.com" } } },
+  "clipboardNoticeAddrBody": { "message": "Перед отправкой убедитесь, что он совпадает с ожидаемым адресом." },
+  "clipboardWarnTitle": { "message": "$HOST$ самостоятельно изменил ваш буфер обмена", "placeholders": { "host": { "content": "$1", "example": "example.com" } } },
+  "ackMuted": { "message": "ScamShield больше не будет показывать это предупреждение на $HOST$.", "placeholders": { "host": { "content": "$1", "example": "example.com" } } },
+  "dontWarnHere": { "message": "Не предупреждать меня на этом сайте" },
+  "leakTitle": { "message": "Ваши данные покинули эту страницу до того, как вы нажали «Отправить»" },
+  "notifyLureTitle": { "message": "Не нажимайте «Разрешить» здесь" },
+  "credPostTitle": { "message": "Эта форма отправляет введённые данные на другой сайт" },
+  "keepMyDetails": { "message": "Сохранить мои данные" },
+  "supportOpen": { "message": "Открыть" },
+  "guardLeakyFormPlain": { "message": "Этот сайт отправил ваш email/телефон на $HOST$ в открытом виде — ещё до того, как вы нажали отправить.", "placeholders": { "host": { "content": "$1", "example": "tracker.example" } } },
+  "guardLeakyFormHashed": { "message": "Этот сайт отправил ваш email/телефон на $HOST$ в виде хешированного ($ALGO$) идентификатора — ещё до того, как вы нажали отправить.", "placeholders": { "host": { "content": "$1", "example": "tracker.example" }, "algo": { "content": "$2", "example": "MD5" } } },
+  "guardNotifyLure": { "message": "Этот сайт пытается получить разрешение на уведомления с помощью трюка «нажмите Разрешить, чтобы продолжить». Вы можете спокойно нажать Заблокировать." },
+  "serpAdMismatch": { "message": "⚠ ScamShield: эта реклама ведёт на $ACTUAL$, а не на $SHOWN$", "placeholders": { "actual": { "content": "$1", "example": "malicious-download.example" }, "shown": { "content": "$2", "example": "trusted-brand.example" } } },
+  "serpBadgeDanger": { "message": "ScamShield: этот результат находится в нашем списке блокировки угроз" },
+  "serpBadgeCaution": { "message": "ScamShield: этот результат показывает признаки мошенничества" },
+  "chipLink": { "message": "Ссылка" },
+  "chipBrand": { "message": "Бренд" },
+  "chipPage": { "message": "Страница" },
+  "chipWallet": { "message": "Кошелёк" },
+  "chipClipboard": { "message": "Буфер обмена" },
+  "chipTechscam": { "message": "Страница запугивания" },
+  "chipShop": { "message": "Магазин" },
+  "chipMessage": { "message": "Сообщение" },
+  "reason_ipHost": { "message": "Использует прямой IP-адрес вместо доменного имени." },
+  "reason_atSymbol": { "message": "URL содержит символ «@», который может скрывать настоящий адрес назначения." },
+  "reason_punycodeHost": { "message": "Домен использует punycode, который часто применяют для имитации настоящих брендов." },
+  "reason_idnHomograph": { "message": "Этот домен имитирует «$BRAND$», используя похожие иностранные символы.", "placeholders": { "brand": { "content": "$1", "example": "paypal" } } },
+  "reason_brandLookalike": { "message": "Домен выглядит как имитация известного бренда." },
+  "reason_suspiciousTld": { "message": "Домен использует домен верхнего уровня, часто используемый мошенниками." },
+  "reason_noHttps": { "message": "Соединение небезопасно (нет HTTPS)." },
+  "reason_manySubdomains": { "message": "Необычно много поддоменов." },
+  "reason_urgencyKeywords": { "message": "URL содержит несколько ключевых слов, связанных со срочностью/безопасностью." },
+  "reason_randomHost": { "message": "Доменное имя выглядит сгенерированным случайным образом." },
+  "reason_brandFuzzyMatch": { "message": "Этот домен очень похож на настоящий домен $BRAND$ — внимательно проверьте адресную строку, прежде чем что-либо вводить.", "placeholders": { "brand": { "content": "$1", "example": "PayPal" } } },
+  "reason_deepSubdomainChain": { "message": "У домена необычно глубокая цепочка поддоменов под его настоящим доменом — распространённый приём маскировки." },
+  "reason_longHostLabel": { "message": "Домен содержит необычно длинную часть, которую часто используют, чтобы скрыть поддельное название бренда или настоящий домен." },
+  "reason_shortenerHost": { "message": "Это домен сервиса сокращения ссылок ($HOST$) — настоящий адрес назначения скрыт, пока вы не перейдёте по ссылке.", "placeholders": { "host": { "content": "$1", "example": "bit.ly" } } },
+  "reason_riskAbusedTld": { "message": "Домен верхнего уровня ($TLD$) этого сайта имеет высокий уровень использования в мошеннических целях по данным таблиц риска в списке угроз ScamShield.", "placeholders": { "tld": { "content": "$1", "example": ".top" } } },
+  "reason_brandForeignSuffix": { "message": "Использует имя $BRAND$ в адресе .$SUFFIX$, который настоящий $BRAND$ никогда не использует.", "placeholders": { "brand": { "content": "$1", "example": "Roblox" }, "suffix": { "content": "$2", "example": "com.do" } } },
+  "reason_gatewayRedirect": { "message": "На эту страницу привела короткая ссылка-переадресация на $HOST$, которая вела на совершенно другой сайт — типичный приём мошеннических шлюзов.", "placeholders": { "host": { "content": "$1", "example": "mgpxq.com" } } },
+  "reason_riskDynamicHost": { "message": "Домен размещён у провайдера динамического DNS или бесплатного хостинга, часто используемого для мошеннических страниц." },
+  "reason_feedBlock": { "message": "Этот домен совпадает со списком угроз ScamShield, подтверждён $COUNT$ независимым(и) источником(ами).", "placeholders": { "count": { "content": "$1", "example": "3" } } },
+  "reason_feedWarn": { "message": "Этот домен совпадает с записью с низкой достоверностью в списке угроз ScamShield ($COUNT$ источник(ов)) — действуйте осторожно.", "placeholders": { "count": { "content": "$1", "example": "1" } } },
+  "reason_newDomain": { "message": "Домен есть в списке недавно зарегистрированных доменов — большинству мошеннических сайтов всего несколько дней$EXTRA$.", "placeholders": { "extra": { "content": "$1", "example": ", and you have never visited it before" } } },
+  "reason_credentialFormForeignDomain": { "message": "Форма ввода пароля на этой странице отправляет ваши учётные данные на другой сайт." },
+  "reason_crossOriginCredPost": { "message": "Эта форма отправляет ваш пароль или данные карты на $HOST$ — сайт, отличный от того, на котором вы находитесь.", "placeholders": { "host": { "content": "$1", "example": "collector.example" } } },
+  "reason_hiddenIframes": { "message": "Страница содержит скрытые фреймы, которые могут перехватывать ввод." },
+  "reason_scamPhrase": { "message": "Страница содержит классические формулировки мошенничества/розыгрыша («$PHRASE$»).", "placeholders": { "phrase": { "content": "$1", "example": "you won" } } },
+  "reason_seedPhraseAsk": { "message": "Эта страница запрашивает вашу seed-фразу восстановления кошелька — никогда не вводите её; это украдёт ваши средства." },
+  "reason_brandImpersonationContent": { "message": "Эта страница выглядит как «$BRAND$», но не находится на её настоящем сайте.", "placeholders": { "brand": { "content": "$1", "example": "paypal" } } },
+  "reason_deliveryFeeScam": { "message": "Эта страница притворяется $BRAND$ и запрашивает данные карты, чтобы «выпустить» посылку. Перевозчики никогда не собирают сборы через подобные страницы.", "placeholders": { "brand": { "content": "$1", "example": "DHL" } } },
+  "reason_credentialFormOnTenantHost": { "message": "Запрашивает пароль на общей хостинг-платформе ($HOST$), где любой может опубликовать страницу за секунды.", "placeholders": { "host": { "content": "$1", "example": "webflow.io" } } },
+  "reason_brandInTenantHost": { "message": "Имя $BRAND$ есть в адресе страницы на бесплатном хостинге, которая запрашивает пароль.", "placeholders": { "brand": { "content": "$1", "example": "AT&T" } } },
+  "reason_brandIconMismatch": { "message": "Эта страница использует значок $BRAND$, но не является сайтом $BRAND$.", "placeholders": { "brand": { "content": "$1", "example": "PayPal" } } },
+  "reason_contentPhishingPattern": { "message": "Формулировки и оформление страницы напоминают известные фишинговые страницы." },
+  "reason_techScamScareText": { "message": "Страница использует поддельную формулировку предупреждения безопасности («$PHRASE$»).", "placeholders": { "phrase": { "content": "$1", "example": "virus detected" } } },
+  "reason_techScamPhoneAsk": { "message": "Страница настойчиво просит позвонить по номеру «поддержки» — характерный признак мошенничества с техподдержкой." },
+  "reason_techScamFakeAlert": { "message": "Это веб-страница, притворяющаяся системным предупреждением — с вашим компьютером всё в порядке. Настоящие предупреждения Microsoft/Apple никогда не показывают номера телефонов." },
+  "reason_techScamFullscreen": { "message": "Страница принудительно перешла в полноэкранный режим, чтобы её было сложнее закрыть." },
+  "reason_techScamAlarmAudio": { "message": "Страница воспроизводит звук тревоги, чтобы вызвать у вас панику." },
+  "reason_techScamDialogFlood": { "message": "Страница завалила экран всплывающими диалогами, чтобы удержать вас." },
+  "reason_techScamHistoryTrap": { "message": "Страница перехватывает кнопку «Назад»." },
+  "reason_walletBlindSign": { "message": "Сайт попросил ваш кошелёк «слепо» подписать произвольные данные — распространённый приём дрейнеров." },
+  "reason_walletPermitApproval": { "message": "Эта подпись является разрешением на токен («Permit»). Подписав её, вы позволяете этому сайту позже перемещать ваши токены или NFT без повторного запроса — самая распространённая подпись дрейнеров кошельков." },
+  "reason_walletDelegation7702": { "message": "Эта транзакция передаст управление вашим аккаунтом контракту (делегирование EIP-7702) — техника, которую дрейнеры используют для опустошения кошельков." },
+  "reason_walletSetApprovalAll": { "message": "Эта транзакция предоставляет сайту контроль над ВСЕМИ вашими NFT в коллекции." },
+  "reason_walletUnlimitedApprove": { "message": "Эта транзакция даёт сайту НЕОГРАНИЧЕННОЕ разрешение тратить ваши токены." },
+  "reason_walletTokenApprove": { "message": "Эта транзакция позволяет сайту потратить часть ваших токенов." },
+  "reason_clickfixPasteRun": { "message": "Эта страница поместила системную команду в ваш буфер обмена и просит вставить и выполнить её. Настоящие сайты никогда так не делают — выполнение заразит ваш компьютер." },
+  "reason_clickfixFakeCaptcha": { "message": "Эта «проверка» просит вас нажать Win+R и вставить команду. Настоящие CAPTCHA никогда не просят что-либо запускать — это устанавливает вредоносное ПО." },
+  "reason_clickfixWinR": { "message": "Эта страница просит вас открыть окно «Выполнить» Windows и что-то вставить — приём, используемый, чтобы заставить людей запустить вредоносное ПО." },
+  "reason_clickfixCaptchaDisguise": { "message": "Инструкции замаскированы под этап проверки «я не робот»." },
+  "reason_clipboardCommand": { "message": "Сайт скопировал системную команду в ваш буфер обмена. НЕ вставляйте её в терминал или окно «Выполнить»." },
+  "reason_clipboardCryptoAddress": { "message": "Сайт поместил адрес криптовалюты в ваш буфер обмена — проверьте его перед вставкой." },
+  "reason_fakeUpdatePrompt": { "message": "Эта страница притворяется, что вашему браузеру нужно обновление, и предлагает загрузку. Настоящие уведомления об обновлении приходят от самого браузера — никогда со страницы. Загрузка почти наверняка является вредоносным ПО." },
+  "reason_msgOtpAsk": { "message": "Просит поделиться одноразовым кодом (OTP), PIN-кодом или паролем — ни один легитимный сервис никогда так не делает." },
+  "reason_msgScamWording": { "message": "Использует известную мошенническую формулировку («$PHRASE$»).", "placeholders": { "phrase": { "content": "$1", "example": "delivery fee" } } },
+  "reason_msgUrgencyDeadline": { "message": "Создаёт давление с помощью искусственного дедлайна — классическая тактика мошенников." },
+  "reason_msgDangerousLink": { "message": "Содержит подозрительно опасную ссылку ($URL$).", "placeholders": { "url": { "content": "$1", "example": "http://verify-bank.tk/otp" } } },
+  "reason_qrCodeDestination": { "message": "Эта страница содержит QR-код, ведущий на $URL$, — проверено автоматически, ещё до того как вы отсканируете его телефоном.", "placeholders": { "url": { "content": "$1", "example": "http://verify-bank.tk/otp" } } },
+  "reason_shop_countdownReset": { "message": "Фальшивый таймер" },
+  "reason_shop_countdownReset_detail": { "message": "Таймер «спешите, акция заканчивается» сбрасывается при каждом посещении — срочность фальшивая." },
+  "reason_shop_offPlatformPay": { "message": "Рискованная оплата" },
+  "reason_shop_offPlatformPay_detail": { "message": "Оформление заказа подталкивает вас к оплате через Zelle/Venmo/CashApp/перевод/крипто — если это мошенничество, вернуть деньги не получится." },
+  "reason_shop_fakeScarcity": { "message": "Фальшивый дефицит" },
+  "reason_shop_fakeScarcity_detail": { "message": "Внедрённые виджеты давления типа «осталось всего немного / просматривают N человек»." },
+  "reason_shop_badgeHotlink": { "message": "Фальшивый значок доверия" },
+  "reason_shop_badgeHotlink_detail": { "message": "Значок «безопасно»/«проверено», который является просто изображением и никуда не ведёт." },
+  "reason_shop_missingContact": { "message": "Нет контактной информации" },
+  "reason_shop_missingContact_detail": { "message": "Нет настоящего адреса, телефона или данных компании — типично для одноразового мошеннического магазина." },
+  "obDocTitle": { "message": "Добро пожаловать в ScamShield" },
+  "obTitle": { "message": "ScamShield защищает вас" },
+  "obLead": { "message": "Он следит за страницами, которые вы посещаете, и предупреждает о мошенничестве — полностью на вашем устройстве. Ваш просмотр никогда не покидает ваш компьютер." },
+  "obPhishing": { "message": "Фишинг и поддельные логины" },
+  "obPhishingBody": { "message": "Предупреждает, когда страница отправляет ваш пароль не на тот сайт." },
+  "obBrand": { "message": "Подделки брендов" },
+  "obBrandBody": { "message": "Распознаёт скопированный значок PayPal, банка или оператора связи на сайте, который им не принадлежит — более 60 брендов, включая банки и государственные службы ОАЭ." },
+  "obPage": { "message": "Анализ страницы" },
+  "obPageBody": { "message": "Анализирует текст и оформление страниц входа на вашем устройстве, чтобы выявлять мошенничество, которого ещё нет ни в одном списке." },
+  "obWallet": { "message": "Защита крипто-кошелька" },
+  "obWalletBody": { "message": "Останавливает одобрения дрейнеров и кражу seed-фразы восстановления до того, как их увидит ваш кошелёк." },
+  "obClipboard": { "message": "Мошенничество с буфером обмена и трюком «вставьте это»" },
+  "obClipboardBody": { "message": "Предупреждает вас, когда сайт незаметно копирует команду в ваш буфер обмена." },
+  "obPopups": { "message": "Фальшивые всплывающие окна о вирусах" },
+  "obPopupsBody": { "message": "Прерывает пугающий цикл всплывающих окон и помогает вам уйти." },
+  "obPin": { "message": "Закрепить ScamShield" },
+  "obPinBody": { "message": "Нажмите на значок пазла на панели инструментов, затем на булавку рядом с ScamShield, чтобы видеть статус каждой страницы с первого взгляда." },
+  "obOpenSettings": { "message": "Открыть настройки" },
+  "blockedDocTitle": { "message": "Сайт заблокирован ScamShield" },
+  "blockedTitle": { "message": "ScamShield заблокировал этот сайт" },
+  "blockedLead": { "message": "$HOST$ находится в списке известных мошеннических и вредоносных сайтов ScamShield, поэтому загрузка страницы была остановлена. Ничего не было запущено, и ничего из введённого вами не было отправлено.", "placeholders": { "host": { "content": "$1", "example": "secure-paypa1-login.com" } } },
+  "blockedLeadHot": { "message": "$HOST$ был отмечен как фишинговый за последние два дня, поэтому загрузка страницы была остановлена. Ничего не было запущено, и ничего из введённого вами не было отправлено.", "placeholders": { "host": { "content": "$1", "example": "secure-paypa1-login.com" } } },
+  "blockedAddress": { "message": "Заблокированный адрес" },
+  "blockedListedBy": { "message": "Внесён в список источниками: $SOURCES$", "placeholders": { "sources": { "content": "$1", "example": "Phishing.Database, ScamSniffer" } } },
+  "blockedListedGeneric": { "message": "Внесён в список заблокированных доменов ScamShield с подтверждённым мошенничеством." },
+  "blockedGoBack": { "message": "Вернуться в безопасное место" },
+  "blockedTrustSite": { "message": "Это не мошенники? Доверять этому сайту" },
+  "blockedVisitAnyway": { "message": "Всё равно перейти (не рекомендуется)" },
+  "blockedVisitHint": { "message": "Откроет сайт с приостановленной на 1 час защитой ScamShield." },
+  "blockedFooter": { "message": "Заблокировано на вашем устройстве. Информация об этой странице никуда не отправлялась." },
+  "detailsAndOptions": { "message": "Подробности и другие варианты" },
+  "continuePausesHour": { "message": "Приостанавливает ScamShield на этом сайте на 1 час." },
+  "thisPage": { "message": "Эта страница" },
+  "chipBlocklist": { "message": "Заблокирован" },
+  "obNote": { "message": "ScamShield бесплатен. Необязательно: в Настройках вы можете помочь сделать его умнее, делясь анонимными отчётами о выявленном мошенничестве — по умолчанию отключено, если вы сами не включите. Если он вам помог, вы можете поддержать разработку на странице Настроек." },
+  "statsLink": { "message": "Статистика →" },
+  "tabStats": { "message": "Статистика" },
+  "optLang": { "message": "Язык" },
+  "optLangHint": { "message": "Применяется к предупреждениям, всплывающему окну и настройкам ScamShield. Синхронизируется с другими вашими устройствами, если синхронизация включена." },
+  "optLangAuto": { "message": "По умолчанию в браузере" },
+  "fmtStatsSince": { "message": "Защищает этот браузер с $DATE$", "placeholders": { "date": { "content": "$1", "example": "12 Jun 2026" } } },
+  "stats7d": { "message": "7 дней" },
+  "stats30d": { "message": "30 дней" },
+  "statsAll": { "message": "За всё время" },
+  "statsPagesChecked": { "message": "Страниц проверено на устройстве" },
+  "statsThreatsStopped": { "message": "Угроз остановлено" },
+  "statsThreatsNone": { "message": "Всё чисто — ничего не проскочило" },
+  "statsScamsBlockedOne": { "message": "1 мошенничество не добралось до вас" },
+  "fmtStatsScamsBlocked": { "message": "$COUNT$ мошеннических схем не добрались до вас", "placeholders": { "count": { "content": "$1", "example": "8" } } },
+  "statsPrivacyFindings": { "message": "Находки по приватности" },
+  "statsRulesActive": { "message": "Активных правил блокировки" },
+  "statsRulesActiveHint": { "message": "Действуют прямо сейчас, включая список, встроенный в ScamShield." },
+  "statsChartTitle7d": { "message": "Проверено страниц · последние 7 дней" },
+  "statsChartTitle30d": { "message": "Проверено страниц · последние 30 дней" },
+  "statsChartTitleAll": { "message": "Проверено страниц · с момента установки" },
+  "statsChartTitle90d": { "message": "Проверено страниц · последние 90 дней" },
+  "statsAxisToday": { "message": "Сегодня" },
+  "statsLegendChecked": { "message": "Проверено страниц" },
+  "statsLegendThreat": { "message": "Угроза остановлена в этот день" },
+  "fmtStatsBarTip": { "message": "$DATE$ · $COUNT$ страниц проверено", "placeholders": { "date": { "content": "$1", "example": "21 Aug" }, "count": { "content": "$2", "example": "63" } } },
+  "fmtStatsBarTipThreat": { "message": "$DATE$ · $COUNT$ страниц проверено · остановлена 1 угроза", "placeholders": { "date": { "content": "$1", "example": "21 Aug" }, "count": { "content": "$2", "example": "63" } } },
+  "fmtStatsBarTipThreats": { "message": "$DATE$ · $COUNT$ страниц проверено · остановлено угроз: $THREATS$", "placeholders": { "date": { "content": "$1", "example": "21 Aug" }, "count": { "content": "$2", "example": "63" }, "threats": { "content": "$3", "example": "2" } } },
+  "statsByType": { "message": "Угрозы по типу · за всё время" },
+  "statsCatPhishing": { "message": "Фишинг" },
+  "statsCatFakeShop": { "message": "Поддельный магазин" },
+  "statsCatWallet": { "message": "Опустошение кошелька" },
+  "statsCatTechSupport": { "message": "Техподдержка" },
+  "statsCatClipboard": { "message": "Буфер обмена" },
+  "statsCatClickfix": { "message": "Фальшивая CAPTCHA" },
+  "statsCatFakeUpdate": { "message": "Фальшивое обновление" },
+  "statsCatOther": { "message": "Другое" },
+  "statsRecent": { "message": "Недавние" },
+  "statsPillBlocked": { "message": "Заблокировано" },
+  "statsPillWarned": { "message": "Предупреждено" },
+  "statsFooter": { "message": "Каждое число подсчитывается на вашем устройстве. Ничто на этой странице никуда не отправляется." },
+  "reviewAskBody": { "message": "ScamShield уже остановил для вас $COUNT$ мошеннических попыток. Если считаете, что он это заслужил, короткий отзыв поможет другим людям его найти — это бесплатно и всегда будет бесплатно.", "placeholders": { "count": { "content": "$1", "example": "2" } } },
+  "reviewRate": { "message": "Оценить ScamShield" },
+  "reviewLater": { "message": "Может быть, позже" },
+  "reviewNo": { "message": "Нет, спасибо" },
+  "reviewAboutLink": { "message": "Нравится ScamShield? Оставьте отзыв" }
 }

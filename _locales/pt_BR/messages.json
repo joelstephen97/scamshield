@@ -1,1607 +1,438 @@
 {
-  "extName": {
-    "message": "Bloqueador de golpes e phishing: ScamShield"
-  },
-  "extShortName": {
-    "message": "ScamShield"
-  },
-  "extDescription": {
-    "message": "Proteção contra golpes e phishing no seu dispositivo: avisa você, detecta imitações de marcas e verifica mensagens. Nada sai do seu dispositivo."
-  },
-  "on": {
-    "message": "Ativado"
-  },
-  "paused": {
-    "message": "Pausado"
-  },
-  "settings": {
-    "message": "Configurações"
-  },
-  "dismiss": {
-    "message": "Dispensar"
-  },
-  "ariaDismiss": {
-    "message": "Dispensar"
-  },
-  "cancel": {
-    "message": "Cancelar"
-  },
-  "reportMistake": {
-    "message": "Relatar um erro"
-  },
-  "thanks": {
-    "message": "Obrigado"
-  },
-  "trustThisSite": {
-    "message": "Confiar neste site"
-  },
-  "ackTrusted": {
-    "message": "O ScamShield não vai mais sinalizar $HOST$.",
-    "placeholders": {
-      "host": {
-        "content": "$1",
-        "example": "secure-paypa1-login.com"
-      }
-    }
-  },
-  "undo": {
-    "message": "Desfazer"
-  },
-  "popupPauseMenu": {
-    "message": "Pausar proteção ▾"
-  },
-  "privacyPolicyLink": {
-    "message": "Política de privacidade"
-  },
-  "whatsNewLink": {
-    "message": "Novidades"
-  },
-  "unknownSite": {
-    "message": "site desconhecido"
-  },
-  "popupChecking": {
-    "message": "Verificando…"
-  },
-  "popupSafe": {
-    "message": "Nada suspeito aqui"
-  },
-  "popupSuspicious": {
-    "message": "Página suspeita"
-  },
-  "popupDangerous": {
-    "message": "Página perigosa"
-  },
-  "popupUnknown": {
-    "message": "Não verificada"
-  },
-  "popupPausedSummary": {
-    "message": "A proteção está pausada — ative-a para continuar."
-  },
-  "popupNotHttp": {
-    "message": "Páginas do navegador e a loja não são verificadas."
-  },
-  "popupDangerSummary": {
-    "message": "Não digite senhas nem dados do cartão aqui."
-  },
-  "popupSuspiciousSummary": {
-    "message": "Tenha cuidado antes de digitar algo aqui."
-  },
-  "leaveThisPage": {
-    "message": "Sair desta página"
-  },
-  "showWhy": {
-    "message": "Ver por quê"
-  },
-  "whyVerdict": {
-    "message": "Por que esse veredito?"
-  },
-  "whyVerdictCountOne": {
-    "message": "· 1 sinal"
-  },
-  "fmtWhyVerdictCount": {
-    "message": "· $COUNT$ sinais",
-    "placeholders": {
-      "count": {
-        "content": "$1"
-      }
-    }
-  },
-  "takeMeToReal": {
-    "message": "Ir para o site real da $BRAND$",
-    "placeholders": {
-      "brand": {
-        "content": "$1"
-      }
-    }
-  },
-  "copyReportBtn": {
-    "message": "Copiar relatório"
-  },
-  "copyReportHeader": {
-    "message": "⚠ O ScamShield sinalizou este site: $HOST$",
-    "placeholders": {
-      "host": {
-        "content": "$1",
-        "example": "evil[.]example"
-      }
-    }
-  },
-  "copyReportVerdict": {
-    "message": "Veredito: $LEVEL$",
-    "placeholders": {
-      "level": {
-        "content": "$1",
-        "example": "Dangerous page"
-      }
-    }
-  },
-  "copyReportSignals": {
-    "message": "Sinais:"
-  },
-  "copyReportFooter": {
-    "message": "Verificado no dispositivo pelo ScamShield — gratuito, código aberto: https://joelstephen97.github.io/scamshield/"
-  },
-  "reportScam": {
-    "message": "Relatar: isto é um golpe"
-  },
-  "reportSafe": {
-    "message": "Relatar: isto é seguro"
-  },
-  "pause1h": {
-    "message": "1 hora"
-  },
-  "pause1d": {
-    "message": "1 dia"
-  },
-  "pauseAlways": {
-    "message": "Sempre"
-  },
-  "resumeNow": {
-    "message": "Retomar agora"
-  },
-  "blockedOnSite": {
-    "message": "Bloqueados neste site"
-  },
-  "blockedAllTime": {
-    "message": "Bloqueados no total"
-  },
-  "sinceInstall": {
-    "message": "Desde a instalação"
-  },
-  "thisWeek": {
-    "message": "Esta semana"
-  },
-  "privacyOnPage": {
-    "message": "Privacidade nesta página"
-  },
-  "shoppingCheck": {
-    "message": "Verificação de compra"
-  },
-  "checkMessageTitle": {
-    "message": "Verificar uma mensagem ou link"
-  },
-  "checkMessageHint": {
-    "message": "Cole um SMS, mensagem do WhatsApp, e-mail suspeito ou um link. Verificado totalmente no seu dispositivo."
-  },
-  "checkMessagePlaceholder": {
-    "message": "Cole a mensagem ou o link aqui…"
-  },
-  "check": {
-    "message": "Verificar"
-  },
-  "checkedOnDevice": {
-    "message": "Verificado apenas no seu dispositivo"
-  },
-  "msgSafe": {
-    "message": "Parece seguro: sem sinais de golpe"
-  },
-  "msgSuspicious": {
-    "message": "Suspeito: trate com cautela"
-  },
-  "msgDangerous": {
-    "message": "Quase com certeza é um golpe"
-  },
-  "qrScanTitle": {
-    "message": "Escanear esta página em busca de códigos QR"
-  },
-  "qrScanHint": {
-    "message": "Decodifica os códigos QR nas imagens desta página e verifica para onde eles levam — antes de você escaneá-los com o celular. Tudo verificado no seu dispositivo."
-  },
-  "qrScanBtn": {
-    "message": "Escanear agora"
-  },
-  "qrScanNone": {
-    "message": "Nenhum código QR encontrado nesta página."
-  },
-  "qrScanFoundOne": {
-    "message": "1 código QR encontrado"
-  },
-  "fmtQrScanFoundCount": {
-    "message": "$COUNT$ códigos QR encontrados",
-    "placeholders": {
-      "count": {
-        "content": "$1",
-        "example": "3"
-      }
-    }
-  },
-  "support": {
-    "message": "Apoiar"
-  },
-  "footerTrustLine": {
-    "message": "Funciona no seu dispositivo. Nenhum dado sai do seu navegador."
-  },
-  "takeMeToRealSite": {
-    "message": "Ir para o site real"
-  },
-  "toastThanksNoted": {
-    "message": "Obrigado — anotado"
-  },
-  "toastThanksSent": {
-    "message": "Obrigado — enviado"
-  },
-  "toastPausedForNow": {
-    "message": "Pausado por agora"
-  },
-  "toastResumed": {
-    "message": "Proteção retomada"
-  },
-  "toastCopied": {
-    "message": "Copiado"
-  },
-  "toastExtensionError": {
-    "message": "Erro na extensão — tente reabrir."
-  },
-  "whatsNewBanner": {
-    "message": "Novidades na 0.13: uma lista urgente a cada hora bloqueia sites de golpe recém-criados cerca de uma hora depois da denúncia, e continua sem nenhuma requisição para nós. Além disso, “Confiar neste site” em todo aviso."
-  },
-  "popupBrandDangerSummary": {
-    "message": "Parece com a $BRAND$, mas não é. Não digite sua senha aqui.",
-    "placeholders": {
-      "brand": {
-        "content": "$1",
-        "example": "PayPal"
-      }
-    }
-  },
-  "pausedUntil": {
-    "message": "Pausado até $TIME$",
-    "placeholders": {
-      "time": {
-        "content": "$1"
-      }
-    }
-  },
-  "fmtProtocolPage": {
-    "message": "Página $PROTOCOL$",
-    "placeholders": {
-      "protocol": {
-        "content": "$1",
-        "example": "chrome"
-      }
-    }
-  },
-  "popupShopFlagFallback": {
-    "message": "Sinalizar"
-  },
-  "chipWhy": {
-    "message": "Por quê"
-  },
-  "chipDataLeak": {
-    "message": "Vazamento de dados"
-  },
-  "chipTracking": {
-    "message": "Rastreamento"
-  },
-  "chipPopups": {
-    "message": "Pop-ups"
-  },
-  "chipPrivacy": {
-    "message": "Privacidade"
-  },
-  "popupPrivacyLeakPlain": {
-    "message": "Enviou seu e-mail/telefone para $HOST$ antes de você enviar o formulário.",
-    "placeholders": {
-      "host": {
-        "content": "$1",
-        "example": "tracker.example"
-      }
-    }
-  },
-  "popupPrivacyLeakHashed": {
-    "message": "Enviou seu e-mail/telefone (com hash) para $HOST$ antes de você enviar o formulário.",
-    "placeholders": {
-      "host": {
-        "content": "$1",
-        "example": "tracker.example"
-      }
-    }
-  },
-  "popupPrivacyFingerprint": {
-    "message": "$HOST$ está gerando uma impressão digital do seu dispositivo para rastreá-lo.",
-    "placeholders": {
-      "host": {
-        "content": "$1",
-        "example": "tracker.example"
-      }
-    }
-  },
-  "popupPrivacyNotifyLure": {
-    "message": "Este site tentou o truque de notificação \"clique em Permitir\"."
-  },
-  "popupPrivacyCredExfilPassword": {
-    "message": "Enviou sua senha para $HOST$ — um site diferente daquele em que você estava.",
-    "placeholders": {
-      "host": {
-        "content": "$1",
-        "example": "collector.example"
-      }
-    }
-  },
-  "popupPrivacyCredExfilCard": {
-    "message": "Enviou os dados do seu cartão para $HOST$ — um site diferente daquele em que você estava.",
-    "placeholders": {
-      "host": {
-        "content": "$1",
-        "example": "collector.example"
-      }
-    }
-  },
-  "popupPrivacyDefaultText": {
-    "message": "Problema de privacidade detectado."
-  },
-  "levelDangerous": {
-    "message": "Página perigosa"
-  },
-  "levelSuspicious": {
-    "message": "Página suspeita"
-  },
-  "levelSafe": {
-    "message": "Nada suspeito aqui"
-  },
-  "levelUnknown": {
-    "message": "Não é possível verificar esta página"
-  },
-  "tabProtection": {
-    "message": "Proteção"
-  },
-  "tabTrusted": {
-    "message": "Sites em pausa"
-  },
-  "tabHistory": {
-    "message": "Histórico"
-  },
-  "tabFeed": {
-    "message": "Lista de ameaças"
-  },
-  "tabAbout": {
-    "message": "Sobre"
-  },
-  "protectionLead": {
-    "message": "Tudo aqui funciona no seu dispositivo. Nada é enviado a lugar nenhum, a menos que você ative os relatórios da comunidade abaixo."
-  },
-  "protectionOn": {
-    "message": "Proteção ativada"
-  },
-  "protectionOnHint": {
-    "message": "Verifica páginas em busca de golpes e avisa você. Desative para pausar tudo."
-  },
-  "grpScams": {
-    "message": "Golpes e phishing"
-  },
-  "grpScamsHint": {
-    "message": "Bloqueia sites já conhecidos como maliciosos e detecta novos phishings no seu dispositivo."
-  },
-  "grpPopups": {
-    "message": "Pop-ups e alertas falsos do sistema"
-  },
-  "grpPopupsHint": {
-    "message": "Alertas falsos de vírus, bloqueadores de tela e sequestros da área de transferência."
-  },
-  "grpShopping": {
-    "message": "Compras"
-  },
-  "grpShoppingHint": {
-    "message": "Identifica lojas on-line falsas e para onde os anúncios de busca realmente levam."
-  },
-  "grpCrypto": {
-    "message": "Cripto e carteiras"
-  },
-  "grpCryptoHint": {
-    "message": "Avisos antes de assinaturas arriscadas na carteira."
-  },
-  "grpPrivacy": {
-    "message": "Privacidade"
-  },
-  "grpPrivacyHint": {
-    "message": "Detecta sites que vazam seus dados ou rastreiam seu dispositivo — tudo no seu dispositivo."
-  },
-  "optBlockKnown": {
-    "message": "Bloquear sites de golpe conhecidos"
-  },
-  "optBlockKnownHint": {
-    "message": "Impede que páginas da lista de ameaças, atualizada diariamente, sejam carregadas."
-  },
-  "optPageAnalysis": {
-    "message": "Análise de página"
-  },
-  "optPageAnalysisHint": {
-    "message": "Lê o texto, o layout e os ícones da página no seu dispositivo para detectar golpes que ainda não estão em nenhuma lista."
-  },
-  "optClickfix": {
-    "message": "Bloqueador de CAPTCHA falso / \"cole isto\""
-  },
-  "optClickfixHint": {
-    "message": "Impede páginas que pedem para você pressionar Win+R e colar um comando (malware ClickFix)."
-  },
-  "optFakeupdate": {
-    "message": "Bloqueador de atualização falsa do navegador"
-  },
-  "optFakeupdateHint": {
-    "message": "Bloqueia páginas que fingem que seu navegador precisa de atualização para fazer você baixar malware."
-  },
-  "optHide": {
-    "message": "Ocultar conteúdo de golpe"
-  },
-  "optHideHint": {
-    "message": "Esmaece os blocos \"você ganhou um prêmio\" dentro de páginas normais."
-  },
-  "optQrScan": {
-    "message": "Escanear códigos QR automaticamente"
-  },
-  "optQrScanHint": {
-    "message": "Decodifica os códigos QR de imagens grandes na página e verifica o destino deles antes de você escaneá-los com o celular — a proteção no dispositivo contra e-mails de \"quishing\" (phishing por QR code). Você também pode escanear qualquer página sob demanda pelo pop-up."
-  },
-  "optTechscam": {
-    "message": "Saída de golpe de suporte técnico"
-  },
-  "optTechscamHint": {
-    "message": "Detecta páginas falsas do tipo \"seu PC está infectado, ligue para este número\" e oferece uma forma de sair."
-  },
-  "optClipboard": {
-    "message": "Aviso de sequestro da área de transferência"
-  },
-  "optClipboardHint": {
-    "message": "Avisa quando um site coloca secretamente um comando ou endereço de criptomoeda na sua área de transferência."
-  },
-  "optShop": {
-    "message": "Verificação de lojas falsas"
-  },
-  "optShopHint": {
-    "message": "Procura contagens regressivas falsas, pressão falsa de \"restam só 2\", falta de dados de contato e pagamento fora da plataforma (Zelle/transferência/cripto), e mostra tudo no popup."
-  },
-  "optSerp": {
-    "message": "Verificação de resultado patrocinado"
-  },
-  "optSerpHint": {
-    "message": "No Google/Bing/DuckDuckGo, sinaliza um resultado patrocinado cujo anúncio leva a um lugar diferente do site exibido."
-  },
-  "optWallet": {
-    "message": "Proteção contra drenagem de carteira"
-  },
-  "optWalletHint": {
-    "message": "Avisa antes de você aprovar gastos de tokens, assinaturas \"Permit\" ou delegações de conta que os drenadores exploram."
-  },
-  "optLeakyForm": {
-    "message": "Aviso de formulário vazando dados"
-  },
-  "optLeakyFormHint": {
-    "message": "Avisa quando um site envia o e-mail ou telefone que você digitou para um rastreador antes de você enviar o formulário."
-  },
-  "optFingerprint": {
-    "message": "Detecção de impressão digital do dispositivo"
-  },
-  "optFingerprintHint": {
-    "message": "Informa qual script está gerando uma impressão digital do seu dispositivo para rastreá-lo entre sites."
-  },
-  "optNotify": {
-    "message": "Aviso de armadilha de notificação"
-  },
-  "optNotifyHint": {
-    "message": "Sinaliza o truque \"clique em Permitir para continuar\" que sites usam para bombardear você com pop-ups."
-  },
-  "optStrict": {
-    "message": "Modo estrito"
-  },
-  "optStrictHint": {
-    "message": "Para quem quer o máximo de cautela: até páginas \"suspeitas\" são bloqueadas com um aviso em tela cheia e linguagem mais simples. Ideal para ajudar um familiar menos confiante a se manter seguro."
-  },
-  "optReporting": {
-    "message": "Ajude a tornar o ScamShield mais inteligente"
-  },
-  "optReportingHint": {
-    "message": "Envia o nome do site (nunca o endereço completo ou o texto da página) e sinais de risco anônimos de páginas sinalizadas como perigosas, e de sites que você denuncia. Desativado por padrão."
-  },
-  "saved": {
-    "message": "Salvo"
-  },
-  "trustedLead": {
-    "message": "A proteção está pausada nesses sites. Retome um deles para protegê-lo novamente."
-  },
-  "trustedAlways": {
-    "message": "Sempre"
-  },
-  "trustedForAWhile": {
-    "message": "Por um tempo"
-  },
-  "remove": {
-    "message": "Remover"
-  },
-  "trustedViaWarning": {
-    "message": "Aprovado por um aviso"
-  },
-  "historyTitle": {
-    "message": "Histórico de proteção"
-  },
-  "historyLead": {
-    "message": "Armazenado apenas neste dispositivo (nomes de sites, nunca endereços completos)."
-  },
-  "clearHistory": {
-    "message": "Limpar histórico"
-  },
-  "markMistake": {
-    "message": "Marcar como erro"
-  },
-  "feedTitle": {
-    "message": "Lista de ameaças"
-  },
-  "feedLead": {
-    "message": "Uma lista de sites de golpe conhecidos, reconstruída diariamente (OpenPhish + URLhaus, fortemente filtrada). O ScamShield apenas a baixa."
-  },
-  "checkNow": {
-    "message": "Verificar agora"
-  },
-  "aboutVersion": {
-    "message": "Versão"
-  },
-  "appearance": {
-    "message": "Aparência"
-  },
-  "whatLeaves": {
-    "message": "O que sai do seu dispositivo"
-  },
-  "backupSettings": {
-    "message": "Fazer backup das configurações"
-  },
-  "backupHint": {
-    "message": "Salve suas configurações e sites em pausa em um arquivo, ou carregue-os em outro computador."
-  },
-  "exportBtn": {
-    "message": "Exportar"
-  },
-  "importBtn": {
-    "message": "Importar"
-  },
-  "syncTitle": {
-    "message": "Sincronizar entre meus dispositivos"
-  },
-  "syncHint": {
-    "message": "Mantenha suas configurações e sites em pausa sincronizados em todos os navegadores em que você está conectado. Usa a sincronização própria do seu navegador — o ScamShield continua sem conta ou servidor. Desativado por padrão."
-  },
-  "optDocTitle": {
-    "message": "Configurações do ScamShield"
-  },
-  "ariaSettingsSections": {
-    "message": "Seções de configurações"
-  },
-  "optWhatSentToggle": {
-    "message": "O que exatamente é enviado ▾"
-  },
-  "optWhatSentBody": {
-    "message": "Um relatório contém apenas: o nome do site (hostname), o veredito e códigos internos de motivo, sinais de risco numéricos derivados do endereço e do layout da página (contagens de palavras com hash e contagens de formulários, campos e links — nunca o texto em si), nomes de marcas correspondentes, a versão da extensão e a hora. Nunca o endereço completo (caminho ou consulta), o texto da página, qualquer coisa que você digitou, cookies ou qualquer identificador seu ou do seu dispositivo. Os relatórios são excluídos após 180 dias."
-  },
-  "feedNeverUpdated": {
-    "message": "Nunca atualizado"
-  },
-  "hotListPending": {
-    "message": "Lista urgente: ainda não baixada"
-  },
-  "hotListStatus": {
-    "message": "Lista urgente: $COUNT$ sites, atualizada $AGO$",
-    "placeholders": {
-      "count": {
-        "content": "$1",
-        "example": "1,204"
-      },
-      "ago": {
-        "content": "$2",
-        "example": "12 minutes ago"
-      }
-    }
-  },
-  "hotListOff": {
-    "message": "Lista urgente: desativada"
-  },
-  "hotListSub": {
-    "message": "…e a lista urgente das últimas 48 horas, atualizada a cada hora."
-  },
-  "optAdvancedFeedUrl": {
-    "message": "Avançado: URL da lista"
-  },
-  "optFeedUrlLabel": {
-    "message": "URL da lista"
-  },
-  "optFeedUrlPlaceholder": {
-    "message": "https://…/blocklist.json"
-  },
-  "resetToOfficialFeed": {
-    "message": "Redefinir para a lista oficial"
-  },
-  "optFeedUrlHint": {
-    "message": "Aponte isso para seu próprio JSON para autogerenciar, ou deixe em branco para desativar as atualizações."
-  },
-  "optThemeHint": {
-    "message": "Siga o seu sistema ou escolha um."
-  },
-  "optThemeAuto": {
-    "message": "Automático"
-  },
-  "optThemeLight": {
-    "message": "Claro"
-  },
-  "optThemeDark": {
-    "message": "Escuro"
-  },
-  "optLinksTitle": {
-    "message": "Links"
-  },
-  "optLinkGithub": {
-    "message": "GitHub"
-  },
-  "optLinkReportIssue": {
-    "message": "Relatar um problema"
-  },
-  "supportFreeOnDevice": {
-    "message": "O ScamShield é gratuito e funciona totalmente no seu dispositivo."
-  },
-  "supportSponsorGithub": {
-    "message": "Patrocinar no GitHub"
-  },
-  "supportDonatePaypal": {
-    "message": "Doar via PayPal"
-  },
-  "netNoTelemetry": {
-    "message": "O ScamShield nunca faz solicitações de análise, telemetria ou rastreamento. As únicas solicitações que ele pode fazer são estas três, e você mesmo pode verificar: abra as DevTools do seu navegador → aba Rede, use o ScamShield normalmente e você não verá nada além delas."
-  },
-  "receiptFeedLabel": {
-    "message": "Download da lista de ameaças"
-  },
-  "receiptFeedDetail": {
-    "message": "O arquivo público da lista de bloqueio — o mesmo para todos, nada sobre você é enviado."
-  },
-  "receiptReportLabel": {
-    "message": "Relatórios da comunidade"
-  },
-  "receiptReportDetail": {
-    "message": "Somente se você ativou os relatórios. Nome do site + sinais numéricos, nunca URLs ou texto da página."
-  },
-  "receiptIconLabel": {
-    "message": "Verificação do ícone da página"
-  },
-  "receiptIconDetail": {
-    "message": "Busca o próprio favicon da página para identificar imitações de marca. Sem terceiros, sem cookies."
-  },
-  "receiptPerPage": {
-    "message": "por página"
-  },
-  "receiptOnInstall12h": {
-    "message": "na instalação + a cada 12h"
-  },
-  "receiptDisabled": {
-    "message": "desativado"
-  },
-  "receiptWhenFlagged": {
-    "message": "quando sinalizado"
-  },
-  "receiptOffDefault": {
-    "message": "desativado (padrão)"
-  },
-  "optExportSyncHint": {
-    "message": "As configurações podem ser exportadas/importadas abaixo e (opcionalmente) sincronizadas entre seus próprios dispositivos."
-  },
-  "toastSyncOn": {
-    "message": "Sincronização ativada"
-  },
-  "toastSyncUnavailable": {
-    "message": "Sincronização indisponível"
-  },
-  "toastSyncOff": {
-    "message": "Sincronização desativada"
-  },
-  "toastExported": {
-    "message": "Exportado"
-  },
-  "toastImported": {
-    "message": "Importado"
-  },
-  "toastInvalidFile": {
-    "message": "Arquivo inválido"
-  },
-  "toastCheckingUpdates": {
-    "message": "Verificando…"
-  },
-  "fmtUpdatedToVersion": {
-    "message": "Atualizado para v$VERSION$",
-    "placeholders": {
-      "version": {
-        "content": "$1",
-        "example": "0.6.1"
-      }
-    }
-  },
-  "toastAlreadyUpToDate": {
-    "message": "Já está atualizado"
-  },
-  "toastUpdateFailed": {
-    "message": "Falha na atualização"
-  },
-  "toastHistoryCleared": {
-    "message": "Histórico limpo"
-  },
-  "toastOpenedReport": {
-    "message": "Relatório aberto"
-  },
-  "optNoneYet": {
-    "message": "Nenhum ainda"
-  },
-  "optNoneRightNow": {
-    "message": "Nenhum no momento"
-  },
-  "optNothingYetGood": {
-    "message": "Nada ainda — isso é bom."
-  },
-  "fmtVersion": {
-    "message": "Versão $VERSION$",
-    "placeholders": {
-      "version": {
-        "content": "$1",
-        "example": "0.6.0"
-      }
-    }
-  },
-  "fmtUntilTime": {
-    "message": "até $TIME$",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "22 Aug, 3:45 PM"
-      }
-    }
-  },
-  "fmtUpdatedRules": {
-    "message": "Atualizado $TIME$ · $COUNT$ regras",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "2 h ago"
-      },
-      "count": {
-        "content": "$2",
-        "example": "12,345"
-      }
-    }
-  },
-  "bannerDangerBrand": {
-    "message": "Página perigosa — parece a $BRAND$, mas não é",
-    "placeholders": {
-      "brand": {
-        "content": "$1"
-      }
-    }
-  },
-  "bannerDanger": {
-    "message": "Página perigosa"
-  },
-  "bannerSuspicious": {
-    "message": "Página suspeita"
-  },
-  "interstitialHead1": {
-    "message": "Pare — esta página está tentando aplicar um golpe"
-  },
-  "interstitialHead2": {
-    "message": "Espere — isto parece uma página de golpe"
-  },
-  "interstitialHead3": {
-    "message": "Não continue — aviso de golpe"
-  },
-  "interstitialReassure": {
-    "message": "Nada do que você digitou foi enviado ainda. Sair agora é seguro."
-  },
-  "continueAnyway": {
-    "message": "Continuar mesmo assim"
-  },
-  "submitAnyway": {
-    "message": "Enviar mesmo assim"
-  },
-  "proceedAnyway": {
-    "message": "Continuar mesmo assim"
-  },
-  "cancelRecommended": {
-    "message": "Cancelar (recomendado)"
-  },
-  "phishingStop": {
-    "message": "Pare — possível phishing"
-  },
-  "techScamTitle": {
-    "message": "Possível golpe de suporte técnico"
-  },
-  "techScamBody": {
-    "message": "Isto é uma página da web, não o seu computador — o seu computador está bem. Avisos de segurança reais nunca bloqueiam a tela nem mostram um número de telefone. Não ligue e não pague."
-  },
-  "getMeOut": {
-    "message": "Tire-me daqui (fechar esta página)"
-  },
-  "walletRiskyTitle": {
-    "message": "Solicitação de carteira arriscada"
-  },
-  "walletRiskyBody": {
-    "message": "Se você não esperava isto, cancele. Golpistas usam essas solicitações para roubar suas criptomoedas."
-  },
-  "compareThisSite": {
-    "message": "Este site"
-  },
-  "compareRealSite": {
-    "message": "$BRAND$ real",
-    "placeholders": {
-      "brand": {
-        "content": "$1"
-      }
-    }
-  },
-  "guardCountdown": {
-    "message": "$LABEL$ ($COUNT$)",
-    "placeholders": {
-      "label": {
-        "content": "$1",
-        "example": "Continue anyway"
-      },
-      "count": {
-        "content": "$2",
-        "example": "3"
-      }
-    }
-  },
-  "ariaScamWarning": {
-    "message": "Aviso de golpe"
-  },
-  "ariaPhishingWarning": {
-    "message": "Aviso de possível phishing"
-  },
-  "interstitialFallback": {
-    "message": "Esta página corresponde ao padrão de um golpe conhecido."
-  },
-  "toastSupportAsk": {
-    "message": "O ScamShield acabou de te proteger — é gratuito e funciona no seu dispositivo. Quer contribuir? ❤"
-  },
-  "guardFormDestKnown": {
-    "message": "Este formulário envia sua senha para $DEST$, não para $HOST$. Enviar uma senha para um site diferente é como golpistas roubam logins.",
-    "placeholders": {
-      "dest": {
-        "content": "$1",
-        "example": "evil.example"
-      },
-      "host": {
-        "content": "$2",
-        "example": "your-bank.example"
-      }
-    }
-  },
-  "guardFormDestUnknown": {
-    "message": "Este formulário envia sua senha para um site diferente daquele que você está visitando. Esta é uma forma comum de golpistas roubarem logins."
-  },
-  "guardHiddenTag": {
-    "message": "Ocultado pelo ScamShield"
-  },
-  "guardWalletCollision": {
-    "message": "O ScamShield bloqueou uma solicitação de carteira enquanto outro aviso estava aberto. Feche-o e tente novamente."
-  },
-  "guardWalletFallback": {
-    "message": "Este site está solicitando uma ação sensível da carteira."
-  },
-  "guardPrivacyFallback": {
-    "message": "Um problema de privacidade foi detectado nesta página."
-  },
-  "guardClipboardFallback": {
-    "message": "Um site alterou sua área de transferência."
-  },
-  "guardTechScamFallback": {
-    "message": "Esta página está usando táticas de intimidação."
-  },
-  "guardClipboardBlockedPayload": {
-    "message": "Bloqueado pelo ScamShield — este site colocou um comando perigoso na sua área de transferência. Não cole em lugar nenhum."
-  },
-  "guardLeakyFormPlain": {
-    "message": "Este site enviou seu e-mail/telefone para $HOST$ em texto simples — antes de você pressionar enviar.",
-    "placeholders": {
-      "host": {
-        "content": "$1",
-        "example": "tracker.example"
-      }
-    }
-  },
-  "guardLeakyFormHashed": {
-    "message": "Este site enviou seu e-mail/telefone para $HOST$ como um identificador com hash ($ALGO$) — antes de você pressionar enviar.",
-    "placeholders": {
-      "host": {
-        "content": "$1",
-        "example": "tracker.example"
-      },
-      "algo": {
-        "content": "$2",
-        "example": "MD5"
-      }
-    }
-  },
-  "guardNotifyLure": {
-    "message": "Este site está tentando obter permissão de notificação usando o truque \"clique em Permitir para continuar\". Você pode bloqueá-lo com segurança."
-  },
-  "serpAdMismatch": {
-    "message": "⚠ ScamShield: este anúncio leva a $ACTUAL$, não a $SHOWN$",
-    "placeholders": {
-      "actual": {
-        "content": "$1",
-        "example": "malicious-download.example"
-      },
-      "shown": {
-        "content": "$2",
-        "example": "trusted-brand.example"
-      }
-    }
-  },
-  "serpBadgeDanger": {
-    "message": "ScamShield: este resultado está na nossa lista de bloqueio de ameaças"
-  },
-  "serpBadgeCaution": {
-    "message": "ScamShield: este resultado mostra sinais de alerta de golpe"
-  },
-  "chipLink": {
-    "message": "Link"
-  },
-  "chipBrand": {
-    "message": "Marca"
-  },
-  "chipPage": {
-    "message": "Página"
-  },
-  "chipWallet": {
-    "message": "Carteira"
-  },
-  "chipClipboard": {
-    "message": "Área de transferência"
-  },
-  "chipTechscam": {
-    "message": "Página de intimidação"
-  },
-  "chipShop": {
-    "message": "Loja"
-  },
-  "chipMessage": {
-    "message": "Mensagem"
-  },
-  "reason_ipHost": {
-    "message": "Usa um endereço IP puro em vez de um nome de domínio."
-  },
-  "reason_atSymbol": {
-    "message": "A URL contém um \"@\" que pode ocultar o destino real."
-  },
-  "reason_punycodeHost": {
-    "message": "O domínio usa punycode, frequentemente usado para imitar marcas reais."
-  },
-  "reason_idnHomograph": {
-    "message": "Este domínio imita \"$BRAND$\" usando caracteres estrangeiros parecidos.",
-    "placeholders": {
-      "brand": {
-        "content": "$1",
-        "example": "paypal"
-      }
-    }
-  },
-  "reason_brandLookalike": {
-    "message": "O domínio parece estar se passando por uma marca conhecida."
-  },
-  "reason_suspiciousTld": {
-    "message": "O domínio usa um domínio de nível superior frequentemente usado por golpes."
-  },
-  "reason_noHttps": {
-    "message": "A conexão não é segura (sem HTTPS)."
-  },
-  "reason_manySubdomains": {
-    "message": "Número incomum de subdomínios."
-  },
-  "reason_urgencyKeywords": {
-    "message": "A URL contém várias palavras-chave de urgência/segurança."
-  },
-  "reason_randomHost": {
-    "message": "O nome de domínio parece gerado aleatoriamente."
-  },
-  "reason_brandFuzzyMatch": {
-    "message": "Este domínio se parece muito com o domínio real da $BRAND$ — verifique a barra de endereço com cuidado antes de digitar qualquer coisa.",
-    "placeholders": {
-      "brand": {
-        "content": "$1",
-        "example": "PayPal"
-      }
-    }
-  },
-  "reason_deepSubdomainChain": {
-    "message": "O domínio tem uma cadeia de subdomínios incomumente profunda abaixo do seu domínio real — um truque de disfarce comum."
-  },
-  "reason_longHostLabel": {
-    "message": "O domínio contém uma parte incomumente longa, frequentemente usada para esconder um nome de marca falso ou ocultar o domínio real."
-  },
-  "reason_shortenerHost": {
-    "message": "Este é um domínio encurtador de links ($HOST$) — o destino real fica oculto até você clicar.",
-    "placeholders": {
-      "host": {
-        "content": "$1",
-        "example": "bit.ly"
-      }
-    }
-  },
-  "reason_riskAbusedTld": {
-    "message": "O domínio de nível superior ($TLD$) deste site tem alta taxa de abuso por golpes nas tabelas de risco da lista de ameaças do ScamShield.",
-    "placeholders": {
-      "tld": {
-        "content": "$1",
-        "example": ".top"
-      }
-    }
-  },
-  "reason_brandForeignSuffix": {
-    "message": "Usa o nome da $BRAND$ em um endereço .$SUFFIX$ que a $BRAND$ verdadeira nunca usa.",
-    "placeholders": {
-      "brand": {
-        "content": "$1",
-        "example": "Roblox"
-      },
-      "suffix": {
-        "content": "$2",
-        "example": "com.do"
-      }
-    }
-  },
-  "reason_gatewayRedirect": {
-    "message": "Esta página foi alcançada por um link curto de redirecionamento em $HOST$ que levava a um site completamente diferente: um padrão comum de portal de golpe.",
-    "placeholders": {
-      "host": {
-        "content": "$1",
-        "example": "mgpxq.com"
-      }
-    }
-  },
-  "reason_riskDynamicHost": {
-    "message": "O domínio está hospedado em um provedor de DNS dinâmico ou hospedagem gratuita, frequentemente usado em páginas de golpe."
-  },
-  "reason_feedBlock": {
-    "message": "Este domínio corresponde à lista de ameaças do ScamShield, confirmado por $COUNT$ fonte(s) independente(s).",
-    "placeholders": {
-      "count": {
-        "content": "$1",
-        "example": "3"
-      }
-    }
-  },
-  "reason_feedWarn": {
-    "message": "Este domínio corresponde a uma entrada de baixa confiança na lista de ameaças do ScamShield ($COUNT$ fonte(s)) — prossiga com cautela.",
-    "placeholders": {
-      "count": {
-        "content": "$1",
-        "example": "1"
-      }
-    }
-  },
-  "reason_newDomain": {
-    "message": "O domínio aparece em uma lista de domínios registrados recentemente — a maioria dos sites de golpe tem apenas alguns dias$EXTRA$.",
-    "placeholders": {
-      "extra": {
-        "content": "$1",
-        "example": ", and you have never visited it before"
-      }
-    }
-  },
-  "reason_credentialFormForeignDomain": {
-    "message": "Um formulário de senha nesta página envia suas credenciais para um site diferente."
-  },
-  "reason_crossOriginCredPost": {
-    "message": "Este formulário envia sua senha ou os dados do seu cartão para $HOST$ — um site diferente daquele em que você está.",
-    "placeholders": {
-      "host": {
-        "content": "$1",
-        "example": "collector.example"
-      }
-    }
-  },
-  "reason_hiddenIframes": {
-    "message": "A página contém quadros ocultos que podem capturar sua entrada."
-  },
-  "reason_scamPhrase": {
-    "message": "A página mostra linguagem clássica de golpe/sorteio (\"$PHRASE$\").",
-    "placeholders": {
-      "phrase": {
-        "content": "$1",
-        "example": "you won"
-      }
-    }
-  },
-  "reason_seedPhraseAsk": {
-    "message": "Esta página pede sua frase de recuperação da carteira — nunca a digite; isso rouba seus fundos."
-  },
-  "reason_brandImpersonationContent": {
-    "message": "Esta página se parece com \"$BRAND$\", mas não está no site real dela.",
-    "placeholders": {
-      "brand": {
-        "content": "$1",
-        "example": "paypal"
-      }
-    }
-  },
-  "reason_deliveryFeeScam": {
-    "message": "Esta página finge ser $BRAND$ e pede dados do cartão para liberar um pacote. As transportadoras nunca cobram taxas por meio de páginas assim.",
-    "placeholders": {
-      "brand": {
-        "content": "$1",
-        "example": "DHL"
-      }
-    }
-  },
-  "reason_credentialFormOnTenantHost": {
-    "message": "Pede uma senha em uma plataforma de hospedagem compartilhada ($HOST$) onde qualquer pessoa pode publicar uma página em segundos.",
-    "placeholders": {
-      "host": {
-        "content": "$1",
-        "example": "webflow.io"
-      }
-    }
-  },
-  "reason_brandInTenantHost": {
-    "message": "O nome da $BRAND$ está no endereço de uma página de hospedagem gratuita que pede uma senha.",
-    "placeholders": {
-      "brand": {
-        "content": "$1",
-        "example": "AT&T"
-      }
-    }
-  },
-  "reason_brandIconMismatch": {
-    "message": "Esta página usa o ícone da $BRAND$, mas não é o site da $BRAND$.",
-    "placeholders": {
-      "brand": {
-        "content": "$1",
-        "example": "PayPal"
-      }
-    }
-  },
-  "reason_contentPhishingPattern": {
-    "message": "O texto e o layout da página se assemelham a páginas de phishing conhecidas."
-  },
-  "reason_techScamScareText": {
-    "message": "A página usa linguagem falsa de alerta de segurança (\"$PHRASE$\").",
-    "placeholders": {
-      "phrase": {
-        "content": "$1",
-        "example": "virus detected"
-      }
-    }
-  },
-  "reason_techScamPhoneAsk": {
-    "message": "A página o pressiona a ligar para um número de telefone de \"suporte\" — uma marca registrada dos golpes de suporte técnico."
-  },
-  "reason_techScamFakeAlert": {
-    "message": "Esta é uma página da web fingindo ser um alerta do sistema — seu computador está bem. Avisos reais da Microsoft/Apple nunca mostram números de telefone."
-  },
-  "reason_techScamFullscreen": {
-    "message": "A página forçou o modo de tela cheia para dificultar seu fechamento."
-  },
-  "reason_techScamAlarmAudio": {
-    "message": "A página toca um som de alarme para te causar pânico."
-  },
-  "reason_techScamDialogFlood": {
-    "message": "A página inundou a tela com diálogos pop-up para prendê-lo."
-  },
-  "reason_techScamHistoryTrap": {
-    "message": "A página está sequestrando seu botão Voltar."
-  },
-  "reason_walletBlindSign": {
-    "message": "Um site pediu que sua carteira assinasse dados arbitrários às cegas — um truque comum de drenadores."
-  },
-  "reason_walletPermitApproval": {
-    "message": "Esta assinatura é uma aprovação de token (\"Permit\"). Assiná-la permite que este site movimente seus tokens ou NFTs depois, sem pedir novamente — a assinatura mais comum usada por drenadores de carteira."
-  },
-  "reason_walletDelegation7702": {
-    "message": "Esta transação entregaria o controle da sua conta a um contrato (delegação EIP-7702) — uma técnica que drenadores usam para esvaziar carteiras."
-  },
-  "reason_walletSetApprovalAll": {
-    "message": "Esta transação concede a um site controle sobre TODOS os seus NFTs em uma coleção."
-  },
-  "reason_walletUnlimitedApprove": {
-    "message": "Esta transação dá a um site permissão ILIMITADA para gastar seus tokens."
-  },
-  "reason_walletTokenApprove": {
-    "message": "Esta transação permite que um site gaste parte dos seus tokens."
-  },
-  "reason_clickfixPasteRun": {
-    "message": "Esta página colocou um comando do sistema na sua área de transferência e está pedindo para você colar e executá-lo. Sites reais nunca fazem isso — executá-lo infectaria seu computador."
-  },
-  "reason_clickfixFakeCaptcha": {
-    "message": "Esta \"verificação\" pede para você pressionar Win+R e colar um comando. CAPTCHAs reais nunca pedem para você executar nada — isso instala malware."
-  },
-  "reason_clickfixWinR": {
-    "message": "Esta página instrui você a abrir a caixa Executar do Windows e colar algo — um padrão usado para enganar as pessoas e fazê-las executar malware."
-  },
-  "reason_clickfixCaptchaDisguise": {
-    "message": "As instruções são disfarçadas como uma etapa de verificação humana."
-  },
-  "reason_clipboardCommand": {
-    "message": "Um site copiou um comando do sistema para sua área de transferência. NÃO o cole em um terminal ou na caixa Executar."
-  },
-  "reason_clipboardCryptoAddress": {
-    "message": "Um site colocou um endereço de criptomoeda na sua área de transferência — verifique antes de colar."
-  },
-  "reason_fakeUpdatePrompt": {
-    "message": "Esta página finge que seu navegador precisa de uma atualização e oferece um download. Avisos reais de atualização vêm do próprio navegador — nunca de uma página da web. O download é muito provavelmente malware."
-  },
-  "reason_msgOtpAsk": {
-    "message": "Pede para você compartilhar um OTP, PIN ou senha — nenhum serviço legítimo faz isso."
-  },
-  "reason_msgScamWording": {
-    "message": "Usa uma linguagem conhecida de golpe (\"$PHRASE$\").",
-    "placeholders": {
-      "phrase": {
-        "content": "$1",
-        "example": "delivery fee"
-      }
-    }
-  },
-  "reason_msgUrgencyDeadline": {
-    "message": "Adiciona pressão com um prazo artificial — uma tática clássica de golpe."
-  },
-  "reason_msgDangerousLink": {
-    "message": "Contém um link com aparência perigosa ($URL$).",
-    "placeholders": {
-      "url": {
-        "content": "$1",
-        "example": "http://verify-bank.tk/otp"
-      }
-    }
-  },
-  "reason_qrCodeDestination": {
-    "message": "Esta página contém um código QR que aponta para $URL$ — verificado automaticamente antes de você escaneá-lo com o celular.",
-    "placeholders": {
-      "url": {
-        "content": "$1",
-        "example": "http://verify-bank.tk/otp"
-      }
-    }
-  },
-  "reason_shop_countdownReset": {
-    "message": "Contagem regressiva falsa"
-  },
-  "reason_shop_countdownReset_detail": {
-    "message": "Um temporizador \"corra, a oferta termina\" reinicia a cada visita — a urgência é falsa."
-  },
-  "reason_shop_offPlatformPay": {
-    "message": "Pagamento arriscado"
-  },
-  "reason_shop_offPlatformPay_detail": {
-    "message": "O checkout empurra você para Zelle/Venmo/CashApp/transferência/cripto — você não pode recuperar esse dinheiro se for um golpe."
-  },
-  "reason_shop_fakeScarcity": {
-    "message": "Escassez falsa"
-  },
-  "reason_shop_fakeScarcity_detail": {
-    "message": "Widgets de pressão injetados do tipo \"restam só alguns / N pessoas visualizando\"."
-  },
-  "reason_shop_badgeHotlink": {
-    "message": "Selo de confiança falso"
-  },
-  "reason_shop_badgeHotlink_detail": {
-    "message": "Um selo \"seguro\"/\"verificado\" que é apenas uma imagem, sem link para lugar nenhum."
-  },
-  "reason_shop_missingContact": {
-    "message": "Sem informações de contato"
-  },
-  "reason_shop_missingContact_detail": {
-    "message": "Sem endereço real, telefone ou dados da empresa — comum em lojas de golpe descartáveis."
-  },
-  "obDocTitle": {
-    "message": "Bem-vindo ao ScamShield"
-  },
-  "obTitle": {
-    "message": "O ScamShield está protegendo você"
-  },
-  "obLead": {
-    "message": "Ele observa as páginas que você visita e avisa sobre golpes — totalmente no seu dispositivo. Sua navegação nunca sai do seu computador."
-  },
-  "obPhishing": {
-    "message": "Phishing e logins falsos"
-  },
-  "obPhishingBody": {
-    "message": "Avisa quando uma página envia sua senha para o site errado."
-  },
-  "obBrand": {
-    "message": "Imitações de marca"
-  },
-  "obBrandBody": {
-    "message": "Reconhece um ícone copiado do PayPal, banco ou operadora em um site que não é deles — mais de 60 marcas, incluindo bancos e serviços governamentais dos Emirados Árabes Unidos."
-  },
-  "obPage": {
-    "message": "Análise de página"
-  },
-  "obPageBody": {
-    "message": "Lê o texto e o layout das páginas de login no seu dispositivo para detectar golpes ainda não incluídos em nenhuma lista."
-  },
-  "obWallet": {
-    "message": "Proteção da carteira cripto"
-  },
-  "obWalletBody": {
-    "message": "Impede aprovações de drenadores e roubo de frase de recuperação antes que sua carteira as veja."
-  },
-  "obClipboard": {
-    "message": "Golpes de área de transferência e \"cole isto\""
-  },
-  "obClipboardBody": {
-    "message": "Alerta você quando um site copia secretamente um comando para sua área de transferência."
-  },
-  "obPopups": {
-    "message": "Pop-ups falsos de vírus"
-  },
-  "obPopupsBody": {
-    "message": "Interrompe o loop assustador de pop-ups e ajuda você a sair."
-  },
-  "obPin": {
-    "message": "Fixar o ScamShield"
-  },
-  "obPinBody": {
-    "message": "Clique no ícone de peça de quebra-cabeça na sua barra de ferramentas e, em seguida, no alfinete ao lado do ScamShield, para poder ver o status de cada página rapidamente."
-  },
-  "obOpenSettings": {
-    "message": "Abrir configurações"
-  },
-  "blockedDocTitle": {
-    "message": "Site bloqueado pelo ScamShield"
-  },
-  "blockedTitle": {
-    "message": "O ScamShield bloqueou este site"
-  },
-  "blockedLead": {
-    "message": "$HOST$ está na lista do ScamShield de sites de golpe e maliciosos conhecidos, por isso a página foi interrompida antes de carregar. Nada foi executado e nada que você digitou foi enviado.",
-    "placeholders": {
-      "host": {
-        "content": "$1",
-        "example": "secure-paypa1-login.com"
-      }
-    }
-  },
-  "blockedLeadHot": {
-    "message": "$HOST$ foi denunciado por phishing nos últimos dois dias, por isso a página foi interrompida antes de carregar. Nada foi executado e nada que você digitou foi enviado.",
-    "placeholders": {
-      "host": {
-        "content": "$1",
-        "example": "secure-paypa1-login.com"
-      }
-    }
-  },
-  "blockedAddress": {
-    "message": "Endereço bloqueado"
-  },
-  "blockedListedBy": {
-    "message": "Listado por $SOURCES$",
-    "placeholders": {
-      "sources": {
-        "content": "$1",
-        "example": "Phishing.Database, ScamSniffer"
-      }
-    }
-  },
-  "blockedListedGeneric": {
-    "message": "Listado na lista de bloqueio do ScamShield de domínios de golpe confirmados."
-  },
-  "blockedGoBack": {
-    "message": "Voltar para um lugar seguro"
-  },
-  "blockedTrustSite": {
-    "message": "Não é golpe? Confiar neste site"
-  },
-  "blockedVisitAnyway": {
-    "message": "Visitar mesmo assim (não recomendado)"
-  },
-  "blockedVisitHint": {
-    "message": "Abre o site com o ScamShield pausado nele por 1 hora."
-  },
-  "blockedFooter": {
-    "message": "Bloqueado no seu dispositivo. Nada sobre esta página foi enviado a lugar nenhum."
-  },
-  "chipBlocklist": {
-    "message": "Site bloqueado"
-  },
-  "obNote": {
-    "message": "O ScamShield é gratuito. Opcional: nas Configurações, você pode ajudar a torná-lo mais inteligente compartilhando relatórios anônimos dos golpes que ele detecta — está desativado a menos que você o ative. Se ele te ajudou, você pode apoiar o desenvolvimento na página de Configurações."
-  },
-  "statsLink": {
-    "message": "Estatísticas →"
-  },
-  "tabStats": {
-    "message": "Estatísticas"
-  },
-  "optLang": {
-    "message": "Idioma"
-  },
-  "optLangHint": {
-    "message": "Aplica-se aos avisos, ao popup e às configurações do ScamShield. Sincroniza com seus outros dispositivos se a sincronização estiver ativada."
-  },
-  "optLangAuto": {
-    "message": "Padrão do navegador"
-  },
-  "fmtStatsSince": {
-    "message": "Protegendo este navegador desde $DATE$",
-    "placeholders": {
-      "date": {
-        "content": "$1",
-        "example": "12 Jun 2026"
-      }
-    }
-  },
-  "stats7d": {
-    "message": "7 dias"
-  },
-  "stats30d": {
-    "message": "30 dias"
-  },
-  "statsAll": {
-    "message": "Desde sempre"
-  },
-  "statsPagesChecked": {
-    "message": "Páginas verificadas no dispositivo"
-  },
-  "statsThreatsStopped": {
-    "message": "Ameaças bloqueadas"
-  },
-  "statsThreatsNone": {
-    "message": "Tudo limpo — nada passou"
-  },
-  "statsScamsBlockedOne": {
-    "message": "1 golpe nunca chegou até você"
-  },
-  "fmtStatsScamsBlocked": {
-    "message": "$COUNT$ golpes nunca chegaram até você",
-    "placeholders": {
-      "count": {
-        "content": "$1",
-        "example": "8"
-      }
-    }
-  },
-  "statsPrivacyFindings": {
-    "message": "Descobertas de privacidade"
-  },
-  "statsRulesActive": {
-    "message": "Regras da lista de bloqueio ativas"
-  },
-  "statsRulesActiveHint": {
-    "message": "Em vigor agora, incluindo a lista integrada ao ScamShield."
-  },
-  "statsChartTitle7d": {
-    "message": "Páginas verificadas · últimos 7 dias"
-  },
-  "statsChartTitle30d": {
-    "message": "Páginas verificadas · últimos 30 dias"
-  },
-  "statsChartTitleAll": {
-    "message": "Páginas verificadas · desde a instalação"
-  },
-  "statsChartTitle90d": {
-    "message": "Páginas verificadas · últimos 90 dias"
-  },
-  "statsAxisToday": {
-    "message": "Hoje"
-  },
-  "statsLegendChecked": {
-    "message": "Páginas verificadas"
-  },
-  "statsLegendThreat": {
-    "message": "Ameaça bloqueada nesse dia"
-  },
-  "fmtStatsBarTip": {
-    "message": "$DATE$ · $COUNT$ páginas verificadas",
-    "placeholders": {
-      "date": {
-        "content": "$1",
-        "example": "21 Aug"
-      },
-      "count": {
-        "content": "$2",
-        "example": "63"
-      }
-    }
-  },
-  "fmtStatsBarTipThreat": {
-    "message": "$DATE$ · $COUNT$ páginas verificadas · 1 ameaça bloqueada",
-    "placeholders": {
-      "date": {
-        "content": "$1",
-        "example": "21 Aug"
-      },
-      "count": {
-        "content": "$2",
-        "example": "63"
-      }
-    }
-  },
-  "fmtStatsBarTipThreats": {
-    "message": "$DATE$ · $COUNT$ páginas verificadas · $THREATS$ ameaças bloqueadas",
-    "placeholders": {
-      "date": {
-        "content": "$1",
-        "example": "21 Aug"
-      },
-      "count": {
-        "content": "$2",
-        "example": "63"
-      },
-      "threats": {
-        "content": "$3",
-        "example": "2"
-      }
-    }
-  },
-  "statsByType": {
-    "message": "Ameaças por tipo · desde sempre"
-  },
-  "statsCatPhishing": {
-    "message": "Phishing"
-  },
-  "statsCatFakeShop": {
-    "message": "Loja falsa"
-  },
-  "statsCatWallet": {
-    "message": "Drenagem de carteira"
-  },
-  "statsCatTechSupport": {
-    "message": "Suporte técnico"
-  },
-  "statsCatClipboard": {
-    "message": "Área de transferência"
-  },
-  "statsCatClickfix": {
-    "message": "CAPTCHA falso"
-  },
-  "statsCatFakeUpdate": {
-    "message": "Atualização falsa"
-  },
-  "statsCatOther": {
-    "message": "Outro"
-  },
-  "statsRecent": {
-    "message": "Recente"
-  },
-  "statsPillBlocked": {
-    "message": "Bloqueado"
-  },
-  "statsPillWarned": {
-    "message": "Avisado"
-  },
-  "statsFooter": {
-    "message": "Cada número é contado no seu dispositivo. Nada nesta página é enviado a lugar nenhum."
-  },
-  "reviewAskBody": {
-    "message": "O ScamShield já bloqueou $COUNT$ golpes para você. Se você acha que ele merece, uma avaliação curta ajuda outras pessoas a encontrá-lo — é grátis e sempre será.",
-    "placeholders": {
-      "count": {
-        "content": "$1",
-        "example": "2"
-      }
-    }
-  },
-  "reviewRate": {
-    "message": "Avaliar o ScamShield"
-  },
-  "reviewLater": {
-    "message": "Talvez depois"
-  },
-  "reviewNo": {
-    "message": "Não, obrigado"
-  },
-  "reviewAboutLink": {
-    "message": "Gostando do ScamShield? Deixe uma avaliação"
-  }
+  "extName": { "message": "Bloqueador de golpes e phishing: ScamShield" },
+  "extShortName": { "message": "ScamShield" },
+  "extDescription": { "message": "Proteção contra golpes e phishing no seu dispositivo: avisa você, detecta imitações de marcas e verifica mensagens. Nada sai do seu dispositivo." },
+  "on": { "message": "Ativado" },
+  "paused": { "message": "Pausado" },
+  "settings": { "message": "Configurações" },
+  "dismiss": { "message": "Dispensar" },
+  "ariaDismiss": { "message": "Dispensar" },
+  "cancel": { "message": "Cancelar" },
+  "reportMistake": { "message": "Relatar um erro" },
+  "thanks": { "message": "Obrigado" },
+  "trustThisSite": { "message": "Confiar neste site" },
+  "ackTrusted": { "message": "O ScamShield não vai mais sinalizar $HOST$.", "placeholders": { "host": { "content": "$1", "example": "secure-paypa1-login.com" } } },
+  "undo": { "message": "Desfazer" },
+  "popupPauseMenu": { "message": "Pausar proteção ▾" },
+  "privacyPolicyLink": { "message": "Política de privacidade" },
+  "whatsNewLink": { "message": "Novidades" },
+  "unknownSite": { "message": "site desconhecido" },
+  "popupChecking": { "message": "Verificando…" },
+  "popupSafe": { "message": "Nada suspeito aqui" },
+  "popupSuspicious": { "message": "Página suspeita" },
+  "popupDangerous": { "message": "Página perigosa" },
+  "popupUnknown": { "message": "Não verificada" },
+  "popupPausedSummary": { "message": "A proteção está pausada — ative-a para continuar." },
+  "popupNotHttp": { "message": "Páginas do navegador e a loja não são verificadas." },
+  "popupDangerSummary": { "message": "Não digite senhas nem dados do cartão aqui." },
+  "popupSuspiciousSummary": { "message": "Tenha cuidado antes de digitar algo aqui." },
+  "leaveThisPage": { "message": "Sair desta página" },
+  "whyVerdict": { "message": "Por que esse veredito?" },
+  "whyVerdictCountOne": { "message": "· 1 sinal" },
+  "fmtWhyVerdictCount": { "message": "· $COUNT$ sinais", "placeholders": { "count": { "content": "$1" } } },
+  "takeMeToReal": { "message": "Ir para o site real da $BRAND$", "placeholders": { "brand": { "content": "$1" } } },
+  "copyReportBtn": { "message": "Copiar relatório" },
+  "copyReportHeader": { "message": "⚠ O ScamShield sinalizou este site: $HOST$", "placeholders": { "host": { "content": "$1", "example": "evil[.]example" } } },
+  "copyReportVerdict": { "message": "Veredito: $LEVEL$", "placeholders": { "level": { "content": "$1", "example": "Dangerous page" } } },
+  "copyReportSignals": { "message": "Sinais:" },
+  "copyReportFooter": { "message": "Verificado no dispositivo pelo ScamShield — gratuito, código aberto: https://joelstephen97.github.io/scamshield/" },
+  "reportScam": { "message": "Relatar: isto é um golpe" },
+  "reportSafe": { "message": "Relatar: isto é seguro" },
+  "pause1h": { "message": "1 hora" },
+  "pause1d": { "message": "1 dia" },
+  "pauseAlways": { "message": "Sempre" },
+  "resumeNow": { "message": "Retomar agora" },
+  "blockedOnSite": { "message": "Bloqueados neste site" },
+  "blockedAllTime": { "message": "Bloqueados no total" },
+  "sinceInstall": { "message": "Desde a instalação" },
+  "thisWeek": { "message": "Esta semana" },
+  "privacyOnPage": { "message": "Privacidade nesta página" },
+  "shoppingCheck": { "message": "Verificação de compra" },
+  "checkMessageTitle": { "message": "Verificar uma mensagem ou link" },
+  "checkMessageHint": { "message": "Cole um SMS, mensagem do WhatsApp, e-mail suspeito ou um link. Verificado totalmente no seu dispositivo." },
+  "checkMessagePlaceholder": { "message": "Cole a mensagem ou o link aqui…" },
+  "check": { "message": "Verificar" },
+  "checkedOnDevice": { "message": "Verificado apenas no seu dispositivo" },
+  "msgSafe": { "message": "Parece seguro: sem sinais de golpe" },
+  "msgSuspicious": { "message": "Suspeito: trate com cautela" },
+  "msgDangerous": { "message": "Quase com certeza é um golpe" },
+  "qrScanTitle": { "message": "Escanear esta página em busca de códigos QR" },
+  "qrScanHint": { "message": "Decodifica os códigos QR nas imagens desta página e verifica para onde eles levam — antes de você escaneá-los com o celular. Tudo verificado no seu dispositivo." },
+  "qrScanBtn": { "message": "Escanear agora" },
+  "qrScanNone": { "message": "Nenhum código QR encontrado nesta página." },
+  "qrScanFoundOne": { "message": "1 código QR encontrado" },
+  "fmtQrScanFoundCount": { "message": "$COUNT$ códigos QR encontrados", "placeholders": { "count": { "content": "$1", "example": "3" } } },
+  "support": { "message": "Apoiar" },
+  "footerTrustLine": { "message": "Funciona no seu dispositivo. Nenhum dado sai do seu navegador." },
+  "takeMeToRealSite": { "message": "Ir para o site real" },
+  "toastThanksNoted": { "message": "Obrigado — anotado" },
+  "toastThanksSent": { "message": "Obrigado — enviado" },
+  "toastPausedForNow": { "message": "Pausado por agora" },
+  "toastResumed": { "message": "Proteção retomada" },
+  "toastCopied": { "message": "Copiado" },
+  "toastExtensionError": { "message": "Erro na extensão — tente reabrir." },
+  "whatsNewBanner": { "message": "Novidades na 0.13: uma lista urgente a cada hora bloqueia sites de golpe recém-criados cerca de uma hora depois da denúncia, e continua sem nenhuma requisição para nós. Além disso, “Confiar neste site” em todo aviso." },
+  "popupBrandDangerSummary": { "message": "Parece com a $BRAND$, mas não é. Não digite sua senha aqui.", "placeholders": { "brand": { "content": "$1", "example": "PayPal" } } },
+  "pausedUntil": { "message": "Pausado até $TIME$", "placeholders": { "time": { "content": "$1" } } },
+  "fmtProtocolPage": { "message": "Página $PROTOCOL$", "placeholders": { "protocol": { "content": "$1", "example": "chrome" } } },
+  "popupShopFlagFallback": { "message": "Sinalizar" },
+  "chipWhy": { "message": "Por quê" },
+  "chipDataLeak": { "message": "Vazamento de dados" },
+  "chipTracking": { "message": "Rastreamento" },
+  "chipPopups": { "message": "Pop-ups" },
+  "chipPrivacy": { "message": "Privacidade" },
+  "popupPrivacyLeakPlain": { "message": "Enviou seu e-mail/telefone para $HOST$ antes de você enviar o formulário.", "placeholders": { "host": { "content": "$1", "example": "tracker.example" } } },
+  "popupPrivacyLeakHashed": { "message": "Enviou seu e-mail/telefone (com hash) para $HOST$ antes de você enviar o formulário.", "placeholders": { "host": { "content": "$1", "example": "tracker.example" } } },
+  "popupPrivacyFingerprint": { "message": "$HOST$ está gerando uma impressão digital do seu dispositivo para rastreá-lo.", "placeholders": { "host": { "content": "$1", "example": "tracker.example" } } },
+  "popupPrivacyNotifyLure": { "message": "Este site tentou o truque de notificação \"clique em Permitir\"." },
+  "popupPrivacyCredExfilPassword": { "message": "Enviou sua senha para $HOST$ — um site diferente daquele em que você estava.", "placeholders": { "host": { "content": "$1", "example": "collector.example" } } },
+  "popupPrivacyCredExfilCard": { "message": "Enviou os dados do seu cartão para $HOST$ — um site diferente daquele em que você estava.", "placeholders": { "host": { "content": "$1", "example": "collector.example" } } },
+  "popupPrivacyDefaultText": { "message": "Problema de privacidade detectado." },
+  "levelDangerous": { "message": "Página perigosa" },
+  "levelSuspicious": { "message": "Página suspeita" },
+  "levelSafe": { "message": "Nada suspeito aqui" },
+  "levelUnknown": { "message": "Não é possível verificar esta página" },
+  "tabProtection": { "message": "Proteção" },
+  "tabTrusted": { "message": "Sites em pausa" },
+  "tabHistory": { "message": "Histórico" },
+  "tabFeed": { "message": "Lista de ameaças" },
+  "tabAbout": { "message": "Sobre" },
+  "protectionLead": { "message": "Tudo aqui funciona no seu dispositivo. Nada é enviado a lugar nenhum, a menos que você ative os relatórios da comunidade abaixo." },
+  "protectionOn": { "message": "Proteção ativada" },
+  "protectionOnHint": { "message": "Verifica páginas em busca de golpes e avisa você. Desative para pausar tudo." },
+  "grpScams": { "message": "Golpes e phishing" },
+  "grpScamsHint": { "message": "Bloqueia sites já conhecidos como maliciosos e detecta novos phishings no seu dispositivo." },
+  "grpPopups": { "message": "Pop-ups e alertas falsos do sistema" },
+  "grpPopupsHint": { "message": "Alertas falsos de vírus, bloqueadores de tela e sequestros da área de transferência." },
+  "grpShopping": { "message": "Compras" },
+  "grpShoppingHint": { "message": "Identifica lojas on-line falsas e para onde os anúncios de busca realmente levam." },
+  "grpCrypto": { "message": "Cripto e carteiras" },
+  "grpCryptoHint": { "message": "Avisos antes de assinaturas arriscadas na carteira." },
+  "grpPrivacy": { "message": "Privacidade" },
+  "grpPrivacyHint": { "message": "Detecta sites que vazam seus dados ou rastreiam seu dispositivo — tudo no seu dispositivo." },
+  "optBlockKnown": { "message": "Bloquear sites de golpe conhecidos" },
+  "optBlockKnownHint": { "message": "Impede que páginas da lista de ameaças, atualizada diariamente, sejam carregadas." },
+  "optPageAnalysis": { "message": "Análise de página" },
+  "optPageAnalysisHint": { "message": "Lê o texto, o layout e os ícones da página no seu dispositivo para detectar golpes que ainda não estão em nenhuma lista." },
+  "optClickfix": { "message": "Bloqueador de CAPTCHA falso / \"cole isto\"" },
+  "optClickfixHint": { "message": "Impede páginas que pedem para você pressionar Win+R e colar um comando (malware ClickFix)." },
+  "optFakeupdate": { "message": "Bloqueador de atualização falsa do navegador" },
+  "optFakeupdateHint": { "message": "Bloqueia páginas que fingem que seu navegador precisa de atualização para fazer você baixar malware." },
+  "optHide": { "message": "Ocultar conteúdo de golpe" },
+  "optHideHint": { "message": "Esmaece os blocos \"você ganhou um prêmio\" dentro de páginas normais." },
+  "optQrScan": { "message": "Escanear códigos QR automaticamente" },
+  "optQrScanHint": { "message": "Decodifica os códigos QR de imagens grandes na página e verifica o destino deles antes de você escaneá-los com o celular — a proteção no dispositivo contra e-mails de \"quishing\" (phishing por QR code). Você também pode escanear qualquer página sob demanda pelo pop-up." },
+  "optTechscam": { "message": "Saída de golpe de suporte técnico" },
+  "optTechscamHint": { "message": "Detecta páginas falsas do tipo \"seu PC está infectado, ligue para este número\" e oferece uma forma de sair." },
+  "optClipboard": { "message": "Aviso de sequestro da área de transferência" },
+  "optClipboardHint": { "message": "Avisa quando um site coloca secretamente um comando ou endereço de criptomoeda na sua área de transferência." },
+  "optShop": { "message": "Verificação de lojas falsas" },
+  "optShopHint": { "message": "Procura contagens regressivas falsas, pressão falsa de \"restam só 2\", falta de dados de contato e pagamento fora da plataforma (Zelle/transferência/cripto), e mostra tudo no popup." },
+  "optSerp": { "message": "Verificação de resultado patrocinado" },
+  "optSerpHint": { "message": "No Google/Bing/DuckDuckGo, sinaliza um resultado patrocinado cujo anúncio leva a um lugar diferente do site exibido." },
+  "optWallet": { "message": "Proteção contra drenagem de carteira" },
+  "optWalletHint": { "message": "Avisa antes de você aprovar gastos de tokens, assinaturas \"Permit\" ou delegações de conta que os drenadores exploram." },
+  "optLeakyForm": { "message": "Aviso de formulário vazando dados" },
+  "optLeakyFormHint": { "message": "Avisa quando um site envia o e-mail ou telefone que você digitou para um rastreador antes de você enviar o formulário." },
+  "optFingerprint": { "message": "Detecção de impressão digital do dispositivo" },
+  "optFingerprintHint": { "message": "Informa qual script está gerando uma impressão digital do seu dispositivo para rastreá-lo entre sites." },
+  "optNotify": { "message": "Aviso de armadilha de notificação" },
+  "optNotifyHint": { "message": "Sinaliza o truque \"clique em Permitir para continuar\" que sites usam para bombardear você com pop-ups." },
+  "optStrict": { "message": "Modo estrito" },
+  "optStrictHint": { "message": "Para quem quer o máximo de cautela: até páginas \"suspeitas\" são bloqueadas com um aviso em tela cheia e linguagem mais simples. Ideal para ajudar um familiar menos confiante a se manter seguro." },
+  "optReporting": { "message": "Ajude a tornar o ScamShield mais inteligente" },
+  "optReportingHint": { "message": "Envia o nome do site (nunca o endereço completo ou o texto da página) e sinais de risco anônimos de páginas sinalizadas como perigosas, e de sites que você denuncia. Desativado por padrão." },
+  "saved": { "message": "Salvo" },
+  "trustedLead": { "message": "A proteção está pausada nesses sites. Retome um deles para protegê-lo novamente." },
+  "trustedAlways": { "message": "Sempre" },
+  "trustedForAWhile": { "message": "Por um tempo" },
+  "remove": { "message": "Remover" },
+  "trustedViaWarning": { "message": "Aprovado por um aviso" },
+  "mutedWarnings": { "message": "Avisos silenciados" },
+  "warnAgain": { "message": "Avisar novamente" },
+  "muteKind_clipboard": { "message": "Avisos da área de transferência" },
+  "muteKind_leak": { "message": "Avisos de vazamento de formulário" },
+  "muteKind_notify": { "message": "Avisos de armadilha de notificação" },
+  "muteKind_credpost": { "message": "Avisos de formulário de cartão e senha" },
+  "historyTitle": { "message": "Histórico de proteção" },
+  "historyLead": { "message": "Armazenado apenas neste dispositivo (nomes de sites, nunca endereços completos)." },
+  "clearHistory": { "message": "Limpar histórico" },
+  "markMistake": { "message": "Marcar como erro" },
+  "feedTitle": { "message": "Lista de ameaças" },
+  "feedLead": { "message": "Uma lista de sites de golpe conhecidos, reconstruída diariamente (OpenPhish + URLhaus, fortemente filtrada). O ScamShield apenas a baixa." },
+  "checkNow": { "message": "Verificar agora" },
+  "aboutVersion": { "message": "Versão" },
+  "appearance": { "message": "Aparência" },
+  "whatLeaves": { "message": "O que sai do seu dispositivo" },
+  "backupSettings": { "message": "Fazer backup das configurações" },
+  "backupHint": { "message": "Salve suas configurações e sites em pausa em um arquivo, ou carregue-os em outro computador." },
+  "exportBtn": { "message": "Exportar" },
+  "importBtn": { "message": "Importar" },
+  "syncTitle": { "message": "Sincronizar entre meus dispositivos" },
+  "syncHint": { "message": "Mantenha suas configurações e sites em pausa sincronizados em todos os navegadores em que você está conectado. Usa a sincronização própria do seu navegador — o ScamShield continua sem conta ou servidor. Desativado por padrão." },
+  "optDocTitle": { "message": "Configurações do ScamShield" },
+  "ariaSettingsSections": { "message": "Seções de configurações" },
+  "optWhatSentToggle": { "message": "O que exatamente é enviado ▾" },
+  "optWhatSentBody": { "message": "Um relatório contém apenas: o nome do site (hostname), o veredito e códigos internos de motivo, sinais de risco numéricos derivados do endereço e do layout da página (contagens de palavras com hash e contagens de formulários, campos e links — nunca o texto em si), nomes de marcas correspondentes, a versão da extensão e a hora. Nunca o endereço completo (caminho ou consulta), o texto da página, qualquer coisa que você digitou, cookies ou qualquer identificador seu ou do seu dispositivo. Os relatórios são excluídos após 180 dias." },
+  "feedNeverUpdated": { "message": "Nunca atualizado" },
+  "hotListPending": { "message": "Lista urgente: ainda não baixada" },
+  "hotListStatus": { "message": "Lista urgente: $COUNT$ sites, atualizada $AGO$", "placeholders": { "count": { "content": "$1", "example": "1,204" }, "ago": { "content": "$2", "example": "12 minutes ago" } } },
+  "hotListOff": { "message": "Lista urgente: desativada" },
+  "hotListSub": { "message": "…e a lista urgente das últimas 48 horas, atualizada a cada hora." },
+  "optAdvancedFeedUrl": { "message": "Avançado: URL da lista" },
+  "optFeedUrlLabel": { "message": "URL da lista" },
+  "optFeedUrlPlaceholder": { "message": "https://…/blocklist.json" },
+  "resetToOfficialFeed": { "message": "Redefinir para a lista oficial" },
+  "optFeedUrlHint": { "message": "Aponte isso para seu próprio JSON para autogerenciar, ou deixe em branco para desativar as atualizações." },
+  "optThemeHint": { "message": "Siga o seu sistema ou escolha um." },
+  "optThemeAuto": { "message": "Automático" },
+  "optThemeLight": { "message": "Claro" },
+  "optThemeDark": { "message": "Escuro" },
+  "optLinksTitle": { "message": "Links" },
+  "optLinkGithub": { "message": "GitHub" },
+  "optLinkReportIssue": { "message": "Relatar um problema" },
+  "supportFreeOnDevice": { "message": "O ScamShield é gratuito e funciona totalmente no seu dispositivo." },
+  "supportSponsorGithub": { "message": "Patrocinar no GitHub" },
+  "supportDonatePaypal": { "message": "Doar via PayPal" },
+  "netNoTelemetry": { "message": "O ScamShield nunca faz solicitações de análise, telemetria ou rastreamento. As únicas solicitações que ele pode fazer são estas três, e você mesmo pode verificar: abra as DevTools do seu navegador → aba Rede, use o ScamShield normalmente e você não verá nada além delas." },
+  "receiptFeedLabel": { "message": "Download da lista de ameaças" },
+  "receiptFeedDetail": { "message": "O arquivo público da lista de bloqueio — o mesmo para todos, nada sobre você é enviado." },
+  "receiptReportLabel": { "message": "Relatórios da comunidade" },
+  "receiptReportDetail": { "message": "Somente se você ativou os relatórios. Nome do site + sinais numéricos, nunca URLs ou texto da página." },
+  "receiptIconLabel": { "message": "Verificação do ícone da página" },
+  "receiptIconDetail": { "message": "Busca o próprio favicon da página para identificar imitações de marca. Sem terceiros, sem cookies." },
+  "receiptPerPage": { "message": "por página" },
+  "receiptOnInstall12h": { "message": "na instalação + a cada 12h" },
+  "receiptDisabled": { "message": "desativado" },
+  "receiptWhenFlagged": { "message": "quando sinalizado" },
+  "receiptOffDefault": { "message": "desativado (padrão)" },
+  "optExportSyncHint": { "message": "As configurações podem ser exportadas/importadas abaixo e (opcionalmente) sincronizadas entre seus próprios dispositivos." },
+  "toastSyncOn": { "message": "Sincronização ativada" },
+  "toastSyncUnavailable": { "message": "Sincronização indisponível" },
+  "toastSyncOff": { "message": "Sincronização desativada" },
+  "toastExported": { "message": "Exportado" },
+  "toastImported": { "message": "Importado" },
+  "toastInvalidFile": { "message": "Arquivo inválido" },
+  "toastCheckingUpdates": { "message": "Verificando…" },
+  "fmtUpdatedToVersion": { "message": "Atualizado para v$VERSION$", "placeholders": { "version": { "content": "$1", "example": "0.6.1" } } },
+  "toastAlreadyUpToDate": { "message": "Já está atualizado" },
+  "toastUpdateFailed": { "message": "Falha na atualização" },
+  "toastHistoryCleared": { "message": "Histórico limpo" },
+  "toastOpenedReport": { "message": "Relatório aberto" },
+  "optNoneYet": { "message": "Nenhum ainda" },
+  "optNoneRightNow": { "message": "Nenhum no momento" },
+  "optNothingYetGood": { "message": "Nada ainda — isso é bom." },
+  "fmtVersion": { "message": "Versão $VERSION$", "placeholders": { "version": { "content": "$1", "example": "0.6.0" } } },
+  "fmtUntilTime": { "message": "até $TIME$", "placeholders": { "time": { "content": "$1", "example": "22 Aug, 3:45 PM" } } },
+  "fmtUpdatedRules": { "message": "Atualizado $TIME$ · $COUNT$ regras", "placeholders": { "time": { "content": "$1", "example": "2 h ago" }, "count": { "content": "$2", "example": "12,345" } } },
+  "bannerDangerBrand": { "message": "Página perigosa — parece a $BRAND$, mas não é", "placeholders": { "brand": { "content": "$1" } } },
+  "bannerDanger": { "message": "Página perigosa" },
+  "bannerTakeCare": { "message": "Tenha cuidado neste site" },
+  "whyShort": { "message": "Por quê?" },
+  "moreActions": { "message": "Mais ações" },
+  "hideForToday": { "message": "Ocultar por hoje" },
+  "hideForAnHour": { "message": "Ocultar por uma hora" },
+  "interstitialHead1": { "message": "Pare — esta página está tentando aplicar um golpe" },
+  "interstitialHead2": { "message": "Espere — isto parece uma página de golpe" },
+  "interstitialHead3": { "message": "Não continue — aviso de golpe" },
+  "interstitialReassure": { "message": "Nada do que você digitou foi enviado ainda. Sair agora é seguro." },
+  "continueAnyway": { "message": "Continuar mesmo assim" },
+  "submitAnyway": { "message": "Enviar mesmo assim" },
+  "proceedAnyway": { "message": "Continuar mesmo assim" },
+  "cancelRecommended": { "message": "Cancelar (recomendado)" },
+  "phishingStop": { "message": "Pare — possível phishing" },
+  "techScamTitle": { "message": "Possível golpe de suporte técnico" },
+  "techScamBody": { "message": "Isto é uma página da web, não o seu computador — o seu computador está bem. Avisos de segurança reais nunca bloqueiam a tela nem mostram um número de telefone. Não ligue e não pague." },
+  "getMeOut": { "message": "Tire-me daqui (fechar esta página)" },
+  "walletRiskyTitle": { "message": "Solicitação de carteira arriscada" },
+  "walletRiskyBody": { "message": "Se você não esperava isto, cancele. Golpistas usam essas solicitações para roubar suas criptomoedas." },
+  "compareThisSite": { "message": "Este site" },
+  "compareRealSite": { "message": "$BRAND$ real", "placeholders": { "brand": { "content": "$1" } } },
+  "guardCountdown": { "message": "$LABEL$ ($COUNT$)", "placeholders": { "label": { "content": "$1", "example": "Continue anyway" }, "count": { "content": "$2", "example": "3" } } },
+  "ariaScamWarning": { "message": "Aviso de golpe" },
+  "ariaPhishingWarning": { "message": "Aviso de possível phishing" },
+  "interstitialFallback": { "message": "Esta página corresponde ao padrão de um golpe conhecido." },
+  "toastSupportAsk": { "message": "O ScamShield acabou de te proteger — é gratuito e funciona no seu dispositivo. Quer contribuir? ❤" },
+  "guardFormDestKnown": { "message": "Este formulário envia sua senha para $DEST$, não para $HOST$. Enviar uma senha para um site diferente é como golpistas roubam logins.", "placeholders": { "dest": { "content": "$1", "example": "evil.example" }, "host": { "content": "$2", "example": "your-bank.example" } } },
+  "guardFormDestUnknown": { "message": "Este formulário envia sua senha para um site diferente daquele que você está visitando. Esta é uma forma comum de golpistas roubarem logins." },
+  "guardHiddenTag": { "message": "Ocultado pelo ScamShield" },
+  "guardWalletCollision": { "message": "O ScamShield bloqueou uma solicitação de carteira enquanto outro aviso estava aberto. Feche-o e tente novamente." },
+  "guardWalletFallback": { "message": "Este site está solicitando uma ação sensível da carteira." },
+  "guardPrivacyFallback": { "message": "Um problema de privacidade foi detectado nesta página." },
+  "guardClipboardFallback": { "message": "Um site alterou sua área de transferência." },
+  "guardTechScamFallback": { "message": "Esta página está usando táticas de intimidação." },
+  "guardClipboardBlockedPayload": { "message": "Bloqueado pelo ScamShield — este site colocou um comando perigoso na sua área de transferência. Não cole em lugar nenhum." },
+  "clipboardNoticeCmdTitle": { "message": "Você copiou um comando de terminal de $HOST$", "placeholders": { "host": { "content": "$1", "example": "ollama.com" } } },
+  "clipboardNoticeCmdBody": { "message": "Só execute se você confia neste site. Sites reais nunca pedem para colar comandos para \"verificar\" algo." },
+  "clipboardNoticeAddrTitle": { "message": "Você copiou um endereço de criptomoeda de $HOST$", "placeholders": { "host": { "content": "$1", "example": "example.com" } } },
+  "clipboardNoticeAddrBody": { "message": "Confira se corresponde ao endereço esperado antes de enviar qualquer coisa." },
+  "clipboardWarnTitle": { "message": "$HOST$ alterou sua área de transferência por conta própria", "placeholders": { "host": { "content": "$1", "example": "example.com" } } },
+  "ackMuted": { "message": "O ScamShield não vai mais mostrar este aviso em $HOST$.", "placeholders": { "host": { "content": "$1", "example": "example.com" } } },
+  "dontWarnHere": { "message": "Não me avise neste site" },
+  "leakTitle": { "message": "Seus dados saíram desta página antes de você pressionar Enviar" },
+  "notifyLureTitle": { "message": "Não clique em Permitir aqui" },
+  "credPostTitle": { "message": "Este formulário envia o que você digita para outro site" },
+  "keepMyDetails": { "message": "Manter meus dados" },
+  "supportOpen": { "message": "Abrir" },
+  "guardLeakyFormPlain": { "message": "Este site enviou seu e-mail/telefone para $HOST$ em texto simples — antes de você pressionar enviar.", "placeholders": { "host": { "content": "$1", "example": "tracker.example" } } },
+  "guardLeakyFormHashed": { "message": "Este site enviou seu e-mail/telefone para $HOST$ como um identificador com hash ($ALGO$) — antes de você pressionar enviar.", "placeholders": { "host": { "content": "$1", "example": "tracker.example" }, "algo": { "content": "$2", "example": "MD5" } } },
+  "guardNotifyLure": { "message": "Este site está tentando obter permissão de notificação usando o truque \"clique em Permitir para continuar\". Você pode bloqueá-lo com segurança." },
+  "serpAdMismatch": { "message": "⚠ ScamShield: este anúncio leva a $ACTUAL$, não a $SHOWN$", "placeholders": { "actual": { "content": "$1", "example": "malicious-download.example" }, "shown": { "content": "$2", "example": "trusted-brand.example" } } },
+  "serpBadgeDanger": { "message": "ScamShield: este resultado está na nossa lista de bloqueio de ameaças" },
+  "serpBadgeCaution": { "message": "ScamShield: este resultado mostra sinais de alerta de golpe" },
+  "chipLink": { "message": "Link" },
+  "chipBrand": { "message": "Marca" },
+  "chipPage": { "message": "Página" },
+  "chipWallet": { "message": "Carteira" },
+  "chipClipboard": { "message": "Área de transferência" },
+  "chipTechscam": { "message": "Página de intimidação" },
+  "chipShop": { "message": "Loja" },
+  "chipMessage": { "message": "Mensagem" },
+  "reason_ipHost": { "message": "Usa um endereço IP puro em vez de um nome de domínio." },
+  "reason_atSymbol": { "message": "A URL contém um \"@\" que pode ocultar o destino real." },
+  "reason_punycodeHost": { "message": "O domínio usa punycode, frequentemente usado para imitar marcas reais." },
+  "reason_idnHomograph": { "message": "Este domínio imita \"$BRAND$\" usando caracteres estrangeiros parecidos.", "placeholders": { "brand": { "content": "$1", "example": "paypal" } } },
+  "reason_brandLookalike": { "message": "O domínio parece estar se passando por uma marca conhecida." },
+  "reason_suspiciousTld": { "message": "O domínio usa um domínio de nível superior frequentemente usado por golpes." },
+  "reason_noHttps": { "message": "A conexão não é segura (sem HTTPS)." },
+  "reason_manySubdomains": { "message": "Número incomum de subdomínios." },
+  "reason_urgencyKeywords": { "message": "A URL contém várias palavras-chave de urgência/segurança." },
+  "reason_randomHost": { "message": "O nome de domínio parece gerado aleatoriamente." },
+  "reason_brandFuzzyMatch": { "message": "Este domínio se parece muito com o domínio real da $BRAND$ — verifique a barra de endereço com cuidado antes de digitar qualquer coisa.", "placeholders": { "brand": { "content": "$1", "example": "PayPal" } } },
+  "reason_deepSubdomainChain": { "message": "O domínio tem uma cadeia de subdomínios incomumente profunda abaixo do seu domínio real — um truque de disfarce comum." },
+  "reason_longHostLabel": { "message": "O domínio contém uma parte incomumente longa, frequentemente usada para esconder um nome de marca falso ou ocultar o domínio real." },
+  "reason_shortenerHost": { "message": "Este é um domínio encurtador de links ($HOST$) — o destino real fica oculto até você clicar.", "placeholders": { "host": { "content": "$1", "example": "bit.ly" } } },
+  "reason_riskAbusedTld": { "message": "O domínio de nível superior ($TLD$) deste site tem alta taxa de abuso por golpes nas tabelas de risco da lista de ameaças do ScamShield.", "placeholders": { "tld": { "content": "$1", "example": ".top" } } },
+  "reason_brandForeignSuffix": { "message": "Usa o nome da $BRAND$ em um endereço .$SUFFIX$ que a $BRAND$ verdadeira nunca usa.", "placeholders": { "brand": { "content": "$1", "example": "Roblox" }, "suffix": { "content": "$2", "example": "com.do" } } },
+  "reason_gatewayRedirect": { "message": "Esta página foi alcançada por um link curto de redirecionamento em $HOST$ que levava a um site completamente diferente: um padrão comum de portal de golpe.", "placeholders": { "host": { "content": "$1", "example": "mgpxq.com" } } },
+  "reason_riskDynamicHost": { "message": "O domínio está hospedado em um provedor de DNS dinâmico ou hospedagem gratuita, frequentemente usado em páginas de golpe." },
+  "reason_feedBlock": { "message": "Este domínio corresponde à lista de ameaças do ScamShield, confirmado por $COUNT$ fonte(s) independente(s).", "placeholders": { "count": { "content": "$1", "example": "3" } } },
+  "reason_feedWarn": { "message": "Este domínio corresponde a uma entrada de baixa confiança na lista de ameaças do ScamShield ($COUNT$ fonte(s)) — prossiga com cautela.", "placeholders": { "count": { "content": "$1", "example": "1" } } },
+  "reason_newDomain": { "message": "O domínio aparece em uma lista de domínios registrados recentemente — a maioria dos sites de golpe tem apenas alguns dias$EXTRA$.", "placeholders": { "extra": { "content": "$1", "example": ", and you have never visited it before" } } },
+  "reason_credentialFormForeignDomain": { "message": "Um formulário de senha nesta página envia suas credenciais para um site diferente." },
+  "reason_crossOriginCredPost": { "message": "Este formulário envia sua senha ou os dados do seu cartão para $HOST$ — um site diferente daquele em que você está.", "placeholders": { "host": { "content": "$1", "example": "collector.example" } } },
+  "reason_hiddenIframes": { "message": "A página contém quadros ocultos que podem capturar sua entrada." },
+  "reason_scamPhrase": { "message": "A página mostra linguagem clássica de golpe/sorteio (\"$PHRASE$\").", "placeholders": { "phrase": { "content": "$1", "example": "you won" } } },
+  "reason_seedPhraseAsk": { "message": "Esta página pede sua frase de recuperação da carteira — nunca a digite; isso rouba seus fundos." },
+  "reason_brandImpersonationContent": { "message": "Esta página se parece com \"$BRAND$\", mas não está no site real dela.", "placeholders": { "brand": { "content": "$1", "example": "paypal" } } },
+  "reason_deliveryFeeScam": { "message": "Esta página finge ser $BRAND$ e pede dados do cartão para liberar um pacote. As transportadoras nunca cobram taxas por meio de páginas assim.", "placeholders": { "brand": { "content": "$1", "example": "DHL" } } },
+  "reason_credentialFormOnTenantHost": { "message": "Pede uma senha em uma plataforma de hospedagem compartilhada ($HOST$) onde qualquer pessoa pode publicar uma página em segundos.", "placeholders": { "host": { "content": "$1", "example": "webflow.io" } } },
+  "reason_brandInTenantHost": { "message": "O nome da $BRAND$ está no endereço de uma página de hospedagem gratuita que pede uma senha.", "placeholders": { "brand": { "content": "$1", "example": "AT&T" } } },
+  "reason_brandIconMismatch": { "message": "Esta página usa o ícone da $BRAND$, mas não é o site da $BRAND$.", "placeholders": { "brand": { "content": "$1", "example": "PayPal" } } },
+  "reason_contentPhishingPattern": { "message": "O texto e o layout da página se assemelham a páginas de phishing conhecidas." },
+  "reason_techScamScareText": { "message": "A página usa linguagem falsa de alerta de segurança (\"$PHRASE$\").", "placeholders": { "phrase": { "content": "$1", "example": "virus detected" } } },
+  "reason_techScamPhoneAsk": { "message": "A página o pressiona a ligar para um número de telefone de \"suporte\" — uma marca registrada dos golpes de suporte técnico." },
+  "reason_techScamFakeAlert": { "message": "Esta é uma página da web fingindo ser um alerta do sistema — seu computador está bem. Avisos reais da Microsoft/Apple nunca mostram números de telefone." },
+  "reason_techScamFullscreen": { "message": "A página forçou o modo de tela cheia para dificultar seu fechamento." },
+  "reason_techScamAlarmAudio": { "message": "A página toca um som de alarme para te causar pânico." },
+  "reason_techScamDialogFlood": { "message": "A página inundou a tela com diálogos pop-up para prendê-lo." },
+  "reason_techScamHistoryTrap": { "message": "A página está sequestrando seu botão Voltar." },
+  "reason_walletBlindSign": { "message": "Um site pediu que sua carteira assinasse dados arbitrários às cegas — um truque comum de drenadores." },
+  "reason_walletPermitApproval": { "message": "Esta assinatura é uma aprovação de token (\"Permit\"). Assiná-la permite que este site movimente seus tokens ou NFTs depois, sem pedir novamente — a assinatura mais comum usada por drenadores de carteira." },
+  "reason_walletDelegation7702": { "message": "Esta transação entregaria o controle da sua conta a um contrato (delegação EIP-7702) — uma técnica que drenadores usam para esvaziar carteiras." },
+  "reason_walletSetApprovalAll": { "message": "Esta transação concede a um site controle sobre TODOS os seus NFTs em uma coleção." },
+  "reason_walletUnlimitedApprove": { "message": "Esta transação dá a um site permissão ILIMITADA para gastar seus tokens." },
+  "reason_walletTokenApprove": { "message": "Esta transação permite que um site gaste parte dos seus tokens." },
+  "reason_clickfixPasteRun": { "message": "Esta página colocou um comando do sistema na sua área de transferência e está pedindo para você colar e executá-lo. Sites reais nunca fazem isso — executá-lo infectaria seu computador." },
+  "reason_clickfixFakeCaptcha": { "message": "Esta \"verificação\" pede para você pressionar Win+R e colar um comando. CAPTCHAs reais nunca pedem para você executar nada — isso instala malware." },
+  "reason_clickfixWinR": { "message": "Esta página instrui você a abrir a caixa Executar do Windows e colar algo — um padrão usado para enganar as pessoas e fazê-las executar malware." },
+  "reason_clickfixCaptchaDisguise": { "message": "As instruções são disfarçadas como uma etapa de verificação humana." },
+  "reason_clipboardCommand": { "message": "Um site copiou um comando do sistema para sua área de transferência. NÃO o cole em um terminal ou na caixa Executar." },
+  "reason_clipboardCryptoAddress": { "message": "Um site colocou um endereço de criptomoeda na sua área de transferência — verifique antes de colar." },
+  "reason_fakeUpdatePrompt": { "message": "Esta página finge que seu navegador precisa de uma atualização e oferece um download. Avisos reais de atualização vêm do próprio navegador — nunca de uma página da web. O download é muito provavelmente malware." },
+  "reason_msgOtpAsk": { "message": "Pede para você compartilhar um OTP, PIN ou senha — nenhum serviço legítimo faz isso." },
+  "reason_msgScamWording": { "message": "Usa uma linguagem conhecida de golpe (\"$PHRASE$\").", "placeholders": { "phrase": { "content": "$1", "example": "delivery fee" } } },
+  "reason_msgUrgencyDeadline": { "message": "Adiciona pressão com um prazo artificial — uma tática clássica de golpe." },
+  "reason_msgDangerousLink": { "message": "Contém um link com aparência perigosa ($URL$).", "placeholders": { "url": { "content": "$1", "example": "http://verify-bank.tk/otp" } } },
+  "reason_qrCodeDestination": { "message": "Esta página contém um código QR que aponta para $URL$ — verificado automaticamente antes de você escaneá-lo com o celular.", "placeholders": { "url": { "content": "$1", "example": "http://verify-bank.tk/otp" } } },
+  "reason_shop_countdownReset": { "message": "Contagem regressiva falsa" },
+  "reason_shop_countdownReset_detail": { "message": "Um temporizador \"corra, a oferta termina\" reinicia a cada visita — a urgência é falsa." },
+  "reason_shop_offPlatformPay": { "message": "Pagamento arriscado" },
+  "reason_shop_offPlatformPay_detail": { "message": "O checkout empurra você para Zelle/Venmo/CashApp/transferência/cripto — você não pode recuperar esse dinheiro se for um golpe." },
+  "reason_shop_fakeScarcity": { "message": "Escassez falsa" },
+  "reason_shop_fakeScarcity_detail": { "message": "Widgets de pressão injetados do tipo \"restam só alguns / N pessoas visualizando\"." },
+  "reason_shop_badgeHotlink": { "message": "Selo de confiança falso" },
+  "reason_shop_badgeHotlink_detail": { "message": "Um selo \"seguro\"/\"verificado\" que é apenas uma imagem, sem link para lugar nenhum." },
+  "reason_shop_missingContact": { "message": "Sem informações de contato" },
+  "reason_shop_missingContact_detail": { "message": "Sem endereço real, telefone ou dados da empresa — comum em lojas de golpe descartáveis." },
+  "obDocTitle": { "message": "Bem-vindo ao ScamShield" },
+  "obTitle": { "message": "O ScamShield está protegendo você" },
+  "obLead": { "message": "Ele observa as páginas que você visita e avisa sobre golpes — totalmente no seu dispositivo. Sua navegação nunca sai do seu computador." },
+  "obPhishing": { "message": "Phishing e logins falsos" },
+  "obPhishingBody": { "message": "Avisa quando uma página envia sua senha para o site errado." },
+  "obBrand": { "message": "Imitações de marca" },
+  "obBrandBody": { "message": "Reconhece um ícone copiado do PayPal, banco ou operadora em um site que não é deles — mais de 60 marcas, incluindo bancos e serviços governamentais dos Emirados Árabes Unidos." },
+  "obPage": { "message": "Análise de página" },
+  "obPageBody": { "message": "Lê o texto e o layout das páginas de login no seu dispositivo para detectar golpes ainda não incluídos em nenhuma lista." },
+  "obWallet": { "message": "Proteção da carteira cripto" },
+  "obWalletBody": { "message": "Impede aprovações de drenadores e roubo de frase de recuperação antes que sua carteira as veja." },
+  "obClipboard": { "message": "Golpes de área de transferência e \"cole isto\"" },
+  "obClipboardBody": { "message": "Alerta você quando um site copia secretamente um comando para sua área de transferência." },
+  "obPopups": { "message": "Pop-ups falsos de vírus" },
+  "obPopupsBody": { "message": "Interrompe o loop assustador de pop-ups e ajuda você a sair." },
+  "obPin": { "message": "Fixar o ScamShield" },
+  "obPinBody": { "message": "Clique no ícone de peça de quebra-cabeça na sua barra de ferramentas e, em seguida, no alfinete ao lado do ScamShield, para poder ver o status de cada página rapidamente." },
+  "obOpenSettings": { "message": "Abrir configurações" },
+  "blockedDocTitle": { "message": "Site bloqueado pelo ScamShield" },
+  "blockedTitle": { "message": "O ScamShield bloqueou este site" },
+  "blockedLead": { "message": "$HOST$ está na lista do ScamShield de sites de golpe e maliciosos conhecidos, por isso a página foi interrompida antes de carregar. Nada foi executado e nada que você digitou foi enviado.", "placeholders": { "host": { "content": "$1", "example": "secure-paypa1-login.com" } } },
+  "blockedLeadHot": { "message": "$HOST$ foi denunciado por phishing nos últimos dois dias, por isso a página foi interrompida antes de carregar. Nada foi executado e nada que você digitou foi enviado.", "placeholders": { "host": { "content": "$1", "example": "secure-paypa1-login.com" } } },
+  "blockedAddress": { "message": "Endereço bloqueado" },
+  "blockedListedBy": { "message": "Listado por $SOURCES$", "placeholders": { "sources": { "content": "$1", "example": "Phishing.Database, ScamSniffer" } } },
+  "blockedListedGeneric": { "message": "Listado na lista de bloqueio do ScamShield de domínios de golpe confirmados." },
+  "blockedGoBack": { "message": "Voltar para um lugar seguro" },
+  "blockedTrustSite": { "message": "Não é golpe? Confiar neste site" },
+  "blockedVisitAnyway": { "message": "Visitar mesmo assim (não recomendado)" },
+  "blockedVisitHint": { "message": "Abre o site com o ScamShield pausado nele por 1 hora." },
+  "blockedFooter": { "message": "Bloqueado no seu dispositivo. Nada sobre esta página foi enviado a lugar nenhum." },
+  "detailsAndOptions": { "message": "Detalhes e outras opções" },
+  "continuePausesHour": { "message": "Pausa o ScamShield neste site por 1 hora." },
+  "thisPage": { "message": "Esta página" },
+  "chipBlocklist": { "message": "Site bloqueado" },
+  "obNote": { "message": "O ScamShield é gratuito. Opcional: nas Configurações, você pode ajudar a torná-lo mais inteligente compartilhando relatórios anônimos dos golpes que ele detecta — está desativado a menos que você o ative. Se ele te ajudou, você pode apoiar o desenvolvimento na página de Configurações." },
+  "statsLink": { "message": "Estatísticas →" },
+  "tabStats": { "message": "Estatísticas" },
+  "optLang": { "message": "Idioma" },
+  "optLangHint": { "message": "Aplica-se aos avisos, ao popup e às configurações do ScamShield. Sincroniza com seus outros dispositivos se a sincronização estiver ativada." },
+  "optLangAuto": { "message": "Padrão do navegador" },
+  "fmtStatsSince": { "message": "Protegendo este navegador desde $DATE$", "placeholders": { "date": { "content": "$1", "example": "12 Jun 2026" } } },
+  "stats7d": { "message": "7 dias" },
+  "stats30d": { "message": "30 dias" },
+  "statsAll": { "message": "Desde sempre" },
+  "statsPagesChecked": { "message": "Páginas verificadas no dispositivo" },
+  "statsThreatsStopped": { "message": "Ameaças bloqueadas" },
+  "statsThreatsNone": { "message": "Tudo limpo — nada passou" },
+  "statsScamsBlockedOne": { "message": "1 golpe nunca chegou até você" },
+  "fmtStatsScamsBlocked": { "message": "$COUNT$ golpes nunca chegaram até você", "placeholders": { "count": { "content": "$1", "example": "8" } } },
+  "statsPrivacyFindings": { "message": "Descobertas de privacidade" },
+  "statsRulesActive": { "message": "Regras da lista de bloqueio ativas" },
+  "statsRulesActiveHint": { "message": "Em vigor agora, incluindo a lista integrada ao ScamShield." },
+  "statsChartTitle7d": { "message": "Páginas verificadas · últimos 7 dias" },
+  "statsChartTitle30d": { "message": "Páginas verificadas · últimos 30 dias" },
+  "statsChartTitleAll": { "message": "Páginas verificadas · desde a instalação" },
+  "statsChartTitle90d": { "message": "Páginas verificadas · últimos 90 dias" },
+  "statsAxisToday": { "message": "Hoje" },
+  "statsLegendChecked": { "message": "Páginas verificadas" },
+  "statsLegendThreat": { "message": "Ameaça bloqueada nesse dia" },
+  "fmtStatsBarTip": { "message": "$DATE$ · $COUNT$ páginas verificadas", "placeholders": { "date": { "content": "$1", "example": "21 Aug" }, "count": { "content": "$2", "example": "63" } } },
+  "fmtStatsBarTipThreat": { "message": "$DATE$ · $COUNT$ páginas verificadas · 1 ameaça bloqueada", "placeholders": { "date": { "content": "$1", "example": "21 Aug" }, "count": { "content": "$2", "example": "63" } } },
+  "fmtStatsBarTipThreats": { "message": "$DATE$ · $COUNT$ páginas verificadas · $THREATS$ ameaças bloqueadas", "placeholders": { "date": { "content": "$1", "example": "21 Aug" }, "count": { "content": "$2", "example": "63" }, "threats": { "content": "$3", "example": "2" } } },
+  "statsByType": { "message": "Ameaças por tipo · desde sempre" },
+  "statsCatPhishing": { "message": "Phishing" },
+  "statsCatFakeShop": { "message": "Loja falsa" },
+  "statsCatWallet": { "message": "Drenagem de carteira" },
+  "statsCatTechSupport": { "message": "Suporte técnico" },
+  "statsCatClipboard": { "message": "Área de transferência" },
+  "statsCatClickfix": { "message": "CAPTCHA falso" },
+  "statsCatFakeUpdate": { "message": "Atualização falsa" },
+  "statsCatOther": { "message": "Outro" },
+  "statsRecent": { "message": "Recente" },
+  "statsPillBlocked": { "message": "Bloqueado" },
+  "statsPillWarned": { "message": "Avisado" },
+  "statsFooter": { "message": "Cada número é contado no seu dispositivo. Nada nesta página é enviado a lugar nenhum." },
+  "reviewAskBody": { "message": "O ScamShield já bloqueou $COUNT$ golpes para você. Se você acha que ele merece, uma avaliação curta ajuda outras pessoas a encontrá-lo — é grátis e sempre será.", "placeholders": { "count": { "content": "$1", "example": "2" } } },
+  "reviewRate": { "message": "Avaliar o ScamShield" },
+  "reviewLater": { "message": "Talvez depois" },
+  "reviewNo": { "message": "Não, obrigado" },
+  "reviewAboutLink": { "message": "Gostando do ScamShield? Deixe uma avaliação" }
 }

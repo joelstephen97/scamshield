@@ -2,7 +2,6 @@
   "extName": { "message": "Scam & Phishing Blocker: ScamShield" },
   "extShortName": { "message": "ScamShield" },
   "extDescription": { "message": "On-device scam & phishing protection: warns you, spots brand look-alikes, checks messages. Nothing leaves your device." },
-
   "on": { "message": "On" },
   "paused": { "message": "Paused" },
   "settings": { "message": "Settings" },
@@ -18,7 +17,6 @@
   "privacyPolicyLink": { "message": "Privacy policy" },
   "whatsNewLink": { "message": "What's new" },
   "unknownSite": { "message": "unknown site" },
-
   "popupChecking": { "message": "Checking…" },
   "popupSafe": { "message": "Nothing suspicious here" },
   "popupSuspicious": { "message": "Suspicious page" },
@@ -67,7 +65,6 @@
   "fmtQrScanFoundCount": { "message": "$COUNT$ QR codes found", "placeholders": { "count": { "content": "$1", "example": "3" } } },
   "support": { "message": "Support" },
   "footerTrustLine": { "message": "Made on-device. No data leaves your browser." },
-
   "takeMeToRealSite": { "message": "Take me to the real site" },
   "toastThanksNoted": { "message": "Thanks — noted" },
   "toastThanksSent": { "message": "Thanks — sent" },
@@ -96,7 +93,6 @@
   "levelSuspicious": { "message": "Suspicious page" },
   "levelSafe": { "message": "Nothing suspicious here" },
   "levelUnknown": { "message": "Can't check this page" },
-
   "tabProtection": { "message": "Protection" },
   "tabTrusted": { "message": "Paused sites" },
   "tabHistory": { "message": "History" },
@@ -176,7 +172,6 @@
   "importBtn": { "message": "Import" },
   "syncTitle": { "message": "Sync across my devices" },
   "syncHint": { "message": "Keep your settings and paused sites in step on every browser where you're signed in. Uses your browser's own sync — ScamShield still has no account or server. Off by default." },
-
   "optDocTitle": { "message": "ScamShield Settings" },
   "ariaSettingsSections": { "message": "Settings sections" },
   "optWhatSentToggle": { "message": "What exactly is sent ▾" },
@@ -235,7 +230,6 @@
   "fmtVersion": { "message": "Version $VERSION$", "placeholders": { "version": { "content": "$1", "example": "0.6.0" } } },
   "fmtUntilTime": { "message": "until $TIME$", "placeholders": { "time": { "content": "$1", "example": "22 Aug, 3:45 PM" } } },
   "fmtUpdatedRules": { "message": "Updated $TIME$ · $COUNT$ rules", "placeholders": { "time": { "content": "$1", "example": "2 h ago" }, "count": { "content": "$2", "example": "12,345" } } },
-
   "fmtStatsSince": { "message": "Protecting this browser since $DATE$", "placeholders": { "date": { "content": "$1", "example": "12 Jun 2026" } } },
   "stats7d": { "message": "7 days" },
   "stats30d": { "message": "30 days" },
@@ -271,13 +265,11 @@
   "statsPillBlocked": { "message": "Blocked" },
   "statsPillWarned": { "message": "Warned" },
   "statsFooter": { "message": "Every number is counted on your device. Nothing on this page is sent anywhere." },
-
   "reviewAskBody": { "message": "ScamShield has now stopped $COUNT$ scams for you. If it's earned it, a short review helps other people find it — it's free and always will be.", "placeholders": { "count": { "content": "$1", "example": "2" } } },
   "reviewRate": { "message": "Rate ScamShield" },
   "reviewLater": { "message": "Maybe later" },
   "reviewNo": { "message": "No thanks" },
   "reviewAboutLink": { "message": "Enjoying ScamShield? Leave a review" },
-
   "bannerDangerBrand": { "message": "Dangerous page — looks like $BRAND$, but isn't", "placeholders": { "brand": { "content": "$1" } } },
   "bannerDanger": { "message": "Dangerous page" },
   "bannerTakeCare": { "message": "Take care on this site" },
@@ -301,7 +293,6 @@
   "walletRiskyBody": { "message": "If you did not expect this, cancel. Drainers use these requests to steal your crypto." },
   "compareThisSite": { "message": "This site" },
   "compareRealSite": { "message": "Real $BRAND$", "placeholders": { "brand": { "content": "$1" } } },
-
   "guardCountdown": { "message": "$LABEL$ ($COUNT$)", "placeholders": { "label": { "content": "$1", "example": "Continue anyway" }, "count": { "content": "$2", "example": "3" } } },
   "ariaScamWarning": { "message": "Scam warning" },
   "ariaPhishingWarning": { "message": "Possible phishing warning" },
@@ -334,7 +325,6 @@
   "serpAdMismatch": { "message": "⚠ ScamShield: this ad goes to $ACTUAL$, not $SHOWN$", "placeholders": { "actual": { "content": "$1", "example": "malicious-download.example" }, "shown": { "content": "$2", "example": "trusted-brand.example" } } },
   "serpBadgeDanger": { "message": "ScamShield: this result is on our threat block list" },
   "serpBadgeCaution": { "message": "ScamShield: this result shows scam warning signs" },
-
   "chipLink": { "message": "Link" },
   "chipBrand": { "message": "Brand" },
   "chipPage": { "message": "Page" },
@@ -343,7 +333,6 @@
   "chipTechscam": { "message": "Scare page" },
   "chipShop": { "message": "Shop" },
   "chipMessage": { "message": "Message" },
-
   "reason_ipHost": { "message": "Uses a raw IP address instead of a domain name." },
   "reason_atSymbol": { "message": "URL contains an \"@\" that can hide the real destination." },
   "reason_punycodeHost": { "message": "Domain uses punycode, often used to mimic real brands." },
@@ -411,7 +400,6 @@
   "reason_shop_badgeHotlink_detail": { "message": "A \"secure\"/\"verified\" badge that is just an image, linking nowhere." },
   "reason_shop_missingContact": { "message": "No contact info" },
   "reason_shop_missingContact_detail": { "message": "No real address, phone or company details — normal for a throwaway scam shop." },
-
   "obDocTitle": { "message": "Welcome to ScamShield" },
   "obTitle": { "message": "ScamShield is protecting you" },
   "obLead": { "message": "It watches the pages you visit and warns you about scams — entirely on your device. Your browsing never leaves your computer." },

@@ -1,1607 +1,438 @@
 {
-  "extName": {
-    "message": "Dolandırıcılık ve Kimlik Avı Engelleyici: ScamShield"
-  },
-  "extShortName": {
-    "message": "ScamShield"
-  },
-  "extDescription": {
-    "message": "Cihazınızda dolandırıcılık ve kimlik avı koruması: sizi uyarır, marka taklitlerini tespit eder ve mesajları kontrol eder. Hiçbir şey cihazınızdan çıkmaz."
-  },
-  "on": {
-    "message": "Açık"
-  },
-  "paused": {
-    "message": "Duraklatıldı"
-  },
-  "settings": {
-    "message": "Ayarlar"
-  },
-  "dismiss": {
-    "message": "Kapat"
-  },
-  "ariaDismiss": {
-    "message": "Kapat"
-  },
-  "cancel": {
-    "message": "İptal"
-  },
-  "reportMistake": {
-    "message": "Hata bildir"
-  },
-  "thanks": {
-    "message": "Teşekkürler"
-  },
-  "trustThisSite": {
-    "message": "Bu siteye güven"
-  },
-  "ackTrusted": {
-    "message": "ScamShield $HOST$ adresini bir daha işaretlemeyecek.",
-    "placeholders": {
-      "host": {
-        "content": "$1",
-        "example": "secure-paypa1-login.com"
-      }
-    }
-  },
-  "undo": {
-    "message": "Geri al"
-  },
-  "popupPauseMenu": {
-    "message": "Korumayı duraklat ▾"
-  },
-  "privacyPolicyLink": {
-    "message": "Gizlilik politikası"
-  },
-  "whatsNewLink": {
-    "message": "Yenilikler"
-  },
-  "unknownSite": {
-    "message": "bilinmeyen site"
-  },
-  "popupChecking": {
-    "message": "Kontrol ediliyor…"
-  },
-  "popupSafe": {
-    "message": "Burada şüpheli bir şey yok"
-  },
-  "popupSuspicious": {
-    "message": "Şüpheli sayfa"
-  },
-  "popupDangerous": {
-    "message": "Tehlikeli sayfa"
-  },
-  "popupUnknown": {
-    "message": "Taranmadı"
-  },
-  "popupPausedSummary": {
-    "message": "Koruma duraklatıldı — devam etmek için açın."
-  },
-  "popupNotHttp": {
-    "message": "Tarayıcı sayfaları ve web mağazası taranmaz."
-  },
-  "popupDangerSummary": {
-    "message": "Buraya şifre veya kart bilgisi girmeyin."
-  },
-  "popupSuspiciousSummary": {
-    "message": "Buraya bir şey yazmadan önce dikkatli olun."
-  },
-  "leaveThisPage": {
-    "message": "Bu sayfadan ayrıl"
-  },
-  "showWhy": {
-    "message": "Nedenini göster"
-  },
-  "whyVerdict": {
-    "message": "Bu karar neden verildi?"
-  },
-  "whyVerdictCountOne": {
-    "message": "· 1 sinyal"
-  },
-  "fmtWhyVerdictCount": {
-    "message": "· $COUNT$ sinyal",
-    "placeholders": {
-      "count": {
-        "content": "$1"
-      }
-    }
-  },
-  "takeMeToReal": {
-    "message": "Beni gerçek $BRAND$ sitesine götür",
-    "placeholders": {
-      "brand": {
-        "content": "$1"
-      }
-    }
-  },
-  "copyReportBtn": {
-    "message": "Raporu kopyala"
-  },
-  "copyReportHeader": {
-    "message": "⚠ ScamShield bu siteyi işaretledi: $HOST$",
-    "placeholders": {
-      "host": {
-        "content": "$1",
-        "example": "evil[.]example"
-      }
-    }
-  },
-  "copyReportVerdict": {
-    "message": "Karar: $LEVEL$",
-    "placeholders": {
-      "level": {
-        "content": "$1",
-        "example": "Dangerous page"
-      }
-    }
-  },
-  "copyReportSignals": {
-    "message": "Sinyaller:"
-  },
-  "copyReportFooter": {
-    "message": "ScamShield tarafından cihazda kontrol edildi — ücretsiz, açık kaynak: https://joelstephen97.github.io/scamshield/"
-  },
-  "reportScam": {
-    "message": "Bildir: bu dolandırıcılık"
-  },
-  "reportSafe": {
-    "message": "Bildir: bu güvenli"
-  },
-  "pause1h": {
-    "message": "1 saat"
-  },
-  "pause1d": {
-    "message": "1 gün"
-  },
-  "pauseAlways": {
-    "message": "Her zaman"
-  },
-  "resumeNow": {
-    "message": "Şimdi devam ettir"
-  },
-  "blockedOnSite": {
-    "message": "Bu sitede engellenen"
-  },
-  "blockedAllTime": {
-    "message": "Toplam engellenen"
-  },
-  "sinceInstall": {
-    "message": "Kurulumdan bu yana"
-  },
-  "thisWeek": {
-    "message": "Bu hafta"
-  },
-  "privacyOnPage": {
-    "message": "Bu sayfada gizlilik"
-  },
-  "shoppingCheck": {
-    "message": "Alışveriş kontrolü"
-  },
-  "checkMessageTitle": {
-    "message": "Bir mesaj veya bağlantı kontrol et"
-  },
-  "checkMessageHint": {
-    "message": "Şüpheli bir SMS, WhatsApp veya e-posta metni ya da bağlantı yapıştırın. Tamamen cihazınızda kontrol edilir."
-  },
-  "checkMessagePlaceholder": {
-    "message": "Mesajı veya bağlantıyı buraya yapıştırın…"
-  },
-  "check": {
-    "message": "Kontrol et"
-  },
-  "checkedOnDevice": {
-    "message": "Yalnızca cihazınızda kontrol edildi"
-  },
-  "msgSafe": {
-    "message": "Güvenli görünüyor: dolandırıcılık işareti yok"
-  },
-  "msgSuspicious": {
-    "message": "Şüpheli: dikkatli olun"
-  },
-  "msgDangerous": {
-    "message": "Neredeyse kesinlikle dolandırıcılık"
-  },
-  "qrScanTitle": {
-    "message": "Bu sayfada QR kod tara"
-  },
-  "qrScanHint": {
-    "message": "Bu sayfadaki görsellerdeki QR kodlarını çözer ve telefonunuzla taramadan önce nereye yönlendirdiklerini kontrol eder. Tamamen cihazınızda denetlenir."
-  },
-  "qrScanBtn": {
-    "message": "Şimdi tara"
-  },
-  "qrScanNone": {
-    "message": "Bu sayfada QR kod bulunamadı."
-  },
-  "qrScanFoundOne": {
-    "message": "1 QR kod bulundu"
-  },
-  "fmtQrScanFoundCount": {
-    "message": "$COUNT$ QR kod bulundu",
-    "placeholders": {
-      "count": {
-        "content": "$1",
-        "example": "3"
-      }
-    }
-  },
-  "support": {
-    "message": "Destekle"
-  },
-  "footerTrustLine": {
-    "message": "Cihazınızda çalışır. Hiçbir veri tarayıcınızdan çıkmaz."
-  },
-  "takeMeToRealSite": {
-    "message": "Beni gerçek siteye götür"
-  },
-  "toastThanksNoted": {
-    "message": "Teşekkürler — not edildi"
-  },
-  "toastThanksSent": {
-    "message": "Teşekkürler — gönderildi"
-  },
-  "toastPausedForNow": {
-    "message": "Şimdilik duraklatıldı"
-  },
-  "toastResumed": {
-    "message": "Koruma devam ettirildi"
-  },
-  "toastCopied": {
-    "message": "Kopyalandı"
-  },
-  "toastExtensionError": {
-    "message": "Uzantı hatası — yeniden açmayı deneyin."
-  },
-  "whatsNewBanner": {
-    "message": "0.13'teki yenilikler: saatlik acil liste, yepyeni dolandırıcılık sitelerini bildirimden yaklaşık bir saat sonra engelliyor; bize hâlâ tek bir istek bile gitmiyor. Ayrıca her uyarıda „Bu siteye güven“."
-  },
-  "popupBrandDangerSummary": {
-    "message": "$BRAND$ gibi görünüyor ama değil. Buraya şifrenizi girmeyin.",
-    "placeholders": {
-      "brand": {
-        "content": "$1",
-        "example": "PayPal"
-      }
-    }
-  },
-  "pausedUntil": {
-    "message": "$TIME$ saatine kadar duraklatıldı",
-    "placeholders": {
-      "time": {
-        "content": "$1"
-      }
-    }
-  },
-  "fmtProtocolPage": {
-    "message": "$PROTOCOL$ sayfası",
-    "placeholders": {
-      "protocol": {
-        "content": "$1",
-        "example": "chrome"
-      }
-    }
-  },
-  "popupShopFlagFallback": {
-    "message": "İşaretle"
-  },
-  "chipWhy": {
-    "message": "Neden"
-  },
-  "chipDataLeak": {
-    "message": "Veri sızıntısı"
-  },
-  "chipTracking": {
-    "message": "Takip"
-  },
-  "chipPopups": {
-    "message": "Açılır pencereler"
-  },
-  "chipPrivacy": {
-    "message": "Gizlilik"
-  },
-  "popupPrivacyLeakPlain": {
-    "message": "Formu göndermeden önce e-posta/telefon bilginizi $HOST$ adresine gönderdi.",
-    "placeholders": {
-      "host": {
-        "content": "$1",
-        "example": "tracker.example"
-      }
-    }
-  },
-  "popupPrivacyLeakHashed": {
-    "message": "Formu göndermeden önce e-posta/telefon bilginizi (hash'lenmiş) $HOST$ adresine gönderdi.",
-    "placeholders": {
-      "host": {
-        "content": "$1",
-        "example": "tracker.example"
-      }
-    }
-  },
-  "popupPrivacyFingerprint": {
-    "message": "$HOST$, sizi takip etmek için cihazınızın parmak izini alıyor.",
-    "placeholders": {
-      "host": {
-        "content": "$1",
-        "example": "tracker.example"
-      }
-    }
-  },
-  "popupPrivacyNotifyLure": {
-    "message": "Bu site \"İzin Ver'e tıklayın\" bildirim hilesini denedi."
-  },
-  "popupPrivacyCredExfilPassword": {
-    "message": "Şifrenizi $HOST$ adresine gönderdi — bulunduğunuz siteden farklı bir site.",
-    "placeholders": {
-      "host": {
-        "content": "$1",
-        "example": "collector.example"
-      }
-    }
-  },
-  "popupPrivacyCredExfilCard": {
-    "message": "Kart bilgilerinizi $HOST$ adresine gönderdi — bulunduğunuz siteden farklı bir site.",
-    "placeholders": {
-      "host": {
-        "content": "$1",
-        "example": "collector.example"
-      }
-    }
-  },
-  "popupPrivacyDefaultText": {
-    "message": "Gizlilik sorunu tespit edildi."
-  },
-  "levelDangerous": {
-    "message": "Tehlikeli sayfa"
-  },
-  "levelSuspicious": {
-    "message": "Şüpheli sayfa"
-  },
-  "levelSafe": {
-    "message": "Burada şüpheli bir şey yok"
-  },
-  "levelUnknown": {
-    "message": "Bu sayfa kontrol edilemiyor"
-  },
-  "tabProtection": {
-    "message": "Koruma"
-  },
-  "tabTrusted": {
-    "message": "Duraklatılan siteler"
-  },
-  "tabHistory": {
-    "message": "Geçmiş"
-  },
-  "tabFeed": {
-    "message": "Tehdit listesi"
-  },
-  "tabAbout": {
-    "message": "Hakkında"
-  },
-  "protectionLead": {
-    "message": "Buradaki her şey cihazınızda çalışır. Aşağıdaki topluluk raporlamasını açmadığınız sürece hiçbir şey gönderilmez."
-  },
-  "protectionOn": {
-    "message": "Koruma açık"
-  },
-  "protectionOnHint": {
-    "message": "Sayfaları dolandırıcılığa karşı tarar ve sizi uyarır. Her şeyi duraklatmak için kapatın."
-  },
-  "grpScams": {
-    "message": "Dolandırıcılık ve kimlik avı"
-  },
-  "grpScamsHint": {
-    "message": "Bilinen kötü siteleri engeller ve yeni kimlik avını cihazınızda yakalar."
-  },
-  "grpPopups": {
-    "message": "Açılır pencereler ve sahte sistem uyarıları"
-  },
-  "grpPopupsHint": {
-    "message": "Sahte virüs uyarıları, ekran kilitleyiciler ve pano ele geçirmeleri."
-  },
-  "grpShopping": {
-    "message": "Alışveriş"
-  },
-  "grpShoppingHint": {
-    "message": "Sahte çevrimiçi mağazaları ve arama reklamlarının gerçekte nereye gittiğini tespit eder."
-  },
-  "grpCrypto": {
-    "message": "Kripto ve cüzdanlar"
-  },
-  "grpCryptoHint": {
-    "message": "Riskli cüzdan imzalarından önce uyarılar."
-  },
-  "grpPrivacy": {
-    "message": "Gizlilik"
-  },
-  "grpPrivacyHint": {
-    "message": "Bilgilerinizi sızdıran veya cihazınızı takip eden siteleri yakalar — tamamı cihazınızda."
-  },
-  "optBlockKnown": {
-    "message": "Bilinen dolandırıcılık sitelerini engelle"
-  },
-  "optBlockKnownHint": {
-    "message": "Günlük güncellenen tehdit listesindeki sayfaları yüklenmeden önce durdurur."
-  },
-  "optPageAnalysis": {
-    "message": "Sayfa analizi"
-  },
-  "optPageAnalysisHint": {
-    "message": "Henüz hiçbir listede olmayan dolandırıcılıkları yakalamak için sayfanın metnini, düzenini ve simgelerini cihazınızda okur."
-  },
-  "optClickfix": {
-    "message": "Sahte CAPTCHA / \"bunu yapıştır\" engelleyici"
-  },
-  "optClickfixHint": {
-    "message": "Win+R'ye basıp bir komut yapıştırmanızı isteyen sayfaları durdurur (ClickFix kötü amaçlı yazılımı)."
-  },
-  "optFakeupdate": {
-    "message": "Sahte tarayıcı güncelleme engelleyici"
-  },
-  "optFakeupdateHint": {
-    "message": "Tarayıcınızın güncelleme gerektirdiğini iddia ederek kötü amaçlı yazılım indirtmeye çalışan sayfaları engeller."
-  },
-  "optHide": {
-    "message": "Dolandırıcılık içeriğini gizle"
-  },
-  "optHideHint": {
-    "message": "Normal görünen sayfalar içindeki \"bir ödül kazandınız\" bloklarını griye boyar."
-  },
-  "optQrScan": {
-    "message": "QR kodlarını otomatik tara"
-  },
-  "optQrScanHint": {
-    "message": "Sayfadaki büyük görsellerdeki QR kodlarını çözer ve telefonunuzla taramadan önce nereye yönlendirdiklerini kontrol eder — \"quishing\" (QR kod kimlik avı) e-postalarına karşı cihaz üzerinde çalışan bir önlem. Ayrıca herhangi bir sayfayı istediğiniz zaman popup'tan da tarayabilirsiniz."
-  },
-  "optTechscam": {
-    "message": "Teknik destek dolandırıcılığından kaçış"
-  },
-  "optTechscamHint": {
-    "message": "Sahte \"bilgisayarınız virüslü, bu numarayı arayın\" sayfalarını tespit eder ve size bir çıkış yolu sunar."
-  },
-  "optClipboard": {
-    "message": "Pano ele geçirme uyarısı"
-  },
-  "optClipboardHint": {
-    "message": "Bir site gizlice panonuza bir komut veya kripto adresi koyduğunda uyarır."
-  },
-  "optShop": {
-    "message": "Sahte mağaza kontrolleri"
-  },
-  "optShopHint": {
-    "message": "Sahte geri sayımları, sahte \"sadece 2 tane kaldı\" baskısını, eksik iletişim bilgilerini ve platform dışı ödemeyi (Zelle/havale/kripto) arar ve bunları popup'ta gösterir."
-  },
-  "optSerp": {
-    "message": "Sponsorlu sonuç kontrolü"
-  },
-  "optSerpHint": {
-    "message": "Google/Bing/DuckDuckGo'da, reklamı gösterdiği siteden başka bir yere giden sponsorlu bir sonucu işaretler."
-  },
-  "optWallet": {
-    "message": "Cüzdan boşaltıcı koruması"
-  },
-  "optWalletHint": {
-    "message": "Cüzdan boşaltıcıların istismar ettiği token harcamalarını, \"Permit\" imzalarını veya hesap devirlerini onaylamadan önce uyarır."
-  },
-  "optLeakyForm": {
-    "message": "Veri sızdıran form uyarısı"
-  },
-  "optLeakyFormHint": {
-    "message": "Bir site, gönder'e basmadan önce girdiğiniz e-posta veya telefonu bir izleyiciye gönderdiğinde uyarır."
-  },
-  "optFingerprint": {
-    "message": "Parmak izi tespiti"
-  },
-  "optFingerprintHint": {
-    "message": "Sizi sitelerde takip etmek için cihazınızın parmak izini alan betiği gösterir."
-  },
-  "optNotify": {
-    "message": "Bildirim tuzağı uyarısı"
-  },
-  "optNotifyHint": {
-    "message": "Sitelerin sizi açılır pencerelerle bombardımana tutmak için kullandığı \"devam etmek için İzin Ver'e tıklayın\" hilesini işaretler."
-  },
-  "optStrict": {
-    "message": "Katı mod"
-  },
-  "optStrictHint": {
-    "message": "Maksimum dikkat isteyenler için: \"şüpheli\" sayfalar bile tam ekran uyarı ve daha basit ifadelerle engellenir. Kendine daha az güvenen bir aile bireyinin güvende kalmasına yardımcı olmak için idealdir."
-  },
-  "optReporting": {
-    "message": "ScamShield'ı daha akıllı hale getirmeye yardım edin"
-  },
-  "optReportingHint": {
-    "message": "Tehlikeli olarak işaretlenen sayfaların ve bildirdiğiniz sitelerin site adını (asla tam adresi veya sayfa metnini değil) ve anonim risk sinyallerini gönderir. Varsayılan olarak kapalıdır."
-  },
-  "saved": {
-    "message": "Kaydedildi"
-  },
-  "trustedLead": {
-    "message": "Koruma bu sitelerde duraklatıldı. Birini devam ettirerek tekrar koruma altına alın."
-  },
-  "trustedAlways": {
-    "message": "Her zaman"
-  },
-  "trustedForAWhile": {
-    "message": "Bir süreliğine"
-  },
-  "remove": {
-    "message": "Kaldır"
-  },
-  "trustedViaWarning": {
-    "message": "Uyarı üzerinden güvenildi"
-  },
-  "historyTitle": {
-    "message": "Koruma geçmişi"
-  },
-  "historyLead": {
-    "message": "Yalnızca bu cihazda saklanır (site adları, asla tam adresler değil)."
-  },
-  "clearHistory": {
-    "message": "Geçmişi temizle"
-  },
-  "markMistake": {
-    "message": "Hata olarak işaretle"
-  },
-  "feedTitle": {
-    "message": "Tehdit listesi"
-  },
-  "feedLead": {
-    "message": "Günlük olarak yeniden oluşturulan bilinen dolandırıcılık siteleri listesi (OpenPhish + URLhaus, yoğun şekilde filtrelenmiş). ScamShield sadece onu indirir."
-  },
-  "checkNow": {
-    "message": "Şimdi kontrol et"
-  },
-  "aboutVersion": {
-    "message": "Sürüm"
-  },
-  "appearance": {
-    "message": "Görünüm"
-  },
-  "whatLeaves": {
-    "message": "Cihazınızdan neler çıkıyor"
-  },
-  "backupSettings": {
-    "message": "Ayarları yedekle"
-  },
-  "backupHint": {
-    "message": "Ayarlarınızı ve duraklattığınız siteleri bir dosyaya kaydedin veya başka bir bilgisayarda yükleyin."
-  },
-  "exportBtn": {
-    "message": "Dışa aktar"
-  },
-  "importBtn": {
-    "message": "İçe aktar"
-  },
-  "syncTitle": {
-    "message": "Cihazlarım arasında senkronize et"
-  },
-  "syncHint": {
-    "message": "Ayarlarınızı ve duraklattığınız siteleri oturum açtığınız her tarayıcıda senkronize tutun. Tarayıcınızın kendi senkronizasyonunu kullanır — ScamShield'ın hâlâ hesabı veya sunucusu yoktur. Varsayılan olarak kapalıdır."
-  },
-  "optDocTitle": {
-    "message": "ScamShield Ayarları"
-  },
-  "ariaSettingsSections": {
-    "message": "Ayar bölümleri"
-  },
-  "optWhatSentToggle": {
-    "message": "Tam olarak ne gönderiliyor ▾"
-  },
-  "optWhatSentBody": {
-    "message": "Bir rapor yalnızca şunları içerir: site adı (ana bilgisayar adı), karar ve dahili neden kodları, adres ve sayfa düzeninden türetilen sayısal risk sinyalleri (hash'lenmiş kelime sayıları ile form, giriş alanı ve bağlantı sayıları — asla metnin kendisi değil), eşleşen marka adları, uzantı sürümü ve saat. Asla tam adres (yol veya sorgu), sayfa metni, yazdığınız herhangi bir şey, çerezler veya sizi ya da cihazınızı tanımlayan herhangi bir bilgi gönderilmez. Raporlar 180 gün sonra silinir."
-  },
-  "feedNeverUpdated": {
-    "message": "Hiç güncellenmedi"
-  },
-  "hotListPending": {
-    "message": "Acil liste: henüz indirilmedi"
-  },
-  "hotListStatus": {
-    "message": "Acil liste: $COUNT$ site, $AGO$ güncellendi",
-    "placeholders": {
-      "count": {
-        "content": "$1",
-        "example": "1,204"
-      },
-      "ago": {
-        "content": "$2",
-        "example": "12 minutes ago"
-      }
-    }
-  },
-  "hotListOff": {
-    "message": "Acil liste: kapalı"
-  },
-  "hotListSub": {
-    "message": "…ve son 48 saatin acil listesi, saatlik yenilenir."
-  },
-  "optAdvancedFeedUrl": {
-    "message": "Gelişmiş: besleme URL'si"
-  },
-  "optFeedUrlLabel": {
-    "message": "Besleme URL'si"
-  },
-  "optFeedUrlPlaceholder": {
-    "message": "https://…/blocklist.json"
-  },
-  "resetToOfficialFeed": {
-    "message": "Resmi beslemeye sıfırla"
-  },
-  "optFeedUrlHint": {
-    "message": "Kendi barındırmanız için bunu kendi JSON'unuza yönlendirin veya güncellemeleri devre dışı bırakmak için boş bırakın."
-  },
-  "optThemeHint": {
-    "message": "Sisteminizi takip edin veya birini seçin."
-  },
-  "optThemeAuto": {
-    "message": "Otomatik"
-  },
-  "optThemeLight": {
-    "message": "Açık"
-  },
-  "optThemeDark": {
-    "message": "Koyu"
-  },
-  "optLinksTitle": {
-    "message": "Bağlantılar"
-  },
-  "optLinkGithub": {
-    "message": "GitHub"
-  },
-  "optLinkReportIssue": {
-    "message": "Bir sorun bildir"
-  },
-  "supportFreeOnDevice": {
-    "message": "ScamShield ücretsizdir ve tamamen cihazınızda çalışır."
-  },
-  "supportSponsorGithub": {
-    "message": "GitHub'da sponsor ol"
-  },
-  "supportDonatePaypal": {
-    "message": "PayPal ile bağış yap"
-  },
-  "netNoTelemetry": {
-    "message": "ScamShield asla analitik, telemetri veya takip isteği yapmaz. Yapabileceği tek istekler bu üçüdür ve bunu kendiniz doğrulayabilirsiniz: tarayıcınızın Geliştirici Araçları'nı açın → Ağ sekmesi, ScamShield'ı normal şekilde kullanın ve bunların dışında hiçbir şey görmeyeceksiniz."
-  },
-  "receiptFeedLabel": {
-    "message": "Tehdit listesi indirme"
-  },
-  "receiptFeedDetail": {
-    "message": "Herkese açık engel listesi dosyası — herkes için aynıdır, hakkınızda hiçbir şey gönderilmez."
-  },
-  "receiptReportLabel": {
-    "message": "Topluluk raporları"
-  },
-  "receiptReportDetail": {
-    "message": "Yalnızca raporlamayı açtıysanız. Site adı + sayısal sinyaller, asla URL'ler veya sayfa metni değil."
-  },
-  "receiptIconLabel": {
-    "message": "Sayfa simgesi kontrolü"
-  },
-  "receiptIconDetail": {
-    "message": "Marka taklitlerini tespit etmek için sayfanın kendi favicon'unu getirir. Üçüncü taraf yok, çerez yok."
-  },
-  "receiptPerPage": {
-    "message": "sayfa başına"
-  },
-  "receiptOnInstall12h": {
-    "message": "kurulumda + her 12 saatte bir"
-  },
-  "receiptDisabled": {
-    "message": "devre dışı"
-  },
-  "receiptWhenFlagged": {
-    "message": "işaretlendiğinde"
-  },
-  "receiptOffDefault": {
-    "message": "kapalı (varsayılan)"
-  },
-  "optExportSyncHint": {
-    "message": "Ayarlar aşağıdan dışa/içe aktarılabilir ve (isteğe bağlı olarak) kendi cihazlarınız arasında senkronize edilebilir."
-  },
-  "toastSyncOn": {
-    "message": "Senkronizasyon açık"
-  },
-  "toastSyncUnavailable": {
-    "message": "Senkronizasyon kullanılamıyor"
-  },
-  "toastSyncOff": {
-    "message": "Senkronizasyon kapalı"
-  },
-  "toastExported": {
-    "message": "Dışa aktarıldı"
-  },
-  "toastImported": {
-    "message": "İçe aktarıldı"
-  },
-  "toastInvalidFile": {
-    "message": "Geçersiz dosya"
-  },
-  "toastCheckingUpdates": {
-    "message": "Kontrol ediliyor…"
-  },
-  "fmtUpdatedToVersion": {
-    "message": "v$VERSION$ sürümüne güncellendi",
-    "placeholders": {
-      "version": {
-        "content": "$1",
-        "example": "0.6.1"
-      }
-    }
-  },
-  "toastAlreadyUpToDate": {
-    "message": "Zaten güncel"
-  },
-  "toastUpdateFailed": {
-    "message": "Güncelleme başarısız oldu"
-  },
-  "toastHistoryCleared": {
-    "message": "Geçmiş temizlendi"
-  },
-  "toastOpenedReport": {
-    "message": "Bir rapor açıldı"
-  },
-  "optNoneYet": {
-    "message": "Henüz yok"
-  },
-  "optNoneRightNow": {
-    "message": "Şu anda yok"
-  },
-  "optNothingYetGood": {
-    "message": "Henüz bir şey yok — bu iyi bir şey."
-  },
-  "fmtVersion": {
-    "message": "Sürüm $VERSION$",
-    "placeholders": {
-      "version": {
-        "content": "$1",
-        "example": "0.6.0"
-      }
-    }
-  },
-  "fmtUntilTime": {
-    "message": "$TIME$ tarihine kadar",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "22 Aug, 3:45 PM"
-      }
-    }
-  },
-  "fmtUpdatedRules": {
-    "message": "$TIME$ güncellendi · $COUNT$ kural",
-    "placeholders": {
-      "time": {
-        "content": "$1",
-        "example": "2 h ago"
-      },
-      "count": {
-        "content": "$2",
-        "example": "12,345"
-      }
-    }
-  },
-  "bannerDangerBrand": {
-    "message": "Tehlikeli sayfa — $BRAND$ gibi görünüyor ama değil",
-    "placeholders": {
-      "brand": {
-        "content": "$1"
-      }
-    }
-  },
-  "bannerDanger": {
-    "message": "Tehlikeli sayfa"
-  },
-  "bannerSuspicious": {
-    "message": "Şüpheli sayfa"
-  },
-  "interstitialHead1": {
-    "message": "Durun — bu sayfa sizi dolandırmaya çalışıyor"
-  },
-  "interstitialHead2": {
-    "message": "Bekleyin — bu bir dolandırıcılık sayfasına benziyor"
-  },
-  "interstitialHead3": {
-    "message": "Devam etmeyin — dolandırıcılık uyarısı"
-  },
-  "interstitialReassure": {
-    "message": "Yazdıklarınızın hiçbiri henüz gönderilmedi. Şimdi ayrılmak güvenli."
-  },
-  "continueAnyway": {
-    "message": "Yine de devam et"
-  },
-  "submitAnyway": {
-    "message": "Yine de gönder"
-  },
-  "proceedAnyway": {
-    "message": "Yine de devam et"
-  },
-  "cancelRecommended": {
-    "message": "İptal (önerilir)"
-  },
-  "phishingStop": {
-    "message": "Dur — olası kimlik avı"
-  },
-  "techScamTitle": {
-    "message": "Olası teknik destek dolandırıcılığı"
-  },
-  "techScamBody": {
-    "message": "Bu bir web sayfası, bilgisayarınız değil — bilgisayarınız iyi durumda. Gerçek güvenlik uyarıları asla ekranınızı kilitlemez veya telefon numarası göstermez. Aramayın ve ödeme yapmayın."
-  },
-  "getMeOut": {
-    "message": "Beni buradan çıkar (bu sayfayı kapat)"
-  },
-  "walletRiskyTitle": {
-    "message": "Riskli cüzdan isteği"
-  },
-  "walletRiskyBody": {
-    "message": "Bunu beklemiyorsanız iptal edin. Hırsızlar kriptonuzu çalmak için bu istekleri kullanır."
-  },
-  "compareThisSite": {
-    "message": "Bu site"
-  },
-  "compareRealSite": {
-    "message": "Gerçek $BRAND$",
-    "placeholders": {
-      "brand": {
-        "content": "$1"
-      }
-    }
-  },
-  "guardCountdown": {
-    "message": "$LABEL$ ($COUNT$)",
-    "placeholders": {
-      "label": {
-        "content": "$1",
-        "example": "Continue anyway"
-      },
-      "count": {
-        "content": "$2",
-        "example": "3"
-      }
-    }
-  },
-  "ariaScamWarning": {
-    "message": "Dolandırıcılık uyarısı"
-  },
-  "ariaPhishingWarning": {
-    "message": "Olası kimlik avı uyarısı"
-  },
-  "interstitialFallback": {
-    "message": "Bu sayfa bilinen bir dolandırıcılık kalıbıyla eşleşiyor."
-  },
-  "toastSupportAsk": {
-    "message": "ScamShield az önce sizi korudu — ücretsizdir ve cihazınızda çalışır. Katkıda bulunmak ister misiniz? ❤"
-  },
-  "guardFormDestKnown": {
-    "message": "Bu form şifrenizi $HOST$ yerine $DEST$ adresine gönderiyor. Şifreyi farklı bir web sitesine göndermek, dolandırıcıların oturum bilgilerini çalma yöntemidir.",
-    "placeholders": {
-      "dest": {
-        "content": "$1",
-        "example": "evil.example"
-      },
-      "host": {
-        "content": "$2",
-        "example": "your-bank.example"
-      }
-    }
-  },
-  "guardFormDestUnknown": {
-    "message": "Bu form şifrenizi ziyaret ettiğiniz siteden farklı bir web sitesine gönderiyor. Bu, dolandırıcıların oturum bilgilerini çalmak için yaygın kullandığı bir yöntemdir."
-  },
-  "guardHiddenTag": {
-    "message": "ScamShield tarafından gizlendi"
-  },
-  "guardWalletCollision": {
-    "message": "Başka bir uyarı açıkken ScamShield bir cüzdan isteğini engelledi. Kapatıp tekrar deneyin."
-  },
-  "guardWalletFallback": {
-    "message": "Bu site hassas bir cüzdan işlemi talep ediyor."
-  },
-  "guardPrivacyFallback": {
-    "message": "Bu sayfada bir gizlilik sorunu tespit edildi."
-  },
-  "guardClipboardFallback": {
-    "message": "Bir site panonuzu değiştirdi."
-  },
-  "guardTechScamFallback": {
-    "message": "Bu sayfa korkutma taktikleri kullanıyor."
-  },
-  "guardClipboardBlockedPayload": {
-    "message": "ScamShield tarafından engellendi — bu site panonuza tehlikeli bir komut koydu. Hiçbir yere yapıştırmayın."
-  },
-  "guardLeakyFormPlain": {
-    "message": "Bu site, gönder'e basmadan önce e-posta/telefon bilginizi düz metin olarak $HOST$ adresine gönderdi.",
-    "placeholders": {
-      "host": {
-        "content": "$1",
-        "example": "tracker.example"
-      }
-    }
-  },
-  "guardLeakyFormHashed": {
-    "message": "Bu site, gönder'e basmadan önce e-posta/telefon bilginizi hash'lenmiş ($ALGO$) bir tanımlayıcı olarak $HOST$ adresine gönderdi.",
-    "placeholders": {
-      "host": {
-        "content": "$1",
-        "example": "tracker.example"
-      },
-      "algo": {
-        "content": "$2",
-        "example": "MD5"
-      }
-    }
-  },
-  "guardNotifyLure": {
-    "message": "Bu site, \"devam etmek için İzin Ver'e tıklayın\" hilesini kullanarak bildirim izni almaya çalışıyor. Güvenle Engelle'yi seçebilirsiniz."
-  },
-  "serpAdMismatch": {
-    "message": "⚠ ScamShield: bu reklam $SHOWN$ yerine $ACTUAL$ adresine gidiyor",
-    "placeholders": {
-      "actual": {
-        "content": "$1",
-        "example": "malicious-download.example"
-      },
-      "shown": {
-        "content": "$2",
-        "example": "trusted-brand.example"
-      }
-    }
-  },
-  "serpBadgeDanger": {
-    "message": "ScamShield: bu sonuç tehdit engelleme listemizde"
-  },
-  "serpBadgeCaution": {
-    "message": "ScamShield: bu sonuç dolandırıcılık uyarı işaretleri gösteriyor"
-  },
-  "chipLink": {
-    "message": "Bağlantı"
-  },
-  "chipBrand": {
-    "message": "Marka"
-  },
-  "chipPage": {
-    "message": "Sayfa"
-  },
-  "chipWallet": {
-    "message": "Cüzdan"
-  },
-  "chipClipboard": {
-    "message": "Pano"
-  },
-  "chipTechscam": {
-    "message": "Korkutma sayfası"
-  },
-  "chipShop": {
-    "message": "Mağaza"
-  },
-  "chipMessage": {
-    "message": "Mesaj"
-  },
-  "reason_ipHost": {
-    "message": "Alan adı yerine ham bir IP adresi kullanıyor."
-  },
-  "reason_atSymbol": {
-    "message": "URL, gerçek hedefi gizleyebilecek bir \"@\" işareti içeriyor."
-  },
-  "reason_punycodeHost": {
-    "message": "Alan adı, gerçek markaları taklit etmek için sıkça kullanılan punycode kullanıyor."
-  },
-  "reason_idnHomograph": {
-    "message": "Bu alan adı, benzer yabancı karakterler kullanarak \"$BRAND$\" markasını taklit ediyor.",
-    "placeholders": {
-      "brand": {
-        "content": "$1",
-        "example": "paypal"
-      }
-    }
-  },
-  "reason_brandLookalike": {
-    "message": "Alan adı, tanınmış bir markanın taklidi gibi görünüyor."
-  },
-  "reason_suspiciousTld": {
-    "message": "Alan adı, dolandırıcılık için sıkça kötüye kullanılan bir üst düzey alan adı kullanıyor."
-  },
-  "reason_noHttps": {
-    "message": "Bağlantı güvenli değil (HTTPS yok)."
-  },
-  "reason_manySubdomains": {
-    "message": "Alışılmadık derecede çok alt alan adı."
-  },
-  "reason_urgencyKeywords": {
-    "message": "URL, birden fazla aciliyet/güvenlik anahtar kelimesi içeriyor."
-  },
-  "reason_randomHost": {
-    "message": "Alan adı rastgele oluşturulmuş gibi görünüyor."
-  },
-  "reason_brandFuzzyMatch": {
-    "message": "Bu alan adı $BRAND$'ın gerçek alan adına çok benziyor — herhangi bir şey girmeden önce adres çubuğunu dikkatle kontrol edin.",
-    "placeholders": {
-      "brand": {
-        "content": "$1",
-        "example": "PayPal"
-      }
-    }
-  },
-  "reason_deepSubdomainChain": {
-    "message": "Alan adının gerçek domainin altında alışılmadık derecede uzun bir alt alan adı zinciri var — yaygın bir gizleme hilesi."
-  },
-  "reason_longHostLabel": {
-    "message": "Alan adı, genellikle sahte bir marka adını gizlemek veya gerçek alan adını saklamak için kullanılan alışılmadık derecede uzun bir bölüm içeriyor."
-  },
-  "reason_shortenerHost": {
-    "message": "Bu bir bağlantı kısaltma alan adıdır ($HOST$) — tıklayana kadar gerçek hedef gizli kalır.",
-    "placeholders": {
-      "host": {
-        "content": "$1",
-        "example": "bit.ly"
-      }
-    }
-  },
-  "reason_riskAbusedTld": {
-    "message": "Bu sitenin üst düzey alan adı ($TLD$), ScamShield'ın tehdit listesi risk tablolarında yüksek oranda dolandırıcılık amacıyla kötüye kullanılıyor.",
-    "placeholders": {
-      "tld": {
-        "content": "$1",
-        "example": ".top"
-      }
-    }
-  },
-  "reason_brandForeignSuffix": {
-    "message": "Gerçek $BRAND$ markasının hiç kullanmadığı bir .$SUFFIX$ adresinde $BRAND$ adını kullanıyor.",
-    "placeholders": {
-      "brand": {
-        "content": "$1",
-        "example": "Roblox"
-      },
-      "suffix": {
-        "content": "$2",
-        "example": "com.do"
-      }
-    }
-  },
-  "reason_gatewayRedirect": {
-    "message": "Bu sayfaya $HOST$ üzerindeki kısa bir yönlendirme bağlantısıyla ulaşıldı ve bağlantı tamamen farklı bir siteye götürdü — dolandırıcılık geçitlerinin bilinen bir yöntemi.",
-    "placeholders": {
-      "host": {
-        "content": "$1",
-        "example": "mgpxq.com"
-      }
-    }
-  },
-  "reason_riskDynamicHost": {
-    "message": "Alan adı, dolandırıcılık sayfaları için sıkça kötüye kullanılan bir dinamik DNS veya ücretsiz barındırma sağlayıcısında barındırılıyor."
-  },
-  "reason_feedBlock": {
-    "message": "Bu alan adı, ScamShield'ın tehdit listesiyle eşleşiyor ve $COUNT$ bağımsız kaynak tarafından doğrulandı.",
-    "placeholders": {
-      "count": {
-        "content": "$1",
-        "example": "3"
-      }
-    }
-  },
-  "reason_feedWarn": {
-    "message": "Bu alan adı, ScamShield'ın tehdit listesinde daha düşük güvenilirlikte bir kayıtla eşleşiyor ($COUNT$ kaynak) — dikkatli ilerleyin.",
-    "placeholders": {
-      "count": {
-        "content": "$1",
-        "example": "1"
-      }
-    }
-  },
-  "reason_newDomain": {
-    "message": "Alan adı yakın zamanda kaydedilmiş alan adları listesinde görünüyor — dolandırıcılık sitelerinin çoğu yalnızca birkaç günlüktür$EXTRA$.",
-    "placeholders": {
-      "extra": {
-        "content": "$1",
-        "example": ", and you have never visited it before"
-      }
-    }
-  },
-  "reason_credentialFormForeignDomain": {
-    "message": "Bu sayfadaki bir şifre formu, kimlik bilgilerinizi farklı bir siteye gönderiyor."
-  },
-  "reason_crossOriginCredPost": {
-    "message": "Bu form şifrenizi veya kart bilgilerinizi $HOST$ adresine gönderiyor — bulunduğunuz siteden farklı bir site.",
-    "placeholders": {
-      "host": {
-        "content": "$1",
-        "example": "collector.example"
-      }
-    }
-  },
-  "reason_hiddenIframes": {
-    "message": "Sayfa, girdinizi yakalayabilecek gizli çerçeveler içeriyor."
-  },
-  "reason_scamPhrase": {
-    "message": "Sayfa, klasik dolandırıcılık/hediye dili gösteriyor (\"$PHRASE$\").",
-    "placeholders": {
-      "phrase": {
-        "content": "$1",
-        "example": "you won"
-      }
-    }
-  },
-  "reason_seedPhraseAsk": {
-    "message": "Bu sayfa cüzdan kurtarma ifadenizi istiyor — asla girmeyin; bu paranızı çalar."
-  },
-  "reason_brandImpersonationContent": {
-    "message": "Bu sayfa \"$BRAND$\" gibi görünüyor ama onun gerçek web sitesinde değil.",
-    "placeholders": {
-      "brand": {
-        "content": "$1",
-        "example": "paypal"
-      }
-    }
-  },
-  "reason_deliveryFeeScam": {
-    "message": "Bu sayfa $BRAND$ gibi davranarak bir paketi teslim etmek için kart bilgisi istiyor. Kargo şirketleri asla böyle sayfalar aracılığıyla ücret almaz.",
-    "placeholders": {
-      "brand": {
-        "content": "$1",
-        "example": "DHL"
-      }
-    }
-  },
-  "reason_credentialFormOnTenantHost": {
-    "message": "Herkesin saniyeler içinde sayfa yayımlayabildiği paylaşımlı bir barındırma platformunda ($HOST$) parola istiyor.",
-    "placeholders": {
-      "host": {
-        "content": "$1",
-        "example": "webflow.io"
-      }
-    }
-  },
-  "reason_brandInTenantHost": {
-    "message": "Parola isteyen ücretsiz barındırma sayfasının adresinde $BRAND$ adı geçiyor.",
-    "placeholders": {
-      "brand": {
-        "content": "$1",
-        "example": "AT&T"
-      }
-    }
-  },
-  "reason_brandIconMismatch": {
-    "message": "Bu sayfa $BRAND$'ın simgesini kullanıyor ama $BRAND$'ın web sitesi değil.",
-    "placeholders": {
-      "brand": {
-        "content": "$1",
-        "example": "PayPal"
-      }
-    }
-  },
-  "reason_contentPhishingPattern": {
-    "message": "Sayfanın metni ve düzeni, bilinen kimlik avı sayfalarına benziyor."
-  },
-  "reason_techScamScareText": {
-    "message": "Sayfa sahte güvenlik uyarısı dili kullanıyor (\"$PHRASE$\").",
-    "placeholders": {
-      "phrase": {
-        "content": "$1",
-        "example": "virus detected"
-      }
-    }
-  },
-  "reason_techScamPhoneAsk": {
-    "message": "Sayfa, \"destek\" için bir telefon numarasını aramanız için sizi zorluyor — teknik destek dolandırıcılığının tipik özelliği."
-  },
-  "reason_techScamFakeAlert": {
-    "message": "Bu, bir sistem uyarısı gibi davranan bir web sayfasıdır — bilgisayarınız iyi durumda. Gerçek Microsoft/Apple uyarıları asla telefon numarası göstermez."
-  },
-  "reason_techScamFullscreen": {
-    "message": "Sayfa, kapatılmasını zorlaştırmak için tam ekranı zorladı."
-  },
-  "reason_techScamAlarmAudio": {
-    "message": "Sayfa, sizi paniğe sürüklemek için alarm sesi çalıyor."
-  },
-  "reason_techScamDialogFlood": {
-    "message": "Sayfa, sizi kapana kıstırmak için açılır pencerelerle doldu."
-  },
-  "reason_techScamHistoryTrap": {
-    "message": "Sayfa, Geri düğmenizi ele geçiriyor."
-  },
-  "reason_walletBlindSign": {
-    "message": "Bir site, cüzdanınızdan rastgele veriyi körlemesine imzalamasını istedi — yaygın bir cüzdan boşaltma hilesi."
-  },
-  "reason_walletPermitApproval": {
-    "message": "Bu imza bir token onayıdır (\"Permit\"). İmzalamak, bu sitenin daha sonra sizden tekrar sormadan token'larınızı veya NFT'lerinizi taşımasına izin verir — en yaygın cüzdan boşaltma imzasıdır."
-  },
-  "reason_walletDelegation7702": {
-    "message": "Bu işlem, hesabınızın kontrolünü bir sözleşmeye devreder (EIP-7702 devri) — cüzdan boşaltıcıların cüzdanları boşaltmak için kullandığı bir teknik."
-  },
-  "reason_walletSetApprovalAll": {
-    "message": "Bu işlem, bir siteye bir koleksiyondaki TÜM NFT'leriniz üzerinde kontrol veriyor."
-  },
-  "reason_walletUnlimitedApprove": {
-    "message": "Bu işlem, bir siteye token'larınızı harcaması için SINIRSIZ izin veriyor."
-  },
-  "reason_walletTokenApprove": {
-    "message": "Bu işlem, bir sitenin token'larınızın bir kısmını harcamasına izin veriyor."
-  },
-  "reason_clickfixPasteRun": {
-    "message": "Bu sayfa panonuza bir sistem komutu koydu ve yapıştırıp çalıştırmanızı istiyor. Gerçek web siteleri bunu asla yapmaz — çalıştırmak bilgisayarınıza virüs bulaştırır."
-  },
-  "reason_clickfixFakeCaptcha": {
-    "message": "Bu \"doğrulama\", Win+R'ye basıp bir komut yapıştırmanızı istiyor. Gerçek CAPTCHA'lar asla bir şey çalıştırmanızı istemez — bu kötü amaçlı yazılım yükler."
-  },
-  "reason_clickfixWinR": {
-    "message": "Bu sayfa, Windows Çalıştır kutusunu açıp bir şey yapıştırmanızı istiyor — insanları kötü amaçlı yazılım çalıştırmaya kandırmak için kullanılan bir yöntem."
-  },
-  "reason_clickfixCaptchaDisguise": {
-    "message": "Talimatlar, bir insan doğrulama adımı gibi gizlenmiştir."
-  },
-  "reason_clipboardCommand": {
-    "message": "Bir site panonuza bir sistem komutu kopyaladı. Bunu bir terminale veya Çalıştır kutusuna YAPIŞTIRMAYIN."
-  },
-  "reason_clipboardCryptoAddress": {
-    "message": "Bir site panonuza bir kripto para adresi koydu — yapıştırmadan önce doğrulayın."
-  },
-  "reason_fakeUpdatePrompt": {
-    "message": "Bu sayfa, tarayıcınızın güncelleme gerektirdiğini iddia ederek bir indirme sunuyor. Gerçek güncelleme istemleri tarayıcının kendisinden gelir — asla bir web sayfasından gelmez. İndirilen dosya büyük olasılıkla kötü amaçlı yazılımdır."
-  },
-  "reason_msgOtpAsk": {
-    "message": "Sizden bir OTP, PIN veya şifre paylaşmanızı istiyor — hiçbir meşru hizmet bunu yapmaz."
-  },
-  "reason_msgScamWording": {
-    "message": "Bilinen dolandırıcılık ifadesini kullanıyor (\"$PHRASE$\").",
-    "placeholders": {
-      "phrase": {
-        "content": "$1",
-        "example": "delivery fee"
-      }
-    }
-  },
-  "reason_msgUrgencyDeadline": {
-    "message": "Yapay bir son tarihle baskı oluşturuyor — klasik bir dolandırıcılık taktiği."
-  },
-  "reason_msgDangerousLink": {
-    "message": "Tehlikeli görünen bir bağlantı içeriyor ($URL$).",
-    "placeholders": {
-      "url": {
-        "content": "$1",
-        "example": "http://verify-bank.tk/otp"
-      }
-    }
-  },
-  "reason_qrCodeDestination": {
-    "message": "Bu sayfa, $URL$ adresine yönlendiren bir QR kod içeriyor — telefonunuzla taramadan önce otomatik olarak kontrol edildi.",
-    "placeholders": {
-      "url": {
-        "content": "$1",
-        "example": "http://verify-bank.tk/otp"
-      }
-    }
-  },
-  "reason_shop_countdownReset": {
-    "message": "Sahte geri sayım"
-  },
-  "reason_shop_countdownReset_detail": {
-    "message": "\"Acele edin, teklif bitiyor\" sayacı her ziyarette sıfırlanıyor — aciliyet sahte."
-  },
-  "reason_shop_offPlatformPay": {
-    "message": "Riskli ödeme"
-  },
-  "reason_shop_offPlatformPay_detail": {
-    "message": "Ödeme sayfası sizi Zelle/Venmo/CashApp/havale/kripto ödemeye yönlendiriyor — dolandırıcılık ise bu parayı geri alamazsınız."
-  },
-  "reason_shop_fakeScarcity": {
-    "message": "Sahte kıtlık"
-  },
-  "reason_shop_fakeScarcity_detail": {
-    "message": "Eklenmiş \"sadece birkaç tane kaldı / N kişi görüntülüyor\" baskı widget'ları."
-  },
-  "reason_shop_badgeHotlink": {
-    "message": "Sahte güven rozeti"
-  },
-  "reason_shop_badgeHotlink_detail": {
-    "message": "Sadece bir resim olan ve hiçbir yere bağlantısı olmayan \"güvenli\"/\"doğrulanmış\" rozeti."
-  },
-  "reason_shop_missingContact": {
-    "message": "İletişim bilgisi yok"
-  },
-  "reason_shop_missingContact_detail": {
-    "message": "Gerçek adres, telefon veya şirket bilgisi yok — tek kullanımlık sahte mağazalar için normal."
-  },
-  "obDocTitle": {
-    "message": "ScamShield'a Hoş Geldiniz"
-  },
-  "obTitle": {
-    "message": "ScamShield sizi koruyor"
-  },
-  "obLead": {
-    "message": "Ziyaret ettiğiniz sayfaları izler ve dolandırıcılıklara karşı sizi uyarır — tamamen cihazınızda. Gezinme geçmişiniz asla bilgisayarınızdan çıkmaz."
-  },
-  "obPhishing": {
-    "message": "Kimlik avı ve sahte girişler"
-  },
-  "obPhishingBody": {
-    "message": "Bir sayfa şifrenizi yanlış siteye gönderdiğinde uyarır."
-  },
-  "obBrand": {
-    "message": "Marka taklitleri"
-  },
-  "obBrandBody": {
-    "message": "Kendilerine ait olmayan bir sitede kopyalanmış PayPal, banka veya operatör simgesini tanır — BAE bankaları ve devlet hizmetleri dahil 60'tan fazla marka."
-  },
-  "obPage": {
-    "message": "Sayfa analizi"
-  },
-  "obPageBody": {
-    "message": "Henüz hiçbir listede olmayan dolandırıcılıkları yakalamak için giriş sayfalarının metnini ve düzenini cihazınızda okur."
-  },
-  "obWallet": {
-    "message": "Kripto cüzdan koruması"
-  },
-  "obWalletBody": {
-    "message": "Cüzdanınız görmeden önce boşaltıcı onaylarını ve kurtarma ifadesi hırsızlığını durdurur."
-  },
-  "obClipboard": {
-    "message": "Pano ve \"bunu yapıştır\" dolandırıcılıkları"
-  },
-  "obClipboardBody": {
-    "message": "Bir site gizlice panonuza bir komut kopyaladığında sizi uyarır."
-  },
-  "obPopups": {
-    "message": "Sahte virüs açılır pencereleri"
-  },
-  "obPopupsBody": {
-    "message": "Korkutucu açılır pencere döngüsünü kırar ve çıkmanıza yardımcı olur."
-  },
-  "obPin": {
-    "message": "ScamShield'ı sabitle"
-  },
-  "obPinBody": {
-    "message": "Araç çubuğunuzdaki yapboz parçası simgesine, ardından ScamShield'ın yanındaki iğneye tıklayın, böylece her sayfanın durumunu bir bakışta görebilirsiniz."
-  },
-  "obOpenSettings": {
-    "message": "Ayarları aç"
-  },
-  "blockedDocTitle": {
-    "message": "Site ScamShield tarafından engellendi"
-  },
-  "blockedTitle": {
-    "message": "ScamShield bu siteyi engelledi"
-  },
-  "blockedLead": {
-    "message": "$HOST$, ScamShield'ın bilinen dolandırıcılık ve zararlı site listesinde yer alıyor, bu yüzden sayfa yüklenmeden durduruldu. Hiçbir şey çalışmadı ve yazdığınız hiçbir şey gönderilmedi.",
-    "placeholders": {
-      "host": {
-        "content": "$1",
-        "example": "secure-paypa1-login.com"
-      }
-    }
-  },
-  "blockedLeadHot": {
-    "message": "$HOST$ son iki gün içinde kimlik avı nedeniyle bildirildi, bu yüzden sayfa yüklenmeden durduruldu. Hiçbir şey çalışmadı ve yazdığınız hiçbir şey gönderilmedi.",
-    "placeholders": {
-      "host": {
-        "content": "$1",
-        "example": "secure-paypa1-login.com"
-      }
-    }
-  },
-  "blockedAddress": {
-    "message": "Engellenen adres"
-  },
-  "blockedListedBy": {
-    "message": "$SOURCES$ tarafından listelendi",
-    "placeholders": {
-      "sources": {
-        "content": "$1",
-        "example": "Phishing.Database, ScamSniffer"
-      }
-    }
-  },
-  "blockedListedGeneric": {
-    "message": "ScamShield'ın onaylanmış dolandırıcılık alan adları engelleme listesinde yer alıyor."
-  },
-  "blockedGoBack": {
-    "message": "Güvenliğe geri dön"
-  },
-  "blockedTrustSite": {
-    "message": "Dolandırıcılık değil mi? Bu siteye güven"
-  },
-  "blockedVisitAnyway": {
-    "message": "Yine de ziyaret et (önerilmez)"
-  },
-  "blockedVisitHint": {
-    "message": "Siteyi, ScamShield 1 saatliğine bu sitede duraklatılmış olarak açar."
-  },
-  "blockedFooter": {
-    "message": "Cihazınızda engellendi. Bu sayfayla ilgili hiçbir şey herhangi bir yere gönderilmedi."
-  },
-  "chipBlocklist": {
-    "message": "Engellenen site"
-  },
-  "obNote": {
-    "message": "ScamShield ücretsizdir. İsteğe bağlı: Ayarlar'da, yakaladığı dolandırıcılıkların anonim raporlarını paylaşarak onu daha akıllı hale getirmeye yardımcı olabilirsiniz — siz açmadığınız sürece kapalıdır. Size yardımcı olduysa, Ayarlar sayfasından geliştirmeyi destekleyebilirsiniz."
-  },
-  "statsLink": {
-    "message": "İstatistikler →"
-  },
-  "tabStats": {
-    "message": "İstatistikler"
-  },
-  "optLang": {
-    "message": "Dil"
-  },
-  "optLangHint": {
-    "message": "ScamShield'ın uyarılarına, açılır penceresine ve ayarlarına uygulanır. Senkronizasyon açıksa diğer cihazlarınızla senkronize edilir."
-  },
-  "optLangAuto": {
-    "message": "Tarayıcı varsayılanı"
-  },
-  "fmtStatsSince": {
-    "message": "Bu tarayıcıyı $DATE$ tarihinden beri koruyor",
-    "placeholders": {
-      "date": {
-        "content": "$1",
-        "example": "12 Jun 2026"
-      }
-    }
-  },
-  "stats7d": {
-    "message": "7 gün"
-  },
-  "stats30d": {
-    "message": "30 gün"
-  },
-  "statsAll": {
-    "message": "Tüm zamanlar"
-  },
-  "statsPagesChecked": {
-    "message": "Cihazda kontrol edilen sayfalar"
-  },
-  "statsThreatsStopped": {
-    "message": "Durdurulan tehditler"
-  },
-  "statsThreatsNone": {
-    "message": "Temizsiniz — hiçbir şey sızmadı"
-  },
-  "statsScamsBlockedOne": {
-    "message": "1 dolandırıcılık size hiç ulaşmadı"
-  },
-  "fmtStatsScamsBlocked": {
-    "message": "$COUNT$ dolandırıcılık size hiç ulaşmadı",
-    "placeholders": {
-      "count": {
-        "content": "$1",
-        "example": "8"
-      }
-    }
-  },
-  "statsPrivacyFindings": {
-    "message": "Gizlilik bulguları"
-  },
-  "statsRulesActive": {
-    "message": "Etkin engelleme listesi kuralı"
-  },
-  "statsRulesActiveHint": {
-    "message": "ScamShield'a yerleşik liste dahil, şu anda yürürlükte."
-  },
-  "statsChartTitle7d": {
-    "message": "Kontrol edilen sayfalar · son 7 gün"
-  },
-  "statsChartTitle30d": {
-    "message": "Kontrol edilen sayfalar · son 30 gün"
-  },
-  "statsChartTitleAll": {
-    "message": "Kontrol edilen sayfalar · kurulumdan bu yana"
-  },
-  "statsChartTitle90d": {
-    "message": "Kontrol edilen sayfalar · son 90 gün"
-  },
-  "statsAxisToday": {
-    "message": "Bugün"
-  },
-  "statsLegendChecked": {
-    "message": "Kontrol edilen sayfalar"
-  },
-  "statsLegendThreat": {
-    "message": "O gün durdurulan tehdit"
-  },
-  "fmtStatsBarTip": {
-    "message": "$DATE$ · $COUNT$ sayfa kontrol edildi",
-    "placeholders": {
-      "date": {
-        "content": "$1",
-        "example": "21 Aug"
-      },
-      "count": {
-        "content": "$2",
-        "example": "63"
-      }
-    }
-  },
-  "fmtStatsBarTipThreat": {
-    "message": "$DATE$ · $COUNT$ sayfa kontrol edildi · 1 tehdit durduruldu",
-    "placeholders": {
-      "date": {
-        "content": "$1",
-        "example": "21 Aug"
-      },
-      "count": {
-        "content": "$2",
-        "example": "63"
-      }
-    }
-  },
-  "fmtStatsBarTipThreats": {
-    "message": "$DATE$ · $COUNT$ sayfa kontrol edildi · $THREATS$ tehdit durduruldu",
-    "placeholders": {
-      "date": {
-        "content": "$1",
-        "example": "21 Aug"
-      },
-      "count": {
-        "content": "$2",
-        "example": "63"
-      },
-      "threats": {
-        "content": "$3",
-        "example": "2"
-      }
-    }
-  },
-  "statsByType": {
-    "message": "Türe göre tehditler · tüm zamanlar"
-  },
-  "statsCatPhishing": {
-    "message": "Kimlik avı"
-  },
-  "statsCatFakeShop": {
-    "message": "Sahte mağaza"
-  },
-  "statsCatWallet": {
-    "message": "Cüzdan boşaltıcı"
-  },
-  "statsCatTechSupport": {
-    "message": "Teknik destek"
-  },
-  "statsCatClipboard": {
-    "message": "Pano"
-  },
-  "statsCatClickfix": {
-    "message": "Sahte CAPTCHA"
-  },
-  "statsCatFakeUpdate": {
-    "message": "Sahte güncelleme"
-  },
-  "statsCatOther": {
-    "message": "Diğer"
-  },
-  "statsRecent": {
-    "message": "Son etkinlik"
-  },
-  "statsPillBlocked": {
-    "message": "Engellendi"
-  },
-  "statsPillWarned": {
-    "message": "Uyarıldı"
-  },
-  "statsFooter": {
-    "message": "Her sayı cihazınızda sayılır. Bu sayfadaki hiçbir şey herhangi bir yere gönderilmez."
-  },
-  "reviewAskBody": {
-    "message": "ScamShield şu ana kadar sizin için $COUNT$ dolandırıcılığı durdurdu. Hak ettiğini düşünüyorsanız kısa bir değerlendirme, başkalarının onu bulmasına yardımcı olur — ücretsizdir ve her zaman ücretsiz kalacaktır.",
-    "placeholders": {
-      "count": {
-        "content": "$1",
-        "example": "2"
-      }
-    }
-  },
-  "reviewRate": {
-    "message": "ScamShield'ı değerlendirin"
-  },
-  "reviewLater": {
-    "message": "Belki sonra"
-  },
-  "reviewNo": {
-    "message": "Hayır, teşekkürler"
-  },
-  "reviewAboutLink": {
-    "message": "ScamShield'ı beğendiniz mi? Bir değerlendirme bırakın"
-  }
+  "extName": { "message": "Dolandırıcılık ve Kimlik Avı Engelleyici: ScamShield" },
+  "extShortName": { "message": "ScamShield" },
+  "extDescription": { "message": "Cihazınızda dolandırıcılık ve kimlik avı koruması: sizi uyarır, marka taklitlerini tespit eder ve mesajları kontrol eder. Hiçbir şey cihazınızdan çıkmaz." },
+  "on": { "message": "Açık" },
+  "paused": { "message": "Duraklatıldı" },
+  "settings": { "message": "Ayarlar" },
+  "dismiss": { "message": "Kapat" },
+  "ariaDismiss": { "message": "Kapat" },
+  "cancel": { "message": "İptal" },
+  "reportMistake": { "message": "Hata bildir" },
+  "thanks": { "message": "Teşekkürler" },
+  "trustThisSite": { "message": "Bu siteye güven" },
+  "ackTrusted": { "message": "ScamShield $HOST$ adresini bir daha işaretlemeyecek.", "placeholders": { "host": { "content": "$1", "example": "secure-paypa1-login.com" } } },
+  "undo": { "message": "Geri al" },
+  "popupPauseMenu": { "message": "Korumayı duraklat ▾" },
+  "privacyPolicyLink": { "message": "Gizlilik politikası" },
+  "whatsNewLink": { "message": "Yenilikler" },
+  "unknownSite": { "message": "bilinmeyen site" },
+  "popupChecking": { "message": "Kontrol ediliyor…" },
+  "popupSafe": { "message": "Burada şüpheli bir şey yok" },
+  "popupSuspicious": { "message": "Şüpheli sayfa" },
+  "popupDangerous": { "message": "Tehlikeli sayfa" },
+  "popupUnknown": { "message": "Taranmadı" },
+  "popupPausedSummary": { "message": "Koruma duraklatıldı — devam etmek için açın." },
+  "popupNotHttp": { "message": "Tarayıcı sayfaları ve web mağazası taranmaz." },
+  "popupDangerSummary": { "message": "Buraya şifre veya kart bilgisi girmeyin." },
+  "popupSuspiciousSummary": { "message": "Buraya bir şey yazmadan önce dikkatli olun." },
+  "leaveThisPage": { "message": "Bu sayfadan ayrıl" },
+  "whyVerdict": { "message": "Bu karar neden verildi?" },
+  "whyVerdictCountOne": { "message": "· 1 sinyal" },
+  "fmtWhyVerdictCount": { "message": "· $COUNT$ sinyal", "placeholders": { "count": { "content": "$1" } } },
+  "takeMeToReal": { "message": "Beni gerçek $BRAND$ sitesine götür", "placeholders": { "brand": { "content": "$1" } } },
+  "copyReportBtn": { "message": "Raporu kopyala" },
+  "copyReportHeader": { "message": "⚠ ScamShield bu siteyi işaretledi: $HOST$", "placeholders": { "host": { "content": "$1", "example": "evil[.]example" } } },
+  "copyReportVerdict": { "message": "Karar: $LEVEL$", "placeholders": { "level": { "content": "$1", "example": "Dangerous page" } } },
+  "copyReportSignals": { "message": "Sinyaller:" },
+  "copyReportFooter": { "message": "ScamShield tarafından cihazda kontrol edildi — ücretsiz, açık kaynak: https://joelstephen97.github.io/scamshield/" },
+  "reportScam": { "message": "Bildir: bu dolandırıcılık" },
+  "reportSafe": { "message": "Bildir: bu güvenli" },
+  "pause1h": { "message": "1 saat" },
+  "pause1d": { "message": "1 gün" },
+  "pauseAlways": { "message": "Her zaman" },
+  "resumeNow": { "message": "Şimdi devam ettir" },
+  "blockedOnSite": { "message": "Bu sitede engellenen" },
+  "blockedAllTime": { "message": "Toplam engellenen" },
+  "sinceInstall": { "message": "Kurulumdan bu yana" },
+  "thisWeek": { "message": "Bu hafta" },
+  "statsLink": { "message": "İstatistikler →" },
+  "privacyOnPage": { "message": "Bu sayfada gizlilik" },
+  "shoppingCheck": { "message": "Alışveriş kontrolü" },
+  "checkMessageTitle": { "message": "Bir mesaj veya bağlantı kontrol et" },
+  "checkMessageHint": { "message": "Şüpheli bir SMS, WhatsApp veya e-posta metni ya da bağlantı yapıştırın. Tamamen cihazınızda kontrol edilir." },
+  "checkMessagePlaceholder": { "message": "Mesajı veya bağlantıyı buraya yapıştırın…" },
+  "check": { "message": "Kontrol et" },
+  "checkedOnDevice": { "message": "Yalnızca cihazınızda kontrol edildi" },
+  "msgSafe": { "message": "Güvenli görünüyor: dolandırıcılık işareti yok" },
+  "msgSuspicious": { "message": "Şüpheli: dikkatli olun" },
+  "msgDangerous": { "message": "Neredeyse kesinlikle dolandırıcılık" },
+  "qrScanTitle": { "message": "Bu sayfada QR kod tara" },
+  "qrScanHint": { "message": "Bu sayfadaki görsellerdeki QR kodlarını çözer ve telefonunuzla taramadan önce nereye yönlendirdiklerini kontrol eder. Tamamen cihazınızda denetlenir." },
+  "qrScanBtn": { "message": "Şimdi tara" },
+  "qrScanNone": { "message": "Bu sayfada QR kod bulunamadı." },
+  "qrScanFoundOne": { "message": "1 QR kod bulundu" },
+  "fmtQrScanFoundCount": { "message": "$COUNT$ QR kod bulundu", "placeholders": { "count": { "content": "$1", "example": "3" } } },
+  "support": { "message": "Destekle" },
+  "footerTrustLine": { "message": "Cihazınızda çalışır. Hiçbir veri tarayıcınızdan çıkmaz." },
+  "takeMeToRealSite": { "message": "Beni gerçek siteye götür" },
+  "toastThanksNoted": { "message": "Teşekkürler — not edildi" },
+  "toastThanksSent": { "message": "Teşekkürler — gönderildi" },
+  "toastPausedForNow": { "message": "Şimdilik duraklatıldı" },
+  "toastResumed": { "message": "Koruma devam ettirildi" },
+  "toastCopied": { "message": "Kopyalandı" },
+  "toastExtensionError": { "message": "Uzantı hatası — yeniden açmayı deneyin." },
+  "whatsNewBanner": { "message": "0.13'teki yenilikler: saatlik acil liste, yepyeni dolandırıcılık sitelerini bildirimden yaklaşık bir saat sonra engelliyor; bize hâlâ tek bir istek bile gitmiyor. Ayrıca her uyarıda „Bu siteye güven“." },
+  "popupBrandDangerSummary": { "message": "$BRAND$ gibi görünüyor ama değil. Buraya şifrenizi girmeyin.", "placeholders": { "brand": { "content": "$1", "example": "PayPal" } } },
+  "pausedUntil": { "message": "$TIME$ saatine kadar duraklatıldı", "placeholders": { "time": { "content": "$1" } } },
+  "fmtProtocolPage": { "message": "$PROTOCOL$ sayfası", "placeholders": { "protocol": { "content": "$1", "example": "chrome" } } },
+  "popupShopFlagFallback": { "message": "İşaretle" },
+  "chipWhy": { "message": "Neden" },
+  "chipDataLeak": { "message": "Veri sızıntısı" },
+  "chipTracking": { "message": "Takip" },
+  "chipPopups": { "message": "Açılır pencereler" },
+  "chipPrivacy": { "message": "Gizlilik" },
+  "popupPrivacyLeakPlain": { "message": "Formu göndermeden önce e-posta/telefon bilginizi $HOST$ adresine gönderdi.", "placeholders": { "host": { "content": "$1", "example": "tracker.example" } } },
+  "popupPrivacyLeakHashed": { "message": "Formu göndermeden önce e-posta/telefon bilginizi (hash'lenmiş) $HOST$ adresine gönderdi.", "placeholders": { "host": { "content": "$1", "example": "tracker.example" } } },
+  "popupPrivacyFingerprint": { "message": "$HOST$, sizi takip etmek için cihazınızın parmak izini alıyor.", "placeholders": { "host": { "content": "$1", "example": "tracker.example" } } },
+  "popupPrivacyNotifyLure": { "message": "Bu site \"İzin Ver'e tıklayın\" bildirim hilesini denedi." },
+  "popupPrivacyCredExfilPassword": { "message": "Şifrenizi $HOST$ adresine gönderdi — bulunduğunuz siteden farklı bir site.", "placeholders": { "host": { "content": "$1", "example": "collector.example" } } },
+  "popupPrivacyCredExfilCard": { "message": "Kart bilgilerinizi $HOST$ adresine gönderdi — bulunduğunuz siteden farklı bir site.", "placeholders": { "host": { "content": "$1", "example": "collector.example" } } },
+  "popupPrivacyDefaultText": { "message": "Gizlilik sorunu tespit edildi." },
+  "levelDangerous": { "message": "Tehlikeli sayfa" },
+  "levelSuspicious": { "message": "Şüpheli sayfa" },
+  "levelSafe": { "message": "Burada şüpheli bir şey yok" },
+  "levelUnknown": { "message": "Bu sayfa kontrol edilemiyor" },
+  "tabProtection": { "message": "Koruma" },
+  "tabTrusted": { "message": "Duraklatılan siteler" },
+  "tabHistory": { "message": "Geçmiş" },
+  "tabStats": { "message": "İstatistikler" },
+  "tabFeed": { "message": "Tehdit listesi" },
+  "tabAbout": { "message": "Hakkında" },
+  "protectionLead": { "message": "Buradaki her şey cihazınızda çalışır. Aşağıdaki topluluk raporlamasını açmadığınız sürece hiçbir şey gönderilmez." },
+  "protectionOn": { "message": "Koruma açık" },
+  "protectionOnHint": { "message": "Sayfaları dolandırıcılığa karşı tarar ve sizi uyarır. Her şeyi duraklatmak için kapatın." },
+  "grpScams": { "message": "Dolandırıcılık ve kimlik avı" },
+  "grpScamsHint": { "message": "Bilinen kötü siteleri engeller ve yeni kimlik avını cihazınızda yakalar." },
+  "grpPopups": { "message": "Açılır pencereler ve sahte sistem uyarıları" },
+  "grpPopupsHint": { "message": "Sahte virüs uyarıları, ekran kilitleyiciler ve pano ele geçirmeleri." },
+  "grpShopping": { "message": "Alışveriş" },
+  "grpShoppingHint": { "message": "Sahte çevrimiçi mağazaları ve arama reklamlarının gerçekte nereye gittiğini tespit eder." },
+  "grpCrypto": { "message": "Kripto ve cüzdanlar" },
+  "grpCryptoHint": { "message": "Riskli cüzdan imzalarından önce uyarılar." },
+  "grpPrivacy": { "message": "Gizlilik" },
+  "grpPrivacyHint": { "message": "Bilgilerinizi sızdıran veya cihazınızı takip eden siteleri yakalar — tamamı cihazınızda." },
+  "optBlockKnown": { "message": "Bilinen dolandırıcılık sitelerini engelle" },
+  "optBlockKnownHint": { "message": "Günlük güncellenen tehdit listesindeki sayfaları yüklenmeden önce durdurur." },
+  "optPageAnalysis": { "message": "Sayfa analizi" },
+  "optPageAnalysisHint": { "message": "Henüz hiçbir listede olmayan dolandırıcılıkları yakalamak için sayfanın metnini, düzenini ve simgelerini cihazınızda okur." },
+  "optClickfix": { "message": "Sahte CAPTCHA / \"bunu yapıştır\" engelleyici" },
+  "optClickfixHint": { "message": "Win+R'ye basıp bir komut yapıştırmanızı isteyen sayfaları durdurur (ClickFix kötü amaçlı yazılımı)." },
+  "optFakeupdate": { "message": "Sahte tarayıcı güncelleme engelleyici" },
+  "optFakeupdateHint": { "message": "Tarayıcınızın güncelleme gerektirdiğini iddia ederek kötü amaçlı yazılım indirtmeye çalışan sayfaları engeller." },
+  "optHide": { "message": "Dolandırıcılık içeriğini gizle" },
+  "optHideHint": { "message": "Normal görünen sayfalar içindeki \"bir ödül kazandınız\" bloklarını griye boyar." },
+  "optQrScan": { "message": "QR kodlarını otomatik tara" },
+  "optQrScanHint": { "message": "Sayfadaki büyük görsellerdeki QR kodlarını çözer ve telefonunuzla taramadan önce nereye yönlendirdiklerini kontrol eder — \"quishing\" (QR kod kimlik avı) e-postalarına karşı cihaz üzerinde çalışan bir önlem. Ayrıca herhangi bir sayfayı istediğiniz zaman popup'tan da tarayabilirsiniz." },
+  "optTechscam": { "message": "Teknik destek dolandırıcılığından kaçış" },
+  "optTechscamHint": { "message": "Sahte \"bilgisayarınız virüslü, bu numarayı arayın\" sayfalarını tespit eder ve size bir çıkış yolu sunar." },
+  "optClipboard": { "message": "Pano ele geçirme uyarısı" },
+  "optClipboardHint": { "message": "Bir site gizlice panonuza bir komut veya kripto adresi koyduğunda uyarır." },
+  "optShop": { "message": "Sahte mağaza kontrolleri" },
+  "optShopHint": { "message": "Sahte geri sayımları, sahte \"sadece 2 tane kaldı\" baskısını, eksik iletişim bilgilerini ve platform dışı ödemeyi (Zelle/havale/kripto) arar ve bunları popup'ta gösterir." },
+  "optSerp": { "message": "Sponsorlu sonuç kontrolü" },
+  "optSerpHint": { "message": "Google/Bing/DuckDuckGo'da, reklamı gösterdiği siteden başka bir yere giden sponsorlu bir sonucu işaretler." },
+  "optWallet": { "message": "Cüzdan boşaltıcı koruması" },
+  "optWalletHint": { "message": "Cüzdan boşaltıcıların istismar ettiği token harcamalarını, \"Permit\" imzalarını veya hesap devirlerini onaylamadan önce uyarır." },
+  "optLeakyForm": { "message": "Veri sızdıran form uyarısı" },
+  "optLeakyFormHint": { "message": "Bir site, gönder'e basmadan önce girdiğiniz e-posta veya telefonu bir izleyiciye gönderdiğinde uyarır." },
+  "optFingerprint": { "message": "Parmak izi tespiti" },
+  "optFingerprintHint": { "message": "Sizi sitelerde takip etmek için cihazınızın parmak izini alan betiği gösterir." },
+  "optNotify": { "message": "Bildirim tuzağı uyarısı" },
+  "optNotifyHint": { "message": "Sitelerin sizi açılır pencerelerle bombardımana tutmak için kullandığı \"devam etmek için İzin Ver'e tıklayın\" hilesini işaretler." },
+  "optStrict": { "message": "Katı mod" },
+  "optStrictHint": { "message": "Maksimum dikkat isteyenler için: \"şüpheli\" sayfalar bile tam ekran uyarı ve daha basit ifadelerle engellenir. Kendine daha az güvenen bir aile bireyinin güvende kalmasına yardımcı olmak için idealdir." },
+  "optReporting": { "message": "ScamShield'ı daha akıllı hale getirmeye yardım edin" },
+  "optReportingHint": { "message": "Tehlikeli olarak işaretlenen sayfaların ve bildirdiğiniz sitelerin site adını (asla tam adresi veya sayfa metnini değil) ve anonim risk sinyallerini gönderir. Varsayılan olarak kapalıdır." },
+  "saved": { "message": "Kaydedildi" },
+  "trustedLead": { "message": "Koruma bu sitelerde duraklatıldı. Birini devam ettirerek tekrar koruma altına alın." },
+  "trustedAlways": { "message": "Her zaman" },
+  "trustedForAWhile": { "message": "Bir süreliğine" },
+  "remove": { "message": "Kaldır" },
+  "trustedViaWarning": { "message": "Uyarı üzerinden güvenildi" },
+  "mutedWarnings": { "message": "Kapalı tutulan uyarılar" },
+  "warnAgain": { "message": "Tekrar uyar" },
+  "muteKind_clipboard": { "message": "Pano bildirimleri" },
+  "muteKind_leak": { "message": "Form-sızıntı uyarıları" },
+  "muteKind_notify": { "message": "Bildirim tuzağı uyarıları" },
+  "muteKind_credpost": { "message": "Kart ve şifre form uyarıları" },
+  "historyTitle": { "message": "Koruma geçmişi" },
+  "historyLead": { "message": "Yalnızca bu cihazda saklanır (site adları, asla tam adresler değil)." },
+  "clearHistory": { "message": "Geçmişi temizle" },
+  "markMistake": { "message": "Hata olarak işaretle" },
+  "feedTitle": { "message": "Tehdit listesi" },
+  "feedLead": { "message": "Günlük olarak yeniden oluşturulan bilinen dolandırıcılık siteleri listesi (OpenPhish + URLhaus, yoğun şekilde filtrelenmiş). ScamShield sadece onu indirir." },
+  "checkNow": { "message": "Şimdi kontrol et" },
+  "aboutVersion": { "message": "Sürüm" },
+  "appearance": { "message": "Görünüm" },
+  "whatLeaves": { "message": "Cihazınızdan neler çıkıyor" },
+  "backupSettings": { "message": "Ayarları yedekle" },
+  "backupHint": { "message": "Ayarlarınızı ve duraklattığınız siteleri bir dosyaya kaydedin veya başka bir bilgisayarda yükleyin." },
+  "exportBtn": { "message": "Dışa aktar" },
+  "importBtn": { "message": "İçe aktar" },
+  "syncTitle": { "message": "Cihazlarım arasında senkronize et" },
+  "syncHint": { "message": "Ayarlarınızı ve duraklattığınız siteleri oturum açtığınız her tarayıcıda senkronize tutun. Tarayıcınızın kendi senkronizasyonunu kullanır — ScamShield'ın hâlâ hesabı veya sunucusu yoktur. Varsayılan olarak kapalıdır." },
+  "optDocTitle": { "message": "ScamShield Ayarları" },
+  "ariaSettingsSections": { "message": "Ayar bölümleri" },
+  "optWhatSentToggle": { "message": "Tam olarak ne gönderiliyor ▾" },
+  "optWhatSentBody": { "message": "Bir rapor yalnızca şunları içerir: site adı (ana bilgisayar adı), karar ve dahili neden kodları, adres ve sayfa düzeninden türetilen sayısal risk sinyalleri (hash'lenmiş kelime sayıları ile form, giriş alanı ve bağlantı sayıları — asla metnin kendisi değil), eşleşen marka adları, uzantı sürümü ve saat. Asla tam adres (yol veya sorgu), sayfa metni, yazdığınız herhangi bir şey, çerezler veya sizi ya da cihazınızı tanımlayan herhangi bir bilgi gönderilmez. Raporlar 180 gün sonra silinir." },
+  "feedNeverUpdated": { "message": "Hiç güncellenmedi" },
+  "hotListStatus": { "message": "Acil liste: $COUNT$ site, $AGO$ güncellendi", "placeholders": { "count": { "content": "$1", "example": "1,204" }, "ago": { "content": "$2", "example": "12 minutes ago" } } },
+  "hotListOff": { "message": "Acil liste: kapalı" },
+  "hotListPending": { "message": "Acil liste: henüz indirilmedi" },
+  "hotListSub": { "message": "…ve son 48 saatin acil listesi, saatlik yenilenir." },
+  "optAdvancedFeedUrl": { "message": "Gelişmiş: besleme URL'si" },
+  "optFeedUrlLabel": { "message": "Besleme URL'si" },
+  "optFeedUrlPlaceholder": { "message": "https://…/blocklist.json" },
+  "resetToOfficialFeed": { "message": "Resmi beslemeye sıfırla" },
+  "optFeedUrlHint": { "message": "Kendi barındırmanız için bunu kendi JSON'unuza yönlendirin veya güncellemeleri devre dışı bırakmak için boş bırakın." },
+  "optThemeHint": { "message": "Sisteminizi takip edin veya birini seçin." },
+  "optThemeAuto": { "message": "Otomatik" },
+  "optThemeLight": { "message": "Açık" },
+  "optThemeDark": { "message": "Koyu" },
+  "optLang": { "message": "Dil" },
+  "optLangHint": { "message": "ScamShield'ın uyarılarına, açılır penceresine ve ayarlarına uygulanır. Senkronizasyon açıksa diğer cihazlarınızla senkronize edilir." },
+  "optLangAuto": { "message": "Tarayıcı varsayılanı" },
+  "optLinksTitle": { "message": "Bağlantılar" },
+  "optLinkGithub": { "message": "GitHub" },
+  "optLinkReportIssue": { "message": "Bir sorun bildir" },
+  "supportFreeOnDevice": { "message": "ScamShield ücretsizdir ve tamamen cihazınızda çalışır." },
+  "supportSponsorGithub": { "message": "GitHub'da sponsor ol" },
+  "supportDonatePaypal": { "message": "PayPal ile bağış yap" },
+  "netNoTelemetry": { "message": "ScamShield asla analitik, telemetri veya takip isteği yapmaz. Yapabileceği tek istekler bu üçüdür ve bunu kendiniz doğrulayabilirsiniz: tarayıcınızın Geliştirici Araçları'nı açın → Ağ sekmesi, ScamShield'ı normal şekilde kullanın ve bunların dışında hiçbir şey görmeyeceksiniz." },
+  "receiptFeedLabel": { "message": "Tehdit listesi indirme" },
+  "receiptFeedDetail": { "message": "Herkese açık engel listesi dosyası — herkes için aynıdır, hakkınızda hiçbir şey gönderilmez." },
+  "receiptReportLabel": { "message": "Topluluk raporları" },
+  "receiptReportDetail": { "message": "Yalnızca raporlamayı açtıysanız. Site adı + sayısal sinyaller, asla URL'ler veya sayfa metni değil." },
+  "receiptIconLabel": { "message": "Sayfa simgesi kontrolü" },
+  "receiptIconDetail": { "message": "Marka taklitlerini tespit etmek için sayfanın kendi favicon'unu getirir. Üçüncü taraf yok, çerez yok." },
+  "receiptPerPage": { "message": "sayfa başına" },
+  "receiptOnInstall12h": { "message": "kurulumda + her 12 saatte bir" },
+  "receiptDisabled": { "message": "devre dışı" },
+  "receiptWhenFlagged": { "message": "işaretlendiğinde" },
+  "receiptOffDefault": { "message": "kapalı (varsayılan)" },
+  "optExportSyncHint": { "message": "Ayarlar aşağıdan dışa/içe aktarılabilir ve (isteğe bağlı olarak) kendi cihazlarınız arasında senkronize edilebilir." },
+  "toastSyncOn": { "message": "Senkronizasyon açık" },
+  "toastSyncUnavailable": { "message": "Senkronizasyon kullanılamıyor" },
+  "toastSyncOff": { "message": "Senkronizasyon kapalı" },
+  "toastExported": { "message": "Dışa aktarıldı" },
+  "toastImported": { "message": "İçe aktarıldı" },
+  "toastInvalidFile": { "message": "Geçersiz dosya" },
+  "toastCheckingUpdates": { "message": "Kontrol ediliyor…" },
+  "fmtUpdatedToVersion": { "message": "v$VERSION$ sürümüne güncellendi", "placeholders": { "version": { "content": "$1", "example": "0.6.1" } } },
+  "toastAlreadyUpToDate": { "message": "Zaten güncel" },
+  "toastUpdateFailed": { "message": "Güncelleme başarısız oldu" },
+  "toastHistoryCleared": { "message": "Geçmiş temizlendi" },
+  "toastOpenedReport": { "message": "Bir rapor açıldı" },
+  "optNoneYet": { "message": "Henüz yok" },
+  "optNoneRightNow": { "message": "Şu anda yok" },
+  "optNothingYetGood": { "message": "Henüz bir şey yok — bu iyi bir şey." },
+  "fmtVersion": { "message": "Sürüm $VERSION$", "placeholders": { "version": { "content": "$1", "example": "0.6.0" } } },
+  "fmtUntilTime": { "message": "$TIME$ tarihine kadar", "placeholders": { "time": { "content": "$1", "example": "22 Aug, 3:45 PM" } } },
+  "fmtUpdatedRules": { "message": "$TIME$ güncellendi · $COUNT$ kural", "placeholders": { "time": { "content": "$1", "example": "2 h ago" }, "count": { "content": "$2", "example": "12,345" } } },
+  "fmtStatsSince": { "message": "Bu tarayıcıyı $DATE$ tarihinden beri koruyor", "placeholders": { "date": { "content": "$1", "example": "12 Jun 2026" } } },
+  "stats7d": { "message": "7 gün" },
+  "stats30d": { "message": "30 gün" },
+  "statsAll": { "message": "Tüm zamanlar" },
+  "statsPagesChecked": { "message": "Cihazda kontrol edilen sayfalar" },
+  "statsThreatsStopped": { "message": "Durdurulan tehditler" },
+  "statsThreatsNone": { "message": "Temizsiniz — hiçbir şey sızmadı" },
+  "statsScamsBlockedOne": { "message": "1 dolandırıcılık size hiç ulaşmadı" },
+  "fmtStatsScamsBlocked": { "message": "$COUNT$ dolandırıcılık size hiç ulaşmadı", "placeholders": { "count": { "content": "$1", "example": "8" } } },
+  "statsPrivacyFindings": { "message": "Gizlilik bulguları" },
+  "statsRulesActive": { "message": "Etkin engelleme listesi kuralı" },
+  "statsRulesActiveHint": { "message": "ScamShield'a yerleşik liste dahil, şu anda yürürlükte." },
+  "statsChartTitle7d": { "message": "Kontrol edilen sayfalar · son 7 gün" },
+  "statsChartTitle30d": { "message": "Kontrol edilen sayfalar · son 30 gün" },
+  "statsChartTitleAll": { "message": "Kontrol edilen sayfalar · kurulumdan bu yana" },
+  "statsChartTitle90d": { "message": "Kontrol edilen sayfalar · son 90 gün" },
+  "statsAxisToday": { "message": "Bugün" },
+  "statsLegendChecked": { "message": "Kontrol edilen sayfalar" },
+  "statsLegendThreat": { "message": "O gün durdurulan tehdit" },
+  "fmtStatsBarTip": { "message": "$DATE$ · $COUNT$ sayfa kontrol edildi", "placeholders": { "date": { "content": "$1", "example": "21 Aug" }, "count": { "content": "$2", "example": "63" } } },
+  "fmtStatsBarTipThreat": { "message": "$DATE$ · $COUNT$ sayfa kontrol edildi · 1 tehdit durduruldu", "placeholders": { "date": { "content": "$1", "example": "21 Aug" }, "count": { "content": "$2", "example": "63" } } },
+  "fmtStatsBarTipThreats": { "message": "$DATE$ · $COUNT$ sayfa kontrol edildi · $THREATS$ tehdit durduruldu", "placeholders": { "date": { "content": "$1", "example": "21 Aug" }, "count": { "content": "$2", "example": "63" }, "threats": { "content": "$3", "example": "2" } } },
+  "statsByType": { "message": "Türe göre tehditler · tüm zamanlar" },
+  "statsCatPhishing": { "message": "Kimlik avı" },
+  "statsCatFakeShop": { "message": "Sahte mağaza" },
+  "statsCatWallet": { "message": "Cüzdan boşaltıcı" },
+  "statsCatTechSupport": { "message": "Teknik destek" },
+  "statsCatClipboard": { "message": "Pano" },
+  "statsCatClickfix": { "message": "Sahte CAPTCHA" },
+  "statsCatFakeUpdate": { "message": "Sahte güncelleme" },
+  "statsCatOther": { "message": "Diğer" },
+  "statsRecent": { "message": "Son etkinlik" },
+  "statsPillBlocked": { "message": "Engellendi" },
+  "statsPillWarned": { "message": "Uyarıldı" },
+  "statsFooter": { "message": "Her sayı cihazınızda sayılır. Bu sayfadaki hiçbir şey herhangi bir yere gönderilmez." },
+  "reviewAskBody": { "message": "ScamShield şu ana kadar sizin için $COUNT$ dolandırıcılığı durdurdu. Hak ettiğini düşünüyorsanız kısa bir değerlendirme, başkalarının onu bulmasına yardımcı olur — ücretsizdir ve her zaman ücretsiz kalacaktır.", "placeholders": { "count": { "content": "$1", "example": "2" } } },
+  "reviewRate": { "message": "ScamShield'ı değerlendirin" },
+  "reviewLater": { "message": "Belki sonra" },
+  "reviewNo": { "message": "Hayır, teşekkürler" },
+  "reviewAboutLink": { "message": "ScamShield'ı beğendiniz mi? Bir değerlendirme bırakın" },
+  "bannerDangerBrand": { "message": "Tehlikeli sayfa — $BRAND$ gibi görünüyor ama değil", "placeholders": { "brand": { "content": "$1" } } },
+  "bannerDanger": { "message": "Tehlikeli sayfa" },
+  "bannerTakeCare": { "message": "Bu sitede dikkatli olun" },
+  "whyShort": { "message": "Neden?" },
+  "moreActions": { "message": "Diğer eylemler" },
+  "hideForToday": { "message": "Bugün gizle" },
+  "hideForAnHour": { "message": "Bir saat gizle" },
+  "interstitialHead1": { "message": "Durun — bu sayfa sizi dolandırmaya çalışıyor" },
+  "interstitialHead2": { "message": "Bekleyin — bu bir dolandırıcılık sayfasına benziyor" },
+  "interstitialHead3": { "message": "Devam etmeyin — dolandırıcılık uyarısı" },
+  "interstitialReassure": { "message": "Yazdıklarınızın hiçbiri henüz gönderilmedi. Şimdi ayrılmak güvenli." },
+  "continueAnyway": { "message": "Yine de devam et" },
+  "submitAnyway": { "message": "Yine de gönder" },
+  "proceedAnyway": { "message": "Yine de devam et" },
+  "cancelRecommended": { "message": "İptal (önerilir)" },
+  "phishingStop": { "message": "Dur — olası kimlik avı" },
+  "techScamTitle": { "message": "Olası teknik destek dolandırıcılığı" },
+  "techScamBody": { "message": "Bu bir web sayfası, bilgisayarınız değil — bilgisayarınız iyi durumda. Gerçek güvenlik uyarıları asla ekranınızı kilitlemez veya telefon numarası göstermez. Aramayın ve ödeme yapmayın." },
+  "getMeOut": { "message": "Beni buradan çıkar (bu sayfayı kapat)" },
+  "walletRiskyTitle": { "message": "Riskli cüzdan isteği" },
+  "walletRiskyBody": { "message": "Bunu beklemiyorsanız iptal edin. Hırsızlar kriptonuzu çalmak için bu istekleri kullanır." },
+  "compareThisSite": { "message": "Bu site" },
+  "compareRealSite": { "message": "Gerçek $BRAND$", "placeholders": { "brand": { "content": "$1" } } },
+  "guardCountdown": { "message": "$LABEL$ ($COUNT$)", "placeholders": { "label": { "content": "$1", "example": "Continue anyway" }, "count": { "content": "$2", "example": "3" } } },
+  "ariaScamWarning": { "message": "Dolandırıcılık uyarısı" },
+  "ariaPhishingWarning": { "message": "Olası kimlik avı uyarısı" },
+  "interstitialFallback": { "message": "Bu sayfa bilinen bir dolandırıcılık kalıbıyla eşleşiyor." },
+  "toastSupportAsk": { "message": "ScamShield az önce sizi korudu — ücretsizdir ve cihazınızda çalışır. Katkıda bulunmak ister misiniz? ❤" },
+  "guardFormDestKnown": { "message": "Bu form şifrenizi $HOST$ yerine $DEST$ adresine gönderiyor. Şifreyi farklı bir web sitesine göndermek, dolandırıcıların oturum bilgilerini çalma yöntemidir.", "placeholders": { "dest": { "content": "$1", "example": "evil.example" }, "host": { "content": "$2", "example": "your-bank.example" } } },
+  "guardFormDestUnknown": { "message": "Bu form şifrenizi ziyaret ettiğiniz siteden farklı bir web sitesine gönderiyor. Bu, dolandırıcıların oturum bilgilerini çalmak için yaygın kullandığı bir yöntemdir." },
+  "guardHiddenTag": { "message": "ScamShield tarafından gizlendi" },
+  "guardWalletCollision": { "message": "Başka bir uyarı açıkken ScamShield bir cüzdan isteğini engelledi. Kapatıp tekrar deneyin." },
+  "guardWalletFallback": { "message": "Bu site hassas bir cüzdan işlemi talep ediyor." },
+  "guardPrivacyFallback": { "message": "Bu sayfada bir gizlilik sorunu tespit edildi." },
+  "guardClipboardFallback": { "message": "Bir site panonuzu değiştirdi." },
+  "guardTechScamFallback": { "message": "Bu sayfa korkutma taktikleri kullanıyor." },
+  "guardClipboardBlockedPayload": { "message": "ScamShield tarafından engellendi — bu site panonuza tehlikeli bir komut koydu. Hiçbir yere yapıştırmayın." },
+  "clipboardNoticeCmdTitle": { "message": "$HOST$ sitesinden bir terminal komutunu kopyaladınız", "placeholders": { "host": { "content": "$1", "example": "ollama.com" } } },
+  "clipboardNoticeCmdBody": { "message": "Sadece bu siteye güveniyorsanız çalıştırın. Gerçek siteler asla \"doğrulama\" için komut yapıştırmanızı istemez." },
+  "clipboardNoticeAddrTitle": { "message": "$HOST$ sitesinden bir kripto adresi kopyaladınız", "placeholders": { "host": { "content": "$1", "example": "example.com" } } },
+  "clipboardNoticeAddrBody": { "message": "Herhangi bir şey göndermeden önce adresin beklendiğiniz adresle eşleşip eşleşmediğini kontrol edin." },
+  "clipboardWarnTitle": { "message": "$HOST$ panonuzu kendi başına değiştirdi", "placeholders": { "host": { "content": "$1", "example": "example.com" } } },
+  "ackMuted": { "message": "ScamShield bu uyarıyı $HOST$ adresinde bir daha göstermeyecek.", "placeholders": { "host": { "content": "$1", "example": "example.com" } } },
+  "dontWarnHere": { "message": "Bu sitede beni uyarmayın" },
+  "leakTitle": { "message": "Bilgileriniz Gönder'i basmadan önce bu sayfadan çıktı" },
+  "notifyLureTitle": { "message": "Burada İzin Ver'e tıklamayın" },
+  "credPostTitle": { "message": "Bu form yazdığınız bilgileri başka bir siteye gönderiyor" },
+  "keepMyDetails": { "message": "Bilgilerimi koru" },
+  "supportOpen": { "message": "Aç" },
+  "guardLeakyFormPlain": { "message": "Bu site, gönder'e basmadan önce e-posta/telefon bilginizi düz metin olarak $HOST$ adresine gönderdi.", "placeholders": { "host": { "content": "$1", "example": "tracker.example" } } },
+  "guardLeakyFormHashed": { "message": "Bu site, gönder'e basmadan önce e-posta/telefon bilginizi hash'lenmiş ($ALGO$) bir tanımlayıcı olarak $HOST$ adresine gönderdi.", "placeholders": { "host": { "content": "$1", "example": "tracker.example" }, "algo": { "content": "$2", "example": "MD5" } } },
+  "guardNotifyLure": { "message": "Bu site, \"devam etmek için İzin Ver'e tıklayın\" hilesini kullanarak bildirim izni almaya çalışıyor. Güvenle Engelle'yi seçebilirsiniz." },
+  "serpAdMismatch": { "message": "⚠ ScamShield: bu reklam $SHOWN$ yerine $ACTUAL$ adresine gidiyor", "placeholders": { "actual": { "content": "$1", "example": "malicious-download.example" }, "shown": { "content": "$2", "example": "trusted-brand.example" } } },
+  "serpBadgeDanger": { "message": "ScamShield: bu sonuç tehdit engelleme listemizde" },
+  "serpBadgeCaution": { "message": "ScamShield: bu sonuç dolandırıcılık uyarı işaretleri gösteriyor" },
+  "chipLink": { "message": "Bağlantı" },
+  "chipBrand": { "message": "Marka" },
+  "chipPage": { "message": "Sayfa" },
+  "chipWallet": { "message": "Cüzdan" },
+  "chipClipboard": { "message": "Pano" },
+  "chipTechscam": { "message": "Korkutma sayfası" },
+  "chipShop": { "message": "Mağaza" },
+  "chipMessage": { "message": "Mesaj" },
+  "reason_ipHost": { "message": "Alan adı yerine ham bir IP adresi kullanıyor." },
+  "reason_atSymbol": { "message": "URL, gerçek hedefi gizleyebilecek bir \"@\" işareti içeriyor." },
+  "reason_punycodeHost": { "message": "Alan adı, gerçek markaları taklit etmek için sıkça kullanılan punycode kullanıyor." },
+  "reason_idnHomograph": { "message": "Bu alan adı, benzer yabancı karakterler kullanarak \"$BRAND$\" markasını taklit ediyor.", "placeholders": { "brand": { "content": "$1", "example": "paypal" } } },
+  "reason_brandLookalike": { "message": "Alan adı, tanınmış bir markanın taklidi gibi görünüyor." },
+  "reason_suspiciousTld": { "message": "Alan adı, dolandırıcılık için sıkça kötüye kullanılan bir üst düzey alan adı kullanıyor." },
+  "reason_noHttps": { "message": "Bağlantı güvenli değil (HTTPS yok)." },
+  "reason_manySubdomains": { "message": "Alışılmadık derecede çok alt alan adı." },
+  "reason_urgencyKeywords": { "message": "URL, birden fazla aciliyet/güvenlik anahtar kelimesi içeriyor." },
+  "reason_randomHost": { "message": "Alan adı rastgele oluşturulmuş gibi görünüyor." },
+  "reason_brandFuzzyMatch": { "message": "Bu alan adı $BRAND$'ın gerçek alan adına çok benziyor — herhangi bir şey girmeden önce adres çubuğunu dikkatle kontrol edin.", "placeholders": { "brand": { "content": "$1", "example": "PayPal" } } },
+  "reason_deepSubdomainChain": { "message": "Alan adının gerçek domainin altında alışılmadık derecede uzun bir alt alan adı zinciri var — yaygın bir gizleme hilesi." },
+  "reason_longHostLabel": { "message": "Alan adı, genellikle sahte bir marka adını gizlemek veya gerçek alan adını saklamak için kullanılan alışılmadık derecede uzun bir bölüm içeriyor." },
+  "reason_shortenerHost": { "message": "Bu bir bağlantı kısaltma alan adıdır ($HOST$) — tıklayana kadar gerçek hedef gizli kalır.", "placeholders": { "host": { "content": "$1", "example": "bit.ly" } } },
+  "reason_riskAbusedTld": { "message": "Bu sitenin üst düzey alan adı ($TLD$), ScamShield'ın tehdit listesi risk tablolarında yüksek oranda dolandırıcılık amacıyla kötüye kullanılıyor.", "placeholders": { "tld": { "content": "$1", "example": ".top" } } },
+  "reason_riskDynamicHost": { "message": "Alan adı, dolandırıcılık sayfaları için sıkça kötüye kullanılan bir dinamik DNS veya ücretsiz barındırma sağlayıcısında barındırılıyor." },
+  "reason_brandForeignSuffix": { "message": "Gerçek $BRAND$ markasının hiç kullanmadığı bir .$SUFFIX$ adresinde $BRAND$ adını kullanıyor.", "placeholders": { "brand": { "content": "$1", "example": "Roblox" }, "suffix": { "content": "$2", "example": "com.do" } } },
+  "reason_gatewayRedirect": { "message": "Bu sayfaya $HOST$ üzerindeki kısa bir yönlendirme bağlantısıyla ulaşıldı ve bağlantı tamamen farklı bir siteye götürdü — dolandırıcılık geçitlerinin bilinen bir yöntemi.", "placeholders": { "host": { "content": "$1", "example": "mgpxq.com" } } },
+  "reason_feedBlock": { "message": "Bu alan adı, ScamShield'ın tehdit listesiyle eşleşiyor ve $COUNT$ bağımsız kaynak tarafından doğrulandı.", "placeholders": { "count": { "content": "$1", "example": "3" } } },
+  "reason_feedWarn": { "message": "Bu alan adı, ScamShield'ın tehdit listesinde daha düşük güvenilirlikte bir kayıtla eşleşiyor ($COUNT$ kaynak) — dikkatli ilerleyin.", "placeholders": { "count": { "content": "$1", "example": "1" } } },
+  "reason_newDomain": { "message": "Alan adı yakın zamanda kaydedilmiş alan adları listesinde görünüyor — dolandırıcılık sitelerinin çoğu yalnızca birkaç günlüktür$EXTRA$.", "placeholders": { "extra": { "content": "$1", "example": ", and you have never visited it before" } } },
+  "reason_credentialFormForeignDomain": { "message": "Bu sayfadaki bir şifre formu, kimlik bilgilerinizi farklı bir siteye gönderiyor." },
+  "reason_crossOriginCredPost": { "message": "Bu form şifrenizi veya kart bilgilerinizi $HOST$ adresine gönderiyor — bulunduğunuz siteden farklı bir site.", "placeholders": { "host": { "content": "$1", "example": "collector.example" } } },
+  "reason_hiddenIframes": { "message": "Sayfa, girdinizi yakalayabilecek gizli çerçeveler içeriyor." },
+  "reason_scamPhrase": { "message": "Sayfa, klasik dolandırıcılık/hediye dili gösteriyor (\"$PHRASE$\").", "placeholders": { "phrase": { "content": "$1", "example": "you won" } } },
+  "reason_seedPhraseAsk": { "message": "Bu sayfa cüzdan kurtarma ifadenizi istiyor — asla girmeyin; bu paranızı çalar." },
+  "reason_brandImpersonationContent": { "message": "Bu sayfa \"$BRAND$\" gibi görünüyor ama onun gerçek web sitesinde değil.", "placeholders": { "brand": { "content": "$1", "example": "paypal" } } },
+  "reason_deliveryFeeScam": { "message": "Bu sayfa $BRAND$ gibi davranarak bir paketi teslim etmek için kart bilgisi istiyor. Kargo şirketleri asla böyle sayfalar aracılığıyla ücret almaz.", "placeholders": { "brand": { "content": "$1", "example": "DHL" } } },
+  "reason_brandIconMismatch": { "message": "Bu sayfa $BRAND$'ın simgesini kullanıyor ama $BRAND$'ın web sitesi değil.", "placeholders": { "brand": { "content": "$1", "example": "PayPal" } } },
+  "reason_credentialFormOnTenantHost": { "message": "Herkesin saniyeler içinde sayfa yayımlayabildiği paylaşımlı bir barındırma platformunda ($HOST$) parola istiyor.", "placeholders": { "host": { "content": "$1", "example": "webflow.io" } } },
+  "reason_brandInTenantHost": { "message": "Parola isteyen ücretsiz barındırma sayfasının adresinde $BRAND$ adı geçiyor.", "placeholders": { "brand": { "content": "$1", "example": "AT&T" } } },
+  "reason_contentPhishingPattern": { "message": "Sayfanın metni ve düzeni, bilinen kimlik avı sayfalarına benziyor." },
+  "reason_techScamScareText": { "message": "Sayfa sahte güvenlik uyarısı dili kullanıyor (\"$PHRASE$\").", "placeholders": { "phrase": { "content": "$1", "example": "virus detected" } } },
+  "reason_techScamPhoneAsk": { "message": "Sayfa, \"destek\" için bir telefon numarasını aramanız için sizi zorluyor — teknik destek dolandırıcılığının tipik özelliği." },
+  "reason_techScamFakeAlert": { "message": "Bu, bir sistem uyarısı gibi davranan bir web sayfasıdır — bilgisayarınız iyi durumda. Gerçek Microsoft/Apple uyarıları asla telefon numarası göstermez." },
+  "reason_techScamFullscreen": { "message": "Sayfa, kapatılmasını zorlaştırmak için tam ekranı zorladı." },
+  "reason_techScamAlarmAudio": { "message": "Sayfa, sizi paniğe sürüklemek için alarm sesi çalıyor." },
+  "reason_techScamDialogFlood": { "message": "Sayfa, sizi kapana kıstırmak için açılır pencerelerle doldu." },
+  "reason_techScamHistoryTrap": { "message": "Sayfa, Geri düğmenizi ele geçiriyor." },
+  "reason_walletBlindSign": { "message": "Bir site, cüzdanınızdan rastgele veriyi körlemesine imzalamasını istedi — yaygın bir cüzdan boşaltma hilesi." },
+  "reason_walletPermitApproval": { "message": "Bu imza bir token onayıdır (\"Permit\"). İmzalamak, bu sitenin daha sonra sizden tekrar sormadan token'larınızı veya NFT'lerinizi taşımasına izin verir — en yaygın cüzdan boşaltma imzasıdır." },
+  "reason_walletDelegation7702": { "message": "Bu işlem, hesabınızın kontrolünü bir sözleşmeye devreder (EIP-7702 devri) — cüzdan boşaltıcıların cüzdanları boşaltmak için kullandığı bir teknik." },
+  "reason_walletSetApprovalAll": { "message": "Bu işlem, bir siteye bir koleksiyondaki TÜM NFT'leriniz üzerinde kontrol veriyor." },
+  "reason_walletUnlimitedApprove": { "message": "Bu işlem, bir siteye token'larınızı harcaması için SINIRSIZ izin veriyor." },
+  "reason_walletTokenApprove": { "message": "Bu işlem, bir sitenin token'larınızın bir kısmını harcamasına izin veriyor." },
+  "reason_clickfixPasteRun": { "message": "Bu sayfa panonuza bir sistem komutu koydu ve yapıştırıp çalıştırmanızı istiyor. Gerçek web siteleri bunu asla yapmaz — çalıştırmak bilgisayarınıza virüs bulaştırır." },
+  "reason_clickfixFakeCaptcha": { "message": "Bu \"doğrulama\", Win+R'ye basıp bir komut yapıştırmanızı istiyor. Gerçek CAPTCHA'lar asla bir şey çalıştırmanızı istemez — bu kötü amaçlı yazılım yükler." },
+  "reason_clickfixWinR": { "message": "Bu sayfa, Windows Çalıştır kutusunu açıp bir şey yapıştırmanızı istiyor — insanları kötü amaçlı yazılım çalıştırmaya kandırmak için kullanılan bir yöntem." },
+  "reason_clickfixCaptchaDisguise": { "message": "Talimatlar, bir insan doğrulama adımı gibi gizlenmiştir." },
+  "reason_clipboardCommand": { "message": "Bir site panonuza bir sistem komutu kopyaladı. Bunu bir terminale veya Çalıştır kutusuna YAPIŞTIRMAYIN." },
+  "reason_clipboardCryptoAddress": { "message": "Bir site panonuza bir kripto para adresi koydu — yapıştırmadan önce doğrulayın." },
+  "reason_fakeUpdatePrompt": { "message": "Bu sayfa, tarayıcınızın güncelleme gerektirdiğini iddia ederek bir indirme sunuyor. Gerçek güncelleme istemleri tarayıcının kendisinden gelir — asla bir web sayfasından gelmez. İndirilen dosya büyük olasılıkla kötü amaçlı yazılımdır." },
+  "reason_msgOtpAsk": { "message": "Sizden bir OTP, PIN veya şifre paylaşmanızı istiyor — hiçbir meşru hizmet bunu yapmaz." },
+  "reason_msgScamWording": { "message": "Bilinen dolandırıcılık ifadesini kullanıyor (\"$PHRASE$\").", "placeholders": { "phrase": { "content": "$1", "example": "delivery fee" } } },
+  "reason_msgUrgencyDeadline": { "message": "Yapay bir son tarihle baskı oluşturuyor — klasik bir dolandırıcılık taktiği." },
+  "reason_msgDangerousLink": { "message": "Tehlikeli görünen bir bağlantı içeriyor ($URL$).", "placeholders": { "url": { "content": "$1", "example": "http://verify-bank.tk/otp" } } },
+  "reason_qrCodeDestination": { "message": "Bu sayfa, $URL$ adresine yönlendiren bir QR kod içeriyor — telefonunuzla taramadan önce otomatik olarak kontrol edildi.", "placeholders": { "url": { "content": "$1", "example": "http://verify-bank.tk/otp" } } },
+  "reason_shop_countdownReset": { "message": "Sahte geri sayım" },
+  "reason_shop_countdownReset_detail": { "message": "\"Acele edin, teklif bitiyor\" sayacı her ziyarette sıfırlanıyor — aciliyet sahte." },
+  "reason_shop_offPlatformPay": { "message": "Riskli ödeme" },
+  "reason_shop_offPlatformPay_detail": { "message": "Ödeme sayfası sizi Zelle/Venmo/CashApp/havale/kripto ödemeye yönlendiriyor — dolandırıcılık ise bu parayı geri alamazsınız." },
+  "reason_shop_fakeScarcity": { "message": "Sahte kıtlık" },
+  "reason_shop_fakeScarcity_detail": { "message": "Eklenmiş \"sadece birkaç tane kaldı / N kişi görüntülüyor\" baskı widget'ları." },
+  "reason_shop_badgeHotlink": { "message": "Sahte güven rozeti" },
+  "reason_shop_badgeHotlink_detail": { "message": "Sadece bir resim olan ve hiçbir yere bağlantısı olmayan \"güvenli\"/\"doğrulanmış\" rozeti." },
+  "reason_shop_missingContact": { "message": "İletişim bilgisi yok" },
+  "reason_shop_missingContact_detail": { "message": "Gerçek adres, telefon veya şirket bilgisi yok — tek kullanımlık sahte mağazalar için normal." },
+  "obDocTitle": { "message": "ScamShield'a Hoş Geldiniz" },
+  "obTitle": { "message": "ScamShield sizi koruyor" },
+  "obLead": { "message": "Ziyaret ettiğiniz sayfaları izler ve dolandırıcılıklara karşı sizi uyarır — tamamen cihazınızda. Gezinme geçmişiniz asla bilgisayarınızdan çıkmaz." },
+  "obPhishing": { "message": "Kimlik avı ve sahte girişler" },
+  "obPhishingBody": { "message": "Bir sayfa şifrenizi yanlış siteye gönderdiğinde uyarır." },
+  "obBrand": { "message": "Marka taklitleri" },
+  "obBrandBody": { "message": "Kendilerine ait olmayan bir sitede kopyalanmış PayPal, banka veya operatör simgesini tanır — BAE bankaları ve devlet hizmetleri dahil 60'tan fazla marka." },
+  "obPage": { "message": "Sayfa analizi" },
+  "obPageBody": { "message": "Henüz hiçbir listede olmayan dolandırıcılıkları yakalamak için giriş sayfalarının metnini ve düzenini cihazınızda okur." },
+  "obWallet": { "message": "Kripto cüzdan koruması" },
+  "obWalletBody": { "message": "Cüzdanınız görmeden önce boşaltıcı onaylarını ve kurtarma ifadesi hırsızlığını durdurur." },
+  "obClipboard": { "message": "Pano ve \"bunu yapıştır\" dolandırıcılıkları" },
+  "obClipboardBody": { "message": "Bir site gizlice panonuza bir komut kopyaladığında sizi uyarır." },
+  "obPopups": { "message": "Sahte virüs açılır pencereleri" },
+  "obPopupsBody": { "message": "Korkutucu açılır pencere döngüsünü kırar ve çıkmanıza yardımcı olur." },
+  "obPin": { "message": "ScamShield'ı sabitle" },
+  "obPinBody": { "message": "Araç çubuğunuzdaki yapboz parçası simgesine, ardından ScamShield'ın yanındaki iğneye tıklayın, böylece her sayfanın durumunu bir bakışta görebilirsiniz." },
+  "obOpenSettings": { "message": "Ayarları aç" },
+  "blockedDocTitle": { "message": "Site ScamShield tarafından engellendi" },
+  "blockedTitle": { "message": "ScamShield bu siteyi engelledi" },
+  "blockedLead": { "message": "$HOST$, ScamShield'ın bilinen dolandırıcılık ve zararlı site listesinde yer alıyor, bu yüzden sayfa yüklenmeden durduruldu. Hiçbir şey çalışmadı ve yazdığınız hiçbir şey gönderilmedi.", "placeholders": { "host": { "content": "$1", "example": "secure-paypa1-login.com" } } },
+  "blockedLeadHot": { "message": "$HOST$ son iki gün içinde kimlik avı nedeniyle bildirildi, bu yüzden sayfa yüklenmeden durduruldu. Hiçbir şey çalışmadı ve yazdığınız hiçbir şey gönderilmedi.", "placeholders": { "host": { "content": "$1", "example": "secure-paypa1-login.com" } } },
+  "blockedAddress": { "message": "Engellenen adres" },
+  "blockedListedBy": { "message": "$SOURCES$ tarafından listelendi", "placeholders": { "sources": { "content": "$1", "example": "Phishing.Database, ScamSniffer" } } },
+  "blockedListedGeneric": { "message": "ScamShield'ın onaylanmış dolandırıcılık alan adları engelleme listesinde yer alıyor." },
+  "blockedGoBack": { "message": "Güvenliğe geri dön" },
+  "blockedTrustSite": { "message": "Dolandırıcılık değil mi? Bu siteye güven" },
+  "blockedVisitAnyway": { "message": "Yine de ziyaret et (önerilmez)" },
+  "blockedVisitHint": { "message": "Siteyi, ScamShield 1 saatliğine bu sitede duraklatılmış olarak açar." },
+  "blockedFooter": { "message": "Cihazınızda engellendi. Bu sayfayla ilgili hiçbir şey herhangi bir yere gönderilmedi." },
+  "detailsAndOptions": { "message": "Ayrıntılar ve diğer seçenekler" },
+  "continuePausesHour": { "message": "Bu sitede ScamShield'ı 1 saat duraklatır." },
+  "thisPage": { "message": "Bu sayfa" },
+  "chipBlocklist": { "message": "Engellenen site" },
+  "obNote": { "message": "ScamShield ücretsizdir. İsteğe bağlı: Ayarlar'da, yakaladığı dolandırıcılıkların anonim raporlarını paylaşarak onu daha akıllı hale getirmeye yardımcı olabilirsiniz — siz açmadığınız sürece kapalıdır. Size yardımcı olduysa, Ayarlar sayfasından geliştirmeyi destekleyebilirsiniz." }
 }
