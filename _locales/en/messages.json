@@ -75,7 +75,7 @@
   "toastResumed": { "message": "Protection resumed" },
   "toastCopied": { "message": "Copied" },
   "toastExtensionError": { "message": "Extension error — try reopening." },
-  "whatsNewBanner": { "message": "New in 0.13: an hourly hot list blocks brand-new scam sites within about an hour of a report, still with zero requests to us. Plus “Trust this site” on every warning." },
+  "whatsNewBanner": { "message": "New in 0.14: warnings remember what you told them — “Don’t warn me on this site”, hide for today, or a one-hour pause — and the warning bar, stop page and toasts are redesigned." },
   "popupBrandDangerSummary": { "message": "Looks like $BRAND$, but isn't. Don't enter your password here.", "placeholders": { "brand": { "content": "$1", "example": "PayPal" } } },
   "pausedUntil": { "message": "Paused until $TIME$", "placeholders": { "time": { "content": "$1", "example": "3:45 PM" } } },
   "fmtProtocolPage": { "message": "$PROTOCOL$ page", "placeholders": { "protocol": { "content": "$1", "example": "chrome" } } },
