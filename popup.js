@@ -40,11 +40,12 @@ function renderStatus(level, host, summary, levelTextOverride) {
 // clipboard|techscam|shop|message) — no more guessing from the English text.
 const chipLabel = (kind) => T('chip' + kind.charAt(0).toUpperCase() + kind.slice(1), null, F.detectorLabel(kind));
 // "Why this verdict?" panel (0.8.0): absorbs the old #evidence card + #showwhy
-// button into one <details> disclosure. Collapsed to just the heading (+
-// signal count) on a safe/unknown verdict; expanded by default the moment
+// button into one <details> disclosure, expanded by default the moment
 // there's something to explain (suspicious or dangerous) — no more manual
 // "Show why" click to reveal a suspicious page's reasons. Hidden outright when
-// there are no reasons at all (nothing to disclose, same as the old card).
+// there are no reasons to show, which — 0.14.0 (Task 8) — now includes every
+// safe/unknown verdict: a weak incidental signal (e.g. clean-login.html's
+// randomHost quirk) isn't worth a panel on a page that already reads as safe.
 function renderEvidence(reasons, level) {
   const ul = $('reasons'); ul.replaceChildren();
   const list = (level === 'safe' || level === 'unknown') ? [] : (reasons || []).slice(0, 5);
