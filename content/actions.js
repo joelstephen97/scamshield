@@ -199,15 +199,28 @@
   // those are already gone (bar.remove()/ov.remove() already ran) by the time
   // this shows. `restore` re-opens the original surface fresh (a real Undo,
   // not a resurrected stale DOM node) with the exact verdict it was called with.
-  function ackSurface(domain, restore) {
+  // Two call shapes (0.14.0): the legacy `ackSurface(domain, restore)` used by
+  // the banner/interstitial trust buttons, and the object form
+  // `ackSurface({ text, onUndo, restore })` used by muteHandler (Task 2) and
+  // Task 4's redesigned toasts. Both render the same bar.
+  function ackSurface(arg, restoreArg) {
+    let text, onUndo, restore;
+    if (arg && typeof arg === 'object') {
+      text = arg.text; onUndo = arg.onUndo; restore = arg.restore;
+    } else {
+      const domain = arg;
+      text = t('ackTrusted', [bidi(domain)], "ScamShield won't flag " + domain + ' again.');
+      onUndo = () => send('untrustSite', { domain });
+      restore = restoreArg;
+    }
     const old = document.querySelector('.' + NS + '-ack'); if (old) old.remove();
     const bar = el('div', NS + '-ack');
     bar.setAttribute('role', 'status');
     setDir(bar);
-    bar.append(el('span', null, t('ackTrusted', [bidi(domain)], "ScamShield won't flag " + domain + ' again.')));
+    bar.append(el('span', null, text));
     const undo = el('button', 'ss-undo', t('undo', null, 'Undo'));
     onTrustedClick(undo, async () => {
-      await send('untrustSite', { domain });
+      await onUndo();
       bar.remove();
       restore && restore();
     });
