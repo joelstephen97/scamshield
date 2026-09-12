@@ -1,7 +1,9 @@
 # Store submission checklist
 
 Live listing (Chrome Web Store): **https://chromewebstore.google.com/detail/fojjjofjimbfoddafoampojopijnlihl** (item ID `fojjjofjimbfoddafoampojopijnlihl`).
-Firefox AMO: not yet listed — add the URL here, in `README.md`, `index.html` and `privacy.html` once live.
+Firefox AMO: **submitted 2026-09-13 via API** (first listed version 0.14.0, status nominated → awaiting review): https://addons.mozilla.org/en-US/firefox/addon/scam-phishing-blocker-scamshie/ — once approved, add the URL to `README.md`, `index.html` and `privacy.html`.
+
+**Releases are now scripted:** `npm run release:cws` (upload + submit for review via the Chrome Web Store API) and `npm run release:amo` (`web-ext sign --channel listed` with what's-new + reviewer notes from `store/reviewer-notes/<version>-amo.txt`); secrets in `docs/store-secrets.local.txt` (git-ignored; refresh token via `npm run cws:token`). The CWS API cannot edit listing text/screenshots — paste those in the dashboard when they change.
 
 Listing copy lives in **`store/listings/en.md`** (canon) + 19 `store/listings/<locale>.md` translations; `chrome-listing.md` / `firefox-listing.md` hold the URLs, category and reviewer notes and say which section goes in which dashboard field. Permissions + data-use text in `permissions-justification.md`; privacy policy at https://joelstephen97.github.io/scamshield/privacy.html (source `privacy-policy.md` → `/privacy.html`).
 

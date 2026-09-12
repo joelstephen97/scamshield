@@ -22,7 +22,10 @@ const { execFileSync } = require('child_process');
 // through a command string.
 const CWS_CLI = path.join(__dirname, '..', 'node_modules', 'chrome-webstore-upload-cli', 'source', 'cli.js');
 const WEBEXT_CLI = path.join(__dirname, '..', 'node_modules', 'web-ext', 'bin', 'web-ext.js');
-const run = (entry, args, env) => execFileSync(process.execPath, [entry, ...args], { stdio: 'inherit', env: env || process.env, cwd: path.resolve(__dirname, '..') });
+const run = (entry, args, env) => {
+  try { execFileSync(process.execPath, [entry, ...args], { stdio: 'inherit', env: env || process.env, cwd: path.resolve(__dirname, '..') }); }
+  catch (e) { console.error(`${path.basename(entry)} exited with status ${e.status}`); process.exit(e.status || 1); } // never echo the argv (it carries secrets)
+};
 
 const ROOT = path.resolve(__dirname, '..');
 const version = require(path.join(ROOT, 'manifest.json')).version;
@@ -62,7 +65,19 @@ function cws(uploadOnly) {
 
 function amo() {
   const key = need('AMO_API_KEY'), secret = need('AMO_API_SECRET');
-  const meta = { version: { release_notes: { 'en-US': whatsNew() }, approval_notes: notes('amo') } };
+  // Listed versions need a license; a first-ever listed submission also needs the
+  // addon-level listing fields, which the API accepts alongside `version`.
+  const en = fs.readFileSync(path.join(ROOT, 'store', 'listings', 'en.md'), 'utf8');
+  const sec = (h) => { const i = en.indexOf('## ' + h); if (i < 0) return ''; const j = en.indexOf('\n## ', i + 3); return en.slice(en.indexOf('\n', i) + 1, j < 0 ? en.length : j).trim(); };
+  const meta = {
+    summary: { 'en-US': sec('Short description') },
+    description: { 'en-US': sec('Full description') },
+    categories: ['privacy-security'],
+    homepage: { 'en-US': 'https://joelstephen97.github.io/scamshield/' },
+    support_url: { 'en-US': 'https://github.com/joelstephen97/scamshield/issues' },
+    is_experimental: false,
+    version: { license: 'GPL-3.0-only' /* AMO offers no or-later slug; repo LICENSE is GPL-3.0-or-later, of which GPL-3.0 is a valid choice */, release_notes: { 'en-US': whatsNew() }, approval_notes: notes('amo') }
+  };
   const metaPath = path.join(ROOT, 'dist', 'amo-metadata.json');
   fs.writeFileSync(metaPath, JSON.stringify(meta, null, 2));
   const src = path.join(ROOT, 'dist', 'amo-src'); fs.rmSync(src, { recursive: true, force: true }); fs.mkdirSync(src, { recursive: true });
