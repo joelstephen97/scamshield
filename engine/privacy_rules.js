@@ -89,5 +89,11 @@
     return { isFp, distinct, surfaces: FP_SURFACES.filter((k) => (c[k] || 0) > 0) };
   }
 
-  return { privacy: { md5, findLeak, scoreFingerprint, FP_SURFACES } };
+  // 0.14.0: a page posting to its own subdomain is not a "leak". `registrable`
+  // is injected (constants.js registrableDomain in the MAIN world; a stub in tests).
+  function isSameSite(originA, originB, registrable) {
+    try { const ha = new URL(originA).hostname, hb = new URL(originB).hostname; const r = typeof registrable === 'function' ? registrable : (h) => h; return r(ha) === r(hb); } catch (_) { return false; }
+  }
+
+  return { privacy: { md5, findLeak, scoreFingerprint, FP_SURFACES, isSameSite } };
 });

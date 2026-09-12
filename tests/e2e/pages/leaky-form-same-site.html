@@ -1,0 +1,17 @@
+<!doctype html><meta charset="utf-8"><title>Newsletter signup (same site)</title>
+<h1>Join our newsletter</h1>
+<form>
+  <input type="email" id="email" name="email" placeholder="Your email">
+  <button type="submit">Subscribe</button>
+</form>
+<script>
+  // Same fixture as leaky-form.html, but the beacon target is the page's own
+  // subdomain (www.leaky-fixture.example) instead of a third-party tracker —
+  // this must NOT be reported as a leak (v0.14.0, Task 3).
+  document.getElementById('email').addEventListener('input', function (e) {
+    var v = e.target.value;
+    if (v.indexOf('@') !== -1) {
+      try { navigator.sendBeacon('http://www.leaky-fixture.example:5599/collect?e=' + encodeURIComponent(v)); } catch (_) {}
+    }
+  });
+</script>

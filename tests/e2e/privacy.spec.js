@@ -16,6 +16,12 @@ test('leaky form: typing an email that is beaconed to a third party warns before
   await expect(popup.locator('#privacylist')).toContainText(/tracker\.example/);
 });
 
+test('leaky form: a beacon to the site\'s own subdomain is not a leak', async ({ context }) => {
+  const page = await context.newPage(); await page.goto('http://leaky-fixture.example:5599/leaky-form-same-site.html');
+  await page.fill('#email', 'jane.doe@example.com'); await page.waitForTimeout(1500);
+  await expect(page.locator('.scamshield-toast')).toHaveCount(0); await page.close();
+});
+
 test('fingerprinting page is detected and named in the popup Privacy card', async ({ context, extensionId }) => {
   const page = await context.newPage();
   await page.goto(BASE + '/fingerprint.html');

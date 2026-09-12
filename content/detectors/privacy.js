@@ -80,7 +80,8 @@
     if (!armed) return;
     let destOrigin = location.origin;
     try { destOrigin = new URL(dest, location.href).origin; } catch (_) {}
-    if (destOrigin === location.origin) return; // first-party echo isn't a leak we warn on
+    const reg = window.ScamShield && window.ScamShield.registrableDomain;
+    if (destOrigin === location.origin || P.isSameSite(location.origin, destOrigin, reg)) return; // first-party echo isn't a leak we warn on
     for (const p of payloads) {
       let dec = p;
       try { dec = decodeURIComponent(String(p).replace(/\+/g, ' ')); } catch (_) { dec = p; }

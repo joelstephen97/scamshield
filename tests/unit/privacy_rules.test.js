@@ -54,3 +54,11 @@ test('scoreFingerprint does not flag a single benign canvas draw', () => {
   assert.equal(privacy.scoreFingerprint({ canvasReadback: 1 }).isFp, false);
   assert.equal(privacy.scoreFingerprint({ fontProbe: 3 }).isFp, false);
 });
+
+test('isSameSite: same registrable domain is first party, different is not', () => {
+  const reg = (h) => h.split('.').slice(-2).join('.');
+  assert.equal(privacy.isSameSite('https://llhhospital.com', 'https://www.llhhospital.com', reg), true);
+  assert.equal(privacy.isSameSite('https://www.llhhospital.com', 'https://booking.llhhospital.com/api', reg), true);
+  assert.equal(privacy.isSameSite('https://llhhospital.com', 'https://tracker.example', reg), false);
+  assert.equal(privacy.isSameSite('https://a.com', 'not a url', reg), false);
+});
