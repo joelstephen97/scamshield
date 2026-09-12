@@ -37,10 +37,15 @@
     "gen:parity": "node scripts/gen-parity.js",
     "screenshots": "node tools/screenshots.js",
     "promo": "node tools/promo.js",
-    "crawl:pages": "node scripts/crawl-pages.js"
+    "crawl:pages": "node scripts/crawl-pages.js",
+    "release:cws": "node tools/release-stores.js cws",
+    "release:amo": "node tools/release-stores.js amo",
+    "release:stores": "node tools/release-stores.js all",
+    "cws:token": "node tools/cws-token.js"
   },
   "devDependencies": {
     "@playwright/test": "^1.48.0",
+    "chrome-webstore-upload-cli": "^4.0.1",
     "linkedom": "^0.18.13",
     "qrcode": "^1.5.4"
   },
