@@ -205,10 +205,6 @@
     });
   }
 
-  const SHIELD = (inner) => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l8 3v6c0 5.2-3.4 9.6-8 11-4.6-1.4-8-5.8-8-11V5l8-3z"/>' + inner + '</svg>';
-  const ICON = { dangerous: SHIELD('<path d="M9.5 9.5l5 5M14.5 9.5l-5 5"/>'), suspicious: SHIELD('<path d="M12 8v5"/><path d="M12 16h.01"/>') };
-  function iconSpan(kind) { const s = el('span', 'ss-ico'); s.innerHTML = ICON[kind]; return s; }
-
   // Evidence-backed friction (0.6.0): a short enforced delay before the risky
   // choice becomes clickable measurably improves warning adherence. Used on
   // every "proceed anyway" style button.
@@ -493,13 +489,7 @@
       // through the collision path. The dApp receives a standard user-rejected
       // error (4001) and can simply retry. collision:true tells the bridge
       // this denial is synthetic, not a user-confirmed threat.
-      const toast = el('div', NS + '-toast warn');
-      toast.setAttribute('role', 'alert');
-      setDir(toast);
-      toast.append(iconSpan('suspicious'), el('span', 'ss-msg',
-        t('guardWalletCollision', null, 'ScamShield blocked a wallet request while another warning was open. Close it and retry.')));
-      (document.body || document.documentElement).appendChild(toast);
-      setTimeout(() => toast.remove(), 12000);
+      toast({ kind: 'warn', role: 'alert', title: t('guardWalletCollision', null, 'ScamShield blocked a wallet request while another warning was open. Close it and retry.'), timeoutMs: 12000 });
       onDecision(false, { collision: true });
       return;
     }
@@ -508,8 +498,8 @@
     ov.setAttribute('aria-label', t('walletRiskyTitle', null, 'Risky wallet request'));
     setDir(ov);
     const card = el('div', 'ss-card');
-    const h3 = el('h3'); h3.append(iconSpan('suspicious'), el('span', null, t('walletRiskyTitle', null, 'Risky wallet request')));
-    card.append(h3,
+    const head = el('div', 'ss-head'); const h3 = el('h3', null, t('walletRiskyTitle', null, 'Risky wallet request')); head.append(tile('warn'), h3);
+    card.append(head,
       el('p', null, reasonText(detail.reasons && detail.reasons[0]) || t('guardWalletFallback', null, 'This site is requesting a sensitive wallet action.')),
       el('p', 'ss-sub', t('walletRiskyBody', null, 'If you did not expect this, cancel. Drainers use these requests to steal your crypto.')));
     const actions = el('div', 'ss-actions');
@@ -598,8 +588,8 @@
     ov.setAttribute('aria-label', t('techScamTitle', null, 'Possible tech-support scam'));
     setDir(ov);
     const card = el('div', 'ss-card');
-    const h3 = el('h3'); h3.append(iconSpan('dangerous'), el('span', null, t('techScamTitle', null, 'Possible tech-support scam')));
-    card.append(h3,
+    const head = el('div', 'ss-head'); const h3 = el('h3', null, t('techScamTitle', null, 'Possible tech-support scam')); head.append(tile('danger'), h3);
+    card.append(head,
       el('p', null, reasonText(verdict.reasons && verdict.reasons[0]) || t('guardTechScamFallback', null, 'This page is using scare tactics.')),
       el('p', 'ss-sub', t('techScamBody', null, 'This is a web page, not your computer — your computer is fine. Real security warnings never lock your screen or show a phone number. Do not call, and do not pay.')));
     const actions = el('div', 'ss-actions');
