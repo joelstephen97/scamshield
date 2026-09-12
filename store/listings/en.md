@@ -108,16 +108,14 @@ Hard numbers, not adjectives: 20 languages with full menu, warning and settings 
 
 Source code, privacy policy and issue tracker: github.com/joelstephen97/scamshield
 
-## What's new (0.13.0)
+## What's new (0.14.0)
 
-• An hourly hot list. Alongside the threat list that is rebuilt daily, ScamShield now downloads a small list of sites reported in the last 48 hours, once an hour. A scam site that appeared this morning is usually blocked before it can load, within about an hour of being reported. It is the same public file for everyone, fetched the way any file download is: no account, and nothing about you or your browsing goes anywhere.
+• Warnings now remember what you told them. Every warning has a control that sticks: a toast's "Don't warn me on this site" turns that kind of warning off for that site (with an undo, and a list in Settings where you can turn it back on); the warning bar's close button hides page warnings on that site for a day; "Continue anyway" on the full-page stop pauses ScamShield on that site for an hour; "Trust this site" is still forever. Before this, closing a warning stored nothing and the same warning came straight back.
 
-• Trust this site, from any warning. The banner, the full-page warning and the block page all now carry a one-click "Not a scam? Trust this site", with an undo if you press it by accident. Sites you trusted from a warning are tagged as such in Settings, so you can always see how each one got on the list.
+• Copying an install command is no longer treated as an attack. When you press a site's own copy button and it puts a terminal command or a crypto address on your clipboard, ScamShield shows a quiet notice naming the site, once per page, and does not count it as a blocked threat. The fake-CAPTCHA "paste this into Run" attack is still stopped outright.
 
-• Wider brand coverage. The look-alike checker now knows more than 300 brands, so more fake bank, delivery, telecom and gaming logins are caught by name as well as by logo.
+• Redesigned warnings. The warning bar is a clean full-width bar with at most three buttons and a menu for the rest, a "Why?" link, and the real and fake address side by side when a brand is involved. The full-page stop is now a plain stop page with one "Leave this page" button and everything else under "Details". Notices have a title, one sentence and a timer that pauses while you hover. Buttons are larger, keyboard focus is visible, and dark mode matches the popup.
 
-• Fewer false alarms on real sites. Genuine bank, government and company sites that use a country-style address (a bank's own .bank.in domain, for example) no longer get a warning banner.
-
-• Measured, not claimed: on 134 fresh phishing pages ScamShield 0.13.0 blocked 56 % before they loaded and stopped 69 % in total, with zero requests to any ScamShield server — method in docs/benchmark.md.
+• Fewer false alarms. A site sending your details to its own subdomain is no longer reported as a leak, and the popup no longer shows evidence under a green Safe verdict.
 
 No new permissions. Still storage, declarativeNetRequest, alarms and http/https access, the same as every version since 0.3.1.
