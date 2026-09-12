@@ -108,7 +108,12 @@
     const start = () => { if (done) return; started = Date.now(); handle = setTimeout(() => { done = true; onDone(); }, left); paint(); };
     const pause = () => { if (done || handle == null) return; clearTimeout(handle); handle = null; left = Math.max(0, left - (Date.now() - started)); if (bar) { bar.style.transition = 'none'; bar.style.transform = 'scaleX(' + (left / ms) + ')'; } };
     node.addEventListener('mouseenter', pause); node.addEventListener('focusin', pause);
-    node.addEventListener('mouseleave', start); node.addEventListener('focusout', () => { if (!node.contains(document.activeElement)) start(); });
+    // Fix round 1: a mouseleave must not resume the timer while keyboard
+    // focus is still inside the surface (e.g. tabbing through its buttons
+    // with the pointer elsewhere) — same "stays paused while focus is
+    // inside" guard focusout already has.
+    node.addEventListener('mouseleave', () => { if (!node.contains(document.activeElement)) start(); });
+    node.addEventListener('focusout', () => { if (!node.contains(document.activeElement)) start(); });
     start();
     return { cancel: () => { done = true; clearTimeout(handle); } };
   }
@@ -119,7 +124,12 @@
   // so calling it still clears whatever plain toast was on screen.
   function toast(opts) {
     const o = opts || {};
-    document.querySelectorAll('.' + NS + '-toast').forEach((n) => n.remove()); // one plain toast at a time
+    // Fix round 1: ackSurface's bar now carries BOTH `scamshield-toast` and
+    // `scamshield-ack` (so it keeps the .ss-title/.ss-acts styling that is
+    // scoped under `.scamshield-toast .ss-X` in content.css) — so this dedupe
+    // must explicitly exclude `.scamshield-ack` or it would remove the Undo
+    // bar itself, regressing ruling 1 (a toast never replaces the ack).
+    document.querySelectorAll('.' + NS + '-toast:not(.' + NS + '-ack)').forEach((n) => n.remove()); // one plain toast at a time
     const box = el('div', NS + '-toast ' + (o.kind || 'info'));
     box.setAttribute('role', o.role || 'status'); setDir(box);
     box.append(tile(o.kind === 'notice' ? 'info' : (o.kind || 'info')), el('div', 'ss-title', o.title || ''));
@@ -254,15 +264,19 @@
     }
     const old = document.querySelector('.' + NS + '-ack'); if (old) old.remove();
     // Built on the same toast() primitive as every other surface (tile 'ok',
-    // title, .ss-undo action), then reclassed onto the .scamshield-ack root
-    // so it keeps its own grid layout and CSS identity (still asserted by
-    // trust-this-site.spec.js: `.scamshield-ack` + `.ss-undo`). persist:true —
-    // an acknowledgement never auto-hides.
+    // title, .ss-undo action). Fix round 1: ADD the .scamshield-ack class
+    // rather than replacing the root class outright — .ss-title's font-weight
+    // and .ss-acts's flex layout in content.css are scoped under
+    // `.scamshield-toast .ss-X`, so dropping `scamshield-toast` silently lost
+    // both. Keeping both classes means `.scamshield-ack` (which is declared
+    // after the shared `.scamshield-toast,.scamshield-ack` rule in
+    // content.css) still wins the grid-template-columns override. persist:true
+    // — an acknowledgement never auto-hides.
     const bar = toast({
       kind: 'ok', persist: true, title: text,
       actions: [{ cls: 'ss-undo', label: t('undo', null, 'Undo'), onClick: async () => { await onUndo(); restore && restore(); } }]
     });
-    bar.className = NS + '-ack ok';
+    bar.classList.add(NS + '-ack');
     return bar;
   }
   // `onAllow` null/undefined → a plain button with no click behaviour of its

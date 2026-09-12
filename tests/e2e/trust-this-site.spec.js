@@ -41,7 +41,11 @@ test('banner: Trust this site -> allowlisted, acknowledgement with Undo restores
   // would bypass the very trusted-click path this suite exists to prove.
   // (0.14.0, Task 4: supportToast now refuses to render at all while an
   // acknowledgement is on screen, so this should be a no-op — kept defensive.)
-  const toast = page.locator('.scamshield-toast');
+  // Fix round 1: the ack bar itself now also carries the `scamshield-toast`
+  // class (so it keeps the shared .ss-title/.ss-acts styling) — scope this
+  // locator to :not(.scamshield-ack) so it can never target the ack's own
+  // ✕ and rip out the Undo bar we're about to click.
+  const toast = page.locator('.scamshield-toast:not(.scamshield-ack)');
   const toastX = toast.locator('.ss-x');
   if (await toastX.first().isVisible().catch(() => false)) {
     await toastX.first().click();
