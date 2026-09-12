@@ -72,7 +72,7 @@
   "toastResumed": { "message": "Đã tiếp tục bảo vệ" },
   "toastCopied": { "message": "Đã sao chép" },
   "toastExtensionError": { "message": "Lỗi tiện ích — hãy thử mở lại." },
-  "whatsNewBanner": { "message": "Mới trong 0.13: danh sách khẩn mỗi giờ chặn những trang lừa đảo vừa xuất hiện trong khoảng một giờ sau khi bị báo cáo, vẫn không gửi yêu cầu nào về phía chúng tôi. Thêm nút „Tin cậy trang này“ ở mọi cảnh báo." },
+  "whatsNewBanner": { "message": "Mới trong 0.14: các cảnh báo nay ghi nhớ lựa chọn của bạn — „Đừng cảnh báo tôi trên trang này“, ẩn cho hôm nay, hoặc tạm dừng một giờ — và thanh cảnh báo, trang chặn cùng các thông báo đã được thiết kế lại." },
   "popupBrandDangerSummary": { "message": "Trông giống $BRAND$ nhưng không phải. Đừng nhập mật khẩu ở đây.", "placeholders": { "brand": { "content": "$1", "example": "PayPal" } } },
   "pausedUntil": { "message": "Tạm dừng đến $TIME$", "placeholders": { "time": { "content": "$1", "example": "3:45 PM" } } },
   "fmtProtocolPage": { "message": "Trang $PROTOCOL$", "placeholders": { "protocol": { "content": "$1", "example": "chrome" } } },

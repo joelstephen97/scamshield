@@ -71,7 +71,7 @@
   "toastResumed": { "message": "보호 재개됨" },
   "toastCopied": { "message": "복사됨" },
   "toastExtensionError": { "message": "확장 프로그램 오류 — 다시 열어 보세요." },
-  "whatsNewBanner": { "message": "0.13 버전 신규 기능: 매시간 갱신되는 긴급 목록이 방금 나타난 사기 사이트를 신고 약 한 시간 만에 차단합니다. 저희 쪽으로 가는 요청은 여전히 없습니다. 또한 모든 경고에 「이 사이트 신뢰하기」가 생겼습니다." },
+  "whatsNewBanner": { "message": "0.14 버전 신규 기능: 경고가 사용자의 선택을 기억합니다 — 「이 사이트에서 경고하지 않기」, 오늘 하루 숨기기, 1시간 일시 중지 — 그리고 경고 막대, 차단 페이지, 알림의 디자인을 새로 다듬었습니다." },
   "popupBrandDangerSummary": { "message": "$BRAND$처럼 보이지만 아닙니다. 여기에 비밀번호를 입력하지 마세요.", "placeholders": { "brand": { "content": "$1", "example": "PayPal" } } },
   "pausedUntil": { "message": "$TIME$까지 일시 중지", "placeholders": { "time": { "content": "$1", "example": "3:45 PM" } } },
   "fmtProtocolPage": { "message": "$PROTOCOL$ 페이지", "placeholders": { "protocol": { "content": "$1", "example": "chrome" } } },

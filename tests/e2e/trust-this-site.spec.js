@@ -88,7 +88,9 @@ test('banner: synthetic (untrusted) clicks on Trust this site do nothing, even a
   await expect(page.locator('.scamshield-ack')).toHaveCount(0);
   // A real click — Playwright's locator.click() drives it via CDP input
   // simulation, which sets isTrusted:true, same as a genuine user click —
-  // still works normally.
+  // still works normally, once past the arm delay that opening the ⋯ menu
+  // re-started (0.14.0 final review: the trust button re-arms on menu open).
+  await page.waitForTimeout(350);
   await page.locator('.scamshield-banner .ss-trust').click();
   await expect(page.locator('.scamshield-ack')).toContainText(/won't flag/i);
   expect((await sw.evaluate(() => getSettings())).allowlist).toContain(HOST);

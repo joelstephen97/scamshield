@@ -50,9 +50,14 @@ const BASE_HTTPS = 'https://localhost:5600';
 // 0.14.0, Task 5: report/trust/copy live inside the ⋯ menu now (visible row
 // caps at 3 controls). A no-op when no menu is present (e.g. a surface with
 // no ⋯ button at all), so existing callers that don't need it are unaffected.
+// 0.14.0 final review: the trust button inside that menu RE-ARMS its 300ms
+// anti-synthetic-click delay the moment the menu opens (it is unreachable
+// until then, so arming at render time guarded nothing). Wait past it here, in
+// the one place every caller goes through, so a spec that opens the menu and
+// immediately clicks Trust isn't racing the guard.
 async function openMore(scope) {
   const m = scope.locator('.ss-more');
-  if (await m.count()) await m.first().click();
+  if (await m.count()) { await m.first().click(); await scope.page().waitForTimeout(350); }
 }
 // 0.14.0, Task 6: the interstitial's "Continue anyway" / "Trust this site" /
 // "Report a mistake" controls now live inside a closed <details class="ss-details">

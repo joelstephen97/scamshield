@@ -84,6 +84,12 @@
 .scamshield-toast .ss-body{grid-column:2;color:var(--ss-muted);font-size:13px;line-height:1.45}
 .scamshield-toast .ss-acts{grid-column:2;display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:8px}
 .scamshield-toast .ss-acts .ss-x{margin-left:auto}
+/* The ack bar is a 3-column grid (tile | text | actions) and carries BOTH
+   root classes, so `.scamshield-toast .ss-acts{grid-column:2}` above would
+   otherwise drop Undo ✕ onto a second row under the text. Same specificity,
+   declared later, so these win: tile | text | Undo ✕ on one row. */
+.scamshield-ack .ss-title{grid-column:2}
+.scamshield-ack .ss-acts{grid-column:3;margin-top:0}
 .scamshield-toast .ss-prog{grid-column:1/-1;height:2px;background:var(--ss-hair);border-radius:2px;margin-top:8px;overflow:hidden}
 .scamshield-toast .ss-prog i{display:block;height:100%;width:100%;background:var(--ss-accent);opacity:.6;transform-origin:left;transition:transform linear}
 .ss-btn{display:inline-flex;align-items:center;justify-content:center;min-height:32px;min-width:24px;padding:0 12px;border-radius:8px;border:1px solid var(--ss-hair);background:var(--ss-surface);color:var(--ss-text);font-weight:500;cursor:pointer;white-space:nowrap;line-height:1.2}

@@ -72,7 +72,7 @@
   "toastResumed": { "message": "Koruma devam ettirildi" },
   "toastCopied": { "message": "Kopyalandı" },
   "toastExtensionError": { "message": "Uzantı hatası — yeniden açmayı deneyin." },
-  "whatsNewBanner": { "message": "0.13'teki yenilikler: saatlik acil liste, yepyeni dolandırıcılık sitelerini bildirimden yaklaşık bir saat sonra engelliyor; bize hâlâ tek bir istek bile gitmiyor. Ayrıca her uyarıda „Bu siteye güven“." },
+  "whatsNewBanner": { "message": "0.14'teki yenilikler: uyarılar artık kendilerine söylediklerinizi hatırlıyor — „Bu sitede beni uyarmayın“, bugün gizle veya bir saatlik duraklatma — ayrıca uyarı çubuğu, durdurma sayfası ve bildirimler yeniden tasarlandı." },
   "popupBrandDangerSummary": { "message": "$BRAND$ gibi görünüyor ama değil. Buraya şifrenizi girmeyin.", "placeholders": { "brand": { "content": "$1", "example": "PayPal" } } },
   "pausedUntil": { "message": "$TIME$ saatine kadar duraklatıldı", "placeholders": { "time": { "content": "$1" } } },
   "fmtProtocolPage": { "message": "$PROTOCOL$ sayfası", "placeholders": { "protocol": { "content": "$1", "example": "chrome" } } },

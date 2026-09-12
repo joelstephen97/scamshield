@@ -22,6 +22,10 @@
           // call writeText from a timer chained off an earlier gesture — this
           // distinguishes "user clicked copy" (ollama.com) from a background
           // clipboard hijack the user never asked for.
+          // NOTE (0.14.0 final review): informational only. This file runs in
+          // the MAIN world, where page script can forge the event outright, so
+          // content_script.js deliberately IGNORES this field and reads
+          // navigator.userActivation itself in the isolated world.
           userGesture: !!(navigator.userActivation && navigator.userActivation.isActive)
         }
       }));

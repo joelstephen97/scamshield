@@ -72,7 +72,7 @@
   "toastResumed": { "message": "সুরক্ষা আবার চালু হয়েছে" },
   "toastCopied": { "message": "কপি হয়েছে" },
   "toastExtensionError": { "message": "এক্সটেনশনে সমস্যা — আবার খুলে দেখুন।" },
-  "whatsNewBanner": { "message": "0.13-এ নতুন: প্রতি ঘণ্টার জরুরি তালিকা একদম নতুন প্রতারণামূলক সাইটকে অভিযোগের প্রায় এক ঘণ্টার মধ্যেই আটকে দেয়, আর আমাদের কাছে এখনও কোনো অনুরোধ যায় না। সেই সঙ্গে প্রতিটি সতর্কতায় «এই সাইটকে বিশ্বাস করুন»।" },
+  "whatsNewBanner": { "message": "0.14-এ নতুন: সতর্কতাগুলো এখন মনে রাখে আপনি সেগুলোকে কী বলেছিলেন — «এই সাইটে আমাকে সতর্ক করবেন না», আজকের জন্য লুকান, বা এক ঘণ্টার বিরতি — আর সতর্কতা বার, থামার পাতা ও বিজ্ঞপ্তিগুলো নতুন করে সাজানো হয়েছে।" },
   "popupBrandDangerSummary": { "message": "$BRAND$-এর মতো দেখায়, কিন্তু নয়। এখানে আপনার পাসওয়ার্ড দেবেন না।", "placeholders": { "brand": { "content": "$1", "example": "PayPal" } } },
   "pausedUntil": { "message": "$TIME$ পর্যন্ত থামানো", "placeholders": { "time": { "content": "$1", "example": "3:45 PM" } } },
   "fmtProtocolPage": { "message": "$PROTOCOL$ পেজ", "placeholders": { "protocol": { "content": "$1", "example": "chrome" } } },

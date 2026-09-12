@@ -1902,16 +1902,25 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         sendResponse(await handleHashIcons(msg.urls)); break;
       case 'userReport':
         sendResponse(await handleUserReport(msg, sender)); break;
+      // Fix round 2: normalize the domain exactly as addTrust/removeTrust do.
+      // Without it a stray 'Example.COM ' writes a pausedSites key (and an
+      // allowlist entry for 'always') that isTrustedHost/isPaused — which
+      // compare against a lowercased registrable domain — can never match, so
+      // the pause silently does nothing and cannot be undone from options.
       case 'pauseSite': {
+        const d = typeof msg.domain === 'string' ? msg.domain.trim().toLowerCase() : '';
+        if (!d) { sendResponse({ ok: false }); break; }
         const s = await getSettings(); const SS = globalThis.ScamShield;
         const until = SS.pauseUntil(msg.choice, Date.now());
-        if (until === null) { if (!s.allowlist.includes(msg.domain)) s.allowlist.push(msg.domain); await setSettings({ allowlist: s.allowlist }); sendResponse({ ok: true, until: null }); break; }
-        const ps = Object.assign({}, s.pausedSites, { [msg.domain]: until });
+        if (until === null) { if (!s.allowlist.includes(d)) s.allowlist.push(d); await setSettings({ allowlist: s.allowlist }); sendResponse({ ok: true, until: null }); break; }
+        const ps = Object.assign({}, s.pausedSites, { [d]: until });
         await setSettings({ pausedSites: ps }); sendResponse({ ok: true, until }); break;
       }
       case 'unpauseSite': {
-        const s = await getSettings(); const ps = Object.assign({}, s.pausedSites); delete ps[msg.domain];
-        await setSettings({ pausedSites: ps, allowlist: s.allowlist.filter((d) => d !== msg.domain) }); sendResponse({ ok: true }); break;
+        const d = typeof msg.domain === 'string' ? msg.domain.trim().toLowerCase() : '';
+        if (!d) { sendResponse({ ok: false }); break; }
+        const s = await getSettings(); const ps = Object.assign({}, s.pausedSites); delete ps[d];
+        await setSettings({ pausedSites: ps, allowlist: s.allowlist.filter((x) => x !== d) }); sendResponse({ ok: true }); break;
       }
       case 'getTabStats': {
         const cur = await api.storage.local.get('history'); const list = Array.isArray(cur.history) ? cur.history : [];

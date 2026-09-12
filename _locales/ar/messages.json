@@ -72,7 +72,7 @@
   "toastResumed": { "message": "استؤنفت الحماية" },
   "toastCopied": { "message": "تم النسخ" },
   "toastExtensionError": { "message": "خطأ في الإضافة — جرّب إعادة فتحها." },
-  "whatsNewBanner": { "message": "الجديد في 0.13: قائمة عاجلة كل ساعة تحظر مواقع الاحتيال الجديدة تمامًا بعد نحو ساعة من الإبلاغ عنها، وما زال لا يصلنا أي طلب على الإطلاق. إضافة إلى خيار «الوثوق بهذا الموقع» في كل تحذير." },
+  "whatsNewBanner": { "message": "الجديد في 0.14: التحذيرات صارت تتذكّر ما أخبرتها به — «لا تحذّرني في هذا الموقع» أو الإخفاء لهذا اليوم أو الإيقاف المؤقت لمدة ساعة — كما أُعيد تصميم شريط التحذير وصفحة الإيقاف والإشعارات." },
   "popupBrandDangerSummary": { "message": "يبدو مثل $BRAND$ لكنه ليس كذلك. لا تُدخِل كلمة المرور هنا.", "placeholders": { "brand": { "content": "$1", "example": "PayPal" } } },
   "pausedUntil": { "message": "متوقّف حتى $TIME$", "placeholders": { "time": { "content": "$1", "example": "3:45 PM" } } },
   "fmtProtocolPage": { "message": "صفحة $PROTOCOL$", "placeholders": { "protocol": { "content": "$1", "example": "chrome" } } },

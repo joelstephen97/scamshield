@@ -105,7 +105,11 @@
     let left = ms, started = Date.now(), handle = null, done = false;
     const bar = node.querySelector('.ss-prog i');
     const paint = () => { if (bar) { bar.style.transition = 'none'; bar.style.transform = 'scaleX(' + (left / ms) + ')'; requestAnimationFrame(() => { bar.style.transition = 'transform ' + left + 'ms linear'; bar.style.transform = 'scaleX(0)'; }); } };
-    const start = () => { if (done) return; started = Date.now(); handle = setTimeout(() => { done = true; onDone(); }, left); paint(); };
+    // Fix round 2: re-entrancy guard. mouseleave and focusout can both fire for
+    // the same "pointer and focus left" gesture; without the `handle != null`
+    // check the second one stacks a SECOND setTimeout on top of the first and
+    // the surface's onDone runs twice (and the earlier handle leaks).
+    const start = () => { if (done || handle != null) return; started = Date.now(); handle = setTimeout(() => { done = true; onDone(); }, left); paint(); };
     const pause = () => { if (done || handle == null) return; clearTimeout(handle); handle = null; left = Math.max(0, left - (Date.now() - started)); if (bar) { bar.style.transition = 'none'; bar.style.transform = 'scaleX(' + (left / ms) + ')'; } };
     node.addEventListener('mouseenter', pause); node.addEventListener('focusin', pause);
     // Fix round 1: a mouseleave must not resume the timer while keyboard
@@ -141,9 +145,15 @@
     box.appendChild(acts);
     let tm = null;
     if (!o.persist) { const p = el('div', 'ss-prog'); p.setAttribute('aria-hidden', 'true'); p.appendChild(el('i')); box.appendChild(p); }
+    // Fix round 2: close() is idempotent and safe to call from the timer —
+    // tm.cancel() on an ALREADY-fired timer just clearTimeout()s a spent
+    // handle (a no-op) and flips `done`, and box.remove() on a detached node
+    // is a no-op too.
     function close() { if (tm) tm.cancel(); box.remove(); o.onClose && o.onClose(); }
     (document.body || document.documentElement).appendChild(box);
-    if (!o.persist) tm = timer(box, o.timeoutMs || 10000, () => box.remove());
+    // Fix round 2: the auto-hide must go through close(), not box.remove(), so
+    // o.onClose fires whether the surface was dismissed or simply timed out.
+    if (!o.persist) tm = timer(box, o.timeoutMs || 10000, close);
     return box;
   }
 
@@ -173,7 +183,10 @@
     return toast({ kind: 'ok', title: t('toastCopied', null, 'Copied'), timeoutMs: 2500 });
   }
   function copyReportButton(verdict) {
-    const btn = el('button', 'ss-copy', t('copyReportBtn', null, 'Copy report'));
+    // Fix round 2: built through button() so it gets type="button" (no stray
+    // form submits) and .ss-btn styling here, once, instead of every call site
+    // remembering to classList.add('ss-btn') afterwards.
+    const btn = button('ss-copy', t('copyReportBtn', null, 'Copy report'));
     // Guarded like every other in-page control (0.13.0 final review): page
     // script could otherwise synthesise a click and read the composed report
     // text out of the clipboard.
@@ -273,10 +286,14 @@
     // `.scamshield-toast .ss-X`, so dropping `scamshield-toast` silently lost
     // both. Keeping both classes means `.scamshield-ack` (which is declared
     // after the shared `.scamshield-toast,.scamshield-ack` rule in
-    // content.css) still wins the grid-template-columns override. persist:true
-    // — an acknowledgement never auto-hides.
+    // content.css) still wins the grid-template-columns override.
+    // Fix round 2: the bar auto-hides after 10s instead of persisting forever —
+    // it is an acknowledgement, not a warning, and a permanently parked bar in
+    // the corner of every trusted page is its own nuisance. timer()'s WCAG
+    // 2.2.1 pause-on-hover/focus still applies, so Undo is always reachable
+    // for as long as the user is actually pointing at or tabbed into it.
     const bar = toast({
-      kind: 'ok', persist: true, title: text,
+      kind: 'ok', timeoutMs: 10000, title: text,
       actions: [{ cls: 'ss-undo', label: t('undo', null, 'Undo'), onClick: async () => { await onUndo(); restore && restore(); } }]
     });
     bar.classList.add(NS + '-ack');
@@ -299,7 +316,12 @@
   function trustButton(onAllow) {
     const btn = button('ss-trust', t('trustThisSite', null, 'Trust this site'));
     if (onAllow) {
-      const armedAt = performance.now();
+      let armedAt = performance.now();
+      // Fix round 2: on the danger banner the trust button lives inside the ⋯
+      // menu, so it is unreachable (hidden) until the menu opens — by then the
+      // 300ms arm has long since elapsed and the guard protects nothing. The
+      // caller re-arms it at the moment it becomes reachable.
+      btn.__ssRearm = () => { armedAt = performance.now(); };
       onTrustedClick(btn, (e) => { if (performance.now() < armedAt + TRUST_ARM_MS) return; onAllow(e); });
     }
     return btn;
@@ -330,7 +352,7 @@
     // there now; "Dismiss" (the ✕) is the honest control for that surface.
     const trust = x.noTrust ? null : trustButton(async () => { bar.__ssTeardown && bar.__ssTeardown(); bar.remove(); const domain = regDomain(); await send('trustSite', { domain, via: x.trustVia || 'banner' }); ackSurface({ text: t('ackTrusted', [bidi(domain)], "ScamShield won't flag " + domain + ' again.'), onUndo: () => send('untrustSite', { domain }), restore: () => showBanner(verdict, extra) }); });
     const report = button('ss-report', t('reportMistake', null, 'Report a mistake')); onTrustedClick(report, () => { report.textContent = t('thanks', null, 'Thanks'); report.disabled = true; x.onReport && x.onReport(); closeMenu(); });
-    const copyBtn = copyReportButton(verdict); copyBtn.classList.add('ss-btn'); onTrustedClick(copyBtn, () => closeMenu());
+    const copyBtn = copyReportButton(verdict); onTrustedClick(copyBtn, () => closeMenu());
     // Visible row (Hick): danger = filled primary (rescue, else Leave) + outlined Leave (when rescue is primary) + ⋯ + ✕;
     // suspicious = outlined Trust + ⋯ + ✕ (nothing filled on a suspicious page). Trust (danger), Report, Copy live in the menu.
     if (danger) { if (rescue) { acts.append(rescue, leave); } else { leave.classList.add('primary'); acts.appendChild(leave); } if (trust) menu.appendChild(trust); }
@@ -354,7 +376,7 @@
     // attaches synchronously here. Only the outside-click listener is
     // deferred a tick — otherwise the very click that opened the menu would
     // immediately bubble to document and close it right back.
-    onTrustedClick(moreBtn, () => { if (menu.hidden) { menu.hidden = false; moreBtn.setAttribute('aria-expanded', 'true'); document.addEventListener('keydown', onKey, true); setTimeout(() => { document.addEventListener('click', onDoc, true); }, 0); } else closeMenu(); });
+    onTrustedClick(moreBtn, () => { if (menu.hidden) { menu.hidden = false; moreBtn.setAttribute('aria-expanded', 'true'); trust && trust.__ssRearm && trust.__ssRearm(); document.addEventListener('keydown', onKey, true); setTimeout(() => { document.addEventListener('click', onDoc, true); }, 0); } else closeMenu(); });
     const close = button('ss-x', '✕'); const choice = danger ? '1h' : '1d';
     close.setAttribute('aria-label', danger ? t('hideForAnHour', null, 'Hide for an hour') : t('hideForToday', null, 'Hide for today')); close.title = close.getAttribute('aria-label');
     onTrustedClick(close, () => { closeMenu(); bar.remove(); if (!x.noTrust && x.onHide) x.onHide(choice); });
@@ -386,8 +408,10 @@
     const ul = el('ul', 'ss-evidence'); for (const r of (verdict.reasons || []).slice(1, 4)) { const li = el('li'); li.append(el('span', 'ss-chip', t('chipWhy', null, 'Why')), el('span', null, reasonText(r))); ul.appendChild(li); } if (ul.children.length) card.appendChild(ul);
     card.append(el('p', 'ss-sub', t('interstitialReassure', null, 'Nothing you typed has been sent yet. Leaving now is safe.')));
     const actions = el('div', 'ss-actions'); const leave = button('ss-primary', t('leaveThisPage', null, 'Leave this page')); onTrustedClick(leave, () => { x.onLeave ? x.onLeave() : history.back(); }); actions.append(leave);
-    const copyBtn = copyReportButton(verdict); copyBtn.classList.add('ss-btn'); actions.append(copyBtn);
-    if (verdict.brandUrl) { const rescue = button('ss-rescue-ghost', t('takeMeToReal', [bidi(verdict.brandLabel || 'site')], 'Go to the real ' + (verdict.brandLabel || 'site'))); onTrustedClick(rescue, () => { location.href = verdict.brandUrl; }); actions.prepend(rescue); }
+    const copyBtn = copyReportButton(verdict); actions.append(copyBtn);
+    // Fix round 2: append, not prepend — the row reads Leave, Copy report,
+    // "Go to the real site", so the recommended action stays first.
+    if (verdict.brandUrl) { const rescue = button('ss-rescue-ghost', t('takeMeToReal', [bidi(verdict.brandLabel || 'site')], 'Go to the real ' + (verdict.brandLabel || 'site'))); onTrustedClick(rescue, () => { location.href = verdict.brandUrl; }); actions.append(rescue); }
     card.append(actions);
     const details = el('details', 'ss-details'); const sum = el('summary', null, t('detailsAndOptions', null, 'Details and other options')); details.append(sum);
     const row1 = el('div', 'ss-dt'); const stay = button('ss-danger-ghost', t('continueAnyway', null, 'Continue anyway')); armDelayed(stay, 3);
@@ -454,14 +478,19 @@
         const back = button('ss-primary', t('cancelRecommended', null, 'Cancel (recommended)'));
         const close = () => { document.removeEventListener('keydown', onKey, true); ov.remove(); };
         const onKey = (e) => { if (e.key === 'Escape') { e.preventDefault(); close(); } };
-        back.addEventListener('click', close);
+        // Fix round 2: all three controls are trusted-click guarded like every
+        // other in-page control. The armDelayed() countdown alone was not
+        // enough — page script could simply wait out the 3s and then
+        // .click() "Submit anyway" itself, posting the password to the
+        // attacker's host with no user involvement at all.
+        onTrustedClick(back, close);
         const go = button('ss-danger-ghost', t('submitAnyway', null, 'Submit anyway'));
         armDelayed(go, 3);
         // form.submit() here runs the isolated world's native (unhooked) method,
         // so it really submits without re-triggering this guard.
-        go.addEventListener('click', () => { document.removeEventListener('keydown', onKey, true); ov.remove(); form.submit(); });
+        onTrustedClick(go, () => { document.removeEventListener('keydown', onKey, true); ov.remove(); form.submit(); });
         actions.append(back, go);
-        const rep = button('ss-report', t('reportMistake', null, 'Report a mistake')); rep.addEventListener('click', () => { rep.textContent = t('thanks', null, 'Thanks'); rep.disabled = true; onReport && onReport(); }); actions.prepend(rep);
+        const rep = button('ss-report', t('reportMistake', null, 'Report a mistake')); onTrustedClick(rep, () => { rep.textContent = t('thanks', null, 'Thanks'); rep.disabled = true; onReport && onReport(); }); actions.prepend(rep);
         card.append(actions); ov.append(card);
         document.documentElement.appendChild(ov);
         document.addEventListener('keydown', onKey, true);
@@ -508,8 +537,10 @@
     armDelayed(proceed, 3);
     const done = (allow) => { document.removeEventListener('keydown', onKey, true); ov.remove(); onDecision(allow); };
     const onKey = (e) => { if (e.key === 'Escape') { e.preventDefault(); done(false); } };
-    cancel.addEventListener('click', () => done(false));
-    proceed.addEventListener('click', () => done(true));
+    // Fix round 2: trusted-click guarded — a drainer page must not be able to
+    // .click() "Proceed anyway" for the user once the 3s arm has elapsed.
+    onTrustedClick(cancel, () => done(false));
+    onTrustedClick(proceed, () => done(true));
     actions.append(cancel, proceed); card.append(actions); ov.append(card);
     document.documentElement.appendChild(ov);
     document.addEventListener('keydown', onKey, true); cancel.focus();
@@ -597,8 +628,10 @@
     const stay = button('', t('dismiss', null, 'Dismiss'));
     const close = () => { document.removeEventListener('keydown', onKey, true); ov.remove(); };
     const onKey = (e) => { if (e.key === 'Escape') { e.preventDefault(); close(); } };
-    leave.addEventListener('click', () => { close(); onLeave && onLeave(); });
-    stay.addEventListener('click', close);
+    // Fix round 2: trusted-click guarded — a tech-support scam page must not be
+    // able to dismiss its own warning overlay by synthesising a Dismiss click.
+    onTrustedClick(leave, () => { close(); onLeave && onLeave(); });
+    onTrustedClick(stay, close);
     actions.append(leave, stay); card.append(actions); ov.append(card);
     document.documentElement.appendChild(ov);
     document.addEventListener('keydown', onKey, true); leave.focus();

@@ -72,7 +72,7 @@
   "toastResumed": { "message": "सुरक्षा फिर से शुरू हुई" },
   "toastCopied": { "message": "कॉपी हो गया" },
   "toastExtensionError": { "message": "एक्सटेंशन में गड़बड़ी — दोबारा खोलकर देखें।" },
-  "whatsNewBanner": { "message": "0.13 में नया: हर घंटे की ताज़ा सूची बिलकुल नई ठगी वाली साइटों को शिकायत के करीब एक घंटे बाद ही रोक देती है, और हमारे पास अब भी कोई अनुरोध नहीं जाता। साथ ही हर चेतावनी पर «इस साइट पर भरोसा करें»।" },
+  "whatsNewBanner": { "message": "0.14 में नया: चेतावनियाँ अब याद रखती हैं कि आपने उनसे क्या कहा था — «इस साइट पर मुझे चेतावनी न दें», आज के लिए छिपाएँ, या एक घंटे का विराम — और चेतावनी बार, रोक पृष्ठ तथा सूचनाएँ नए सिरे से डिज़ाइन की गई हैं।" },
   "popupBrandDangerSummary": { "message": "$BRAND$ जैसा दिखता है, पर है नहीं। यहाँ अपना पासवर्ड न डालें।", "placeholders": { "brand": { "content": "$1", "example": "PayPal" } } },
   "pausedUntil": { "message": "$TIME$ तक रोका गया", "placeholders": { "time": { "content": "$1", "example": "3:45 PM" } } },
   "fmtProtocolPage": { "message": "$PROTOCOL$ पेज", "placeholders": { "protocol": { "content": "$1", "example": "chrome" } } },

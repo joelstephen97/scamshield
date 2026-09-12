@@ -72,7 +72,7 @@
   "toastResumed": { "message": "تحفظ دوبارہ شروع ہو گیا" },
   "toastCopied": { "message": "کاپی ہو گیا" },
   "toastExtensionError": { "message": "ایکسٹینشن میں خرابی — دوبارہ کھول کر دیکھیں۔" },
-  "whatsNewBanner": { "message": "0.13 میں نیا: ہر گھنٹے کی فوری فہرست بالکل نئی دھوکہ دہی کی سائٹس کو شکایت کے تقریباً ایک گھنٹے بعد ہی بلاک کر دیتی ہے، اور ہماری طرف اب بھی کوئی درخواست نہیں جاتی۔ ساتھ ہی ہر انتباہ پر «اس سائٹ پر بھروسا کریں»۔" },
+  "whatsNewBanner": { "message": "0.14 میں نیا: انتباہات اب یاد رکھتے ہیں کہ آپ نے انہیں کیا کہا تھا — «اس سائٹ پر مجھے خبردار نہ کریں»، آج کے لیے چھپائیں، یا ایک گھنٹے کا وقفہ — اور انتباہی پٹی، رکاوٹ کا صفحہ اور اطلاعات نئے سرے سے ڈیزائن کی گئی ہیں۔" },
   "popupBrandDangerSummary": { "message": "$BRAND$ جیسا لگتا ہے، مگر ہے نہیں۔ یہاں اپنا پاس ورڈ درج نہ کریں۔", "placeholders": { "brand": { "content": "$1", "example": "PayPal" } } },
   "pausedUntil": { "message": "$TIME$ تک روکا گیا", "placeholders": { "time": { "content": "$1", "example": "3:45 PM" } } },
   "fmtProtocolPage": { "message": "$PROTOCOL$ صفحہ", "placeholders": { "protocol": { "content": "$1", "example": "chrome" } } },

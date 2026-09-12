@@ -72,7 +72,7 @@
   "toastResumed": { "message": "Perlindungan dilanjutkan" },
   "toastCopied": { "message": "Disalin" },
   "toastExtensionError": { "message": "Terjadi kesalahan ekstensi — coba buka kembali." },
-  "whatsNewBanner": { "message": "Baru di 0.13: daftar terkini tiap jam memblokir situs penipuan yang baru muncul sekitar satu jam setelah dilaporkan, dan tetap tanpa satu pun permintaan ke kami. Plus „Percayai situs ini“ di setiap peringatan." },
+  "whatsNewBanner": { "message": "Baru di 0.14: peringatan kini mengingat apa yang Anda pilih — „Jangan peringatkan saya di situs ini“, sembunyikan untuk hari ini, atau jeda satu jam — dan bilah peringatan, halaman stop serta notifikasi didesain ulang." },
   "popupBrandDangerSummary": { "message": "Tampak seperti $BRAND$, tetapi bukan. Jangan masukkan kata sandi Anda di sini.", "placeholders": { "brand": { "content": "$1", "example": "PayPal" } } },
   "pausedUntil": { "message": "Dijeda hingga $TIME$", "placeholders": { "time": { "content": "$1" } } },
   "fmtProtocolPage": { "message": "Halaman $PROTOCOL$", "placeholders": { "protocol": { "content": "$1", "example": "chrome" } } },

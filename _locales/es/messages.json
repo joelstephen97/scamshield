@@ -71,7 +71,7 @@
   "toastResumed": { "message": "Protección reanudada" },
   "toastCopied": { "message": "Copiado" },
   "toastExtensionError": { "message": "Error de la extensión; prueba a volver a abrirla." },
-  "whatsNewBanner": { "message": "Novedades de la 0.13: una lista urgente cada hora bloquea sitios fraudulentos recién aparecidos alrededor de una hora después de la denuncia, y sigue sin enviarnos ninguna petición. Además, «Confiar en este sitio» en cada aviso." },
+  "whatsNewBanner": { "message": "Novedades de la 0.14: los avisos recuerdan lo que les dijiste — «No avisarme en este sitio», ocultar por hoy o una pausa de una hora — y la barra de aviso, la página de bloqueo y las notificaciones se han rediseñado." },
   "popupBrandDangerSummary": { "message": "Parece $BRAND$, pero no lo es. No introduzcas tu contraseña aquí.", "placeholders": { "brand": { "content": "$1", "example": "PayPal" } } },
   "pausedUntil": { "message": "Pausado hasta las $TIME$", "placeholders": { "time": { "content": "$1", "example": "3:45 PM" } } },
   "fmtProtocolPage": { "message": "Página $PROTOCOL$", "placeholders": { "protocol": { "content": "$1", "example": "chrome" } } },

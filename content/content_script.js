@@ -116,7 +116,14 @@
     if (detail.level === 'dangerous' && settings.clickFixGuard !== false && SS.scoreClickFix) {
       cf = SS.scoreClickFix({ text: (document.body ? document.body.innerText : '').slice(0, 20000), clipboardLevel: 'dangerous' });
     }
-    const tier = SS.clipboardTier({ level: detail.level, clickfixLevel: cf.level, userGesture: detail.userGesture });
+    // Fix round 2: the gesture decides warn-vs-notice tier, and `detail` comes
+    // from the MAIN world (content/detectors/clipboard.js), where page script
+    // can forge the whole CustomEvent — a site could claim userGesture:true and
+    // downgrade its own silent clipboard hijack from "warn" to "notice".
+    // navigator.userActivation is read here, in the isolated world, off the
+    // same document's real activation state, so the page cannot influence it.
+    const userGesture = !!(navigator.userActivation && navigator.userActivation.isActive);
+    const tier = SS.clipboardTier({ level: detail.level, clickfixLevel: cf.level, userGesture });
     if (tier === 'none') return;
     if (tier === 'block' && SS.actions.dangerInterstitial) {
       try { await navigator.clipboard.writeText(t('guardClipboardBlockedPayload', null, 'Blocked by ScamShield — this site put a dangerous command on your clipboard. Do not paste it anywhere.')); } catch (_) { /* overwrite is best-effort */ }
