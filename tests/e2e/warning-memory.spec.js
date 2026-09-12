@@ -46,10 +46,9 @@ test('banner ✕ snooze expires: an expired pausedSites entry brings the banner 
   await page.reload(); await expect(page.locator('.scamshield-banner')).toBeVisible({ timeout: 8000 }); await page.close();
 });
 
-// Depends on Task 8 (options.html "Muted warnings" list + #mutedlist rows +
-// per-row "Warn again" button), which is not built yet — kept exact per the
-// brief and skipped rather than weakened; Task 8 flips this back to `test(`.
-test.skip('options: muted warnings list shows the row and Warn again removes it', async ({ context, extensionId }) => {
+// Task 8: options.html "Muted warnings" list (#mutedlist rows + per-row
+// "Warn again" button).
+test('options: muted warnings list shows the row and Warn again removes it', async ({ context, extensionId }) => {
   const sw = context.serviceWorkers()[0]; await sw.evaluate(() => setSettings({ mutedWarnings: { 'ollama.com': { clipboard: { via: 'clipboard-toast', at: Date.now() } } } }));
   const page = await context.newPage(); await page.goto(`chrome-extension://${extensionId}/options.html#trusted`);
   const row = page.locator('#mutedlist li', { hasText: 'ollama.com' }); await expect(row).toContainText(/Clipboard/);

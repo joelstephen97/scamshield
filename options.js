@@ -2,6 +2,7 @@
 const api = globalThis.browser || globalThis.chrome;
 const $ = (id) => document.getElementById(id);
 const F = globalThis.SSFormat, I = globalThis.SSIcons, REVIEW = globalThis.SSReview;
+const SS = globalThis.ScamShield;
 // The locale every Intl formatter on this page uses. `let`, not `const`: when
 // the user has overridden the UI language, dates, numbers and relative times
 // must follow it too — otherwise the page reads German with English month
@@ -133,7 +134,7 @@ async function load() {
     $('feedstatus').textContent = T('feedNeverUpdated', null, 'Never updated');
   }
   $('feeddot').classList.toggle('ok', !!s.lastOtaAt);
-  renderAllow(s.allowlist || [], s.pausedSites || {}, s.allowlistMeta || {});
+  renderAllow(s.allowlist || [], s.pausedSites || {}, s.allowlistMeta || {}, s.mutedWarnings || {});
   // 0.13.0: the hourly hot list sits under the 12-hourly feed line. It is a
   // separate download with its own freshness, so it gets its own dot/status
   // rather than folding into the feed line above. `getHotStatus` answers
@@ -185,7 +186,7 @@ function allowLi(d, meta) {
   el.appendChild(b);
   return el;
 }
-function renderAllow(list, paused, meta) {
+function renderAllow(list, paused, meta, muted) {
   $('allowlist').replaceChildren(); $('pausedlist').replaceChildren();
   if (!list.length) $('allowlist').appendChild(li(T('optNoneYet', null, 'None yet')));
   for (const d of list) $('allowlist').appendChild(allowLi(d, (meta || {})[d]));
@@ -195,6 +196,16 @@ function renderAllow(list, paused, meta) {
     const whenStr = intlDate({ hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' }).format(new Date(until));
     $('pausedlist').appendChild(li(d, T('fmtUntilTime', [bidi(whenStr)], 'until ' + whenStr), T('resumeNow', null, 'Resume now'), async () => { await send('unpauseSite', { domain: d }); load(); }));
   }
+  renderMuted(muted || {});
+}
+// Per-site, per-kind warning mutes (0.14.0, Task 8): a "Don't warn here"
+// toast/banner choice, listed newest-first via engine/decisions.js's
+// listMuted() so someone who muted a warning weeks ago can find and undo it.
+const MUTE_KIND = (k) => T('muteKind_' + k, null, { clipboard: 'Clipboard notices', leak: 'Form-leak warnings', notify: 'Notification-lure warnings', credpost: 'Card and password form warnings' }[k] || k);
+function renderMuted(muted) {
+  $('mutedlist').replaceChildren(); const rows = SS.listMuted(muted);
+  if (!rows.length) { $('mutedlist').appendChild(li(T('optNoneYet', null, 'None yet'))); return; }
+  for (const r of rows) $('mutedlist').appendChild(li(r.domain, `${MUTE_KIND(r.kind)} · ${stamp(r.at)}`, T('warnAgain', null, 'Warn again'), async () => { await send('unmuteWarning', { domain: r.domain, kind: r.kind }); load(); }));
 }
 function renderHistory(list) {
   $('history').replaceChildren();

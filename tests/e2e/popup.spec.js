@@ -45,22 +45,35 @@ test('hero counters render both since-install and this-week totals from seeded s
 });
 // clean-login.html over this host is a documented "safe" fixture (see
 // tests/e2e/detection.spec.js) whose URL still trips one weak rule
-// (randomHost, host-entropy heuristic) — exactly the case the "Why this
-// verdict?" panel exists for: a safe verdict that still has something to
-// show, collapsed behind a signal count until the user asks for it.
-test('Why-verdict panel: collapsed with a signal count on a safe page, expands on click', async ({ context, extensionId }) => {
+// (randomHost, host-entropy heuristic). 0.14.0 (Task 8): a safe verdict no
+// longer shows the "Why this verdict?" panel at all — collapsed-with-a-count
+// was more clutter than reassurance on a page that already reads as safe —
+// so the weak rule stays silent and the panel only appears on an active
+// suspicious/dangerous warning.
+test('Why-panel: hidden on a safe page; visible and open with reasons on a dangerous page', async ({ context, extensionId }) => {
+  const safePage = await context.newPage();
+  await safePage.goto('https://shop.contoso-fixture.com:5600/clean-login.html');
+  await safePage.waitForTimeout(1200);
+  const safePopup = await openPopup(context, extensionId, safePage);
+  await expect(safePopup.locator('#status')).toHaveClass(/safe/, { timeout: 5000 });
+  await expect(safePopup.locator('#whypanel')).toBeHidden();
+  await safePage.close();
+
   const page = await context.newPage();
-  await page.goto('https://shop.contoso-fixture.com:5600/clean-login.html');
-  await page.waitForTimeout(1200);
+  await page.goto(BASE + '/phishing-login.html');
+  await page.waitForTimeout(800);
   const popup = await openPopup(context, extensionId, page);
-  await expect(popup.locator('#status')).toHaveClass(/safe/, { timeout: 5000 });
+  await expect(popup.locator('#status')).toHaveClass(/dangerous/, { timeout: 5000 });
   const panel = popup.locator('#whypanel');
   await expect(panel).toBeVisible();
-  await expect(panel).toHaveJSProperty('open', false);
-  await expect(popup.locator('#whycount')).toContainText('signal');
-  await popup.click('#whypanel summary');
   await expect(panel).toHaveJSProperty('open', true);
   await expect(popup.locator('#reasons li')).not.toHaveCount(0);
+});
+test('popup: a safe page shows no evidence panel', async ({ context, extensionId }) => {
+  const page = await context.newPage(); await page.goto(BASE + '/clean.html'); await page.waitForTimeout(500);
+  const popup = await openPopup(context, extensionId, page);
+  await expect(popup.locator('#status')).toHaveClass(/safe/, { timeout: 5000 });
+  await expect(popup.locator('#whypanel')).toBeHidden();
 });
 test('Pause protection → 1 hour suppresses the banner and shows a resume time', async ({ context, extensionId }) => {
   const page = await context.newPage(); await page.goto(BASE + '/phishing-login.html');

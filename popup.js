@@ -47,7 +47,7 @@ const chipLabel = (kind) => T('chip' + kind.charAt(0).toUpperCase() + kind.slice
 // there are no reasons at all (nothing to disclose, same as the old card).
 function renderEvidence(reasons, level) {
   const ul = $('reasons'); ul.replaceChildren();
-  const list = (reasons || []).slice(0, 5);
+  const list = (level === 'safe' || level === 'unknown') ? [] : (reasons || []).slice(0, 5);
   for (const r of list) {
     const kind = R.reasonKind(r);
     const li = document.createElement('li'); const chip = document.createElement('span'); chip.className = 'chip' + (kind === 'brand' ? ' brand' : '');
