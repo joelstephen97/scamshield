@@ -2,6 +2,42 @@
 
 All notable changes to ScamShield. Versions are git tags (`vX.Y.Z`); the version on the [Chrome Web Store](https://chromewebstore.google.com/detail/fojjjofjimbfoddafoampojopijnlihl) may lag a tag by a few days while Google reviews it. Privacy-relevant changes are also reflected in the [privacy policy](https://joelstephen97.github.io/scamshield/privacy.html).
 
+## 0.14.0 — 2026-09-12
+
+### Fixed
+- **Warnings now remember what you told them.** Every warning surface has a
+  control that sticks: a toast's "Don't warn me on this site" turns that kind
+  of warning off for that site for good (undo for ten seconds, and reviewable
+  under Settings → Paused sites → Muted warnings); the warning bar's ✕ hides
+  page warnings on that site for a day (an hour on a dangerous page);
+  "Continue anyway" on the full-page stop pauses ScamShield on that site for
+  an hour; "Trust this site" is still forever. Before this, dismissing a toast
+  or a bar stored nothing and the same warning came straight back.
+- **Copying an install command is no longer treated as an attack.** A site's
+  own "copy" button putting a terminal command or a crypto address on your
+  clipboard now shows a quiet notice that names the site, once per page, and
+  no longer counts as a blocked threat. The fake-CAPTCHA "paste this into Run"
+  attack is still stopped outright, exactly as before.
+- **A site sending your details to its own subdomain is no longer a "leak".**
+  The before-you-press-submit check now compares sites, not exact addresses.
+- **The popup no longer shows scary evidence under a green verdict.** On a
+  Safe page the "Why this verdict?" panel is hidden.
+- **Strict mode: "Continue anyway" no longer trusts the site forever.** It
+  pauses ScamShield there for an hour, the same as everywhere else.
+
+### Changed
+- **Redesigned warnings.** The warning bar is a full-width bar at the top of
+  the page with at most three controls and a ⋯ menu for the rest, a "Why?"
+  link for more reasons, and the real-vs-fake address side by side when a
+  brand is involved. The full-page stop is now a plain stop page like the
+  network block page: one "Leave this page" button, the address, the
+  evidence, and everything else under "Details and other options". Toasts
+  have a title, one sentence, and a timer that pauses while you hover or
+  focus them. Buttons meet the 24 px target size, keyboard focus is visible,
+  and dark mode uses the same colours as the popup.
+- **Settings → Paused sites** gained a third list, "Muted warnings", next to
+  "Always" and "For a while".
+
 ## 0.13.0 — 2026-09-07
 
 ### New

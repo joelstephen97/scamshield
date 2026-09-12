@@ -29,7 +29,6 @@
   "popupDangerSummary": { "message": "Don't enter passwords or card details here." },
   "popupSuspiciousSummary": { "message": "Take care before typing anything here." },
   "leaveThisPage": { "message": "Leave this page" },
-  "showWhy": { "message": "Show why" },
   "whyVerdict": { "message": "Why this verdict?" },
   "whyVerdictCountOne": { "message": "· 1 signal" },
   "fmtWhyVerdictCount": { "message": "· $COUNT$ signals", "placeholders": { "count": { "content": "$1", "example": "3" } } },
@@ -281,7 +280,6 @@
 
   "bannerDangerBrand": { "message": "Dangerous page — looks like $BRAND$, but isn't", "placeholders": { "brand": { "content": "$1" } } },
   "bannerDanger": { "message": "Dangerous page" },
-  "bannerSuspicious": { "message": "Suspicious page" },
   "bannerTakeCare": { "message": "Take care on this site" },
   "whyShort": { "message": "Why?" },
   "moreActions": { "message": "More actions" },
