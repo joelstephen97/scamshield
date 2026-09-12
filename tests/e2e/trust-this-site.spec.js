@@ -78,6 +78,10 @@ test('banner: synthetic (untrusted) clicks on Trust this site do nothing, even a
   // arming guard lives on the trust button itself, not the menu, so opening
   // the menu with a real click changes nothing about what's under test.
   await page.locator('.scamshield-banner .ss-more').click();
+  // Opening the menu re-arms the trust button for 300 ms (0.14.0 final
+  // review). Wait that out FIRST, so the synthetic clicks below are rejected
+  // by the isTrusted guard alone — not merely by the arm window.
+  await page.waitForTimeout(350);
   await page.evaluate(() => document.querySelector('.scamshield-banner .ss-trust').click());
   await page.evaluate(() => {
     document.querySelector('.scamshield-banner .ss-trust').dispatchEvent(new MouseEvent('click', { bubbles: true }));
@@ -88,9 +92,7 @@ test('banner: synthetic (untrusted) clicks on Trust this site do nothing, even a
   await expect(page.locator('.scamshield-ack')).toHaveCount(0);
   // A real click — Playwright's locator.click() drives it via CDP input
   // simulation, which sets isTrusted:true, same as a genuine user click —
-  // still works normally, once past the arm delay that opening the ⋯ menu
-  // re-started (0.14.0 final review: the trust button re-arms on menu open).
-  await page.waitForTimeout(350);
+  // still works normally (the arm window was already waited out above).
   await page.locator('.scamshield-banner .ss-trust').click();
   await expect(page.locator('.scamshield-ack')).toContainText(/won't flag/i);
   expect((await sw.evaluate(() => getSettings())).allowlist).toContain(HOST);
