@@ -54,4 +54,11 @@ async function openMore(scope) {
   const m = scope.locator('.ss-more');
   if (await m.count()) await m.first().click();
 }
-module.exports = { test, EXTENSION_PATH, BASE_HTTPS, openMore };
+// 0.14.0, Task 6: the interstitial's "Continue anyway" / "Trust this site" /
+// "Report a mistake" controls now live inside a closed <details class="ss-details">
+// disclosure (only "Leave this page" and "Copy report" are visible by default) —
+// a spec must open it before interacting with any control inside.
+async function openDetails(page) {
+  await page.locator('.ss-details summary').click();
+}
+module.exports = { test, EXTENSION_PATH, BASE_HTTPS, openMore, openDetails };

@@ -49,6 +49,17 @@ test('seed-phrase harvesting page gets the blocking interstitial with a delayed 
   await expect(cont).toBeEnabled({ timeout: 6000 });
 });
 
+test('interstitial: Leave is the focused primary; Continue lives under Details and pauses the site for an hour', async ({ context }) => {
+  const page = await context.newPage(); const sw = context.serviceWorkers()[0];
+  await page.goto(BASE + '/seed-phrase.html'); const ov = page.locator('.scamshield-interstitial');
+  await expect(ov).toBeVisible({ timeout: 8000 }); await expect(ov.locator('.ss-primary')).toBeFocused();
+  await expect(ov.locator('.ss-danger-ghost')).toBeHidden(); await ov.locator('.ss-details summary').click();
+  const cont = ov.locator('.ss-danger-ghost'); await expect(cont).toBeVisible(); await expect(cont).toBeDisabled(); await page.waitForTimeout(3300); await expect(cont).toBeEnabled();
+  await cont.click(); await expect(ov).toHaveCount(0);
+  const s = await sw.evaluate(() => getSettings()); expect(s.pausedSites['localhost']).toBeGreaterThan(Date.now() + 50 * 60e3); expect(s.pausedSites['localhost']).toBeLessThan(Date.now() + 70 * 60e3);
+  expect(s.allowlist).not.toContain('localhost'); await page.close();
+});
+
 test('scam giveaway content is hidden', async ({ context }) => {
   const page = await context.newPage();
   await page.goto(BASE + '/scam-giveaway.html');

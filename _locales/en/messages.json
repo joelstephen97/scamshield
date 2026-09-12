@@ -438,6 +438,9 @@
   "blockedVisitAnyway": { "message": "Visit anyway (not recommended)" },
   "blockedVisitHint": { "message": "Opens the site with ScamShield paused on it for 1 hour." },
   "blockedFooter": { "message": "Blocked on your device. Nothing about this page was sent anywhere." },
+  "detailsAndOptions": { "message": "Details and other options" },
+  "continuePausesHour": { "message": "Pauses ScamShield on this site for 1 hour." },
+  "thisPage": { "message": "This page" },
   "chipBlocklist": { "message": "Blocked site" },
   "obNote": { "message": "ScamShield is free. Optional: in Settings you can help make it smarter by sharing anonymous reports of scams it catches — it's off unless you turn it on. If it helps you, you can support development from the Settings page." }
 }

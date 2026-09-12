@@ -381,61 +381,30 @@
       t('interstitialHead2', null, 'Hold on — this looks like a scam page'),
       t('interstitialHead3', null, "Don't go further — scam warning")
     ];
-    const ov = el('div', NS + '-overlay ' + NS + '-interstitial');
-    ov.setAttribute('role', 'alertdialog');
-    ov.setAttribute('aria-modal', 'true');
-    ov.setAttribute('aria-label', t('ariaScamWarning', null, 'Scam warning'));
-    setDir(ov);
-    const card = el('div', 'ss-card');
-    const h3 = el('h3');
-    h3.append(iconSpan('dangerous'), el('span', null, HEADS[Math.floor(Math.random() * HEADS.length)]));
-    card.append(h3);
-    const why = el('p', null, reasonText(verdict.reasons[0]) || t('interstitialFallback', null, 'This page matches the pattern of a known scam.'));
-    card.append(why);
-    if (verdict.brandLabel && verdict.brandUrl) {
-      const cmp = compareRow(verdict.brandLabel, verdict.brandUrl);
-      if (cmp) card.appendChild(cmp);
-    }
-    const ul = el('ul', 'ss-evidence');
-    for (const r of (verdict.reasons || []).slice(1, 4)) { const li = el('li'); li.append(el('span', 'ss-chip', t('chipWhy', null, 'Why')), el('span', null, reasonText(r))); ul.appendChild(li); }
-    if (ul.children.length) card.appendChild(ul);
+    const ov = el('div', NS + '-overlay ' + NS + '-interstitial'); ov.setAttribute('role', 'alertdialog'); ov.setAttribute('aria-modal', 'true'); ov.setAttribute('aria-label', t('ariaScamWarning', null, 'Scam warning')); setDir(ov);
+    const card = el('div', 'ss-card'); const head = el('div', 'ss-head'); const h3 = el('h3', null, HEADS[Math.floor(Math.random() * HEADS.length)]); head.append(tile('danger'), h3); card.append(head);
+    card.append(el('p', 'ss-lead', reasonText(verdict.reasons[0]) || t('interstitialFallback', null, 'This page matches the pattern of a known scam.')));
+    // Address box, same as blocked.html: label + the page URL, LTR-isolated.
+    const addr = el('div', 'ss-addr'); addr.append(el('small', null, t('thisPage', null, 'This page')), el('code', null, location.href.slice(0, 200))); card.append(addr);
+    if (verdict.brandLabel && verdict.brandUrl) { const cmp = compareRow(verdict.brandLabel, verdict.brandUrl); if (cmp) card.appendChild(cmp); }
+    const ul = el('ul', 'ss-evidence'); for (const r of (verdict.reasons || []).slice(1, 4)) { const li = el('li'); li.append(el('span', 'ss-chip', t('chipWhy', null, 'Why')), el('span', null, reasonText(r))); ul.appendChild(li); } if (ul.children.length) card.appendChild(ul);
     card.append(el('p', 'ss-sub', t('interstitialReassure', null, 'Nothing you typed has been sent yet. Leaving now is safe.')));
-    const actions = el('div', 'ss-actions');
-    const leave = el('button', 'ss-primary', t('leaveThisPage', null, 'Leave this page'));
-    onTrustedClick(leave, () => { x.onLeave ? x.onLeave() : history.back(); });
-    actions.append(leave);
-    // Secondary link right under "Leave this page" (0.13.0, Task 11): the
-    // interstitial used to offer no permanent trust at all, only "Continue
-    // anyway" (which just dismisses this one showing). Styled as a plain
-    // link, not a button, so it never competes visually with Leave/Continue.
-    // Single guarded listener: ov.remove() lives inside onAllow itself (see
-    // showBanner's trust button for the same pattern/rationale).
-    // Not rendered at all on a `noTrust` surface — see showBanner above.
-    const trust = x.noTrust ? null : trustButton(async () => {
-      ov.remove();
-      const domain = regDomain();
-      await send('trustSite', { domain, via: x.trustVia || 'interstitial' });
-      ackSurface(domain, () => dangerInterstitial(verdict, x));
-    });
-    if (trust) { trust.classList.add('ss-trust-link'); actions.append(trust); }
-    if (verdict.brandUrl) {
-      const rescue = el('button', 'ss-rescue-ghost', t('takeMeToReal', [bidi(verdict.brandLabel || 'site')], 'Go to the real ' + (verdict.brandLabel || 'site')));
-      onTrustedClick(rescue, () => { location.href = verdict.brandUrl; });
-      actions.append(rescue);
-    }
-    const stay = el('button', 'ss-danger-ghost', t('continueAnyway', null, 'Continue anyway'));
-    armDelayed(stay, 3);
-    onTrustedClick(stay, () => { ov.remove(); if (x.onDismiss) x.onDismiss(); });
-    actions.append(stay);
-    const rep = el('button', 'ss-report', t('reportMistake', null, 'Report a mistake'));
-    onTrustedClick(rep, () => { rep.textContent = t('thanks', null, 'Thanks'); rep.disabled = true; x.onReport && x.onReport(); });
-    actions.prepend(rep);
-    const copyBtn = copyReportButton(verdict);
-    rep.insertAdjacentElement('afterend', copyBtn);
+    const actions = el('div', 'ss-actions'); const leave = button('ss-primary', t('leaveThisPage', null, 'Leave this page')); onTrustedClick(leave, () => { x.onLeave ? x.onLeave() : history.back(); }); actions.append(leave);
+    const copyBtn = copyReportButton(verdict); copyBtn.classList.add('ss-btn'); actions.append(copyBtn);
+    if (verdict.brandUrl) { const rescue = button('ss-rescue-ghost', t('takeMeToReal', [bidi(verdict.brandLabel || 'site')], 'Go to the real ' + (verdict.brandLabel || 'site'))); onTrustedClick(rescue, () => { location.href = verdict.brandUrl; }); actions.prepend(rescue); }
     card.append(actions);
-    ov.append(card);
-    document.documentElement.appendChild(ov);
-    leave.focus();
+    const details = el('details', 'ss-details'); const sum = el('summary', null, t('detailsAndOptions', null, 'Details and other options')); details.append(sum);
+    const row1 = el('div', 'ss-dt'); const stay = button('ss-danger-ghost', t('continueAnyway', null, 'Continue anyway')); armDelayed(stay, 3);
+    // Continue = pause this site for 1 hour (the block page's "Visit anyway" rule), never a permanent trust.
+    onTrustedClick(stay, () => { ov.remove(); send('pauseSite', { domain: regDomain(), choice: '1h' }); if (x.onDismiss) x.onDismiss(); });
+    row1.append(stay, el('span', 'ss-consequence', t('continuePausesHour', null, 'Pauses ScamShield on this site for 1 hour.'))); details.append(row1);
+    const row2 = el('div', 'ss-dt');
+    const trust = x.noTrust ? null : trustButton(async () => { ov.remove(); const domain = regDomain(); await send('trustSite', { domain, via: x.trustVia || 'interstitial' }); ackSurface({ text: t('ackTrusted', [bidi(domain)], "ScamShield won't flag " + domain + ' again.'), onUndo: () => send('untrustSite', { domain }), restore: () => dangerInterstitial(verdict, x) }); });
+    if (trust) { trust.className = 'ss-trust ss-trust-link'; trust.textContent = t('blockedTrustSite', null, 'Not a scam? Trust this site'); row2.append(trust); }
+    const rep = el('button', 'ss-report', t('reportMistake', null, 'Report a mistake')); rep.type = 'button'; onTrustedClick(rep, () => { rep.textContent = t('thanks', null, 'Thanks'); rep.disabled = true; x.onReport && x.onReport(); });
+    row2.append(rep); details.append(row2); card.append(details);
+    card.append(el('p', 'ss-foot', t('blockedFooter', null, 'Blocked on your device. Nothing about this page was sent anywhere.')));
+    ov.append(card); document.documentElement.appendChild(ov); leave.focus();
   }
 
   // One-time-ever, shown 1.5s after a dangerous page was blocked. Controller
@@ -486,17 +455,17 @@
         for (const r of (reasons || []).slice(0, 3)) { const li = el('li'); li.append(el('span', 'ss-chip', t('chipPage', null, 'Page')), el('span', null, reasonText(r))); ul.appendChild(li); }
         card.appendChild(ul);
         const actions = el('div', 'ss-actions');
-        const back = el('button', 'ss-primary', t('cancelRecommended', null, 'Cancel (recommended)'));
+        const back = button('ss-primary', t('cancelRecommended', null, 'Cancel (recommended)'));
         const close = () => { document.removeEventListener('keydown', onKey, true); ov.remove(); };
         const onKey = (e) => { if (e.key === 'Escape') { e.preventDefault(); close(); } };
         back.addEventListener('click', close);
-        const go = el('button', 'ss-danger-ghost', t('submitAnyway', null, 'Submit anyway'));
+        const go = button('ss-danger-ghost', t('submitAnyway', null, 'Submit anyway'));
         armDelayed(go, 3);
         // form.submit() here runs the isolated world's native (unhooked) method,
         // so it really submits without re-triggering this guard.
         go.addEventListener('click', () => { document.removeEventListener('keydown', onKey, true); ov.remove(); form.submit(); });
-        actions.append(go, back);
-        const rep = el('button', 'ss-report', t('reportMistake', null, 'Report a mistake')); rep.addEventListener('click', () => { rep.textContent = t('thanks', null, 'Thanks'); rep.disabled = true; onReport && onReport(); }); actions.prepend(rep);
+        actions.append(back, go);
+        const rep = button('ss-report', t('reportMistake', null, 'Report a mistake')); rep.addEventListener('click', () => { rep.textContent = t('thanks', null, 'Thanks'); rep.disabled = true; onReport && onReport(); }); actions.prepend(rep);
         card.append(actions); ov.append(card);
         document.documentElement.appendChild(ov);
         document.addEventListener('keydown', onKey, true);
@@ -544,8 +513,8 @@
       el('p', null, reasonText(detail.reasons && detail.reasons[0]) || t('guardWalletFallback', null, 'This site is requesting a sensitive wallet action.')),
       el('p', 'ss-sub', t('walletRiskyBody', null, 'If you did not expect this, cancel. Drainers use these requests to steal your crypto.')));
     const actions = el('div', 'ss-actions');
-    const cancel = el('button', 'ss-primary', t('cancelRecommended', null, 'Cancel (recommended)'));
-    const proceed = el('button', 'ss-danger-ghost', t('proceedAnyway', null, 'Proceed anyway'));
+    const cancel = button('ss-primary', t('cancelRecommended', null, 'Cancel (recommended)'));
+    const proceed = button('ss-danger-ghost', t('proceedAnyway', null, 'Proceed anyway'));
     armDelayed(proceed, 3);
     const done = (allow) => { document.removeEventListener('keydown', onKey, true); ov.remove(); onDecision(allow); };
     const onKey = (e) => { if (e.key === 'Escape') { e.preventDefault(); done(false); } };
@@ -634,8 +603,8 @@
       el('p', null, reasonText(verdict.reasons && verdict.reasons[0]) || t('guardTechScamFallback', null, 'This page is using scare tactics.')),
       el('p', 'ss-sub', t('techScamBody', null, 'This is a web page, not your computer — your computer is fine. Real security warnings never lock your screen or show a phone number. Do not call, and do not pay.')));
     const actions = el('div', 'ss-actions');
-    const leave = el('button', 'ss-primary', t('getMeOut', null, 'Get me out (close this page)'));
-    const stay = el('button', null, t('dismiss', null, 'Dismiss'));
+    const leave = button('ss-primary', t('getMeOut', null, 'Get me out (close this page)'));
+    const stay = button('', t('dismiss', null, 'Dismiss'));
     const close = () => { document.removeEventListener('keydown', onKey, true); ov.remove(); };
     const onKey = (e) => { if (e.key === 'Escape') { e.preventDefault(); close(); } };
     leave.addEventListener('click', () => { close(); onLeave && onLeave(); });

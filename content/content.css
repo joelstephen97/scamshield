@@ -1,7 +1,7 @@
-.scamshield-banner,.scamshield-overlay,.scamshield-toast,.scamshield-ack{--ss-surface:#fff;--ss-text:#15211B;--ss-muted:#5E6F67;--ss-hair:#DFE7E2;--ss-accent:#0B6E4F;--ss-danger:#B42318;--ss-warn:#9A5B00;--ss-warn-bg:#FFF1D6;--ss-radius:10px;--ss-chip:6px;--ss-danger-bg:#FDE9E7;--ss-accent-soft:#E3F1EA;--ss-safe:#1B7F3B;--ss-safe-bg:#E5F4EA;
+.scamshield-banner,.scamshield-overlay,.scamshield-toast,.scamshield-ack{--ss-surface:#fff;--ss-text:#15211B;--ss-muted:#5E6F67;--ss-hair:#DFE7E2;--ss-accent:#0B6E4F;--ss-danger:#B42318;--ss-warn:#9A5B00;--ss-warn-bg:#FFF1D6;--ss-radius:10px;--ss-chip:6px;--ss-danger-bg:#FDE9E7;--ss-accent-soft:#E3F1EA;--ss-safe:#1B7F3B;--ss-safe-bg:#E5F4EA;--ss-ground:#F5F8F6;
   font:13px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ss-text);box-sizing:border-box}
 .scamshield-banner *,.scamshield-overlay *,.scamshield-toast *,.scamshield-ack *{box-sizing:border-box;font:inherit}
-@media (prefers-color-scheme: dark){.scamshield-banner,.scamshield-overlay,.scamshield-toast,.scamshield-ack{--ss-surface:#171F1B;--ss-text:#E7EEEA;--ss-muted:#9AAAA2;--ss-hair:#27342D;--ss-accent:#3FB489;--ss-danger:#F87171;--ss-warn:#FBBF24;--ss-warn-bg:#2A2110;--ss-danger-bg:#2D1513;--ss-accent-soft:#16302A;--ss-safe:#4ADE80;--ss-safe-bg:#10281A}}
+@media (prefers-color-scheme: dark){.scamshield-banner,.scamshield-overlay,.scamshield-toast,.scamshield-ack{--ss-surface:#171F1B;--ss-text:#E7EEEA;--ss-muted:#9AAAA2;--ss-hair:#27342D;--ss-accent:#3FB489;--ss-danger:#F87171;--ss-warn:#FBBF24;--ss-warn-bg:#2A2110;--ss-danger-bg:#2D1513;--ss-accent-soft:#16302A;--ss-safe:#4ADE80;--ss-safe-bg:#10281A;--ss-ground:#0F1513}}
 /* Full-width bar pinned to the top edge (browser-infobar position). One row;
    a second line appears only when a brand comparison is shown. */
 .scamshield-banner{position:fixed;top:0;left:0;right:0;z-index:2147483647;min-height:56px;display:flex;align-items:flex-start;gap:12px;padding:10px 16px;box-shadow:0 2px 12px rgba(0,0,0,.18)}
@@ -35,26 +35,41 @@
 @media (max-width:640px){.scamshield-banner{flex-wrap:wrap}.scamshield-banner .ss-acts{width:100%;justify-content:flex-end;flex-wrap:wrap}}
 .scamshield-hidden-block{position:relative;filter:grayscale(1) blur(2px);opacity:.5}
 .scamshield-hidden-tag{position:absolute;top:4px;left:4px;background:#0B6E4F;color:#fff;font:11px/1 system-ui;padding:3px 6px;border-radius:4px;z-index:2}
-.scamshield-overlay{position:fixed;inset:0;z-index:2147483646;background:rgba(10,16,13,.55);display:flex;align-items:center;justify-content:center}
-.scamshield-overlay .ss-card{background:var(--ss-surface);color:var(--ss-text);width:360px;max-width:92vw;padding:16px;border-radius:var(--ss-radius);box-shadow:0 8px 28px rgba(0,0,0,.35)}
-.scamshield-overlay h3{margin:0;font-size:16px;font-weight:600;color:var(--ss-danger);display:flex;align-items:center;gap:8px}
-.scamshield-overlay h3 .ss-ico,.scamshield-toast .ss-ico{width:18px;height:18px;flex:none}
-.scamshield-overlay h3 .ss-ico svg,.scamshield-toast .ss-ico svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
-.scamshield-overlay .ss-sub{color:var(--ss-muted);font-size:13px;margin:6px 0 0}
-.scamshield-overlay .ss-evidence{list-style:none;margin:10px 0 0;padding:0} .scamshield-overlay .ss-evidence li{padding:7px 0;border-top:1px solid var(--ss-hair);display:flex;gap:8px} .scamshield-overlay .ss-evidence li:first-child{border-top:0;padding-top:0}
-.scamshield-overlay .ss-chip{font-size:11px;line-height:1;padding:4px 7px;border-radius:var(--ss-chip);background:#EEF1EF;color:var(--ss-muted);flex:none}
-.scamshield-overlay .ss-actions{display:flex;gap:8px;margin-top:14px;justify-content:flex-end;align-items:center}
-.scamshield-overlay button{border:1px solid var(--ss-hair);border-radius:var(--ss-chip);padding:6px 12px;cursor:pointer;background:var(--ss-surface);color:var(--ss-text)}
-.scamshield-overlay .ss-actions .ss-primary{background:var(--ss-accent);color:#fff;border-color:var(--ss-accent);font-weight:600}
-.scamshield-overlay .ss-actions .ss-danger-ghost{background:transparent;color:var(--ss-danger);border-color:var(--ss-danger)}
+/* Dialog overlays (form guard, wallet, tech-scam): dimmed page + card. */
+.scamshield-overlay{position:fixed;inset:0;z-index:2147483646;background:rgba(10,16,13,.55);display:flex;align-items:center;justify-content:center;padding:12px}
+.scamshield-overlay .ss-card{background:var(--ss-surface);color:var(--ss-text);width:440px;max-width:100%;padding:20px;border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.4)}
+.scamshield-overlay .ss-head{display:flex;gap:12px;align-items:center;margin-bottom:10px}
+.scamshield-overlay h3{margin:0;font-size:17px;font-weight:600;line-height:1.25;letter-spacing:-.01em;color:var(--ss-text)}
+.scamshield-overlay p{margin:0;font-size:13.5px}.scamshield-overlay .ss-sub{color:var(--ss-muted);font-size:13px;margin-top:10px}
+.scamshield-overlay .ss-evidence{list-style:none;margin:12px 0 0;padding:0}.scamshield-overlay .ss-evidence li{padding:7px 0;border-top:1px solid var(--ss-hair);display:flex;gap:8px;font-size:13px}.scamshield-overlay .ss-evidence li:first-child{border-top:0;padding-top:0}
+.scamshield-overlay .ss-chip{font-size:11px;line-height:1;padding:4px 7px;border-radius:6px;background:var(--ss-unknown-bg,#EEF1EF);color:var(--ss-muted);flex:none;height:fit-content}
+.scamshield-overlay .ss-actions{display:flex;gap:8px;margin-top:14px;justify-content:flex-end;align-items:center;flex-wrap:wrap}
+.scamshield-overlay .ss-primary{background:var(--ss-accent);color:#fff;border-color:var(--ss-accent);font-weight:600}
+.scamshield-overlay .ss-rescue-ghost{color:var(--ss-accent);border-color:var(--ss-accent);font-weight:600}
+.scamshield-overlay .ss-danger-ghost{color:var(--ss-danger);border-color:var(--ss-danger)}
 .scamshield-overlay .ss-report{margin-right:auto;border-color:transparent;color:var(--ss-accent)}
-.scamshield-overlay .ss-copy{border-color:transparent;color:var(--ss-accent)}
-.scamshield-interstitial{background:rgba(10,16,13,.78);z-index:2147483647}
-.scamshield-interstitial .ss-card{width:420px;border-top:4px solid var(--ss-danger)}
-.scamshield-interstitial .ss-actions{flex-wrap:wrap}
-/* "Trust this site" secondary link on the interstitial (0.13.0, Task 11) —
-   plain text-link styling so it never competes visually with Leave/Continue. */
-.scamshield-interstitial .ss-trust-link{border-color:transparent;background:transparent;color:var(--ss-muted);text-decoration:underline;padding:6px 2px}
+/* Interstitial = full-viewport STOP PAGE, same layout as blocked.html (no dimmed scam page behind). */
+.scamshield-interstitial{background:var(--ss-ground,#F5F8F6);z-index:2147483647;align-items:flex-start;overflow:auto;padding:0}
+.scamshield-interstitial .ss-card{width:100%;max-width:560px;margin:0 auto;padding:44px 24px 28px;background:transparent;box-shadow:none;border-radius:0}
+.scamshield-interstitial h3{font-size:22px;line-height:1.2}
+.scamshield-interstitial .ss-lead{font-size:14.5px;line-height:1.5;margin-bottom:12px;max-width:60ch}
+.scamshield-interstitial .ss-addr{background:var(--ss-surface);border:1px solid var(--ss-hair);border-radius:10px;padding:10px 12px;margin-bottom:12px}
+.scamshield-interstitial .ss-addr small{display:block;font-size:11px;color:var(--ss-muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px}
+.scamshield-interstitial .ss-addr code{font:12.5px/1.4 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;word-break:break-all;direction:ltr;unicode-bidi:isolate}
+.scamshield-interstitial .ss-evidence{margin:0 0 12px}.scamshield-interstitial .ss-evidence li{font-size:13.5px}
+.scamshield-interstitial .ss-sub{margin:0 0 16px}
+.scamshield-interstitial .ss-actions{justify-content:flex-start;gap:10px;margin-top:0}
+.scamshield-interstitial .ss-actions .ss-btn{min-height:36px;padding:0 16px}
+.scamshield-interstitial .ss-copy{border:1px solid var(--ss-hair);color:var(--ss-text);background:var(--ss-surface)}
+.scamshield-interstitial .ss-details{margin-top:18px;border-top:1px solid var(--ss-hair);padding-top:12px}
+.scamshield-interstitial .ss-details summary{cursor:pointer;color:var(--ss-muted);font-size:13px;list-style:none;display:flex;justify-content:space-between;min-height:24px;align-items:center}
+.scamshield-interstitial .ss-details summary::-webkit-details-marker{display:none}.scamshield-interstitial .ss-details summary::after{content:"▾"}.scamshield-interstitial .ss-details[open] summary::after{content:"▴"}
+.scamshield-interstitial .ss-dt{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:10px;align-items:center;font-size:13px}
+.scamshield-interstitial .ss-dt .ss-danger-ghost{min-height:32px}
+.scamshield-interstitial .ss-consequence{color:var(--ss-muted);font-size:12.5px}
+.scamshield-interstitial .ss-trust-link,.scamshield-interstitial .ss-dt .ss-report{background:none;border:0;color:var(--ss-muted);text-decoration:underline;text-underline-offset:2px;cursor:pointer;padding:0;min-height:24px;font:inherit;margin:0}
+.scamshield-interstitial .ss-dt .ss-report:disabled{text-decoration:none;cursor:default}
+.scamshield-interstitial .ss-foot{margin-top:22px;font-size:12px;color:var(--ss-muted)}
 /* Toast family + trust acknowledgement (0.14.0, Task 4) — shared primitives:
    tile() (icon), button() (.ss-btn), timer() (hover/focus-paused auto-hide).
    .scamshield-ack reuses the same surface/shape as .scamshield-toast (its
@@ -78,8 +93,6 @@
 .ss-btn:focus-visible{outline:2px solid var(--ss-accent);outline-offset:2px}
 .ss-btn:disabled{opacity:.55;cursor:not-allowed}
 @media (prefers-reduced-motion:reduce){.scamshield-toast .ss-prog i{transition:none}}
-.scamshield-overlay button:disabled{opacity:.55;cursor:not-allowed}
-.scamshield-overlay .ss-rescue-ghost{background:transparent;color:var(--ss-accent);border-color:var(--ss-accent);font-weight:600}
 .ss-compare{display:flex;gap:8px;align-items:center;margin-top:8px;padding:8px 10px;border:1px solid var(--ss-hair);border-radius:var(--ss-chip);background:var(--ss-surface);color:var(--ss-text);max-width:100%;overflow:hidden}
 .ss-compare small{display:block;font-size:11px;color:var(--ss-muted)}
 .ss-compare b{font-weight:600;word-break:break-all}
