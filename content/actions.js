@@ -510,7 +510,11 @@
   function clipboardToast(detail) {
     const old = document.querySelector('.' + NS + '-toast'); if (old) old.remove();
     const toast = el('div', NS + '-toast ' + (detail.level === 'dangerous' ? 'danger' : 'warn'));
-    toast.setAttribute('role', 'alert');
+    // 0.14.0: notice/warn tiers are informational, not an interruption — role
+    // "status" (polite) instead of "alert" (assertive) for screen readers.
+    // Task 4 rebuilds this toast around detail.tier; this is the minimal
+    // change to unblock the new e2e assertion until then.
+    toast.setAttribute('role', (detail.tier === 'notice' || detail.tier === 'warn') ? 'status' : 'alert');
     setDir(toast);
     toast.append(iconSpan(detail.level === 'dangerous' ? 'dangerous' : 'suspicious'), el('span', 'ss-msg', reasonText(detail.reasons && detail.reasons[0]) || t('guardClipboardFallback', null, 'A site changed your clipboard.')));
     const x = el('button', null, t('dismiss', null, 'Dismiss')); x.addEventListener('click', () => toast.remove());

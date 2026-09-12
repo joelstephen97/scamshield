@@ -39,5 +39,15 @@
     }
   }
 
-  return { analyzeClipboardWrite };
+  // 0.14.0 tiering. The ollama.com case: a user clicks "copy" on an install
+  // page, the payload is a real shell command, but there are no paste-and-run
+  // instructions — that is a notice, not a threat. Only the ClickFix pattern
+  // (payload + instructions) is the interstitial/"block" tier.
+  function clipboardTier(input) {
+    const s = input || {};
+    if (!s.level || s.level === 'safe') return 'none';
+    if (s.clickfixLevel === 'dangerous') return 'block';
+    return s.userGesture === true ? 'notice' : 'warn';
+  }
+  return { analyzeClipboardWrite, clipboardTier };
 });

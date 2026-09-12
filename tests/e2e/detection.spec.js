@@ -98,6 +98,23 @@ test('clipboard hijack shows a warning toast', async ({ context }) => {
   await expect(page.locator('.scamshield-toast')).toBeVisible({ timeout: 6000 });
 });
 
+test('clipboard: a user-initiated copy of a shell command is a notice, shown once per page, never counted as a threat', async ({ context }) => {
+  const page = await context.newPage(); const sw = context.serviceWorkers()[0];
+  await context.grantPermissions(['clipboard-read', 'clipboard-write'], { origin: BASE });
+  await page.goto(BASE + '/clipboard-copy-button.html');
+  const before = (await sw.evaluate(() => getSettings())).threatsBlocked || 0;
+  await page.click('#c'); await expect(page.locator('.scamshield-toast')).toBeVisible({ timeout: 6000 });
+  await expect(page.locator('.scamshield-toast')).toHaveAttribute('role', 'status');
+  // Controller ruling: `.ss-x` only exists after Task 4's toast rebuild; the
+  // current clipboardToast's dismiss button is the last (only) button, and
+  // stays the last button once Task 4 adds a leading mute button, so this
+  // selector passes both before and after Task 4.
+  await page.locator('.scamshield-toast button').last().click(); await expect(page.locator('.scamshield-toast')).toHaveCount(0);
+  await page.click('#c'); await page.waitForTimeout(800); await expect(page.locator('.scamshield-toast')).toHaveCount(0);
+  expect((await sw.evaluate(() => getSettings())).threatsBlocked || 0).toBe(before);
+  await page.close();
+});
+
 test('ClickFix fake-CAPTCHA page is blocked by the interstitial', async ({ context }) => {
   const page = await context.newPage();
   await page.goto(BASE + '/clickfix.html');

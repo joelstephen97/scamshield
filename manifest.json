@@ -27,6 +27,7 @@
         "engine/heuristics.js",
         "engine/techscam_rules.js",
         "engine/clickfix_rules.js",
+        "engine/clipboard_rules.js",
         "engine/fakeupdate_rules.js",
         "engine/shop_rules.js",
         "engine/verdict.js",

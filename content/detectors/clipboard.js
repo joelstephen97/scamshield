@@ -15,7 +15,15 @@
     if (verdict.level === 'safe') return;
     try {
       window.dispatchEvent(new CustomEvent('scamshield:clipboard-alert', {
-        detail: { level: verdict.level, reasons: verdict.reasons, sample: String(sample || '').slice(0, 120) }
+        detail: {
+          level: verdict.level, reasons: verdict.reasons, sample: String(sample || '').slice(0, 120),
+          // 0.14.0: was this write inside a real click/keypress handler? Chrome
+          // only lets a copy through user activation anyway, but a page can
+          // call writeText from a timer chained off an earlier gesture — this
+          // distinguishes "user clicked copy" (ollama.com) from a background
+          // clipboard hijack the user never asked for.
+          userGesture: !!(navigator.userActivation && navigator.userActivation.isActive)
+        }
       }));
     } catch (_) {}
   }

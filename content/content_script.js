@@ -78,6 +78,15 @@
     return ((settings && settings.allowlist) || []).includes(reg);
   }
 
+  // "Don't warn me on this site" (0.14.0): one implementation for every toast kind.
+  function muteHandler(kind) {
+    return async () => {
+      const domain = registrable(location.hostname);
+      await send('muteWarning', { domain, kind, via: kind + '-toast' });
+      if (SS.actions && SS.actions.ackSurface) SS.actions.ackSurface({ text: t('ackMuted', [bidi(domain)], "ScamShield won't show this warning on " + domain + ' again.'), onUndo: () => send('unmuteWarning', { domain, kind }) });
+    };
+  }
+
   // --- MAIN-world detector bridges (registered once; re-injection guard above) ---
   function reply(id, allow) {
     try { window.dispatchEvent(new CustomEvent('scamshield:wallet-decision', { detail: { id, allow } })); } catch (_) {}
@@ -93,32 +102,36 @@
       if (!allow && !(meta && meta.collision)) send('bumpThreats', { kind: 'wallet' });
     });
   });
+  const clipboardSeen = new Set(); // per page load: level|sample — the same copy button never re-toasts
   window.addEventListener('scamshield:clipboard-alert', async (e) => {
     const settings = await send('getSettings');
     if (!settings || !settings.enabled || !SS || !SS.actions) return;
     if (settings.clipboardGuard === false && settings.clickFixGuard === false) return;
     if (isTrustedHost(location.hostname, settings)) return;
     const detail = (e && e.detail) || {};
+    let cf = { level: 'none', reasons: [], flags: [] };
     // ClickFix escalation (0.6.0): a dangerous clipboard payload PLUS
     // paste-and-run instructions in the page text = the fake-CAPTCHA malware
     // pattern. Neutralise the clipboard and block the interaction outright.
-    if (detail.level === 'dangerous' && settings.clickFixGuard !== false && SS.scoreClickFix && SS.actions.dangerInterstitial) {
-      const text = (document.body ? document.body.innerText : '').slice(0, 20000);
-      const cf = SS.scoreClickFix({ text, clipboardLevel: 'dangerous' });
-      if (cf.level === 'dangerous') {
-        try { await navigator.clipboard.writeText(t('guardClipboardBlockedPayload', null, 'Blocked by ScamShield — this site put a dangerous command on your clipboard. Do not paste it anywhere.')); } catch (_) { /* overwrite is best-effort */ }
-        SS.actions.dangerInterstitial(
-          { level: 'dangerous', reasons: cf.reasons, flags: cf.flags },
-          { onLeave: () => send('leaveTab'), onReport: () => send('userReport', { label: 'false_positive' }) }
-        );
-        send('reportVerdict', { verdict: { level: 'dangerous', score: 0.95, reasons: cf.reasons, reasonCodes: cf.reasons.map((x) => x.code), flags: cf.flags, modelUsed: false }, subframe: !IS_TOP });
-        send('bumpThreats', { kind: 'clipboard' });
-        return;
-      }
+    if (detail.level === 'dangerous' && settings.clickFixGuard !== false && SS.scoreClickFix) {
+      cf = SS.scoreClickFix({ text: (document.body ? document.body.innerText : '').slice(0, 20000), clipboardLevel: 'dangerous' });
+    }
+    const tier = SS.clipboardTier({ level: detail.level, clickfixLevel: cf.level, userGesture: detail.userGesture });
+    if (tier === 'none') return;
+    if (tier === 'block' && SS.actions.dangerInterstitial) {
+      try { await navigator.clipboard.writeText(t('guardClipboardBlockedPayload', null, 'Blocked by ScamShield — this site put a dangerous command on your clipboard. Do not paste it anywhere.')); } catch (_) { /* overwrite is best-effort */ }
+      SS.actions.dangerInterstitial({ level: 'dangerous', reasons: cf.reasons, flags: cf.flags }, { onLeave: () => send('leaveTab'), onReport: () => send('userReport', { label: 'false_positive' }) });
+      send('reportVerdict', { verdict: { level: 'dangerous', score: 0.95, reasons: cf.reasons, reasonCodes: cf.reasons.map((x) => x.code), flags: cf.flags, modelUsed: false }, subframe: !IS_TOP });
+      send('bumpThreats', { kind: 'clipboard' });
+      return;
     }
     if (settings.clipboardGuard === false) return;
-    SS.actions.clipboardToast(detail);
-    send('bumpThreats', { kind: 'clipboard' });
+    const domain = registrable(location.hostname);
+    if (SS.isMuted && SS.isMuted(settings.mutedWarnings, domain, 'clipboard')) return;
+    const key = detail.level + '|' + (detail.sample || '');
+    if (clipboardSeen.has(key)) return; clipboardSeen.add(key);
+    // notice/warn tiers are informational: no threat count, no history row.
+    SS.actions.clipboardToast({ tier, level: detail.level, reasons: detail.reasons, host: location.hostname, onMute: muteHandler('clipboard') });
   });
   let techSignal = { dialogFloodCount: 0, fullscreenOnLoad: false, beforeUnloadCount: 0, alarmAudio: false };
   let techShown = false;
@@ -1067,6 +1080,7 @@
     // anchors are gone from the DOM either way, so the cap should reset with
     // them rather than staying exhausted for the rest of the tab's life.
     serpBadgeBudget = SERP_BADGE_CAP;
+    clipboardSeen.clear();
     navTimer = setTimeout(() => { if (SS && SS.actions) SS.actions.clearAll(); run(); }, 400);
   });
 
