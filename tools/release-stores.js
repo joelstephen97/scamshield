@@ -17,7 +17,12 @@
 'use strict';
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
+const { execFileSync } = require('child_process');
+// Spawn the CLIs through node directly (no shell): secrets and paths never pass
+// through a command string.
+const CWS_CLI = path.join(__dirname, '..', 'node_modules', 'chrome-webstore-upload-cli', 'source', 'cli.js');
+const WEBEXT_CLI = path.join(__dirname, '..', 'node_modules', 'web-ext', 'bin', 'web-ext.js');
+const run = (entry, args, env) => execFileSync(process.execPath, [entry, ...args], { stdio: 'inherit', env: env || process.env, cwd: path.resolve(__dirname, '..') });
 
 const ROOT = path.resolve(__dirname, '..');
 const version = require(path.join(ROOT, 'manifest.json')).version;
@@ -48,10 +53,10 @@ function cws(uploadOnly) {
   if (secrets.CWS_PUBLISHER_ID || process.env.CWS_PUBLISHER_ID) env.PUBLISHER_ID = process.env.CWS_PUBLISHER_ID || secrets.CWS_PUBLISHER_ID;
   const src = zip('scamshield-chrome.zip');
   console.log(`CWS: uploading ${path.basename(src)} (${version}) to item ${env.EXTENSION_ID}`);
-  execSync(`npx chrome-webstore-upload upload --source "${src}"`, { stdio: 'inherit', env, cwd: ROOT });
+  run(CWS_CLI, ['upload', '--source', src], env);
   if (uploadOnly) { console.log('CWS: uploaded as draft (not submitted). Submit from the dashboard or re-run without --upload-only.'); return; }
   console.log('CWS: submitting for review (publish)');
-  execSync('npx chrome-webstore-upload publish', { stdio: 'inherit', env, cwd: ROOT });
+  run(CWS_CLI, ['publish'], env);
   console.log('CWS: submitted. Reviewer notes cannot be set via the API — paste store/reviewer-notes/' + version + '-cws.txt in the dashboard if you want them on record.');
 }
 
@@ -61,9 +66,9 @@ function amo() {
   const metaPath = path.join(ROOT, 'dist', 'amo-metadata.json');
   fs.writeFileSync(metaPath, JSON.stringify(meta, null, 2));
   const src = path.join(ROOT, 'dist', 'amo-src'); fs.rmSync(src, { recursive: true, force: true }); fs.mkdirSync(src, { recursive: true });
-  execSync(`powershell -NoProfile -Command "Expand-Archive -Path '${zip('scamshield-firefox.zip')}' -DestinationPath '${src}' -Force"`, { stdio: 'inherit' });
+  execFileSync('powershell', ['-NoProfile', '-Command', 'Expand-Archive', '-Path', zip('scamshield-firefox.zip'), '-DestinationPath', src, '-Force'], { stdio: 'inherit' });
   console.log(`AMO: signing/submitting ${version} (listed)`);
-  execSync(`npx web-ext sign --source-dir "${src}" --artifacts-dir "${path.join(ROOT, 'dist', 'amo-artifacts')}" --channel listed --api-key "${key}" --api-secret "${secret}" --amo-metadata "${metaPath}"`, { stdio: 'inherit', cwd: ROOT });
+  run(WEBEXT_CLI, ['sign', '--source-dir', src, '--artifacts-dir', path.join(ROOT, 'dist', 'amo-artifacts'), '--channel', 'listed', '--api-key', key, '--api-secret', secret, '--amo-metadata', metaPath]);
   console.log('AMO: submitted.');
 }
 
