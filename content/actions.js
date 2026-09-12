@@ -92,6 +92,51 @@
     node.addEventListener('click', (e) => { if (!e.isTrusted) return; fn(e); });
   }
 
+  // --- Shared surface primitives (0.14.0, Task 4) ---------------------------
+  // tile()/button()/timer()/toast() are the building blocks every toast below
+  // (and the banner/interstitial in Tasks 5/6) is built from, so there is one
+  // implementation of "what does a warning surface look like" instead of one
+  // per caller.
+  const TILE = { danger: '<path d="M12 2l8 3v6c0 5.2-3.4 9.6-8 11-4.6-1.4-8-5.8-8-11V5l8-3z"/><path d="M9.5 9.5l5 5M14.5 9.5l-5 5"/>', warn: '<path d="M12 2l8 3v6c0 5.2-3.4 9.6-8 11-4.6-1.4-8-5.8-8-11V5l8-3z"/><path d="M12 8v5"/><path d="M12 16h.01"/>', info: '<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 10l3 2-3 2M13 14h3"/>', ok: '<path d="M20 6L9 17l-5-5"/>' };
+  function tile(kind) { const s = el('span', 'ss-tile ' + (TILE[kind] ? kind : 'info')); s.setAttribute('aria-hidden', 'true'); s.innerHTML = '<svg viewBox="0 0 24 24">' + (TILE[kind] || TILE.info) + '</svg>'; return s; }
+  function button(cls, label, opts) { const b = el('button', 'ss-btn ' + cls + (opts && opts.primary ? ' primary' : '') + (opts && opts.quiet ? ' quiet' : ''), label); b.type = 'button'; return b; }
+  // WCAG 2.2.1: an auto-hide timer pauses while the pointer or focus is on the surface.
+  function timer(node, ms, onDone) {
+    let left = ms, started = Date.now(), handle = null, done = false;
+    const bar = node.querySelector('.ss-prog i');
+    const paint = () => { if (bar) { bar.style.transition = 'none'; bar.style.transform = 'scaleX(' + (left / ms) + ')'; requestAnimationFrame(() => { bar.style.transition = 'transform ' + left + 'ms linear'; bar.style.transform = 'scaleX(0)'; }); } };
+    const start = () => { if (done) return; started = Date.now(); handle = setTimeout(() => { done = true; onDone(); }, left); paint(); };
+    const pause = () => { if (done || handle == null) return; clearTimeout(handle); handle = null; left = Math.max(0, left - (Date.now() - started)); if (bar) { bar.style.transition = 'none'; bar.style.transform = 'scaleX(' + (left / ms) + ')'; } };
+    node.addEventListener('mouseenter', pause); node.addEventListener('focusin', pause);
+    node.addEventListener('mouseleave', start); node.addEventListener('focusout', () => { if (!node.contains(document.activeElement)) start(); });
+    start();
+    return { cancel: () => { done = true; clearTimeout(handle); } };
+  }
+  // Controller ruling (0.14.0, Task 4 fix round): toast() replaces only an
+  // existing .scamshield-toast, NEVER a .scamshield-ack — the support toast
+  // fires 1.5s after a dangerous verdict and must not wipe the Undo bar that
+  // a trust click just raised. ackSurface (below) is itself built via toast(),
+  // so calling it still clears whatever plain toast was on screen.
+  function toast(opts) {
+    const o = opts || {};
+    document.querySelectorAll('.' + NS + '-toast').forEach((n) => n.remove()); // one plain toast at a time
+    const box = el('div', NS + '-toast ' + (o.kind || 'info'));
+    box.setAttribute('role', o.role || 'status'); setDir(box);
+    box.append(tile(o.kind === 'notice' ? 'info' : (o.kind || 'info')), el('div', 'ss-title', o.title || ''));
+    if (o.body) box.append(el('div', 'ss-body', o.body));
+    const acts = el('div', 'ss-acts');
+    for (const a of (o.actions || [])) { const b = button(a.cls || '', a.label, { primary: !!a.primary }); onTrustedClick(b, () => { a.onClick && a.onClick(); if (a.closes !== false) close(); }); acts.appendChild(b); }
+    if (o.muteKind && o.onMute) { const m = button('ss-mute', t('dontWarnHere', null, "Don't warn me on this site"), { quiet: true }); onTrustedClick(m, () => { close(); o.onMute(); }); acts.appendChild(m); }
+    const x = button('ss-x', '✕'); x.setAttribute('aria-label', t('ariaDismiss', null, 'Dismiss')); onTrustedClick(x, close); acts.appendChild(x);
+    box.appendChild(acts);
+    let tm = null;
+    if (!o.persist) { const p = el('div', 'ss-prog'); p.setAttribute('aria-hidden', 'true'); p.appendChild(el('i')); box.appendChild(p); }
+    function close() { if (tm) tm.cancel(); box.remove(); o.onClose && o.onClose(); }
+    (document.body || document.documentElement).appendChild(box);
+    if (!o.persist) tm = timer(box, o.timeoutMs || 10000, () => box.remove());
+    return box;
+  }
+
   // "Copy report" (0.10.0, Task C4) — Privacy Badger's popup Share button,
   // adapted for organic distribution: a plain-text summary of the CURRENT
   // verdict, built fresh on every click so it always matches what's on
@@ -115,13 +160,7 @@
       : [headerLine, verdictLine, signalsLabel].concat(reasons.map((r) => '- ' + r), [footerLine]).join('\n');
   }
   function copiedToast() {
-    const old = document.querySelector('.' + NS + '-toast'); if (old) old.remove();
-    const toast = el('div', NS + '-toast ok');
-    toast.setAttribute('role', 'status');
-    setDir(toast);
-    toast.append(el('span', 'ss-msg', t('toastCopied', null, 'Copied')));
-    (document.body || document.documentElement).appendChild(toast);
-    setTimeout(() => toast.remove(), 2500);
+    return toast({ kind: 'ok', title: t('toastCopied', null, 'Copied'), timeoutMs: 2500 });
   }
   function copyReportButton(verdict) {
     const btn = el('button', 'ss-copy', t('copyReportBtn', null, 'Copy report'));
@@ -214,18 +253,16 @@
       restore = restoreArg;
     }
     const old = document.querySelector('.' + NS + '-ack'); if (old) old.remove();
-    const bar = el('div', NS + '-ack');
-    bar.setAttribute('role', 'status');
-    setDir(bar);
-    bar.append(el('span', null, text));
-    const undo = el('button', 'ss-undo', t('undo', null, 'Undo'));
-    onTrustedClick(undo, async () => {
-      await onUndo();
-      bar.remove();
-      restore && restore();
+    // Built on the same toast() primitive as every other surface (tile 'ok',
+    // title, .ss-undo action), then reclassed onto the .scamshield-ack root
+    // so it keeps its own grid layout and CSS identity (still asserted by
+    // trust-this-site.spec.js: `.scamshield-ack` + `.ss-undo`). persist:true —
+    // an acknowledgement never auto-hides.
+    const bar = toast({
+      kind: 'ok', persist: true, title: text,
+      actions: [{ cls: 'ss-undo', label: t('undo', null, 'Undo'), onClick: async () => { await onUndo(); restore && restore(); } }]
     });
-    bar.appendChild(undo);
-    (document.body || document.documentElement).appendChild(bar);
+    bar.className = NS + '-ack ok';
     return bar;
   }
   // `onAllow` null/undefined → a plain button with no click behaviour of its
@@ -366,18 +403,17 @@
     leave.focus();
   }
 
-  // One-time-ever, shown only right after a dangerous page was blocked.
+  // One-time-ever, shown 1.5s after a dangerous page was blocked. Controller
+  // ruling: must never appear over an open trust acknowledgement — that toast
+  // fires right when a "Trust this site" click is landing, and wiping the
+  // Undo bar out from under the user would be far worse than skipping the ask.
   function supportToast() {
-    if (document.querySelector('.' + NS + '-toast')) return;
-    const toast = el('div', NS + '-toast warn');
-    toast.setAttribute('role', 'status');
-    setDir(toast);
-    const a = el('a', null, t('toastSupportAsk', null, 'ScamShield just protected you — it’s free and runs on your device. Chip in? ❤'));
-    a.href = 'https://github.com/sponsors/joelstephen97';
-    a.target = '_blank'; a.rel = 'noopener';
-    const x = el('button', null, t('dismiss', null, 'Dismiss')); x.addEventListener('click', () => toast.remove());
-    toast.append(a, x); (document.body || document.documentElement).appendChild(toast);
-    setTimeout(() => toast.remove(), 20000);
+    if (document.querySelector('.' + NS + '-toast') || document.querySelector('.' + NS + '-ack')) return;
+    return toast({
+      kind: 'ok', title: t('toastSupportAsk', null, 'ScamShield just protected you — it’s free and runs on your device. Chip in? ❤'),
+      actions: [{ cls: 'ss-support', label: t('supportOpen', null, 'Open'), onClick: () => window.open('https://github.com/sponsors/joelstephen97', '_blank', 'noopener') }],
+      timeoutMs: 20000
+    });
   }
 
   // Intercept submit on password forms that post off-domain.
@@ -486,17 +522,16 @@
   }
 
   // Privacy findings are informational (badge/popup tier), never blocking.
+  // `detail.muteKind`/`onMute` (0.14.0) let the leaky-form/notify-lure
+  // listeners in content_script.js offer the shared "Don't warn me on this
+  // site" control instead of each wiring its own.
   function privacyToast(detail) {
-    // Replace, never stack: same rule as crossOriginCredToast/copiedToast —
-    // two toasts share one fixed position, so the newer one must win.
-    const old = document.querySelector('.' + NS + '-toast'); if (old) old.remove();
-    const toast = el('div', NS + '-toast ' + (detail.level === 'warn' ? 'warn' : ''));
-    toast.setAttribute('role', 'status');
-    setDir(toast);
-    toast.append(iconSpan('suspicious'), el('span', 'ss-msg', detail.text || t('guardPrivacyFallback', null, 'A privacy issue was detected on this page.')));
-    const x = el('button', null, t('dismiss', null, 'Dismiss')); x.addEventListener('click', () => toast.remove());
-    toast.append(x); (document.body || document.documentElement).appendChild(toast);
-    setTimeout(() => toast.remove(), 14000);
+    const d = detail || {};
+    return toast({
+      kind: 'warn', role: 'status', title: d.title || '',
+      body: d.text || t('guardPrivacyFallback', null, 'A privacy issue was detected on this page.'),
+      muteKind: d.muteKind, onMute: d.onMute
+    });
   }
 
   // Cross-origin credential/card exfil watch (0.10.0, Task C2) — warn-tier
@@ -505,34 +540,51 @@
   // "possible phishing" overlay. The submit that triggered this was already
   // paused (content/content_script.js's guardExfilForms calls preventDefault
   // before calling here), so — unlike privacyToast, which is purely
-  // informational — this toast carries an explicit "Send anyway" so a
-  // legitimate but unlisted cross-origin post isn't silently stuck forever.
-  function crossOriginCredToast(reason, onProceed) {
-    const old = document.querySelector('.' + NS + '-toast'); if (old) old.remove();
-    const toast = el('div', NS + '-toast warn');
-    toast.setAttribute('role', 'alert');
-    setDir(toast);
-    toast.append(iconSpan('suspicious'), el('span', 'ss-msg', reasonText(reason) || t('guardPrivacyFallback', null, 'A privacy issue was detected on this page.')));
-    const proceed = el('button', null, t('submitAnyway', null, 'Submit anyway'));
-    proceed.addEventListener('click', () => { toast.remove(); onProceed && onProceed(); });
-    const x = el('button', null, t('dismiss', null, 'Dismiss')); x.addEventListener('click', () => toast.remove());
-    toast.append(proceed, x); (document.body || document.documentElement).appendChild(toast);
-    setTimeout(() => toast.remove(), 20000);
+  // informational — this toast persists (no timer) and carries an explicit
+  // "Submit anyway" so a legitimate but unlisted cross-origin post isn't
+  // silently stuck forever. `onMute` (0.14.0) is the 'credpost' mute handler.
+  function crossOriginCredToast(reason, onProceed, onMute) {
+    return toast({
+      kind: 'danger', role: 'alert', persist: true,
+      title: t('credPostTitle', null, 'This form sends what you type to another site'),
+      body: reasonText(reason),
+      actions: [
+        { cls: 'ss-keep', label: t('keepMyDetails', null, 'Keep my details'), primary: true },
+        { cls: 'ss-send', label: t('submitAnyway', null, 'Submit anyway'), onClick: onProceed }
+      ],
+      muteKind: 'credpost', onMute
+    });
   }
 
+  // 0.14.0: notice/warn tiers are informational, not an interruption — role
+  // "status" (polite) instead of "alert" (assertive) for screen readers.
+  // 'notice' (a user-initiated copy — e.g. a shell command off an install
+  // page, or a crypto address) gets its own title/body pair keyed off the
+  // reason code; 'warn' (the site wrote to the clipboard on its own) keeps a
+  // single generic title. Both offer the shared 'clipboard' mute.
   function clipboardToast(detail) {
-    const old = document.querySelector('.' + NS + '-toast'); if (old) old.remove();
-    const toast = el('div', NS + '-toast ' + (detail.level === 'dangerous' ? 'danger' : 'warn'));
-    // 0.14.0: notice/warn tiers are informational, not an interruption — role
-    // "status" (polite) instead of "alert" (assertive) for screen readers.
-    // Task 4 rebuilds this toast around detail.tier; this is the minimal
-    // change to unblock the new e2e assertion until then.
-    toast.setAttribute('role', (detail.tier === 'notice' || detail.tier === 'warn') ? 'status' : 'alert');
-    setDir(toast);
-    toast.append(iconSpan(detail.level === 'dangerous' ? 'dangerous' : 'suspicious'), el('span', 'ss-msg', reasonText(detail.reasons && detail.reasons[0]) || t('guardClipboardFallback', null, 'A site changed your clipboard.')));
-    const x = el('button', null, t('dismiss', null, 'Dismiss')); x.addEventListener('click', () => toast.remove());
-    toast.append(x); (document.body || document.documentElement).appendChild(toast);
-    setTimeout(() => toast.remove(), 12000);
+    const d = detail || {};
+    const reason = (d.reasons && d.reasons[0]) || {};
+    const host = bidi(d.host);
+    if (d.tier === 'notice') {
+      const isAddr = reason.code === 'clipboardCryptoAddress';
+      return toast({
+        kind: 'notice', role: 'status',
+        title: isAddr
+          ? t('clipboardNoticeAddrTitle', [host], 'You copied a crypto address from ' + d.host)
+          : t('clipboardNoticeCmdTitle', [host], 'You copied a terminal command from ' + d.host),
+        body: isAddr
+          ? t('clipboardNoticeAddrBody', null, 'Check it matches the address you expected before sending anything.')
+          : t('clipboardNoticeCmdBody', null, 'Only run it if you trust this site. Real sites never ask you to paste commands to "verify" anything.'),
+        muteKind: 'clipboard', onMute: d.onMute
+      });
+    }
+    return toast({
+      kind: 'warn', role: 'status',
+      title: t('clipboardWarnTitle', [host], d.host + ' changed your clipboard on its own'),
+      body: reasonText(reason) || t('guardClipboardFallback', null, 'A site changed your clipboard.'),
+      muteKind: 'clipboard', onMute: d.onMute
+    });
   }
 
   function techScamEscapeOverlay(verdict, onLeave) {
@@ -559,5 +611,5 @@
   }
 
   root.ScamShield = root.ScamShield || {};
-  root.ScamShield.actions = { showBanner, guardForms, hideScamBlocks, clearAll, walletConfirmOverlay, clipboardToast, techScamEscapeOverlay, supportToast, dangerInterstitial, armDelayed, privacyToast, crossOriginCredToast };
+  root.ScamShield.actions = { showBanner, guardForms, hideScamBlocks, clearAll, walletConfirmOverlay, clipboardToast, techScamEscapeOverlay, supportToast, dangerInterstitial, armDelayed, privacyToast, crossOriginCredToast, ackSurface };
 })(typeof globalThis !== 'undefined' ? globalThis : self);

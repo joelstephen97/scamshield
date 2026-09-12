@@ -7,7 +7,19 @@ test('leaky form: typing an email that is beaconed to a third party warns before
   await page.goto(BASE + '/leaky-form.html');
   await page.fill('#email', 'jane.doe@example.com');
   // The in-page toast appears without any submit.
-  await expect(page.locator('.scamshield-toast')).toContainText(/before you (pressed )?submit|sent your email/i, { timeout: 8000 });
+  const toast = page.locator('.scamshield-toast');
+  await expect(toast).toContainText(/before you (pressed )?submit|sent your email/i, { timeout: 8000 });
+  // Task 4: shared toast primitive — role=status (informational, not blocking),
+  // a "Don't warn me on this site" mute button, a >=24x24 dismiss target, and
+  // the auto-hide timer pauses while the pointer is on the surface (WCAG 2.2.1).
+  await expect(toast).toHaveAttribute('role', 'status');
+  await expect(toast.locator('.ss-mute')).toHaveText(/Don't warn me on this site/);
+  const box = await toast.locator('.ss-x').boundingBox();
+  expect(box.width).toBeGreaterThanOrEqual(24);
+  expect(box.height).toBeGreaterThanOrEqual(24);
+  await toast.hover();
+  await page.waitForTimeout(11000);
+  await expect(toast).toBeVisible();
   // And it shows up in the popup Privacy card.
   const popup = await context.newPage();
   await popup.goto(`chrome-extension://${extensionId}/popup.html`);

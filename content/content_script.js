@@ -166,13 +166,14 @@
     const settings = await send('getSettings');
     if (!settings || !settings.enabled || settings.leakyFormGuard === false) return;
     if (isTrustedHost(location.hostname, settings)) return;
+    if (SS.isMuted && SS.isMuted(settings.mutedWarnings, registrable(location.hostname), 'leak')) return;
     const key = 'leak|' + d.destHost + '|' + d.kind;
     if (privacySeen.has(key)) return; privacySeen.add(key);
     const text = d.kind === 'plain'
       ? t('guardLeakyFormPlain', [bidi(d.destHost)], 'This site sent your email/phone to ' + d.destHost + ' in plain text — before you pressed submit.')
       : t('guardLeakyFormHashed', [bidi(d.destHost), bidi(d.kind.toUpperCase())], 'This site sent your email/phone to ' + d.destHost + ' as a hashed (' + d.kind.toUpperCase() + ') identifier — before you pressed submit.');
     if (SS.actions && SS.actions.privacyToast) {
-      SS.actions.privacyToast({ text });
+      SS.actions.privacyToast({ title: t('leakTitle', null, 'Your details left this page before you pressed Send'), text, muteKind: 'leak', onMute: muteHandler('leak') });
     }
     send('privacyFinding', { finding: { kind: 'leaky-form', host: d.destHost, detail: d.kind } });
   });
@@ -190,12 +191,13 @@
     const settings = await send('getSettings');
     if (!settings || !settings.enabled || settings.notificationGuard === false) return;
     if (isTrustedHost(location.hostname, settings)) return;
+    if (SS.isMuted && SS.isMuted(settings.mutedWarnings, registrable(location.hostname), 'notify')) return;
     // Lure heuristic: a permission prompt on a page that also shows "allow to
     // continue / prove you are human" copy is the classic push-scam trick.
     const bt = (document.body ? document.body.innerText : '').toLowerCase();
     if (/allow.{0,20}(to (continue|proceed|verify|watch|download)|if you are not a robot|to confirm you are human)|click\s+allow/i.test(bt)) {
       if (SS.actions && SS.actions.privacyToast) {
-        SS.actions.privacyToast({ level: 'warn', text: t('guardNotifyLure', null, 'This site is trying to get notification permission using a "click Allow to continue" trick. You can safely Block it.') });
+        SS.actions.privacyToast({ level: 'warn', title: t('notifyLureTitle', null, "Don't click Allow here"), text: t('guardNotifyLure', null, 'This site is trying to get notification permission using a "click Allow to continue" trick. You can safely Block it.'), muteKind: 'notify', onMute: muteHandler('notify') });
       }
       send('privacyFinding', { finding: { kind: 'notify-lure', host: location.hostname, detail: '' } });
     }
@@ -557,7 +559,7 @@
   // already the signal. Nothing is prevented unless the check actually trips,
   // so an unflagged submit (e.g. a "card" field that isn't holding a PAN)
   // proceeds exactly as if this listener didn't exist.
-  function guardExfilForms(forms) {
+  function guardExfilForms(forms, settings) {
     forms.forEach((form) => {
       if (form.__scamshieldExfilGuarded) return;
       form.__scamshieldExfilGuarded = true;
@@ -574,13 +576,17 @@
         if (!kind) return; // not shaped like a credential/card post — let it submit
         const destHost = SS.crossOriginCredPostHost && SS.crossOriginCredPostHost(location.href, form.getAttribute('action'));
         if (!destHost) return; // action changed since collection, or no longer flaggable — fail open
+        // "Don't warn me on this site" (0.14.0): muted means the submit
+        // proceeds exactly as if this guard didn't exist — return BEFORE
+        // preventDefault so it is never paused at all.
+        if (SS.isMuted && SS.isMuted(settings && settings.mutedWarnings, registrable(location.hostname), 'credpost')) return;
         ev.preventDefault(); ev.stopPropagation();
         const reason = { code: 'crossOriginCredPost', kind: 'page', params: [destHost] };
         if (SS.actions && SS.actions.crossOriginCredToast) {
           // form.submit() is the isolated world's native (unhooked) method, so
-          // "Send anyway" really submits without re-triggering this listener —
+          // "Submit anyway" really submits without re-triggering this listener —
           // same technique guardForms uses for its own "Submit anyway".
-          SS.actions.crossOriginCredToast(reason, () => form.submit());
+          SS.actions.crossOriginCredToast(reason, () => form.submit(), muteHandler('credpost'));
         } else {
           form.submit(); // never trap the user behind a UI that failed to load
         }
@@ -1065,7 +1071,7 @@
     // Reuses leakyFormGuard (0.10.0, Task C2): the closest existing warn-tier
     // "form leak before/at submit" toggle — see task-c2-report.md for why no
     // new setting was added.
-    if (settings.leakyFormGuard !== false && exfilForms.length) guardExfilForms(exfilForms);
+    if (settings.leakyFormGuard !== false && exfilForms.length) guardExfilForms(exfilForms, settings);
     if (settings.hideScamContent && scamBlocks.length && IS_TOP) SS.actions.hideScamBlocks(scamBlocks);
   }
 
