@@ -22,6 +22,12 @@
 .scamshield-banner.danger .ss-x,.scamshield-banner.danger .ss-more{color:#fff;border-color:transparent}
 .scamshield-banner.suspicious .ss-btn{background:var(--ss-surface)}
 .scamshield-banner.suspicious .ss-x,.scamshield-banner.suspicious .ss-more{background:transparent;color:var(--ss-warn)}
+/* Fix round 1: the generic .ss-btn:focus-visible ring is a fixed green,
+   which reads poorly against the danger tier's red fill; restore a
+   banner-scoped currentColor ring (white on danger, warn/text on suspicious)
+   so it still reads on both tiers. Kept below the generic rule so it wins on
+   specificity. */
+.scamshield-banner .ss-btn:focus-visible{outline:2px solid currentColor;outline-offset:2px}
 .scamshield-banner .ss-menu{position:absolute;right:38px;top:calc(100% + 8px);background:var(--ss-surface);color:var(--ss-text);border:1px solid var(--ss-hair);border-radius:10px;box-shadow:0 8px 28px rgba(0,0,0,.22);padding:4px;min-width:200px;display:flex;flex-direction:column;z-index:1}
 .scamshield-banner .ss-menu[hidden]{display:none}
 .scamshield-banner .ss-menu .ss-btn{text-align:left;border-color:transparent;background:transparent;color:var(--ss-text);min-height:32px;justify-content:flex-start;border-radius:6px}

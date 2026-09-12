@@ -31,6 +31,12 @@ test('banner: Trust this site -> allowlisted, acknowledgement with Undo restores
   await openMore(page.locator('.scamshield-banner'));
   await page.locator('.scamshield-banner .ss-trust').click();
   await expect(page.locator('.scamshield-ack')).toContainText(/won't flag/i);
+  // Fix round 1: Trust's onAllow tears down the menu's document-level
+  // keydown/click listeners (bar.__ssTeardown) before bar.remove(). Escape
+  // here must be inert — no stale listener left registered to react to it —
+  // and must not disturb the acknowledgement bar that replaced the banner.
+  await page.keyboard.press('Escape');
+  await expect(page.locator('.scamshield-ack')).toContainText(/won't flag/i);
   const s1 = await sw.evaluate(() => getSettings());
   expect(s1.allowlist).toContain(HOST);
   expect(s1.allowlistMeta[HOST].via).toBe('banner');

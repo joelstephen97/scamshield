@@ -191,7 +191,14 @@
   }
 
   function clearAll() {
-    document.querySelectorAll('.' + NS + '-banner, .' + NS + '-overlay').forEach((n) => n.remove());
+    // Fix round 1: a banner's ⋯ menu attaches capture-phase document
+    // listeners for as long as it's open (see showBanner's bar.__ssTeardown).
+    // clearAll() only ever holds the DOM node, not that closure, so it must
+    // invoke the stashed teardown before ripping the node out — otherwise a
+    // SPA route change (scamshield:navigate) that catches the menu open
+    // leaks both listeners forever.
+    document.querySelectorAll('.' + NS + '-banner').forEach((n) => { if (n.__ssTeardown) n.__ssTeardown(); n.remove(); });
+    document.querySelectorAll('.' + NS + '-overlay').forEach((n) => n.remove());
     document.querySelectorAll('.' + NS + '-hidden-block').forEach((n) => {
       n.classList.remove(NS + '-hidden-block');
       const t = n.querySelector('.' + NS + '-hidden-tag'); if (t) t.remove();
@@ -314,9 +321,9 @@
     if (more.length) { const why = el('button', 'ss-why', t('whyShort', null, 'Why?')); why.type = 'button'; why.setAttribute('aria-expanded', 'false'); onTrustedClick(why, () => { const ul = el('ul', 'ss-why-list'); for (const r of more) ul.appendChild(el('li', null, reasonText(r))); reason.after(ul); why.remove(); }); reason.appendChild(why); }
     bar.append(tile(danger ? 'danger' : 'warn'), text);
     const acts = el('div', 'ss-acts'); const menu = el('div', 'ss-menu'); menu.setAttribute('role', 'menu'); menu.hidden = true;
-    const leave = button('ss-leave', t('leaveThisPage', null, 'Leave this page')); onTrustedClick(leave, () => { x.onLeave ? x.onLeave() : history.back(); });
+    const leave = button('ss-leave', t('leaveThisPage', null, 'Leave this page')); onTrustedClick(leave, () => { bar.__ssTeardown && bar.__ssTeardown(); x.onLeave ? x.onLeave() : history.back(); });
     const rescue = verdict.brandUrl ? button('ss-rescue', t('takeMeToReal', [bidi(verdict.brandLabel || 'site')], 'Take me to the real ' + (verdict.brandLabel || 'site')), { primary: true }) : null;
-    if (rescue) onTrustedClick(rescue, () => { location.href = verdict.brandUrl; });
+    if (rescue) onTrustedClick(rescue, () => { bar.__ssTeardown && bar.__ssTeardown(); location.href = verdict.brandUrl; });
     // Single guarded listener (not two): bar.remove() lives inside onAllow
     // itself, right before the await, so the banner still disappears the
     // instant a real trusted click lands — same UX as before, one fewer
@@ -325,9 +332,9 @@
     // "Trust this site" button that merely dismissed the banner — a label
     // that lied about what the click did. The button is simply not rendered
     // there now; "Dismiss" (the ✕) is the honest control for that surface.
-    const trust = x.noTrust ? null : trustButton(async () => { bar.remove(); const domain = regDomain(); await send('trustSite', { domain, via: x.trustVia || 'banner' }); ackSurface({ text: t('ackTrusted', [bidi(domain)], "ScamShield won't flag " + domain + ' again.'), onUndo: () => send('untrustSite', { domain }), restore: () => showBanner(verdict, extra) }); });
-    const report = button('ss-report', t('reportMistake', null, 'Report a mistake')); onTrustedClick(report, () => { report.textContent = t('thanks', null, 'Thanks'); report.disabled = true; x.onReport && x.onReport(); });
-    const copyBtn = copyReportButton(verdict); copyBtn.classList.add('ss-btn');
+    const trust = x.noTrust ? null : trustButton(async () => { bar.__ssTeardown && bar.__ssTeardown(); bar.remove(); const domain = regDomain(); await send('trustSite', { domain, via: x.trustVia || 'banner' }); ackSurface({ text: t('ackTrusted', [bidi(domain)], "ScamShield won't flag " + domain + ' again.'), onUndo: () => send('untrustSite', { domain }), restore: () => showBanner(verdict, extra) }); });
+    const report = button('ss-report', t('reportMistake', null, 'Report a mistake')); onTrustedClick(report, () => { report.textContent = t('thanks', null, 'Thanks'); report.disabled = true; x.onReport && x.onReport(); closeMenu(); });
+    const copyBtn = copyReportButton(verdict); copyBtn.classList.add('ss-btn'); onTrustedClick(copyBtn, () => closeMenu());
     // Visible row (Hick): danger = filled primary (rescue, else Leave) + outlined Leave (when rescue is primary) + ⋯ + ✕;
     // suspicious = outlined Trust + ⋯ + ✕ (nothing filled on a suspicious page). Trust (danger), Report, Copy live in the menu.
     if (danger) { if (rescue) { acts.append(rescue, leave); } else { leave.classList.add('primary'); acts.appendChild(leave); } if (trust) menu.appendChild(trust); }
@@ -337,6 +344,15 @@
     if (verdict.brandLabel && verdict.brandUrl) { const cmp = compareRow(verdict.brandLabel, verdict.brandUrl); if (cmp) text.appendChild(cmp); }
     const moreBtn = button('ss-more', '⋯'); moreBtn.setAttribute('aria-label', t('moreActions', null, 'More actions')); moreBtn.setAttribute('aria-haspopup', 'menu'); moreBtn.setAttribute('aria-expanded', 'false');
     const closeMenu = () => { menu.hidden = true; moreBtn.setAttribute('aria-expanded', 'false'); document.removeEventListener('click', onDoc, true); document.removeEventListener('keydown', onKey, true); };
+    // The two document-level listeners above are armed only while the menu
+    // is open, but the bar can also leave the DOM without ever going through
+    // closeMenu (Trust's onAllow, Leave/rescue navigating away, or clearAll()
+    // on a SPA route change) — fix round 1: any of those must still tear the
+    // listeners down, or a long-lived tab accumulates one pair of capture-
+    // phase document listeners per banner ever shown. Stashing the teardown
+    // on the element lets clearAll() (which only holds the DOM node, not this
+    // closure) reach it too.
+    bar.__ssTeardown = closeMenu;
     const onDoc = (e) => { if (!acts.contains(e.target)) closeMenu(); }; const onKey = (e) => { if (e.key === 'Escape') closeMenu(); };
     // Escape must close the menu the instant it's open, so its listener
     // attaches synchronously here. Only the outside-click listener is
