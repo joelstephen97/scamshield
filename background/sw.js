@@ -5,6 +5,7 @@
 // so service_worker.js itself must stay free of import/export syntax.
 import '../engine/constants.js';
 import '../engine/trust.js';
+import '../engine/decisions.js';
 import '../engine/features.js';
 import '../engine/risk_rules.js';
 import '../engine/image_hash.js';

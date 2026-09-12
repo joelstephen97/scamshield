@@ -4,7 +4,7 @@
 // a classic-worker context (tests driving this file directly) falls back to
 // importScripts here. In the module SW `importScripts` is undefined — the
 // ReferenceError lands in the catch and the imports from sw.js already won.
-try { importScripts('../engine/constants.js', '../engine/trust.js', '../engine/features.js', '../engine/risk_rules.js', '../engine/image_hash.js', '../engine/brand_icons.js', '../engine/report_payload.js', '../engine/engagement.js', '../engine/blockset.js', '../engine/bloom.js', '../engine/first_seen.js', '../engine/dnr_rules.js', '../engine/hotlist.js', './stats.js', './blockstore.js', './update.js'); } catch (_) { /* deps already loaded by sw.js (Chrome) or the manifest (Firefox) */ }
+try { importScripts('../engine/constants.js', '../engine/trust.js', '../engine/decisions.js', '../engine/features.js', '../engine/risk_rules.js', '../engine/image_hash.js', '../engine/brand_icons.js', '../engine/report_payload.js', '../engine/engagement.js', '../engine/blockset.js', '../engine/bloom.js', '../engine/first_seen.js', '../engine/dnr_rules.js', '../engine/hotlist.js', './stats.js', './blockstore.js', './update.js'); } catch (_) { /* deps already loaded by sw.js (Chrome) or the manifest (Firefox) */ }
 const api = globalThis.browser || globalThis.chrome;
 
 // Official ScamShield feed: rebuilt daily by GitHub Actions from OpenPhish +
@@ -82,7 +82,8 @@ const DEFAULTS = {
   lastReportAt: 0,           // ms epoch of the last community report actually sent
   syncEnabled: false,        // mirror settings to chrome.storage.sync (opt-in)
   uiLang: 'auto',            // 'auto' (follow the browser) | one of SSReasons.LOCALES
-  hotListEnabled: true       // 0.13.0: hourly hot-list redirect rules (block tier only)
+  hotListEnabled: true,      // 0.13.0: hourly hot-list redirect rules (block tier only)
+  mutedWarnings: {}          // 0.14.0: domain -> kind -> { via, at }; "Don't warn me on this site" per warning kind
 };
 
 // Settings mirrored to chrome.storage.sync when syncEnabled (0.6.0). Only
@@ -91,7 +92,7 @@ const DEFAULTS = {
 const SYNCED_KEYS = ['enabled', 'hideScamContent', 'blockKnownBad', 'pageAnalysis',
   'clickFixGuard', 'fakeUpdateGuard', 'walletGuard', 'clipboardGuard', 'techScamGuard',
   'leakyFormGuard', 'fingerprintDetect', 'notificationGuard', 'strictMode', 'qrAutoScan',
-  'reportingOptIn', 'allowlist', 'allowlistMeta', 'theme', 'otaUrl', 'uiLang'];
+  'reportingOptIn', 'allowlist', 'allowlistMeta', 'theme', 'otaUrl', 'uiLang', 'mutedWarnings'];
 
 // Local-only protection history: ring buffer of { ts, host, kind, level }.
 // Hostnames only, never full URLs; capped; user-clearable. Never transmitted.
@@ -551,6 +552,7 @@ function sanitizeImport(obj) {
     else if (k === 'theme') { if (['auto', 'light', 'dark'].includes(v)) patch[k] = v; }
     else if (k === 'otaUrl') { if (typeof v === 'string' && (v === '' || /^https:\/\//i.test(v))) patch[k] = v; }
     else if (k === 'uiLang') { if (isValidLang(v)) patch[k] = v; }
+    else if (k === 'mutedWarnings') { patch[k] = globalThis.ScamShield.sanitizeMuted(v); }
     else if (typeof v === 'boolean') patch[k] = v;
   }
   return Object.keys(patch).length ? patch : null;
@@ -731,6 +733,18 @@ async function removeTrust(domain) {
   await setSettings({ allowlist, allowlistMeta });
   return { ok: true };
 }
+
+// ---- Per-kind warning mutes (0.14.0) — the toast's "Don't warn me on this site" ----
+async function muteWarning(domain, kind, via) {
+  const SS = globalThis.ScamShield; const s = await getSettings();
+  const mutedWarnings = SS.withMute(s.mutedWarnings, domain, kind, via, Date.now());
+  const next = await setSettings({ mutedWarnings }); return { ok: true, mutedWarnings: next.mutedWarnings };
+}
+async function unmuteWarning(domain, kind) {
+  const SS = globalThis.ScamShield; const s = await getSettings();
+  await setSettings({ mutedWarnings: SS.withoutMute(s.mutedWarnings, domain, kind) }); return { ok: true };
+}
+
 // Best-effort, fire-and-forget from the caller's point of view (addTrust
 // above never awaits this before responding) — reuses the exact same
 // queueReport/lastReportInput plumbing as the explicit "Report a mistake"
@@ -1692,6 +1706,8 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         sendResponse(await removeTrust(msg.domain)); break;
       case 'removeAllow':
         sendResponse(await removeTrust(msg.domain)); break;
+      case 'muteWarning': sendResponse(await muteWarning(msg.domain, msg.kind, msg.via)); break;
+      case 'unmuteWarning': sendResponse(await unmuteWarning(msg.domain, msg.kind)); break;
       case 'reportVerdict': {
         const tabId = sender.tab && sender.tab.id;
         if (tabId != null) {

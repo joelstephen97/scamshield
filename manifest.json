@@ -18,6 +18,7 @@
       "js": [
         "engine/constants.js",
         "engine/trust.js",
+        "engine/decisions.js",
         "model/url-model.js",
         "engine/features.js",
         "engine/brand_match.js",
