@@ -81,10 +81,14 @@ function amo() {
   const metaPath = path.join(ROOT, 'dist', 'amo-metadata.json');
   fs.writeFileSync(metaPath, JSON.stringify(meta, null, 2));
   const src = path.join(ROOT, 'dist', 'amo-src'); fs.rmSync(src, { recursive: true, force: true }); fs.mkdirSync(src, { recursive: true });
-  execFileSync('powershell', ['-NoProfile', '-Command', 'Expand-Archive', '-Path', zip('scamshield-firefox.zip'), '-DestinationPath', src, '-Force'], { stdio: 'inherit' });
+  if (process.platform === 'win32') execFileSync('powershell', ['-NoProfile', '-Command', 'Expand-Archive', '-Path', zip('scamshield-firefox.zip'), '-DestinationPath', src, '-Force'], { stdio: 'inherit' });
+  else execFileSync('unzip', ['-q', '-o', zip('scamshield-firefox.zip'), '-d', src], { stdio: 'inherit' });
   console.log(`AMO: signing/submitting ${version} (listed)`);
-  run(WEBEXT_CLI, ['sign', '--source-dir', src, '--artifacts-dir', path.join(ROOT, 'dist', 'amo-artifacts'), '--channel', 'listed', '--api-key', key, '--api-secret', secret, '--amo-metadata', metaPath]);
-  console.log('AMO: submitted.');
+  // --approval-timeout 0: upload, wait for validation, then return. A listed
+  // submission is approved by a human reviewer days later; without this
+  // web-ext polls for approval until killed (and CI would time out).
+  run(WEBEXT_CLI, ['sign', '--source-dir', src, '--artifacts-dir', path.join(ROOT, 'dist', 'amo-artifacts'), '--channel', 'listed', '--approval-timeout', '0', '--api-key', key, '--api-secret', secret, '--amo-metadata', metaPath]);
+  console.log('AMO: submitted (awaiting human review; the signed file arrives once it is approved).');
 }
 
 const cmd = process.argv[2]; const uploadOnly = process.argv.includes('--upload-only');

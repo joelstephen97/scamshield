@@ -1,0 +1,95 @@
+# Continuous integration: every push to main and every pull request.
+#   unit tests -> build both store zips -> lint the Firefox package ->
+#   Playwright e2e against the *unpacked Chrome zip* (so a file the build
+#   forgot to package fails a test, not a user) -> relay tests.
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags-ignore: ['v*']   # tag pushes run release.yml instead
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  extension:
+    name: Extension (unit, build, lint, e2e)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Unit tests
+        run: npm run test:unit
+
+      - name: Build store zips
+        run: npm run build
+
+      - name: Unpack the zips for lint and e2e
+        run: |
+          unzip -q dist/scamshield-chrome.zip -d dist/unpacked-chrome
+          unzip -q dist/scamshield-firefox.zip -d dist/unpacked-firefox
+
+      - name: Lint the Firefox package (web-ext)
+        run: npx web-ext lint --source-dir dist/unpacked-firefox --no-input
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: End-to-end tests (against the packaged extension)
+        env:
+          CI: 'true'
+          SCAMSHIELD_EXT_PATH: ${{ github.workspace }}/dist/unpacked-chrome
+        run: npx playwright test
+
+      - name: Upload zips
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: scamshield-zips-${{ github.sha }}
+          path: |
+            dist/scamshield-chrome.zip
+            dist/scamshield-firefox.zip
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Upload Playwright results on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-results-${{ github.sha }}
+          path: test-results/
+          if-no-files-found: ignore
+          retention-days: 7
+
+  relay:
+    name: Relay (unit)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: relay
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: relay/package-lock.json
+      - run: npm ci
+      - run: npm test

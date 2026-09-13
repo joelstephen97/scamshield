@@ -251,8 +251,10 @@ Known limits (honest): the page model is data-limited (few live positives on any
 1. Bump the version in **three** places: `manifest.json`, `manifest.firefox.json`, `package.json`; update `CHANGELOG.md` and, if user-visible, the `whatsNewSeen` version in `popup.js`.
 2. `npm test && npm run build` — the build asserts the zip stays small (≤ 2.5 MB) and that the staged manifest matches the source.
 3. Regenerate store assets if the UI changed: `npm run screenshots && npm run promo`.
-4. Commit, tag (`git tag vX.Y.Z && git push origin refs/tags/vX.Y.Z`), then publish a GitHub Release with both zips attached: `gh release create vX.Y.Z dist/scamshield-chrome.zip dist/scamshield-firefox.zip --title "ScamShield X.Y.Z" --notes-file <notes>` (the Firefox install instructions link to the latest release).
-5. Upload `dist/scamshield-chrome.zip` to the [Chrome Web Store developer dashboard](https://chrome.google.com/webstore/devconsole) and `dist/scamshield-firefox.zip` to AMO, using the copy in [`store/chrome-listing.md`](store/chrome-listing.md) / [`store/firefox-listing.md`](store/firefox-listing.md) and the checklist in [`store/submission-checklist.md`](store/submission-checklist.md).
+4. Commit and tag: `git tag vX.Y.Z && git push origin refs/tags/vX.Y.Z`. The [Release workflow](.github/workflows/release.yml) checks the tag against the manifests, reruns the tests against the packaged extension, publishes the GitHub Release with both zips and the `CHANGELOG.md` section (the Firefox install instructions link to the latest release), and then submits the zips to the Chrome Web Store and AMO through `tools/release-stores.js` using the secrets in the repository's `stores` environment. Without those secrets the store step skips itself and you run `npm run release:stores` locally instead.
+5. Anything the store APIs cannot set (listing text, screenshots, reviewer notes) is pasted in the dashboards from [`store/chrome-listing.md`](store/chrome-listing.md) / [`store/firefox-listing.md`](store/firefox-listing.md), following [`store/submission-checklist.md`](store/submission-checklist.md).
+
+Every push and pull request also runs the [CI workflow](.github/workflows/ci.yml): unit tests, both builds, `web-ext lint` on the Firefox package, the Playwright suite against the unpacked Chrome zip, and the relay tests.
 
 ## Upgrade safety
 

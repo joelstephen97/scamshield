@@ -41,7 +41,8 @@
     "release:cws": "node tools/release-stores.js cws",
     "release:amo": "node tools/release-stores.js amo",
     "release:stores": "node tools/release-stores.js all",
-    "cws:token": "node tools/cws-token.js"
+    "cws:token": "node tools/cws-token.js",
+    "release:notes": "node tools/release-notes.js"
   },
   "devDependencies": {
     "@playwright/test": "^1.48.0",

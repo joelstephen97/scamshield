@@ -1,0 +1,179 @@
+# Release: push a tag `vX.Y.Z` (matching manifest.json / manifest.firefox.json /
+# package.json) and this workflow
+#   1. verifies the tag matches the manifests, runs the unit tests, builds and
+#      lints the zips, and runs the e2e suite against the packaged extension;
+#   2. creates the GitHub Release with both zips and the CHANGELOG section;
+#   3. publishes to the Chrome Web Store and Firefox AMO through
+#      tools/release-stores.js (the same script as `npm run release:stores`),
+#      using the `stores` environment. Add the secrets there and, if you want a
+#      manual approval before anything reaches a store, a required reviewer.
+#
+# Secrets (Settings -> Environments -> stores):
+#   CWS_CLIENT_ID, CWS_CLIENT_SECRET, CWS_REFRESH_TOKEN, CWS_EXTENSION_ID,
+#   CWS_PUBLISHER_ID, AMO_API_KEY, AMO_API_SECRET
+# Leave them unset and the store steps skip themselves (the GitHub Release still
+# happens). The Chrome Web Store API cannot edit listing text or screenshots:
+# paste those in the dashboard when they change (store/submission-checklist.md).
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      publish_stores:
+        description: Publish to the Chrome Web Store and AMO
+        type: boolean
+        default: false
+
+concurrency:
+  group: release-${{ github.ref }}
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Verify and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Check the tag matches the manifests
+        id: version
+        run: |
+          set -euo pipefail
+          v_manifest=$(node -p "require('./manifest.json').version")
+          v_firefox=$(node -p "require('./manifest.firefox.json').version")
+          v_package=$(node -p "require('./package.json').version")
+          if [ "$v_manifest" != "$v_firefox" ] || [ "$v_manifest" != "$v_package" ]; then
+            echo "::error::version drift: manifest.json=$v_manifest manifest.firefox.json=$v_firefox package.json=$v_package"
+            exit 1
+          fi
+          if [ "$GITHUB_REF_TYPE" = "tag" ] && [ "$GITHUB_REF_NAME" != "v$v_manifest" ]; then
+            echo "::error::tag $GITHUB_REF_NAME does not match manifest version $v_manifest"
+            exit 1
+          fi
+          echo "version=$v_manifest" >> "$GITHUB_OUTPUT"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Unit tests
+        run: npm run test:unit
+
+      - name: Build store zips
+        run: npm run build
+
+      - name: Unpack the zips for lint and e2e
+        run: |
+          unzip -q dist/scamshield-chrome.zip -d dist/unpacked-chrome
+          unzip -q dist/scamshield-firefox.zip -d dist/unpacked-firefox
+
+      - name: Lint the Firefox package (web-ext)
+        run: npx web-ext lint --source-dir dist/unpacked-firefox --no-input
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: End-to-end tests (against the packaged extension)
+        env:
+          CI: 'true'
+          SCAMSHIELD_EXT_PATH: ${{ github.workspace }}/dist/unpacked-chrome
+        run: npx playwright test
+
+      - name: Release notes from CHANGELOG.md
+        run: |
+          node tools/release-notes.js > dist/release-notes.md
+          cat dist/release-notes.md
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: scamshield-${{ steps.version.outputs.version }}
+          path: |
+            dist/scamshield-chrome.zip
+            dist/scamshield-firefox.zip
+            dist/release-notes.md
+          retention-days: 90
+
+  github-release:
+    name: GitHub Release
+    needs: build
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: scamshield-${{ needs.build.outputs.version }}
+          path: dist
+      - name: Create the release (or replace the assets if it exists)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+          VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          set -euo pipefail
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$TAG" dist/scamshield-chrome.zip dist/scamshield-firefox.zip --clobber --repo "$GITHUB_REPOSITORY"
+          else
+            gh release create "$TAG" dist/scamshield-chrome.zip dist/scamshield-firefox.zip \
+              --title "ScamShield $VERSION" --notes-file dist/release-notes.md --repo "$GITHUB_REPOSITORY"
+          fi
+
+  stores:
+    name: Publish to Chrome Web Store and AMO
+    needs: [build, github-release]
+    # Runs after a tag release, or on a manual dispatch that asked for it.
+    if: >-
+      always() && needs.build.result == 'success'
+      && (needs.github-release.result == 'success' || needs.github-release.result == 'skipped')
+      && (github.event_name != 'workflow_dispatch' || inputs.publish_stores)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: stores
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - uses: actions/download-artifact@v4
+        with:
+          name: scamshield-${{ needs.build.outputs.version }}
+          path: dist
+
+      - name: Chrome Web Store (upload + submit for review)
+        env:
+          CWS_CLIENT_ID: ${{ secrets.CWS_CLIENT_ID }}
+          CWS_CLIENT_SECRET: ${{ secrets.CWS_CLIENT_SECRET }}
+          CWS_REFRESH_TOKEN: ${{ secrets.CWS_REFRESH_TOKEN }}
+          CWS_EXTENSION_ID: ${{ secrets.CWS_EXTENSION_ID }}
+          CWS_PUBLISHER_ID: ${{ secrets.CWS_PUBLISHER_ID }}
+        run: |
+          if [ -z "$CWS_CLIENT_ID" ]; then
+            echo "::notice::CWS secrets are not set in the 'stores' environment; skipping the Chrome Web Store"
+            exit 0
+          fi
+          node tools/release-stores.js cws
+
+      - name: Firefox AMO (web-ext sign, listed)
+        env:
+          AMO_API_KEY: ${{ secrets.AMO_API_KEY }}
+          AMO_API_SECRET: ${{ secrets.AMO_API_SECRET }}
+        run: |
+          if [ -z "$AMO_API_KEY" ]; then
+            echo "::notice::AMO secrets are not set in the 'stores' environment; skipping AMO"
+            exit 0
+          fi
+          node tools/release-stores.js amo

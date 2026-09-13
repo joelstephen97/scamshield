@@ -37,6 +37,7 @@ Windows note: run Playwright headed with `set HEADLESS=false && npx playwright t
 - Anything user-visible (banner, popup, options, overlays) needs an e2e in `tests/e2e/` against a fixture page under `tests/e2e/pages/`. Fixture hosts are mapped to 127.0.0.1 in `playwright.config.js` (`--host-resolver-rules`); HTTPS fixtures use the committed self-signed cert.
 - If you touch a model or its feature extractor, regenerate parity (`npm run gen:parity`, then the Python trainer) so `tests/unit/*_parity.test.js` still pass — they assert JS == Python to 1e-4.
 - If you touch the popup/options/in-page UI, re-run `npm run screenshots` and commit the refreshed PNGs (don't hand-edit them).
+- Every push and pull request runs `.github/workflows/ci.yml` on GitHub Actions: unit tests, both store builds, `web-ext lint` on the Firefox package, the full Playwright suite against the *unpacked Chrome zip* (so anything the build forgets to package fails there), and the relay tests. A PR needs it green.
 
 ## How to add…
 
