@@ -300,7 +300,6 @@ jobs:
           merge-multiple: true
       - name: Merge shards
         run: |
-          # shellcheck disable=SC2016  # the ${...} below are JS template literals inside node -e '...'
           npx playwright merge-reports --reporter html ./all-blob-reports
           npx playwright merge-reports --reporter json ./all-blob-reports > merged.json
           {
@@ -417,6 +416,10 @@ jobs:
         with:
           persist-credentials: false
       - name: Run actionlint
+        env:
+          # SC2016 (single quotes don't expand) fires on every node -e '...' step
+          # whose JS uses template literals; that is deliberate, not a shell bug.
+          SHELLCHECK_OPTS: -e SC2016
         run: |
           bash <(curl -fsSL https://raw.githubusercontent.com/rhysd/actionlint/914e7df21a07ef503a81201c76d2b11c789d3fca/scripts/download-actionlint.bash) 1.7.12
           ./actionlint -color
@@ -434,7 +437,6 @@ jobs:
           NEEDS: ${{ toJSON(needs) }}
           DOCS_ONLY: ${{ github.event_name == 'pull_request' && needs.changes.outputs.code == 'false' }}
         run: |
-          # shellcheck disable=SC2016  # the ${...} below are JS template literals inside node -e '...'
           echo "$NEEDS" | node -e '
             const needs = JSON.parse(require("fs").readFileSync(0, "utf8"));
             let bad = 0;
