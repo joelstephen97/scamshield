@@ -8,7 +8,7 @@
     "dev": "vercel dev"
   },
   "dependencies": {
-    "@neondatabase/serverless": "^0.10.4"
+    "@neondatabase/serverless": "^1.1.0"
   },
   "engines": {
     "node": ">=20"
