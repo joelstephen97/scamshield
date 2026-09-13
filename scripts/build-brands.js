@@ -177,11 +177,14 @@ function validate(rows, existingKeys) {
   }
 }
 
-function jsStringArray(arr) { return '[' + arr.map((s) => `'${s.replace(/'/g, "\\'")}'`).join(', ') + ']'; }
+// Single-quoted JS string literal: escape backslashes before quotes so any
+// generated value round-trips exactly.
+function jsStr(s) { return "'" + s.replace(/\\/g, '\\\\').replace(/'/g, "\\'") + "'"; }
+function jsStringArray(arr) { return '[' + arr.map(jsStr).join(', ') + ']'; }
 
 function renderRow(row) {
   const optsParts = [];
-  if (row.display) optsParts.push(`display: '${row.display.replace(/'/g, "\\'")}'`);
+  if (row.display) optsParts.push('display: ' + jsStr(row.display));
   if (row.ccPolicy === 'closed') {
     optsParts.push(`ccPolicy: 'closed'`);
     optsParts.push(`suffixes: ${jsStringArray(row.suffixes)}`);

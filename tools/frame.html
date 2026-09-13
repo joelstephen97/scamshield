@@ -8,7 +8,7 @@ body{background:#0B6E4F;position:relative} body.dark{background:#0F1513}
 .shot img{display:block}
 </style></head><body><div class="grain"></div><div class="cap" id="cap"></div><div class="shot" id="shot"></div>
 <script>
-const q=new URLSearchParams(location.search);document.getElementById('cap').innerHTML=(q.get('caption')||'')+'<small>'+(q.get('sub')||'On-device · private by design')+'</small>';
+const q=new URLSearchParams(location.search);const cap=document.getElementById('cap');cap.textContent=q.get('caption')||'';const sub=document.createElement('small');sub.textContent=q.get('sub')||'On-device · private by design';cap.appendChild(sub);
 if(q.get('theme')==='dark')document.body.classList.add('dark');
 window.__setShot=(d,w,h)=>{const s=document.getElementById('shot');const maxW=700,maxH=660;const k=Math.min(1,maxW/w,maxH/h);s.innerHTML='<img src="'+d+'" width="'+Math.round(w*k)+'" height="'+Math.round(h*k)+'">';};
 </script></body></html>

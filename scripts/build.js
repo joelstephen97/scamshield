@@ -1,7 +1,7 @@
 /** Build ScamShield zips for Chrome Web Store and Firefox AMO. */
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
+const { execFileSync } = require('child_process');
 
 const ROOT = path.resolve(__dirname, '..');
 const DIST = path.join(ROOT, 'dist');
@@ -23,10 +23,11 @@ function copyRecursive(src, dest) {
   }
 }
 function zipDir(sourceDir, zipPath) {
+  // No shell: paths are passed as argv, never interpolated into a command string.
   if (process.platform === 'win32') {
-    execSync(`powershell -NoProfile -Command "Compress-Archive -Path '${sourceDir}\\*' -DestinationPath '${zipPath}' -Force"`, { stdio: 'inherit' });
+    execFileSync('powershell', ['-NoProfile', '-Command', 'Compress-Archive', '-Path', path.join(sourceDir, '*'), '-DestinationPath', zipPath, '-Force'], { stdio: 'inherit' });
   } else {
-    execSync(`cd "${sourceDir}" && zip -r "${zipPath}" .`, { stdio: 'inherit' });
+    execFileSync('zip', ['-r', '-q', zipPath, '.'], { cwd: sourceDir, stdio: 'inherit' });
   }
 }
 

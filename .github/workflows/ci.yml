@@ -300,6 +300,7 @@ jobs:
           merge-multiple: true
       - name: Merge shards
         run: |
+          # shellcheck disable=SC2016  # the ${...} below are JS template literals inside node -e '...'
           npx playwright merge-reports --reporter html ./all-blob-reports
           npx playwright merge-reports --reporter json ./all-blob-reports > merged.json
           {
@@ -433,6 +434,7 @@ jobs:
           NEEDS: ${{ toJSON(needs) }}
           DOCS_ONLY: ${{ github.event_name == 'pull_request' && needs.changes.outputs.code == 'false' }}
         run: |
+          # shellcheck disable=SC2016  # the ${...} below are JS template literals inside node -e '...'
           echo "$NEEDS" | node -e '
             const needs = JSON.parse(require("fs").readFileSync(0, "utf8"));
             let bad = 0;

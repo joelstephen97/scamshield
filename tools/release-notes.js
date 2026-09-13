@@ -9,9 +9,12 @@ const fs = require('fs');
 const path = require('path');
 const ROOT = path.resolve(__dirname, '..');
 const version = process.argv[2] || require(path.join(ROOT, 'manifest.json')).version;
-const s = fs.readFileSync(path.join(ROOT, 'CHANGELOG.md'), 'utf8');
-const m = new RegExp('^## ' + version.replace(/\./g, '\\.') + '\\b.*$', 'm').exec(s);
-if (!m) { console.error(`CHANGELOG.md has no "## ${version}" section`); process.exit(2); }
-const start = m.index + m[0].length;
-const next = s.indexOf('\n## ', start);
-process.stdout.write(s.slice(start, next < 0 ? s.length : next).trim() + '\n');
+const lines = fs.readFileSync(path.join(ROOT, 'CHANGELOG.md'), 'utf8').split(/\r?\n/);
+// A section heading is "## <version>" optionally followed by " — <date>"; match on
+// the exact version token rather than a regex built from user input.
+const isHeading = (l, v) => l.startsWith('## ') && l.slice(3).trim().split(/\s+/)[0] === v;
+const start = lines.findIndex((l) => isHeading(l, version));
+if (start < 0) { console.error(`CHANGELOG.md has no "## ${version}" section`); process.exit(2); }
+let end = lines.findIndex((l, i) => i > start && l.startsWith('## '));
+if (end < 0) end = lines.length;
+process.stdout.write(lines.slice(start + 1, end).join('\n').trim() + '\n');
