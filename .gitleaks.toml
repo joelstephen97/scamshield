@@ -1,0 +1,12 @@
+# gitleaks configuration (used by the CI secret scan and by `gitleaks git .`).
+# Extends the default ruleset; only the committed *test-only* TLS key for the
+# e2e HTTPS fixture server is allowlisted. Real secrets live only in
+# docs/store-secrets.local.txt, which is git-ignored.
+title = "ScamShield gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Self-signed localhost certificate for tests/e2e/server.js (not a secret)"
+paths = ['''tests/e2e/certs/localhost\.key''']

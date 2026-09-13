@@ -1,0 +1,42 @@
+# Dependabot: weekly, grouped, so updates arrive as one PR per ecosystem
+# instead of a dozen. CI (including the e2e suite against the packaged
+# extension) runs on every one of them, so a green PR is safe to merge.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '06:00'
+      timezone: Asia/Dubai
+    groups:
+      dev-tooling:
+        patterns: ['*']
+        update-types: [minor, patch]
+    labels: [dependencies]
+
+  - package-ecosystem: npm
+    directory: /relay
+    schedule:
+      interval: weekly
+      day: monday
+      time: '06:00'
+      timezone: Asia/Dubai
+    groups:
+      relay:
+        patterns: ['*']
+        update-types: [minor, patch]
+    labels: [dependencies, relay]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '06:00'
+      timezone: Asia/Dubai
+    groups:
+      actions:
+        patterns: ['*']
+    labels: [dependencies, ci]

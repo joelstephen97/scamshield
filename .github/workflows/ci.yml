@@ -1,95 +1,448 @@
-# Continuous integration: every push to main and every pull request.
-#   unit tests -> build both store zips -> lint the Firefox package ->
-#   Playwright e2e against the *unpacked Chrome zip* (so a file the build
-#   forgot to package fails a test, not a user) -> relay tests.
+# ScamShield CI
+#
+# Runs on every push to main, every pull request, a weekly schedule (so
+# Chromium / Playwright / Node drift is caught even when nobody pushes), by
+# hand, and as the gate inside release.yml (workflow_call).
+#
+# Jobs (all pinned to commit SHAs, least-privilege token, hard timeouts):
+#   changes          PR only: is this a docs-only change? (skips the heavy jobs)
+#   unit             node --test on ubuntu (Node 22 + 24) and windows (Node 22);
+#                    the Node 22/ubuntu leg enforces coverage floors
+#   build            both store zips, size budget, package-content guard,
+#                    web-ext lint on the Firefox package, SHA256SUMS -> artifact
+#   e2e              Playwright, 3 shards, against the UNPACKED CHROME ZIP from
+#                    `build` (a file the build forgot to package fails here)
+#   e2e-report       merges the shards into one HTML report + a markdown summary
+#   relay            relay/ unit tests + prod-dependency audit
+#   supply-chain     npm audit (prod deps blocking; dev deps informational)
+#   secrets-scan     gitleaks over the full history (.gitleaks.toml allowlist)
+#   dependency-review PR only: new dependencies with known vulnerabilities
+#   workflows        actionlint (+ shellcheck) on .github/workflows
+#   ci-ok            single required status: green only when nothing failed
+#
+# Branch protection: require the check named "CI / ci-ok".
 name: CI
 
 on:
   push:
     branches: [main]
-    tags-ignore: ['v*']   # tag pushes run release.yml instead
+    tags-ignore: ['v*']   # tag pushes run release.yml, which calls this workflow
   pull_request:
+  schedule:
+    - cron: '0 3 * * 1'   # Mondays 03:00 UTC
   workflow_dispatch:
+  workflow_call:
 
 concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
 
+env:
+  NODE_DEFAULT: 22
+  E2E_SHARDS: 3
+
 jobs:
-  extension:
-    name: Extension (unit, build, lint, e2e)
+  # ---------------------------------------------------------------- changes
+  changes:
+    name: Classify change
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      code: ${{ steps.filter.outputs.code }}
+      relay: ${{ steps.filter.outputs.relay }}
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          node-version: 22
+          persist-credentials: false
+      - id: filter
+        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
+        with:
+          filters: |
+            code:
+              - '**'
+              - '!docs/**'
+              - '!README.md'
+              - '!CONTRIBUTING.md'
+              - '!CHANGELOG.md'
+              - '!SECURITY.md'
+              - '!NOTICE'
+              - '!index.html'
+              - '!privacy.html'
+              - '!goodbye.html'
+              - '!assets/store/**'
+              - '!.github/dependabot.yml'
+              - '!.github/FUNDING.yml'
+            relay:
+              - 'relay/**'
+              - 'engine/report_payload.js'
+
+  # ------------------------------------------------------------------- unit
+  unit:
+    name: Unit (${{ matrix.os }}, Node ${{ matrix.node }})
+    needs: changes
+    if: ${{ !cancelled() && (github.event_name != 'pull_request' || needs.changes.outputs.code == 'true') }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest, node: 22, coverage: true }
+          - { os: ubuntu-latest, node: 24, coverage: false }
+          - { os: windows-latest, node: 22, coverage: false }
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ matrix.node }}
           cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
+      - run: npm ci
       - name: Unit tests
+        if: ${{ !matrix.coverage }}
         run: npm run test:unit
+      - name: Unit tests with coverage floors (lines 85, branches 78, functions 76)
+        if: ${{ matrix.coverage }}
+        shell: bash
+        run: |
+          set -o pipefail
+          node --test --experimental-test-coverage \
+            --test-coverage-exclude='tests/**' \
+            --test-coverage-lines=85 --test-coverage-branches=78 --test-coverage-functions=76 \
+            --test-reporter=spec --test-reporter-destination=stdout \
+            "tests/unit/**/*.test.js" 2>&1 | tee unit.log
+      - name: Coverage summary
+        if: ${{ matrix.coverage && always() }}
+        shell: bash
+        run: |
+          {
+            echo '### Unit tests (Node ${{ matrix.node }}, ${{ matrix.os }})'
+            echo '```'
+            grep -E '^ℹ (tests|pass|fail|skipped|duration_ms|all files)' unit.log || true
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Build store zips
+  # ------------------------------------------------------------------ build
+  build:
+    name: Build and lint packages
+    needs: changes
+    if: ${{ !cancelled() && (github.event_name != 'pull_request' || needs.changes.outputs.code == 'true') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ env.NODE_DEFAULT }}
+          cache: npm
+      - run: npm ci
+
+      - name: Build store zips (fails over 2.5 MB or on manifest drift)
         run: npm run build
 
-      - name: Unpack the zips for lint and e2e
+      - name: Unpack for lint, guard and e2e
         run: |
           unzip -q dist/scamshield-chrome.zip -d dist/unpacked-chrome
           unzip -q dist/scamshield-firefox.zip -d dist/unpacked-firefox
 
+      - name: Package-content guard
+        run: |
+          set -euo pipefail
+          fail=0
+          for z in dist/scamshield-chrome.zip dist/scamshield-firefox.zip; do
+            list=$(unzip -Z1 "$z")
+            # Things that must never ship.
+            if echo "$list" | grep -Eq '\.onnx$|^tests/|^docs/|^store/|^model/data/|^node_modules/|^goodbye\.html$|^\.git|\.local\.txt$|^dist/'; then
+              echo "::error::$z contains files that must not ship:"; echo "$list" | grep -E '\.onnx$|^tests/|^docs/|^store/|^model/data/|^node_modules/|^goodbye\.html$|^\.git|\.local\.txt$|^dist/'; fail=1
+            fi
+            # Things that must ship.
+            for must in manifest.json background/ content/ engine/ rules/ ui/ popup.html options.html onboarding.html blocked.html model/url-model.js model/page-content.js _locales/en/messages.json assets/icons/icon128.png; do
+              echo "$list" | grep -q "^$must" || { echo "::error::$z is missing $must"; fail=1; }
+            done
+          done
+          exit $fail
+
+      - name: Permissions are exactly storage, declarativeNetRequest, alarms + http/https
+        run: |
+          node -e '
+            const fs = require("fs");
+            for (const f of ["dist/unpacked-chrome/manifest.json", "dist/unpacked-firefox/manifest.json"]) {
+              const m = JSON.parse(fs.readFileSync(f, "utf8"));
+              const perms = (m.permissions || []).slice().sort().join(",");
+              const hosts = (m.host_permissions || []).slice().sort().join(",");
+              if (perms !== "alarms,declarativeNetRequest,storage" || hosts !== "http://*/*,https://*/*") {
+                console.error(`${f}: unexpected permissions [${perms}] hosts [${hosts}] — a new permission disables the extension for every existing user`); process.exit(1);
+              }
+              console.log(`${f}: permissions ok`);
+            }'
+
       - name: Lint the Firefox package (web-ext)
         run: npx web-ext lint --source-dir dist/unpacked-firefox --no-input
 
-      - name: Install Playwright Chromium
-        run: npx playwright install --with-deps chromium
+      - name: Checksums and summary
+        run: |
+          (cd dist && sha256sum scamshield-chrome.zip scamshield-firefox.zip > SHA256SUMS && cat SHA256SUMS)
+          {
+            echo '### Packages'
+            echo '| Package | Size | SHA-256 |'
+            echo '|---|---:|---|'
+            for z in scamshield-chrome.zip scamshield-firefox.zip; do
+              printf '| %s | %s KB | `%s` |\n' "$z" "$(( $(stat -c %s "dist/$z") / 1024 ))" "$(sha256sum "dist/$z" | cut -c1-16)…"
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: End-to-end tests (against the packaged extension)
-        env:
-          CI: 'true'
-          SCAMSHIELD_EXT_PATH: ${{ github.workspace }}/dist/unpacked-chrome
-        run: npx playwright test
-
-      - name: Upload zips
-        if: always()
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: scamshield-zips-${{ github.sha }}
+          name: scamshield-zips
           path: |
             dist/scamshield-chrome.zip
             dist/scamshield-firefox.zip
-          if-no-files-found: ignore
-          retention-days: 14
+            dist/SHA256SUMS
+          if-no-files-found: error
+          retention-days: 30
 
-      - name: Upload Playwright results on failure
-        if: failure()
-        uses: actions/upload-artifact@v4
+  # -------------------------------------------------------------------- e2e
+  e2e:
+    name: E2E shard ${{ matrix.shard }}/3
+    needs: [changes, build]
+    if: ${{ !cancelled() && needs.build.result == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          name: playwright-results-${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ env.NODE_DEFAULT }}
+          cache: npm
+      - run: npm ci
+
+      - name: Download the packaged extension
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: scamshield-zips
+          path: dist
+      - run: unzip -q dist/scamshield-chrome.zip -d dist/unpacked-chrome
+
+      - name: Playwright version
+        id: pw
+        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+      - name: Cache Playwright Chromium
+        id: pw-cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ runner.os }}-${{ steps.pw.outputs.version }}
+      - name: Install Chromium
+        if: steps.pw-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+      - name: Install Chromium system deps
+        if: steps.pw-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
+
+      - name: Playwright (packaged extension)
+        env:
+          CI: 'true'
+          SCAMSHIELD_EXT_PATH: ${{ github.workspace }}/dist/unpacked-chrome
+        run: npx playwright test --shard=${{ matrix.shard }}/${{ env.E2E_SHARDS }} --reporter=blob,dot
+
+      - name: Upload blob report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: blob-report-${{ matrix.shard }}
+          path: blob-report/
+          if-no-files-found: ignore
+          retention-days: 7
+      - name: Upload failure traces
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: e2e-failures-shard-${{ matrix.shard }}
           path: test-results/
           if-no-files-found: ignore
           retention-days: 7
 
+  e2e-report:
+    name: E2E report
+    needs: e2e
+    if: ${{ !cancelled() && needs.e2e.result != 'skipped' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ env.NODE_DEFAULT }}
+          cache: npm
+      - run: npm ci
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: blob-report-*
+          path: all-blob-reports
+          merge-multiple: true
+      - name: Merge shards
+        run: |
+          npx playwright merge-reports --reporter html ./all-blob-reports
+          npx playwright merge-reports --reporter json ./all-blob-reports > merged.json
+          {
+            echo '### End-to-end (packaged extension, 3 shards)'
+            node -e '
+              const r = require("./merged.json"), s = r.stats, rows = [];
+              const walk = (suites, file) => { for (const su of suites || []) {
+                for (const sp of su.specs || []) for (const t of sp.tests || []) if (t.status !== "expected")
+                  rows.push(`| ${su.file || file} | ${sp.title.replace(/\|/g, "\\|")} | ${t.status} |`);
+                walk(su.suites, su.file || file); } };
+              walk(r.suites);
+              console.log("| Passed | Failed | Flaky | Skipped | Duration |\n|---:|---:|---:|---:|---:|");
+              console.log(`| ${s.expected} | ${s.unexpected} | ${s.flaky} | ${s.skipped} | ${Math.round(s.duration / 1000)} s |`);
+              if (rows.length) console.log("\n| File | Test | Status |\n|---|---|---|\n" + rows.join("\n"));'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14
+
+  # ------------------------------------------------------------------ relay
   relay:
-    name: Relay (unit)
+    name: Relay
+    needs: changes
+    if: ${{ !cancelled() && (github.event_name != 'pull_request' || needs.changes.outputs.relay == 'true') }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     defaults:
       run:
         working-directory: relay
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          node-version: 22
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ env.NODE_DEFAULT }}
           cache: npm
           cache-dependency-path: relay/package-lock.json
       - run: npm ci
       - run: npm test
+      - name: Audit production dependencies (high+ blocks)
+        run: npm audit --omit=dev --audit-level=high
+
+  # ----------------------------------------------------------- supply-chain
+  supply-chain:
+    name: Dependency audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ env.NODE_DEFAULT }}
+          cache: npm
+      - name: Lockfile is in sync with package.json
+        run: npm ci --ignore-scripts
+      - name: Shipped (production) dependencies must be clean
+        run: npm audit --omit=dev --audit-level=high
+      - name: Dev-tooling advisories (informational)
+        continue-on-error: true
+        run: |
+          set +e
+          npm audit --audit-level=high > audit.txt 2>&1; code=$?
+          { echo '### npm audit (dev tooling, informational)'; echo '```'; tail -n 40 audit.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          exit $code
+
+  # ----------------------------------------------------------- secrets-scan
+  secrets-scan:
+    name: Secret scan (gitleaks)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_ENABLE_COMMENTS: 'false'
+
+  # ------------------------------------------------------ dependency-review
+  dependency-review:
+    name: Dependency review
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
+        with:
+          fail-on-severity: high
+          comment-summary-in-pr: never
+
+  # -------------------------------------------------------------- workflows
+  workflows:
+    name: Workflow lint (actionlint)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Run actionlint
+        run: |
+          bash <(curl -fsSL https://raw.githubusercontent.com/rhysd/actionlint/914e7df21a07ef503a81201c76d2b11c789d3fca/scripts/download-actionlint.bash) 1.7.12
+          ./actionlint -color
+
+  # ------------------------------------------------------------------ ci-ok
+  ci-ok:
+    name: ci-ok
+    if: always()
+    needs: [changes, unit, build, e2e, e2e-report, relay, supply-chain, secrets-scan, dependency-review, workflows]
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Every job succeeded or was legitimately skipped
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+          DOCS_ONLY: ${{ github.event_name == 'pull_request' && needs.changes.outputs.code == 'false' }}
+        run: |
+          echo "$NEEDS" | node -e '
+            const needs = JSON.parse(require("fs").readFileSync(0, "utf8"));
+            let bad = 0;
+            for (const [job, { result }] of Object.entries(needs)) {
+              const ok = result === "success" || result === "skipped";
+              console.log(`${ok ? "ok  " : "FAIL"} ${job}: ${result}`);
+              if (!ok) bad = 1;
+            }
+            // The heavy jobs may only be skipped on a docs-only pull request.
+            for (const j of ["unit", "build", "e2e"]) {
+              if (needs[j].result === "skipped" && process.env.DOCS_ONLY !== "true") { console.log(`FAIL ${j} was skipped outside a docs-only PR`); bad = 1; }
+            }
+            process.exit(bad);'
