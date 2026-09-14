@@ -45,7 +45,7 @@
     "release:notes": "node tools/release-notes.js"
   },
   "devDependencies": {
-    "@playwright/test": "^1.48.0",
+    "@playwright/test": "^1.63.0",
     "chrome-webstore-upload-cli": "^4.0.1",
     "linkedom": "^0.18.13",
     "qrcode": "^1.5.4",
