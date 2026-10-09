@@ -218,7 +218,7 @@ async function pollVerdict(host) {
 function renderTrust() {
   const paused = settings.pausedSites && settings.pausedSites[domain];
   const always = (settings.allowlist || []).includes(domain);
-  $('trust').hidden = !!paused || always; $('trusted').hidden = !(paused || always);
+  $('trust').hidden = !!paused || always || (SS.isTenantApex && SS.isTenantApex(domain)); $('trusted').hidden = !(paused || always);
   const until = paused ? timeOfDay(paused) : '';
   $('trustedtext').textContent = always ? T('paused', null, 'Paused') : paused ? T('pausedUntil', [bidi(until)], 'Paused until ' + until) : '';
 }

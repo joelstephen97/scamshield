@@ -86,3 +86,35 @@ test('a legacy bare pages.dev allowlist entry is kept (page warnings stay quiet)
   await expect(opts.locator('#allowlist li[data-domain="pages.dev"] [data-tenant-apex]')).toContainText('pages.dev');
   await sw.evaluate(() => setSettings({ allowlist: [] }));
 });
+
+test('the worker refuses trust / pause / mute on a bare tenant apex; evil tenants still warn and no apex allow rule appears', async ({ context, extensionId }) => {
+  const sw = context.serviceWorkers()[0];
+  await sw.evaluate(() => awaitBootReady());
+  const before = await sw.evaluate(() => getSettings());
+  // The worker cannot message itself: send from an extension page, like the popup does.
+  const ext = await context.newPage();
+  await ext.goto(`chrome-extension://${extensionId}/options.html`);
+  const send = (m) => ext.evaluate((msg) => chrome.runtime.sendMessage(msg), m);
+  const r = {
+    pause: await send({ type: 'pauseSite', domain: 'www.wordpress.com', choice: 'always' }),
+    pause2: await send({ type: 'pauseSite', domain: 'www.pages.dev', choice: '1h' }),
+    mute: await send({ type: 'muteWarning', domain: 'wordpress.com', kind: 'clipboard', via: 't' }),
+    trust: await send({ type: 'trustSite', domain: 'systeme.io', via: 't' })
+  };
+  for (const k of Object.keys(r)) expect(r[k]).toEqual({ ok: false, reason: 'tenant-apex' });
+  const after = await sw.evaluate(() => getSettings());
+  expect(after.allowlist).toEqual(before.allowlist);
+  expect(after.pausedSites).toEqual(before.pausedSites);
+  expect(after.mutedWarnings).toEqual(before.mutedWarnings);
+  const b = await context.newPage();
+  await b.goto(url('b.pages.dev'));
+  await expect(b.locator('.scamshield-banner.danger')).toBeVisible({ timeout: 8000 });
+});
+
+test('a legacy apex entry records allowApexSkipped (no UI) when its allow rule is skipped', async ({ context }) => {
+  const sw = context.serviceWorkers()[0];
+  await sw.evaluate(() => awaitBootReady());
+  await sw.evaluate(() => setSettings({ allowlist: ['pages.dev'] }));
+  await expect.poll(() => sw.evaluate(async () => (await chrome.storage.local.get('allowApexSkipped')).allowApexSkipped)).toBeGreaterThan(0);
+  await sw.evaluate(() => setSettings({ allowlist: [] }));
+});

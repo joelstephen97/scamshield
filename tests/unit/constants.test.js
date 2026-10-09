@@ -234,3 +234,11 @@ test('scopeKeys: scoped host plus the legacy registrable key, deduplicated', () 
   assert.deepStrictEqual(C2.scopeKeys('www.example.com'), ['example.com']);
   assert.deepStrictEqual(C2.scopeKeys('x.pages.dev'), ['x.pages.dev', 'pages.dev']);
 });
+
+test('isTenantApex: bare platform apexes and bare parents of multi-label platforms only; never a TLD or a tenant host (0.14.1)', () => {
+  const C2 = require('../../engine/constants.js');
+  for (const d of ['pages.dev', 'wordpress.com', 'systeme.io', 'windows.net', 'core.windows.net', 'blob.core.windows.net', 'Pages.Dev.']) assert.strictEqual(C2.isTenantApex(d), true, d);
+  for (const d of ['co', 'dev', 'com', 'io', 'net', '', null, 'x.pages.dev', 'example.com', 'a.wordpress.com']) assert.strictEqual(C2.isTenantApex(d), false, String(d));
+  // scopeDomain of the platform's own site is an apex: callers must refuse to store it.
+  for (const h of ['www.wordpress.com', 'wordpress.com', 'www.pages.dev', 'systeme.io']) assert.strictEqual(C2.isTenantApex(C2.scopeDomain(h)), true, h);
+});

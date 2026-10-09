@@ -582,6 +582,17 @@
     for (const a of TENANT_PLATFORMS) if (h.endsWith('.' + a) && (!best || a.length > best.length)) best = a;
     return best;
   }
+  // True for a bare tenant-platform apex ('pages.dev', 'wordpress.com') and for
+  // a bare parent of a multi-label platform ('windows.net', a legacy registrable
+  // key of blob.core.windows.net). Needs >= 2 labels, so a bare TLD ('com',
+  // 'dev') is never one. A trust / pause / mute / network allow on any of these
+  // would cover every tenant, so no new write may ever use one (0.14.1); the
+  // single predicate shared by the SW, content, popup, options and SSDnr.
+  function isTenantApex(d) {
+    const h = String(d || '').toLowerCase().replace(/\.+$/, '');
+    if (h.split('.').filter(Boolean).length < 2) return false;
+    return TENANT_PLATFORMS.some((p) => p === h || p.endsWith('.' + h));
+  }
   function scopeDomain(host) {
     const h = String(host || '').toLowerCase().replace(/\.+$/, '');
     const apex = tenantApexOf(h);
@@ -728,7 +739,7 @@
   return {
     FEATURE_NAMES, THRESHOLDS, BRANDS, BRANDS_BY_KEY, POPULAR_BRANDS, SUSPICIOUS_TLDS, SUSPICIOUS_TOKENS,
     SCAM_PHRASES, SAFE_DOMAINS, BRAND_DOMAINS, SEED_PHRASE_HINTS, CARRIER_BRANDS,
-    TENANT_PLATFORMS, tenantLabel, scopeDomain, scopeKeys,
+    TENANT_PLATFORMS, tenantLabel, scopeDomain, scopeKeys, isTenantApex,
     MULTI_LABEL_SUFFIXES, KNOWN_AUTH_PROVIDERS, KNOWN_BRAND_REGISTRABLES,
     VERIFIED_NAMESPACES, isVerifiedNamespace,
     registrableParts, registrableDomain, isSafeHost, brandNameIn, brandDisplayName,

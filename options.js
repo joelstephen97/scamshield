@@ -179,7 +179,7 @@ function li(text, meta, btnText, onClick) {
 // quiets page warnings on every site on that platform. It is kept, not
 // dropped, but flagged so the user can replace it with the specific site.
 function tenantApexBadge(el, d) {
-  if (!(SS.TENANT_PLATFORMS || []).includes(String(d).toLowerCase())) return el;
+  if (!(SS.isTenantApex && SS.isTenantApex(d))) return el;
   const tag = document.createElement('span'); tag.className = 'tag warn'; tag.dataset.tenantApex = '1';
   tag.textContent = T('optTenantApexBadge', [bidi(d)], 'Covers every site on ' + d + ' — remove it and trust the specific site instead');
   const btn = el.querySelector('button');

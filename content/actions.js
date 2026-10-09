@@ -140,7 +140,7 @@
     if (o.body) box.append(el('div', 'ss-body', o.body));
     const acts = el('div', 'ss-acts');
     for (const a of (o.actions || [])) { const b = button(a.cls || '', a.label, { primary: !!a.primary }); onTrustedClick(b, () => { a.onClick && a.onClick(); if (a.closes !== false) close(); }); acts.appendChild(b); }
-    if (o.muteKind && o.onMute) { const m = button('ss-mute', t('dontWarnHere', null, "Don't warn me on this site"), { quiet: true }); onTrustedClick(m, () => { close(); o.onMute(); }); acts.appendChild(m); }
+    if (o.muteKind && o.onMute && canStore()) { const m = button('ss-mute', t('dontWarnHere', null, "Don't warn me on this site"), { quiet: true }); onTrustedClick(m, () => { close(); o.onMute(); }); acts.appendChild(m); }
     const x = button('ss-x', '✕'); x.setAttribute('aria-label', t('ariaDismiss', null, 'Dismiss')); onTrustedClick(x, close); acts.appendChild(x);
     box.appendChild(acts);
     let tm = null;
@@ -253,6 +253,12 @@
   // three surfaces (banner, interstitial, block page) end up calling
   // trustSite the same way, so the click-through and the undo affordance
   // live here once instead of in each caller.
+  // 0.14.1: on a bare tenant apex ('wordpress.com') the worker refuses to store
+  // a trust / pause / mute (it would cover every tenant), so no surface may
+  // offer a control that would be refused.
+  function canStore() {
+    try { const SS = root.ScamShield; return !(SS && SS.isTenantApex && SS.isTenantApex(regDomain())); } catch (_) { return true; }
+  }
   function regDomain() {
     try {
       const SS = root.ScamShield;
@@ -353,7 +359,7 @@
     // "Trust this site" button that merely dismissed the banner — a label
     // that lied about what the click did. The button is simply not rendered
     // there now; "Dismiss" (the ✕) is the honest control for that surface.
-    const trust = x.noTrust ? null : trustButton(async () => { bar.__ssTeardown && bar.__ssTeardown(); bar.remove(); const domain = regDomain(); await send('trustSite', { domain, via: x.trustVia || 'banner' }); ackSurface({ text: t('ackTrusted', [bidi(domain)], "ScamShield won't flag " + domain + ' again.'), onUndo: () => send('untrustSite', { domain }), restore: () => showBanner(verdict, extra) }); });
+    const trust = (x.noTrust || !canStore()) ? null : trustButton(async () => { bar.__ssTeardown && bar.__ssTeardown(); bar.remove(); const domain = regDomain(); await send('trustSite', { domain, via: x.trustVia || 'banner' }); ackSurface({ text: t('ackTrusted', [bidi(domain)], "ScamShield won't flag " + domain + ' again.'), onUndo: () => send('untrustSite', { domain }), restore: () => showBanner(verdict, extra) }); });
     const report = button('ss-report', t('reportMistake', null, 'Report a mistake')); onTrustedClick(report, () => { report.textContent = t('thanks', null, 'Thanks'); report.disabled = true; x.onReport && x.onReport(); closeMenu(); });
     const copyBtn = copyReportButton(verdict); onTrustedClick(copyBtn, () => closeMenu());
     // Visible row (Hick): danger = filled primary (rescue, else Leave) + outlined Leave (when rescue is primary) + ⋯ + ✕;
@@ -382,7 +388,7 @@
     onTrustedClick(moreBtn, () => { if (menu.hidden) { menu.hidden = false; moreBtn.setAttribute('aria-expanded', 'true'); trust && trust.__ssRearm && trust.__ssRearm(); document.addEventListener('keydown', onKey, true); setTimeout(() => { document.addEventListener('click', onDoc, true); }, 0); } else closeMenu(); });
     const close = button('ss-x', '✕'); const choice = danger ? '1h' : '1d';
     close.setAttribute('aria-label', danger ? t('hideForAnHour', null, 'Hide for an hour') : t('hideForToday', null, 'Hide for today')); close.title = close.getAttribute('aria-label');
-    onTrustedClick(close, () => { closeMenu(); bar.remove(); if (!x.noTrust && x.onHide) x.onHide(choice); });
+    onTrustedClick(close, () => { closeMenu(); bar.remove(); if (!x.noTrust && x.onHide && canStore()) x.onHide(choice); });
     acts.append(moreBtn, close, menu); bar.appendChild(acts);
     (document.body || document.documentElement).appendChild(bar);
   }
@@ -419,10 +425,10 @@
     const details = el('details', 'ss-details'); const sum = el('summary', null, t('detailsAndOptions', null, 'Details and other options')); details.append(sum);
     const row1 = el('div', 'ss-dt'); const stay = button('ss-danger-ghost', t('continueAnyway', null, 'Continue anyway')); armDelayed(stay, 3);
     // Continue = pause this site for 1 hour (the block page's "Visit anyway" rule), never a permanent trust.
-    onTrustedClick(stay, () => { ov.remove(); send('pauseSite', { domain: regDomain(), choice: '1h' }); if (x.onDismiss) x.onDismiss(); });
+    onTrustedClick(stay, () => { ov.remove(); if (canStore()) send('pauseSite', { domain: regDomain(), choice: '1h' }); if (x.onDismiss) x.onDismiss(); });
     row1.append(stay, el('span', 'ss-consequence', t('continuePausesHour', null, 'Pauses ScamShield on this site for 1 hour.'))); details.append(row1);
     const row2 = el('div', 'ss-dt');
-    const trust = x.noTrust ? null : trustButton(async () => { ov.remove(); const domain = regDomain(); await send('trustSite', { domain, via: x.trustVia || 'interstitial' }); ackSurface({ text: t('ackTrusted', [bidi(domain)], "ScamShield won't flag " + domain + ' again.'), onUndo: () => send('untrustSite', { domain }), restore: () => dangerInterstitial(verdict, x) }); });
+    const trust = (x.noTrust || !canStore()) ? null : trustButton(async () => { ov.remove(); const domain = regDomain(); await send('trustSite', { domain, via: x.trustVia || 'interstitial' }); ackSurface({ text: t('ackTrusted', [bidi(domain)], "ScamShield won't flag " + domain + ' again.'), onUndo: () => send('untrustSite', { domain }), restore: () => dangerInterstitial(verdict, x) }); });
     if (trust) { trust.className = 'ss-trust ss-trust-link'; trust.textContent = t('blockedTrustSite', null, 'Not a scam? Trust this site'); row2.append(trust); }
     const rep = el('button', 'ss-report', t('reportMistake', null, 'Report a mistake')); rep.type = 'button'; onTrustedClick(rep, () => { rep.textContent = t('thanks', null, 'Thanks'); rep.disabled = true; x.onReport && x.onReport(); });
     row2.append(rep); details.append(row2); card.append(details);

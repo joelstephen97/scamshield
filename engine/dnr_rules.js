@@ -119,13 +119,9 @@
     return out;
   }
 
-  // True for a bare tenant-platform apex ('pages.dev') and for a bare parent
-  // of one ('windows.net', a legacy registrable key for blob.core.windows.net):
-  // an allow rule on either would override blocking for every tenant (0.14.1).
-  function isTenantApex(d) {
-    const platforms = (C && C.TENANT_PLATFORMS) || [];
-    return platforms.some((p) => p === d || p.endsWith('.' + d));
-  }
+  // An allow rule on a bare tenant apex would override blocking for every
+  // tenant (0.14.1); the predicate lives in engine/constants.js.
+  function isTenantApex(d) { return !!(C && C.isTenantApex && C.isTenantApex(d)); }
   // `stats`, when given, receives { skipped }: how many entries were refused.
   function buildAllowRules(domains, stats) {
     const all = [...new Set([...(domains || [])].filter(Boolean).map((d) => String(d).toLowerCase()))];

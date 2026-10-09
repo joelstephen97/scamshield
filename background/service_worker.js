@@ -726,9 +726,13 @@ function removalKeys(domain) {
   const d = typeof domain === 'string' ? domain.trim().toLowerCase() : '';
   return d ? [...new Set([d, scopedKey(d)])] : [];
 }
+// 0.14.1: a write whose scoped key is a bare tenant apex ('wordpress.com',
+// 'pages.dev') would cover every tenant on the platform — refuse it.
+const TENANT_APEX_REFUSAL = { ok: false, reason: 'tenant-apex' };
 async function addTrust(domain, via, tabId) {
   const d = scopedKey(domain);
   if (!d) return { ok: false };
+  if (globalThis.ScamShield.isTenantApex(d)) return TENANT_APEX_REFUSAL;
   const s = await getSettings();
   const allowlist = s.allowlist.includes(d) ? s.allowlist.slice() : [...s.allowlist, d];
   const allowlistMeta = Object.assign({}, s.allowlistMeta, { [d]: { via: typeof via === 'string' && via ? via : 'unknown', at: Date.now() } });
@@ -752,7 +756,9 @@ async function removeTrust(domain) {
 // ---- Per-kind warning mutes (0.14.0) — the toast's "Don't warn me on this site" ----
 async function muteWarning(domain, kind, via) {
   const SS = globalThis.ScamShield; const s = await getSettings();
-  const mutedWarnings = SS.withMute(s.mutedWarnings, scopedKey(domain), kind, via, Date.now());
+  const key = scopedKey(domain);
+  if (key && SS.isTenantApex(key)) return TENANT_APEX_REFUSAL;
+  const mutedWarnings = SS.withMute(s.mutedWarnings, key, kind, via, Date.now());
   const next = await setSettings({ mutedWarnings }); return { ok: true, mutedWarnings: next.mutedWarnings };
 }
 async function unmuteWarning(domain, kind) {
@@ -895,9 +901,12 @@ async function syncAllowRules(settings) {
   const D = globalThis.SSDnr;
   try {
     const s = settings || await getSettings();
+    const stats = {};
     const existing = await api.declarativeNetRequest.getDynamicRules();
     const removeRuleIds = existing.filter((r) => D.inRange(r.id, D.ALLOW_BASE)).map((r) => r.id);
-    await api.declarativeNetRequest.updateDynamicRules({ removeRuleIds, addRules: D.buildAllowRules(D.exemptDomains(s, Date.now()), {}) }); // bare tenant apexes are skipped (0.14.1)
+    await api.declarativeNetRequest.updateDynamicRules({ removeRuleIds, addRules: D.buildAllowRules(D.exemptDomains(s, Date.now()), stats) });
+    // 0.14.1: bare tenant apexes never get an allow rule; keep the count (no UI) for diagnosis.
+    if (stats.skipped > 0) await api.storage.local.set({ allowApexSkipped: stats.skipped });
   } catch (_) { /* best-effort */ }
 }
 // Every SW boot: make sure the redirect rules exist for whatever block rules
@@ -1935,6 +1944,7 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       case 'pauseSite': {
         const d = scopedKey(msg.domain);
         if (!d) { sendResponse({ ok: false }); break; }
+        if (globalThis.ScamShield.isTenantApex(d)) { sendResponse(TENANT_APEX_REFUSAL); break; }
         const s = await getSettings(); const SS = globalThis.ScamShield;
         const until = SS.pauseUntil(msg.choice, Date.now());
         if (until === null) { if (!s.allowlist.includes(d)) s.allowlist.push(d); await setSettings({ allowlist: s.allowlist }); sendResponse({ ok: true, until: null }); break; }

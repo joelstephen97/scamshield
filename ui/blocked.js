@@ -66,6 +66,9 @@ $('copy').addEventListener('click', async () => {
   ].join('\n');
   try { await navigator.clipboard.writeText(text); $('copy').textContent = T('toastCopied', null, 'Copied'); } catch (_) {}
 });
+// 0.14.1: the worker refuses to store a pause / trust for a bare tenant apex
+// ('wordpress.com'), so those two controls are not offered there.
+if (domain && SS && SS.isTenantApex && SS.isTenantApex(domain)) { for (const id of ['visit', 'trust']) { const b = $(id); if (b) b.hidden = true; } }
 $('visit').addEventListener('click', async (e) => {
   e.preventDefault();
   if (!target || !domain) return;
