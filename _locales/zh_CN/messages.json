@@ -434,5 +434,6 @@
   "continuePausesHour": { "message": "在此网站上暂停 ScamShield 1 小时。" },
   "thisPage": { "message": "此页面" },
   "chipBlocklist": { "message": "已拦截" },
-  "obNote": { "message": "ScamShield 是免费的。可选功能：在设置中，您可以通过分享它检测到的诈骗的匿名报告来帮助它变得更智能——除非您主动开启，否则默认关闭。如果它对您有帮助，您可以在设置页面支持它的开发。" }
+  "obNote": { "message": "ScamShield 是免费的。可选功能：在设置中，您可以通过分享它检测到的诈骗的匿名报告来帮助它变得更智能——除非您主动开启，否则默认关闭。如果它对您有帮助，您可以在设置页面支持它的开发。" },
+  "optHotRejected": {"message": "Latest hot-list update was rejected as unsafe; still using the previous list."}
 }

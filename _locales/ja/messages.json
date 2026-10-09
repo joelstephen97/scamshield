@@ -434,5 +434,6 @@
   "continuePausesHour": { "message": "このサイトのScamShieldを1時間一時停止します。" },
   "thisPage": { "message": "このページ" },
   "chipBlocklist": { "message": "ブロック済みサイト" },
-  "obNote": { "message": "ScamShieldは無料です。任意：設定画面で、検出した詐欺の匿名報告を共有することでScamShieldをより賢くする手助けができます — オンにしない限りオフのままです。役立ったと感じたら、設定ページから開発を支援できます。" }
+  "obNote": { "message": "ScamShieldは無料です。任意：設定画面で、検出した詐欺の匿名報告を共有することでScamShieldをより賢くする手助けができます — オンにしない限りオフのままです。役立ったと感じたら、設定ページから開発を支援できます。" },
+  "optHotRejected": {"message": "Latest hot-list update was rejected as unsafe; still using the previous list."}
 }

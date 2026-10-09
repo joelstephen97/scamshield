@@ -159,6 +159,13 @@ async function load() {
     $('hotstatus').textContent = T('hotListStatus', [bidi(hotCount), bidi(hotAgo)], `Hot list: ${hotCount} sites, updated ${hotAgo}`);
     $('hotdot').classList.add('ok');
   }
+  // 0.14.1 kill switch: a rejected update leaves the previous list in force;
+  // say so on its own line so the status above stays truthful.
+  const hotRej = $('hotrejected');
+  if (hotRej) {
+    hotRej.textContent = hot && hot.rejectReason ? T('optHotRejected', null, 'Latest hot-list update was rejected as unsafe; still using the previous list.') : '';
+    hotRej.hidden = !(hot && hot.rejectReason);
+  }
   const h = await send('getHistory'); renderHistory((h && h.history) || []);
 }
 function li(text, meta, btnText, onClick) {

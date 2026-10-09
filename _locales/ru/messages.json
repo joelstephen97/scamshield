@@ -434,5 +434,6 @@
   "reviewRate": { "message": "Оценить ScamShield" },
   "reviewLater": { "message": "Может быть, позже" },
   "reviewNo": { "message": "Нет, спасибо" },
-  "reviewAboutLink": { "message": "Нравится ScamShield? Оставьте отзыв" }
+  "reviewAboutLink": { "message": "Нравится ScamShield? Оставьте отзыв" },
+  "optHotRejected": {"message": "Latest hot-list update was rejected as unsafe; still using the previous list."}
 }

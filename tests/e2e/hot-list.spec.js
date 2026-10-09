@@ -212,3 +212,43 @@ test('a hot list past its TTL (7 h old, ttl 360) keeps its rules across the boot
   expect(st.count).toBe(1);
   expect(st.dropped.expired).toBe(0);
 });
+
+// 0.14.1 client-side kill switch: a poisoned list after a good one is refused,
+// the good list's rules stay, and Options says so.
+test('kill switch: a poisoned hot list is rejected; previous rules stay and Options shows the notice', async ({ context, extensionId }) => {
+  const sw = context.serviceWorkers()[0];
+  const good = await installHot(sw, writeHot('hot.json', [HOT_HOST], [], []));
+  expect(good.updated).toBe(true);
+  const poison = ['google.com', 'paypal.com', 'www.google.com', 'www.paypal.com', 'accounts.google.com', 'www.microsoft.com'];
+  const many = [];
+  for (let i = 0; i < 30; i++) many.push(poison[i % poison.length]);
+  const bad = await sw.evaluate((u) => runHotUpdate(u), writeHot('hot.json', [HOT_HOST, ...many, 'extra.example'], [], []));
+  expect(bad.ok).toBe(false);
+  expect(bad.reason).toMatch(/^rejected-/);
+  const st = await sw.evaluate(() => chrome.storage.local.get(['hotRejectReason', 'hotRejectedAt', 'hotList']));
+  expect(st.hotRejectReason).toBeTruthy();
+  expect(st.hotList.domains.map((d) => d.h)).toEqual([HOT_HOST]);
+  const domains = (await hotRuleIds(sw)).flatMap((r) => r.condition.requestDomains || []);
+  expect(domains).toEqual([HOT_HOST]);
+  const page = await context.newPage();
+  await page.goto(`chrome-extension://${extensionId}/options.html`);
+  await page.locator('[role=tab]', { hasText: /feed/i }).first().click().catch(() => {});
+  await expect(page.locator('#hotrejected')).toContainText('rejected as unsafe');
+  // a good list afterwards clears the notice
+  await installHot(sw, writeHot('hot.json', [HOT_HOST, 'other-hot.example'], [], []));
+  expect((await sw.evaluate(() => chrome.storage.local.get('hotRejectReason'))).hotRejectReason).toBeUndefined();
+});
+
+test('kill switch: an OTA filter naming google.com yields no block/redirect rule for it', async ({ context }) => {
+  const sw = context.serviceWorkers()[0];
+  await sw.evaluate(() => awaitBootReady());
+  await sw.evaluate(() => applyNetworkRules(['||google.com^', '||ota-evil.example^'], true));
+  const rules = await sw.evaluate(() => chrome.declarativeNetRequest.getDynamicRules());
+  const filters = rules.map((r) => r.condition.urlFilter).filter(Boolean);
+  const domains = rules.flatMap((r) => r.condition.requestDomains || []);
+  expect(filters).toContain('||ota-evil.example^');
+  expect(filters).not.toContain('||google.com^');
+  expect(domains).toContain('ota-evil.example');
+  expect(domains).not.toContain('google.com');
+  expect((await sw.evaluate(() => chrome.storage.local.get('otaDropped'))).otaDropped).toBe(1);
+});

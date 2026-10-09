@@ -434,5 +434,6 @@
   "reviewRate": { "message": "ScamShield 평가하기" },
   "reviewLater": { "message": "나중에" },
   "reviewNo": { "message": "괜찮습니다" },
-  "reviewAboutLink": { "message": "ScamShield가 마음에 드시나요? 리뷰를 남겨주세요" }
+  "reviewAboutLink": { "message": "ScamShield가 마음에 드시나요? 리뷰를 남겨주세요" },
+  "optHotRejected": {"message": "Latest hot-list update was rejected as unsafe; still using the previous list."}
 }

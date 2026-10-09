@@ -434,5 +434,6 @@
   "continuePausesHour": { "message": "Tạm dừng ScamShield trên trang này trong 1 giờ." },
   "thisPage": { "message": "Trang này" },
   "chipBlocklist": { "message": "Bị chặn" },
-  "obNote": { "message": "ScamShield miễn phí. Tùy chọn: trong Cài đặt bạn có thể giúp nó thông minh hơn bằng cách chia sẻ báo cáo ẩn danh về những vụ lừa đảo nó bắt được — mặc định tắt cho đến khi bạn bật. Nếu nó hữu ích, bạn có thể ủng hộ việc phát triển từ trang Cài đặt." }
+  "obNote": { "message": "ScamShield miễn phí. Tùy chọn: trong Cài đặt bạn có thể giúp nó thông minh hơn bằng cách chia sẻ báo cáo ẩn danh về những vụ lừa đảo nó bắt được — mặc định tắt cho đến khi bạn bật. Nếu nó hữu ích, bạn có thể ủng hộ việc phát triển từ trang Cài đặt." },
+  "optHotRejected": {"message": "Latest hot-list update was rejected as unsafe; still using the previous list."}
 }

@@ -843,6 +843,13 @@ async function currentOtaFilters() {
 async function applyNetworkRules(filters, enabled) {
   if (!api.declarativeNetRequest || !api.declarativeNetRequest.updateDynamicRules) return { ok: false };
   const D = globalThis.SSDnr;
+  // 0.14.1: same trust check as the hot guard — a poisoned OTA list must not
+  // block google.com. Dropped silently, counted for the diagnostics.
+  if (enabled && Array.isArray(filters)) {
+    const g = globalThis.SSHot.guardOtaFilters(filters);
+    filters = g.kept;
+    try { await api.storage.local.set({ otaDropped: g.dropped }); } catch (_) {}
+  }
   if (enabled && Array.isArray(filters) && filters.length) { try { await api.storage.local.set({ otaFilters: filters.map(String) }); } catch (_) {} }
   const existing = await api.declarativeNetRequest.getDynamicRules();
   const removeRuleIds = existing.filter((r) => D.inRange(r.id, D.BLOCK_BASE) || D.inRange(r.id, D.REDIRECT_BASE)).map((r) => r.id);
@@ -998,9 +1005,27 @@ async function runHotUpdate(urlOverride) {
   let json; try { json = await res.json(); } catch (_) { return { ok: false, updated: false, reason: 'bad-json' }; }
   const hot = globalThis.SSHot.parseHot(json, Date.now());
   if (!hot) return { ok: false, updated: false, reason: 'bad-shape' };
-  try { await api.storage.local.set({ hotList: hot, hotEtag: res.headers.get('ETag') || '', hotUpdatedAt: Date.now() }); } catch (_) {}
+  // 0.14.1 kill switch: judge the list BEFORE it touches rules or storage. A
+  // reject leaves the previous stored list and installed rules untouched.
+  const prevCount = prev.hotList && Array.isArray(prev.hotList.domains) ? prev.hotList.domains.length : 0;
+  const verdict = globalThis.SSHot.assessHot(hot, globalThis.SSHot.guardHot(hot, s, Date.now()), prevCount);
+  if (!verdict.ok) {
+    try { await api.storage.local.set({ hotRejectedAt: Date.now(), hotRejectReason: verdict.reason }); } catch (_) {}
+    return { ok: false, updated: false, reason: 'rejected-' + verdict.reason };
+  }
+  // Apply first, persist second: a list whose apply threw must not become the
+  // boot baseline. The previous list is re-applied if the new one fails.
   hotReadyPromise = applyHotRules(hot, s);
-  let r; try { r = await hotReadyPromise; } catch (_) { r = { rules: 0 }; }
+  let r;
+  try { r = await hotReadyPromise; } catch (_) { r = null; }
+  if (!r || r.ok === false) {
+    hotReadyPromise = applyHotRules(prev.hotList || null, s).catch(() => {});
+    return { ok: false, updated: false, reason: 'apply-failed' };
+  }
+  try {
+    await api.storage.local.set({ hotList: hot, hotEtag: res.headers.get('ETag') || '', hotUpdatedAt: Date.now() });
+    await api.storage.local.remove(['hotRejectReason', 'hotRejectedAt']);
+  } catch (_) {}
   return { ok: true, updated: true, count: r.rules };
 }
 
@@ -1093,8 +1118,8 @@ async function getHotStatus() {
   // Same readiness gate checkFeedHost/checkFeedBatchHosts use, same 3 s cap.
   await awaitHotReady();
   let l = {};
-  try { l = await api.storage.local.get(['hotUpdatedAt']); } catch (_) {}
-  return Object.assign({ enabled: !!s.blockKnownBad && s.hotListEnabled !== false, updatedAt: l.hotUpdatedAt || 0 }, hotStatus);
+  try { l = await api.storage.local.get(['hotUpdatedAt', 'hotRejectReason']); } catch (_) {}
+  return Object.assign({ enabled: !!s.blockKnownBad && s.hotListEnabled !== false, updatedAt: l.hotUpdatedAt || 0, rejectReason: l.hotRejectReason || '' }, hotStatus);
 }
 
 // The block page reporting a catch. Sender must be our own extension page.

@@ -108,3 +108,45 @@ test('hotRules + hotRuleIds: HOT_BASE redirect chunks then PATH_BASE regex rules
   assert.deepStrictEqual(rules[0].condition.requestDomains, ['a.example', 'b.example']);
   assert.deepStrictEqual(H.hotRuleIds([{ id: 100000 }, { id: 400003 }, { id: 500010 }, { id: 300000 }]), [400003, 500010]);
 });
+
+// ---- 0.14.1 client-side kill switch ----------------------------------------
+const hotOf = (n, extra) => ({ domains: Array.from({ length: n }, (_, i) => ({ h: `h${i}.example`, s: 'pd', t: MIN(NOW) })).concat(extra || []), paths: [] });
+const dropped = (o) => ({ dropped: Object.assign({ apex: 0, exempt: 0, safe: 0, brand: 0, verified: 0, expired: 0, aged: 0 }, o) });
+
+test('assessHot: thresholds are exported', () => {
+  assert.strictEqual(H.MAX_TRUST_DROPPED, 25);
+  assert.strictEqual(H.MAX_GROWTH_FACTOR, 3);
+});
+
+test('assessHot: a poisoned list (30 safe/brand/verified hits) is rejected', () => {
+  const poisoned = hotOf(10, Array.from({ length: 30 }, () => ({ h: 'www.google.com', s: 'pd', t: MIN(NOW) })));
+  const g = H.guardHot(Object.assign({ generatedAt: NOW, ttlMinutes: 360 }, poisoned), {}, NOW);
+  assert.strictEqual(g.dropped.brand, 30);
+  const r = H.assessHot(poisoned, g, 10);
+  assert.strictEqual(r.ok, false);
+  assert.strictEqual(r.reason, 'trusted-hosts');
+  // brand + safe + verified are summed
+  assert.strictEqual(H.assessHot(hotOf(5), dropped({ brand: 10, safe: 10, verified: 6 }), 5).ok, false);
+  assert.strictEqual(H.assessHot(hotOf(5), dropped({ brand: 10, safe: 10, verified: 5 }), 5).ok, true);
+  // exempt/apex/aged are not poisoning signals
+  assert.strictEqual(H.assessHot(hotOf(5), dropped({ exempt: 99, apex: 99, aged: 99 }), 5).ok, true);
+});
+
+test('assessHot: more than 3x growth over the previous list is rejected; first load and 3x exactly are fine', () => {
+  const r = H.assessHot(hotOf(301), dropped(), 100);
+  assert.deepStrictEqual([r.ok, r.reason], [false, 'growth']);
+  assert.strictEqual(H.assessHot(hotOf(300), dropped(), 100).ok, true);
+  assert.strictEqual(H.assessHot(hotOf(5000), dropped(), 0).ok, true);
+});
+
+test('assessHot: over MAX_DOMAINS is rejected; a normal list is ok', () => {
+  const r = H.assessHot({ domains: new Array(H.MAX_DOMAINS + 1) }, dropped(), 0);
+  assert.deepStrictEqual([r.ok, r.reason], [false, 'too-many']);
+  assert.deepStrictEqual(H.assessHot(hotOf(50), dropped({ brand: 2 }), 40), { ok: true, reason: '' });
+});
+
+test('guardOtaFilters: drops safe/brand/verified hosts from OTA filters, keeps the rest, counts drops', () => {
+  const out = H.guardOtaFilters(['||evil-login.example^', '||google.com^', '||www.paypal.com^', '||hdfc.bank.in^', '||wikipedia.org^', '/odd-filter/']);
+  assert.deepStrictEqual(out.kept, ['||evil-login.example^', '/odd-filter/']);
+  assert.strictEqual(out.dropped, 4);
+});

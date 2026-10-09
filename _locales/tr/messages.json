@@ -434,5 +434,6 @@
   "continuePausesHour": { "message": "Bu sitede ScamShield'ı 1 saat duraklatır." },
   "thisPage": { "message": "Bu sayfa" },
   "chipBlocklist": { "message": "Engellenen site" },
-  "obNote": { "message": "ScamShield ücretsizdir. İsteğe bağlı: Ayarlar'da, yakaladığı dolandırıcılıkların anonim raporlarını paylaşarak onu daha akıllı hale getirmeye yardımcı olabilirsiniz — siz açmadığınız sürece kapalıdır. Size yardımcı olduysa, Ayarlar sayfasından geliştirmeyi destekleyebilirsiniz." }
+  "obNote": { "message": "ScamShield ücretsizdir. İsteğe bağlı: Ayarlar'da, yakaladığı dolandırıcılıkların anonim raporlarını paylaşarak onu daha akıllı hale getirmeye yardımcı olabilirsiniz — siz açmadığınız sürece kapalıdır. Size yardımcı olduysa, Ayarlar sayfasından geliştirmeyi destekleyebilirsiniz." },
+  "optHotRejected": {"message": "Latest hot-list update was rejected as unsafe; still using the previous list."}
 }

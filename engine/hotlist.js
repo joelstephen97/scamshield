@@ -20,6 +20,11 @@
   // applied (a feed outage must not tear down every HOT/PATH rule) until this
   // hard cap, measured from generatedAt. Beyond it the list is dropped.
   const MAX_STALE_MS = 48 * 3600 * 1000;
+  // 0.14.1 client-side kill switch (assessHot): a list whose guard had to drop
+  // more than this many safe/brand/verified hosts, or that grew past this
+  // multiple of the previous list, is treated as poisoned and not applied.
+  const MAX_TRUST_DROPPED = 25;
+  const MAX_GROWTH_FACTOR = 3;
   const HOST_RE = /^[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?$/;
 
   function parseHot(json, now) {
@@ -111,11 +116,42 @@
     return { domains, paths, dropped };
   }
 
+  // 0.14.1 kill switch. Pure verdict on a freshly parsed list BEFORE it
+  // replaces anything: `guardResult` is guardHot()'s return for that list,
+  // `prevCount` the domain count of the list currently applied. Only the
+  // trust-based drops count (a feed that names google.com 30 times is
+  // poisoned); exempt/apex/aged drops are routine and say nothing about the
+  // feed's honesty.
+  function assessHot(parsed, guardResult, prevCount) {
+    const n = parsed && parsed.domains ? parsed.domains.length : 0;
+    const d = (guardResult && guardResult.dropped) || {};
+    const trusted = (d.brand || 0) + (d.safe || 0) + (d.verified || 0);
+    if (trusted > MAX_TRUST_DROPPED) return { ok: false, reason: 'trusted-hosts' };
+    if (prevCount > 0 && n > prevCount * MAX_GROWTH_FACTOR) return { ok: false, reason: 'growth' };
+    if (n > MAX_DOMAINS) return { ok: false, reason: 'too-many' };
+    return { ok: true, reason: '' };
+  }
+
+  // 0.14.1: the OTA filter list gets the same trust check as the hot list
+  // (verified namespace / known brand / SAFE_DOMAINS) before it becomes block
+  // + redirect rules. Filters that are not a plain `||host^` are kept as-is.
+  function guardOtaFilters(filters) {
+    const brands = new Set(C.KNOWN_BRAND_REGISTRABLES || []);
+    const verified = typeof C.isVerifiedNamespace === 'function' ? C.isVerifiedNamespace : () => false;
+    const kept = []; let dropped = 0;
+    for (const f of filters || []) {
+      const h = D.domainOfFilter(f);
+      if (h && (verified(h) || brands.has(C.registrableDomain(h)) || brands.has(h) || C.isSafeHost(h))) { dropped++; continue; }
+      kept.push(f);
+    }
+    return { kept, dropped };
+  }
+
   function hotRules(guarded, targetUrl) {
     return [...D.buildRedirectRules(guarded.domains, targetUrl, D.HOT_BASE), ...D.buildPathRedirectRules(guarded.paths, targetUrl)];
   }
   function hotRuleIds(existing) {
     return (existing || []).filter((r) => D.inRange(r.id, D.HOT_BASE) || D.inRange(r.id, D.PATH_BASE)).map((r) => r.id);
   }
-  return { MAX_DOMAINS, WINDOW_MS, MAX_STALE_MS, parseHot, isStale, isExpired, guardHot, hotRules, hotRuleIds };
+  return { MAX_DOMAINS, WINDOW_MS, MAX_STALE_MS, MAX_TRUST_DROPPED, MAX_GROWTH_FACTOR, parseHot, isStale, isExpired, guardHot, assessHot, guardOtaFilters, hotRules, hotRuleIds };
 });

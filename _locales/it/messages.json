@@ -434,5 +434,6 @@
   "reviewRate": { "message": "Valuta ScamShield" },
   "reviewLater": { "message": "Magari più tardi" },
   "reviewNo": { "message": "No grazie" },
-  "reviewAboutLink": { "message": "Ti piace ScamShield? Lascia una recensione" }
+  "reviewAboutLink": { "message": "Ti piace ScamShield? Lascia una recensione" },
+  "optHotRejected": {"message": "Latest hot-list update was rejected as unsafe; still using the previous list."}
 }

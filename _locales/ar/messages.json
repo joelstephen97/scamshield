@@ -434,5 +434,6 @@
   "continuePausesHour": { "message": "يوقف ScamShield مؤقتًا في هذا الموقع لمدة ساعة." },
   "thisPage": { "message": "هذه الصفحة" },
   "chipBlocklist": { "message": "موقع محظور" },
-  "obNote": { "message": "ScamShield مجاني. اختياريًا: من الإعدادات يمكنك المساعدة في تحسينه بمشاركة تقارير مجهولة عن الاحتيال الذي يرصده — وهو معطّل ما لم تُفعّله. وإن كان مفيدًا لك، يمكنك دعم التطوير من صفحة الإعدادات." }
+  "obNote": { "message": "ScamShield مجاني. اختياريًا: من الإعدادات يمكنك المساعدة في تحسينه بمشاركة تقارير مجهولة عن الاحتيال الذي يرصده — وهو معطّل ما لم تُفعّله. وإن كان مفيدًا لك، يمكنك دعم التطوير من صفحة الإعدادات." },
+  "optHotRejected": {"message": "Latest hot-list update was rejected as unsafe; still using the previous list."}
 }

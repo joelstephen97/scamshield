@@ -434,5 +434,6 @@
   "continuePausesHour": { "message": "Pauses ScamShield on this site for 1 hour." },
   "thisPage": { "message": "This page" },
   "chipBlocklist": { "message": "Blocked site" },
-  "obNote": { "message": "ScamShield is free. Optional: in Settings you can help make it smarter by sharing anonymous reports of scams it catches — it's off unless you turn it on. If it helps you, you can support development from the Settings page." }
+  "obNote": { "message": "ScamShield is free. Optional: in Settings you can help make it smarter by sharing anonymous reports of scams it catches — it's off unless you turn it on. If it helps you, you can support development from the Settings page." },
+  "optHotRejected": {"message": "Latest hot-list update was rejected as unsafe; still using the previous list."}
 }

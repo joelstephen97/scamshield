@@ -123,3 +123,18 @@ test('M1: awaitHotReady falls back to boot readiness instead of returning empty'
   assert.ok(/setTimeout\(resolve, HOT_READY_TIMEOUT_MS\)/.test(fallback), 'the boot fallback is bounded by HOT_READY_TIMEOUT_MS');
   assert.strictEqual((body.match(/Promise\.race\(\[/g) || []).length, 2, 'both the boot fallback and the apply wait are bounded');
 });
+
+// 0.14.1 kill switch wiring.
+test('0.14.1: runHotUpdate assesses before applying and persists only after a successful apply', () => {
+  const body = functionBody('runHotUpdate');
+  assert.ok(/SSHot\.assessHot\(/.test(body), 'assessHot is consulted');
+  assert.ok(/hotRejectedAt: Date\.now\(\), hotRejectReason: verdict\.reason/.test(body), 'a reject is recorded');
+  assert.ok(body.indexOf('assessHot(') < body.indexOf('applyHotRules(hot, s)'), 'assessment precedes the apply');
+  assert.ok(body.indexOf('applyHotRules(hot, s)') < body.indexOf('hotList: hot'), 'apply precedes saving hotList');
+  assert.ok(/remove\(\['hotRejectReason'/.test(body), 'an accepted list clears the reject reason');
+});
+test('0.14.1: applyNetworkRules filters OTA domains through guardOtaFilters and counts otaDropped', () => {
+  const body = functionBody('applyNetworkRules');
+  assert.ok(/guardOtaFilters\(/.test(body) && /otaDropped/.test(body));
+  assert.ok(body.indexOf('guardOtaFilters(') < body.indexOf('buildBlockRules('), 'filtering precedes rule building');
+});

@@ -434,5 +434,6 @@
   "continuePausesHour": { "message": "Pausiert ScamShield auf dieser Seite für 1 Stunde." },
   "thisPage": { "message": "Diese Seite" },
   "chipBlocklist": { "message": "Blockiert" },
-  "obNote": { "message": "ScamShield ist kostenlos. Optional: In den Einstellungen kannst du helfen, es schlauer zu machen, indem du anonyme Berichte über erkannten Betrug teilst – das ist deaktiviert, bis du es einschaltest. Wenn es dir hilft, kannst du die Entwicklung über die Einstellungsseite unterstützen." }
+  "obNote": { "message": "ScamShield ist kostenlos. Optional: In den Einstellungen kannst du helfen, es schlauer zu machen, indem du anonyme Berichte über erkannten Betrug teilst – das ist deaktiviert, bis du es einschaltest. Wenn es dir hilft, kannst du die Entwicklung über die Einstellungsseite unterstützen." },
+  "optHotRejected": {"message": "Latest hot-list update was rejected as unsafe; still using the previous list."}
 }

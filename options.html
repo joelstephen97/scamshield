@@ -94,6 +94,7 @@
   <h2 id="h-feed" tabindex="-1" data-i18n="feedTitle">Threat feed</h2><p class="lead" data-i18n="feedLead">A daily-rebuilt list of known scam sites (OpenPhish + URLhaus, heavily filtered). ScamShield only downloads it.</p>
   <div class="feedline"><span class="dot" id="feeddot"></span><span id="feedstatus" data-i18n="feedNeverUpdated">Never updated</span><button id="checkupd" class="btn ghost" data-i18n="checkNow">Check now</button></div>
   <div class="feedline"><span class="dot" id="hotdot"></span><span id="hotstatus"></span></div>
+  <div class="feedline" id="hotrejected" hidden></div>
   <details class="adv"><summary data-i18n="optAdvancedFeedUrl">Advanced: feed URL</summary>
     <label class="row"><span data-i18n="optFeedUrlLabel">Feed URL</span><input type="url" id="otaurl" placeholder="https://…/blocklist.json" data-i18n-ph="optFeedUrlPlaceholder"></label>
     <button id="resetfeed" class="btn" data-i18n="resetToOfficialFeed">Reset to official feed</button><p class="hint" data-i18n="optFeedUrlHint">Point this at your own JSON to self-host, or leave blank to disable updates.</p></details>
