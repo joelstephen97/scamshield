@@ -78,6 +78,18 @@ test('popup reflects a dangerous verdict', async ({ context, extensionId }) => {
   await expect(popup.locator('#status')).toHaveClass(/dangerous|suspicious/, { timeout: 5000 });
 });
 
+test('danger banner ✕ says "Hide for an hour" and still pauses for an hour (0.14.1)', async ({ context }) => {
+  const page = await context.newPage(); const sw = context.serviceWorkers()[0];
+  await page.goto(BASE + '/phishing-login.html');
+  const banner = page.locator('.scamshield-banner.danger'); await expect(banner).toBeVisible({ timeout: 8000 });
+  const x = banner.locator('.ss-x');
+  await expect(x).toContainText('Hide for an hour'); await expect(x).toBeVisible();
+  await expect(x).toHaveAttribute('aria-label', 'Hide for an hour'); await expect(x).toHaveAttribute('title', 'Hide for an hour');
+  await x.click(); await expect(banner).toHaveCount(0);
+  const s = await sw.evaluate(() => getSettings()); const until = s.pausedSites['localhost'];
+  expect(until).toBeGreaterThan(Date.now() + 50 * 60e3); expect(until).toBeLessThan(Date.now() + 70 * 60e3);
+});
+
 test('programmatic form.submit() on a foreign credential form is intercepted', async ({ context }) => {
   const page = await context.newPage();
   await page.goto(BASE + '/phishing-autosubmit.html');
@@ -385,7 +397,27 @@ test('banner: at most three visible controls, the rest in a menu; ✕ pauses the
   expect(await banner.locator('.ss-acts > button:visible').count()).toBeLessThanOrEqual(3);
   await banner.locator('.ss-more').click(); await expect(banner.locator('.ss-menu .ss-report')).toBeVisible();
   await page.keyboard.press('Escape'); await expect(banner.locator('.ss-menu')).toBeHidden();
+  // 0.14.1: the ✕ says what it does (visible text + aria-label + title), not a bare glyph.
+  await expect(banner.locator('.ss-x')).toContainText('Hide for a day');
+  await expect(banner.locator('.ss-x')).toHaveAttribute('aria-label', 'Hide for a day');
+  await expect(banner.locator('.ss-x')).toHaveAttribute('title', 'Hide for a day');
   await banner.locator('.ss-x').click(); await expect(banner).toHaveCount(0);
   const s = await sw.evaluate(() => getSettings()); expect(s.pausedSites['localhost']).toBeGreaterThan(Date.now() + 23 * 3600e3);
   await page.reload(); await page.waitForTimeout(1500); await expect(page.locator('.scamshield-banner')).toHaveCount(0); await page.close();
 });
+
+// 0.14.1: the labelled ✕ must stay inside a 320px viewport in the longest locales and in RTL.
+for (const [lang, dir] of [['de', 'ltr'], ['ta', 'ltr'], ['ar', 'rtl'], ['ur', 'rtl']]) {
+  test(`banner ✕ label fits a 320px viewport in ${lang}`, async ({ context }) => {
+    const sw = context.serviceWorkers()[0];
+    await sw.evaluate((l) => setSettings({ uiLang: l }), lang).catch(async () => { await sw.evaluate((l) => chrome.storage.local.set({ settings: { uiLang: l } }), lang); });
+    const page = await context.newPage(); await page.setViewportSize({ width: 320, height: 700 });
+    await page.goto(BASE_HTTPS + '/content-suspicious.html');
+    const banner = page.locator('.scamshield-banner.suspicious'); await expect(banner).toBeVisible({ timeout: 8000 });
+    await expect(banner).toHaveAttribute('dir', dir);
+    const x = banner.locator('.ss-x'); await expect(x.locator('.ss-x-label')).not.toHaveText('Hide for a day');
+    const b = await x.boundingBox(); expect(b.x).toBeGreaterThanOrEqual(0); expect(b.x + b.width).toBeLessThanOrEqual(320);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+    await page.close();
+  });
+}

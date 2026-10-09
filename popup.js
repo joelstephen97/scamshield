@@ -107,7 +107,7 @@ function renderVerdictUI(host) {
 }
 // Earned review ask (0.7.0): a quiet card below the status card, shown only
 // after ui/review.js's pure predicate says it's earned (2nd real block, 7+
-// day-old install, Chrome only — no AMO listing to ask for on Firefox, state
+// day-old install, Chrome and Firefox (0.14.1: AMO listing), state
 // pending/eligible-snooze) AND the current tab's verdict isn't an active
 // warning (never "please review us" beneath a dangerous/suspicious card —
 // the eligible state just waits for a popup open on a clean/unknown page).
@@ -125,11 +125,11 @@ function renderVerdictUI(host) {
 // (manifest.firefox.json) carries `browser_specific_settings` (the Gecko
 // extension ID) — Chrome's manifest.json never has it, regardless of what
 // globals the browser injects.
-function isChromeBuild() {
-  // Fails open (assumes Chrome) on any getManifest() error. Intentional and
-  // low-stakes: the worst case is a working CWS review link/card shown on a
-  // browser that isn't actually Chrome, never a broken feature.
-  try { return REVIEW.isChromeFromManifest(api.runtime.getManifest()); } catch (_) { return true; }
+function reviewHref() {
+  // Fails open (CWS URL) on any getManifest() error. Intentional and
+  // low-stakes: the worst case is a working CWS review link on a browser that
+  // isn't actually Chrome, never a broken feature.
+  try { return REVIEW.reviewUrl(api.runtime.getManifest()); } catch (_) { return REVIEW.CWS_REVIEW_URL; }
 }
 // Fetches eligibility once (cheap, and independent of which page the popup
 // happens to be over) and caches it in module scope; renderFooter() below
@@ -139,13 +139,13 @@ function isChromeBuild() {
 let reviewEligible = false, reviewCount = 0, reviewListenersBound = false;
 async function initReviewAsk() {
   if (!REVIEW) return;
-  if (!isChromeBuild()) return;
+  $('askrate').href = reviewHref();
   const ctx = await send('getReviewAsk');
   if (!ctx) return;
   const ra = ctx.reviewAsk || {};
   reviewCount = settings.threatsBlocked || 0;
   reviewEligible = REVIEW.eligible({
-    isChrome: true, threatsBlocked: reviewCount, installedAt: ctx.installedAt, now: Date.now(),
+    threatsBlocked: reviewCount, installedAt: ctx.installedAt, now: Date.now(),
     state: ra.state, snoozeUntil: ra.snoozeUntil, asks: ra.asks
   });
 }

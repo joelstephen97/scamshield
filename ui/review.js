@@ -1,7 +1,7 @@
 // ui/review.js — earned review-ask eligibility (0.7.0).
 //
 // Pure predicate: nothing here touches chrome.* or the DOM. Call sites (popup.js,
-// options.js) compute `isChrome` from the packaged manifest — NOT `typeof
+// options.js) derive the store URL from the packaged manifest — NOT `typeof
 // browser === 'undefined'`, which modern Chrome's native `browser.*` alias
 // (Chromium 148, 2026) makes unreliable — and pass in the stored reviewAsk
 // state plus the counters it depends on. Kept separate from
@@ -24,9 +24,10 @@
   const THREATS_THRESHOLD = 2;    // minimum all-time blocks before we ever ask (never on the 1st — could be a false positive)
   const SNOOZE_DAYS = 90;         // "Maybe later" snooze length
   const MAX_ASKS = 2;             // "asks" (Maybe-later count) at or above this stops re-asking forever
-  // Chrome Web Store review tab. No Firefox equivalent exists yet (no AMO
-  // listing), so Firefox never shows the ask — see eligible()'s isChrome gate.
+  // Chrome Web Store review tab, and (0.14.1) the AMO reviews page now that the
+  // Firefox listing exists — reviewUrl() picks one from the packaged manifest.
   const CWS_REVIEW_URL = 'https://chromewebstore.google.com/detail/fojjjofjimbfoddafoampojopijnlihl/reviews';
+  const AMO_REVIEW_URL = 'https://addons.mozilla.org/firefox/addon/scam-phishing-blocker-scamshie/reviews/';
 
   function num(v) {
     const n = Number(v);
@@ -34,14 +35,13 @@
   }
 
   // eligible ⇔ ALL of:
-  //  - Chrome build (isChrome passed in — Firefox never has a store listing to ask for)
+  //  (0.14.1: no browser gate — Firefox has an AMO listing, so it is asked under the same rules)
   //  - threatsBlocked >= 2
   //  - now - installedAt >= 7 days
   //  - state === 'pending', OR (state === 'snoozed' AND now >= snoozeUntil AND asks < 2)
   // 'rated' and 'declined' are permanent — never eligible again.
   function eligible(input) {
     const o = input || {};
-    if (!o.isChrome) return false;
     if (num(o.threatsBlocked) < THREATS_THRESHOLD) return false;
     const now = typeof o.now === 'number' && Number.isFinite(o.now) ? o.now : Date.now();
     if (now - num(o.installedAt) < INSTALL_AGE_DAYS * DAY) return false;
@@ -63,6 +63,11 @@
     return !(manifest && manifest.browser_specific_settings);
   }
 
+  // Store review URL for this build (0.14.1): AMO on Firefox, CWS on Chrome.
+  function reviewUrl(manifest) {
+    return isChromeFromManifest(manifest) ? CWS_REVIEW_URL : AMO_REVIEW_URL;
+  }
+
   // Render-gate: even an eligible profile never gets the ask beneath an
   // active warning ("please review us" under a dangerous/suspicious verdict
   // is the exact pattern the design explicitly rejects) — the eligible state
@@ -73,5 +78,5 @@
     return !!isEligible && level !== 'dangerous' && level !== 'suspicious';
   }
 
-  return { DAY, INSTALL_AGE_DAYS, THREATS_THRESHOLD, SNOOZE_DAYS, MAX_ASKS, CWS_REVIEW_URL, eligible, isChromeFromManifest, shouldShowCard };
+  return { DAY, INSTALL_AGE_DAYS, THREATS_THRESHOLD, SNOOZE_DAYS, MAX_ASKS, CWS_REVIEW_URL, AMO_REVIEW_URL, eligible, isChromeFromManifest, reviewUrl, shouldShowCard };
 });

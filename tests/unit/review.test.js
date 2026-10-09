@@ -24,8 +24,17 @@ test('eligible when every condition holds (pending, Chrome, 2 blocks, 8-day inst
   assert.equal(R.eligible(base()), true);
 });
 
-test('not eligible on Firefox — no AMO listing to ask for', () => {
-  assert.equal(R.eligible(base({ isChrome: false })), false);
+test('Firefox is eligible under the same thresholds (0.14.1: AMO listing exists)', () => {
+  assert.equal(R.eligible(base({ isChrome: false })), true);
+  assert.equal(R.eligible(base({ isChrome: false, threatsBlocked: 1 })), false);
+  assert.equal(R.eligible(base({ isChrome: false, installedAt: NOW - 6 * DAY })), false);
+  assert.equal(R.eligible(base({ isChrome: false, state: 'declined' })), false);
+});
+
+test('reviewUrl picks the CWS URL on Chrome and the AMO URL on Firefox', () => {
+  assert.equal(R.AMO_REVIEW_URL, 'https://addons.mozilla.org/firefox/addon/scam-phishing-blocker-scamshie/reviews/');
+  assert.equal(R.reviewUrl({ version: '1' }), R.CWS_REVIEW_URL);
+  assert.equal(R.reviewUrl({ browser_specific_settings: { gecko: { id: 'x@y' } } }), R.AMO_REVIEW_URL);
 });
 
 test('not eligible below the 2-blocks threshold', () => {

@@ -390,8 +390,12 @@
     // deferred a tick — otherwise the very click that opened the menu would
     // immediately bubble to document and close it right back.
     onTrustedClick(moreBtn, () => { if (menu.hidden) { menu.hidden = false; moreBtn.setAttribute('aria-expanded', 'true'); trust && trust.__ssRearm && trust.__ssRearm(); document.addEventListener('keydown', onKey, true); setTimeout(() => { document.addEventListener('click', onDoc, true); }, 0); } else closeMenu(); });
-    const close = button('ss-x', '✕'); const choice = danger ? '1h' : '1d';
-    close.setAttribute('aria-label', danger ? t('hideForAnHour', null, 'Hide for an hour') : t('hideForToday', null, 'Hide for today')); close.title = close.getAttribute('aria-label');
+    // (0.14.1) The ✕ says what it does. On a bare tenant apex canStore() is false, so ✕ only dismisses
+    // this page (nothing is stored) and must not claim "for a day/an hour" — it keeps the generic label.
+    const choice = danger ? '1h' : '1d';
+    const closeLabel = !canStore() ? t('ariaDismiss', null, 'Dismiss') : danger ? t('bannerHideHour', null, 'Hide for an hour') : t('bannerHideDay', null, 'Hide for a day');
+    const close = button('ss-x', ''); const glyph = el('span', 'ss-x-glyph', '✕'); glyph.setAttribute('aria-hidden', 'true'); close.append(glyph, el('span', 'ss-x-label', closeLabel));
+    close.setAttribute('aria-label', closeLabel); close.title = closeLabel;
     onTrustedClick(close, () => { closeMenu(); bar.remove(); if (!x.noTrust && x.onHide && canStore()) x.onHide(choice); });
     acts.append(moreBtn, close, menu); bar.appendChild(acts);
     (document.body || document.documentElement).appendChild(bar);

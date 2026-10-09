@@ -50,22 +50,16 @@ function renderVersion() {
   try { const v = api.runtime.getManifest().version; $('ver').textContent = T('fmtVersion', [bidi(v)], 'Version ' + v); $('aboutver').textContent = v; } catch (_) {}
 }
 renderVersion();
-// Earned review ask (0.7.0): the always-available "leave a review" link is
-// Chrome only (no AMO listing to deep-link to). Sets nothing — this is a
-// separate, zero-pressure channel from the popup's earned ask-card.
-// Not `typeof browser === 'undefined'`: modern Chrome (Chromium 148, 2026)
-// now ships its own native `browser.*` alias, so that check is no longer a
-// reliable Chrome/Firefox signal. Uses ui/review.js's isChromeFromManifest()
-// (same pure helper popup.js's isChromeBuild() calls) against our OWN
-// packaged manifest instead — only the Firefox build carries
-// `browser_specific_settings`.
+// Earned review ask (0.7.0): the always-available "leave a review" link.
+// Sets nothing — a separate, zero-pressure channel from the popup's earned
+// ask-card. 0.14.1: shown on Firefox too, pointing at the AMO reviews page.
+// Store is picked from our OWN packaged manifest via ui/review.js's
+// reviewUrl() (not `typeof browser`: modern Chrome ships a native `browser.*`
+// alias); only the Firefox build carries `browser_specific_settings`.
 try {
-  const isChrome = REVIEW ? REVIEW.isChromeFromManifest(api.runtime.getManifest()) : true;
-  // Fails open (assumes Chrome) when the module didn't load or getManifest()
-  // throws. Intentional and low-stakes: worst case is a working CWS link
-  // shown on a browser that isn't actually Chrome, never a broken feature.
-  if (isChrome) $('reviewaboutrow').hidden = false;
-} catch (_) { $('reviewaboutrow').hidden = false; }
+  if (REVIEW) $('reviewaboutlink').href = REVIEW.reviewUrl(api.runtime.getManifest());
+} catch (_) { /* keep the CWS href from options.html */ }
+$('reviewaboutrow').hidden = false;
 
 const CHIPKEY = (k) => 'chip' + k.charAt(0).toUpperCase() + k.slice(1);
 const KIND = (k) => T(CHIPKEY(k), null, F.detectorLabel(k));
