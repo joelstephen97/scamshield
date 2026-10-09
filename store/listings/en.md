@@ -110,11 +110,12 @@ Source code, privacy policy and issue tracker: github.com/joelstephen97/scamshie
 
 ## What's new (0.14.1)
 
-• The hourly scam list now keeps protecting you through a feed outage, and a damaged or suspicious update is rejected before it can block anything.
-• "Trust this site" on free-hosting sites now trusts only that one site, not everyone else's site on the same platform.
-• The on/off switch now pauses blocking too, not just the page warnings.
-• Clearer warning labels and wording in all 20 languages.
-• Scam pages on free code-hosting sites are now caught by the hourly list.
-• Steadier update checks. If you clear the feed address in Settings, it stays cleared.
+• Brand-new scam sites stay blocked. The hourly list of fresh phishing and scam sites used to lapse for a few hours whenever an update ran late. It now keeps protecting you until the next one arrives, and a broken or suspicious update is thrown out before it can block anything.
+• Trusting one site trusts only that site. On free website hosts, "Trust this site" used to cover every site on the same platform, scam pages included. Now it covers just the one you picked.
+• Off means off. Turning ScamShield off now pauses site blocking as well as the warnings, and switching it off on one computer no longer switches it off on your others.
+• Safer crypto wallet checks. A wallet request now waits for your answer instead of going through on its own after a few seconds.
+• Better at catching phishing pages hidden on free code-hosting sites.
+• Warning buttons say what they do. The ✕ on the warning bar now tells you whether it hides the warning for an hour or for a day, in all 20 languages.
+• If you clear the feed address in Settings, ScamShield downloads nothing, and it stays that way after every update.
 
-No new permissions. Still storage, declarativeNetRequest, alarms and http/https access, the same as every version since 0.3.1.
+No new permissions. Still storage, declarativeNetRequest, alarms and http/https access, the same as every version since 0.3.1, and still nothing about your browsing leaves your computer.
