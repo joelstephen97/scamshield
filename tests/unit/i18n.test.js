@@ -188,3 +188,51 @@ for (const loc of NON_EN_LOCALES) {
     );
   });
 }
+
+// --- 0.14.1 copy + translations guard (Task 11) -----------------------------
+// Past releases shipped English pasted into non-en locales. Every key added or
+// reworded in 0.14.1 must exist, differ from en, and (for non-Latin scripts)
+// actually contain non-ASCII text. SAME_AS_EN lists genuinely identical values;
+// it is empty on purpose — add a key here only with a reason.
+const V0141_KEYS = [
+  'netNoTelemetry', 'receiptFeedDetail', 'feedLead', 'obBrandBody',
+  'interstitialReassure', 'interstitialFooter', 'reason_newDomain', 'reason_newDomainUnvisited',
+  'continueOnce', 'bannerHideDay', 'bannerHideHour', 'optHotRejected', 'optTenantApexBadge'
+];
+const SAME_AS_EN = new Set([]);
+const LATIN_SCRIPT = new Set(['id', 'tr', 'vi', 'de', 'es', 'fr', 'it', 'pt_BR']);
+
+for (const loc of NON_EN_LOCALES) {
+  test(`0.14.1 strings: ${loc} is translated (differs from en)`, () => {
+    const data = JSON.parse(fs.readFileSync(path.join(LOCALES_DIR, loc, 'messages.json'), 'utf8'));
+    const issues = [];
+    for (const k of V0141_KEYS) {
+      const v = data[k] && data[k].message;
+      if (!v) { issues.push(`${k}: missing`); continue; }
+      if (SAME_AS_EN.has(k)) continue;
+      if (v === EN[k].message) issues.push(`${k}: identical to en`);
+      else if (!LATIN_SCRIPT.has(loc) && !/[^\x00-\x7F]{3,}/.test(v)) issues.push(`${k}: no non-ASCII text`);
+    }
+    assert.deepStrictEqual(issues, [], `${loc}: ${issues.join('; ')}`);
+  });
+}
+
+test('0.14.1 copy: removed claims are gone from locales, README and options.html', () => {
+  const stale = /OpenPhish|URLhaus|60\+|60 (marques|Marken|marcas|marchi|merek)|three requests|three kinds of request|these three/i;
+  for (const loc of EXPECTED) {
+    const data = JSON.parse(fs.readFileSync(path.join(LOCALES_DIR, loc, 'messages.json'), 'utf8'));
+    for (const [k, v] of Object.entries(data)) assert.ok(!stale.test(v.message), `${loc}: ${k} still has a stale claim: ${v.message}`);
+  }
+  for (const f of ['README.md', 'options.html']) {
+    const txt = fs.readFileSync(path.join(__dirname, '../..', f), 'utf8');
+    assert.ok(!/OpenPhish|URLhaus|three kinds of network request|at most three network requests|these three/i.test(txt), `${f} still has a stale claim`);
+  }
+});
+
+test('0.14.1 copy: interstitial no longer claims nothing was sent; en values are the agreed wording', () => {
+  assert.match(EN.interstitialReassure.message, /already typed a password or card number/);
+  assert.doesNotMatch(EN.interstitialReassure.message, /Nothing you typed has been sent/);
+  assert.match(EN.obBrandBody.message, /300\+ brands/);
+  assert.doesNotMatch(EN.reason_newDomain.message, /\$EXTRA\$/);
+  assert.match(EN.reason_newDomainUnvisited.message, /never visited it before/);
+});

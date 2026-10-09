@@ -46,7 +46,9 @@
     feedBlock: "This domain matches ScamShield's threat feed, confirmed by $1 independent source(s).",
     feedWarn: "This domain matches a lower-confidence entry in ScamShield's threat feed ($1 source(s)) — proceed carefully.",
     // background/service_worker.js checkNrdHost() — "new site" signal (0.10.0, Task C3)
-    newDomain: 'Domain appears on a newly-registered-domains list — most scam sites are only days old$1.',
+    newDomain: 'Domain appears on a newly-registered-domains list — most scam sites are only days old.',
+    // 0.14.1: its own sentence (not a "$1" English tail) so every locale words it naturally.
+    newDomainUnvisited: 'Domain appears on a newly-registered-domains list — most scam sites are only days old, and you have never visited it before.',
     // engine/heuristics.js — scoreDom
     credentialFormForeignDomain: 'A password form on this page sends your credentials to a different site.',
     // engine/constants.js crossOriginCredPostHost + content/content_script.js guardExfilForms (0.10.0, Task C2)

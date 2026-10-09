@@ -91,7 +91,7 @@
   <p class="dfoot"><span aria-hidden="true">🔒</span><span data-i18n="statsFooter">Every number is counted on your device. Nothing on this page is sent anywhere.</span></p>
 </section>
 <section id="tab-feed" class="tab" hidden role="tabpanel" aria-labelledby="h-feed">
-  <h2 id="h-feed" tabindex="-1" data-i18n="feedTitle">Threat feed</h2><p class="lead" data-i18n="feedLead">A daily-rebuilt list of known scam sites (OpenPhish + URLhaus, heavily filtered). ScamShield only downloads it.</p>
+  <h2 id="h-feed" tabindex="-1" data-i18n="feedTitle">Threat feed</h2><p class="lead" data-i18n="feedLead">A regularly updated list of known scam sites, built from public, licence-vetted phishing and malware lists. ScamShield only downloads it.</p>
   <div class="feedline"><span class="dot" id="feeddot"></span><span id="feedstatus" data-i18n="feedNeverUpdated">Never updated</span><button id="checkupd" class="btn ghost" data-i18n="checkNow">Check now</button></div>
   <div class="feedline"><span class="dot" id="hotdot"></span><span id="hotstatus"></span></div>
   <div class="feedline" id="hotrejected" hidden></div>
@@ -108,9 +108,9 @@
   <div class="setrow" id="reviewaboutrow" hidden><div class="t"><span><a id="reviewaboutlink" href="https://chromewebstore.google.com/detail/fojjjofjimbfoddafoampojopijnlihl/reviews" target="_blank" rel="noopener" data-i18n="reviewAboutLink">Enjoying ScamShield? Leave a review</a></span></div></div>
   <div class="setrow"><div class="t"><b data-i18n="support">Support</b><span><span data-i18n="supportFreeOnDevice">ScamShield is free and runs entirely on your device.</span> <a id="support" href="https://github.com/sponsors/joelstephen97" target="_blank" rel="noopener" data-i18n="supportSponsorGithub">Sponsor on GitHub</a> · <a href="https://www.paypal.me/joelstephen1" target="_blank" rel="noopener" data-i18n="supportDonatePaypal">Donate via PayPal</a></span></div></div>
   <h3 data-i18n="whatLeaves">What leaves your device</h3>
-  <p class="lead" data-i18n="netNoTelemetry">ScamShield makes no analytics, telemetry or tracking requests — ever. The only requests it can make are these three, and you can verify it yourself: open your browser's DevTools → Network tab, use ScamShield normally, and you will see nothing beyond them.</p>
+  <p class="lead" data-i18n="netNoTelemetry">ScamShield makes no analytics, telemetry or tracking requests — ever. It only makes the requests listed below, and you can check this yourself: open your browser's DevTools → Network tab, use ScamShield normally, and you will see nothing else.</p>
   <ul id="netreceipt" class="list">
-    <li><span><b data-i18n="receiptFeedLabel">Threat-list download</b><br><span class="meta" data-i18n="receiptFeedDetail">The public blocklist file — the same for everyone, nothing about you is sent.</span></span><span class="meta" id="net-feed">—</span></li>
+    <li><span><b data-i18n="receiptFeedLabel">Threat-list download</b><br><span class="meta" data-i18n="receiptFeedDetail">Public threat-list files: the main list, a small hourly update, and one small detail file if a page matches. Same for everyone; nothing about you or your pages is sent.</span></span><span class="meta" id="net-feed">—</span></li>
     <li><span><b data-i18n="receiptReportLabel">Community reports</b><br><span class="meta" data-i18n="receiptReportDetail">Only if you turned reporting on. Site name + numeric signals, never URLs or page text.</span></span><span class="meta" id="net-report">—</span></li>
     <li><span><b data-i18n="receiptIconLabel">Page icon check</b><br><span class="meta" data-i18n="receiptIconDetail">Fetches a page's own favicon to spot brand look-alikes. No third party, no cookies.</span></span><span class="meta" data-i18n="receiptPerPage">per page</span></li>
   </ul>

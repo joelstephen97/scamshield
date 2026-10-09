@@ -125,11 +125,11 @@ The engine modules are DOM-free UMD wrappers, so the same files run in the brows
 
 **ScamShield collects nothing by default.** All classification runs locally. Full policy: **<https://joelstephen97.github.io/scamshield/privacy.html>** (source: [`privacy.html`](privacy.html) / [`store/privacy-policy.md`](store/privacy-policy.md)).
 
-The extension makes exactly three kinds of network request:
+The extension makes only the following kinds of network request (the same list as the [privacy policy](store/privacy-policy.md)):
 
 | Request | When | What is sent | Can be turned off |
 |---|---|---|---|
-| **Threat-feed download** | On install, then every 12 h | A plain GET for a static JSON file from GitHub — the same file for every user. Nothing about you or your browsing. | Yes — clear the feed URL in Settings (or point it at your own feed). |
+| **Threat-feed download** | On install, then every 12 h; the small hot list (`hot.json`) hourly | Plain GETs for static files from GitHub / jsDelivr — the same files for every user. When a page matches the downloaded feed, one small "shard" file naming the sources that listed it is fetched the same way. Nothing about you or your browsing is sent. | Yes — clear the feed URL in Settings (or point it at your own feed); turning off *Block known scam sites* also stops the hot list. |
 | **Icon fetch** | When a page references a favicon/logo that needs checking | A GET for the icon file the page itself references (usually same-site, sometimes the site's CDN), with no cookies or credentials. No third party is contacted. | It is part of page analysis, which can be turned off in Settings. |
 | **Community report** (relay) | **Only if you opt in** ("Help make ScamShield smarter"), and then only for pages flagged *dangerous* (max once per site per day) or when you press *Report a mistake* | Hostname, verdict + reason codes, numeric risk signals (hashed word counts, form/input/link counts — never text), matched brand names, extension version, hour. Never the full URL, page text, anything you typed, cookies, or any identifier. | Off by default; turn off any time and queued reports are discarded. |
 
@@ -233,7 +233,7 @@ Both models are trained offline with scikit-learn, exported to JSON, and evaluat
 
 | Model | Training data | Shipped as | Last metrics |
 |---|---|---|---|
-| URL (HistGradientBoosting) | `model/data/real.csv` — OpenPhish + URLhaus positives, Tranco negatives expanded with realistic deep paths (`build_dataset.py`), ~22.5k rows | `model/url-model.json` → `model/url-model.js` | acc 0.988 · precision 0.993 · recall 0.983 · AUC 0.998; a deep-URL regression gate runs on every training run |
+| URL (HistGradientBoosting) | `model/data/real.csv` — positives from public phishing and malware URL lists (see `build_dataset.py`), Tranco negatives expanded with realistic deep paths (`build_dataset.py`), ~22.5k rows | `model/url-model.json` → `model/url-model.js` | acc 0.988 · precision 0.993 · recall 0.983 · AUC 0.998; a deep-URL regression gate runs on every training run |
 | Page content (logistic regression) | `model/data/pages.jsonl` from `npm run crawl:pages` — 2,917 rows (375 positive / 2,542 negative incl. 269 legitimate login pages), 1,915 registrable domains | `model/page-content.json` → `model/page-content.js` | grouped-holdout AUC 0.886; threshold 0.80 chosen for precision (precision 1.000, FPR 0.00 % on legit-login holdout, recall 0.107 — content alone can only raise *suspicious*) |
 
 ```bash
@@ -268,7 +268,7 @@ Active users are on the store version, so every release must be a drop-in upgrad
 
 Security extensions live or die on trust, and several well-known ones lost it — some sold browsing history, some quietly changed hands and turned malicious after an update. ScamShield is built so you don't have to take that on faith:
 
-- **No telemetry, verifiable by you.** In normal use ScamShield makes at most three network requests, all listed in Settings → About: the public threat-list download, opt-in community reports (off by default), and same-page favicon fetches for brand matching. Open your browser's DevTools → Network tab and check — you'll see nothing else.
+- **No telemetry, verifiable by you.** In normal use ScamShield makes only the network requests listed in Settings → About and in the privacy policy: public threat-feed downloads (including the hourly hot list and, on a local match, one exact-shard file), the page's own favicon for brand matching, and opt-in community reports (off by default). Open your browser's DevTools → Network tab and check — you'll see nothing else.
 - **Permissions are frozen.** `storage`, `declarativeNetRequest`, `alarms` and http/https access — the same set since 0.3.1. A unit test fails the build if that ever changes, and a new permission would disable the extension for existing users until they re-approve it.
 - **Everything is auditable.** The whole extension is open source (GPL-3.0-or-later) and releases are tagged and published with the exact zips; you can diff any version against the last.
 - **It will not be sold or quietly re-owned.** The extension will not be transferred to a new owner without a clear, public heads-up in this repository and the changelog. No ads, no data resale, no account, ever.

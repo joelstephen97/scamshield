@@ -681,7 +681,7 @@
     try {
       const nrdHit = await withTimeout(send('checkNrd', { host }), 3000);
       if (nrdHit && nrdHit.hit) {
-        const extra = nrdHit.strengthen ? ', and you have never visited it before' : '';
+        const nrdCode = nrdHit.strengthen ? 'newDomainUnvisited' : 'newDomain'; // 0.14.1: whole localized sentence, no English tail
         // 0.13.0: a bloom-positive "new site" is evidence, not a verdict. It
         // only surfaces when something else corroborates it — here, only
         // urlRules is in scope (this scores a QR-decoded URL that was never
@@ -689,7 +689,7 @@
         // Bloom collision on an old site (doi.org, bench 2026-09-06) can
         // never paint a banner by itself.
         const nrdCorroborated = !!(urlRules && urlRules.score >= 0.15);
-        verdict = SS.foldRiskEvidence(verdict, 0.20, { code: 'newDomain', kind: 'link', params: [extra] }, 'new-domain', nrdCorroborated ? { minLevel: 'suspicious' } : undefined);
+        verdict = SS.foldRiskEvidence(verdict, 0.20, { code: nrdCode, kind: 'link' }, 'new-domain', nrdCorroborated ? { minLevel: 'suspicious' } : undefined);
       }
     } catch (_) { /* best-effort */ }
     return { url, host, level: verdict.level, score: verdict.score, reasons: verdict.reasons || [], flags: verdict.flags || [] };
@@ -1029,18 +1029,18 @@
     // so this can never by itself push a page past "suspicious" alone — even
     // stacked with other risk-table signals — and never touches an
     // already-dangerous verdict. A genuine first-ever visit to this install
-    // strengthens the reason's wording via the params slot.
+    // switches the reason to its "never visited it before" wording.
     try {
       const nrdHit = await withTimeout(nrdP, 3000);
       if (nrdHit && nrdHit.hit) {
-        const extra = nrdHit.strengthen ? ', and you have never visited it before' : '';
+        const nrdCode = nrdHit.strengthen ? 'newDomainUnvisited' : 'newDomain'; // 0.14.1: whole localized sentence, no English tail
         // 0.13.0: a bloom-positive "new site" is evidence, not a verdict. It
         // only surfaces when something else on the page corroborates it —
         // a credential/card form, any URL-rule evidence, or DOM evidence —
         // so a Bloom collision on an old site (doi.org, bench 2026-09-06)
         // can never paint a banner by itself.
         const nrdCorroborated = !!((signals && (signals.hasPasswordField || signals.hasCardInput)) || (urlRules && urlRules.score >= 0.15) || (domRules && domRules.score >= 0.15));
-        verdict = SS.foldRiskEvidence(verdict, 0.20, { code: 'newDomain', kind: 'link', params: [extra] }, 'new-domain', nrdCorroborated ? { minLevel: 'suspicious' } : undefined);
+        verdict = SS.foldRiskEvidence(verdict, 0.20, { code: nrdCode, kind: 'link' }, 'new-domain', nrdCorroborated ? { minLevel: 'suspicious' } : undefined);
       }
     } catch (_) { /* NRD check is best-effort — never blocks the rest of the scan */ }
 

@@ -7,10 +7,11 @@
 try { importScripts('../engine/constants.js', '../engine/trust.js', '../engine/decisions.js', '../engine/features.js', '../engine/risk_rules.js', '../engine/image_hash.js', '../engine/brand_icons.js', '../engine/report_payload.js', '../engine/engagement.js', '../engine/blockset.js', '../engine/bloom.js', '../engine/first_seen.js', '../engine/dnr_rules.js', '../engine/hotlist.js', '../ui/reasons.js', './stats.js', './blockstore.js', './update.js', './feedsync.js'); } catch (_) { /* deps already loaded by sw.js (Chrome) or the manifest (Firefox) */ }
 const api = globalThis.browser || globalThis.chrome;
 
-// Official ScamShield feed: rebuilt daily by GitHub Actions from OpenPhish +
-// URLhaus with a Tranco top-10k false-positive guard. Download-only static
-// JSON — no user or browsing data is ever sent. Users can point this at
-// their own feed or clear it in settings to disable updates.
+// Official ScamShield feed: rebuilt by GitHub Actions from public,
+// licence-vetted phishing/malware lists with a Tranco top-10k false-positive
+// guard. Download-only static JSON — no user or browsing data is ever sent.
+// Users can point this at their own feed or clear it in settings to disable
+// updates.
 const DEFAULT_FEED_URL = 'https://raw.githubusercontent.com/joelstephen97/scamshield-feed/main/blocklist.json';
 // Community reporting relay: opt-in only, off by default. Placeholder host
 // until Task 6 deploys the real relay; users can point this at their own or

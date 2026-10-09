@@ -34,10 +34,11 @@
   // at all. Only a real override pays for the round trip. Guarded so a
   // re-injection into an already-initialised frame does not re-ask.
   //
-  // Promises, not callbacks: on Firefox `api` is the promise-only `browser`
-  // namespace, where a trailing callback is simply never invoked. Both
-  // storage.local.get and runtime.sendMessage return a promise when called
-  // without one, on Chrome (MV3, and our floor is 121) and on Firefox alike.
+  // Promise style, kept for consistency rather than necessity: Firefox's
+  // `browser.*` does invoke a trailing callback (Schemas.sys.mjs pops it), so
+  // callbacks would work there too. Both storage.local.get and
+  // runtime.sendMessage return a promise when called without one, on Chrome
+  // (MV3, and our floor is 121) and on Firefox alike.
   if (!root.__scamshieldLangAsked) {
     root.__scamshieldLangAsked = true;
     try {
@@ -418,7 +419,7 @@
     const addr = el('div', 'ss-addr'); addr.append(el('small', null, t('thisPage', null, 'This page')), el('code', null, location.href.slice(0, 200))); card.append(addr);
     if (verdict.brandLabel && verdict.brandUrl) { const cmp = compareRow(verdict.brandLabel, verdict.brandUrl); if (cmp) card.appendChild(cmp); }
     const ul = el('ul', 'ss-evidence'); for (const r of (verdict.reasons || []).slice(1, 4)) { const li = el('li'); li.append(el('span', 'ss-chip', t('chipWhy', null, 'Why')), el('span', null, reasonText(r))); ul.appendChild(li); } if (ul.children.length) card.appendChild(ul);
-    card.append(el('p', 'ss-sub', t('interstitialReassure', null, 'Nothing you typed has been sent yet. Leaving now is safe.')));
+    card.append(el('p', 'ss-sub', t('interstitialReassure', null, "If you already typed a password or card number on this page, change it now.")));
     const actions = el('div', 'ss-actions'); const leave = button('ss-primary', t('leaveThisPage', null, 'Leave this page')); onTrustedClick(leave, () => { x.onLeave ? x.onLeave() : history.back(); }); actions.append(leave);
     const copyBtn = copyReportButton(verdict); actions.append(copyBtn);
     // Fix round 2: append, not prepend — the row reads Leave, Copy report,
@@ -429,13 +430,16 @@
     const row1 = el('div', 'ss-dt'); const stay = button('ss-danger-ghost', t('continueAnyway', null, 'Continue anyway')); armDelayed(stay, 3);
     // Continue = pause this site for 1 hour (the block page's "Visit anyway" rule), never a permanent trust.
     onTrustedClick(stay, () => { ov.remove(); if (canStore()) send('pauseSite', { domain: regDomain(), choice: '1h' }); if (x.onDismiss) x.onDismiss(); });
-    row1.append(stay, el('span', 'ss-consequence', t('continuePausesHour', null, 'Pauses ScamShield on this site for 1 hour.'))); details.append(row1);
+    // 0.14.1: on a bare tenant-apex host nothing is stored (canStore() false), so Continue only proceeds once.
+    const consequence = canStore() ? t('continuePausesHour', null, 'Pauses ScamShield on this site for 1 hour.') : t('continueOnce', null, 'Continues to this page once. ScamShield stays on.');
+    row1.append(stay, el('span', 'ss-consequence', consequence)); details.append(row1);
     const row2 = el('div', 'ss-dt');
     const trust = (x.noTrust || !canStore()) ? null : trustButton(async () => { ov.remove(); const domain = regDomain(); await send('trustSite', { domain, via: x.trustVia || 'interstitial' }); ackSurface({ text: t('ackTrusted', [bidi(domain)], "ScamShield won't flag " + domain + ' again.'), onUndo: () => send('untrustSite', { domain }), restore: () => dangerInterstitial(verdict, x) }); });
     if (trust) { trust.className = 'ss-trust ss-trust-link'; trust.textContent = t('blockedTrustSite', null, 'Not a scam? Trust this site'); row2.append(trust); }
     const rep = el('button', 'ss-report', t('reportMistake', null, 'Report a mistake')); rep.type = 'button'; onTrustedClick(rep, () => { rep.textContent = t('thanks', null, 'Thanks'); rep.disabled = true; x.onReport && x.onReport(); });
     row2.append(rep); details.append(row2); card.append(details);
-    card.append(el('p', 'ss-foot', t('blockedFooter', null, 'Blocked on your device. Nothing about this page was sent anywhere.')));
+    // 0.14.1: not blockedFooter — that text says nothing was sent, which is true of blocked.html only.
+    card.append(el('p', 'ss-foot', t('interstitialFooter', null, "ScamShield checked this page on your device.")));
     ov.append(card); document.documentElement.appendChild(ov); leave.focus();
   }
 
