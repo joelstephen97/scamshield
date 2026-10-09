@@ -157,3 +157,23 @@ test('0.14.1: ota alarm uses ensureAlarm, and every feed-job start goes through 
   assert.ok(/startFeedJobs\(\)/.test(body));
   assert.ok(!/\brunOtaUpdate\(\)|\brunFeedUpdate\(\)/.test(body));
 });
+
+// 0.14.1 Task 10: the master switch is device-local and gates rule application.
+test('enabled is not a synced key (one device must not disarm another)', () => {
+  const m = /const SYNCED_KEYS = \[([^\]]*)\]/.exec(src);
+  assert.ok(m, 'SYNCED_KEYS found');
+  const keys = [...m[1].matchAll(/'([^']+)'/g)].map((x) => x[1]);
+  assert.ok(!keys.includes('enabled'), 'enabled must not be synced');
+  assert.ok(keys.includes('blockKnownBad'), 'other prefs still synced');
+});
+test('pushSync payload is built only from SYNCED_KEYS', () => {
+  const body = functionBody('pushSync');
+  assert.ok(/for \(const k of SYNCED_KEYS\) out\[k\] = s\[k\]/.test(body));
+  assert.ok(!/\benabled\b/.test(body));
+});
+test('rule application is gated on the master switch', () => {
+  assert.ok(/function blockingOn\(s\)/.test(src));
+  assert.ok(/'enabled' in patch/.test(functionBody('setSettings') + src.slice(src.indexOf('async function setSettings'), src.indexOf('async function setSettings') + 2500)));
+  assert.ok(/blockingOn\(/.test(functionBody('applyHotRulesNow')));
+  assert.ok(/blockingOn\(/.test(functionBody('ensureNetworkRules')));
+});

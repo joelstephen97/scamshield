@@ -89,7 +89,10 @@ const DEFAULTS = {
 // Settings mirrored to chrome.storage.sync when syncEnabled (0.6.0). Only
 // user preferences + trusted sites — never stats, feed cursors or queues, and
 // never anything that could identify the user. Kept well under sync's 8KB/item.
-const SYNCED_KEYS = ['enabled', 'hideScamContent', 'blockKnownBad', 'pageAnalysis',
+// 0.14.1: `enabled` (the master switch) is deliberately NOT here — it gates
+// this device's network rules, so one device must not disarm another. Old
+// synced/exported copies are ignored (the loops below only read SYNCED_KEYS).
+const SYNCED_KEYS = ['hideScamContent', 'blockKnownBad', 'pageAnalysis',
   'clickFixGuard', 'fakeUpdateGuard', 'walletGuard', 'clipboardGuard', 'techScamGuard',
   'leakyFormGuard', 'fingerprintDetect', 'notificationGuard', 'strictMode', 'qrAutoScan',
   'reportingOptIn', 'allowlist', 'allowlistMeta', 'theme', 'otaUrl', 'uiLang', 'mutedWarnings'];
@@ -452,6 +455,20 @@ async function getSettings() {
   merged.pausedSites = globalThis.ScamShield.prunePaused(merged.pausedSites, Date.now());
   return merged;
 }
+// 0.14.1: network blocking (static ruleset, dynamic block/redirect, hot rules)
+// is on only when the master switch AND "block known scam sites" are both on.
+// `enabled` undefined (pre-0.14.1 / fresh) counts as on, like the defaults.
+function blockingOn(s) { return !!s && s.enabled !== false && !!s.blockKnownBad; }
+async function setStaticRuleset(on) {
+  if (!api.declarativeNetRequest || !api.declarativeNetRequest.updateEnabledRulesets) return;
+  try {
+    await api.declarativeNetRequest.updateEnabledRulesets({
+      enableRulesetIds: on ? ['blocklist'] : [],
+      disableRulesetIds: on ? [] : ['blocklist']
+    });
+  } catch (e) { /* ruleset toggle is best-effort */ }
+}
+
 // All setSettings() callers (onInstalled, runOtaUpdate, message handlers,
 // tests driving the SW directly via sw.evaluate) read-modify-write the same
 // `settings` key. Without serialization, two concurrent calls can each read
@@ -465,22 +482,27 @@ async function setSettings(patch) {
   const run = async () => {
     const next = Object.assign(await getSettings(), patch);
     await api.storage.local.set({ settings: next });
-    if ('blockKnownBad' in patch && api.declarativeNetRequest && api.declarativeNetRequest.updateEnabledRulesets) {
-      try {
-        await api.declarativeNetRequest.updateEnabledRulesets({
-          enableRulesetIds: patch.blockKnownBad ? ['blocklist'] : [],
-          disableRulesetIds: patch.blockKnownBad ? [] : ['blocklist']
-        });
-      } catch (e) { /* ruleset toggle is best-effort */ }
-    }
+    // 0.14.1: the master switch rides the same mechanism — effective rule is
+    // enabled && blockKnownBad. Turning back on re-applies from the stored
+    // lists (otaFilters / hotList), so it is instant.
+    const switchTouched = 'blockKnownBad' in patch || 'enabled' in patch;
+    if (switchTouched) await setStaticRuleset(blockingOn(next));
     // 0.12.0: the dynamic block + redirect rules follow the same switch (they
     // used to linger until the next 12h OTA), and pause/allowlist changes
     // keep the network allow rules in step.
-    if ('blockKnownBad' in patch) { try { await applyNetworkRules(await currentOtaFilters(), !!patch.blockKnownBad); } catch (_) {} }
+    if (switchTouched) {
+      try {
+        const filters = await currentOtaFilters();
+        // Going off: keep the (already guarded) installed filters in storage so
+        // turning back on restores them even on a pre-0.12 install.
+        if (!blockingOn(next) && filters.length) { try { await api.storage.local.set({ otaFilters: filters }); } catch (_) {} }
+        await applyNetworkRules(filters, blockingOn(next));
+      } catch (_) {}
+    }
     if ('pausedSites' in patch || 'allowlist' in patch) await syncAllowRules(next);
     // 0.13.0: keep the hot-list redirect rules in step with the same toggles —
     // a newly trusted site's hot rule must go away, not just be out-prioritised.
-    if ('blockKnownBad' in patch || 'hotListEnabled' in patch || 'pausedSites' in patch || 'allowlist' in patch) {
+    if (switchTouched || 'hotListEnabled' in patch || 'pausedSites' in patch || 'allowlist' in patch) {
       hotReadyPromise = applyHotRules(undefined, next).catch(() => {});
       await hotReadyPromise;
     }
@@ -813,7 +835,11 @@ async function runOtaUpdate() {
     //   MAX_PATH_RULES         =  300  (hot path tier)
     //   slack                  ~  183
     const filters = data.rules.slice(0, Math.max(0, dnrCap - 1500)).map((r) => String(r.urlFilter || r));
-    await applyNetworkRules(filters, s.blockKnownBad);
+    // 0.14.1: the download always happens; only the APPLY is gated on the
+    // master switch. While off the list is parked in storage so turning
+    // protection back on applies the freshest one instantly.
+    if (blockingOn(s)) await applyNetworkRules(filters, true);
+    else if (filters.length) { try { await api.storage.local.set({ otaFilters: filters }); } catch (_) {} }
     await setSettings({ lastBlocklistVersion: data.version, lastOtaAt: Date.now(), lastOtaCount: filters.length });
     return { ok: true, version: data.version, updated: true, count: filters.length };
   } catch (e) {
@@ -934,7 +960,13 @@ async function ensureNetworkRules() {
     const D = globalThis.SSDnr;
     const existing = await api.declarativeNetRequest.getDynamicRules();
     const hasRedirect = existing.some((r) => D.inRange(r.id, D.REDIRECT_BASE));
-    if (s.blockKnownBad && !hasRedirect) {
+    if (!blockingOn(s)) {
+      // 0.14.1: off (master switch or block-known-bad). The static ruleset's
+      // enabled state resets to the manifest default on an extension reload,
+      // and dynamic rules persist, so re-assert "nothing blocks" on every boot.
+      await setStaticRuleset(false);
+      if (existing.some((r) => D.inRange(r.id, D.BLOCK_BASE) || D.inRange(r.id, D.REDIRECT_BASE))) await applyNetworkRules([], false);
+    } else if (!hasRedirect) {
       const filters = existing.filter((r) => D.inRange(r.id, D.BLOCK_BASE)).sort((a, b) => a.id - b.id).map((r) => r.condition.urlFilter);
       await applyNetworkRules(filters, true);
     }
@@ -1101,7 +1133,7 @@ async function applyHotRulesNow(hotIn, settingsIn) {
     const s = settingsIn || await getSettings();
     let hot = hotIn;
     if (hot === undefined) { try { hot = (await api.storage.local.get('hotList')).hotList || null; } catch (_) { hot = null; } }
-    const enabled = !!s.blockKnownBad && s.hotListEnabled !== false && hot;
+    const enabled = blockingOn(s) && s.hotListEnabled !== false && hot;
     const guarded = enabled ? SSHot.guardHot(hot, s, Date.now()) : { domains: [], paths: [], dropped: null };
     // Firefox / older Chrome: a small regex budget means no path tier (R17).
     const regexCap = (api.declarativeNetRequest && typeof api.declarativeNetRequest.MAX_NUMBER_OF_REGEX_RULES === 'number') ? api.declarativeNetRequest.MAX_NUMBER_OF_REGEX_RULES : 1000;
@@ -1179,7 +1211,7 @@ async function getHotStatus() {
   await awaitHotReady();
   let l = {};
   try { l = await api.storage.local.get(['hotUpdatedAt', 'hotRejectReason']); } catch (_) {}
-  return Object.assign({ enabled: !!s.blockKnownBad && s.hotListEnabled !== false, updatedAt: l.hotUpdatedAt || 0, rejectReason: l.hotRejectReason || '' }, hotStatus);
+  return Object.assign({ enabled: blockingOn(s) && s.hotListEnabled !== false, updatedAt: l.hotUpdatedAt || 0, rejectReason: l.hotRejectReason || '' }, hotStatus);
 }
 
 // The block page reporting a catch. Sender must be our own extension page.

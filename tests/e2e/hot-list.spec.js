@@ -268,3 +268,60 @@ test('kill switch: growth is soft - after 3 consecutive growth rejections the ne
   expect(st.hotRejectReason).toBeUndefined();
   expect(st.hotGrowthRejects).toBeUndefined();
 });
+
+// 0.14.1 Task 10: the master switch really pauses everything. Static ruleset
+// sentinel + a hot-listed host both stop blocking when `enabled` is false,
+// stay off across a service-worker restart, and come back on instantly.
+test('master switch off lifts static + hot blocking (also across an SW restart); on restores it', async ({ context, extensionId }) => {
+  let sw = context.serviceWorkers()[0];
+  const SENTINEL = 'http://scamshield-test-blocked.example/';
+  await installHot(sw, writeHot('hot.json', [HOT_HOST], [], []));
+  const blockedNow = async (url) => {
+    const p = await context.newPage();
+    try { await p.goto(url, { waitUntil: 'domcontentloaded' }); } catch (_) { /* DNS error page when not blocked */ }
+    const u = p.url(); await p.close();
+    return u.startsWith(`chrome-extension://${extensionId}/blocked.html`);
+  };
+  expect(await blockedNow(HOT_URL)).toBe(true);
+  expect(await blockedNow(SENTINEL)).toBe(true);
+
+  await sw.evaluate(() => setSettings({ enabled: false }));
+  expect(await sw.evaluate(() => chrome.declarativeNetRequest.getEnabledRulesets())).toEqual([]);
+  const dyn = await sw.evaluate(() => chrome.declarativeNetRequest.getDynamicRules());
+  expect(dyn.filter((r) => r.id < 300000 || r.id >= 400000)).toEqual([]);
+  expect(await blockedNow(HOT_URL)).toBe(false);
+  expect(await blockedNow(SENTINEL)).toBe(false);
+
+  // Terminate the worker over CDP (runtime.reload() takes the whole headless
+  // context down) and wake a fresh one: ensureNetworkRules runs on its boot.
+  await sw.evaluate(() => { globalThis.__bootMarker = 1; });
+  const wake = await context.newPage();
+  const cdp = await context.newCDPSession(wake);
+  const versions = [];
+  cdp.on('ServiceWorker.workerVersionUpdated', (e) => versions.push(...e.versions));
+  await cdp.send('ServiceWorker.enable');
+  await new Promise((r) => setTimeout(r, 500));
+  for (const v of versions) await cdp.send('ServiceWorker.stopWorker', { versionId: v.versionId });
+  await new Promise((r) => setTimeout(r, 1000));
+  await wake.goto(`chrome-extension://${extensionId}/options.html`);
+  sw = context.serviceWorkers().find((w) => w.url().includes(extensionId));
+  // A genuinely fresh worker has none of the old global state.
+  expect(await sw.evaluate(() => globalThis.__bootMarker)).toBeUndefined();
+  await sw.evaluate(() => awaitBootReady());
+  expect((await sw.evaluate(() => getSettings())).enabled).toBe(false);
+  expect(await sw.evaluate(() => chrome.declarativeNetRequest.getEnabledRulesets())).toEqual([]);
+  expect(await blockedNow(HOT_URL)).toBe(false);
+  expect(await blockedNow(SENTINEL)).toBe(false);
+
+  // A hot refresh while off still downloads + saves the list, but applies nothing.
+  const r = await sw.evaluate((u) => runHotUpdate(u), writeHot('hot2.json', [HOT_HOST, 'other-hot.example'], [], []));
+  expect(r.ok).toBe(true);
+  expect((await sw.evaluate(() => chrome.storage.local.get('hotRejectReason'))).hotRejectReason).toBeUndefined();
+  expect((await sw.evaluate(() => chrome.storage.local.get('hotList'))).hotList.domains.length).toBe(2);
+  expect(await hotRuleIds(sw)).toEqual([]);
+
+  await sw.evaluate(() => setSettings({ enabled: true }));
+  expect(await sw.evaluate(() => chrome.declarativeNetRequest.getEnabledRulesets())).toEqual(['blocklist']);
+  expect(await blockedNow(HOT_URL)).toBe(true);
+  expect(await blockedNow(SENTINEL)).toBe(true);
+});
