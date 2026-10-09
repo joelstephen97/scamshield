@@ -65,3 +65,24 @@ test('ack for a different id does not cancel this request\'s timer', async () =>
   await settle(); emit('scamshield:wallet-ack', { id: 99 }); advance(8000); await settle();
   assert.strictEqual(out, 'forwarded:eth_sign');
 });
+
+test('ack: a 5-minute backstop denies (4001) if no decision ever arrives', async () => {
+  const { win, advance, emit } = load();
+  let out; let err;
+  win.ethereum.request({ method: 'eth_sign' }).then((v) => { out = v; }, (e) => { err = e; });
+  await settle(); emit('scamshield:wallet-ack', { id: 1 });
+  advance(5 * 60000 - 1); await settle(); assert.strictEqual(err, undefined);
+  advance(1); await settle();
+  assert.strictEqual(out, undefined);
+  assert.strictEqual(err && err.code, 4001);
+});
+
+test('ack: a decision before the backstop clears it (no late second resolve)', async () => {
+  const { win, advance, emit } = load();
+  let out; let err;
+  win.ethereum.request({ method: 'eth_sign' }).then((v) => { out = v; }, (e) => { err = e; });
+  await settle(); emit('scamshield:wallet-ack', { id: 1 });
+  emit('scamshield:wallet-decision', { id: 1, allow: true }); await settle();
+  advance(10 * 60000); await settle();
+  assert.strictEqual(out, 'forwarded:eth_sign'); assert.strictEqual(err, undefined);
+});

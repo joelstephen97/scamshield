@@ -28,10 +28,28 @@
   // Growth is a SOFT check (fix round 1): the baseline is floored so a small
   // list after a source outage cannot freeze updates, and after this many
   // consecutive growth rejections the list is accepted anyway (the hard
-  // trusted-hosts / too-many checks still apply).
+  // trusted-hosts check still applies).
   const GROWTH_FLOOR = 2000;
   const MAX_GROWTH_REJECTS = 3;
   const HOST_RE = /^[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?$/;
+
+  const BRANDS = new Set(C.KNOWN_BRAND_REGISTRABLES || []);
+  const verifiedNs = typeof C.isVerifiedNamespace === 'function' ? C.isVerifiedNamespace : () => false;
+  const isTenantHost = (h) => (C.TENANT_PLATFORMS || []).some((p) => h.endsWith('.' + p));
+
+  // 0.14.1 final review: the one definition of "a host we must never block".
+  // Only an entry that IS a safe/brand registrable (or its www. form), or a
+  // verified registry namespace, is protected. A strict subdomain of a
+  // tenant-platform apex or of a brand/safe registrable (evil.github.io,
+  // x.sharepoint.com, accounts.google.com) is exactly where phishing kits
+  // live, so it is not. Shared by the kill switch (assessHot) and the OTA
+  // filter guard.
+  function isProtectedHost(h) {
+    if (verifiedNs(h)) return true;
+    const bare = h.replace(/^www\./, '');
+    if (isTenantHost(bare) || C.registrableDomain(bare) !== bare) return false;
+    return BRANDS.has(bare) || C.isSafeHost(bare);
+  }
 
   function parseHot(json, now) {
     const t = typeof now === 'number' ? now : Date.now();
@@ -123,6 +141,12 @@
       if (isApex(h)) { dropped.apex++; return false; }
       if (isExempt(h, reg)) { dropped.exempt++; return false; }
       if (verified(h)) { dropped.verified++; return false; }
+      // 0.14.1 final review: github.io / gitlab.io are brand/safe registrables
+      // AND tenant platforms. Their strict subdomains are phishing tenants and
+      // stay in the hot rules; the apex (dropped above as `apex`) and its www.
+      // form are still dropped here.
+      const bare = h.replace(/^www\./, '');
+      if (isTenantHost(h) && !platforms.has(bare) && !isProtectedHost(h)) return true;
       if (brands.has(reg) || brands.has(h)) { dropped.brand++; return false; }
       if (C.isSafeHost(h)) { dropped.safe++; return false; }
       return true;
@@ -137,17 +161,18 @@
   }
 
   // 0.14.1 kill switch. Pure verdict on a freshly parsed list BEFORE it
-  // replaces anything: `guardResult` is guardHot()'s return for that list,
-  // `prevCount` the domain count of the list currently applied. Only the
-  // trust-based drops count (a feed that names google.com 30 times is
-  // poisoned); exempt/apex/aged drops are routine and say nothing about the
-  // feed's honesty.
-  function assessHot(parsed, guardResult, prevCount, growthRejects) {
-    const n = parsed && parsed.domains ? parsed.domains.length : 0;
-    const d = (guardResult && guardResult.dropped) || {};
-    const trusted = (d.brand || 0) + (d.safe || 0) + (d.verified || 0);
+  // replaces anything. `trusted` is counted from the parsed list itself with
+  // isProtectedHost (a feed that names google.com 30 times is poisoned), NOT
+  // from guardHot's drops: guardHot keeps tenant phishing on github.io, and
+  // its drop counters say nothing about how many protected hosts the feed
+  // named. `_guardResult` is unused (kept for the SW call shape); `prevCount`
+  // is the domain count of the list currently applied. The list-size cap is
+  // enforced by parseHot (MAX_DOMAINS), so no size check is needed here.
+  function assessHot(parsed, _guardResult, prevCount, growthRejects) {
+    const domains = parsed && parsed.domains ? parsed.domains : [];
+    const n = domains.length;
+    const trusted = domains.filter((d) => d && typeof d.h === 'string' && isProtectedHost(d.h)).length;
     if (trusted > MAX_TRUST_DROPPED) return { ok: false, reason: 'trusted-hosts' };
-    if (n > MAX_DOMAINS) return { ok: false, reason: 'too-many' };
     if (prevCount > 0 && n > Math.max(prevCount, GROWTH_FLOOR) * MAX_GROWTH_FACTOR && !((growthRejects || 0) >= MAX_GROWTH_REJECTS)) return { ok: false, reason: 'growth' };
     return { ok: true, reason: '' };
   }
@@ -156,22 +181,10 @@
   // (verified namespace / known brand / SAFE_DOMAINS) before it becomes block
   // + redirect rules. Filters that are not a plain `||host^` are kept as-is.
   function guardOtaFilters(filters) {
-    const brands = new Set(C.KNOWN_BRAND_REGISTRABLES || []);
-    const verified = typeof C.isVerifiedNamespace === 'function' ? C.isVerifiedNamespace : () => false;
     const kept = []; let dropped = 0;
-    // Fix round 1: only an entry that IS a safe/brand registrable (or its
-    // www. form) is dropped. A strict subdomain of a brand/safe/tenant apex
-    // (evil.github.io, x.sharepoint.com, phish.storage.googleapis.com) is
-    // exactly where phishing kits live and stays blockable.
-    const protectedHost = (h) => {
-      if (verified(h)) return true;
-      const bare = h.replace(/^www\./, '');
-      if (C.registrableDomain(bare) !== bare) return false;
-      return brands.has(bare) || C.isSafeHost(bare);
-    };
     for (const f of filters || []) {
       const h = D.domainOfFilter(f);
-      if (h && protectedHost(h)) { dropped++; continue; }
+      if (h && isProtectedHost(h)) { dropped++; continue; }
       kept.push(f);
     }
     return { kept, dropped };
@@ -183,5 +196,5 @@
   function hotRuleIds(existing) {
     return (existing || []).filter((r) => D.inRange(r.id, D.HOT_BASE) || D.inRange(r.id, D.PATH_BASE)).map((r) => r.id);
   }
-  return { MAX_DOMAINS, WINDOW_MS, MAX_STALE_MS, MAX_TRUST_DROPPED, MAX_GROWTH_FACTOR, GROWTH_FLOOR, MAX_GROWTH_REJECTS, parseHot, isStale, isExpired, guardHot, assessHot, guardOtaFilters, hotRules, hotRuleIds };
+  return { MAX_DOMAINS, WINDOW_MS, MAX_STALE_MS, MAX_TRUST_DROPPED, MAX_GROWTH_FACTOR, GROWTH_FLOOR, MAX_GROWTH_REJECTS, parseHot, isStale, isExpired, guardHot, assessHot, isProtectedHost, guardOtaFilters, hotRules, hotRuleIds };
 });

@@ -27,7 +27,13 @@
   // can forge an ack, but that only makes its own request hang.
   window.addEventListener('scamshield:wallet-ack', (e) => {
     const d = e.detail || {};
-    if (pending.has(d.id) && timers.has(d.id)) { clearTimeout(timers.get(d.id)); timers.delete(d.id); }
+    if (pending.has(d.id) && timers.has(d.id)) {
+      clearTimeout(timers.get(d.id));
+      // Backstop: the overlay is up, but if no decision ever arrives (the
+      // isolated world died, the page tore the overlay down) the request must
+      // not hang forever. After 5 minutes resolve it as a deny (4001).
+      timers.set(d.id, setTimeout(() => { timers.delete(d.id); if (pending.has(d.id)) { const p = pending.get(d.id); pending.delete(d.id); p(false); } }, 5 * 60000));
+    }
   });
 
   function confirm(verdict) {

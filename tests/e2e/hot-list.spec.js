@@ -221,7 +221,7 @@ test('kill switch: a poisoned hot list is rejected; previous rules stay and Opti
   expect(good.updated).toBe(true);
   const poison = ['google.com', 'paypal.com', 'www.google.com', 'www.paypal.com', 'accounts.google.com', 'www.microsoft.com'];
   const many = [];
-  for (let i = 0; i < 30; i++) many.push(poison[i % poison.length]);
+  for (let i = 0; i < 36; i++) many.push(poison[i % poison.length]);   // 36 entries cycling 6 hosts = 30 protected (accounts.google.com is a brand subdomain, not protected)
   const bad = await sw.evaluate((u) => runHotUpdate(u), writeHot('hot.json', [HOT_HOST, ...many, 'extra.example'], [], []));
   expect(bad.ok).toBe(false);
   expect(bad.reason).toMatch(/^rejected-/);

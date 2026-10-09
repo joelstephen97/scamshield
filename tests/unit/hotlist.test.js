@@ -125,11 +125,12 @@ test('assessHot: a poisoned list (30 safe/brand/verified hits) is rejected', () 
   const r = H.assessHot(poisoned, g, 10);
   assert.strictEqual(r.ok, false);
   assert.strictEqual(r.reason, 'trusted-hosts');
-  // brand + safe + verified are summed
-  assert.strictEqual(H.assessHot(hotOf(5), dropped({ brand: 10, safe: 10, verified: 6 }), 5).ok, false);
-  assert.strictEqual(H.assessHot(hotOf(5), dropped({ brand: 10, safe: 10, verified: 5 }), 5).ok, true);
-  // exempt/apex/aged are not poisoning signals
-  assert.strictEqual(H.assessHot(hotOf(5), dropped({ exempt: 99, apex: 99, aged: 99 }), 5).ok, true);
+  // protected hosts are counted from the list itself: exactly 25 is fine, 26 is not
+  const prot = (n) => hotOf(5, Array.from({ length: n }, (_, i) => ({ h: i % 2 ? 'www.paypal.com' : 'google.com', s: 'pd', t: MIN(NOW) })));
+  assert.strictEqual(H.assessHot(prot(25), dropped(), 5).ok, true);
+  assert.strictEqual(H.assessHot(prot(26), dropped(), 5).ok, false);
+  // guardHot's drop counters no longer decide anything
+  assert.strictEqual(H.assessHot(hotOf(5), dropped({ brand: 99, safe: 99, verified: 99, exempt: 99, apex: 99, aged: 99 }), 5).ok, true);
 });
 
 test('assessHot: growth is floored and soft', () => {
@@ -147,14 +148,40 @@ test('assessHot: growth is floored and soft', () => {
   assert.strictEqual(H.assessHot(hotOf(16000), dropped(), 5000, 2).ok, false);
   assert.strictEqual(H.assessHot(hotOf(16000), dropped(), 5000, 3).ok, true);
   // ...but the hard checks still bite
-  assert.strictEqual(H.assessHot(hotOf(16000), dropped({ brand: 26 }), 5000, 3).ok, false);
-  assert.strictEqual(H.assessHot({ domains: new Array(H.MAX_DOMAINS + 1) }, dropped(), 5000, 3).reason, 'too-many');
+  assert.strictEqual(H.assessHot(hotOf(16000, Array.from({ length: 26 }, () => ({ h: 'google.com' }))), dropped(), 5000, 3).ok, false);
 });
 
-test('assessHot: over MAX_DOMAINS is rejected; a normal list is ok', () => {
-  const r = H.assessHot({ domains: new Array(H.MAX_DOMAINS + 1) }, dropped(), 0);
-  assert.deepStrictEqual([r.ok, r.reason], [false, 'too-many']);
-  assert.deepStrictEqual(H.assessHot(hotOf(50), dropped({ brand: 2 }), 40), { ok: true, reason: '' });
+test('assessHot: a normal list is ok', () => {
+  assert.deepStrictEqual(H.assessHot(hotOf(50), dropped(), 40), { ok: true, reason: '' });
+});
+
+// 0.14.1 final review: `trusted` is counted from the parsed list itself, not
+// from guardHot's drops, so tenant phishing (kept by guardHot) cannot trip it
+// and brand apexes cannot slip past it.
+test('assessHot: 40 *.github.io tenants alongside a normal list is accepted', () => {
+  const tenants = Array.from({ length: 40 }, (_, i) => ({ h: `kit${i}.github.io`, s: 'pd', t: MIN(NOW) }));
+  const parsed = hotOf(100, tenants);
+  const g = H.guardHot(Object.assign({ generatedAt: NOW, ttlMinutes: 360 }, parsed), {}, NOW);
+  assert.deepStrictEqual(H.assessHot(parsed, g, 100), { ok: true, reason: '' });
+});
+
+test('assessHot: 30 brand apexes are rejected as trusted-hosts', () => {
+  const brands = ['google.com', 'paypal.com', 'microsoft.com', 'apple.com', 'amazon.com', 'facebook.com'];
+  const list = Array.from({ length: 30 }, (_, i) => ({ h: brands[i % brands.length], s: 'pd', t: MIN(NOW) }));
+  const parsed = hotOf(10, list);
+  const g = H.guardHot(Object.assign({ generatedAt: NOW, ttlMinutes: 360 }, parsed), {}, NOW);
+  assert.deepStrictEqual(H.assessHot(parsed, g, 10), { ok: false, reason: 'trusted-hosts' });
+});
+
+test('isProtectedHost: exact safe/brand host, its www. form, verified namespace; never a tenant or brand subdomain', () => {
+  assert.strictEqual(H.isProtectedHost('google.com'), true);
+  assert.strictEqual(H.isProtectedHost('www.paypal.com'), true);
+  assert.strictEqual(H.isProtectedHost('hdfc.bank.in'), true);
+  assert.strictEqual(H.isProtectedHost('github.io'), true);
+  assert.strictEqual(H.isProtectedHost('evil.github.io'), false);
+  assert.strictEqual(H.isProtectedHost('x.gitlab.io'), false);
+  assert.strictEqual(H.isProtectedHost('accounts.google.com'), false);
+  assert.strictEqual(H.isProtectedHost('evil-login.example'), false);
 });
 
 test('guardOtaFilters: drops only exact safe/brand hosts (or www.); tenant/brand subdomains stay blockable', () => {
@@ -171,4 +198,16 @@ test('guardHot: trusting one tenant exempts only that host and its subdomains, n
   // A legacy bare-apex allowlist entry no longer shields every tenant.
   const legacy = H.guardHot(hot, { allowlist: ['pages.dev'] }, NOW);
   assert.deepStrictEqual(legacy.domains, ['x.pages.dev', 'y.pages.dev', 'a.x.pages.dev']);
+});
+
+// 0.14.1 final review: github.io / gitlab.io are brand/safe registrables AND
+// tenant platforms; their tenants are exactly where phishing kits live.
+test('guardHot: tenants under github.io / gitlab.io are kept; exact apexes and www. forms still dropped', () => {
+  const hot = { domains: ['kit.github.io', 'a.b.gitlab.io', 'www.google.com', 'google.com', 'secure.chase.com'].map((h) => ({ h, s: 'pd', t: MIN(NOW) - 5 })), paths: [{ h: 'kit2.github.io', p: '/x', s: 'pdb', t: MIN(NOW) - 5 }], removed: [], generatedAt: NOW - 60000, ttlMinutes: 360 };
+  const out = H.guardHot(hot, {}, NOW);
+  assert.deepStrictEqual(out.domains, ['kit.github.io', 'a.b.gitlab.io']);
+  assert.deepStrictEqual(out.paths, [{ h: 'kit2.github.io', p: '/x' }]);
+  assert.strictEqual(out.dropped.brand + out.dropped.safe, 3);
+  const www = H.guardHot({ domains: [{ h: 'www.github.io', s: 'pd', t: MIN(NOW) }], paths: [], generatedAt: NOW, ttlMinutes: 360 }, {}, NOW);
+  assert.deepStrictEqual(www.domains, []);
 });

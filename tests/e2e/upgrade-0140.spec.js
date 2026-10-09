@@ -71,3 +71,47 @@ test('0.14.0 profile -> 0.14.1: cleared feed stays cleared, platform trust is no
   const hotDomains = rules.flatMap((r) => r.condition.requestDomains || []);
   expect(hotDomains).toContain('hot-upgrade.example');
 });
+
+// Default feed URL (the real-world profile): a stale (7 h, ttl 360) hot list
+// survives the update path and then a failed or 304 hot refresh - the refresh
+// must never tear down rules that are still inside the 48 h hard cap.
+test('0.14.0 profile with the default feed URL: stale hot list keeps its rules through the update and a failed / 304 hot refresh', async ({ context }) => {
+  const sw = context.serviceWorkers()[0];
+  await sw.evaluate(() => awaitBootReady());
+  const seed = {
+    settings: { enabled: true, blockKnownBad: true, hotListEnabled: true },   // otaUrl left unset -> default URL
+    hotList: {
+      v: 1, generatedAt: Date.now() - 7 * HOUR, ttlMinutes: 360,
+      domains: [{ h: 'hot-upgrade.example', s: 'pd', t: Math.floor(Date.now() / 60000) - 60 }], paths: [], removed: []
+    }
+  };
+  await sw.evaluate(async (s) => { await chrome.storage.local.clear(); await chrome.storage.local.set(s); }, seed);
+  const hasHot = async () => (await sw.evaluate(() => chrome.declarativeNetRequest.getDynamicRules()))
+    .some((r) => r.id >= 400000 && r.id < 500000 && (r.condition.requestDomains || []).includes('hot-upgrade.example'));
+
+  await sw.evaluate(async () => {
+    await applyInstallMigrations({ reason: 'update', previousVersion: '0.14.0' });
+    await syncAllowRules();
+    await applyHotRules(undefined);
+  });
+  expect((await sw.evaluate(() => getSettings())).otaUrl).toBeTruthy();   // the default is in effect
+  expect(await hasHot()).toBe(true);
+
+  await sw.evaluate(() => { if (!globalThis.__realFetch) globalThis.__realFetch = globalThis.fetch; });
+  try {
+    // Failed refresh (network error).
+    await sw.evaluate(() => { globalThis.fetch = async () => { throw new TypeError('network down'); }; });
+    await sw.evaluate(() => runHotUpdate());
+    expect(await hasHot()).toBe(true);
+    // 304 refresh.
+    await sw.evaluate(() => { globalThis.fetch = async () => new Response(null, { status: 304 }); });
+    await sw.evaluate(() => runHotUpdate());
+    expect(await hasHot()).toBe(true);
+    // And a 500.
+    await sw.evaluate(() => { globalThis.fetch = async () => new Response('boom', { status: 500 }); });
+    await sw.evaluate(() => runHotUpdate());
+    expect(await hasHot()).toBe(true);
+  } finally {
+    await sw.evaluate(() => { globalThis.fetch = globalThis.__realFetch; });
+  }
+});
