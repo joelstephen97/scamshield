@@ -25,7 +25,12 @@ function copyRecursive(src, dest) {
 function zipDir(sourceDir, zipPath) {
   // No shell: paths are passed as argv, never interpolated into a command string.
   if (process.platform === 'win32') {
-    execFileSync('powershell', ['-NoProfile', '-Command', 'Compress-Archive', '-Path', path.join(sourceDir, '*'), '-DestinationPath', zipPath, '-Force'], { stdio: 'inherit' });
+    // (0.14.1) Windows PowerShell 5.1 Compress-Archive writes backslash entry
+    // names, which violates the zip spec (APPNOTE 4.4.17). The Windows-bundled
+    // bsdtar writes forward slashes; -a picks zip from the .zip suffix and -C
+    // avoids a leading path. (Git-bundled GNU tar has no zip support.)
+    const tar = path.join(process.env.SystemRoot || 'C:\\Windows', 'System32', 'tar.exe');
+    execFileSync(tar, ['-a', '-c', '-f', zipPath, '-C', sourceDir, ...fs.readdirSync(sourceDir)], { stdio: 'inherit' });
   } else {
     execFileSync('zip', ['-r', '-q', zipPath, '.'], { cwd: sourceDir, stdio: 'inherit' });
   }
@@ -105,4 +110,4 @@ function main() {
 
 if (require.main === module) main();
 
-module.exports = { SHARED, manifestReferencedFiles, assertManifestFilesExist, build };
+module.exports = { SHARED, zipDir, manifestReferencedFiles, assertManifestFilesExist, build };
