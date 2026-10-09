@@ -223,9 +223,11 @@ test('0.14.1 copy: removed claims are gone from locales, README and options.html
     const data = JSON.parse(fs.readFileSync(path.join(LOCALES_DIR, loc, 'messages.json'), 'utf8'));
     for (const [k, v] of Object.entries(data)) assert.ok(!stale.test(v.message), `${loc}: ${k} still has a stale claim: ${v.message}`);
   }
+  // OpenPhish/URLhaus are banned only in user-facing feed claims (locales, options.html); the README may name them as ML training data.
+  assert.ok(!/OpenPhish|URLhaus/i.test(fs.readFileSync(path.join(__dirname, '../..', 'options.html'), 'utf8')), 'options.html still names removed feed sources');
   for (const f of ['README.md', 'options.html']) {
     const txt = fs.readFileSync(path.join(__dirname, '../..', f), 'utf8');
-    assert.ok(!/OpenPhish|URLhaus|three kinds of network request|at most three network requests|these three/i.test(txt), `${f} still has a stale claim`);
+    assert.ok(!/three kinds of network request|at most three network requests|these three/i.test(txt), `${f} still has a stale claim`);
   }
 });
 

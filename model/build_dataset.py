@@ -1,8 +1,8 @@
 """Build a real-world url,label training CSV for train.py.
 
 Positives (label 1): live phishing/malware-distribution URLs from OpenPhish
-and URLhaus — the same public sources that power the scamshield-feed
-blocklist.
+and URLhaus. These are training-data sources only; they were dropped from
+the scamshield-feed in 0.9.0.
 Negatives (label 0): Tranco top-ranked domains expanded into realistic URLs
 (homepages plus common benign paths), so the model does not learn a
 "has a path = phishing" shortcut. Regional brand storefronts (amazon.ae

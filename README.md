@@ -233,7 +233,7 @@ Both models are trained offline with scikit-learn, exported to JSON, and evaluat
 
 | Model | Training data | Shipped as | Last metrics |
 |---|---|---|---|
-| URL (HistGradientBoosting) | `model/data/real.csv` — positives from public phishing and malware URL lists (see `build_dataset.py`), Tranco negatives expanded with realistic deep paths (`build_dataset.py`), ~22.5k rows | `model/url-model.json` → `model/url-model.js` | acc 0.988 · precision 0.993 · recall 0.983 · AUC 0.998; a deep-URL regression gate runs on every training run |
+| URL (HistGradientBoosting) | `model/data/real.csv` — OpenPhish + URLhaus positives (see `build_dataset.py`), Tranco negatives expanded with realistic deep paths (`build_dataset.py`), ~22.5k rows | `model/url-model.json` → `model/url-model.js` | acc 0.988 · precision 0.993 · recall 0.983 · AUC 0.998; a deep-URL regression gate runs on every training run |
 | Page content (logistic regression) | `model/data/pages.jsonl` from `npm run crawl:pages` — 2,917 rows (375 positive / 2,542 negative incl. 269 legitimate login pages), 1,915 registrable domains | `model/page-content.json` → `model/page-content.js` | grouped-holdout AUC 0.886; threshold 0.80 chosen for precision (precision 1.000, FPR 0.00 % on legit-login holdout, recall 0.107 — content alone can only raise *suspicious*) |
 
 ```bash
