@@ -8,7 +8,7 @@ test('hot list constants and default setting exist', () => {
   assert.ok(/HOT_PERIOD_MINUTES = 60/.test(src));
 });
 test('hot alarm is created, handled, and the job is tracked for the store-update gate', () => {
-  assert.ok(/api\.alarms\.create\('hot'/.test(src));
+  assert.ok(/ensureAlarm\(api\.alarms, 'hot'/.test(src)); // 0.14.1: ensureAlarm, not create (keeps the timer)
   assert.ok(/a\.name === 'hot'\) runHotUpdate\(\)/.test(src));
   assert.ok(/runHotUpdate = trackedJob\(runHotUpdate\)/.test(src));
 });

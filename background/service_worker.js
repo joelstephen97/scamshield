@@ -913,6 +913,17 @@ async function ensureNetworkRules() {
     let hotAt = 0;
     try { hotAt = (await api.storage.local.get('hotAttemptAt')).hotAttemptAt || 0; } catch (_) {}
     if (Date.now() - hotAt > HOT_PERIOD_MINUTES * 60000) runHotUpdate();
+    // 0.14.1: same boot top-up for the feed + OTA rules (12 h), keyed on the
+    // last ATTEMPT stamp written BEFORE the jobs start so a dead feed or an
+    // offline device does not re-fire on every wake. Needed because the ota
+    // alarm is no longer re-created (and so restarted) on every SW start.
+    let feedAt = 0;
+    try { feedAt = (await api.storage.local.get('feedAttemptAt')).feedAttemptAt || 0; } catch (_) {}
+    if (globalThis.SSUpdate.shouldTopUpFeed(feedAt, Date.now())) {
+      try { await api.storage.local.set({ feedAttemptAt: Date.now() }); } catch (_) {}
+      runOtaUpdate();
+      runFeedUpdate();
+    }
   } catch (_) {}
 }
 // Deterministic "cold boot has fully settled" signal (fix round 1) — the
@@ -1579,10 +1590,11 @@ function requestStoreUpdateCheck() {
 }
 
 if (api.alarms) {
-  api.alarms.create('ota', { periodInMinutes: 720 }); // every 12h — feed OTA rides the same cadence
-  api.alarms.create('hot', { periodInMinutes: HOT_PERIOD_MINUTES }); // every 60m — the hourly hot list
+  // 0.14.1: ensureAlarm, not create — re-creating on every SW start restarted the 12 h timer.
+  try { globalThis.SSUpdate.ensureAlarm(api.alarms, 'ota', 720).catch(() => {}); } catch (_) {} // every 12h — feed OTA rides the same cadence
+  try { globalThis.SSUpdate.ensureAlarm(api.alarms, 'hot', HOT_PERIOD_MINUTES).catch(() => {}); } catch (_) {} // every 60m — the hourly hot list
   api.alarms.onAlarm.addListener((a) => {
-    if (a.name === 'ota') { runOtaUpdate(); runFeedUpdate(); flushReports(); runHotUpdate(); requestStoreUpdateCheck(); }
+    if (a.name === 'ota') { try { api.storage.local.set({ feedAttemptAt: Date.now() }); } catch (_) {} runOtaUpdate(); runFeedUpdate(); flushReports(); runHotUpdate(); requestStoreUpdateCheck(); }
     if (a.name === 'hot') runHotUpdate();
     if (a.name === 'applyUpdate') applyPendingUpdate();
   });

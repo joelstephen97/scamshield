@@ -63,3 +63,53 @@ test('versionLessThan is a strict numeric semver compare that is false on garbag
   assert.equal(lt('0.3.x', '0.4.0'), false);
   assert.equal(lt(3, '0.4.0'), false);
 });
+
+// ---- 0.14.1: alarm hygiene + feed top-up ----
+
+function fakeAlarms(initial) {
+  const store = new Map(Object.entries(initial || {}));
+  const calls = { create: [] };
+  return {
+    calls, store,
+    get: async (name) => store.get(name), // promise-only, like Firefox
+    create: (name, info) => { calls.create.push([name, info]); store.set(name, { name, scheduledTime: Date.now() + 1, ...info }); },
+  };
+}
+
+test('ensureAlarm leaves an existing same-period alarm untouched (timer not restarted)', async () => {
+  const a = fakeAlarms({ ota: { name: 'ota', scheduledTime: 12345, periodInMinutes: 720 } });
+  assert.equal(await U.ensureAlarm(a, 'ota', 720), 'kept');
+  assert.equal(a.calls.create.length, 0);
+  assert.equal(a.store.get('ota').scheduledTime, 12345);
+});
+
+test('ensureAlarm creates a missing alarm', async () => {
+  const a = fakeAlarms();
+  assert.equal(await U.ensureAlarm(a, 'hot', 60), 'created');
+  assert.deepEqual(a.calls.create, [['hot', { periodInMinutes: 60 }]]);
+});
+
+test('ensureAlarm replaces an alarm whose period differs', async () => {
+  const a = fakeAlarms({ hot: { name: 'hot', scheduledTime: 1, periodInMinutes: 30 } });
+  assert.equal(await U.ensureAlarm(a, 'hot', 60), 'created');
+  assert.equal(a.calls.create.length, 1);
+});
+
+test('ensureAlarm works with a callback-only get() and survives a throwing get()', async () => {
+  const cb = { calls: [], get(name, fn) { fn({ name, periodInMinutes: 720 }); }, create() { this.calls.push(1); } };
+  assert.equal(await U.ensureAlarm(cb, 'ota', 720), 'kept');
+  assert.equal(cb.calls.length, 0);
+  const bad = { calls: [], get() { throw new Error('boom'); }, create() { this.calls.push(1); } };
+  assert.equal(await U.ensureAlarm(bad, 'ota', 720), 'created');
+  assert.equal(bad.calls.length, 1);
+});
+
+test('shouldTopUpFeed: never attempted -> yes, 1 h ago -> no, 13 h ago -> yes', () => {
+  const H = 3600000;
+  assert.equal(U.shouldTopUpFeed(undefined, T0), true);
+  assert.equal(U.shouldTopUpFeed(0, T0), true);
+  assert.equal(U.shouldTopUpFeed(T0 - H, T0), false);
+  assert.equal(U.shouldTopUpFeed(T0 - 13 * H, T0), true);
+  assert.equal(U.shouldTopUpFeed(T0 - 12 * H, T0), false);   // strictly greater, like hot
+  assert.equal(U.shouldTopUpFeed(T0 + H, T0), false);        // clock skew: future stamp is not stale
+});

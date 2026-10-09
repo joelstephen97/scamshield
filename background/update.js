@@ -76,5 +76,38 @@
     return false;
   }
 
-  return { MAX_DEFER_MS, RECHECK_MINUTES, openPageCount, decide, versionLessThan };
+  // ---- Alarm hygiene + feed top-up (0.14.1) ----
+  // alarms.create() with an existing name cancels and REPLACES it, restarting
+  // its timer. Calling it on every SW start meant an active user's 12 h `ota`
+  // alarm kept being pushed back and might never fire. ensureAlarm only
+  // creates when the alarm is missing or its period changed.
+  // get() is promise-based on Chrome MV3 and Firefox; the callback form is
+  // handled too so a callback-only shim cannot hang or double-create.
+  function getAlarm(alarms, name) {
+    return new Promise((resolve) => {
+      try {
+        const r = alarms.get(name, resolve);
+        if (r && typeof r.then === 'function') r.then(resolve, () => resolve(undefined));
+      } catch (_) { resolve(undefined); }
+    });
+  }
+  async function ensureAlarm(alarms, name, periodInMinutes) {
+    const existing = await getAlarm(alarms, name);
+    if (existing && existing.periodInMinutes === periodInMinutes) return 'kept';
+    alarms.create(name, { periodInMinutes });
+    return 'created';
+  }
+
+  // Boot-time feed top-up: SW eviction can outlast the 12 h alarm, so on boot
+  // the feed refreshes if the last ATTEMPT (not success; an offline device
+  // would otherwise retry on every wake) is older than this. Mirrors hot's
+  // hotAttemptAt rule.
+  const FEED_TOPUP_MS = 12 * 60 * 60 * 1000;
+  function shouldTopUpFeed(lastAttemptAt, now) {
+    const t = typeof now === 'number' ? now : Date.now();
+    const a = typeof lastAttemptAt === 'number' ? lastAttemptAt : 0;
+    return t - a > FEED_TOPUP_MS;
+  }
+
+  return { MAX_DEFER_MS, RECHECK_MINUTES, FEED_TOPUP_MS, openPageCount, decide, versionLessThan, ensureAlarm, shouldTopUpFeed };
 });
