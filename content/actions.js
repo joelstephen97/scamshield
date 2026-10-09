@@ -382,7 +382,8 @@
     // on the element lets clearAll() (which only holds the DOM node, not this
     // closure) reach it too.
     bar.__ssTeardown = closeMenu;
-    const onDoc = (e) => { if (!acts.contains(e.target)) closeMenu(); }; const onKey = (e) => { if (e.key === 'Escape') closeMenu(); };
+    // (0.14.1) isTrusted: page script can dispatchEvent(new KeyboardEvent('keydown',{key:'Escape'})) to dismiss a warning; only a real keypress counts.
+    const onDoc = (e) => { if (!acts.contains(e.target)) closeMenu(); }; const onKey = (e) => { if (!e.isTrusted) return; if (e.key === 'Escape') closeMenu(); };
     // Escape must close the menu the instant it's open, so its listener
     // attaches synchronously here. Only the outside-click listener is
     // deferred a tick — otherwise the very click that opened the menu would
@@ -488,7 +489,7 @@
         const actions = el('div', 'ss-actions');
         const back = button('ss-primary', t('cancelRecommended', null, 'Cancel (recommended)'));
         const close = () => { document.removeEventListener('keydown', onKey, true); ov.remove(); };
-        const onKey = (e) => { if (e.key === 'Escape') { e.preventDefault(); close(); } };
+        const onKey = (e) => { if (!e.isTrusted) return; if (e.key === 'Escape') { e.preventDefault(); close(); } };
         // Fix round 2: all three controls are trusted-click guarded like every
         // other in-page control. The armDelayed() countdown alone was not
         // enough — page script could simply wait out the 3s and then
@@ -554,7 +555,7 @@
     });
     const stop = () => { watch.disconnect(); document.removeEventListener('keydown', onKey, true); };
     const done = (allow) => { if (decided) return; decided = true; stop(); ov.remove(); onDecision(allow); };
-    const onKey = (e) => { if (e.key === 'Escape') { e.preventDefault(); done(false); } };
+    const onKey = (e) => { if (!e.isTrusted) return; if (e.key === 'Escape') { e.preventDefault(); done(false); } };
     // Fix round 2: trusted-click guarded — a drainer page must not be able to
     // .click() "Proceed anyway" for the user once the 3s arm has elapsed.
     onTrustedClick(cancel, () => done(false));
@@ -650,7 +651,7 @@
     const leave = button('ss-primary', t('getMeOut', null, 'Get me out (close this page)'));
     const stay = button('', t('dismiss', null, 'Dismiss'));
     const close = () => { document.removeEventListener('keydown', onKey, true); ov.remove(); };
-    const onKey = (e) => { if (e.key === 'Escape') { e.preventDefault(); close(); } };
+    const onKey = (e) => { if (!e.isTrusted) return; if (e.key === 'Escape') { e.preventDefault(); close(); } };
     // Fix round 2: trusted-click guarded — a tech-support scam page must not be
     // able to dismiss its own warning overlay by synthesising a Dismiss click.
     onTrustedClick(leave, () => { close(); onLeave && onLeave(); });
