@@ -177,3 +177,17 @@ test('rule application is gated on the master switch', () => {
   assert.ok(/blockingOn\(/.test(functionBody('applyHotRulesNow')));
   assert.ok(/blockingOn\(/.test(functionBody('ensureNetworkRules')));
 });
+
+test('pullSync and the onChanged path both filter the blob through SYNCED_KEYS (0.14.0 enabled:false is ignored)', () => {
+  const m = /function filterSynced\(incoming\) \{[\s\S]*?\n\}/.exec(src);
+  assert.ok(m, 'filterSynced found');
+  const synced = [...(/const SYNCED_KEYS = \[([^\]]*)\]/.exec(src))[1].matchAll(/'([^']+)'/g)].map((x) => x[1]);
+  const filterSynced = new Function('SYNCED_KEYS', m[0] + '; return filterSynced;')(synced);
+  assert.deepStrictEqual(filterSynced({ enabled: false, theme: 'dark' }), { theme: 'dark' });
+  assert.ok(/setSettings\(filterSynced\(got\.ssSettings\)\)/.test(functionBody('pullSync')));
+  assert.ok(/setSettings\(filterSynced\(incoming\)\)/.test(src));
+});
+test('ensureNetworkRules disables the static ruleset before reading dynamic rules when off', () => {
+  const b = functionBody('ensureNetworkRules');
+  assert.ok(b.indexOf('setStaticRuleset(false)') > -1 && b.indexOf('setStaticRuleset(false)') < b.indexOf('getDynamicRules()'));
+});

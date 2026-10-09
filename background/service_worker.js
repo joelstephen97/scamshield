@@ -526,11 +526,18 @@ async function pushSync(settings) {
     await api.storage.sync.set({ ssSettings: out });
   } catch (_) { /* sync is best-effort (quota, disabled) */ }
 }
+// 0.14.1: only SYNCED_KEYS cross the sync boundary in either direction — a
+// 0.14.0 device's blob still carries the master switch, which is ignored here.
+function filterSynced(incoming) {
+  const filtered = {};
+  if (incoming && typeof incoming === 'object') for (const k of SYNCED_KEYS) if (k in incoming) filtered[k] = incoming[k];
+  return filtered;
+}
 async function pullSync() {
   if (!api.storage || !api.storage.sync) return { ok: false };
   try {
     const got = await api.storage.sync.get('ssSettings');
-    if (got && got.ssSettings) { await setSettings(got.ssSettings); return { ok: true }; }
+    if (got && got.ssSettings) { await setSettings(filterSynced(got.ssSettings)); return { ok: true }; }
     return { ok: true, empty: true };
   } catch (_) { return { ok: false }; }
 }
@@ -541,7 +548,7 @@ if (api.storage && api.storage.onChanged) {
     const s = await getSettings();
     if (!s.syncEnabled) return;
     const incoming = changes.ssSettings.newValue;
-    if (incoming) { const filtered = {}; for (const k of SYNCED_KEYS) if (k in incoming) filtered[k] = incoming[k]; await setSettings(filtered); }
+    if (incoming) await setSettings(filterSynced(incoming));
   });
 }
 async function exportSettings(s) {
@@ -958,13 +965,14 @@ async function ensureNetworkRules() {
   try {
     const s = await getSettings();
     const D = globalThis.SSDnr;
+    // Off: disable the static ruleset BEFORE any read that could throw.
+    if (!blockingOn(s)) await setStaticRuleset(false);
     const existing = await api.declarativeNetRequest.getDynamicRules();
     const hasRedirect = existing.some((r) => D.inRange(r.id, D.REDIRECT_BASE));
     if (!blockingOn(s)) {
       // 0.14.1: off (master switch or block-known-bad). The static ruleset's
       // enabled state resets to the manifest default on an extension reload,
       // and dynamic rules persist, so re-assert "nothing blocks" on every boot.
-      await setStaticRuleset(false);
       if (existing.some((r) => D.inRange(r.id, D.BLOCK_BASE) || D.inRange(r.id, D.REDIRECT_BASE))) await applyNetworkRules([], false);
     } else if (!hasRedirect) {
       const filters = existing.filter((r) => D.inRange(r.id, D.BLOCK_BASE)).sort((a, b) => a.id - b.id).map((r) => r.condition.urlFilter);
