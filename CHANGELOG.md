@@ -2,6 +2,46 @@
 
 All notable changes to ScamShield. Versions are git tags (`vX.Y.Z`); the version on the [Chrome Web Store](https://chromewebstore.google.com/detail/fojjjofjimbfoddafoampojopijnlihl) may lag a tag by a few days while Google reviews it. Privacy-relevant changes are also reflected in the [privacy policy](https://joelstephen97.github.io/scamshield/privacy.html).
 
+## 0.14.1 — 2026-10-09
+
+### Fixed
+- **A cleared feed URL stays cleared.** If you emptied Settings → Threat feed
+  → feed URL to stop every remote list, an update used to quietly put the
+  official feed back. It no longer does, and with the URL empty ScamShield
+  makes no feed, hot-list or update-rule requests at all. (If an earlier
+  update already restored the URL for you, you stay on the official feed: that
+  cannot be told apart from a choice. Clear it again if you want it off.)
+- **The hourly hot list keeps protecting you through a feed outage.** A hot
+  list is now kept for up to 48 hours past its expiry instead of being dropped
+  the moment it ages out, and a damaged or suspicious list (one that names
+  well-known safe sites, is oversized, or jumps in size) is rejected before it
+  can block anything. Settings shows when an update was rejected.
+- **"Trust this site", pause and mute on free-hosting sites now apply to that
+  site only.** On platforms such as pages.dev or vercel.app, trusting one
+  page used to trust everyone else's site on the same platform. Network
+  allow rules never cover a whole platform, entries made that way by older
+  versions are badged in Settings so you can remove them, and these controls
+  are refused on a platform's own homepage.
+- **The crypto-wallet check no longer approves on its own.** Once the
+  confirmation is on screen it waits for you, and it refuses if the page
+  removes it.
+- **The protection switch now pauses network blocking too**, not just the
+  page warnings, and it no longer syncs between your devices.
+- **Update checks are steadier.** Timers are no longer reset every time the
+  browser wakes the extension, there is one feed job at a time, a missed
+  12-hour refresh is made up on startup, and the threat feed is saved as it
+  downloads so a dropped connection loses nothing.
+- **Form protection is ready sooner.** Password and payment form guards attach
+  first and the slower checks run in parallel.
+- **Page scripts cannot dismiss ScamShield dialogs** with forged key presses.
+- **Clearer wording.** The ✕ on the warning bar says what it does; the copy
+  about what leaves your device, where the lists come from, the 300+ brands we
+  know, "if you already typed a password, change it", and the reason shown for
+  a brand-new site is now accurate and translated in all 20 languages.
+
+### Changed
+- **Firefox:** the review link in the popup now opens the Firefox add-on page.
+
 ## 0.14.0 — 2026-09-12
 
 ### Fixed
