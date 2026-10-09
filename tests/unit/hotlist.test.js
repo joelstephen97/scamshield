@@ -163,3 +163,12 @@ test('guardOtaFilters: drops only exact safe/brand hosts (or www.); tenant/brand
   assert.deepStrictEqual(out.kept, ['||evil-login.example^', '/odd-filter/', '||evil.github.io^', '||x.sharepoint.com^', '||phish.storage.googleapis.com^']);
   assert.strictEqual(out.dropped, 4);
 });
+
+test('guardHot: trusting one tenant exempts only that host and its subdomains, never the apex (0.14.1)', () => {
+  const hot = { domains: ['x.pages.dev', 'y.pages.dev', 'a.x.pages.dev'].map((h) => ({ h, s: 'pd', t: MIN(NOW) - 5 })), paths: [], removed: [], generatedAt: NOW - 60000, ttlMinutes: 360 };
+  const out = H.guardHot(hot, { allowlist: ['x.pages.dev'] }, NOW);
+  assert.deepStrictEqual(out.domains, ['y.pages.dev']);
+  // A legacy bare-apex allowlist entry no longer shields every tenant.
+  const legacy = H.guardHot(hot, { allowlist: ['pages.dev'] }, NOW);
+  assert.deepStrictEqual(legacy.domains, ['x.pages.dev', 'y.pages.dev', 'a.x.pages.dev']);
+});

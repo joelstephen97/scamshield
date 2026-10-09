@@ -150,6 +150,7 @@
   "trustedForAWhile": { "message": "Trong một thời gian" },
   "remove": { "message": "Xóa" },
   "trustedViaWarning": { "message": "Tin cậy từ cảnh báo" },
+  "optTenantApexBadge": { "message": "Covers every site on $APEX$ — remove it and trust the specific site instead", "placeholders": { "apex": { "content": "$1", "example": "pages.dev" } } },
   "mutedWarnings": { "message": "Các cảnh báo bị tắt tiếng" },
   "warnAgain": { "message": "Cảnh báo lại" },
   "muteKind_clipboard": { "message": "Thông báo clipboard" },

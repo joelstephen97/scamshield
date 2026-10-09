@@ -8,7 +8,7 @@
   // Site-engagement gating (0.6.0) — the same false-positive suppressor Chrome
   // documents for its lookalike warnings: only warn about probabilistic
   // signals on sites the user does NOT visit frequently. Fully local: a small
-  // per-registrable-domain visit counter, capped, pruned, never transmitted.
+  // per-scope visit counter (scopeDomain: the tenant host on shared platforms, 0.14.1), capped, pruned, never transmitted.
   //
   // Only clean (safe-verdict, top-frame) visits are recorded, so repeatedly
   // landing on a flagged page can never build enough engagement to mute its
@@ -20,7 +20,7 @@
   const MIN_VISITS = 3;                           // "frequent" = 3+ separate visits...
   const RECENT_MS = 30 * 24 * 3600 * 1000;        // ...with the last one inside 30 days
 
-  // map shape: { [registrableDomain]: { n: visitCount, ts: lastVisitMs } }
+  // map shape: { [scopeDomain]: { n: visitCount, ts: lastVisitMs } }
   function recordVisit(map, domain, now) {
     if (!domain) return map || {};
     const m = Object.assign({}, map);

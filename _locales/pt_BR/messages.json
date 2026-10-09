@@ -148,6 +148,7 @@
   "trustedForAWhile": { "message": "Por um tempo" },
   "remove": { "message": "Remover" },
   "trustedViaWarning": { "message": "Aprovado por um aviso" },
+  "optTenantApexBadge": { "message": "Covers every site on $APEX$ — remove it and trust the specific site instead", "placeholders": { "apex": { "content": "$1", "example": "pages.dev" } } },
   "mutedWarnings": { "message": "Avisos silenciados" },
   "warnAgain": { "message": "Avisar novamente" },
   "muteKind_clipboard": { "message": "Avisos da área de transferência" },

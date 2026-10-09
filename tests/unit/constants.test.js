@@ -215,3 +215,22 @@ test('crossOriginCredPostHost never flags a self-post (no action) or a non-http(
 test('crossOriginCredPostHost fails safe on an unparsable page URL', () => {
   assert.equal(C.crossOriginCredPostHost('not a url', 'https://evil.tk/grab'), null);
 });
+
+// 0.14.1 (Task 6): trust / pause / mute are scoped to the tenant host on
+// shared-hosting platforms, never the whole apex.
+test('scopeDomain: registrable domain, except a tenant host keeps its full (www-stripped) host', () => {
+  const C2 = require('../../engine/constants.js');
+  const table = [
+    ['localhost', 'localhost'], ['127.0.0.1', '127.0.0.1'], ['example.com', 'example.com'],
+    ['www.example.com', 'example.com'], ['a.example.co.uk', 'example.co.uk'],
+    ['x.pages.dev', 'x.pages.dev'], ['www.x.pages.dev', 'x.pages.dev'], ['a.b.vercel.app', 'a.b.vercel.app'],
+    ['pages.dev', 'pages.dev'], ['WWW.X.Pages.DEV.', 'x.pages.dev'],
+    ['x.blob.core.windows.net', 'x.blob.core.windows.net']
+  ];
+  for (const [h, want] of table) assert.strictEqual(C2.scopeDomain(h), want, h);
+});
+test('scopeKeys: scoped host plus the legacy registrable key, deduplicated', () => {
+  const C2 = require('../../engine/constants.js');
+  assert.deepStrictEqual(C2.scopeKeys('www.example.com'), ['example.com']);
+  assert.deepStrictEqual(C2.scopeKeys('x.pages.dev'), ['x.pages.dev', 'pages.dev']);
+});

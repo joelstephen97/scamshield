@@ -256,6 +256,9 @@
   function regDomain() {
     try {
       const SS = root.ScamShield;
+      // 0.14.1: scopeDomain, not registrableDomain — trusting evil.pages.dev
+      // must not trust every site on pages.dev.
+      if (SS && typeof SS.scopeDomain === 'function') return SS.scopeDomain(location.hostname);
       return (SS && typeof SS.registrableDomain === 'function') ? SS.registrableDomain(location.hostname) : location.hostname;
     } catch (_) { return location.hostname; }
   }

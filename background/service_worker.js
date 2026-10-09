@@ -123,7 +123,7 @@ function recordEngagement(tabUrl) {
       const u = new URL(tabUrl);
       if (!/^https?:$/.test(u.protocol)) return;
       const SS = globalThis.ScamShield;
-      const reg = SS.registrableDomain(u.hostname);
+      const reg = SS.scopeDomain(u.hostname); // 0.14.1: tenant host, not the shared apex
       const cur = await api.storage.local.get('engagement');
       const next = SS.engagement.recordVisit(cur.engagement || {}, reg, Date.now());
       await api.storage.local.set({ engagement: next });
@@ -648,7 +648,9 @@ async function maybeAutoReport(tabUrl, verdict, report, detectors) {
   let host; try { host = new URL(tabUrl).hostname; } catch (_) { return; }
   const SS = globalThis.ScamShield;
   const reg = SS.registrableDomain(host);
-  if (SS.isSafeHost(host) || (s.allowlist || []).includes(reg)) return;
+  // 0.14.1: a trust is scoped to the tenant host on shared platforms; the
+  // dedupe key below stays registrable (relay payload contract is untouched).
+  if (SS.isSafeHost(host) || SS.scopeKeys(host).some((k) => (s.allowlist || []).includes(k))) return;
   const cur = await api.storage.local.get('reportedHosts');
   const seen = cur.reportedHosts || {};
   if (seen[reg] && Date.now() - seen[reg] < AUTO_REPORT_TTL) return;
@@ -711,8 +713,21 @@ async function handleUserReport(msg, sender) {
 // page can show a "Trusted via warning" tag and a one-click remove — the #1
 // feature ask across rival reviews (a permanent allowlist) plus a visible,
 // undoable origin instead of a silent one-way trust.
-async function addTrust(domain, via, tabId) {
+// 0.14.1: every domain a surface sends for trust / pause / mute is normalised
+// to its scope, so a stale or hand-built message can never widen a trust to a
+// shared tenant apex ('pages.dev') — only the scoped host is ever written.
+function scopedKey(domain) {
   const d = typeof domain === 'string' ? domain.trim().toLowerCase() : '';
+  return d ? globalThis.ScamShield.scopeDomain(d) : '';
+}
+// Removal also accepts the raw key, so a legacy entry (a bare tenant apex, or
+// a key imported by hand) can always be taken out again.
+function removalKeys(domain) {
+  const d = typeof domain === 'string' ? domain.trim().toLowerCase() : '';
+  return d ? [...new Set([d, scopedKey(d)])] : [];
+}
+async function addTrust(domain, via, tabId) {
+  const d = scopedKey(domain);
   if (!d) return { ok: false };
   const s = await getSettings();
   const allowlist = s.allowlist.includes(d) ? s.allowlist.slice() : [...s.allowlist, d];
@@ -725,11 +740,11 @@ async function addTrust(domain, via, tabId) {
   return { ok: true, allowlist: next.allowlist, domain: d };
 }
 async function removeTrust(domain) {
-  const d = typeof domain === 'string' ? domain.trim().toLowerCase() : '';
+  const ds = removalKeys(domain);
   const s = await getSettings();
-  const allowlist = s.allowlist.filter((x) => x !== d);
+  const allowlist = s.allowlist.filter((x) => !ds.includes(x));
   const allowlistMeta = Object.assign({}, s.allowlistMeta);
-  delete allowlistMeta[d];
+  for (const d of ds) delete allowlistMeta[d];
   await setSettings({ allowlist, allowlistMeta });
   return { ok: true };
 }
@@ -737,12 +752,14 @@ async function removeTrust(domain) {
 // ---- Per-kind warning mutes (0.14.0) — the toast's "Don't warn me on this site" ----
 async function muteWarning(domain, kind, via) {
   const SS = globalThis.ScamShield; const s = await getSettings();
-  const mutedWarnings = SS.withMute(s.mutedWarnings, domain, kind, via, Date.now());
+  const mutedWarnings = SS.withMute(s.mutedWarnings, scopedKey(domain), kind, via, Date.now());
   const next = await setSettings({ mutedWarnings }); return { ok: true, mutedWarnings: next.mutedWarnings };
 }
 async function unmuteWarning(domain, kind) {
   const SS = globalThis.ScamShield; const s = await getSettings();
-  await setSettings({ mutedWarnings: SS.withoutMute(s.mutedWarnings, domain, kind) }); return { ok: true };
+  let mutedWarnings = s.mutedWarnings;
+  for (const d of removalKeys(domain)) mutedWarnings = SS.withoutMute(mutedWarnings, d, kind);
+  await setSettings({ mutedWarnings }); return { ok: true };
 }
 
 // Best-effort, fire-and-forget from the caller's point of view (addTrust
@@ -880,7 +897,7 @@ async function syncAllowRules(settings) {
     const s = settings || await getSettings();
     const existing = await api.declarativeNetRequest.getDynamicRules();
     const removeRuleIds = existing.filter((r) => D.inRange(r.id, D.ALLOW_BASE)).map((r) => r.id);
-    await api.declarativeNetRequest.updateDynamicRules({ removeRuleIds, addRules: D.buildAllowRules(D.exemptDomains(s, Date.now())) });
+    await api.declarativeNetRequest.updateDynamicRules({ removeRuleIds, addRules: D.buildAllowRules(D.exemptDomains(s, Date.now()), {}) }); // bare tenant apexes are skipped (0.14.1)
   } catch (_) { /* best-effort */ }
 }
 // Every SW boot: make sure the redirect rules exist for whatever block rules
@@ -1187,7 +1204,7 @@ async function handleDnrBlocked(msg, sender) {
     if (hit && hit.hot) kind = 'hot';
   } catch (_) {}
   const SS = globalThis.ScamShield;
-  return { ok: true, host, domain: SS && SS.registrableDomain ? SS.registrableDomain(host) : host, counted, sources, kind };
+  return { ok: true, host, domain: SS && SS.scopeDomain ? SS.scopeDomain(host) : host, counted, sources, kind };
 }
 
 // ---- v0.9 threat-feed: OTA cycle + verdict-path lookup (Task B2) ----------
@@ -1916,7 +1933,7 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       // compare against a lowercased registrable domain — can never match, so
       // the pause silently does nothing and cannot be undone from options.
       case 'pauseSite': {
-        const d = typeof msg.domain === 'string' ? msg.domain.trim().toLowerCase() : '';
+        const d = scopedKey(msg.domain);
         if (!d) { sendResponse({ ok: false }); break; }
         const s = await getSettings(); const SS = globalThis.ScamShield;
         const until = SS.pauseUntil(msg.choice, Date.now());
@@ -1925,15 +1942,15 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         await setSettings({ pausedSites: ps }); sendResponse({ ok: true, until }); break;
       }
       case 'unpauseSite': {
-        const d = typeof msg.domain === 'string' ? msg.domain.trim().toLowerCase() : '';
-        if (!d) { sendResponse({ ok: false }); break; }
-        const s = await getSettings(); const ps = Object.assign({}, s.pausedSites); delete ps[d];
-        await setSettings({ pausedSites: ps, allowlist: s.allowlist.filter((x) => x !== d) }); sendResponse({ ok: true }); break;
+        const ds = removalKeys(msg.domain);
+        if (!ds.length) { sendResponse({ ok: false }); break; }
+        const s = await getSettings(); const ps = Object.assign({}, s.pausedSites); for (const d of ds) delete ps[d];
+        await setSettings({ pausedSites: ps, allowlist: s.allowlist.filter((x) => !ds.includes(x)) }); sendResponse({ ok: true }); break;
       }
       case 'getTabStats': {
         const cur = await api.storage.local.get('history'); const list = Array.isArray(cur.history) ? cur.history : [];
         const SS = globalThis.ScamShield;
-        sendResponse({ siteCount: list.filter((e) => SS.registrableDomain(e.host) === msg.domain).length }); break;
+        sendResponse({ siteCount: list.filter((e) => SS.scopeDomain(e.host) === msg.domain).length }); break;
       }
       case 'leaveTab': {
         const tabId = msg.tabId != null ? msg.tabId : (sender.tab && sender.tab.id);

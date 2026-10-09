@@ -150,6 +150,7 @@
   "trustedForAWhile": { "message": "一時的に" },
   "remove": { "message": "削除" },
   "trustedViaWarning": { "message": "警告から信頼済み" },
+  "optTenantApexBadge": { "message": "Covers every site on $APEX$ — remove it and trust the specific site instead", "placeholders": { "apex": { "content": "$1", "example": "pages.dev" } } },
   "mutedWarnings": { "message": "消音した警告" },
   "warnAgain": { "message": "再度警告する" },
   "muteKind_clipboard": { "message": "クリップボード通知" },

@@ -33,10 +33,10 @@
 // UMD like the rest of engine/: attaches SSDnr to globalThis for the worker
 // and exports for Node.
 (function (root, factory) {
-  const mod = factory();
+  const mod = factory(typeof require === 'function' ? require('./constants') : root.ScamShield);
   if (typeof module !== 'undefined' && module.exports) module.exports = mod;
   root.SSDnr = mod;
-})(typeof globalThis !== 'undefined' ? globalThis : self, function () {
+})(typeof globalThis !== 'undefined' ? globalThis : self, function (C) {
   'use strict';
 
   const BLOCK_BASE = 100000;
@@ -119,8 +119,19 @@
     return out;
   }
 
-  function buildAllowRules(domains) {
-    const uniq = [...new Set([...(domains || [])].filter(Boolean).map((d) => String(d).toLowerCase()))].slice(0, MAX_ALLOW);
+  // True for a bare tenant-platform apex ('pages.dev') and for a bare parent
+  // of one ('windows.net', a legacy registrable key for blob.core.windows.net):
+  // an allow rule on either would override blocking for every tenant (0.14.1).
+  function isTenantApex(d) {
+    const platforms = (C && C.TENANT_PLATFORMS) || [];
+    return platforms.some((p) => p === d || p.endsWith('.' + d));
+  }
+  // `stats`, when given, receives { skipped }: how many entries were refused.
+  function buildAllowRules(domains, stats) {
+    const all = [...new Set([...(domains || [])].filter(Boolean).map((d) => String(d).toLowerCase()))];
+    const kept = all.filter((d) => !isTenantApex(d));
+    if (stats && typeof stats === 'object') stats.skipped = all.length - kept.length;
+    const uniq = kept.slice(0, MAX_ALLOW);
     return uniq.map((d, i) => ({
       id: ALLOW_BASE + i, priority: 3, action: { type: 'allow' },
       condition: { urlFilter: '||' + d + '^', resourceTypes: ['main_frame', 'sub_frame'] }
@@ -139,6 +150,6 @@
 
   return {
     BLOCK_BASE, REDIRECT_BASE, ALLOW_BASE, HOT_BASE, PATH_BASE, RANGE, CHUNK, MAX_ALLOW, MAX_PATH_RULES,
-    domainOfFilter, inRange, escapeRegex, buildBlockRules, buildRedirectRules, buildPathRedirectRules, buildAllowRules, exemptDomains
+    domainOfFilter, inRange, escapeRegex, buildBlockRules, buildRedirectRules, buildPathRedirectRules, buildAllowRules, exemptDomains, isTenantApex
   };
 });

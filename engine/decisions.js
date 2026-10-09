@@ -1,7 +1,7 @@
 (function (root, factory) { const mod = factory(); if (typeof module !== 'undefined' && module.exports) module.exports = mod; root.ScamShield = Object.assign(root.ScamShield || {}, mod); })(typeof globalThis !== 'undefined' ? globalThis : self, function () {
   'use strict';
   // Per-site, per-warning-kind mutes (0.14.0). Pure; storage shape:
-  // { [registrableDomain]: { [kind]: { via, at } } }. Page verdicts are not
+  // { [scopeDomain]: { [kind]: { via, at } } } (scopeDomain: the full tenant host on shared platforms, 0.14.1). Page verdicts are not
   // muted per kind — they use pausedSites/allowlist (engine/trust.js).
   const WARNING_KINDS = ['clipboard', 'leak', 'notify', 'credpost'];
   const MAX_DOMAINS = 2000;

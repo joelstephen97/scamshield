@@ -65,3 +65,11 @@ test('the three id ranges never overlap', () => {
   assert.ok(D.inRange(D.ALLOW_BASE + 3, D.ALLOW_BASE));
   assert.ok(!D.inRange(D.ALLOW_BASE, D.REDIRECT_BASE));
 });
+
+test('buildAllowRules: never emits a rule for a bare tenant-platform apex (0.14.1)', () => {
+  const stats = {};
+  const r = D.buildAllowRules(['pages.dev', 'x.pages.dev', 'example.com', 'windows.net'], stats);
+  const filters = r.map((x) => x.condition.urlFilter);
+  assert.deepStrictEqual(filters, ['||x.pages.dev^', '||example.com^']);
+  assert.strictEqual(stats.skipped, 2);
+});

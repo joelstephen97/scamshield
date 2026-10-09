@@ -68,20 +68,37 @@
     return String(host || '').toLowerCase().split('.').filter(Boolean).slice(-2).join('.');
   }
 
+  // The scope a trust / pause / mute is stored under (0.14.1): the full tenant
+  // host on shared-hosting platforms, the registrable domain elsewhere.
+  function scopeOf(host) {
+    if (SS && typeof SS.scopeDomain === 'function') return SS.scopeDomain(host);
+    return registrable(host);
+  }
+  // Keys a stored entry for this host may live under: the scope plus the
+  // pre-0.14.1 registrable key (a legacy bare-apex entry keeps suppressing
+  // page warnings; it just no longer produces a network allow rule).
+  function scopeKeysOf(host) {
+    if (SS && typeof SS.scopeKeys === 'function') return SS.scopeKeys(host);
+    return [registrable(host)];
+  }
+  function isMutedHere(muted, kind) {
+    return !!(SS.isMuted && scopeKeysOf(location.hostname).some((k) => SS.isMuted(muted, k, kind)));
+  }
+
   // Built-in safe list OR the user's own trusted sites. Gates every warning
   // surface (page scan, wallet overlay, clipboard toast, tech-scam overlay) —
   // a site the user trusts must never nag them.
   function isTrustedHost(host, settings) {
     if (SS && typeof SS.isSafeHost === 'function' && SS.isSafeHost(host)) return true;
-    const reg = registrable(host);
-    if (SS && SS.isPaused && SS.isPaused(settings && settings.pausedSites, reg, Date.now())) return true;
-    return ((settings && settings.allowlist) || []).includes(reg);
+    const keys = scopeKeysOf(host);
+    if (SS && SS.isPaused && keys.some((k) => SS.isPaused(settings && settings.pausedSites, k, Date.now()))) return true;
+    return keys.some((k) => ((settings && settings.allowlist) || []).includes(k));
   }
 
   // "Don't warn me on this site" (0.14.0): one implementation for every toast kind.
   function muteHandler(kind) {
     return async () => {
-      const domain = registrable(location.hostname);
+      const domain = scopeOf(location.hostname);
       await send('muteWarning', { domain, kind, via: kind + '-toast' });
       if (SS.actions && SS.actions.ackSurface) SS.actions.ackSurface({ text: t('ackMuted', [bidi(domain)], "ScamShield won't show this warning on " + domain + ' again.'), onUndo: () => send('unmuteWarning', { domain, kind }) });
     };
@@ -133,8 +150,7 @@
       return;
     }
     if (settings.clipboardGuard === false) return;
-    const domain = registrable(location.hostname);
-    if (SS.isMuted && SS.isMuted(settings.mutedWarnings, domain, 'clipboard')) return;
+    if (isMutedHere(settings.mutedWarnings, 'clipboard')) return;
     const key = detail.level + '|' + (detail.sample || '');
     if (clipboardSeen.has(key)) return; clipboardSeen.add(key);
     // notice/warn tiers are informational: no threat count, no history row.
@@ -173,7 +189,7 @@
     const settings = await send('getSettings');
     if (!settings || !settings.enabled || settings.leakyFormGuard === false) return;
     if (isTrustedHost(location.hostname, settings)) return;
-    if (SS.isMuted && SS.isMuted(settings.mutedWarnings, registrable(location.hostname), 'leak')) return;
+    if (isMutedHere(settings.mutedWarnings, 'leak')) return;
     const key = 'leak|' + d.destHost + '|' + d.kind;
     if (privacySeen.has(key)) return; privacySeen.add(key);
     const text = d.kind === 'plain'
@@ -198,7 +214,7 @@
     const settings = await send('getSettings');
     if (!settings || !settings.enabled || settings.notificationGuard === false) return;
     if (isTrustedHost(location.hostname, settings)) return;
-    if (SS.isMuted && SS.isMuted(settings.mutedWarnings, registrable(location.hostname), 'notify')) return;
+    if (isMutedHere(settings.mutedWarnings, 'notify')) return;
     // Lure heuristic: a permission prompt on a page that also shows "allow to
     // continue / prove you are human" copy is the classic push-scam trick.
     const bt = (document.body ? document.body.innerText : '').toLowerCase();
@@ -586,7 +602,7 @@
         // "Don't warn me on this site" (0.14.0): muted means the submit
         // proceeds exactly as if this guard didn't exist — return BEFORE
         // preventDefault so it is never paused at all.
-        if (SS.isMuted && SS.isMuted(settings && settings.mutedWarnings, registrable(location.hostname), 'credpost')) return;
+        if (isMutedHere(settings && settings.mutedWarnings, 'credpost')) return;
         ev.preventDefault(); ev.stopPropagation();
         const reason = { code: 'crossOriginCredPost', kind: 'page', params: [destHost] };
         if (SS.actions && SS.actions.crossOriginCredToast) {
@@ -843,7 +859,7 @@
     }
     const settings = await send('getSettings');
     if (!settings || !settings.enabled) return;
-    const pageDomain = registrable(location.hostname);
+    const pageDomain = scopeOf(location.hostname); // 0.14.1: engagement + pause are per tenant host
     // Sponsored-search check runs even on (trusted) search-engine hosts.
     if (IS_TOP && settings.serpCheck !== false && SEARCH_HOSTS.test(location.hostname)) {
       try { checkSerp(); } catch (_) {}

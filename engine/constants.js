@@ -570,6 +570,33 @@
     return first;
   }
 
+  // The scope a user's trust / pause / mute / engagement applies to (0.14.1).
+  // registrableDomain() is right for ordinary sites, but a tenant-platform
+  // apex ('pages.dev') is shared by strangers: scoping "Trust this site" on
+  // evil.pages.dev to 'pages.dev' silenced warnings, installed a network
+  // allow rule and exempted hot-list entries for every other tenant. So on a
+  // tenant platform the scope is the full tenant host (leading 'www.'
+  // stripped); everywhere else it is the registrable domain, unchanged.
+  function tenantApexOf(h) {
+    let best = null;
+    for (const a of TENANT_PLATFORMS) if (h.endsWith('.' + a) && (!best || a.length > best.length)) best = a;
+    return best;
+  }
+  function scopeDomain(host) {
+    const h = String(host || '').toLowerCase().replace(/\.+$/, '');
+    const apex = tenantApexOf(h);
+    if (!apex) return registrableDomain(h);
+    const s = h.replace(/^www\./, '');
+    return s === apex ? apex : s;
+  }
+  // Every key a stored trust / pause / mute for this page could live under:
+  // the scope, plus the pre-0.14.1 registrable key so legacy entries keep
+  // working (they are never silently dropped).
+  function scopeKeys(host) {
+    const a = scopeDomain(host), b = registrableDomain(host);
+    return a === b ? [a] : [a, b];
+  }
+
   // SERP redirect-wrapper hosts (0.10.0, Task C1): search engines that route
   // an organic/sponsored result through a same-origin tracking redirect
   // before the real destination, keyed on the query param(s) that carry it.
@@ -701,7 +728,7 @@
   return {
     FEATURE_NAMES, THRESHOLDS, BRANDS, BRANDS_BY_KEY, POPULAR_BRANDS, SUSPICIOUS_TLDS, SUSPICIOUS_TOKENS,
     SCAM_PHRASES, SAFE_DOMAINS, BRAND_DOMAINS, SEED_PHRASE_HINTS, CARRIER_BRANDS,
-    TENANT_PLATFORMS, tenantLabel,
+    TENANT_PLATFORMS, tenantLabel, scopeDomain, scopeKeys,
     MULTI_LABEL_SUFFIXES, KNOWN_AUTH_PROVIDERS, KNOWN_BRAND_REGISTRABLES,
     VERIFIED_NAMESPACES, isVerifiedNamespace,
     registrableParts, registrableDomain, isSafeHost, brandNameIn, brandDisplayName,

@@ -150,6 +150,7 @@
   "trustedForAWhile": { "message": "کچھ دیر کے لیے" },
   "remove": { "message": "ہٹائیں" },
   "trustedViaWarning": { "message": "انتباہ سے قابلِ اعتماد بنایا گیا" },
+  "optTenantApexBadge": { "message": "Covers every site on $APEX$ — remove it and trust the specific site instead", "placeholders": { "apex": { "content": "$1", "example": "pages.dev" } } },
   "mutedWarnings": { "message": "خاموش کی گئی وارننگز" },
   "warnAgain": { "message": "دوبارہ خبردار کریں" },
   "muteKind_clipboard": { "message": "کلپ بورڈ کی اطلاعات" },

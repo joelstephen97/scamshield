@@ -148,6 +148,7 @@
   "trustedForAWhile": { "message": "일정 기간" },
   "remove": { "message": "삭제" },
   "trustedViaWarning": { "message": "경고에서 신뢰함" },
+  "optTenantApexBadge": { "message": "Covers every site on $APEX$ — remove it and trust the specific site instead", "placeholders": { "apex": { "content": "$1", "example": "pages.dev" } } },
   "mutedWarnings": { "message": "숨긴 경고" },
   "warnAgain": { "message": "다시 경고" },
   "muteKind_clipboard": { "message": "클립보드 알림" },

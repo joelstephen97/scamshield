@@ -16,7 +16,8 @@ const SS = globalThis.ScamShield, I = globalThis.SSIcons, R = globalThis.SSReaso
 const $ = (id) => document.getElementById(id);
 const T = (key, subs, fallback) => { try { const v = i18n && i18n.t ? i18n.t(key, subs) : ''; return v || fallback; } catch (_) { return fallback; } };
 const bidi = (s) => '⁨' + s + '⁩';
-const registrable = (h) => (SS && SS.registrableDomain) ? SS.registrableDomain(h) : String(h || '').split('.').slice(-2).join('.');
+// 0.14.1: the block page pauses / trusts the scoped host (full tenant host on shared platforms).
+const registrable = (h) => (SS && SS.scopeDomain) ? SS.scopeDomain(h) : (SS && SS.registrableDomain) ? SS.registrableDomain(h) : String(h || '').split('.').slice(-2).join('.');
 const send = (type, data) => new Promise((resolve) => { try { api.runtime.sendMessage(Object.assign({ type }, data || {}), (r) => resolve(r || null)); } catch (_) { resolve(null); } });
 
 function blockedUrl() {

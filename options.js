@@ -174,6 +174,18 @@ function li(text, meta, btnText, onClick) {
   if (btnText) { const b = document.createElement('button'); b.className = 'btn'; b.textContent = btnText; b.addEventListener('click', onClick); el.appendChild(b); }
   return el;
 }
+// 0.14.1: a trust / pause / mute entry that IS a bare tenant-platform apex
+// (pre-0.14.1 "Trust this site" on evil.pages.dev stored 'pages.dev') still
+// quiets page warnings on every site on that platform. It is kept, not
+// dropped, but flagged so the user can replace it with the specific site.
+function tenantApexBadge(el, d) {
+  if (!(SS.TENANT_PLATFORMS || []).includes(String(d).toLowerCase())) return el;
+  const tag = document.createElement('span'); tag.className = 'tag warn'; tag.dataset.tenantApex = '1';
+  tag.textContent = T('optTenantApexBadge', [bidi(d)], 'Covers every site on ' + d + ' — remove it and trust the specific site instead');
+  const btn = el.querySelector('button');
+  if (btn) el.insertBefore(tag, btn); else el.appendChild(tag);
+  return el;
+}
 // One allowlist row (0.13.0, Task 11): same shape as li() above, plus a
 // data-domain attribute and — when the trust carries an origin (banner/
 // interstitial/block page, via allowlistMeta[d].via) — a small "Trusted via
@@ -191,7 +203,7 @@ function allowLi(d, meta) {
   const b = document.createElement('button'); b.className = 'btn remove'; b.textContent = T('remove', null, 'Remove');
   b.addEventListener('click', async () => { await send('removeAllow', { domain: d }); load(); });
   el.appendChild(b);
-  return el;
+  return tenantApexBadge(el, d);
 }
 function renderAllow(list, paused, meta, muted) {
   $('allowlist').replaceChildren(); $('pausedlist').replaceChildren();
@@ -201,7 +213,7 @@ function renderAllow(list, paused, meta, muted) {
   if (!entries.length) $('pausedlist').appendChild(li(T('optNoneRightNow', null, 'None right now')));
   for (const [d, until] of entries) {
     const whenStr = intlDate({ hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' }).format(new Date(until));
-    $('pausedlist').appendChild(li(d, T('fmtUntilTime', [bidi(whenStr)], 'until ' + whenStr), T('resumeNow', null, 'Resume now'), async () => { await send('unpauseSite', { domain: d }); load(); }));
+    $('pausedlist').appendChild(tenantApexBadge(li(d, T('fmtUntilTime', [bidi(whenStr)], 'until ' + whenStr), T('resumeNow', null, 'Resume now'), async () => { await send('unpauseSite', { domain: d }); load(); }), d));
   }
   renderMuted(muted || {});
 }
@@ -212,7 +224,7 @@ const MUTE_KIND = (k) => T('muteKind_' + k, null, { clipboard: 'Clipboard notice
 function renderMuted(muted) {
   $('mutedlist').replaceChildren(); const rows = SS.listMuted(muted);
   if (!rows.length) { $('mutedlist').appendChild(li(T('optNoneYet', null, 'None yet'))); return; }
-  for (const r of rows) $('mutedlist').appendChild(li(r.domain, `${MUTE_KIND(r.kind)} · ${stamp(r.at)}`, T('warnAgain', null, 'Warn again'), async () => { await send('unmuteWarning', { domain: r.domain, kind: r.kind }); load(); }));
+  for (const r of rows) $('mutedlist').appendChild(tenantApexBadge(li(r.domain, `${MUTE_KIND(r.kind)} · ${stamp(r.at)}`, T('warnAgain', null, 'Warn again'), async () => { await send('unmuteWarning', { domain: r.domain, kind: r.kind }); load(); }), r.domain));
 }
 function renderHistory(list) {
   $('history').replaceChildren();

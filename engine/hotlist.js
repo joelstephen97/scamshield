@@ -104,10 +104,24 @@
       const parts = C.registrableParts(h);
       return h === parts.suffix;                                // (c) bare public suffix
     };
+    // 0.14.1: a user exemption covers the host it names and that host's
+    // subdomains — and nothing wider. Walking the label suffixes (instead of
+    // only checking the registrable domain) is what keeps a trust on
+    // 'x.pages.dev' from shielding 'y.pages.dev', and a legacy bare tenant
+    // apex entry ('pages.dev') from shielding any tenant at all.
+    const isExempt = (h, reg) => {
+      if (exempt.has(reg) && !D.isTenantApex(reg)) return true;
+      const labels = h.split('.');
+      for (let i = 0; i < labels.length - 1; i++) {
+        const cand = labels.slice(i).join('.');
+        if (exempt.has(cand) && !D.isTenantApex(cand)) return true;
+      }
+      return false;
+    };
     const keep = (h) => {
       const reg = C.registrableDomain(h);
       if (isApex(h)) { dropped.apex++; return false; }
-      if (exempt.has(h) || exempt.has(reg)) { dropped.exempt++; return false; }
+      if (isExempt(h, reg)) { dropped.exempt++; return false; }
       if (verified(h)) { dropped.verified++; return false; }
       if (brands.has(reg) || brands.has(h)) { dropped.brand++; return false; }
       if (C.isSafeHost(h)) { dropped.safe++; return false; }

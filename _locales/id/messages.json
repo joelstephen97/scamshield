@@ -150,6 +150,7 @@
   "trustedForAWhile": { "message": "Untuk sementara" },
   "remove": { "message": "Hapus" },
   "trustedViaWarning": { "message": "Dipercaya lewat peringatan" },
+  "optTenantApexBadge": { "message": "Covers every site on $APEX$ — remove it and trust the specific site instead", "placeholders": { "apex": { "content": "$1", "example": "pages.dev" } } },
   "mutedWarnings": { "message": "Peringatan yang dibisukan" },
   "warnAgain": { "message": "Peringatkan lagi" },
   "muteKind_clipboard": { "message": "Pemberitahuan clipboard" },
