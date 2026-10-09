@@ -37,6 +37,17 @@ const test = base.extend({
       ]
     });
     for (let i = 0; i < 30 && !context.serviceWorkers()[0]; i++) await new Promise((r) => setTimeout(r, 100));
+    // A fresh install opens onboarding.html from onInstalled. If that tab opens
+    // after a spec's own page it becomes the active tab and steals
+    // tabs.query({active:true}) / focus from the spec (seen as reporting.spec
+    // "via: off" and blocked-page flakes once boot did more work in 0.14.1).
+    // Wait for it once here and close it, so every spec starts from the same
+    // state. Specs that test onboarding open it themselves.
+    for (let i = 0; i < 50; i++) {
+      const ob = context.pages().find((p) => p.url().includes('/onboarding.html'));
+      if (ob) { await ob.close().catch(() => {}); break; }
+      await new Promise((r) => setTimeout(r, 100));
+    }
     await use(context);
     await context.close();
   },

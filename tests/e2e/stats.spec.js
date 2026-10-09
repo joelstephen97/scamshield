@@ -202,6 +202,11 @@ test('privacyFindingsTotal backfills once from an existing ring, then only incre
 
 test('options#stats "All time" privacy tile reads the lifetime counter, not the ring', async ({ context, extensionId }) => {
   const sw = context.serviceWorkers()[0];
+  // The boot-time seed (ensurePrivacyTotal at SW start) is a queued
+  // read-modify-write; a direct storage write from the test can land between
+  // its read and its write and be overwritten with the backfilled 0. Queue
+  // behind it first — the product's own writers all go through that queue.
+  await sw.evaluate(() => ensurePrivacyTotal());
   // A total larger than anything the ring holds — only the counter can show it.
   await sw.evaluate(() => chrome.storage.local.set({ privacyFindingsTotal: 137, statsDaily: [] }));
   const page = await context.newPage();
