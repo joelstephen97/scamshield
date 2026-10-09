@@ -71,7 +71,7 @@ function fakeAlarms(initial) {
   const calls = { create: [] };
   return {
     calls, store,
-    get: async (name) => store.get(name), // promise-only, like Firefox
+    get: async (...args) => { assert.equal(args.length, 1, 'promise-only API must not get a callback'); return store.get(args[0]); }, // like Firefox
     create: (name, info) => { calls.create.push([name, info]); store.set(name, { name, scheduledTime: Date.now() + 1, ...info }); },
   };
 }
@@ -96,7 +96,7 @@ test('ensureAlarm replaces an alarm whose period differs', async () => {
 });
 
 test('ensureAlarm works with a callback-only get() and survives a throwing get()', async () => {
-  const cb = { calls: [], get(name, fn) { fn({ name, periodInMinutes: 720 }); }, create() { this.calls.push(1); } };
+  const cb = { calls: [], get(name, fn) { if (typeof fn === 'function') fn({ name, periodInMinutes: 720 }); }, create() { this.calls.push(1); } };
   assert.equal(await U.ensureAlarm(cb, 'ota', 720), 'kept');
   assert.equal(cb.calls.length, 0);
   const bad = { calls: [], get() { throw new Error('boom'); }, create() { this.calls.push(1); } };
@@ -112,4 +112,26 @@ test('shouldTopUpFeed: never attempted -> yes, 1 h ago -> no, 13 h ago -> yes', 
   assert.equal(U.shouldTopUpFeed(T0 - 13 * H, T0), true);
   assert.equal(U.shouldTopUpFeed(T0 - 12 * H, T0), false);   // strictly greater, like hot
   assert.equal(U.shouldTopUpFeed(T0 + H, T0), false);        // clock skew: future stamp is not stale
+});
+
+test('singleFlight: concurrent callers share one run; a later call after settling starts a new one', async () => {
+  let runs = 0, release;
+  const gate = new Promise((r) => { release = r; });
+  const start = U.singleFlight(async () => { runs++; await gate; return 'done'; });
+  // onInstalled + boot top-up in the same SW life
+  const a = start(), b = start();
+  assert.equal(a, b);
+  release();
+  assert.equal(await a, 'done');
+  assert.equal(runs, 1);
+  await start();
+  assert.equal(runs, 2);
+});
+
+test('singleFlight survives a rejecting job and allows a retry', async () => {
+  let runs = 0;
+  const start = U.singleFlight(async () => { runs++; throw new Error('x'); });
+  await assert.rejects(start());
+  await assert.rejects(start());
+  assert.equal(runs, 2);
 });

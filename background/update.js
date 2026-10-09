@@ -86,8 +86,12 @@
   function getAlarm(alarms, name) {
     return new Promise((resolve) => {
       try {
-        const r = alarms.get(name, resolve);
-        if (r && typeof r.then === 'function') r.then(resolve, () => resolve(undefined));
+        // Promise form first (both browsers). A promise-only API must never
+        // be handed a callback; only fall back to the callback form when
+        // get(name) returned no thenable.
+        const r = alarms.get(name);
+        if (r && typeof r.then === 'function') { r.then(resolve, () => resolve(undefined)); return; }
+        alarms.get(name, resolve);
       } catch (_) { resolve(undefined); }
     });
   }
@@ -109,5 +113,21 @@
     return t - a > FEED_TOPUP_MS;
   }
 
-  return { MAX_DEFER_MS, RECHECK_MINUTES, FEED_TOPUP_MS, openPageCount, decide, versionLessThan, ensureAlarm, shouldTopUpFeed };
+  // singleFlight(fn) -> wrapper that, while a call is still running, hands
+  // later callers the SAME promise instead of starting fn again (0.14.1).
+  // Used for the feed+OTA download pair so onInstalled, the boot top-up and
+  // the ota alarm cannot fetch ~16 MB twice or write the blockstore at once.
+  function singleFlight(fn) {
+    let inflight = null;
+    return function () {
+      if (inflight) return inflight;
+      const p = Promise.resolve().then(() => fn());
+      inflight = p;
+      const clear = () => { if (inflight === p) inflight = null; };
+      p.then(clear, clear);
+      return p;
+    };
+  }
+
+  return { singleFlight, MAX_DEFER_MS, RECHECK_MINUTES, FEED_TOPUP_MS, openPageCount, decide, versionLessThan, ensureAlarm, shouldTopUpFeed };
 });

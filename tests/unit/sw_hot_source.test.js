@@ -143,3 +143,17 @@ test('0.14.1 fix round 1: growth baseline ignores an expired previous list; soft
   assert.ok(/isExpired\(prev\.hotList/.test(body) && /hotGrowthRejects/.test(body));
   assert.ok(/remove\(\['hotRejectReason', 'hotRejectedAt', 'hotGrowthRejects'\]\)/.test(body.slice(0, body.indexOf('res.ok'))), '304 path clears reject state');
 });
+
+test('0.14.1: ota alarm uses ensureAlarm, and every feed-job start goes through the single-flight startFeedJobs', () => {
+  assert.ok(/ensureAlarm\(api\.alarms, 'ota'/.test(src));
+  assert.ok(/const startFeedJobs = globalThis\.SSUpdate\.singleFlight\(/.test(src));
+  // boot top-up: gated on shouldTopUpFeed, then startFeedJobs (which stamps feedAttemptAt)
+  assert.ok(/shouldTopUpFeed\(feedAt, Date\.now\(\)\)\) \{\s*startFeedJobs\(\);/.test(src));
+  assert.ok(/feedAttemptAt: Date\.now\(\)/.test(src));
+  assert.ok(/a\.name === 'ota'\) \{ startFeedJobs\(\)/.test(src));
+  // onInstalled starts them via the same entry point, not directly
+  const oi = src.slice(src.indexOf('api.runtime.onInstalled.addListener'));
+  const body = oi.slice(0, oi.indexOf('\n});'));
+  assert.ok(/startFeedJobs\(\)/.test(body));
+  assert.ok(!/\brunOtaUpdate\(\)|\brunFeedUpdate\(\)/.test(body));
+});

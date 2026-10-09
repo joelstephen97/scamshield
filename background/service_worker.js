@@ -888,6 +888,19 @@ async function syncAllowRules(settings) {
 // redirects until its next OTA), and that the allow rules match the current
 // pauses. Cheap — a dozen rules at most.
 let networkRulesEnsured = false;
+// One entry point for the feed + OTA download pair (0.14.1). onInstalled, the
+// boot top-up and the ota alarm all go through here: it stamps feedAttemptAt
+// (awaited, so a boot right behind it sees the stamp) and single-flights, so
+// a second caller while the pair is running joins it instead of starting
+// another ~16 MB download and concurrent blockstore writes. Direct
+// runFeedUpdate(url) calls (e2e harness, message handlers) are not deduped.
+const startFeedJobs = globalThis.SSUpdate.singleFlight(async () => {
+  try { await api.storage.local.set({ feedAttemptAt: Date.now() }); } catch (_) {}
+  await Promise.all([
+    Promise.resolve().then(() => runOtaUpdate()).catch(() => {}),
+    Promise.resolve().then(() => runFeedUpdate()).catch(() => {}),
+  ]);
+});
 async function ensureNetworkRules() {
   if (networkRulesEnsured) return; networkRulesEnsured = true;
   try {
@@ -920,9 +933,7 @@ async function ensureNetworkRules() {
     let feedAt = 0;
     try { feedAt = (await api.storage.local.get('feedAttemptAt')).feedAttemptAt || 0; } catch (_) {}
     if (globalThis.SSUpdate.shouldTopUpFeed(feedAt, Date.now())) {
-      try { await api.storage.local.set({ feedAttemptAt: Date.now() }); } catch (_) {}
-      runOtaUpdate();
-      runFeedUpdate();
+      startFeedJobs();
     }
   } catch (_) {}
 }
@@ -1594,7 +1605,7 @@ if (api.alarms) {
   try { globalThis.SSUpdate.ensureAlarm(api.alarms, 'ota', 720).catch(() => {}); } catch (_) {} // every 12h — feed OTA rides the same cadence
   try { globalThis.SSUpdate.ensureAlarm(api.alarms, 'hot', HOT_PERIOD_MINUTES).catch(() => {}); } catch (_) {} // every 60m — the hourly hot list
   api.alarms.onAlarm.addListener((a) => {
-    if (a.name === 'ota') { try { api.storage.local.set({ feedAttemptAt: Date.now() }); } catch (_) {} runOtaUpdate(); runFeedUpdate(); flushReports(); runHotUpdate(); requestStoreUpdateCheck(); }
+    if (a.name === 'ota') { startFeedJobs(); flushReports(); runHotUpdate(); requestStoreUpdateCheck(); }
     if (a.name === 'hot') runHotUpdate();
     if (a.name === 'applyUpdate') applyPendingUpdate();
   });
@@ -1650,8 +1661,7 @@ api.runtime.onInstalled.addListener(async (details) => {
   if (details && details.reason === 'install' && api.tabs) {
     try { api.tabs.create({ url: api.runtime.getURL('onboarding.html') }); } catch (_) {}
   }
-  runOtaUpdate(); // fresh rules right away instead of waiting for the 12h alarm
-  runFeedUpdate(); // same for the v0.9 threat feed
+  startFeedJobs(); // fresh OTA rules + v0.9 threat feed right away instead of waiting for the 12h alarm
   runHotUpdate(); // and the hourly hot list
   flushReports();
 });
