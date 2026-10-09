@@ -294,6 +294,27 @@ test('a dyndns-listed host gets suspicious-tier evidence, not an interstitial', 
   await expect(banner).toBeVisible({ timeout: 8000 });
 });
 
+// 0.14.1 (Task 8 fix round): the feed/risk/NRD lookups are requested together,
+// but each keeps its own full timeout budget from where it is awaited. A cold
+// SW whose one-time Blockstore load takes 4 s (> the 3 s risk/NRD caps) must
+// still deliver the dyndns evidence — the budget must not start at send time.
+test('slow SW (Blockstore.get +4s): risk-table evidence still reaches the verdict', async ({ context }) => {
+  const sw = context.serviceWorkers()[0];
+  await installFeed(sw);
+  await sw.evaluate(() => {
+    const bs = globalThis.Blockstore; globalThis.__origBsGet = bs.get;
+    const orig = bs.get.bind(bs);
+    bs.get = async (...a) => { await new Promise((r) => setTimeout(r, 4000)); return orig(...a); };
+  });
+  try {
+    const page = await context.newPage();
+    await page.goto(`http://${RISK_DYNDNS_DOMAIN}:5599/clean.html`);
+    await expect(page.locator('.scamshield-banner.suspicious')).toBeVisible({ timeout: 15000 });
+  } finally {
+    await sw.evaluate(() => { globalThis.Blockstore.get = globalThis.__origBsGet; });
+  }
+});
+
 test('an abused-TLD host (risk.json tlds table) gets suspicious-tier evidence via scoreUrl', async ({ context }) => {
   const sw = context.serviceWorkers()[0];
   await installFeed(sw); // populates settings.riskTlds, which content_script.js passes into scoreUrl()

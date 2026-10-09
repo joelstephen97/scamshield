@@ -910,17 +910,21 @@
     if (settings.leakyFormGuard !== false && exfilForms.length) guardExfilForms(exfilForms, settings);
     // 0.14.1: the four independent SW lookups start together instead of as a
     // serial chain (icons 1.2 s + feed 10 s + risk 3 s + nrd 3 s worst case).
-    // Only the *requests* are hoisted: each result is still awaited at its
+    // Only the raw *requests* are hoisted: each result is still awaited at its
     // original position and folded into the verdict with the same inputs and
-    // precedence as before, each keeps its own timeout, and a failure still
-    // means "no evidence" (the .catch mirrors the per-check try/catch).
+    // precedence as before, and a failure still means "no evidence" (the
+    // .catch mirrors the per-check try/catch). The withTimeout() budget is
+    // applied at that original await site, NOT here: on a cold SW all four
+    // lookups queue behind the same one-time Blockstore load, so a timer
+    // started at send time would shrink each budget by the time spent in the
+    // earlier steps (SS.predict, the other lookups) and silently drop
+    // risk/NRD evidence. Applied late, no budget is shorter than before and
+    // the worst case never exceeds the old serial chain.
     const wantIcons = IS_TOP && settings.pageAnalysis !== false && needsPageAnalysis(signals, urlRules, domRules);
-    const iconsP = wantIcons ? withTimeout(send('hashIcons', { urls: iconCandidates() }), 1200).catch(() => null) : null;
-    // Bounded: the SW's shard fetch is itself timeout-capped, but the page
-    // verdict must never wait on a wedged SW either (resolves null on cap).
-    const feedP = withTimeout(send('checkFeed', { host: location.hostname }), 10000).catch(() => null);
-    const riskP = withTimeout(send('checkRisk', { host: location.hostname }), 3000).catch(() => null);
-    const nrdP = withTimeout(send('checkNrd', { host: location.hostname }), 3000).catch(() => null);
+    const iconsP = wantIcons ? send('hashIcons', { urls: iconCandidates() }).catch(() => null) : null;
+    const feedP = send('checkFeed', { host: location.hostname }).catch(() => null);
+    const riskP = send('checkRisk', { host: location.hostname }).catch(() => null);
+    const nrdP = send('checkNrd', { host: location.hostname }).catch(() => null);
     const borderline = Math.max(urlRules.score, domRules.score) >= 0.3 || signals.hasPasswordField;
     if (borderline && SS.isAvailable && SS.isAvailable()) modelProb = await SS.predict(SS.extractUrlFeatures(location.href));
     // Icon hashing + the page-content model are top-frame only: favicons are a
@@ -931,7 +935,7 @@
           pf = SS.extractPageFeatures(document, { host: location.hostname });
           const r = SS.scorePageContent(pf); if (!Number.isNaN(r.prob)) contentProb = r.prob;
         }
-        const icons = await iconsP;
+        const icons = await withTimeout(iconsP, 1200);
         if (icons && icons.matches && icons.matches.length) {
           signals.iconMatches = icons.matches; domRules = SS.scoreDom(signals);
           iconMatch = (domRules.flags || []).includes('brand-impersonation-visual');
@@ -978,7 +982,9 @@
     // feed-* flag so the engagement gate below (which only ever suppresses a
     // flag-less "suspicious") can never silently swallow validated feed intel.
     try {
-      const feedHit = await feedP;
+      // Bounded: the SW's shard fetch is itself timeout-capped, but the page
+      // verdict must never wait on a wedged SW either (resolves null on cap).
+      const feedHit = await withTimeout(feedP, 10000);
       if (feedHit && feedHit.hit === 'block') {
         const reason = { code: 'feedBlock', kind: 'link', params: [String((feedHit.sources || []).length)] };
         verdict = Object.assign({}, verdict, {
@@ -1010,7 +1016,7 @@
     // "dangerous" (only ever "suspicious"), and never touches a verdict
     // already dangerous on other grounds.
     try {
-      const riskHit = await riskP;
+      const riskHit = await withTimeout(riskP, 3000);
       if (riskHit && riskHit.hit) {
         verdict = SS.foldRiskEvidence(verdict, 0.30, { code: 'riskDynamicHost', kind: 'link' }, 'risk-hosting');
       }
@@ -1025,7 +1031,7 @@
     // already-dangerous verdict. A genuine first-ever visit to this install
     // strengthens the reason's wording via the params slot.
     try {
-      const nrdHit = await nrdP;
+      const nrdHit = await withTimeout(nrdP, 3000);
       if (nrdHit && nrdHit.hit) {
         const extra = nrdHit.strengthen ? ', and you have never visited it before' : '';
         // 0.13.0: a bloom-positive "new site" is evidence, not a verdict. It

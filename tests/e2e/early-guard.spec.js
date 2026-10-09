@@ -15,6 +15,7 @@ test('off-domain password submit within 300ms of load is guarded while SW lookup
     bs.get = async (...a) => { await new Promise((r) => setTimeout(r, 3000)); return orig(...a); };
   });
   const page = await context.newPage();
+  try {
   await page.goto(BASE + '/phishing-login.html');
   await page.fill('input[name="pw"]', 'secret');
   await page.waitForTimeout(250);
@@ -23,11 +24,17 @@ test('off-domain password submit within 300ms of load is guarded while SW lookup
   await page.click('button[type="submit"]');
   await expect(page.locator('.scamshield-overlay')).toBeVisible({ timeout: 2000 });
   await expect(page.locator('.scamshield-overlay h3')).toContainText('phishing');
-  await sw.evaluate(() => { globalThis.Blockstore.get = globalThis.__origBsGet; });
+  } finally {
+    await sw.evaluate(() => { globalThis.Blockstore.get = globalThis.__origBsGet; });
+  }
 });
 
 test('guard attaches once and picks up the final verdict reasons after SPA re-run', async ({ context }) => {
   const page = await context.newPage();
+  const cdp = await context.newCDPSession(page);
+  const execContexts = [];
+  cdp.on('Runtime.executionContextCreated', (e) => execContexts.push(e.context));
+  await cdp.send('Runtime.enable');
   await page.goto(BASE + '/phishing-login.html');
   await expect(page.locator('.scamshield-banner.danger')).toBeVisible({ timeout: 8000 });
   // Force a SPA-style re-run: clearAll + run() again on the same form.
@@ -36,5 +43,13 @@ test('guard attaches once and picks up the final verdict reasons after SPA re-ru
   await page.fill('input[name="pw"]', 'secret');
   await page.click('button[type="submit"]');
   await expect(page.locator('.scamshield-overlay')).toHaveCount(1);
-  await expect(page.locator('.scamshield-overlay .ss-evidence li')).not.toHaveCount(0);
+  // The overlay's evidence rows must equal the FINAL verdict's reasons (first
+  // three), not the provisional ones it was seeded with.
+  const extCtx = execContexts.find((c) => c.auxData && c.auxData.type === 'isolated' && /^chrome-extension:\/\//.test(c.origin || ''));
+  expect(extCtx).toBeTruthy();
+  const finalReasons = await cdp.send('Runtime.evaluate', {
+    expression: 'window.__ssLastVerdict.reasons.length', contextId: extCtx.id, returnByValue: true
+  }).then((r) => r.result.value);
+  expect(finalReasons).toBeGreaterThan(0);
+  await expect(page.locator('.scamshield-overlay .ss-evidence li')).toHaveCount(Math.min(3, finalReasons));
 });
