@@ -1109,7 +1109,7 @@ async function runHotUpdate(urlOverride) {
   const prevLive = prev.hotList && Array.isArray(prev.hotList.domains) && !globalThis.SSHot.isExpired(prev.hotList, Date.now());
   const prevCount = prevLive ? prev.hotList.domains.length : 0;
   const growthRejects = prev.hotGrowthRejects || 0;
-  const verdict = globalThis.SSHot.assessHot(hot, globalThis.SSHot.guardHot(hot, s, Date.now()), prevCount, growthRejects);
+  const verdict = globalThis.SSHot.assessHot(hot, prevCount, growthRejects);
   if (!verdict.ok) {
     try { await api.storage.local.set({ hotRejectedAt: Date.now(), hotRejectReason: verdict.reason, hotGrowthRejects: verdict.reason === 'growth' ? growthRejects + 1 : 0 }); } catch (_) {}
     return { ok: false, updated: false, reason: 'rejected-' + verdict.reason };

@@ -114,7 +114,7 @@ const hotOf = (n, extra) => ({ domains: Array.from({ length: n }, (_, i) => ({ h
 const dropped = (o) => ({ dropped: Object.assign({ apex: 0, exempt: 0, safe: 0, brand: 0, verified: 0, expired: 0, aged: 0 }, o) });
 
 test('assessHot: thresholds are exported', () => {
-  assert.strictEqual(H.MAX_TRUST_DROPPED, 25);
+  assert.strictEqual(H.MAX_TRUSTED_HOSTS, 25);
   assert.strictEqual(H.MAX_GROWTH_FACTOR, 3);
 });
 
@@ -122,37 +122,36 @@ test('assessHot: a poisoned list (30 safe/brand/verified hits) is rejected', () 
   const poisoned = hotOf(10, Array.from({ length: 30 }, () => ({ h: 'www.google.com', s: 'pd', t: MIN(NOW) })));
   const g = H.guardHot(Object.assign({ generatedAt: NOW, ttlMinutes: 360 }, poisoned), {}, NOW);
   assert.strictEqual(g.dropped.brand, 30);
-  const r = H.assessHot(poisoned, g, 10);
+  const r = H.assessHot(poisoned, 10);
   assert.strictEqual(r.ok, false);
   assert.strictEqual(r.reason, 'trusted-hosts');
   // protected hosts are counted from the list itself: exactly 25 is fine, 26 is not
   const prot = (n) => hotOf(5, Array.from({ length: n }, (_, i) => ({ h: i % 2 ? 'www.paypal.com' : 'google.com', s: 'pd', t: MIN(NOW) })));
-  assert.strictEqual(H.assessHot(prot(25), dropped(), 5).ok, true);
-  assert.strictEqual(H.assessHot(prot(26), dropped(), 5).ok, false);
-  // guardHot's drop counters no longer decide anything
-  assert.strictEqual(H.assessHot(hotOf(5), dropped({ brand: 99, safe: 99, verified: 99, exempt: 99, apex: 99, aged: 99 }), 5).ok, true);
+  assert.strictEqual(H.assessHot(prot(25), 5).ok, true);
+  assert.strictEqual(H.assessHot(prot(26), 5).ok, false);
+  assert.strictEqual(H.assessHot(hotOf(5), 5).ok, true);
 });
 
 test('assessHot: growth is floored and soft', () => {
   assert.strictEqual(H.GROWTH_FLOOR, 2000);
   // live 5000 previous + 16000 -> rejected; 15000 (3x) is fine
-  const r = H.assessHot(hotOf(16000), dropped(), 5000);
+  const r = H.assessHot(hotOf(16000), 5000);
   assert.deepStrictEqual([r.ok, r.reason], [false, 'growth']);
-  assert.strictEqual(H.assessHot(hotOf(15000), dropped(), 5000).ok, true);
+  assert.strictEqual(H.assessHot(hotOf(15000), 5000).ok, true);
   // tiny (300) previous + 5000 -> accepted (floor 2000 x 3 = 6000)
-  assert.strictEqual(H.assessHot(hotOf(5000), dropped(), 300).ok, true);
-  assert.strictEqual(H.assessHot(hotOf(6001), dropped(), 300).ok, false);
+  assert.strictEqual(H.assessHot(hotOf(5000), 300).ok, true);
+  assert.strictEqual(H.assessHot(hotOf(6001), 300).ok, false);
   // first load: no baseline
-  assert.strictEqual(H.assessHot(hotOf(5000), dropped(), 0).ok, true);
+  assert.strictEqual(H.assessHot(hotOf(5000), 0).ok, true);
   // third consecutive growth rejection -> accepted; two are not enough
-  assert.strictEqual(H.assessHot(hotOf(16000), dropped(), 5000, 2).ok, false);
-  assert.strictEqual(H.assessHot(hotOf(16000), dropped(), 5000, 3).ok, true);
+  assert.strictEqual(H.assessHot(hotOf(16000), 5000, 2).ok, false);
+  assert.strictEqual(H.assessHot(hotOf(16000), 5000, 3).ok, true);
   // ...but the hard checks still bite
-  assert.strictEqual(H.assessHot(hotOf(16000, Array.from({ length: 26 }, () => ({ h: 'google.com' }))), dropped(), 5000, 3).ok, false);
+  assert.strictEqual(H.assessHot(hotOf(16000, Array.from({ length: 26 }, () => ({ h: 'google.com' }))), 5000, 3).ok, false);
 });
 
 test('assessHot: a normal list is ok', () => {
-  assert.deepStrictEqual(H.assessHot(hotOf(50), dropped(), 40), { ok: true, reason: '' });
+  assert.deepStrictEqual(H.assessHot(hotOf(50), 40), { ok: true, reason: '' });
 });
 
 // 0.14.1 final review: `trusted` is counted from the parsed list itself, not
@@ -161,16 +160,14 @@ test('assessHot: a normal list is ok', () => {
 test('assessHot: 40 *.github.io tenants alongside a normal list is accepted', () => {
   const tenants = Array.from({ length: 40 }, (_, i) => ({ h: `kit${i}.github.io`, s: 'pd', t: MIN(NOW) }));
   const parsed = hotOf(100, tenants);
-  const g = H.guardHot(Object.assign({ generatedAt: NOW, ttlMinutes: 360 }, parsed), {}, NOW);
-  assert.deepStrictEqual(H.assessHot(parsed, g, 100), { ok: true, reason: '' });
+  assert.deepStrictEqual(H.assessHot(parsed, 100), { ok: true, reason: '' });
 });
 
 test('assessHot: 30 brand apexes are rejected as trusted-hosts', () => {
   const brands = ['google.com', 'paypal.com', 'microsoft.com', 'apple.com', 'amazon.com', 'facebook.com'];
   const list = Array.from({ length: 30 }, (_, i) => ({ h: brands[i % brands.length], s: 'pd', t: MIN(NOW) }));
   const parsed = hotOf(10, list);
-  const g = H.guardHot(Object.assign({ generatedAt: NOW, ttlMinutes: 360 }, parsed), {}, NOW);
-  assert.deepStrictEqual(H.assessHot(parsed, g, 10), { ok: false, reason: 'trusted-hosts' });
+  assert.deepStrictEqual(H.assessHot(parsed, 10), { ok: false, reason: 'trusted-hosts' });
 });
 
 test('isProtectedHost: exact safe/brand host, its www. form, verified namespace; never a tenant or brand subdomain', () => {

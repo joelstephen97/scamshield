@@ -13,9 +13,9 @@ All notable changes to ScamShield. Versions are git tags (`vX.Y.Z`); the version
   cannot be told apart from a choice. Clear it again if you want it off.)
 - **The hourly hot list keeps protecting you through a feed outage.** A hot
   list is now kept for up to 48 hours past its expiry instead of being dropped
-  the moment it ages out, and a damaged or suspicious list (one that names
-  well-known safe sites, or suddenly grows several times larger) is held back
-  for a few hours before it can block anything. Settings shows when an update was
+  the moment it ages out, and a damaged list, or one that names
+  well-known safe sites, is rejected, and one that suddenly grows several times
+  larger is held back for a few hours, before it can block anything. Settings shows when an update was
   rejected.
 - **"Trust this site", pause and mute on free-hosting sites now apply to that
   site only.** On platforms such as pages.dev or vercel.app, trusting one

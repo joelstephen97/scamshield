@@ -161,6 +161,8 @@ jobs:
           fail=0
           for z in dist/scamshield-chrome.zip dist/scamshield-firefox.zip; do
             list=$(unzip -Z1 "$z")
+            # Zip entries must use forward slashes (a Windows-built zip with backslashes breaks on Chrome/Firefox).
+            if echo "$list" | grep -q '[\]'; then echo "::error::backslash path in $z"; fail=1; fi
             # Things that must never ship.
             if echo "$list" | grep -Eq '\.onnx$|^tests/|^docs/|^store/|^model/data/|^node_modules/|^goodbye\.html$|^\.git|\.local\.txt$|^dist/'; then
               echo "::error::$z contains files that must not ship:"; echo "$list" | grep -E '\.onnx$|^tests/|^docs/|^store/|^model/data/|^node_modules/|^goodbye\.html$|^\.git|\.local\.txt$|^dist/'; fail=1

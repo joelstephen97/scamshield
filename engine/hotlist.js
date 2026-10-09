@@ -20,10 +20,11 @@
   // applied (a feed outage must not tear down every HOT/PATH rule) until this
   // hard cap, measured from generatedAt. Beyond it the list is dropped.
   const MAX_STALE_MS = 48 * 3600 * 1000;
-  // 0.14.1 client-side kill switch (assessHot): a list whose guard had to drop
-  // more than this many safe/brand/verified hosts, or that grew past this
-  // multiple of the previous list, is treated as poisoned and not applied.
-  const MAX_TRUST_DROPPED = 25;
+  // 0.14.1 client-side kill switch (assessHot): a list that names more than
+  // this many protected hosts (isProtectedHost: exact safe/brand/verified),
+  // or that grew past this multiple of the previous list, is treated as
+  // poisoned and not applied.
+  const MAX_TRUSTED_HOSTS = 25;
   const MAX_GROWTH_FACTOR = 3;
   // Growth is a SOFT check (fix round 1): the baseline is floored so a small
   // list after a source outage cannot freeze updates, and after this many
@@ -165,14 +166,13 @@
   // isProtectedHost (a feed that names google.com 30 times is poisoned), NOT
   // from guardHot's drops: guardHot keeps tenant phishing on github.io, and
   // its drop counters say nothing about how many protected hosts the feed
-  // named. `_guardResult` is unused (kept for the SW call shape); `prevCount`
-  // is the domain count of the list currently applied. The list-size cap is
+  // named. `prevCount` is the domain count of the list currently applied. The list-size cap is
   // enforced by parseHot (MAX_DOMAINS), so no size check is needed here.
-  function assessHot(parsed, _guardResult, prevCount, growthRejects) {
+  function assessHot(parsed, prevCount, growthRejects) {
     const domains = parsed && parsed.domains ? parsed.domains : [];
     const n = domains.length;
     const trusted = domains.filter((d) => d && typeof d.h === 'string' && isProtectedHost(d.h)).length;
-    if (trusted > MAX_TRUST_DROPPED) return { ok: false, reason: 'trusted-hosts' };
+    if (trusted > MAX_TRUSTED_HOSTS) return { ok: false, reason: 'trusted-hosts' };
     if (prevCount > 0 && n > Math.max(prevCount, GROWTH_FLOOR) * MAX_GROWTH_FACTOR && !((growthRejects || 0) >= MAX_GROWTH_REJECTS)) return { ok: false, reason: 'growth' };
     return { ok: true, reason: '' };
   }
@@ -196,5 +196,5 @@
   function hotRuleIds(existing) {
     return (existing || []).filter((r) => D.inRange(r.id, D.HOT_BASE) || D.inRange(r.id, D.PATH_BASE)).map((r) => r.id);
   }
-  return { MAX_DOMAINS, WINDOW_MS, MAX_STALE_MS, MAX_TRUST_DROPPED, MAX_GROWTH_FACTOR, GROWTH_FLOOR, MAX_GROWTH_REJECTS, parseHot, isStale, isExpired, guardHot, assessHot, isProtectedHost, guardOtaFilters, hotRules, hotRuleIds };
+  return { MAX_DOMAINS, WINDOW_MS, MAX_STALE_MS, MAX_TRUSTED_HOSTS, MAX_GROWTH_FACTOR, GROWTH_FLOOR, MAX_GROWTH_REJECTS, parseHot, isStale, isExpired, guardHot, assessHot, isProtectedHost, guardOtaFilters, hotRules, hotRuleIds };
 });
