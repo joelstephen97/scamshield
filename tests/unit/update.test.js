@@ -44,3 +44,22 @@ test('deferral cap is 30 minutes and the recheck cadence is one minute', () => {
   assert.equal(U.MAX_DEFER_MS, 30 * 60 * 1000);
   assert.equal(U.RECHECK_MINUTES, 1);
 });
+
+// 0.14.1: the otaUrl '' -> default migration is gated on the PREVIOUS version
+// being older than 0.4.0, so a user who cleared the field later stays cleared.
+test('versionLessThan is a strict numeric semver compare that is false on garbage', () => {
+  const lt = U.versionLessThan;
+  assert.equal(lt('0.3.9', '0.4.0'), true);
+  assert.equal(lt('0.3.1', '0.4.0'), true);
+  assert.equal(lt('0.4.0', '0.4.0'), false);
+  assert.equal(lt('0.14.0', '0.4.0'), false);   // numeric, not lexical
+  assert.equal(lt('0.9.12', '0.10.0'), true);
+  assert.equal(lt('1.0.0', '0.4.0'), false);
+  assert.equal(lt('0.4', '0.4.1'), true);       // missing parts read as 0
+  assert.equal(lt(undefined, '0.4.0'), false);
+  assert.equal(lt(null, '0.4.0'), false);
+  assert.equal(lt('', '0.4.0'), false);
+  assert.equal(lt('garbage', '0.4.0'), false);
+  assert.equal(lt('0.3.x', '0.4.0'), false);
+  assert.equal(lt(3, '0.4.0'), false);
+});

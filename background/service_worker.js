@@ -1215,6 +1215,12 @@ function normalizeFeedHost(h) {
 // (which cannot reach GitHub/jsDelivr from a sandboxed test run) passes its
 // own local fixture-server URL instead, via worker.evaluate.
 async function runFeedUpdate(metaUrl) {
+  // 0.14.1: an empty feed URL is the user's opt-out of every remote list (the
+  // privacy policy says clearing it "disables downloads entirely"). OTA and
+  // hot already honour that; this ~16 MB feed did not. Applies to an explicit
+  // metaUrl too — a manual "Check now" must not fetch either.
+  const cfg = await getSettings();
+  if (!cfg.otaUrl || !String(cfg.otaUrl).trim()) return { ok: false, reason: 'no-url' };
   const meta = await fetchJsonWithTimeout(metaUrl || FEED_META_URL, 10000);
   if (!meta || typeof meta.version !== 'string' || !meta.urls) return { ok: false, reason: 'meta-unavailable' };
   const rec = (await globalThis.Blockstore.get()) || { version: null, blockBuf: null, warnBuf: null, warnUpdatedAt: 0, riskTables: null, riskUpdatedAt: 0, nrdBuf: null, nrdUpdatedAt: 0 };
@@ -1366,6 +1372,10 @@ async function checkNrdHost(host) {
 // negative so the same host doesn't re-trigger a shard fetch all session.
 async function fetchExactShardEntries(urls, hash40) {
   if (!urls) return null;
+  // 0.14.1: same opt-out as runFeedUpdate — no feed URL, no shard fetch.
+  // null reads as "no confirm available" (fail toward caution) upstream.
+  const cfg = await getSettings();
+  if (!cfg.otaUrl || !String(cfg.otaUrl).trim()) return null;
   const hex = globalThis.Blockset.shardByte(hash40).toString(16).padStart(2, '0');
   const bases = [urls.cdn, urls.fallback].filter(Boolean);
   const buf = await fetchArrayBufferFromBases(bases, `exact-${hex}.jsonl.gz`, 4000);
@@ -1562,16 +1572,19 @@ try {
   }
 } catch (_) { /* best-effort — never block boot on this */ }
 
-api.runtime.onInstalled.addListener(async (details) => {
-  await settingsInitPromise; // base defaults are guaranteed to exist once this resolves
-  await ensureInstalledAt(); // first-seen stamp for "protecting you since" (never overwritten)
+// Update-time settings migrations, split out of the onInstalled listener so
+// the e2e suite can drive it with a synthetic `details` (0.14.1).
+async function applyInstallMigrations(details) {
   // Migration: pre-0.4.0 installs stored otaUrl '' (feature existed but had no
-  // default). '' means "never configured", so it is safe to adopt the official
-  // feed; users who intentionally clear the field afterwards stay cleared
-  // because the migration only runs on version updates.
+  // default). '' then meant "never configured", so it was safe to adopt the
+  // official feed. 0.14.1: gated on previousVersion < 0.4.0 — before this it
+  // ran on EVERY update, silently restoring the feed for users who had
+  // deliberately cleared it (breaking the privacy-policy promise).
   if (details && details.reason === 'update') {
     const cur = await getSettings();
-    if (cur.otaUrl === '') await setSettings({ otaUrl: DEFAULT_FEED_URL });
+    if (cur.otaUrl === '' && globalThis.SSUpdate.versionLessThan(details.previousVersion, '0.4.0')) {
+      await setSettings({ otaUrl: DEFAULT_FEED_URL });
+    }
     // Migration: point pre-existing installs at the live relay. Only touches
     // the old placeholder value (or a missing/undefined field, which reads as
     // the placeholder via DEFAULTS); a user-customised reportUrl is untouched.
@@ -1579,6 +1592,12 @@ api.runtime.onInstalled.addListener(async (details) => {
       await setSettings({ reportUrl: DEFAULT_RELAY_URL });
     }
   }
+}
+
+api.runtime.onInstalled.addListener(async (details) => {
+  await settingsInitPromise; // base defaults are guaranteed to exist once this resolves
+  await ensureInstalledAt(); // first-seen stamp for "protecting you since" (never overwritten)
+  await applyInstallMigrations(details);
   if (details && details.reason === 'install' && api.tabs) {
     try { api.tabs.create({ url: api.runtime.getURL('onboarding.html') }); } catch (_) {}
   }
@@ -1943,4 +1962,4 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 // module-scoped. Re-attach the debug/test surface that used to live on the
 // classic worker's global scope — the e2e suite drives these via
 // worker.evaluate, and they're handy in the SW console.
-Object.assign(globalThis, { DEFAULT_FEED_URL, FEED_META_URL, getSettings, setSettings, handleUserReport, runOtaUpdate, flushReports, queueReport, exportSettings, sanitizeImport, pushSync, pullSync, getStats, bumpStat, ensurePrivacyTotal, ensureInstalledAt, getReviewAsk, getReviewAskContext, setReviewAsk, sanitizeReviewAsk, ensureReviewAsk, importReviewAsk, getLangDict, loadLangDict, isValidLang, runFeedUpdate, checkFeedHost, checkFeedBatchHosts, normalizeFeedHost, checkRiskHosting, checkNrdHost, applyNetworkRules, syncAllowRules, ensureNetworkRules, handleDnrBlocked, applyPendingUpdate, requestStoreUpdateCheck, getUpdateState, setUpdateState, runHotUpdate, applyHotRules, getHotStatus, addTrust, removeTrust, awaitBootReady });
+Object.assign(globalThis, { DEFAULT_FEED_URL, FEED_META_URL, getSettings, setSettings, handleUserReport, runOtaUpdate, flushReports, queueReport, exportSettings, sanitizeImport, pushSync, pullSync, getStats, bumpStat, ensurePrivacyTotal, ensureInstalledAt, getReviewAsk, getReviewAskContext, setReviewAsk, sanitizeReviewAsk, ensureReviewAsk, importReviewAsk, getLangDict, loadLangDict, isValidLang, runFeedUpdate, applyInstallMigrations, fetchExactShardEntries, checkFeedHost, checkFeedBatchHosts, normalizeFeedHost, checkRiskHosting, checkNrdHost, applyNetworkRules, syncAllowRules, ensureNetworkRules, handleDnrBlocked, applyPendingUpdate, requestStoreUpdateCheck, getUpdateState, setUpdateState, runHotUpdate, applyHotRules, getHotStatus, addTrust, removeTrust, awaitBootReady });

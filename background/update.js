@@ -58,5 +58,23 @@
     return { apply: true, reason: 'idle' };
   }
 
-  return { MAX_DEFER_MS, RECHECK_MINUTES, openPageCount, decide };
+  // versionLessThan(a, b) — strict numeric dotted-version compare (0.14.1).
+  // Used to gate install migrations on the PREVIOUS version. Anything that is
+  // not a dotted-number string (missing, garbage) is "not less than", so a
+  // migration never fires on a version we cannot read.
+  function parseVersion(v) {
+    if (typeof v !== 'string' || !/^\d+(\.\d+){0,3}$/.test(v)) return null;
+    return v.split('.').map(Number);
+  }
+  function versionLessThan(a, b) {
+    const x = parseVersion(a), y = parseVersion(b);
+    if (!x || !y) return false;
+    for (let i = 0; i < Math.max(x.length, y.length); i++) {
+      const d = (x[i] || 0) - (y[i] || 0);
+      if (d !== 0) return d < 0;
+    }
+    return false;
+  }
+
+  return { MAX_DEFER_MS, RECHECK_MINUTES, openPageCount, decide, versionLessThan };
 });
