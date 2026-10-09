@@ -848,6 +848,10 @@
     } catch (_) {}
   }
 
+  // Shared with the early-attached submit guards: guardForms reads it at submit
+  // time, run() rewrites it in place as the verdict firms up (0.14.1).
+  const formGuardReasons = [];
+
   async function run() {
     if (!SS || typeof SS.scoreUrl !== 'function') return; // engine not loaded
     // Sub-frame gate: only frames a user can actually interact with, and only
@@ -886,13 +890,43 @@
     let urlRules = SS.scoreUrl(location.href, settings.riskTlds);
     let domRules = SS.scoreDom(signals);
     let modelProb = null, contentProb = null, iconMatch = false, pf = null;
+    // 0.14.1: submit guards go up NOW, before any awaited SW round-trip below.
+    // Whether a password form posts off-domain is decidable from the DOM alone
+    // (collectSignals above), so a cold or slow SW must never leave a window
+    // where a password can be submitted to a foreign endpoint unguarded. The
+    // overlay's evidence rows read `formGuardReasons` at submit time; it is
+    // seeded from the synchronous rules here and replaced IN PLACE with the
+    // final verdict's reasons at the end of run() (no re-attach, no new
+    // listeners). The per-form __scamshield*Guarded flags make a re-run on SPA
+    // navigation a no-op for forms that already carry a listener.
+    try {
+      const prov = SS.fuse({ modelProb: null, urlRules, domRules, contentProb: null, iconMatch: false });
+      formGuardReasons.splice(0, formGuardReasons.length, ...(prov.reasons || []));
+    } catch (_) { formGuardReasons.length = 0; }
+    if (foreignForms.length) SS.actions.guardForms(foreignForms, formGuardReasons, () => send('userReport', { label: 'false_positive' }));
+    // Reuses leakyFormGuard (0.10.0, Task C2): the closest existing warn-tier
+    // "form leak before/at submit" toggle — see task-c2-report.md for why no
+    // new setting was added.
+    if (settings.leakyFormGuard !== false && exfilForms.length) guardExfilForms(exfilForms, settings);
+    // 0.14.1: the four independent SW lookups start together instead of as a
+    // serial chain (icons 1.2 s + feed 10 s + risk 3 s + nrd 3 s worst case).
+    // Only the *requests* are hoisted: each result is still awaited at its
+    // original position and folded into the verdict with the same inputs and
+    // precedence as before, each keeps its own timeout, and a failure still
+    // means "no evidence" (the .catch mirrors the per-check try/catch).
+    const wantIcons = IS_TOP && settings.pageAnalysis !== false && needsPageAnalysis(signals, urlRules, domRules);
+    const iconsP = wantIcons ? withTimeout(send('hashIcons', { urls: iconCandidates() }), 1200).catch(() => null) : null;
+    // Bounded: the SW's shard fetch is itself timeout-capped, but the page
+    // verdict must never wait on a wedged SW either (resolves null on cap).
+    const feedP = withTimeout(send('checkFeed', { host: location.hostname }), 10000).catch(() => null);
+    const riskP = withTimeout(send('checkRisk', { host: location.hostname }), 3000).catch(() => null);
+    const nrdP = withTimeout(send('checkNrd', { host: location.hostname }), 3000).catch(() => null);
     const borderline = Math.max(urlRules.score, domRules.score) >= 0.3 || signals.hasPasswordField;
     if (borderline && SS.isAvailable && SS.isAvailable()) modelProb = await SS.predict(SS.extractUrlFeatures(location.href));
     // Icon hashing + the page-content model are top-frame only: favicons are a
     // document-level concept and the page model was trained on full pages.
-    if (IS_TOP && settings.pageAnalysis !== false && needsPageAnalysis(signals, urlRules, domRules)) {
+    if (wantIcons) {
       try {
-        const iconsP = withTimeout(send('hashIcons', { urls: iconCandidates() }), 1200);
         if (SS.isPageModelAvailable && SS.isPageModelAvailable()) {
           pf = SS.extractPageFeatures(document, { host: location.hostname });
           const r = SS.scorePageContent(pf); if (!Number.isNaN(r.prob)) contentProb = r.prob;
@@ -944,9 +978,7 @@
     // feed-* flag so the engagement gate below (which only ever suppresses a
     // flag-less "suspicious") can never silently swallow validated feed intel.
     try {
-      // Bounded: the SW's shard fetch is itself timeout-capped, but the page
-      // verdict must never wait on a wedged SW either (resolves null on cap).
-      const feedHit = await withTimeout(send('checkFeed', { host: location.hostname }), 10000);
+      const feedHit = await feedP;
       if (feedHit && feedHit.hit === 'block') {
         const reason = { code: 'feedBlock', kind: 'link', params: [String((feedHit.sources || []).length)] };
         verdict = Object.assign({}, verdict, {
@@ -978,7 +1010,7 @@
     // "dangerous" (only ever "suspicious"), and never touches a verdict
     // already dangerous on other grounds.
     try {
-      const riskHit = await withTimeout(send('checkRisk', { host: location.hostname }), 3000);
+      const riskHit = await riskP;
       if (riskHit && riskHit.hit) {
         verdict = SS.foldRiskEvidence(verdict, 0.30, { code: 'riskDynamicHost', kind: 'link' }, 'risk-hosting');
       }
@@ -993,7 +1025,7 @@
     // already-dangerous verdict. A genuine first-ever visit to this install
     // strengthens the reason's wording via the params slot.
     try {
-      const nrdHit = await withTimeout(send('checkNrd', { host: location.hostname }), 3000);
+      const nrdHit = await nrdP;
       if (nrdHit && nrdHit.hit) {
         const extra = nrdHit.strengthen ? ', and you have never visited it before' : '';
         // 0.13.0: a bloom-positive "new site" is evidence, not a verdict. It
@@ -1083,11 +1115,9 @@
     // The form guard runs in every frame — blocking a submit inside a
     // credential iframe is exactly the all_frames win. Content hiding stays
     // top-frame (frames are too small for the overlay tag to make sense).
-    if (foreignForms.length) SS.actions.guardForms(foreignForms, verdict.reasons, () => send('userReport', { label: 'false_positive' }));
-    // Reuses leakyFormGuard (0.10.0, Task C2): the closest existing warn-tier
-    // "form leak before/at submit" toggle — see task-c2-report.md for why no
-    // new setting was added.
-    if (settings.leakyFormGuard !== false && exfilForms.length) guardExfilForms(exfilForms, settings);
+    // Guards were attached right after collectSignals (see above); this only
+    // hands them the final verdict's reasons.
+    formGuardReasons.splice(0, formGuardReasons.length, ...(verdict.reasons || []));
     if (settings.hideScamContent && scamBlocks.length && IS_TOP) SS.actions.hideScamBlocks(scamBlocks);
   }
 
