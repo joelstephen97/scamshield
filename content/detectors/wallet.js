@@ -6,6 +6,7 @@
   window.__scamshieldWalletHook = true;
 
   const pending = new Map();
+  const timers = new Map(); // id -> fail-open timer, cleared once the overlay acks (0.14.1)
   let seq = 0;
   const analyze = (req) => {
     try {
@@ -17,7 +18,16 @@
   window.addEventListener('scamshield:wallet-decision', (e) => {
     const d = e.detail || {};
     const p = pending.get(d.id);
-    if (p) { pending.delete(d.id); p(!!d.allow); }
+    if (p) { pending.delete(d.id); clearTimeout(timers.get(d.id)); timers.delete(d.id); p(!!d.allow); }
+  });
+  // 0.14.1: the isolated world acks as soon as the overlay is on screen. From
+  // then on the request waits for the user's decision (a person reading a
+  // warning for >8 s must not be waved through). No ack = extension
+  // disabled/absent/broken, so the fail-open timer below still fires. A page
+  // can forge an ack, but that only makes its own request hang.
+  window.addEventListener('scamshield:wallet-ack', (e) => {
+    const d = e.detail || {};
+    if (pending.has(d.id) && timers.has(d.id)) { clearTimeout(timers.get(d.id)); timers.delete(d.id); }
   });
 
   function confirm(verdict) {
@@ -29,8 +39,8 @@
           detail: { id, level: verdict.level, reasons: verdict.reasons }
         }));
       } catch (_) { pending.delete(id); resolve(true); return; }
-      // Fail-open if the isolated world never answers (e.g., disabled/absent).
-      setTimeout(() => { if (pending.has(id)) { pending.delete(id); resolve(true); } }, 8000);
+      // Fail-open if the isolated world never acks (e.g., disabled/absent).
+      timers.set(id, setTimeout(() => { timers.delete(id); if (pending.has(id)) { pending.delete(id); resolve(true); } }, 8000));
     });
   }
 
@@ -38,6 +48,8 @@
     if (!provider || provider.__scamshieldWrapped || typeof provider.request !== 'function') return;
     provider.__scamshieldWrapped = true;
     const orig = provider.request.bind(provider);
+    // Best-effort guard: a page can still call the provider's prototype
+    // `request` directly and skip this wrapper.
     provider.request = async function (args) {
       const verdict = analyze(args);
       if (verdict.level === 'dangerous' || verdict.level === 'suspicious') {

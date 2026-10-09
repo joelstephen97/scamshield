@@ -323,6 +323,43 @@ test('wallet drainer request is intercepted and rejected on cancel', async ({ co
   await expect.poll(() => page.evaluate(() => window.__rejected), { timeout: 5000 }).toBe(4001);
 });
 
+// 0.14.1 (P0-4): the wallet confirmation must not fail open while the user reads.
+async function openSlowDrainer(context) {
+  const page = await context.newPage();
+  await page.goto(BASE + '/drainer-slow.html');
+  await page.waitForTimeout(600); // let the MAIN-world hook wrap window.ethereum
+  await page.click('#go');
+  await expect(page.locator('.scamshield-overlay')).toBeVisible({ timeout: 6000 });
+  return page;
+}
+test('wallet overlay: still pending after 10 s, then Cancel rejects 4001', async ({ context }) => {
+  const page = await openSlowDrainer(context);
+  await page.waitForTimeout(10000); // past the old 8 s fail-open
+  expect(await page.evaluate(() => [window.__settled, window.__reached])).toEqual([null, false]);
+  await expect(page.locator('.scamshield-overlay')).toBeVisible();
+  await page.click('.scamshield-overlay .ss-actions button'); // Cancel
+  await expect.poll(() => page.evaluate(() => window.__settled), { timeout: 5000 }).toBe(4001);
+  expect(await page.evaluate(() => window.__reached)).toBe(false);
+  await page.close();
+});
+test('wallet overlay survives an SPA navigation', async ({ context }) => {
+  const page = await openSlowDrainer(context);
+  await page.evaluate(() => history.pushState({}, '', '#next'));
+  await page.waitForTimeout(1200);
+  await expect(page.locator('.scamshield-overlay')).toBeVisible();
+  expect(await page.evaluate(() => window.__settled)).toBeNull();
+  await page.click('.scamshield-overlay .ss-actions button');
+  await expect.poll(() => page.evaluate(() => window.__settled), { timeout: 5000 }).toBe(4001);
+  await page.close();
+});
+test('wallet overlay removed by page script denies the request (4001)', async ({ context }) => {
+  const page = await openSlowDrainer(context);
+  await page.evaluate(() => document.querySelector('.scamshield-overlay').remove());
+  await expect.poll(() => page.evaluate(() => window.__settled), { timeout: 5000 }).toBe(4001);
+  expect(await page.evaluate(() => window.__reached)).toBe(false);
+  await page.close();
+});
+
 test('banner has Leave + Report actions and the overlay has evidence rows', async ({ context }) => {
   const page = await context.newPage(); await page.goto(BASE + '/phishing-login.html');
   await expect(page.locator('.scamshield-banner.danger .ss-leave')).toBeVisible({ timeout: 8000 });

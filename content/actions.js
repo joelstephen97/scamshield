@@ -211,7 +211,9 @@
     // SPA route change (scamshield:navigate) that catches the menu open
     // leaks both listeners forever.
     document.querySelectorAll('.' + NS + '-banner').forEach((n) => { if (n.__ssTeardown) n.__ssTeardown(); n.remove(); });
-    document.querySelectorAll('.' + NS + '-overlay').forEach((n) => n.remove());
+    // 0.14.1: never the wallet overlay — removing it without a decision would
+    // strand (and, on the MAIN side, eventually fail open) a pending request.
+    document.querySelectorAll('.' + NS + '-overlay:not(.' + NS + '-wallet)').forEach((n) => n.remove());
     document.querySelectorAll('.' + NS + '-hidden-block').forEach((n) => {
       n.classList.remove(NS + '-hidden-block');
       const t = n.querySelector('.' + NS + '-hidden-tag'); if (t) t.remove();
@@ -531,7 +533,7 @@
       onDecision(false, { collision: true });
       return;
     }
-    const ov = el('div', NS + '-overlay');
+    const ov = el('div', NS + '-overlay ' + NS + '-wallet');
     ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true');
     ov.setAttribute('aria-label', t('walletRiskyTitle', null, 'Risky wallet request'));
     setDir(ov);
@@ -544,7 +546,14 @@
     const cancel = button('ss-primary', t('cancelRecommended', null, 'Cancel (recommended)'));
     const proceed = button('ss-danger-ghost', t('proceedAnyway', null, 'Proceed anyway'));
     armDelayed(proceed, 3);
-    const done = (allow) => { document.removeEventListener('keydown', onKey, true); ov.remove(); onDecision(allow); };
+    let decided = false;
+    const watch = new MutationObserver(() => {
+      // 0.14.1: removed without a trusted decision = page script dismissed it
+      // (done() sets `decided` first). Treat as Cancel, never as approval.
+      if (!decided && !ov.isConnected) { decided = true; stop(); onDecision(false); }
+    });
+    const stop = () => { watch.disconnect(); document.removeEventListener('keydown', onKey, true); };
+    const done = (allow) => { if (decided) return; decided = true; stop(); ov.remove(); onDecision(allow); };
     const onKey = (e) => { if (e.key === 'Escape') { e.preventDefault(); done(false); } };
     // Fix round 2: trusted-click guarded — a drainer page must not be able to
     // .click() "Proceed anyway" for the user once the 3s arm has elapsed.
@@ -552,7 +561,12 @@
     onTrustedClick(proceed, () => done(true));
     actions.append(cancel, proceed); card.append(actions); ov.append(card);
     document.documentElement.appendChild(ov);
+    watch.observe(document, { childList: true });
+    watch.observe(document.documentElement, { childList: true });
     document.addEventListener('keydown', onKey, true); cancel.focus();
+    // Tell the MAIN-world hook the warning is on screen so its 8 s fail-open
+    // timer stops and the request waits for the user.
+    try { window.dispatchEvent(new CustomEvent('scamshield:wallet-ack', { detail: { id: detail.id } })); } catch (_) {}
   }
 
   // Privacy findings are informational (badge/popup tier), never blocking.

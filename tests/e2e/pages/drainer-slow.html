@@ -1,0 +1,13 @@
+<!doctype html><meta charset="utf-8"><title>Claim Airdrop</title>
+<h1>Claim your free airdrop</h1>
+<button id="go">Connect &amp; Claim</button>
+<script>
+  // Records whether the underlying wallet was ever reached and how the
+  // request settled, so specs can assert "still pending".
+  window.__reached = false; window.__settled = null;
+  window.ethereum = { request: async () => { window.__reached = true; return '0x1'; } };
+  document.getElementById('go').onclick = () => {
+    window.ethereum.request({ method: 'eth_sign', params: ['0xabc', '0xdeadbeef'] })
+      .then(() => { window.__settled = 'resolved'; }, (e) => { window.__settled = e && e.code; });
+  };
+</script>
