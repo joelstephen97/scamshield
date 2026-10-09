@@ -108,14 +108,13 @@ Hard numbers, not adjectives: 20 languages with full menu, warning and settings 
 
 Source code, privacy policy and issue tracker: github.com/joelstephen97/scamshield
 
-## What's new (0.14.0)
+## What's new (0.14.1)
 
-• Warnings now remember what you told them. Every warning has a control that sticks: a toast's "Don't warn me on this site" turns that kind of warning off for that site (with an undo, and a list in Settings where you can turn it back on); the warning bar's close button hides page warnings on that site for a day; "Continue anyway" on the full-page stop pauses ScamShield on that site for an hour; "Trust this site" is still forever. Before this, closing a warning stored nothing and the same warning came straight back.
-
-• Copying an install command is no longer treated as an attack. When you press a site's own copy button and it puts a terminal command or a crypto address on your clipboard, ScamShield shows a quiet notice naming the site, once per page, and does not count it as a blocked threat. The fake-CAPTCHA "paste this into Run" attack is still stopped outright.
-
-• Redesigned warnings. The warning bar is a clean full-width bar with at most three buttons and a menu for the rest, a "Why?" link, and the real and fake address side by side when a brand is involved. The full-page stop is now a plain stop page with one "Leave this page" button and everything else under "Details". Notices have a title, one sentence and a timer that pauses while you hover. Buttons are larger, keyboard focus is visible, and dark mode matches the popup.
-
-• Fewer false alarms. A site sending your details to its own subdomain is no longer reported as a leak, and the popup no longer shows evidence under a green Safe verdict.
+• The hourly scam list now keeps protecting you through a feed outage, and a damaged or suspicious update is rejected before it can block anything.
+• "Trust this site" on free-hosting sites now trusts only that one site, not everyone else's site on the same platform.
+• The on/off switch now pauses blocking too, not just the page warnings.
+• Clearer warning labels and wording in all 20 languages.
+• Scam pages on free code-hosting sites are now caught by the hourly list.
+• Steadier update checks. If you clear the feed address in Settings, it stays cleared.
 
 No new permissions. Still storage, declarativeNetRequest, alarms and http/https access, the same as every version since 0.3.1.
