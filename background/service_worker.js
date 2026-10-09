@@ -1196,7 +1196,6 @@ async function handleDnrBlocked(msg, sender) {
 // and the task brief's "Format facts" for the exact byte layouts consumed
 // here (engine/blockset.js owns the pure parsing/searching; this file owns
 // fetch, crypto.subtle, and IndexedDB via background/blockstore.js).
-const WARN_REFRESH_MIN_MS = 7 * 24 * 3600 * 1000; // warn tier: full pull at most every 7 days
 const FEED_NEG_CACHE_TTL = 24 * 3600 * 1000;      // exact-shard-confirmed-absent hosts, per SW lifetime
 const FEED_NEG_CACHE_CAP = 5000;
 const feedNegativeCache = new Map(); // normalized host -> ts of last confirmed-absent check
@@ -1213,19 +1212,7 @@ async function fetchJsonWithTimeout(url, ms) {
 // Tries each base in order (cdn first, then the raw fallback), returning the
 // first successful fetch's bytes. `bases` entries may be falsy/missing.
 async function fetchArrayBufferFromBases(bases, filename, timeoutMs) {
-  for (const base of bases) {
-    if (!base) continue;
-    try {
-      const opts = { cache: 'no-cache' };
-      // Per-base timeout so a stalled CDN connection can't hang a caller
-      // (the per-page verdict path fetches exact shards through here).
-      if (timeoutMs && typeof AbortSignal !== 'undefined' && AbortSignal.timeout) opts.signal = AbortSignal.timeout(timeoutMs);
-      const res = await fetch(base + filename, opts);
-      if (!res.ok) continue;
-      return await res.arrayBuffer();
-    } catch (_) { /* try the next base */ }
-  }
-  return null;
+  return globalThis.SSFeedSync.fetchBufFromBases(bases, filename, timeoutMs);
 }
 async function sha256Hex(buf) {
   const digest = await crypto.subtle.digest('SHA-256', buf);
@@ -1234,19 +1221,8 @@ async function sha256Hex(buf) {
 // Same base/fallback strategy as fetchArrayBufferFromBases, but for a small
 // JSON file (risk.json). Keeps the raw text alongside the parsed object so a
 // caller can hash it for optional sha256 verification without re-fetching.
-async function fetchJsonFromBases(bases, filename) {
-  for (const base of bases) {
-    if (!base) continue;
-    try {
-      const res = await fetch(base + filename, { cache: 'no-cache' });
-      if (!res.ok) continue;
-      const text = await res.text();
-      let data;
-      try { data = JSON.parse(text); } catch (_) { continue; }
-      return { data, text };
-    } catch (_) { /* try the next base */ }
-  }
-  return null;
+async function fetchJsonFromBases(bases, filename, timeoutMs) {
+  return globalThis.SSFeedSync.fetchJsonFromBases(bases, filename, timeoutMs);
 }
 // gzip -> parsed {d, s} lines, via the platform's native DecompressionStream
 // (no new dependency, no new permission — Chrome ≥80 / Firefox ≥113, both
@@ -1284,83 +1260,37 @@ async function runFeedUpdate(metaUrl) {
   if (!meta || typeof meta.version !== 'string' || !meta.urls) return { ok: false, reason: 'meta-unavailable' };
   const rec = (await globalThis.Blockstore.get()) || { version: null, blockBuf: null, warnBuf: null, warnUpdatedAt: 0, riskTables: null, riskUpdatedAt: 0, nrdBuf: null, nrdUpdatedAt: 0 };
   const bases = [meta.urls.cdn, meta.urls.fallback].filter(Boolean);
-  const Bset = globalThis.Blockset;
 
-  let blockBuf = rec.blockBuf;
-  if (meta.version !== rec.version) {
-    let updated = false;
-    if (rec.blockBuf && meta.prev && meta.prev === rec.version) {
-      const deltaBuf = await fetchArrayBufferFromBases(bases, `delta-${rec.version}.bin`);
-      if (deltaBuf && meta.sha256 && meta.sha256.deltaFromPrev && (await sha256Hex(deltaBuf)) === meta.sha256.deltaFromPrev) {
-        try { blockBuf = Bset.applyDelta(rec.blockBuf, deltaBuf); updated = true; } catch (_) { /* corrupt delta — fall through to a full pull */ }
-      }
-    }
-    if (!updated) {
-      // No usable delta chain (first install, schema change, a version gap,
-      // or the delta above failed to verify) — full pull, sha256-verified.
-      const fullBuf = await fetchArrayBufferFromBases(bases, 'set40.bin');
-      if (fullBuf && meta.sha256 && meta.sha256.set40 && (await sha256Hex(fullBuf)) === meta.sha256.set40) blockBuf = fullBuf;
-    }
+  // 0.14.1: tier-by-tier download with an incremental Blockstore save after
+  // each verified tier (background/feedsync.js), so a failing/hung late tier
+  // can no longer discard a verified block tier. Per-fetch timeouts live there.
+  const r = await globalThis.SSFeedSync.syncFeed({
+    meta, rec,
+    deps: {
+      fetchBuf: (name, ms) => fetchArrayBufferFromBases(bases, name, ms),
+      fetchJson: (name, ms) => fetchJsonFromBases(bases, name, ms),
+      sha256Hex,
+      applyDelta: (oldBuf, deltaBuf) => globalThis.Blockset.applyDelta(oldBuf, deltaBuf),
+      save: (next) => globalThis.Blockstore.save(next),
+    },
+  });
+  const partial = r.partial.length ? { partial: r.partial } : {};
+  if (!r.blockChanged && !r.warnChanged && !r.riskChanged && !r.nrdChanged) {
+    await setSettings({ lastFeedAt: Date.now() });
+    return Object.assign({ ok: true, updated: false, version: rec.version || '' }, partial);
   }
-
-  let warnBuf = rec.warnBuf;
-  let warnUpdatedAt = rec.warnUpdatedAt || 0;
-  if (!warnBuf || Date.now() - warnUpdatedAt >= WARN_REFRESH_MIN_MS) {
-    const fetchedWarn = await fetchArrayBufferFromBases(bases, 'warn40.bin');
-    // sha256-verified like the block tier; an older meta.json without a warn
-    // hash (pre-fix feeds) installs unverified rather than never updating.
-    if (fetchedWarn && (!(meta.sha256 && meta.sha256.warn40) || (await sha256Hex(fetchedWarn)) === meta.sha256.warn40)) {
-      warnBuf = fetchedWarn; warnUpdatedAt = Date.now();
-    }
-  }
-
-  // risk.json (Task B3): abused-TLD weight table + dyndns/hoster membership
-  // arrays, same version-agnostic per-version files as set40.bin/warn40.bin,
-  // refreshed on the same 7-day cadence as the warn tier (no delta chain for
-  // this small file either). sha256-verified only when meta.json actually
-  // provides one — future-proofed the same way warn40's verification is.
-  let riskTables = rec.riskTables;
-  let riskUpdatedAt = rec.riskUpdatedAt || 0;
-  let riskChanged = false;
-  if (!riskTables || Date.now() - riskUpdatedAt >= WARN_REFRESH_MIN_MS) {
-    const fetchedRisk = await fetchJsonFromBases(bases, 'risk.json');
-    if (fetchedRisk && fetchedRisk.data && typeof fetchedRisk.data === 'object') {
-      const okHash = !(meta.sha256 && meta.sha256.risk) ||
-        (await sha256Hex(new TextEncoder().encode(fetchedRisk.text))) === meta.sha256.risk;
-      if (okHash) { riskTables = fetchedRisk.data; riskUpdatedAt = Date.now(); riskChanged = true; }
-    }
-  }
-
-  // nrd.bloom (0.10.0, Task C3): newly-registered-domains Bloom filter, same
-  // version-agnostic per-version file as warn40.bin/risk.json, refreshed on
-  // the same 7-day warn-tier cadence (no delta chain — a Bloom filter has no
-  // meaningful "added/removed" diff). sha256-verified against meta.nrd.sha256
-  // only when meta.json actually provides it (future-proofed like warn40).
-  let nrdBuf = rec.nrdBuf;
-  let nrdUpdatedAt = rec.nrdUpdatedAt || 0;
-  let nrdChanged = false;
-  if (!nrdBuf || Date.now() - nrdUpdatedAt >= WARN_REFRESH_MIN_MS) {
-    const fetchedNrd = await fetchArrayBufferFromBases(bases, 'nrd.bloom');
-    const okHash = !(meta.nrd && meta.nrd.sha256) || (fetchedNrd && (await sha256Hex(fetchedNrd)) === meta.nrd.sha256);
-    if (fetchedNrd && okHash) { nrdBuf = fetchedNrd; nrdUpdatedAt = Date.now(); nrdChanged = true; }
-  }
-
-  const blockChanged = blockBuf !== rec.blockBuf;
-  const warnChanged = warnBuf !== rec.warnBuf;
-  if (!blockChanged && !warnChanged && !riskChanged && !nrdChanged) { await setSettings({ lastFeedAt: Date.now() }); return { ok: true, updated: false, version: rec.version || '' }; }
-
-  const nextVersion = blockChanged ? meta.version : (rec.version || '');
-  await globalThis.Blockstore.save({ version: nextVersion, blockBuf, warnBuf, warnUpdatedAt, riskTables, riskUpdatedAt, nrdBuf, nrdUpdatedAt, urls: meta.urls });
+  const nextVersion = r.version;
   // Mirror the (small, pure-lookup) abused-TLD table into settings so
   // content_script.js's already-awaited getSettings() carries it straight
   // into scoreUrl() — no new message round-trip for this half of risk.json.
   // dyndns/hoster membership needs an async hash and stays behind the
   // checkRisk message (checkRiskHosting() below) instead.
-  if (riskChanged && riskTables && riskTables.tlds && typeof riskTables.tlds === 'object') {
+  const riskTables = r.rec.riskTables;
+  if (r.riskChanged && riskTables && riskTables.tlds && typeof riskTables.tlds === 'object') {
     await setSettings({ riskTlds: riskTables.tlds });
   }
   await setSettings({ lastFeedVersion: nextVersion, lastFeedAt: Date.now() });
-  return { ok: true, updated: true, version: nextVersion, blockUpdated: blockChanged, warnUpdated: warnChanged, riskUpdated: riskChanged, nrdUpdated: nrdChanged };
+  return Object.assign({ ok: true, updated: true, version: nextVersion, blockUpdated: r.blockChanged, warnUpdated: r.warnChanged, riskUpdated: r.riskChanged, nrdUpdated: r.nrdChanged }, partial);
 }
 
 // Dyndns/hoster membership evidence (Task B3): the SW computes the SHA-256 of

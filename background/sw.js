@@ -21,4 +21,5 @@ import '../ui/reasons.js';
 import './stats.js';
 import './blockstore.js';
 import './update.js';
+import './feedsync.js';
 import './service_worker.js';
