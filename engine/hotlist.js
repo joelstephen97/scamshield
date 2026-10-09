@@ -16,6 +16,10 @@
   // rules in the HOT_BASE range.
   const MAX_DOMAINS = 20000;
   const WINDOW_MS = 48 * 3600 * 1000;
+  // 0.14.1 stale-while-revalidate: a list past its ttlMinutes keeps being
+  // applied (a feed outage must not tear down every HOT/PATH rule) until this
+  // hard cap, measured from generatedAt. Beyond it the list is dropped.
+  const MAX_STALE_MS = 48 * 3600 * 1000;
   const HOST_RE = /^[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?$/;
 
   function parseHot(json, now) {
@@ -46,6 +50,12 @@
     return !hot || (t - hot.generatedAt) > hot.ttlMinutes * 60000;
   }
 
+  // Past the hard cap (0.14.1): max(ttl, MAX_STALE_MS) after generatedAt.
+  function isExpired(hot, now) {
+    const t = typeof now === 'number' ? now : Date.now();
+    return !hot || (t - hot.generatedAt) > Math.max(hot.ttlMinutes * 60000, MAX_STALE_MS);
+  }
+
   // Client-side defence in depth against a poisoned upstream (R2): nothing
   // the user trusts, no verified registry namespace, no real brand domain,
   // and nothing on SAFE_DOMAINS can ever become a hot rule, whatever the
@@ -61,8 +71,8 @@
   // the strongest of the four.
   function guardHot(hot, settings, now) {
     const t = typeof now === 'number' ? now : Date.now();
-    const dropped = { apex: 0, exempt: 0, safe: 0, brand: 0, verified: 0, expired: 0 };
-    if (isStale(hot, t)) { dropped.expired = (hot ? hot.domains.length + hot.paths.length : 0); return { domains: [], paths: [], dropped }; }
+    const dropped = { apex: 0, exempt: 0, safe: 0, brand: 0, verified: 0, expired: 0, aged: 0 };
+    if (isExpired(hot, t)) { dropped.expired = (hot ? hot.domains.length + hot.paths.length : 0); return { domains: [], paths: [], dropped }; }
     const exempt = new Set(D.exemptDomains(settings || {}, t));
     const brands = new Set(C.KNOWN_BRAND_REGISTRABLES || []);
     const verified = typeof C.isVerifiedNamespace === 'function' ? C.isVerifiedNamespace : () => false;
@@ -92,8 +102,12 @@
       if (C.isSafeHost(h)) { dropped.safe++; return false; }
       return true;
     };
-    const domains = hot.domains.map((d) => d.h).filter(keep);
-    const paths = hot.paths.filter((p) => keep(p.h)).map((p) => ({ h: p.h, p: p.p }));
+    // 0.14.1: parseHot only ages entries against fetch time; a list kept past
+    // its TTL must also shed entries that have since left the 48 h window.
+    const minCutoff = Math.floor((t - WINDOW_MS) / 60000);
+    const fresh = (e) => { if (typeof e.t === 'number' && e.t < minCutoff) { dropped.aged++; return false; } return true; };
+    const domains = hot.domains.filter(fresh).map((d) => d.h).filter(keep);
+    const paths = hot.paths.filter(fresh).filter((p) => keep(p.h)).map((p) => ({ h: p.h, p: p.p }));
     return { domains, paths, dropped };
   }
 
@@ -103,5 +117,5 @@
   function hotRuleIds(existing) {
     return (existing || []).filter((r) => D.inRange(r.id, D.HOT_BASE) || D.inRange(r.id, D.PATH_BASE)).map((r) => r.id);
   }
-  return { MAX_DOMAINS, WINDOW_MS, parseHot, isStale, guardHot, hotRules, hotRuleIds };
+  return { MAX_DOMAINS, WINDOW_MS, MAX_STALE_MS, parseHot, isStale, isExpired, guardHot, hotRules, hotRuleIds };
 });

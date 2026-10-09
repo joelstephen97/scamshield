@@ -45,12 +45,15 @@ const minNow = () => Math.floor(Date.now() / 60000);
 // ({ v, generatedAt, ttlMinutes, domains:[{h,s,t}], paths:[{h,p,s,t}],
 // removed:[h] }, `t` in epoch MINUTES — engine/hotlist.js drops anything
 // older than its 48h window).
-function writeHot(name, domains, paths, removed) {
+// Production ships ttlMinutes 1440 (0.14.1 fixture parity); `opts` lets a case
+// age the file (`ageMs`) or override the TTL.
+function writeHot(name, domains, paths, removed, opts) {
   fs.mkdirSync(FEED_DIR, { recursive: true });
+  const o = opts || {};
   const body = {
     v: 1,
-    generatedAt: Date.now(),
-    ttlMinutes: 60,
+    generatedAt: Date.now() - (o.ageMs || 0),
+    ttlMinutes: o.ttlMinutes || 1440,
     domains: (domains || []).map((h) => ({ h, s: 'pd', t: minNow() })),
     paths: (paths || []).map((p) => ({ h: p.h, p: p.p, s: 'pdb', t: minNow() })),
     removed: removed || []
@@ -174,4 +177,38 @@ test('client guard: SAFE_DOMAINS, real brand domains and the user allowlist neve
   const rules = await hotRuleIds(sw);
   const domains = rules.flatMap((r) => r.condition.requestDomains || []);
   expect(domains).toEqual([HOT_HOST]);
+});
+
+// 0.14.1 stale-while-revalidate: a list 7 h past a 360-minute TTL is still
+// applied; the rules must survive a SW restart (boot path) and a 304 refresh.
+test('a hot list past its TTL (7 h old, ttl 360) keeps its rules across the boot path and a 304 refresh', async ({ context }) => {
+  const sw = context.serviceWorkers()[0];
+  const stale = writeHot('hot-stale.json', [HOT_HOST], [{ h: PATH_HOST, p: '/bad-path' }], [], { ageMs: 7 * 3600000, ttlMinutes: 360 });
+  const r = await installHot(sw, stale);
+  expect(r.ok).toBe(true);
+  const hasHot = (rules) => rules.some((x) => x.id >= 400000 && x.id < 500000 && (x.condition.requestDomains || []).includes(HOT_HOST));
+  expect(hasHot(await hotRuleIds(sw))).toBe(true);
+
+  // Boot path: what ensureNetworkRules() does on a cold-woken worker — rebuild
+  // from storage.local.hotList with applyHotRules(undefined).
+  await sw.evaluate(() => applyHotRules(undefined));
+  const afterBoot = await hotRuleIds(sw);
+  expect(hasHot(afterBoot)).toBe(true);
+  expect(afterBoot.some((x) => x.id >= 500000 && x.id < 600000)).toBe(true);
+
+  // 304 path: runHotUpdate() without an override, fetch answering 304.
+  await sw.evaluate(() => {
+    globalThis.__realFetch = globalThis.fetch;
+    globalThis.fetch = async () => new Response(null, { status: 304 });
+  });
+  try {
+    const r304 = await sw.evaluate(() => runHotUpdate());
+    expect(r304).toMatchObject({ ok: true, updated: false });
+  } finally {
+    await sw.evaluate(() => { globalThis.fetch = globalThis.__realFetch; });
+  }
+  expect(hasHot(await hotRuleIds(sw))).toBe(true);
+  const st = await sw.evaluate(() => getHotStatus());
+  expect(st.count).toBe(1);
+  expect(st.dropped.expired).toBe(0);
 });

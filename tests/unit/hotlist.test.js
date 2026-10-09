@@ -47,13 +47,44 @@ test('guardHot: drops user exemptions, SAFE_DOMAINS, known brand registrables, v
   const out = H.guardHot(hot, { allowlist: ['trusted.example'], pausedSites: { 'paused.example': NOW + 3600000 } }, NOW);
   assert.deepStrictEqual(out.domains, ['signin-att-verifier.webflow.io']);
   assert.deepStrictEqual(out.paths, [{ h: 'rb.gy', p: '/88c5r3' }]);
-  assert.deepStrictEqual(out.dropped, { apex: 0, exempt: 2, safe: 1, brand: 1, verified: 1, expired: 0 });
+  assert.deepStrictEqual(out.dropped, { apex: 0, exempt: 2, safe: 1, brand: 1, verified: 1, expired: 0, aged: 0 });
 });
 
 test('guardHot: a path entry on an exempt host is dropped too; stale file yields nothing', () => {
   const hot = H.parseHot(good(), NOW);
   assert.deepStrictEqual(H.guardHot(hot, { allowlist: ['rb.gy'] }, NOW).paths, []);
-  assert.deepStrictEqual(H.guardHot(hot, {}, NOW + 7 * 3600000), { domains: [], paths: [], dropped: { apex: 0, exempt: 0, safe: 0, brand: 0, verified: 0, expired: 2 } });
+  assert.deepStrictEqual(H.guardHot(hot, {}, NOW + 49 * 3600000), { domains: [], paths: [], dropped: { apex: 0, exempt: 0, safe: 0, brand: 0, verified: 0, expired: 2, aged: 0 } });
+});
+
+// 0.14.1 stale-while-revalidate: past TTL the list keeps working until the
+// 48 h hard cap from generatedAt.
+test('isExpired / guardHot: list past its TTL is still applied until 48 h after generatedAt', () => {
+  const hot = H.parseHot(good(), NOW); // generatedAt = NOW - 60 s, ttl 360
+  const at = (h) => hot.generatedAt + h * 3600000;
+  assert.strictEqual(H.isStale(hot, at(7)), true);
+  assert.strictEqual(H.isExpired(hot, at(7)), false);
+  assert.strictEqual(H.isExpired(hot, at(30)), false);
+  assert.strictEqual(H.isExpired(hot, at(49)), true);
+  assert.strictEqual(H.isExpired(null, NOW), true);
+  assert.deepStrictEqual(H.guardHot(hot, {}, at(7)).domains, ['signin-att-verifier.webflow.io']);
+  assert.strictEqual(H.guardHot(hot, {}, at(7)).dropped.expired, 0);
+  assert.deepStrictEqual(H.guardHot(hot, {}, at(30)).paths, [{ h: 'rb.gy', p: '/88c5r3' }]);
+  const out = H.guardHot(hot, {}, at(49));
+  assert.deepStrictEqual([out.domains, out.paths, out.dropped.expired], [[], [], 2]);
+  // a feed that ships a TTL longer than the cap keeps its own TTL
+  assert.strictEqual(H.isExpired(Object.assign({}, hot, { ttlMinutes: 4000 }), at(49)), false);
+});
+
+test('guardHot: entries older than the 48 h window at apply time are dropped as `aged`', () => {
+  const hot = H.parseHot(good(), NOW);
+  hot.domains.push({ h: 'older.example', s: 'pd', t: MIN(NOW) - 40 * 60 });
+  hot.paths.push({ h: 'rb.gy', p: '/old', s: 'pdb', t: MIN(NOW) - 40 * 60 });
+  // 10 h later: the 40 h-old rows are now 50 h old; the 30-min and 10-min rows are ~10.5 h old.
+  const out = H.guardHot(hot, {}, NOW + 10 * 3600000);
+  assert.deepStrictEqual(out.domains, ['signin-att-verifier.webflow.io']);
+  assert.deepStrictEqual(out.paths, [{ h: 'rb.gy', p: '/88c5r3' }]);
+  assert.strictEqual(out.dropped.aged, 2);
+  assert.strictEqual(out.dropped.expired, 0);
 });
 
 // 0.13.0 final review (C1): a feed row naming a whole namespace rather than a
