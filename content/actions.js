@@ -575,7 +575,12 @@
     document.addEventListener('keydown', onKey, true); cancel.focus();
     // Tell the MAIN-world hook the warning is on screen so its 8 s fail-open
     // timer stops and the request waits for the user.
-    try { window.dispatchEvent(new CustomEvent('scamshield:wallet-ack', { detail: { id: detail.id } })); } catch (_) {}
+    // (0.14.1) cloneInto on Firefox so the MAIN-world hook can read detail.id
+    // (Xray wrappers otherwise throw "Permission denied"); Chrome has no cloneInto.
+    try {
+      const d = { id: detail.id };
+      window.dispatchEvent(new CustomEvent('scamshield:wallet-ack', { detail: typeof cloneInto === 'function' ? cloneInto(d, window) : d }));
+    } catch (_) {}
   }
 
   // Privacy findings are informational (badge/popup tier), never blocking.

@@ -105,8 +105,13 @@
   }
 
   // --- MAIN-world detector bridges (registered once; re-injection guard above) ---
+  // (0.14.1) Firefox: an object built here and handed to a MAIN-world listener
+  // is an Xray-wrapped cross-compartment object, so the page-side hook reads
+  // "Permission denied" on e.detail.id and the request fails open. cloneInto
+  // (Firefox-only global) copies it into the page; Chrome has none, unchanged.
+  const pageDetail = (o) => (typeof cloneInto === 'function' ? cloneInto(o, window) : o);
   function reply(id, allow) {
-    try { window.dispatchEvent(new CustomEvent('scamshield:wallet-decision', { detail: { id, allow } })); } catch (_) {}
+    try { window.dispatchEvent(new CustomEvent('scamshield:wallet-decision', { detail: pageDetail({ id, allow }) })); } catch (_) {}
   }
   window.addEventListener('scamshield:wallet-confirm', async (e) => {
     const detail = (e && e.detail) || {};
