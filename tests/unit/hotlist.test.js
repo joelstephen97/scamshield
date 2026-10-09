@@ -132,11 +132,23 @@ test('assessHot: a poisoned list (30 safe/brand/verified hits) is rejected', () 
   assert.strictEqual(H.assessHot(hotOf(5), dropped({ exempt: 99, apex: 99, aged: 99 }), 5).ok, true);
 });
 
-test('assessHot: more than 3x growth over the previous list is rejected; first load and 3x exactly are fine', () => {
-  const r = H.assessHot(hotOf(301), dropped(), 100);
+test('assessHot: growth is floored and soft', () => {
+  assert.strictEqual(H.GROWTH_FLOOR, 2000);
+  // live 5000 previous + 16000 -> rejected; 15000 (3x) is fine
+  const r = H.assessHot(hotOf(16000), dropped(), 5000);
   assert.deepStrictEqual([r.ok, r.reason], [false, 'growth']);
-  assert.strictEqual(H.assessHot(hotOf(300), dropped(), 100).ok, true);
+  assert.strictEqual(H.assessHot(hotOf(15000), dropped(), 5000).ok, true);
+  // tiny (300) previous + 5000 -> accepted (floor 2000 x 3 = 6000)
+  assert.strictEqual(H.assessHot(hotOf(5000), dropped(), 300).ok, true);
+  assert.strictEqual(H.assessHot(hotOf(6001), dropped(), 300).ok, false);
+  // first load: no baseline
   assert.strictEqual(H.assessHot(hotOf(5000), dropped(), 0).ok, true);
+  // third consecutive growth rejection -> accepted; two are not enough
+  assert.strictEqual(H.assessHot(hotOf(16000), dropped(), 5000, 2).ok, false);
+  assert.strictEqual(H.assessHot(hotOf(16000), dropped(), 5000, 3).ok, true);
+  // ...but the hard checks still bite
+  assert.strictEqual(H.assessHot(hotOf(16000), dropped({ brand: 26 }), 5000, 3).ok, false);
+  assert.strictEqual(H.assessHot({ domains: new Array(H.MAX_DOMAINS + 1) }, dropped(), 5000, 3).reason, 'too-many');
 });
 
 test('assessHot: over MAX_DOMAINS is rejected; a normal list is ok', () => {
@@ -145,8 +157,9 @@ test('assessHot: over MAX_DOMAINS is rejected; a normal list is ok', () => {
   assert.deepStrictEqual(H.assessHot(hotOf(50), dropped({ brand: 2 }), 40), { ok: true, reason: '' });
 });
 
-test('guardOtaFilters: drops safe/brand/verified hosts from OTA filters, keeps the rest, counts drops', () => {
-  const out = H.guardOtaFilters(['||evil-login.example^', '||google.com^', '||www.paypal.com^', '||hdfc.bank.in^', '||wikipedia.org^', '/odd-filter/']);
-  assert.deepStrictEqual(out.kept, ['||evil-login.example^', '/odd-filter/']);
+test('guardOtaFilters: drops only exact safe/brand hosts (or www.); tenant/brand subdomains stay blockable', () => {
+  const out = H.guardOtaFilters(['||evil-login.example^', '||google.com^', '||www.paypal.com^', '||hdfc.bank.in^', '||wikipedia.org^', '/odd-filter/',
+    '||evil.github.io^', '||x.sharepoint.com^', '||phish.storage.googleapis.com^']);
+  assert.deepStrictEqual(out.kept, ['||evil-login.example^', '/odd-filter/', '||evil.github.io^', '||x.sharepoint.com^', '||phish.storage.googleapis.com^']);
   assert.strictEqual(out.dropped, 4);
 });

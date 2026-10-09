@@ -847,8 +847,13 @@ async function applyNetworkRules(filters, enabled) {
   // block google.com. Dropped silently, counted for the diagnostics.
   if (enabled && Array.isArray(filters)) {
     const g = globalThis.SSHot.guardOtaFilters(filters);
+    // Everything dropped: keep the rules already installed rather than
+    // rebuilding down to the static set.
+    if (g.dropped && !g.kept.length) { try { await api.storage.local.set({ otaDropped: g.dropped }); } catch (_) {} return { ok: true, redirect: true, count: 0, kept: true }; }
     filters = g.kept;
-    try { await api.storage.local.set({ otaDropped: g.dropped }); } catch (_) {}
+    // Only record real drops: a boot re-apply of already-filtered stored
+    // filters drops 0 and must not reset the count.
+    if (g.dropped) { try { await api.storage.local.set({ otaDropped: g.dropped }); } catch (_) {} }
   }
   if (enabled && Array.isArray(filters) && filters.length) { try { await api.storage.local.set({ otaFilters: filters.map(String) }); } catch (_) {} }
   const existing = await api.declarativeNetRequest.getDynamicRules();
@@ -986,7 +991,7 @@ async function runHotUpdate(urlOverride) {
   }
   const url = urlOverride || DEFAULT_HOT_URL;
   let prev = {};
-  try { prev = await api.storage.local.get(['hotList', 'hotEtag', 'hotUpdatedAt']); } catch (_) {}
+  try { prev = await api.storage.local.get(['hotList', 'hotEtag', 'hotUpdatedAt', 'hotGrowthRejects']); } catch (_) {}
   const headers = {};
   if (!urlOverride && prev.hotEtag) headers['If-None-Match'] = prev.hotEtag;
   let res;
@@ -996,7 +1001,10 @@ async function runHotUpdate(urlOverride) {
     clearTimeout(timer);
   } catch (_) { return { ok: false, updated: false, reason: 'fetch-failed' }; }
   if (res.status === 304) {
+    // 304 = the server still serves the list we accepted: any earlier
+    // reject notice is stale.
     await api.storage.local.set({ hotUpdatedAt: Date.now() });
+    try { await api.storage.local.remove(['hotRejectReason', 'hotRejectedAt', 'hotGrowthRejects']); } catch (_) {}
     hotReadyPromise = applyHotRules(prev.hotList || null, s).catch(() => {});
     await hotReadyPromise;
     return { ok: true, updated: false };
@@ -1007,10 +1015,14 @@ async function runHotUpdate(urlOverride) {
   if (!hot) return { ok: false, updated: false, reason: 'bad-shape' };
   // 0.14.1 kill switch: judge the list BEFORE it touches rules or storage. A
   // reject leaves the previous stored list and installed rules untouched.
-  const prevCount = prev.hotList && Array.isArray(prev.hotList.domains) ? prev.hotList.domains.length : 0;
-  const verdict = globalThis.SSHot.assessHot(hot, globalThis.SSHot.guardHot(hot, s, Date.now()), prevCount);
+  // The growth baseline only counts a previous list that is still live; an
+  // expired one (feed outage) must not freeze updates.
+  const prevLive = prev.hotList && Array.isArray(prev.hotList.domains) && !globalThis.SSHot.isExpired(prev.hotList, Date.now());
+  const prevCount = prevLive ? prev.hotList.domains.length : 0;
+  const growthRejects = prev.hotGrowthRejects || 0;
+  const verdict = globalThis.SSHot.assessHot(hot, globalThis.SSHot.guardHot(hot, s, Date.now()), prevCount, growthRejects);
   if (!verdict.ok) {
-    try { await api.storage.local.set({ hotRejectedAt: Date.now(), hotRejectReason: verdict.reason }); } catch (_) {}
+    try { await api.storage.local.set({ hotRejectedAt: Date.now(), hotRejectReason: verdict.reason, hotGrowthRejects: verdict.reason === 'growth' ? growthRejects + 1 : 0 }); } catch (_) {}
     return { ok: false, updated: false, reason: 'rejected-' + verdict.reason };
   }
   // Apply first, persist second: a list whose apply threw must not become the
@@ -1024,7 +1036,7 @@ async function runHotUpdate(urlOverride) {
   }
   try {
     await api.storage.local.set({ hotList: hot, hotEtag: res.headers.get('ETag') || '', hotUpdatedAt: Date.now() });
-    await api.storage.local.remove(['hotRejectReason', 'hotRejectedAt']);
+    await api.storage.local.remove(['hotRejectReason', 'hotRejectedAt', 'hotGrowthRejects']);
   } catch (_) {}
   return { ok: true, updated: true, count: r.rules };
 }

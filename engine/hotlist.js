@@ -25,6 +25,12 @@
   // multiple of the previous list, is treated as poisoned and not applied.
   const MAX_TRUST_DROPPED = 25;
   const MAX_GROWTH_FACTOR = 3;
+  // Growth is a SOFT check (fix round 1): the baseline is floored so a small
+  // list after a source outage cannot freeze updates, and after this many
+  // consecutive growth rejections the list is accepted anyway (the hard
+  // trusted-hosts / too-many checks still apply).
+  const GROWTH_FLOOR = 2000;
+  const MAX_GROWTH_REJECTS = 3;
   const HOST_RE = /^[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?$/;
 
   function parseHot(json, now) {
@@ -122,13 +128,13 @@
   // trust-based drops count (a feed that names google.com 30 times is
   // poisoned); exempt/apex/aged drops are routine and say nothing about the
   // feed's honesty.
-  function assessHot(parsed, guardResult, prevCount) {
+  function assessHot(parsed, guardResult, prevCount, growthRejects) {
     const n = parsed && parsed.domains ? parsed.domains.length : 0;
     const d = (guardResult && guardResult.dropped) || {};
     const trusted = (d.brand || 0) + (d.safe || 0) + (d.verified || 0);
     if (trusted > MAX_TRUST_DROPPED) return { ok: false, reason: 'trusted-hosts' };
-    if (prevCount > 0 && n > prevCount * MAX_GROWTH_FACTOR) return { ok: false, reason: 'growth' };
     if (n > MAX_DOMAINS) return { ok: false, reason: 'too-many' };
+    if (prevCount > 0 && n > Math.max(prevCount, GROWTH_FLOOR) * MAX_GROWTH_FACTOR && !((growthRejects || 0) >= MAX_GROWTH_REJECTS)) return { ok: false, reason: 'growth' };
     return { ok: true, reason: '' };
   }
 
@@ -139,9 +145,19 @@
     const brands = new Set(C.KNOWN_BRAND_REGISTRABLES || []);
     const verified = typeof C.isVerifiedNamespace === 'function' ? C.isVerifiedNamespace : () => false;
     const kept = []; let dropped = 0;
+    // Fix round 1: only an entry that IS a safe/brand registrable (or its
+    // www. form) is dropped. A strict subdomain of a brand/safe/tenant apex
+    // (evil.github.io, x.sharepoint.com, phish.storage.googleapis.com) is
+    // exactly where phishing kits live and stays blockable.
+    const protectedHost = (h) => {
+      if (verified(h)) return true;
+      const bare = h.replace(/^www\./, '');
+      if (C.registrableDomain(bare) !== bare) return false;
+      return brands.has(bare) || C.isSafeHost(bare);
+    };
     for (const f of filters || []) {
       const h = D.domainOfFilter(f);
-      if (h && (verified(h) || brands.has(C.registrableDomain(h)) || brands.has(h) || C.isSafeHost(h))) { dropped++; continue; }
+      if (h && protectedHost(h)) { dropped++; continue; }
       kept.push(f);
     }
     return { kept, dropped };
@@ -153,5 +169,5 @@
   function hotRuleIds(existing) {
     return (existing || []).filter((r) => D.inRange(r.id, D.HOT_BASE) || D.inRange(r.id, D.PATH_BASE)).map((r) => r.id);
   }
-  return { MAX_DOMAINS, WINDOW_MS, MAX_STALE_MS, MAX_TRUST_DROPPED, MAX_GROWTH_FACTOR, parseHot, isStale, isExpired, guardHot, assessHot, guardOtaFilters, hotRules, hotRuleIds };
+  return { MAX_DOMAINS, WINDOW_MS, MAX_STALE_MS, MAX_TRUST_DROPPED, MAX_GROWTH_FACTOR, GROWTH_FLOOR, MAX_GROWTH_REJECTS, parseHot, isStale, isExpired, guardHot, assessHot, guardOtaFilters, hotRules, hotRuleIds };
 });

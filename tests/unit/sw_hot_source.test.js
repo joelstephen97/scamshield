@@ -138,3 +138,8 @@ test('0.14.1: applyNetworkRules filters OTA domains through guardOtaFilters and 
   assert.ok(/guardOtaFilters\(/.test(body) && /otaDropped/.test(body));
   assert.ok(body.indexOf('guardOtaFilters(') < body.indexOf('buildBlockRules('), 'filtering precedes rule building');
 });
+test('0.14.1 fix round 1: growth baseline ignores an expired previous list; soft counter; 304 clears the notice', () => {
+  const body = functionBody('runHotUpdate');
+  assert.ok(/isExpired\(prev\.hotList/.test(body) && /hotGrowthRejects/.test(body));
+  assert.ok(/remove\(\['hotRejectReason', 'hotRejectedAt', 'hotGrowthRejects'\]\)/.test(body.slice(0, body.indexOf('res.ok'))), '304 path clears reject state');
+});

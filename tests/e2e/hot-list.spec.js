@@ -252,3 +252,19 @@ test('kill switch: an OTA filter naming google.com yields no block/redirect rule
   expect(domains).not.toContain('google.com');
   expect((await sw.evaluate(() => chrome.storage.local.get('otaDropped'))).otaDropped).toBe(1);
 });
+
+test('kill switch: growth is soft - after 3 consecutive growth rejections the next one is accepted', async ({ context }) => {
+  const sw = context.serviceWorkers()[0];
+  const mk = (n, tag) => Array.from({ length: n }, (_, i) => `${tag}${i}.example`);
+  expect((await installHot(sw, writeHot('hot.json', mk(2500, 'a'), [], []))).updated).toBe(true);
+  const big = writeHot('hot.json', mk(8000, 'b'), [], []);   // > 3 x max(2500, 2000)
+  for (let i = 0; i < 3; i++) {
+    const r = await sw.evaluate((u) => runHotUpdate(u), big);
+    expect(r.reason).toBe('rejected-growth');
+  }
+  const r4 = await sw.evaluate((u) => runHotUpdate(u), big);
+  expect(r4.updated).toBe(true);
+  const st = await sw.evaluate(() => chrome.storage.local.get(['hotRejectReason', 'hotGrowthRejects']));
+  expect(st.hotRejectReason).toBeUndefined();
+  expect(st.hotGrowthRejects).toBeUndefined();
+});
