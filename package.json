@@ -45,11 +45,11 @@
     "release:notes": "node tools/release-notes.js"
   },
   "devDependencies": {
-    "@playwright/test": "^1.48.0",
-    "chrome-webstore-upload-cli": "^4.0.1",
+    "@playwright/test": "^1.64.0",
+    "chrome-webstore-upload-cli": "^4.0.2",
     "linkedom": "^0.18.13",
     "qrcode": "^1.5.4",
-    "web-ext": "^10.6.0"
+    "web-ext": "^10.7.0"
   },
   "engines": {
     "node": ">=18"
