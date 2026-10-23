@@ -504,5 +504,9 @@
   "gbR5": { "message": "Alasan lain" },
   "gbCopied": { "message": "Catatan singkat sudah disalin ke papan klip Anda. Tidak ada yang dikirim. Jika ingin bercerita lebih banyak, tempelkan ke isu GitHub." },
   "gbIssue": { "message": "Buka isu GitHub" },
-  "gbStatic": { "message": "Halaman ini statis: tanpa akun, tanpa analitik, dan tidak ada yang dikirim dari sini. Semua yang disimpan ScamShield ada di browser Anda dan ikut hilang bersamanya." }
+  "gbStatic": { "message": "Halaman ini statis: tanpa akun, tanpa analitik, dan tidak ada yang dikirim dari sini. Semua yang disimpan ScamShield ada di browser Anda dan ikut hilang bersamanya." },
+  "demoFieldEmail": { "message": "Email" },
+  "demoFieldPassword": { "message": "Kata sandi" },
+  "demoFieldLogin": { "message": "Masuk" },
+  "demoRescue": { "message": "Kembali ke penyiapan (ini hanya demo)" }
 }

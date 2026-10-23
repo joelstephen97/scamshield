@@ -244,9 +244,11 @@ test('0.14.1 copy: interstitial no longer claims nothing was sent; en values are
 // (scripts/gen-goodbye-i18n.js; tests/unit/goodbye_page.test.js checks the page is in sync).
 const V0150_T19_KEYS = [
   'blockedLeadEscalated', 'obStepCount', 'obS1Title', 'obS1Body', 'obS1Btn', 'obS2Title', 'obS2Body', 'obNext', 'obBack',
-  'demoLabel', 'demoSub', 'demoTabBanner', 'demoTabStop', 'demoBack', 'demoFakeHead',
+  'demoLabel', 'demoSub', 'demoTabBanner', 'demoTabStop', 'demoBack', 'demoFakeHead', 'demoFieldEmail', 'demoFieldPassword', 'demoFieldLogin', 'demoRescue',
   'gbTitle', 'gbUninstalledV', 'gbPick', 'gbR1', 'gbR2', 'gbR3', 'gbR4', 'gbR5', 'gbCopied', 'gbIssue', 'gbStatic'
 ];
+// Genuine loanwords that are the same word in the target language (form-field labels).
+const LOANWORD_SAME = new Set(['id:demoFieldEmail', 'vi:demoFieldEmail', 'it:demoFieldEmail', 'it:demoFieldPassword']);
 for (const loc of NON_EN_LOCALES) {
   test(`0.15.0 task 19 strings: ${loc} is translated (differs from en)`, () => {
     const data = JSON.parse(fs.readFileSync(path.join(LOCALES_DIR, loc, 'messages.json'), 'utf8'));
@@ -254,7 +256,7 @@ for (const loc of NON_EN_LOCALES) {
     for (const k of V0150_T19_KEYS) {
       const v = data[k] && data[k].message;
       if (!v) { issues.push(`${k}: missing`); continue; }
-      if (v === EN[k].message) issues.push(`${k}: identical to en`);
+      if (v === EN[k].message && !LOANWORD_SAME.has(loc + ':' + k)) issues.push(`${k}: identical to en`);
       else if (!LATIN_SCRIPT.has(loc) && !/[^\x00-\x7F]/.test(v)) issues.push(`${k}: no non-ASCII text`);
     }
     assert.deepStrictEqual(issues, [], `${loc}: ${issues.join('; ')}`);

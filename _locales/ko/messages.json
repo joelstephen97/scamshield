@@ -504,5 +504,9 @@
   "gbR5": { "message": "기타" },
   "gbCopied": { "message": "짧은 메모를 클립보드에 복사했습니다. 아무것도 전송되지 않았습니다. 더 이야기하고 싶다면 GitHub 이슈에 붙여넣어 주세요." },
   "gbIssue": { "message": "GitHub 이슈 열기" },
-  "gbStatic": { "message": "이 페이지는 정적입니다. 계정도, 분석도 없으며 여기에서 전송되는 것은 없습니다. ScamShield가 저장한 모든 것은 브라우저 안에 있었고 브라우저와 함께 사라졌습니다." }
+  "gbStatic": { "message": "이 페이지는 정적입니다. 계정도, 분석도 없으며 여기에서 전송되는 것은 없습니다. ScamShield가 저장한 모든 것은 브라우저 안에 있었고 브라우저와 함께 사라졌습니다." },
+  "demoFieldEmail": { "message": "이메일" },
+  "demoFieldPassword": { "message": "비밀번호" },
+  "demoFieldLogin": { "message": "로그인" },
+  "demoRescue": { "message": "설정으로 돌아가기 (데모입니다)" }
 }

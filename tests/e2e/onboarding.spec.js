@@ -128,3 +128,36 @@ test('goodbye: reason picker copies a note, shows the issue link, sends nothing;
   await page.goto(GOODBYE + '?lang=pt-PT');
   await expect(page.locator('html')).toHaveAttribute('lang', 'pt-BR');
 });
+
+test('demo: the pretend form has labelled fields, and every rescue / leave button lands on onboarding with no web request', async ({ context, extensionId }) => {
+  const page = await context.newPage();
+  const requests = [];
+  page.on('request', (r) => requests.push(r.url()));
+  await page.goto(`chrome-extension://${extensionId}/demo.html`);
+  await expect(page.locator('.fake input[type=text]')).toHaveAttribute('placeholder', 'Email');
+  await expect(page.locator('.fake input[type=password]')).toHaveAttribute('placeholder', 'Password');
+  await expect(page.locator('.fake input[readonly]')).toHaveCount(2);
+  await expect(page.locator('.fake button.go')).toHaveText('Log in');
+  await expect(page.locator('.fake button.go')).toBeDisabled();
+  expect(await page.locator('.fake button.go').getAttribute('type')).toBe('button');
+  expect(await page.locator('#fake').evaluate((n) => n.inert && n.getAttribute('aria-hidden'))).toBe('true');
+  // Banner: rescue + Leave. Stop page: rescue + Leave. Each goes to onboarding#2 and never to a real site.
+  const targets = [
+    ['#tabBanner', '.scamshield-banner .ss-rescue'],
+    ['#tabBanner', '.scamshield-banner .ss-leave'],
+    ['#tabStop', '.scamshield-interstitial .ss-rescue-ghost'],
+    ['#tabStop', '.scamshield-interstitial .ss-primary']
+  ];
+  for (const [tab, sel] of targets) {
+    await page.goto(`chrome-extension://${extensionId}/demo.html`);
+    await page.click(tab);
+    const btn = page.locator(sel);
+    await expect(btn).toBeVisible();
+    await expect(btn).toBeEnabled({ timeout: 6000 }); // past any arm delay
+    await page.waitForTimeout(400);
+    if (/rescue/.test(sel)) await expect(btn).toHaveText('Back to setup (this is a demo)');
+    await btn.click();
+    await expect(page, sel).toHaveURL(`chrome-extension://${extensionId}/onboarding.html#2`);
+  }
+  expect(requests.filter((u) => /^https?:/.test(u))).toEqual([]);
+});

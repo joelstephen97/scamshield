@@ -37,7 +37,8 @@
   function tidy(sr) {
     if (!sr) return;
     sr.querySelectorAll('.ss-copy').forEach((b) => b.remove());
-    sr.querySelectorAll('.ss-rescue, .ss-rescue-ghost').forEach((b) => { const c = b.cloneNode(true); b.replaceWith(c); c.addEventListener('click', goSetup); });
+    // The real-brand button says what it does here: it is a demo, so it goes back to setup.
+    sr.querySelectorAll('.ss-rescue, .ss-rescue-ghost').forEach((b) => { const c = b.cloneNode(true); c.textContent = (i18n && i18n.t && i18n.t('demoRescue')) || 'Back to setup (this is a demo)'; b.replaceWith(c); c.addEventListener('click', goSetup); });
     sr.querySelectorAll('.ss-cmp-fake b').forEach((b) => { b.textContent = FAKE_HOST; });
     sr.querySelectorAll('.ss-addr code').forEach((c) => { c.textContent = FAKE_ADDR; });
   }

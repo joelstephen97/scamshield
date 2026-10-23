@@ -504,5 +504,9 @@
   "gbR5": { "message": "Something else" },
   "gbCopied": { "message": "Copied a short note to your clipboard. Nothing was sent. If you want to say more, paste it into a GitHub issue." },
   "gbIssue": { "message": "Open a GitHub issue" },
-  "gbStatic": { "message": "This page is static: no account, no analytics, and nothing is sent from here. Everything ScamShield stored lived in your browser and went with it." }
+  "gbStatic": { "message": "This page is static: no account, no analytics, and nothing is sent from here. Everything ScamShield stored lived in your browser and went with it." },
+  "demoFieldEmail": { "message": "Email" },
+  "demoFieldPassword": { "message": "Password" },
+  "demoFieldLogin": { "message": "Log in" },
+  "demoRescue": { "message": "Back to setup (this is a demo)" }
 }

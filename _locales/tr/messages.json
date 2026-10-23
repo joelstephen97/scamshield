@@ -504,5 +504,9 @@
   "gbR5": { "message": "Başka bir neden" },
   "gbCopied": { "message": "Panonuza kısa bir not kopyalandı. Hiçbir şey gönderilmedi. Daha fazlasını anlatmak isterseniz bunu bir GitHub issue’sına yapıştırın." },
   "gbIssue": { "message": "GitHub issue aç" },
-  "gbStatic": { "message": "Bu sayfa statiktir: hesap yok, analiz yok ve buradan hiçbir şey gönderilmez. ScamShield’in sakladığı her şey tarayıcınızdaydı ve onunla birlikte gitti." }
+  "gbStatic": { "message": "Bu sayfa statiktir: hesap yok, analiz yok ve buradan hiçbir şey gönderilmez. ScamShield’in sakladığı her şey tarayıcınızdaydı ve onunla birlikte gitti." },
+  "demoFieldEmail": { "message": "E-posta" },
+  "demoFieldPassword": { "message": "Parola" },
+  "demoFieldLogin": { "message": "Giriş yap" },
+  "demoRescue": { "message": "Kuruluma dön (bu bir demodur)" }
 }

@@ -504,5 +504,9 @@
   "gbR5": { "message": "Lý do khác" },
   "gbCopied": { "message": "Đã sao chép một ghi chú ngắn vào bộ nhớ tạm. Không có gì được gửi đi. Nếu muốn nói thêm, hãy dán nó vào một issue trên GitHub." },
   "gbIssue": { "message": "Mở issue trên GitHub" },
-  "gbStatic": { "message": "Trang này là trang tĩnh: không tài khoản, không phân tích, và không có gì được gửi từ đây. Mọi thứ ScamShield lưu đều nằm trong trình duyệt của bạn và đã mất cùng với nó." }
+  "gbStatic": { "message": "Trang này là trang tĩnh: không tài khoản, không phân tích, và không có gì được gửi từ đây. Mọi thứ ScamShield lưu đều nằm trong trình duyệt của bạn và đã mất cùng với nó." },
+  "demoFieldEmail": { "message": "Email" },
+  "demoFieldPassword": { "message": "Mật khẩu" },
+  "demoFieldLogin": { "message": "Đăng nhập" },
+  "demoRescue": { "message": "Quay lại phần thiết lập (đây chỉ là bản demo)" }
 }

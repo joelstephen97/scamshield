@@ -504,5 +504,9 @@
   "gbR5": { "message": "その他" },
   "gbCopied": { "message": "短いメモをクリップボードにコピーしました。何も送信されていません。さらに伝えたい場合は、GitHub の issue に貼り付けてください。" },
   "gbIssue": { "message": "GitHub の issue を開く" },
-  "gbStatic": { "message": "このページは静的です。アカウントも分析もなく、ここから何かが送信されることもありません。ScamShield が保存していたものはすべてブラウザ内にあり、一緒に消えました。" }
+  "gbStatic": { "message": "このページは静的です。アカウントも分析もなく、ここから何かが送信されることもありません。ScamShield が保存していたものはすべてブラウザ内にあり、一緒に消えました。" },
+  "demoFieldEmail": { "message": "メールアドレス" },
+  "demoFieldPassword": { "message": "パスワード" },
+  "demoFieldLogin": { "message": "ログイン" },
+  "demoRescue": { "message": "セットアップに戻る（これはデモです）" }
 }

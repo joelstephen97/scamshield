@@ -504,5 +504,9 @@
   "gbR5": { "message": "Etwas anderes" },
   "gbCopied": { "message": "Eine kurze Notiz wurde in Ihre Zwischenablage kopiert. Es wurde nichts gesendet. Wenn Sie mehr sagen möchten, fügen Sie sie in ein GitHub-Issue ein." },
   "gbIssue": { "message": "GitHub-Issue öffnen" },
-  "gbStatic": { "message": "Diese Seite ist statisch: kein Konto, keine Analyse, und von hier wird nichts gesendet. Alles, was ScamShield gespeichert hat, lag in Ihrem Browser und ist mit ihm verschwunden." }
+  "gbStatic": { "message": "Diese Seite ist statisch: kein Konto, keine Analyse, und von hier wird nichts gesendet. Alles, was ScamShield gespeichert hat, lag in Ihrem Browser und ist mit ihm verschwunden." },
+  "demoFieldEmail": { "message": "E-Mail" },
+  "demoFieldPassword": { "message": "Passwort" },
+  "demoFieldLogin": { "message": "Anmelden" },
+  "demoRescue": { "message": "Zurück zur Einrichtung (dies ist eine Demo)" }
 }

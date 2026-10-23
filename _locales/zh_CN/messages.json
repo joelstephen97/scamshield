@@ -504,5 +504,9 @@
   "gbR5": { "message": "其他原因" },
   "gbCopied": { "message": "已将一条简短的说明复制到剪贴板，没有发送任何内容。如果想多说几句，可以把它粘贴到 GitHub issue 中。" },
   "gbIssue": { "message": "打开 GitHub issue" },
-  "gbStatic": { "message": "本页是静态页面：没有账户，没有统计分析，也不会从这里发送任何内容。ScamShield 存储的一切都保存在您的浏览器中，并已随之删除。" }
+  "gbStatic": { "message": "本页是静态页面：没有账户，没有统计分析，也不会从这里发送任何内容。ScamShield 存储的一切都保存在您的浏览器中，并已随之删除。" },
+  "demoFieldEmail": { "message": "电子邮箱" },
+  "demoFieldPassword": { "message": "密码" },
+  "demoFieldLogin": { "message": "登录" },
+  "demoRescue": { "message": "返回设置引导（这只是演示）" }
 }

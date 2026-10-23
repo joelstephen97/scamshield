@@ -504,5 +504,9 @@
   "gbR5": { "message": "Outro motivo" },
   "gbCopied": { "message": "Uma nota curta foi copiada para a sua área de transferência. Nada foi enviado. Se quiser contar mais, cole-a em uma issue do GitHub." },
   "gbIssue": { "message": "Abrir uma issue no GitHub" },
-  "gbStatic": { "message": "Esta página é estática: sem conta, sem análises e nada é enviado daqui. Tudo o que o ScamShield guardou ficava no seu navegador e foi embora com ele." }
+  "gbStatic": { "message": "Esta página é estática: sem conta, sem análises e nada é enviado daqui. Tudo o que o ScamShield guardou ficava no seu navegador e foi embora com ele." },
+  "demoFieldEmail": { "message": "E-mail" },
+  "demoFieldPassword": { "message": "Senha" },
+  "demoFieldLogin": { "message": "Entrar" },
+  "demoRescue": { "message": "Voltar à configuração (isto é uma demonstração)" }
 }
