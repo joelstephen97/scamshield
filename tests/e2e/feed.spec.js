@@ -15,6 +15,27 @@ const crypto = require('crypto');
 const Blockset = require('../../engine/blockset');
 
 const BASE = 'http://localhost:5599';
+
+// 0.15.0 doctrine: risk-table / NRD evidence has no confident flag, so it is
+// recorded (suspicious verdict) but never interrupts: tier 'quiet', no banner,
+// no interstitial. Returns the recorded verdict for further assertions.
+async function expectQuietSuspicious(context, page, url, timeout = 8000) {
+  const cdp = await context.newCDPSession(page);
+  const ctxs = [];
+  cdp.on('Runtime.executionContextCreated', (e) => ctxs.push(e.context));
+  await cdp.send('Runtime.enable');
+  await page.goto(url);
+  const read = async (expression) => {
+    const c = ctxs.find((x) => x.auxData && x.auxData.type === 'isolated' && /^chrome-extension:\/\//.test(x.origin || ''));
+    return c ? cdp.send('Runtime.evaluate', { expression, contextId: c.id, returnByValue: true }).then((r) => r.result.value).catch(() => null) : null;
+  };
+  await expect.poll(() => read('window.__ssLastTier'), { timeout }).toBe('quiet');
+  const verdict = await read('JSON.parse(JSON.stringify(window.__ssLastVerdict))');
+  expect(verdict.level).toBe('suspicious');
+  await expect(page.locator('.scamshield-banner')).toHaveCount(0);
+  await expect(page.locator('.scamshield-interstitial')).toHaveCount(0);
+  return verdict;
+}
 const FEED_DIR = path.join(__dirname, 'feed-fixtures');
 const FEED_BASE_URL = BASE + '/feed/';
 
@@ -284,14 +305,12 @@ test('checkRiskHosting reports dyndns and hoster membership by hashed registrabl
   expect(cleanHit).toEqual({ hit: null });
 });
 
-test('a dyndns-listed host gets suspicious-tier evidence, not an interstitial', async ({ context }) => {
+test('a dyndns-listed host records suspicious-tier evidence but stays quiet: no banner, no interstitial (0.15.0)', async ({ context }) => {
   const sw = context.serviceWorkers()[0];
   await installFeed(sw);
   const page = await context.newPage();
-  await page.goto(`http://${RISK_DYNDNS_DOMAIN}:5599/clean.html`);
-  await expect(page.locator('.scamshield-interstitial')).toHaveCount(0);
-  const banner = page.locator('.scamshield-banner.suspicious');
-  await expect(banner).toBeVisible({ timeout: 8000 });
+  const v = await expectQuietSuspicious(context, page, `http://${RISK_DYNDNS_DOMAIN}:5599/clean.html`);
+  expect(v.reasonCodes).toContain('riskDynamicHost');
 });
 
 // 0.14.1 (Task 8 fix round): the feed/risk/NRD lookups are requested together,
@@ -308,19 +327,19 @@ test('slow SW (Blockstore.get +4s): risk-table evidence still reaches the verdic
   });
   try {
     const page = await context.newPage();
-    await page.goto(`http://${RISK_DYNDNS_DOMAIN}:5599/clean.html`);
-    await expect(page.locator('.scamshield-banner.suspicious')).toBeVisible({ timeout: 15000 });
+    // 0.15.0: the evidence still reaches the verdict (reason recorded) but the tier is quiet.
+    const v = await expectQuietSuspicious(context, page, `http://${RISK_DYNDNS_DOMAIN}:5599/clean.html`, 15000);
+    expect(v.reasonCodes).toContain('riskDynamicHost');
   } finally {
     await sw.evaluate(() => { globalThis.Blockstore.get = globalThis.__origBsGet; });
   }
 });
 
-test('an abused-TLD host (risk.json tlds table) gets suspicious-tier evidence via scoreUrl', async ({ context }) => {
+test('an abused-TLD host (risk.json tlds table) records suspicious-tier evidence via scoreUrl but stays quiet (0.15.0)', async ({ context }) => {
   const sw = context.serviceWorkers()[0];
   await installFeed(sw); // populates settings.riskTlds, which content_script.js passes into scoreUrl()
   const page = await context.newPage();
-  await page.goto(`http://${RISK_TLD_HOST}:5599/clean.html`);
-  await expect(page.locator('.scamshield-banner.suspicious')).toBeVisible({ timeout: 8000 });
+  await expectQuietSuspicious(context, page, `http://${RISK_TLD_HOST}:5599/clean.html`);
 });
 
 // --- Task C6 (0.10.0): risk-table-class evidence can never make a page
@@ -333,14 +352,11 @@ test('an abused-TLD host (risk.json tlds table) gets suspicious-tier evidence vi
 // only ever surface a "suspicious" banner.
 const RISK_HOSTER_WEAK_SIGNAL_HOST = 'zx9qplwkdvbtnfhrjyec8sm2.' + RISK_HOSTER_DOMAIN;
 
-test('a hoster-listed host with only weak URL signals gets a suspicious banner, never the dangerous interstitial (Task C6)', async ({ context }) => {
+test('a hoster-listed host with only weak URL signals stays suspicious and quiet, never the dangerous interstitial (Task C6; quiet since 0.15.0)', async ({ context }) => {
   const sw = context.serviceWorkers()[0];
   await installFeed(sw);
   const page = await context.newPage();
-  await page.goto(`http://${RISK_HOSTER_WEAK_SIGNAL_HOST}:5599/clean.html`);
-  await expect(page.locator('.scamshield-interstitial')).toHaveCount(0);
-  const banner = page.locator('.scamshield-banner.suspicious');
-  await expect(banner).toBeVisible({ timeout: 8000 });
+  await expectQuietSuspicious(context, page, `http://${RISK_HOSTER_WEAK_SIGNAL_HOST}:5599/clean.html`);
 });
 
 // --- nrd.bloom "new site" signal (0.10.0, Task C3) --------------------------
@@ -390,7 +406,7 @@ test('an NRD-listed, first-time-visited domain with no other signal stays quiet 
   await expect(page.locator('.scamshield-banner')).toHaveCount(0);
 });
 
-test('an NRD-listed, first-time-visited domain WITH a password field (corroborated) gets a suspicious evidence chip with the strengthened wording', async ({ context }) => {
+test('an NRD-listed, first-time-visited domain WITH a password field (corroborated) records suspicious evidence with the strengthened wording but stays quiet (0.15.0)', async ({ context }) => {
   const sw = context.serviceWorkers()[0];
   await installFeed(sw);
   const page = await context.newPage();
@@ -400,12 +416,8 @@ test('an NRD-listed, first-time-visited domain WITH a password field (corroborat
   // (also used by detection.spec.js / popup.spec.js as a documented "safe
   // on its own" fixture) supplies exactly that: a same-origin password
   // form, no other malicious signal.
-  await page.goto(`http://${NRD_DOMAIN}:5599/clean-login.html`);
-  await expect(page.locator('.scamshield-interstitial')).toHaveCount(0); // never escalates past suspicious alone
-  const banner = page.locator('.scamshield-banner.suspicious');
-  await expect(banner).toBeVisible({ timeout: 8000 });
-  await expect(banner.locator('.ss-text span').first()).toContainText(/newly-registered-domains/i);
-  await expect(banner.locator('.ss-text span').first()).toContainText(/never visited it before/i);
+  const v = await expectQuietSuspicious(context, page, `http://${NRD_DOMAIN}:5599/clean-login.html`); // never escalates past suspicious alone
+  expect((v.reasonCodes || []).some((c) => /nrd|newDomain|newlyRegistered/i.test(c)), JSON.stringify(v.reasonCodes)).toBe(true);
 });
 
 test('a clean domain (no nrd.bloom hit) gets no evidence chip', async ({ context }) => {

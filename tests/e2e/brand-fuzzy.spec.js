@@ -9,16 +9,30 @@ const { test, BASE_HTTPS } = require('./fixtures');
 const { expect } = require('@playwright/test');
 const BASE = 'http://localhost:5599';
 
-test('a fuzzy brand-injection subdomain (not a real brand domain) gets a suspicious banner naming the brand, not an interstitial', async ({ context }) => {
+// 0.15.0 doctrine: URL-only evidence has no confident flag, so it is recorded
+// (suspicious verdict) but never interrupts: tier 'quiet', no banner.
+async function expectQuietSuspicious(context, page, url) {
+  const cdp = await context.newCDPSession(page);
+  const ctxs = [];
+  cdp.on('Runtime.executionContextCreated', (e) => ctxs.push(e.context));
+  await cdp.send('Runtime.enable');
+  await page.goto(url);
+  const read = async (expression) => {
+    const c = ctxs.find((x) => x.auxData && x.auxData.type === 'isolated' && /^chrome-extension:\/\//.test(x.origin || ''));
+    return c ? cdp.send('Runtime.evaluate', { expression, contextId: c.id, returnByValue: true }).then((r) => r.result.value).catch(() => null) : null;
+  };
+  await expect.poll(() => read('window.__ssLastTier'), { timeout: 8000 }).toBe('quiet');
+  expect(await read('window.__ssLastVerdict && window.__ssLastVerdict.level')).toBe('suspicious');
+  await expect(page.locator('.scamshield-banner')).toHaveCount(0);
+  await expect(page.locator('.scamshield-interstitial')).toHaveCount(0);
+}
+
+test('a fuzzy brand-injection subdomain (not a real brand domain) is a suspicious verdict but quiet: no banner, no interstitial (0.15.0)', async ({ context }) => {
   const page = await context.newPage();
   // Served over HTTPS with a short host so the ONLY evidence at all is the
   // fuzzy brand match itself (no noHttps/randomHost noise) — a genuinely
   // lone fuzzy hit reaching "suspicious" but never the blocking interstitial.
-  await page.goto(`${BASE_HTTPS}/clean.html`.replace('localhost', 'talabat.xy.com'));
-  await expect(page.locator('.scamshield-interstitial')).toHaveCount(0);
-  const banner = page.locator('.scamshield-banner.suspicious');
-  await expect(banner).toBeVisible({ timeout: 8000 });
-  await expect(banner.locator('.ss-text span').first()).toContainText(/talabat/i);
+  await expectQuietSuspicious(context, page, `${BASE_HTTPS}/clean.html`.replace('localhost', 'talabat.xy.com'));
 });
 
 test('a real brand domain (allowlist short-circuit) never shows brand-impersonation evidence', async ({ context }) => {
@@ -32,9 +46,7 @@ test('a real brand domain (allowlist short-circuit) never shows brand-impersonat
   await expect(page.locator('.scamshield-banner')).toHaveCount(0);
 });
 
-test('a deep subdomain chain below the registrable domain contributes suspicious-tier evidence', async ({ context }) => {
+test('a deep subdomain chain below the registrable domain contributes suspicious-tier evidence, quiet tier (0.15.0)', async ({ context }) => {
   const page = await context.newPage();
-  await page.goto(`${BASE}/clean.html`.replace('localhost', 'a.b.c.d.deep.example'));
-  await expect(page.locator('.scamshield-interstitial')).toHaveCount(0);
-  await expect(page.locator('.scamshield-banner.suspicious')).toBeVisible({ timeout: 8000 });
+  await expectQuietSuspicious(context, page, `${BASE}/clean.html`.replace('localhost', 'a.b.c.d.deep.example'));
 });

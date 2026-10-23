@@ -41,7 +41,8 @@ test('mute is per kind: muting clipboard does not silence the leaky-form toast',
 test('banner ✕ snooze expires: an expired pausedSites entry brings the banner back', async ({ context }) => {
   const page = await context.newPage(); const sw = context.serviceWorkers()[0];
   await sw.evaluate(() => setSettings({ pausedSites: { localhost: Date.now() + 3600e3 } }));
-  await page.goto(BASE_HTTPS + '/content-suspicious.html'); await page.waitForTimeout(1500); await expect(page.locator('.scamshield-banner')).toHaveCount(0);
+  // 0.15.0: dangerous fixture (content-suspicious.html is quiet under the doctrine).
+  await page.goto(BASE + '/phishing-login.html'); await page.waitForTimeout(1500); await expect(page.locator('.scamshield-banner')).toHaveCount(0);
   await sw.evaluate(() => setSettings({ pausedSites: { localhost: Date.now() - 1 } }));
   await page.reload(); await expect(page.locator('.scamshield-banner')).toBeVisible({ timeout: 8000 }); await page.close();
 });

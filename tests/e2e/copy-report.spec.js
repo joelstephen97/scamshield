@@ -59,7 +59,17 @@ test('Copy report on a dangerous banner composes and copies a shareable, defange
 
 test('Copy report also appears on a suspicious banner', async ({ context }) => {
   const page = await context.newPage();
-  await page.goto(BASE_HTTPS + '/content-suspicious.html');
+  // 0.15.0: content-suspicious.html is quiet under the doctrine, and no static fixture yields a
+  // suspicious+confident verdict, so render the suspicious-level banner directly from the
+  // extension's isolated world with a feed-warn verdict (the same shape content_script builds).
+  const cdp = await context.newCDPSession(page);
+  const ctxs = [];
+  cdp.on('Runtime.executionContextCreated', (e) => ctxs.push(e.context));
+  await cdp.send('Runtime.enable');
+  await page.goto(BASE_HTTPS + '/clean.html');
+  await expect.poll(() => ctxs.some((x) => x.auxData && x.auxData.type === 'isolated' && /^chrome-extension:\/\//.test(x.origin || ''))).toBe(true);
+  const ext = ctxs.find((x) => x.auxData && x.auxData.type === 'isolated' && /^chrome-extension:\/\//.test(x.origin || ''));
+  await cdp.send('Runtime.evaluate', { contextId: ext.id, expression: `ScamShield.actions.showBanner({ level: 'suspicious', score: 0.6, flags: ['feed-warn'], reasons: [{ code: 'feedWarn', kind: 'link', params: ['2'] }], reasonCodes: ['feedWarn'] }, { onLeave() {}, onReport() {}, onHide() {} })` });
   await expect(page.locator('.scamshield-banner.suspicious')).toBeVisible({ timeout: 8000 });
   await openMore(page.locator('.scamshield-banner'));
   await expect(page.locator('.scamshield-banner .ss-copy')).toBeVisible();

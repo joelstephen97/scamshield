@@ -163,6 +163,13 @@
   });
   let techSignal = { dialogFloodCount: 0, fullscreenOnLoad: false, beforeUnloadCount: 0, alarmAudio: false };
   let techShown = false;
+  // (0.15.0) Popular hosts never get the tech-scam overlay (a news site's
+  // alarm-sound ad is not a scam page). One checkFeed per page, cached.
+  let popularP = null;
+  const isPopularHere = () => {
+    if (!popularP) popularP = withTimeout(send('checkFeed', { host: location.hostname }), 5000).then((r) => !!(r && r.popular === true)).catch(() => false);
+    return popularP;
+  };
   window.addEventListener('scamshield:techscam-signal', async (e) => {
     techSignal = Object.assign(techSignal, (e && e.detail) || {});
     if (techShown || !SS || typeof SS.scoreTechScam !== 'function' || !SS.actions) return;
@@ -175,6 +182,7 @@
       dialogFloodCount: techSignal.dialogFloodCount, historyTrap: techSignal.beforeUnloadCount >= 2
     });
     if (r.score >= (SS.THRESHOLDS ? SS.THRESHOLDS.dangerous : 0.8)) {
+      if (techShown || await isPopularHere()) return;
       techShown = true;
       SS.actions.techScamEscapeOverlay({ level: 'dangerous', reasons: r.reasons }, () => {
         // Dismantle the page's traps (fullscreen, beforeunload, alarm audio)
@@ -986,10 +994,14 @@
     // hit; a warn-tier hit is a suspicious-tier evidence signal. Both carry a
     // feed-* flag so the engagement gate below (which only ever suppresses a
     // flag-less "suspicious") can never silently swallow validated feed intel.
+    // (0.15.0) `popular` rides on the checkFeed reply; a failed or timed-out
+    // call leaves it false, so the popular guard never shields on a guess.
+    let feedPopular = false;
     try {
       // Bounded: the SW's shard fetch is itself timeout-capped, but the page
       // verdict must never wait on a wedged SW either (resolves null on cap).
       const feedHit = await withTimeout(feedP, 10000);
+      feedPopular = !!(feedHit && feedHit.popular === true);
       if (feedHit && feedHit.hit === 'block') {
         const reason = { code: 'feedBlock', kind: 'link', params: [String((feedHit.sources || []).length)] };
         verdict = Object.assign({}, verdict, {
@@ -1085,7 +1097,9 @@
         verdict = Object.assign({}, verdict, { level: 'safe', reasons: [], reasonCodes: [], suppressed: 'engagement' });
       }
     }
-    try { window.__ssLastVerdict = verdict; } catch (_) {}
+    // Warning doctrine (0.15.0): one pure function decides stop / warn / quiet.
+    const tier = SS.surfaceTier(verdict, { popular: feedPopular, strictMode: settings.strictMode === true, isTop: IS_TOP, host: location.hostname });
+    try { window.__ssLastVerdict = verdict; window.__ssLastTier = tier; } catch (_) {}
     let report = null;
     try {
       report = {
@@ -1094,25 +1108,18 @@
         iconMatches: signals.iconMatches || [], detectors: ['page']
       };
     } catch (_) { report = null; }
-    await send('reportVerdict', { verdict, report, subframe: !IS_TOP });
-    if (verdict.level === 'dangerous') send('bumpThreats');
+    await send('reportVerdict', { verdict, report, subframe: !IS_TOP, tier });
+    const interrupts = tier === 'stop' || tier === 'warn';
+    if (interrupts && verdict.level === 'dangerous') send('bumpThreats');
 
-    if (verdict.level !== 'safe' && IS_TOP) {
+    if (interrupts && IS_TOP) {
       // Impersonation verdicts get a rescue link to the brand's real site.
       if (verdict.brand && SS.BRAND_DOMAINS && SS.BRAND_DOMAINS[verdict.brand]) {
         verdict.brandUrl = 'https://' + SS.BRAND_DOMAINS[verdict.brand][0] + '/';
         verdict.brandLabel = SS.brandDisplayName ? SS.brandDisplayName(verdict.brand) : verdict.brand;
       }
-      // Interstitial tier (0.6.0): decisive, near-zero-FP flags block the
-      // interaction outright; everything else keeps the banner. The
-      // credential-form case stays a banner because its ACTIVE moment is the
-      // submit guard — the interstitial is for scams with no submit moment.
-      const DECISIVE_INTERSTITIAL = ['seed-phrase-harvest', 'clickfix', 'fake-browser-update', 'delivery-fee-scam', 'feed-block'];
       const handlers = { onLeave: () => send('leaveTab'), onReport: () => send('userReport', { label: 'false_positive' }), onHide: (choice) => send('pauseSite', { domain: pageDomain, choice }) };
-      // Strict mode (0.6.0): for a less-confident user, ANY non-safe verdict
-      // gets the blocking interstitial, not just decisive flags.
-      const decisive = verdict.level === 'dangerous' && (verdict.flags || []).some((f) => DECISIVE_INTERSTITIAL.includes(f));
-      if ((decisive || settings.strictMode === true) && SS.actions.dangerInterstitial) {
+      if (tier === 'stop' && SS.actions.dangerInterstitial) {
         SS.actions.dangerInterstitial(verdict, handlers);
       } else {
         SS.actions.showBanner(verdict, handlers);

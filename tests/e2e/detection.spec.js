@@ -272,11 +272,30 @@ test('ordinary login page stays quiet with page analysis on', async ({ context }
 // task-12 fix-round-1 report — well above the 0.80 gate). With no corroboration
 // available, engine/verdict.js caps the content signal at THRESHOLDS.suspicious,
 // so the fused verdict is "suspicious", never "dangerous".
-test('phishy wording with no URL/rule hits → suspicious (yellow), never red', async ({ context }) => {
+// 0.15.0 doctrine: a flag-less content-model "suspicious" is recorded but never
+// interrupts (tier 'quiet'): no banner, verdict + tier still available.
+async function extVars(context, page, expressions) {
+  const cdp = await context.newCDPSession(page);
+  const execContexts = [];
+  cdp.on('Runtime.executionContextCreated', (e) => execContexts.push(e.context));
+  await cdp.send('Runtime.enable');
+  return { cdp, execContexts, read: async () => {
+    const extCtx = execContexts.find((c) => c.auxData && c.auxData.type === 'isolated' && /^chrome-extension:\/\//.test(c.origin || ''));
+    expect(extCtx).toBeTruthy();
+    const out = {};
+    for (const [k, expression] of Object.entries(expressions)) {
+      out[k] = await cdp.send('Runtime.evaluate', { expression, contextId: extCtx.id, returnByValue: true }).then((r) => r.result.value);
+    }
+    return out;
+  } };
+}
+test('phishy wording with no URL/rule hits → suspicious verdict, quiet tier (no banner)', async ({ context }) => {
   const page = await context.newPage();
+  const ev = await extVars(context, page, { level: 'window.__ssLastVerdict && window.__ssLastVerdict.level', tier: 'window.__ssLastTier' });
   await page.goto(BASE_HTTPS + '/content-suspicious.html');
-  await expect(page.locator('.scamshield-banner.suspicious')).toBeVisible({ timeout: 8000 });
-  await expect(page.locator('.scamshield-banner.danger')).toHaveCount(0);
+  await expect.poll(async () => (await ev.read()).tier, { timeout: 8000 }).toBe('quiet');
+  expect((await ev.read()).level).toBe('suspicious');
+  await expect(page.locator('.scamshield-banner')).toHaveCount(0);
 });
 test('brand icon + password form on a non-brand host → danger banner with rescue link', async ({ context, extensionId }) => {
   // Inject a test brand table whose only hash is our fixture icon's hash.
@@ -313,8 +332,13 @@ test('on-brand icon match does not corroborate the content model to dangerous', 
   cdp.on('Runtime.executionContextCreated', (e) => execContexts.push(e.context));
   await cdp.send('Runtime.enable');
   await page.goto('https://www.aramex.com:5600/same-brand-icon.html');
-  await expect(page.locator('.scamshield-banner.suspicious')).toBeVisible({ timeout: 8000 });
-  await expect(page.locator('.scamshield-banner.danger')).toHaveCount(0);
+  await expect.poll(() => execContexts.some((c) => c.auxData && c.auxData.type === 'isolated' && /^chrome-extension:\/\//.test(c.origin || '')), { timeout: 8000 }).toBe(true);
+  // 0.15.0: still suspicious (never dangerous), but flag-less → quiet tier, no banner.
+  await expect.poll(async () => {
+    const c = execContexts.find((x) => x.auxData && x.auxData.type === 'isolated' && /^chrome-extension:\/\//.test(x.origin || ''));
+    return c ? await cdp.send('Runtime.evaluate', { expression: 'window.__ssLastTier', contextId: c.id, returnByValue: true }).then((r) => r.result.value).catch(() => null) : null;
+  }, { timeout: 8000 }).toBe('quiet');
+  await expect(page.locator('.scamshield-banner')).toHaveCount(0);
   const extCtx = execContexts.find((c) => c.auxData && c.auxData.type === 'isolated' && /^chrome-extension:\/\//.test(c.origin || ''));
   expect(extCtx).toBeTruthy();
   const level = await cdp.send('Runtime.evaluate', {
@@ -383,7 +407,7 @@ test('banner has Leave + Report actions and the overlay has evidence rows', asyn
   await expect.poll(() => page.url(), { timeout: 5000 }).not.toContain('phishing-login');
 });
 
-test('banner: at most three visible controls, the rest in a menu; ✕ pauses the site for a day', async ({ context }) => {
+test('banner: at most three visible controls, the rest in a menu; ✕ pauses the site for an hour', async ({ context }) => {
   const page = await context.newPage(); const sw = context.serviceWorkers()[0];
   // BASE_HTTPS (localhost:5600, TLS), not BASE (localhost:5599, plain http):
   // this fixture's URL model gets a +0.15 noHttps rule hit over plain http
@@ -392,17 +416,19 @@ test('banner: at most three visible controls, the rest in a menu; ✕ pauses the
   // a suspicious-tier verdict, same as the other content-suspicious.html
   // specs in this file. Both origins resolve to hostname 'localhost', so the
   // pausedSites key asserted below is unaffected.
-  await page.goto(BASE_HTTPS + '/content-suspicious.html'); const banner = page.locator('.scamshield-banner.suspicious');
-  await expect(banner).toBeVisible({ timeout: 8000 }); await expect(banner).toHaveAttribute('role', 'status');
+  // 0.15.0: content-suspicious.html is now quiet (doctrine), so the banner UI is exercised on the
+  // dangerous phishing-login fixture; the banner chrome is identical, only the role differs (alert).
+  await page.goto(BASE + '/phishing-login.html'); const banner = page.locator('.scamshield-banner.danger');
+  await expect(banner).toBeVisible({ timeout: 8000 }); await expect(banner).toHaveAttribute('role', 'alert');
   expect(await banner.locator('.ss-acts > button:visible').count()).toBeLessThanOrEqual(3);
   await banner.locator('.ss-more').click(); await expect(banner.locator('.ss-menu .ss-report')).toBeVisible();
   await page.keyboard.press('Escape'); await expect(banner.locator('.ss-menu')).toBeHidden();
   // 0.14.1: the ✕ says what it does (visible text + aria-label + title), not a bare glyph.
-  await expect(banner.locator('.ss-x')).toContainText('Hide for a day');
-  await expect(banner.locator('.ss-x')).toHaveAttribute('aria-label', 'Hide for a day');
-  await expect(banner.locator('.ss-x')).toHaveAttribute('title', 'Hide for a day');
+  await expect(banner.locator('.ss-x')).toContainText('Hide for an hour');
+  await expect(banner.locator('.ss-x')).toHaveAttribute('aria-label', 'Hide for an hour');
+  await expect(banner.locator('.ss-x')).toHaveAttribute('title', 'Hide for an hour');
   await banner.locator('.ss-x').click(); await expect(banner).toHaveCount(0);
-  const s = await sw.evaluate(() => getSettings()); expect(s.pausedSites['localhost']).toBeGreaterThan(Date.now() + 23 * 3600e3);
+  const s = await sw.evaluate(() => getSettings()); expect(s.pausedSites['localhost']).toBeGreaterThan(Date.now() + 59 * 60e3);
   await page.reload(); await page.waitForTimeout(1500); await expect(page.locator('.scamshield-banner')).toHaveCount(0); await page.close();
 });
 
@@ -412,10 +438,10 @@ for (const [lang, dir] of [['de', 'ltr'], ['ta', 'ltr'], ['ar', 'rtl'], ['ur', '
     const sw = context.serviceWorkers()[0];
     await sw.evaluate((l) => setSettings({ uiLang: l }), lang).catch(async () => { await sw.evaluate((l) => chrome.storage.local.set({ settings: { uiLang: l } }), lang); });
     const page = await context.newPage(); await page.setViewportSize({ width: 320, height: 700 });
-    await page.goto(BASE_HTTPS + '/content-suspicious.html');
-    const banner = page.locator('.scamshield-banner.suspicious'); await expect(banner).toBeVisible({ timeout: 8000 });
+    await page.goto(BASE + '/phishing-login.html'); // 0.15.0: dangerous fixture; flag-less suspicious is quiet now
+    const banner = page.locator('.scamshield-banner.danger'); await expect(banner).toBeVisible({ timeout: 8000 });
     await expect(banner).toHaveAttribute('dir', dir);
-    const x = banner.locator('.ss-x'); await expect(x.locator('.ss-x-label')).not.toHaveText('Hide for a day');
+    const x = banner.locator('.ss-x'); await expect(x.locator('.ss-x-label')).not.toHaveText('Hide for an hour');
     const b = await x.boundingBox(); expect(b.x).toBeGreaterThanOrEqual(0); expect(b.x + b.width).toBeLessThanOrEqual(320);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
     await page.close();
