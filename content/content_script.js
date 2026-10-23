@@ -245,8 +245,11 @@
     const passwordForms = [...document.querySelectorAll('form')]
       .filter((f) => f.querySelector('input[type="password"]'));
     const passwordFormActions = passwordForms.map((f) => f.getAttribute('action') || location.href);
+    // (0.15.0) empty / #… / javascript: / about:blank actions stay on the page; not "foreign".
+    const samePageAction = (a) => !!(SS && SS.isSamePageAction && SS.isSamePageAction(a));
     const AUTH = (SS && SS.KNOWN_AUTH_PROVIDERS) || [];
     const foreignForms = passwordForms.filter((f) => {
+      if (samePageAction(f.getAttribute('action'))) return false;
       try {
         const h = new URL(f.getAttribute('action') || location.href, location.href).hostname;
         const actionDomain = registrable(h);
@@ -288,7 +291,7 @@
     }).length;
 
     const text = (document.body ? document.body.innerText : '').toLowerCase().slice(0, 20000);
-    const scamPhrases = SS.SCAM_PHRASES.filter((p) => text.includes(p));
+    const scamPhrases = SS.matchScamPhrases(text);
 
     // Candidate scam blocks: elements whose text contains a scam phrase, kept small.
     const scamBlocks = [];
@@ -297,7 +300,7 @@
       for (const node of document.querySelectorAll('div,section,aside,a')) {
         if (scamBlocks.length >= 10 || ++scanned > 2000) break;
         const t = (node.innerText || '').toLowerCase();
-        if (t.length < 200 && SS.SCAM_PHRASES.some((p) => t.includes(p))) scamBlocks.push(node);
+        if (t.length < 200 && SS.matchScamPhrases(t).length) scamBlocks.push(node);
       }
     }
 
@@ -328,23 +331,51 @@
       clone.querySelectorAll('[hidden],[aria-hidden="true"]').forEach((el) => el.remove());
       return SSO_CTA_RE.test(clone.textContent || '');
     };
+    // (0.15.0) A rendered, enabled password field that no hidden ancestor conceals.
+    const isVisiblePassword = (inp) => {
+      if (inp.disabled) return false;
+      if (!(inp.offsetWidth > 0 || inp.getClientRects().length)) return false;
+      if (inp.closest('[hidden],[aria-hidden="true"]')) return false;
+      for (let el = inp; el && el.nodeType === 1; el = el.parentElement) {
+        const cs = getComputedStyle(el);
+        if (cs.display === 'none' || cs.visibility === 'hidden') return false;
+      }
+      return true;
+    };
+    const visiblePasswords = [...document.querySelectorAll('input[type="password"]')].filter(isVisiblePassword);
+    const hasVisiblePasswordField = visiblePasswords.length > 0;
+    // (0.15.0) Logo alts count only when logo-sized AND in the header region or next to a
+    // visible password field (its form / nearest section|main|dialog). [aria-label] is
+    // dropped: footer social icons ("Facebook", "YouTube") used it and read as impersonation.
+    const loginScopes = visiblePasswords.map((p) => p.closest('form') || p.closest('section,main,dialog')).filter(Boolean);
+    const inHeaderRegion = (n) => {
+      if (n.closest('header,[role="banner"]')) return true;
+      try { return n.getBoundingClientRect().top + (window.scrollY || 0) < 200; } catch (_) { return false; }
+    };
     const altImgs = [...document.querySelectorAll('img[alt]')]
       .filter((n) => {
         const bigEnough = (n.naturalWidth || 0) >= 24 || (n.width || 0) >= 24;
         const looksLikeLogo = /logo/i.test((n.getAttribute('src') || '') + ' ' + n.className + ' ' + n.id);
-        return (bigEnough || looksLikeLogo) && !insideSsoButton(n);
+        if (!(bigEnough || looksLikeLogo) || insideSsoButton(n)) return false;
+        return inHeaderRegion(n) || loginScopes.some((sc) => sc.contains(n));
       })
       .map((n) => n.getAttribute('alt') || '');
-    const ariaEls = [...document.querySelectorAll('[aria-label]')]
-      .filter((n) => !insideSsoButton(n))
-      .map((n) => n.getAttribute('aria-label') || '');
-    const logoAltBrands = altImgs.concat(ariaEls).slice(0, 40).map((t) => t.toLowerCase());
+    const logoAltBrands = altImgs.slice(0, 40).map((t) => t.toLowerCase());
 
     // Seed-phrase harvesting: recovery-phrase wording + many word inputs / a textarea.
     const bodyText = (document.body ? document.body.innerText : '').toLowerCase();
     const mentionsSeed = (SS.SEED_PHRASE_HINTS || []).some((p) => bodyText.includes(p));
-    const manyWordInputs = document.querySelectorAll('input[type="text"],input:not([type]),textarea').length >= 12;
-    const seedPhraseForm = mentionsSeed && (manyWordInputs || document.querySelector('textarea') != null);
+    // (0.15.0) Hint wording AND (>=12 visible text inputs OR a visible field that is itself
+    // labelled as a recovery-phrase box). A generic comment textarea no longer counts.
+    const isShown = (n) => (n.offsetWidth > 0 || n.getClientRects().length) && getComputedStyle(n).visibility !== 'hidden';
+    const textFields = [...document.querySelectorAll('input[type="text"],input:not([type]),textarea')].filter(isShown);
+    const manyWordInputs = textFields.length >= 12;
+    const seedLabelled = (n) => {
+      const lab = (n.labels && n.labels[0] && n.labels[0].textContent) || '';
+      const s = [lab, n.getAttribute('placeholder'), n.getAttribute('name'), n.getAttribute('aria-label')].join(' ');
+      return SS.SEED_FIELD_RE.test(s);
+    };
+    const seedPhraseForm = mentionsSeed && (manyWordInputs || textFields.some(seedLabelled));
 
     // ClickFix instruction cluster (0.6.0) — engine/clickfix_rules.js.
     const clickfix = (SS.scoreClickFix && settings.clickFixGuard !== false) ? SS.scoreClickFix({ text: bodyText }) : null;
@@ -378,7 +409,7 @@
 
     return {
       signals: {
-        pageHost, hasPasswordField: passwordForms.length > 0, passwordFormActions, hiddenIframeCount, scamPhrases,
+        pageHost, hasPasswordField: passwordForms.length > 0, hasVisiblePasswordField, passwordFormActions, hiddenIframeCount, scamPhrases,
         titleBrand, ogSiteName, faviconHost, logoAltBrands, seedPhraseForm,
         clickfix, fakeUpdate, hasCardInput, deliveryFeeText
       },
@@ -1099,9 +1130,9 @@
     }
     // Credential-backed confident flags (0.15.0): new-domain / brand-lookalike evidence
     // only earns a warning when the page also asks for a password. The password check
-    // lives in this one place (Task 4 will swap in a visible-field check).
+    // lives in this one place and uses the visible-field check (a hidden login modal does not count).
     if (verdict.level !== 'safe' && SS.credentialFlags) {
-      const credFlags = SS.credentialFlags({ verdictFlags: verdict.flags, urlReasons: urlRules && urlRules.reasons, hasPasswordField: !!(signals && signals.hasPasswordField), popular: feedPopular, host: location.hostname });
+      const credFlags = SS.credentialFlags({ verdictFlags: verdict.flags, urlReasons: urlRules && urlRules.reasons, hasPasswordField: !!(signals && signals.hasVisiblePasswordField), popular: feedPopular, host: location.hostname });
       if (credFlags.length) verdict = Object.assign({}, verdict, { flags: credFlags.concat(verdict.flags || []) });
     }
     // Warning doctrine (0.15.0): one pure function decides stop / warn / quiet.
@@ -1146,7 +1177,8 @@
     // Guards were attached right after collectSignals (see above); this only
     // hands them the final verdict's reasons.
     formGuardReasons.splice(0, formGuardReasons.length, ...(verdict.reasons || []));
-    if (settings.hideScamContent && scamBlocks.length && IS_TOP) SS.actions.hideScamBlocks(scamBlocks);
+    // (0.15.0) Hide page blocks only on pages already warned about; never on quiet/safe ones.
+    if (settings.hideScamContent && scamBlocks.length && IS_TOP && interrupts) SS.actions.hideScamBlocks(scamBlocks);
   }
 
   let lastUrl = location.href;

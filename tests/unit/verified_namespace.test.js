@@ -23,10 +23,10 @@ test('sbi stays out of the fuzzy candidate list (3-letter key, MIN_BRAND_LEN=5 r
   assert.strictEqual(BM.fuzzyBrandMatch('my-sbi-jobs.net'), null);
 });
 test('icon mismatch never fires for a brand icon on its verified-namespace site', () => {
-  const d = H.scoreDom({ pageHost: 'www.icici.bank.in', hasPasswordField: true, iconMatches: [{ brand: 'icici', kind: 'favicon' }] });
+  const d = H.scoreDom({ pageHost: 'www.icici.bank.in', hasPasswordField: true, hasVisiblePasswordField: true, iconMatches: [{ brand: 'icici', kind: 'favicon' }] });
   assert.strictEqual(d.flags.includes('brand-impersonation-visual'), false);
   assert.strictEqual(d.reasons.some((r) => r.code === 'brandIconMismatch'), false);
-  const evil = H.scoreDom({ pageHost: 'icici-netbanking.zya.me', hasPasswordField: true, iconMatches: [{ brand: 'icici', kind: 'favicon' }] });
+  const evil = H.scoreDom({ pageHost: 'icici-netbanking.zya.me', hasPasswordField: true, hasVisiblePasswordField: true, iconMatches: [{ brand: 'icici', kind: 'favicon' }] });
   assert.strictEqual(evil.flags.includes('brand-impersonation-visual'), true);
 });
 test('fp_regressions fixture: the three bench pages score safe on URL rules', () => {

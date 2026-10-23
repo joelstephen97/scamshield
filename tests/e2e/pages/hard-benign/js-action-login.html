@@ -1,0 +1,17 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>Library sign in</title>
+<!-- Hand-authored (0.15.0, Task 4). A script-driven login: the form action is
+     javascript:, so nothing posts off-site and no submit guard should appear. -->
+<header><nav><a href="/">Home</a><a href="/catalogue">Catalogue</a><a href="/events">Events</a><a href="/about">About</a></nav></header>
+<main>
+<h1>Library sign in</h1>
+<form id="f" action="javascript:void(0)">
+  <label>Card number <input type="text" name="card_no" autocomplete="username"></label>
+  <label>PIN <input type="password" name="pin" autocomplete="current-password"></label>
+  <button type="submit">Sign in</button>
+</form>
+<p><a href="/account/register">Get a card</a> · <a href="/account/forgot">Forgot your PIN?</a></p>
+<p id="done"></p>
+</main>
+<footer><a href="/privacy">Privacy</a><a href="/terms">Terms</a></footer>
+<script>document.getElementById('f').addEventListener('submit', function (e) { e.preventDefault(); document.getElementById('done').textContent = 'submitted'; });</script>
+</html>

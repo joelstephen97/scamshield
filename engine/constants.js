@@ -542,7 +542,29 @@
     return SAFE_DOMAINS.some((d) => h === d || h.endsWith('.' + d));
   }
   // Phrases that indicate a wallet recovery-phrase harvesting attempt.
-  const SEED_PHRASE_HINTS = ['recovery phrase', 'seed phrase', 'secret phrase', 'mnemonic', 'private key'];
+  // (0.15.0) Recovery-phrase wording only. Bare 'private key' / 'mnemonic' matched SSH and
+  // crypto tutorials, so a generic comment textarea was enough for a full-page interstitial.
+  const SEED_PHRASE_HINTS = ['seed phrase', 'recovery phrase', 'secret recovery phrase', 'secret phrase', 'mnemonic phrase', '12-word', '24-word'];
+  // A field that is itself labelled as a recovery-phrase box (label/placeholder/name/aria-label).
+  const SEED_FIELD_RE = /(seed|recovery|secret|mnemonic)\s*(phrase|words?)/i;
+
+  // Whole-phrase scam wording (0.15.0). Substring matching flagged "contact now" (act now),
+  // "react now" and "you won't believe" (you won). A phrase counts only between Unicode
+  // letter/number boundaries; an apostrophe straight after it also blocks the match.
+  const _phraseRes = new Map();
+  function phraseRe(p) {
+    let re = _phraseRes.get(p);
+    if (!re) {
+      const esc = String(p).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      re = new RegExp('(^|[^\\p{L}\\p{N}])' + esc + "(?=$|[^\\p{L}\\p{N}'’])", 'iu');
+      _phraseRes.set(p, re);
+    }
+    return re;
+  }
+  function matchScamPhrases(text, phrases) {
+    const t = String(text || '');
+    return (phrases || SCAM_PHRASES).filter((p) => phraseRe(p).test(t));
+  }
 
   // Parcel carriers (0.6.0): brands whose impersonation pattern is a card-fee
   // form rather than a password form — drives the delivery-fee-scam rule.
@@ -723,6 +745,12 @@
   //   - a known SSO/payment target (isCredExfilAllowlisted above).
   // `pageHref` is the page's own URL, used both to resolve a relative action
   // and as the same-origin comparison baseline.
+  // (0.15.0) An action that stays on the page: empty, '#…', javascript: or about:blank.
+  function isSamePageAction(actionAttr) {
+    const a = String(actionAttr == null ? '' : actionAttr).trim();
+    return a === '' || a.charAt(0) === '#' || /^(javascript:|about:blank)/i.test(a);
+  }
+
   function crossOriginCredPostHost(pageHref, actionAttr) {
     if (!actionAttr) return null;
     let base, u;
@@ -738,12 +766,12 @@
 
   return {
     FEATURE_NAMES, THRESHOLDS, BRANDS, BRANDS_BY_KEY, POPULAR_BRANDS, SUSPICIOUS_TLDS, SUSPICIOUS_TOKENS,
-    SCAM_PHRASES, SAFE_DOMAINS, BRAND_DOMAINS, SEED_PHRASE_HINTS, CARRIER_BRANDS,
+    SCAM_PHRASES, matchScamPhrases, SEED_FIELD_RE, SAFE_DOMAINS, BRAND_DOMAINS, SEED_PHRASE_HINTS, CARRIER_BRANDS,
     TENANT_PLATFORMS, tenantLabel, scopeDomain, scopeKeys, isTenantApex,
     MULTI_LABEL_SUFFIXES, KNOWN_AUTH_PROVIDERS, KNOWN_BRAND_REGISTRABLES,
     VERIFIED_NAMESPACES, isVerifiedNamespace,
     registrableParts, registrableDomain, isSafeHost, brandNameIn, brandDisplayName,
     unwrapSerpRedirect, dedupeCapped,
-    luhnValid, isPanShaped, CRED_EXFIL_ALLOWLIST, isCredExfilAllowlisted, crossOriginCredPostHost
+    luhnValid, isPanShaped, isSamePageAction, CRED_EXFIL_ALLOWLIST, isCredExfilAllowlisted, crossOriginCredPostHost
   };
 });

@@ -35,11 +35,11 @@ test('scoreUrl emits brandForeignSuffix (+0.6) and isOnBrand no longer trusts a 
   // A brand's own regional storefront is untouched.
   assert.strictEqual(H.scoreUrl('https://www.amazon.com.tr/').score, 0);
   // ...and one corroborating DOM signal still reaches dangerous.
-  const dom = H.scoreDom({ pageHost: 'roblox.com.do', hasPasswordField: true, titleBrand: 'Roblox' });
+  const dom = H.scoreDom({ pageHost: 'roblox.com.do', hasPasswordField: true, hasVisiblePasswordField: true, titleBrand: 'Roblox' });
   assert.ok(dom.score >= 0.8, 'dom ' + dom.score);
-  const d = H.scoreDom({ pageHost: 'www.roblox.com.do', hasPasswordField: true, titleBrand: 'Roblox' });
+  const d = H.scoreDom({ pageHost: 'www.roblox.com.do', hasPasswordField: true, hasVisiblePasswordField: true, titleBrand: 'Roblox' });
   assert.ok(d.flags.includes('brand-impersonation-content'));
-  const ok = H.scoreDom({ pageHost: 'www.amazon.com.tr', hasPasswordField: true, titleBrand: 'Amazon' });
+  const ok = H.scoreDom({ pageHost: 'www.amazon.com.tr', hasPasswordField: true, hasVisiblePasswordField: true, titleBrand: 'Amazon' });
   assert.ok(!ok.flags.includes('brand-impersonation-content'));
 });
 // Re-review of the 0.13.0 fix wave: listing a brand-owned regional host in
@@ -64,7 +64,7 @@ test('platform_phish fixtures: every bench tenant miss now carries brand evidenc
     const u = H.scoreUrl('https://' + host + '/');
     const hasBrand = u.reasons.some((r) => ['brandFuzzyMatch', 'brandLookalike', 'brandForeignSuffix'].includes(r.code));
     const title = host.split('.')[0].replace(/[-0-9]+/g, ' ');
-    const d = H.scoreDom({ pageHost: host, hasPasswordField: true, titleBrand: title });
+    const d = H.scoreDom({ pageHost: host, hasPasswordField: true, hasVisiblePasswordField: true, titleBrand: title });
     // A tenant-hosted kit with no brand token at all in its label ("shp-entregas",
     // a Shopee-ish but non-matching token) still carries evidence via Task 9's
     // credentialFormOnTenantHost signal (a password form on a free-hosting
@@ -79,7 +79,7 @@ test('platform_legit fixtures: no brand evidence on legit tenant/regional hosts'
     assert.ok(u.score < 0.5, host + ' ' + JSON.stringify(u.reasons));
     // 0.13.0 final review (C2): a credential form on these hosts is warn-tier
     // evidence at most — never a brand-impersonation flag.
-    const d = H.scoreDom({ pageHost: host, hasPasswordField: true });
+    const d = H.scoreDom({ pageHost: host, hasPasswordField: true, hasVisiblePasswordField: true });
     assert.ok(!d.flags.some((f) => f.startsWith('brand-impersonation-')), host + ' ' + JSON.stringify(d.flags));
     assert.ok(d.score < 0.8, host + ' dom ' + d.score);
   }
@@ -88,9 +88,9 @@ test('platform_legit fixtures: no brand evidence on legit tenant/regional hosts'
 // C3: a brand key that is also a bare English word must not carry that word
 // as a content `names` entry, or brandNameIn fires on any page using it.
 test('common-word brands only match content by their qualified product name', () => {
-  const fp = H.scoreDom({ pageHost: 'zoomlens.example.com', hasPasswordField: true, titleBrand: 'Zoom Lens Store' });
+  const fp = H.scoreDom({ pageHost: 'zoomlens.example.com', hasPasswordField: true, hasVisiblePasswordField: true, titleBrand: 'Zoom Lens Store' });
   assert.ok(!fp.flags.includes('brand-impersonation-content'), JSON.stringify(fp.flags));
-  const tp = H.scoreDom({ pageHost: 'zoomlens.example.com', hasPasswordField: true, titleBrand: 'Zoom Meetings sign in' });
+  const tp = H.scoreDom({ pageHost: 'zoomlens.example.com', hasPasswordField: true, hasVisiblePasswordField: true, titleBrand: 'Zoom Meetings sign in' });
   assert.ok(tp.flags.includes('brand-impersonation-content'), JSON.stringify(tp.flags));
 });
 

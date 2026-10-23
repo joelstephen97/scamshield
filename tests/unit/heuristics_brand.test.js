@@ -5,7 +5,7 @@ const { scoreDom } = require('../../engine/heuristics');
 
 test('brand named in content + password form on off-brand domain flags impersonation', () => {
   const r = scoreDom({
-    pageHost: 'paypal-secure-login.xyz', hasPasswordField: true,
+    pageHost: 'paypal-secure-login.xyz', hasPasswordField: true, hasVisiblePasswordField: true,
     passwordFormActions: ['https://paypal-secure-login.xyz/go'],
     titleBrand: 'paypal', ogSiteName: '', faviconHost: '', logoAltBrands: []
   });
@@ -15,7 +15,7 @@ test('brand named in content + password form on off-brand domain flags impersona
 
 test('real brand site is not flagged', () => {
   const r = scoreDom({
-    pageHost: 'paypal.com', hasPasswordField: true,
+    pageHost: 'paypal.com', hasPasswordField: true, hasVisiblePasswordField: true,
     passwordFormActions: ['https://paypal.com/go'],
     titleBrand: 'paypal', faviconHost: 'paypal.com', logoAltBrands: ['paypal']
   });
@@ -35,7 +35,7 @@ test('brand mention without password field does not flag', () => {
 
 test('regional brand storefront login is not flagged (amazon.ae)', () => {
   const r = scoreDom({
-    pageHost: 'www.amazon.ae', hasPasswordField: true,
+    pageHost: 'www.amazon.ae', hasPasswordField: true, hasVisiblePasswordField: true,
     passwordFormActions: ['https://www.amazon.ae/ap/signin'],
     titleBrand: 'amazon sign-in', ogSiteName: '', faviconHost: '', logoAltBrands: ['amazon']
   });
@@ -45,7 +45,7 @@ test('regional brand storefront login is not flagged (amazon.ae)', () => {
 
 test('multi-label-suffix brand storefront login is not flagged (amazon.co.uk)', () => {
   const r = scoreDom({
-    pageHost: 'www.amazon.co.uk', hasPasswordField: true,
+    pageHost: 'www.amazon.co.uk', hasPasswordField: true, hasVisiblePasswordField: true,
     passwordFormActions: ['https://www.amazon.co.uk/ap/signin'],
     titleBrand: 'amazon sign-in', logoAltBrands: ['amazon']
   });
@@ -54,19 +54,19 @@ test('multi-label-suffix brand storefront login is not flagged (amazon.co.uk)', 
 
 test('impersonation verdict names the brand for the rescue button', () => {
   const r = scoreDom({
-    pageHost: 'paypal-secure-login.xyz', hasPasswordField: true,
+    pageHost: 'paypal-secure-login.xyz', hasPasswordField: true, hasVisiblePasswordField: true,
     passwordFormActions: ['https://paypal-secure-login.xyz/go'],
     titleBrand: 'paypal', ogSiteName: '', faviconHost: '', logoAltBrands: []
   });
   assert.equal(r.brand, 'paypal');
-  const clean = scoreDom({ pageHost: 'paypal.com', hasPasswordField: true,
+  const clean = scoreDom({ pageHost: 'paypal.com', hasPasswordField: true, hasVisiblePasswordField: true,
     passwordFormActions: ['https://paypal.com/go'], titleBrand: 'paypal' });
   assert.equal(clean.brand, undefined);
 });
 
 test('exact brand SLD on a high-abuse TLD still flags impersonation', () => {
   const r = scoreDom({
-    pageHost: 'amazon.tk', hasPasswordField: true,
+    pageHost: 'amazon.tk', hasPasswordField: true, hasVisiblePasswordField: true,
     passwordFormActions: ['https://amazon.tk/login'],
     titleBrand: 'amazon', logoAltBrands: []
   });
@@ -75,7 +75,7 @@ test('exact brand SLD on a high-abuse TLD still flags impersonation', () => {
 
 test('exact brand SLD on a generic gTLD with password form still flags', () => {
   const r = scoreDom({
-    pageHost: 'amazon.pizza', hasPasswordField: true,
+    pageHost: 'amazon.pizza', hasPasswordField: true, hasVisiblePasswordField: true,
     passwordFormActions: ['https://amazon.pizza/login'],
     titleBrand: 'amazon', logoAltBrands: []
   });

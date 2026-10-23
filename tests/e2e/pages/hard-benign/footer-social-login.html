@@ -1,0 +1,21 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>Daily Ledger news</title>
+<!-- Hand-authored (0.15.0, Task 4). A news page whose footer social icons carry
+     aria-labels naming big brands, plus a login modal that is display:none.
+     Neither is a claim that this page IS Facebook/Instagram/YouTube, and a
+     hidden password field is not a login ask. -->
+<header><nav><a href="/">Home</a><a href="/world">World</a><a href="/sport">Sport</a></nav></header>
+<main>
+<h1>Daily Ledger</h1>
+<p>Council approves the new cycle lane after a long public consultation.</p>
+</main>
+<footer>
+  <a href="https://social.example/ledger" aria-label="Facebook"><svg width="28" height="28" viewBox="0 0 28 28"><circle cx="14" cy="14" r="12"/></svg></a>
+  <a href="https://social.example/ledger" aria-label="Instagram"><svg width="28" height="28" viewBox="0 0 28 28"><rect width="24" height="24" x="2" y="2"/></svg></a>
+  <a href="https://social.example/ledger" aria-label="YouTube"><svg width="28" height="28" viewBox="0 0 28 28"><path d="M4 4h20v20z"/></svg></a>
+</footer>
+<div id="login-modal" style="display:none" role="dialog">
+  <form action="/account/login" method="post">
+    <input type="text" name="user"><input type="password" name="pw"><button>Sign in</button>
+  </form>
+</div>
+</html>

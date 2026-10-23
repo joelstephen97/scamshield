@@ -242,3 +242,24 @@ test('isTenantApex: bare platform apexes and bare parents of multi-label platfor
   // scopeDomain of the platform's own site is an apex: callers must refuse to store it.
   for (const h of ['www.wordpress.com', 'wordpress.com', 'www.pages.dev', 'systeme.io']) assert.strictEqual(C2.isTenantApex(C2.scopeDomain(h)), true, h);
 });
+
+// --- 0.15.0 Task 4: whole-phrase scam wording ------------------------------
+test('matchScamPhrases matches whole phrases only', () => {
+  const C = require('../../engine/constants');
+  const m = (t) => C.matchScamPhrases(t);
+  assert.ok(m('You won a prize').includes('you won'));
+  assert.ok(m('act now!').includes('act now'));
+  assert.ok(m('Click here, ACT NOW').includes('act now'));
+  for (const neg of ['contact now', 'react now', "you won't believe", 'you won’t believe', 'you wonder', 'Please contact now']) {
+    assert.deepStrictEqual(m(neg), [], neg);
+  }
+});
+
+test('seed-phrase hints are recovery wording only; bare private key / mnemonic are gone', () => {
+  const C = require('../../engine/constants');
+  assert.ok(!C.SEED_PHRASE_HINTS.includes('private key'));
+  assert.ok(!C.SEED_PHRASE_HINTS.includes('mnemonic'));
+  assert.ok(C.SEED_PHRASE_HINTS.includes('12-word'));
+  assert.ok(C.SEED_FIELD_RE.test('Recovery phrase words'));
+  assert.ok(!C.SEED_FIELD_RE.test('Leave a comment'));
+});

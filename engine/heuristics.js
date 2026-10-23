@@ -130,6 +130,8 @@
     if (s.hasPasswordField) {
       const AUTH = C.KNOWN_AUTH_PROVIDERS || [];
       const foreign = (s.passwordFormActions || []).some((action) => {
+        // (0.15.0) empty, #…, javascript: and about:blank stay on the page.
+        if (C.isSamePageAction && C.isSamePageAction(action)) return false;
         try {
           const h = new URL(action, 'https://' + (s.pageHost || 'x')).hostname;
           const actionDomain = registrableDomain(h);
@@ -234,7 +236,8 @@
     // isOnBrand are declared above, ahead of the tenant-host block, which
     // also needs them.)
     const matchedBrand = C.brandNameIn([s.titleBrand, s.ogSiteName, ...(s.logoAltBrands || [])].join(' | '));
-    if (matchedBrand && s.hasPasswordField && !isOnBrand(matchedBrand)) {
+    // (0.15.0) needs a VISIBLE password field: a hidden login modal is not a login ask.
+    if (matchedBrand && s.hasVisiblePasswordField && !isOnBrand(matchedBrand)) {
       score = Math.max(score, 0.85); flags.push('brand-impersonation-content'); brand = matchedBrand;
       reasons.push({ code: 'brandImpersonationContent', kind: 'brand', params: [matchedBrand] });
     }
@@ -256,7 +259,7 @@
     if (icon) {
       const label = displayName(icon.brand);
       const iconReason = { code: 'brandIconMismatch', kind: 'brand', params: [label] };
-      if (s.hasPasswordField && icon.kind !== 'logo') {
+      if (s.hasVisiblePasswordField && icon.kind !== 'logo') {
         score = Math.max(score, 0.85); flags.push('brand-impersonation-visual'); brand = brand || icon.brand;
         reasons.push(iconReason);
       } else {

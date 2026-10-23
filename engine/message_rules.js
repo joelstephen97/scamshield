@@ -71,7 +71,7 @@
       const hits = phrases.filter((p) => t.includes(p));
       if (hits.length) { groupsHit.push({ group, hit: hits[0] }); extraPhrases += hits.length - 1; }
     }
-    const classic = (SCAM_PHRASES || []).find((p) => t.includes(p));
+    const classic = C.matchScamPhrases(t)[0]; // whole-phrase (0.15.0)
     if (classic && !groupsHit.some((g) => g.hit === classic)) {
       groupsHit.push({ group: 'classic', hit: classic });
     }

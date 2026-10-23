@@ -61,10 +61,20 @@ test('interstitial: Leave is the focused primary; Continue lives under Details a
   expect(s.allowlist).not.toContain('localhost'); await page.close();
 });
 
-test('scam giveaway content is hidden', async ({ context }) => {
+test('scam giveaway content is hidden on a warned page', async ({ context }) => {
+  // 0.15.0: content hiding follows the warning tier (stop/warn). This giveaway also posts a
+  // password off-site, so the page is warned and the block is hidden.
+  const page = await context.newPage();
+  await page.goto(BASE + '/scam-giveaway-phish.html');
+  await expect(page.locator('#prize.scamshield-hidden-block')).toBeVisible({ timeout: 8000 });
+});
+
+test('scam giveaway wording alone (suspicious, quiet tier) is not hidden', async ({ context }) => {
   const page = await context.newPage();
   await page.goto(BASE + '/scam-giveaway.html');
-  await expect(page.locator('#prize.scamshield-hidden-block')).toBeVisible({ timeout: 8000 });
+  await page.waitForTimeout(3500);
+  await expect(page.locator('#prize')).toBeVisible();
+  await expect(page.locator('[class*="scamshield-hidden"]')).toHaveCount(0);
 });
 
 test('popup reflects a dangerous verdict', async ({ context, extensionId }) => {
@@ -99,7 +109,7 @@ test('programmatic form.submit() on a foreign credential form is intercepted', a
   await expect(page.locator('.scamshield-overlay')).toBeVisible();
 });
 
-test('SPA navigation re-scans and hides newly injected scam content', async ({ context }) => {
+test('SPA navigation re-scans and hides newly injected scam content on a warned page', async ({ context }) => {
   const page = await context.newPage();
   await page.goto(BASE + '/spa.html');
   await page.waitForTimeout(500);
