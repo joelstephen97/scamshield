@@ -211,6 +211,18 @@
   function candidates() { return CANDIDATES || (CANDIDATES = buildCandidates()); }
   function _resetCandidatesForTest() { CANDIDATES = null; }
 
+  // (0.15.0) Exact brand SLD on a ccTLD-shaped, non-abused suffix of a brand that has
+  // regional storefronts. Shared shape with heuristics.js isOnBrand's exactBrandCc.
+  function isRegionalSite(brand, suffix) {
+    const sfx = String(suffix || '');
+    if (!sfx) return false;
+    const tld = sfx.split('.').pop();
+    const ccShaped = (C.MULTI_LABEL_SUFFIXES || []).includes(sfx) || tld.length === 2;
+    if (!ccShaped || (C.SUSPICIOUS_TLDS || []).includes(tld)) return false;
+    const b = BRANDS_BY_KEY && BRANDS_BY_KEY[brand];
+    return !(b && b.ccPolicy === 'closed');
+  }
+
   const GRADE_RANK = { strongest: 3, strong: 2, weak: 1 };
 
   // Grades `host` against one brand candidate. `hostForm` is the whole
@@ -219,7 +231,7 @@
   // own label. Returns `{ grade, rule }` (rule 'a'..'e') or null — callers
   // that need to know WHICH rule fired (engine/heuristics.js dedupes rules
   // c/d/e against brandForeignSuffix, which is the same evidence) read it.
-  function gradeAgainst(brand, form, hostForm, subLabels, sld) {
+  function gradeAgainst(brand, form, hostForm, subLabels, sld, suffix) {
     // Rules (a)/(b) match the raw brand KEY as a whole token, so they need a
     // key long enough to be distinctive: a 2-3 letter key (fab, icp, ups,
     // ing, dib, du) hits every hyphenated host that happens to contain those
@@ -251,7 +263,14 @@
     // c) TLD-swap of the exact brand: SLD matches exactly (distance 0) —
     // only the suffix differs, and the allowlist gate the caller already ran
     // ruled out that suffix being one the brand controls.
-    if (sld === form) return { grade: 'strong', rule: 'c' };
+    // (0.15.0) ...unless the suffix is a ccTLD-shaped one and the brand has regional sites
+    // (ccPolicy !== 'closed'): google.com.sa / paypal.de / apple.co.uk ARE the brand's own
+    // storefronts, so no grade at all (mirrors isOnBrand's exactBrandCc in heuristics.js).
+    // Closed brands (roblox.com.do) keep the grade and brandForeignSuffix.
+    if (sld === form) {
+      if (isRegionalSite(brand, suffix)) return null;
+      return { grade: 'strong', rule: 'c' };
+    }
     // d) homoglyph substitution match (exact, after normalising).
     for (const variant of homoglyphVariants(sld)) {
       if (variant === form) return { grade: 'strong', rule: 'd' };
@@ -280,7 +299,7 @@
     const subLabels = labels.slice(0, Math.max(0, labels.length - domainLabelCount));
     let best = null;
     for (const { brand, form } of candidates()) {
-      const g = gradeAgainst(brand, form, hostForm, subLabels, parts.sld);
+      const g = gradeAgainst(brand, form, hostForm, subLabels, parts.sld, parts.suffix);
       if (!g) continue;
       if (!best || GRADE_RANK[g.grade] > GRADE_RANK[best.grade]) best = { brand, grade: g.grade, rule: g.rule };
     }

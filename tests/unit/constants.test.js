@@ -263,3 +263,19 @@ test('seed-phrase hints are recovery wording only; bare private key / mnemonic a
   assert.ok(C.SEED_FIELD_RE.test('Recovery phrase words'));
   assert.ok(!C.SEED_FIELD_RE.test('Leave a comment'));
 });
+
+// --- 0.15.0: user-content hosts are never "safe" ---
+test('isSafeHost is false for user-content hosts of safe registrables', () => {
+  for (const h of ['sites.google.com', 'docs.google.com', 'storage.googleapis.com', 'foo.sharepoint.com', 'WWW.Sites.Google.com']) assert.strictEqual(C.isSafeHost(h), false, h);
+  assert.strictEqual(C.isSafeHost('www.google.com'), true);
+  assert.strictEqual(C.isSafeHost('mail.google.com'), true);
+});
+test('constants owns the user-content list (doctrine re-exports it)', () => {
+  assert.strictEqual(C.USER_CONTENT_HOSTS.length, 18);
+  assert.strictEqual(C.isUserContentHost('a.sharepoint.com'), true);
+  assert.strictEqual(require('../../engine/doctrine').USER_CONTENT_HOSTS, C.USER_CONTENT_HOSTS);
+});
+test("'unusual activity' is no longer a scam phrase (challenge/security-notice boilerplate)", () => {
+  assert.ok(!C.SCAM_PHRASES.includes('unusual activity'));
+  assert.ok(C.SCAM_PHRASES.includes('account suspended'));
+});

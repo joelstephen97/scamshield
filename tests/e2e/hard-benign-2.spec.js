@@ -54,3 +54,40 @@ test('a javascript: form action is same-page: no submit guard, verdict safe', as
 test('an SSH tutorial with a comment textarea gets no interstitial', async ({ context }) => {
   await openQuiet(context, 'ssh-tutorial.html');
 });
+
+// --- URL- and page-type precision (0.15.0, Task 5) ---
+test('a bot-challenge page ("unusual activity" + hidden frame) is silent', async ({ context }) => {
+  const sw = context.serviceWorkers()[0];
+  await openQuiet(context, 'challenge.html');
+  const tabs = await sw.evaluate(() => chrome.tabs.query({}));
+  const tab = tabs.filter((t) => (t.url || '').includes('challenge.html')).pop();
+  expect(await sw.evaluate((id) => chrome.action.getBadgeText({ tabId: id }), tab.id)).toBe('');
+});
+
+test('a news article with "virus detected" on Windows and a phone number gets no overlay', async ({ context }) => {
+  await openQuiet(context, 'windows-virus-news.html');
+});
+
+test('a news article about a Chrome update linking to its own site gets no interstitial', async ({ context }) => {
+  await openQuiet(context, 'chrome-update-news.html');
+});
+
+test('google.com.sa (a brand regional site) shows no banner and an empty badge', async ({ context }) => {
+  const sw = context.serviceWorkers()[0];
+  const page = await context.newPage();
+  await page.goto('https://www.google.com.sa/hard-benign/search-regional.html');
+  await expect(page.locator('h1')).toBeVisible();
+  await page.waitForTimeout(4000);
+  for (const sel of ['.scamshield-banner', '.scamshield-overlay', '.scamshield-interstitial']) expect(await page.$(sel), sel).toBeNull();
+  const tabs = await sw.evaluate(() => chrome.tabs.query({}));
+  const tab = tabs.filter((t) => (t.url || '').includes('www.google.com.sa')).pop();
+  expect(await sw.evaluate((id) => chrome.action.getBadgeText({ tabId: id }), tab.id)).toBe('');
+  const v = await verdictFor(sw, 'www.google.com.sa');
+  expect(!v || v.level === 'safe', `verdict ${v && v.level}: ${JSON.stringify(v && v.reasonCodes)}`).toBe(true);
+});
+
+test('a user-content host of a safe registrable (sites.google.com) is still checked: tech-scam overlay shows', async ({ context }) => {
+  const page = await context.newPage();
+  await page.goto('http://sites.google.com:5599/techscam.html');
+  await expect(page.locator('.scamshield-overlay')).toBeVisible({ timeout: 10000 });
+});

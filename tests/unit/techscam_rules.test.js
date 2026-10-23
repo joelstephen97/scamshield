@@ -46,3 +46,25 @@ test('alarm audio adds signal', () => {
   assert.ok(loud.score > quiet.score);
   assert.ok(loud.reasons.some((x) => x.code === 'techScamAlarmAudio'));
 });
+
+// --- 0.15.0: fake-alert-phone needs a behaviour signal or 2 distinct scare phrases ---
+test('news article mentioning a Windows virus and a phone number stays below 0.8 (0.15.0)', () => {
+  const r = scoreTechScam({
+    text: 'A virus detected on Windows machines spread last week, Microsoft said. Readers can phone the helpline on 1-800-555-0199 for advice.',
+    fullscreenOnLoad: false, dialogFloodCount: 0, alarmAudio: false, historyTrap: false
+  });
+  assert.ok(r.score < 0.8, 'score=' + r.score);
+  assert.ok(!r.flags.includes('fake-alert-phone'));
+});
+test('fake-alert-phone fires with one behaviour signal (0.15.0)', () => {
+  for (const b of [{ fullscreenOnLoad: true }, { dialogFloodCount: 2 }, { alarmAudio: true }, { historyTrap: true }]) {
+    const r = scoreTechScam({ text: 'virus detected on windows. call 1-800-555-0199', ...b });
+    assert.ok(r.flags.includes('fake-alert-phone'), JSON.stringify(b));
+    assert.ok(r.score >= 0.85);
+  }
+});
+test('fake-alert-phone fires with two distinct scare phrases and no behaviour (0.15.0)', () => {
+  const r = scoreTechScam({ text: 'windows defender alert: virus detected. call microsoft on 1-800-555-0199' });
+  assert.ok(r.flags.includes('fake-alert-phone'));
+  assert.ok(r.score >= 0.85);
+});

@@ -15,7 +15,7 @@
   // score weights. All three stay under THRESHOLDS.dangerous (0.8) alone, so
   // a lone fuzzy hit — with no other URL/DOM evidence — can only ever reach
   // "suspicious", never "dangerous" (task brief requirement).
-  const FUZZY_BRAND_WEIGHT = { strongest: 0.55, strong: 0.50, weak: 0.25 };
+  const FUZZY_BRAND_WEIGHT = { strongest: 0.55, strong: 0.45, weak: 0.25 };
 
   // `riskTlds` (optional): risk.json's `tlds` abused-TLD weight table
   // (background/service_worker.js mirrors it into settings.riskTlds once
@@ -197,7 +197,7 @@
     }
 
     if ((s.hiddenIframeCount || 0) > 0) {
-      score += 0.2;
+      score += 0.05; // (0.15.0) was 0.2: ad/captcha/analytics frames are ordinary
       reasons.push({ code: 'hiddenIframes', kind: 'page' });
     }
 

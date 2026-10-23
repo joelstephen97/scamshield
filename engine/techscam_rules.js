@@ -42,7 +42,11 @@
     // page that name-drops an OS/security vendor. Microsoft, Apple and Google
     // never put phone numbers in browser warnings, and vendor-owned domains
     // are excluded upstream by the trusted-host gate — near-zero FP.
-    if (hasPhone && hits.length && OS_BRAND_RE.test(text)) {
+    // (0.15.0) ...and the page must also behave like a scam (fullscreen lock, dialog flood, alarm,
+    // history trap) OR carry >= 2 distinct scare phrases: a news article quoting "virus detected"
+    // next to a helpline number has neither.
+    const behaviour = !!(s.fullscreenOnLoad || (s.dialogFloodCount || 0) >= 2 || s.alarmAudio || s.historyTrap);
+    if (hasPhone && hits.length && OS_BRAND_RE.test(text) && (behaviour || hits.length >= 2)) {
       score = Math.max(score, 0.85);
       flags.push('fake-alert-phone');
       reasons.push({ code: 'techScamFakeAlert', kind: 'techscam' });

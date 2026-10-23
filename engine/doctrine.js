@@ -4,10 +4,11 @@
 // interrupted on ordinary pages; the rule is now "interrupt only when
 // confident, and never on a popular site on heuristics alone".
 (function (root, factory) {
-  const mod = factory();
+  const req = typeof require === 'function';
+  const mod = factory(req ? require('./constants') : root.ScamShield);
   if (typeof module !== 'undefined' && module.exports) module.exports = mod;
   root.ScamShield = Object.assign(root.ScamShield || {}, mod);
-})(typeof globalThis !== 'undefined' ? globalThis : self, function () {
+})(typeof globalThis !== 'undefined' ? globalThis : self, function (C) {
   'use strict';
 
   // Decisive, near-zero-FP flags: block the interaction outright.
@@ -21,21 +22,9 @@
   // Feed intel still counts on popular sites: a validated list hit is not a heuristic.
   const FEED_FLAGS = ['feed-warn-verified', 'feed-warn-corroborated', 'feed-warn'];
 
-  // Hosts where anyone can publish a page. Phishing kits live there, so a
-  // popular registrable (google.com, microsoft.com…) must not shield them.
-  const USER_CONTENT_HOSTS = [
-    'sites.google.com', 'docs.google.com', 'drive.google.com', 'forms.gle',
-    'storage.googleapis.com', 'firebasestorage.googleapis.com', 'sharepoint.com',
-    'onedrive.live.com', '1drv.ms', 'dropbox.com', 'dl.dropboxusercontent.com',
-    'notion.site', 'forms.office.com', 'typeform.com', 'jotform.com',
-    'wixsite.com', 'canva.site', 'my.canva.site'
-  ];
-
-  function isUserContentHost(host) {
-    if (typeof host !== 'string' || !host) return false;
-    const h = host.toLowerCase().replace(/\.$/, '').replace(/^www\./, '');
-    return USER_CONTENT_HOSTS.some((u) => h === u || h.endsWith('.' + u));
-  }
+  // (0.15.0) USER_CONTENT_HOSTS / isUserContentHost live in engine/constants.js (single source of
+  // truth; isSafeHost needs them and constants.js loads first). Re-exported unchanged below.
+  const { USER_CONTENT_HOSTS, isUserContentHost } = C;
 
   // Popular guard input: user-content hosts of popular registrables are never shielded.
   function effectivePopular(popular, host) { return !!popular && !isUserContentHost(host); }

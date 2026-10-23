@@ -111,6 +111,15 @@ test('TLD-swap of the exact brand grades strong', () => {
   assert.equal(r.grade, 'strong');
 });
 
+test('exact brand SLD on a ccTLD-shaped suffix gets no grade for open brands (0.15.0)', () => {
+  for (const h of ['www.google.com.sa', 'www.google.it', 'www.paypal.de', 'www.apple.co.uk', 'www.amazon.se']) assert.equal(BM.fuzzyBrandMatch(h), null, h);
+  // closed brands keep the grade (brandForeignSuffix twin); abused TLDs keep it too.
+  assert.equal(BM.fuzzyBrandMatch('roblox.com.do').grade, 'strong');
+  assert.equal(BM.fuzzyBrandMatch('paypal.tk').grade, 'strong');
+  // homoglyph/typo on a ccTLD is still impersonation.
+  assert.equal(BM.fuzzyBrandMatch('amaz0n.co').grade, 'strong');
+});
+
 test('homoglyph substitution on the whole fuzzy form grades strong', () => {
   const r = BM.fuzzyBrandMatch('paypa1.com'); // bare SLD, no hyphen/subdomain
   assert.ok(r);
@@ -201,7 +210,9 @@ test('picks the single best (highest-ranked) grade when multiple would match', (
 test('subdomain prefixes do not defeat SLD typosquat rules', () => {
   assert.equal(BM.fuzzyBrandMatch('www.paypai.com').grade, 'strong');
   assert.equal(BM.fuzzyBrandMatch('secure.paypa1.com').grade, 'strong');
-  assert.equal(BM.fuzzyBrandMatch('mail.paypal.co').grade, 'strong'); // TLD swap behind a subdomain
+  assert.equal(BM.fuzzyBrandMatch('mail.paypal.info').grade, 'strong'); // TLD swap behind a subdomain
+  // (0.15.0) ccTLD-shaped suffixes are the brand's regional sites, not a swap.
+  assert.equal(BM.fuzzyBrandMatch('mail.paypal.co'), null);
 });
 test('short registrable names still get subdomain-injection checks', () => {
   assert.equal(BM.fuzzyBrandMatch('netflix.xy.co').grade, 'strongest');

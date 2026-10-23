@@ -481,7 +481,8 @@
     'you won', 'you have won', 'congratulations you', 'claim your prize',
     'you have been selected', 'free gift', 'crypto giveaway', 'double your',
     'risk-free investment', 'act now', 'verify your account', 'account suspended',
-    'unusual activity', 'confirm your identity'
+    // (0.15.0) 'unusual activity' removed: bot-challenge / security-notice boilerplate on ordinary sites.
+    'confirm your identity'
   ];
 
   // Very-high-traffic legitimate sites; we skip warnings on these to avoid
@@ -537,8 +538,26 @@
     return b.key;
   }
 
+  // Hosts where anyone can publish a page (0.15.0, moved here from engine/doctrine.js,
+  // which re-exports it; constants.js loads first so isSafeHost can use it). Phishing
+  // kits live there, so a safe/popular registrable (google.com, microsoft.com...) must
+  // not shield them.
+  const USER_CONTENT_HOSTS = [
+    'sites.google.com', 'docs.google.com', 'drive.google.com', 'forms.gle',
+    'storage.googleapis.com', 'firebasestorage.googleapis.com', 'sharepoint.com',
+    'onedrive.live.com', '1drv.ms', 'dropbox.com', 'dl.dropboxusercontent.com',
+    'notion.site', 'forms.office.com', 'typeform.com', 'jotform.com',
+    'wixsite.com', 'canva.site', 'my.canva.site'
+  ];
+  function isUserContentHost(host) {
+    if (typeof host !== 'string' || !host) return false;
+    const h = host.toLowerCase().replace(/\.$/, '').replace(/^www\./, '');
+    return USER_CONTENT_HOSTS.some((u) => h === u || h.endsWith('.' + u));
+  }
+
   function isSafeHost(host) {
     const h = String(host || '').toLowerCase();
+    if (isUserContentHost(h)) return false; // (0.15.0) never exempt from page checks
     return SAFE_DOMAINS.some((d) => h === d || h.endsWith('.' + d));
   }
   // Phrases that indicate a wallet recovery-phrase harvesting attempt.
@@ -770,7 +789,7 @@
     TENANT_PLATFORMS, tenantLabel, scopeDomain, scopeKeys, isTenantApex,
     MULTI_LABEL_SUFFIXES, KNOWN_AUTH_PROVIDERS, KNOWN_BRAND_REGISTRABLES,
     VERIFIED_NAMESPACES, isVerifiedNamespace,
-    registrableParts, registrableDomain, isSafeHost, brandNameIn, brandDisplayName,
+    registrableParts, registrableDomain, isSafeHost, USER_CONTENT_HOSTS, isUserContentHost, brandNameIn, brandDisplayName,
     unwrapSerpRedirect, dedupeCapped,
     luhnValid, isPanShaped, isSamePageAction, CRED_EXFIL_ALLOWLIST, isCredExfilAllowlisted, crossOriginCredPostHost
   };

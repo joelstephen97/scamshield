@@ -400,7 +400,7 @@
           if (/^https?:$/.test(u.protocol)) updateAnchorHosts.push(registrable(u.hostname));
         } catch (_) {}
       }
-      fakeUpdate = SS.scoreFakeUpdate({ text: bodyText, updateAnchorHosts, hasBlobDownload });
+      fakeUpdate = SS.scoreFakeUpdate({ text: bodyText, updateAnchorHosts, hasBlobDownload, pageRegistrable: registrable(location.hostname) });
     }
 
     // Delivery-fee scam signals (0.6.0): card-number input + small-fee wording.
@@ -1127,6 +1127,22 @@
       if (eng && eng.engaged) {
         verdict = Object.assign({}, verdict, { level: 'safe', reasons: [], reasonCodes: [], suppressed: 'engagement' });
       }
+    }
+    // Bot-challenge pages (0.15.0): DataDome / PerimeterX / Cloudflare / hCaptcha interstitials
+    // read like a scam ("unusual activity", hidden verification frame) but are the site's own
+    // gate. Decisive flags (feed hit, clickfix, ...) are never silenced, only flag-less verdicts.
+    if (verdict.level !== 'safe' && !(verdict.flags || []).length && SS.isChallengePage) {
+      try {
+        const txt = document.body ? document.body.innerText : '';
+        const frameHosts = [];
+        for (const el of document.querySelectorAll('iframe[src], script[src]')) {
+          try { const u = new URL(el.getAttribute('src'), location.href); frameHosts.push(u.hostname + u.pathname); } catch (_) {}
+          if (frameHosts.length >= 60) break;
+        }
+        if (SS.isChallengePage({ title: document.title, textSample: txt.slice(0, 600), bodyTextLength: txt.trim().length, frameHosts })) {
+          verdict = Object.assign({}, verdict, { level: 'safe', reasons: [], reasonCodes: [], suppressed: 'challenge' });
+        }
+      } catch (_) { /* best-effort */ }
     }
     // Credential-backed confident flags (0.15.0): new-domain / brand-lookalike evidence
     // only earns a warning when the page also asks for a password. The password check

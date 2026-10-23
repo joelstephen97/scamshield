@@ -38,10 +38,27 @@ test('a lone fuzzy brand hit (strongest grade, no other URL evidence) reaches su
   assert.ok(r.score < 0.8, 'a lone fuzzy hit must not reach dangerous on its own');
 });
 
-test('a lone fuzzy brand hit (strong grade: TLD-swap) also stays isolated and sub-dangerous', () => {
+test('a lone fuzzy brand hit (strong grade: TLD-swap) is isolated and stays below suspicious (0.15.0: strong = 0.45)', () => {
   const r = scoreUrl('https://talabat.info/');
   assert.deepEqual(r.reasons, [{ code: 'brandFuzzyMatch', kind: 'brand', params: ['Talabat'], grade: 'strong' }]);
-  assert.ok(r.score >= 0.5 && r.score < 0.8);
+  assert.ok(r.score < 0.5, 'a single strong grade must not warn alone, score=' + r.score);
+});
+
+test('brand regional sites on ccTLD-shaped suffixes score clean (0.15.0)', () => {
+  for (const h of ['www.google.com.sa', 'www.google.com.my', 'www.google.co.th', 'www.google.com.vn', 'www.google.it', 'www.google.es',
+    'www.paypal.de', 'www.apple.co.uk', 'www.facebook.de', 'www.netflix.de', 'www.amazon.se', 'www.zalando.de']) {
+    const r = scoreUrl('https://' + h + '/');
+    assert.ok(r.score < 0.5, h + ' score=' + r.score);
+    assert.ok(!r.reasons.some((x) => x.code === 'brandFuzzyMatch'), h);
+  }
+});
+
+test('real impersonation shapes still warn after the regional-site carve-out (0.15.0)', () => {
+  for (const h of ['paypa1-login.com', 'secure-paypal.com.verify-account.xyz', 'amaz0n.co', 'roblox.com.do']) {
+    assert.ok(scoreUrl('https://' + h + '/').score >= 0.5, h);
+  }
+  assert.ok(scoreUrl('https://roblox.com.do/').reasons.some((x) => x.code === 'brandForeignSuffix'));
+  assert.ok(scoreUrl('https://paypal.xyz/').reasons.some((x) => x.code === 'brandFuzzyMatch')); // abused TLD keeps the TLD-swap grade
 });
 
 test('a real brand domain never gets brandFuzzyMatch evidence (allowlist short-circuit)', () => {

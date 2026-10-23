@@ -28,6 +28,7 @@
   }
 
   // input: { text, updateAnchorHosts: [hostnames of download/update anchors],
+  //          pageRegistrable: the page's own registrable domain (0.15.0),
   //          hasBlobDownload: boolean (download attr / blob:/data: href) }
   function scoreFakeUpdate(input) {
     const s = input || {};
@@ -36,7 +37,10 @@
     const flags = [];
     if (!(BROWSER_RE.test(text) && UPDATE_RE.test(text))) return { level: 'none', reasons, flags };
     const anchorHosts = Array.isArray(s.updateAnchorHosts) ? s.updateAnchorHosts : [];
-    const nonVendor = anchorHosts.filter((h) => h && !isVendorHost(h));
+    // (0.15.0) Links back to the page's own registrable are the site's own pages, not a payload
+    // host: "Chrome update available: how to download" on a news site must stay clean.
+    const own = String(s.pageRegistrable || '').toLowerCase();
+    const nonVendor = anchorHosts.filter((h) => h && !isVendorHost(h) && !(own && String(h).toLowerCase() === own));
     const hasBadDownload = nonVendor.length > 0 || s.hasBlobDownload === true;
     if (hasBadDownload) {
       flags.push('fake-browser-update');

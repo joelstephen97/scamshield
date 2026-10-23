@@ -170,3 +170,10 @@ for (const action of ['javascript:void(0)', 'JavaScript:;', '#', '#login', '', '
     assert.ok(!r.flags.includes('credential-form-foreign-domain'));
   });
 }
+
+// --- 0.15.0 ---
+test('hidden iframes weigh 0.05 (ad/captcha frames are ordinary)', () => {
+  const r = scoreDom({ ...clean, hiddenIframeCount: 2 });
+  assert.equal(r.score, 0.05);
+  assert.ok(r.reasons.some((x) => x.code === 'hiddenIframes'));
+});

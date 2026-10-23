@@ -32,6 +32,7 @@
         "engine/shop_rules.js",
         "engine/verdict.js",
         "engine/doctrine.js",
+        "engine/challenge.js",
         "ui/reasons.js",
         "engine/url_model.js",
         "engine/page_features.js",
