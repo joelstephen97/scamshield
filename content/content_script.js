@@ -150,7 +150,7 @@
     if (tier === 'block' && SS.actions.dangerInterstitial) {
       try { await navigator.clipboard.writeText(t('guardClipboardBlockedPayload', null, 'Blocked by ScamShield — this site put a dangerous command on your clipboard. Do not paste it anywhere.')); } catch (_) { /* overwrite is best-effort */ }
       SS.actions.dangerInterstitial({ level: 'dangerous', reasons: cf.reasons, flags: cf.flags }, { onLeave: () => send('leaveTab'), onReport: () => send('userReport', { label: 'false_positive' }) });
-      send('reportVerdict', { verdict: { level: 'dangerous', score: 0.95, reasons: cf.reasons, reasonCodes: cf.reasons.map((x) => x.code), flags: cf.flags, modelUsed: false }, subframe: !IS_TOP });
+      send('reportVerdict', { verdict: { level: 'dangerous', score: 0.95, reasons: cf.reasons, reasonCodes: cf.reasons.map((x) => x.code), flags: cf.flags, modelUsed: false }, subframe: !IS_TOP, tier: 'stop' });
       send('bumpThreats', { kind: 'clipboard' });
       return;
     }
@@ -190,7 +190,7 @@
         try { window.dispatchEvent(new CustomEvent('scamshield:techscam-escape')); } catch (_) {}
         send('leaveTab');
       });
-      send('reportVerdict', { verdict: { level: 'dangerous', score: r.score, reasons: r.reasons, reasonCodes: r.reasons.map((x) => x.code), flags: r.flags || [], modelUsed: false }, subframe: !IS_TOP });
+      send('reportVerdict', { verdict: { level: 'dangerous', score: r.score, reasons: r.reasons, reasonCodes: r.reasons.map((x) => x.code), flags: r.flags || [], modelUsed: false }, subframe: !IS_TOP, tier: 'stop' });
       send('bumpThreats', { kind: 'techscam' });
     }
   });
@@ -1125,11 +1125,14 @@
         verdict.brandUrl = 'https://' + SS.BRAND_DOMAINS[verdict.brand][0] + '/';
         verdict.brandLabel = SS.brandDisplayName ? SS.brandDisplayName(verdict.brand) : verdict.brand;
       }
-      const handlers = { onLeave: () => send('leaveTab'), onReport: () => send('userReport', { label: 'false_positive' }), onHide: (choice) => send('pauseSite', { domain: pageDomain, choice }) };
+      const handlers = { onLeave: () => send('leaveTab'), onReport: () => send('userReport', { label: 'false_positive' }), onHide: (choice) => { send('warnDismissed', { domain: pageDomain }); return send('pauseSite', { domain: pageDomain, choice }); } };
       if (tier === 'stop' && SS.actions.dangerInterstitial) {
         SS.actions.dangerInterstitial(verdict, handlers);
       } else {
-        SS.actions.showBanner(verdict, handlers);
+        // Interruption budget (0.15.0): at most one banner per site per day, quiet after two
+        // dismissals. Fails open (a failed/slow budget call still warns); badge stays '!'.
+        const budget = await withTimeout(send('warnBudget', { domain: pageDomain }), 2000).catch(() => null);
+        if (!budget || budget.allow !== false) SS.actions.showBanner(verdict, handlers);
       }
       // One-time-ever support ask, only after ScamShield visibly earned it.
       if (verdict.level === 'dangerous' && !settings.supportAskShown && SS.actions.supportToast) {

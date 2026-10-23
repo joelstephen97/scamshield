@@ -4,7 +4,7 @@
 // a classic-worker context (tests driving this file directly) falls back to
 // importScripts here. In the module SW `importScripts` is undefined — the
 // ReferenceError lands in the catch and the imports from sw.js already won.
-try { importScripts('../engine/constants.js', '../engine/trust.js', '../engine/decisions.js', '../engine/features.js', '../engine/risk_rules.js', '../engine/image_hash.js', '../engine/brand_icons.js', '../engine/report_payload.js', '../engine/engagement.js', '../engine/blockset.js', '../engine/bloom.js', '../engine/first_seen.js', '../engine/dnr_rules.js', '../engine/hotlist.js', '../ui/reasons.js', './stats.js', './blockstore.js', './update.js', './feedsync.js'); } catch (_) { /* deps already loaded by sw.js (Chrome) or the manifest (Firefox) */ }
+try { importScripts('../engine/constants.js', '../engine/trust.js', '../engine/decisions.js', '../engine/features.js', '../engine/risk_rules.js', '../engine/image_hash.js', '../engine/brand_icons.js', '../engine/report_payload.js', '../engine/engagement.js', '../engine/blockset.js', '../engine/bloom.js', '../engine/first_seen.js', '../engine/dnr_rules.js', '../engine/hotlist.js', '../engine/budget.js', '../ui/reasons.js', './stats.js', './blockstore.js', './update.js', './feedsync.js'); } catch (_) { /* deps already loaded by sw.js (Chrome) or the manifest (Firefox) */ }
 const api = globalThis.browser || globalThis.chrome;
 
 // Official ScamShield feed: rebuilt by GitHub Actions from public,
@@ -1783,6 +1783,36 @@ if (api.tabs && api.tabs.onRemoved) {
   });
 }
 
+// ---- Interruption budget (0.15.0) ----
+// `quietSites` is a LOCAL, UNSYNCED storage key ({ [scopeDomain]: { dismissals,
+// lastWarnAt, quietUntil } }, capped at 500): like reviewAsk it lives outside
+// `settings`, so neither SYNCED_KEYS nor filterSynced can ever carry it. The
+// decisions are pure (engine/budget.js); this only serializes read-modify-write.
+let quietChain = Promise.resolve();
+function queueQuiet(run) {
+  const result = quietChain.then(run, run);
+  quietChain = result.then(() => {}, () => {});
+  return result;
+}
+async function readQuietSites() {
+  try {
+    const cur = await api.storage.local.get('quietSites');
+    return cur.quietSites && typeof cur.quietSites === 'object' ? cur.quietSites : {};
+  } catch (_) { return {}; }
+}
+function updateQuietSite(domain, fn) {
+  const d = scopedKey(domain);
+  if (!d) return Promise.resolve(null);
+  return queueQuiet(async () => {
+    const B = globalThis.SSBudget;
+    const map = await readQuietSites();
+    const out = fn(B, map[d], Date.now());
+    if (out.entry) map[d] = out.entry; else delete map[d];
+    try { await api.storage.local.set({ quietSites: B.capEntries(map) }); } catch (_) { /* budget is best-effort */ }
+    return out;
+  });
+}
+
 api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   (async () => {
     switch (msg && msg.type) {
@@ -1837,10 +1867,26 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
           // detector's second opinion on a page already counted, and sub-frame
           // merges are never counted at all.
           const firstTopReport = !fromSubframe && fv.top == null;
+          // Warning doctrine (0.15.0): the badge, history and threat counters follow the
+          // content script's surface tier. A missing tier (older content script) is derived
+          // from level: dangerous -> warn, anything else -> quiet. The tech-scam and
+          // clipboard-block senders pass tier 'stop' themselves (decisive detections only).
+          const tier = (msg.tier === 'stop' || msg.tier === 'warn' || msg.tier === 'quiet')
+            ? msg.tier : (msg.verdict && msg.verdict.level === 'dangerous' ? 'warn' : 'quiet');
+          const TIER_RANK = { quiet: 0, warn: 1, stop: 2 };
+          // Ad/captcha iframes stay silent: a sub-frame only touches the frame split, the
+          // badge and history when it earned a full stop.
+          const silentSub = fromSubframe && tier !== 'stop';
           if (fromSubframe) {
-            if (rankOf(msg.verdict) > rankOf(fv.sub)) fv.sub = Object.assign({}, msg.verdict, { subframe: true });
+            if (!silentSub && rankOf(msg.verdict) > rankOf(fv.sub)) fv.sub = Object.assign({}, msg.verdict, { subframe: true });
           } else {
             fv.top = msg.verdict;
+          }
+          // Loudest tier seen on this tab+URL (like the old max-rank merge, a later quiet
+          // rescan must not clear an earlier interruption).
+          if (!silentSub) {
+            const prev = fv.tier || 'quiet';
+            fv.tier = TIER_RANK[tier] > TIER_RANK[prev] ? tier : prev;
           }
           frameVerdicts.set(tabId, fv);
           if (firstTopReport) bumpStat('checked');
@@ -1851,15 +1897,14 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
           // Auto-reports describe the frame that detected the scam (sender.url
           // is the frame's own URL; for the top frame it equals the tab URL).
           maybeAutoReport(sender.url || tabUrl, msg.verdict, msg.report, ['page']);
-          const level = effective && effective.level;
-          if (level === 'dangerous') api.action.setBadgeText({ tabId, text: '!' });
-          else if (level === 'suspicious') api.action.setBadgeText({ tabId, text: '?' });
-          else api.action.setBadgeText({ tabId, text: '' });
-          if (level !== 'safe') {
-            api.action.setBadgeBackgroundColor({ tabId, color: level === 'dangerous' ? '#c0392b' : '#e1a200' });
+          if (!silentSub) {
+            if (fv.tier === 'stop' || fv.tier === 'warn') {
+              api.action.setBadgeText({ tabId, text: '!' });
+              api.action.setBadgeBackgroundColor({ tabId, color: '#c0392b' });
+            } else api.action.setBadgeText({ tabId, text: '' });
           }
           const incomingLevel = msg.verdict && msg.verdict.level;
-          if (incomingLevel && incomingLevel !== 'safe') {
+          if (!silentSub && tier !== 'quiet' && incomingLevel && incomingLevel !== 'safe') {
             recordEvent({ host: hostOfSender(sender), kind: 'page', level: incomingLevel });
           }
           // Engagement only accrues from clean top-frame visits.
@@ -2022,8 +2067,27 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         const ds = removalKeys(msg.domain);
         if (!ds.length) { sendResponse({ ok: false }); break; }
         const s = await getSettings(); const ps = Object.assign({}, s.pausedSites); for (const d of ds) delete ps[d];
-        await setSettings({ pausedSites: ps, allowlist: s.allowlist.filter((x) => !ds.includes(x)) }); sendResponse({ ok: true }); break;
+        await setSettings({ pausedSites: ps, allowlist: s.allowlist.filter((x) => !ds.includes(x)) });
+        // (0.15.0) Resuming protection is an explicit "warn me again": drop the site's interruption budget too.
+        for (const d of ds) await updateQuietSite(d, () => ({ entry: null }));
+        sendResponse({ ok: true }); break;
       }
+      case 'warnBudget': {
+        // Fail open: if the budget cannot be decided, a real warning still shows.
+        let r = null;
+        try { r = await updateQuietSite(msg.domain, (B, e, now) => { const x = B.decideBudget(e, now); return { allow: x.allow, entry: x.allow ? x.entry : e }; }); } catch (_) {}
+        sendResponse({ allow: r ? r.allow : true }); break;
+      }
+      case 'warnDismissed': {
+        const r = await updateQuietSite(msg.domain, (B, e, now) => ({ entry: B.applyDismissal(e, now) }));
+        sendResponse({ ok: !!r }); break;
+      }
+      case 'unquietSite': {
+        const r = await updateQuietSite(msg.domain, () => ({ entry: null }));
+        sendResponse({ ok: !!r }); break;
+      }
+      case 'getQuietSites':
+        sendResponse(await readQuietSites()); break;
       case 'getTabStats': {
         const cur = await api.storage.local.get('history'); const list = Array.isArray(cur.history) ? cur.history : [];
         const SS = globalThis.ScamShield;

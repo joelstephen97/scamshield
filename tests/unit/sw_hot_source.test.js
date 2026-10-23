@@ -184,6 +184,9 @@ test('pullSync and the onChanged path both filter the blob through SYNCED_KEYS (
   const synced = [...(/const SYNCED_KEYS = \[([^\]]*)\]/.exec(src))[1].matchAll(/'([^']+)'/g)].map((x) => x[1]);
   const filterSynced = new Function('SYNCED_KEYS', m[0] + '; return filterSynced;')(synced);
   assert.deepStrictEqual(filterSynced({ enabled: false, theme: 'dark' }), { theme: 'dark' });
+  // (0.15.0) the interruption budget is local-only and must never cross the sync boundary.
+  assert.deepStrictEqual(filterSynced({ quietSites: { a: { dismissals: 1 } }, theme: 'dark' }), { theme: 'dark' });
+  assert.ok(!synced.includes('quietSites'));
   assert.ok(/setSettings\(filterSynced\(got\.ssSettings\)\)/.test(functionBody('pullSync')));
   assert.ok(/setSettings\(filterSynced\(incoming\)\)/.test(src));
 });

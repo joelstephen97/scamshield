@@ -19,7 +19,7 @@ test('phishing login form triggers banner and submit overlay', async ({ context 
   await expect(page.locator('.scamshield-overlay h3')).toContainText('phishing');
 });
 
-test('phishing form inside an iframe is guarded and escalates the tab verdict (all_frames)', async ({ context, extensionId }) => {
+test('phishing form inside an iframe is guarded in-frame without escalating the tab verdict (all_frames, 0.15.0)', async ({ context, extensionId }) => {
   const page = await context.newPage();
   await page.goto(BASE + '/iframe-phish.html');
   // The clean top frame shows no banner of its own — sub-frame UI stays in-frame.
@@ -29,12 +29,13 @@ test('phishing form inside an iframe is guarded and escalates the tab verdict (a
   await frame.locator('input[name="pw"]').fill('secret');
   await frame.locator('button[type="submit"]').click();
   await expect(frame.locator('.scamshield-overlay')).toBeVisible({ timeout: 8000 });
-  // The sub-frame's dangerous verdict must win over the top frame's safe one.
+  // 0.15.0 doctrine: a sub-frame only moves the tab verdict/badge when it earns a full stop. This
+  // frame is warn-tier, so the tab stays safe (the in-frame submit guard above still fired).
   const popup = await context.newPage();
   await popup.goto(`chrome-extension://${extensionId}/popup.html`);
   await page.bringToFront();
   await popup.reload();
-  await expect(popup.locator('#status')).toHaveClass(/dangerous|suspicious/, { timeout: 5000 });
+  await expect(popup.locator('#status')).toHaveClass(/safe/, { timeout: 5000 });
 });
 
 test('seed-phrase harvesting page gets the blocking interstitial with a delayed escape', async ({ context }) => {
