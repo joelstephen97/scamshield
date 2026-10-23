@@ -15,7 +15,7 @@ test('fake shop: red flags show in the popup Shopping card', async ({ context, e
 
 test('sponsored-result mismatch is flagged on a search page', async ({ context }) => {
   const page = await context.newPage();
-  await page.goto(BASE_HTTPS.replace('localhost', 'www.google.com') + '/serp.html');
+  await page.goto(BASE_HTTPS.replace('localhost', 'www.google.com') + '/search?q=notepad');
   // The sponsored result whose ad goes to a different domain gets a warning chip;
   // the organic Wikipedia result does not. The hostname is wrapped in bidi
   // isolate marks (U+2066/U+2069) for RTL safety, so allow for those between

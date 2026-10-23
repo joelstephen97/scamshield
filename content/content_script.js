@@ -33,6 +33,17 @@
     });
   }
 
+  // (0.15.0) Local surface log: every in-page surface actually shown is recorded (SW `surfaceLog`,
+  // host + kind only) so false alarms are visible. Fire-and-forget; the SW takes the host from the sender tab.
+  function surface(kind) { send('surfaceShown', { kind, host: location.hostname }); }
+  // (0.15.0) "Report a mistake" == "This site is fine": relay the report (SW gates it on opt-in), trust
+  // the site via the one shared trust message with via:'mistake', and bump the local falseAlarms counter.
+  function reportMistake() {
+    send('userReport', { label: 'false_positive' });
+    send('trustSite', { domain: scopeOf(location.hostname), via: 'mistake' });
+    send('falseAlarm');
+  }
+
   function needsPageAnalysis(signals, urlRules, domRules) {
     if (signals.hasPasswordField) return true;
     if (Math.max(urlRules.score, domRules.score) >= 0.3) return true;
@@ -215,6 +226,7 @@
     if (!settings || !settings.enabled || settings.walletGuard === false) { reply(detail.id, true); return; }
     if (isTrustedHost(location.hostname, settings)) { reply(detail.id, true); return; }
     if (!SS || !SS.actions) { reply(detail.id, true); return; }
+    surface('wallet');
     SS.actions.walletConfirmOverlay(detail, (allow, meta) => {
       reply(detail.id, allow);
       if (!allow && !(meta && meta.collision)) send('bumpThreats', { kind: 'wallet' });
@@ -249,7 +261,8 @@
     if (tier === 'none') return;
     if (tier === 'block' && SS.actions.dangerInterstitial) {
       try { await navigator.clipboard.writeText(t('guardClipboardBlockedPayload', null, 'Blocked by ScamShield — this site put a dangerous command on your clipboard. Do not paste it anywhere.')); } catch (_) { /* overwrite is best-effort */ }
-      SS.actions.dangerInterstitial({ level: 'dangerous', reasons: cf.reasons, flags: cf.flags }, { onLeave: () => send('leaveTab'), onReport: () => send('userReport', { label: 'false_positive' }) });
+      SS.actions.dangerInterstitial({ level: 'dangerous', reasons: cf.reasons, flags: cf.flags }, { onLeave: () => send('leaveTab'), onReport: reportMistake });
+      surface('interstitial');
       send('reportVerdict', { verdict: { level: 'dangerous', score: 0.95, reasons: cf.reasons, reasonCodes: cf.reasons.map((x) => x.code), flags: cf.flags, modelUsed: false }, subframe: !IS_TOP, tier: 'stop' });
       send('bumpThreats', { kind: 'clipboard' });
       return;
@@ -261,6 +274,7 @@
     const key = detail.level + '|' + (detail.sample || '');
     if (clipboardSeen.has(key)) return; clipboardSeen.add(key);
     // notice/warn tiers are informational: no threat count, no history row.
+    surface('toast-clipboard');
     SS.actions.clipboardToast({ tier, level: detail.level, reasons: detail.reasons, host: location.hostname, onMute: muteHandler('clipboard') });
   });
   let techSignal = { dialogFloodCount: 0, fullscreenOnLoad: false, beforeUnloadCount: 0, alarmAudio: false };
@@ -286,6 +300,7 @@
     if (r.score >= (SS.THRESHOLDS ? SS.THRESHOLDS.dangerous : 0.8)) {
       if (techShown || await isPopularHere()) return;
       techShown = true;
+      surface('techscam');
       SS.actions.techScamEscapeOverlay({ level: 'dangerous', reasons: r.reasons }, () => {
         // Dismantle the page's traps (fullscreen, beforeunload, alarm audio)
         // in the MAIN world, then actually leave via the service worker.
@@ -312,6 +327,7 @@
       : t('guardLeakyFormHashed', [bidi(d.destHost), bidi(d.kind.toUpperCase())], 'This site sent your email/phone to ' + d.destHost + ' as a hashed (' + d.kind.toUpperCase() + ') identifier — before you pressed submit.');
     // (0.15.0) the toast only on an already-warned page; elsewhere the popup lists the finding.
     if (pageWarned() && SS.actions && SS.actions.privacyToast) {
+      surface('toast-leak');
       SS.actions.privacyToast({ title: t('leakTitle', null, 'Your details left this page before you pressed Send'), text, muteKind: 'leak', onMute: muteHandler('leak') });
     }
     send('privacyFinding', { finding: { kind: 'leaky-form', host: d.destHost, detail: d.kind } });
@@ -336,6 +352,7 @@
     const bt = (document.body ? document.body.innerText : '').toLowerCase();
     if (/allow.{0,20}(to (continue|proceed|verify|watch|download)|if you are not a robot|to confirm you are human)|click\s+allow/i.test(bt)) {
       if (pageWarned() && SS.actions && SS.actions.privacyToast) {
+        surface('toast-notify');
         SS.actions.privacyToast({ level: 'warn', title: t('notifyLureTitle', null, "Don't click Allow here"), text: t('guardNotifyLure', null, 'This site is trying to get notification permission using a "click Allow to continue" trick. You can safely Block it.'), muteKind: 'notify', onMute: muteHandler('notify') });
       }
       send('privacyFinding', { finding: { kind: 'notify-lure', host: location.hostname, detail: '' } });
@@ -677,7 +694,10 @@
     return targets;
   }
 
+  let serpDotLogged = false;
   async function annotateSerpResults() {
+    // The observer outlives same-document navigation (results -> Maps/Mail), so re-check the page type.
+    if (!SS.isSerpPage(location.hostname, location.pathname, location.search)) return;
     if (serpBadgeRunning) { serpBadgePending = true; return; }
     serpBadgeRunning = true;
     try {
@@ -691,6 +711,7 @@
           const res = await send('checkFeedBatch', { hosts });
           feedResults = (res && res.results) || {};
         } catch (_) { /* best-effort — local signals below still apply */ }
+        let painted = 0;
         for (const { a, host } of targets) {
           if (!a.isConnected) continue; // removed before the round trip resolved
           const feedHit = feedResults[host];
@@ -701,8 +722,9 @@
             const fuzzy = SS.fuzzyBrandMatch(host);
             if (fuzzy && (fuzzy.grade === 'strongest' || fuzzy.grade === 'strong')) level = 'caution';
           }
-          if (level) paintSerpBadge(a, level);
+          if (level) { paintSerpBadge(a, level); painted++; }
         }
+        if (painted && !serpDotLogged) { serpDotLogged = true; surface('serp-dot'); } // once per page load
       } while (serpBadgePending);
     } catch (_) { /* badges are best-effort — never break the results page */ }
     finally { serpBadgeRunning = false; }
@@ -758,6 +780,7 @@
         ev.preventDefault(); ev.stopPropagation();
         const reason = { code: 'crossOriginCredPost', kind: 'page', params: [destHost] };
         if (SS.actions && SS.actions.crossOriginCredToast) {
+          surface('form-guard');
           // form.submit() is the isolated world's native (unhooked) method, so
           // "Submit anyway" really submits without re-triggering this listener —
           // same technique guardForms uses for its own "Submit anyway".
@@ -1017,7 +1040,8 @@
     if (!settings || !settings.enabled) return;
     const pageDomain = scopeOf(location.hostname); // 0.14.1: engagement + pause are per tenant host
     // Sponsored-search check runs even on (trusted) search-engine hosts.
-    if (IS_TOP && settings.serpCheck !== false && SEARCH_HOSTS.test(location.hostname)) {
+    if (IS_TOP && settings.serpCheck !== false && SS.isSerpPage(location.hostname, location.pathname, location.search)) {
+      // (0.15.0) results pages only: Gmail, Docs, Maps and News on google.* get nothing.
       try { checkSerp(); } catch (_) {}
       try { annotateSerpResults(); ensureSerpBadgeObserver(); } catch (_) {}
     }
@@ -1055,7 +1079,17 @@
       const prov = SS.fuse({ modelProb: null, urlRules, domRules, contentProb: null, iconMatch: false });
       formGuardReasons.splice(0, formGuardReasons.length, ...(prov.reasons || []));
     } catch (_) { formGuardReasons.length = 0; }
-    if (foreignForms.length) SS.actions.guardForms(foreignForms, formGuardReasons, () => send('userReport', { label: 'false_positive' }));
+    if (foreignForms.length) {
+      SS.actions.guardForms(foreignForms, formGuardReasons, reportMistake);
+      // (0.15.0) The submit overlay lives in actions.js (frozen); log it from a listener registered AFTER the
+      // guard's, so by the time it runs the overlay is up. Only when it really rendered.
+      for (const f of foreignForms) {
+        if (f.__ssSurfaceLogged) continue; f.__ssSurfaceLogged = true;
+        const logIfShown = () => { if (document.querySelector('.scamshield-overlay')) surface('form-guard'); };
+        f.addEventListener('submit', logIfShown, true);
+        f.addEventListener('scamshield:formsubmit', logIfShown, true);
+      }
+    }
     // Reuses leakyFormGuard (0.10.0, Task C2): the closest existing warn-tier
     // "form leak before/at submit" toggle — see task-c2-report.md for why no
     // new setting was added.
@@ -1275,14 +1309,15 @@
         verdict.brandUrl = 'https://' + SS.BRAND_DOMAINS[verdict.brand][0] + '/';
         verdict.brandLabel = SS.brandDisplayName ? SS.brandDisplayName(verdict.brand) : verdict.brand;
       }
-      const handlers = { onLeave: () => send('leaveTab'), onReport: () => send('userReport', { label: 'false_positive' }), onHide: (choice) => { send('warnDismissed', { domain: pageDomain }); return send('pauseSite', { domain: pageDomain, choice }); } };
+      const handlers = { onLeave: () => send('leaveTab'), onReport: reportMistake, onHide: (choice) => { send('warnDismissed', { domain: pageDomain }); return send('pauseSite', { domain: pageDomain, choice }); } };
       if (tier === 'stop' && SS.actions.dangerInterstitial) {
         SS.actions.dangerInterstitial(verdict, handlers);
+        surface('interstitial');
       } else {
         // Interruption budget (0.15.0): at most one banner per site per day, quiet after two
         // dismissals. Fails open (a failed/slow budget call still warns); badge stays '!'.
         const budget = await withTimeout(send('warnBudget', { domain: pageDomain }), 2000).catch(() => null);
-        if (!budget || budget.allow !== false) SS.actions.showBanner(verdict, handlers);
+        if (!budget || budget.allow !== false) { SS.actions.showBanner(verdict, handlers); surface('banner'); }
       }
       // One-time-ever support ask, only after ScamShield visibly earned it.
       if (verdict.level === 'dangerous' && !settings.supportAskShown && SS.actions.supportToast) {
@@ -1297,7 +1332,12 @@
     // hands them the final verdict's reasons.
     formGuardReasons.splice(0, formGuardReasons.length, ...(verdict.reasons || []));
     // (0.15.0) Hide page blocks only on pages already warned about; never on quiet/safe ones.
-    if (settings.hideScamContent && scamBlocks.length && IS_TOP && interrupts) SS.actions.hideScamBlocks(scamBlocks);
+    if (settings.hideScamContent && scamBlocks.length && IS_TOP && interrupts) {
+      const hiddenBefore = document.querySelectorAll('.scamshield-hidden-block').length;
+      SS.actions.hideScamBlocks(scamBlocks);
+      // Only when at least one block was newly hidden (hideScamBlocks skips already-hidden nodes, so a re-run logs nothing).
+      if (document.querySelectorAll('.scamshield-hidden-block').length > hiddenBefore) surface('hidden-blocks');
+    }
   }
 
   let lastUrl = location.href;

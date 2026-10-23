@@ -84,7 +84,9 @@ function handler(req, res) {
     return;
   }
   if (url === '/relay/reset') { relay.bodies = []; res.writeHead(204); res.end(); return; }
-  const name = (url === '/' ? '/clean.html' : url);
+  // (0.15.0) SERP gating: search-engine fixtures must sit at a real results path (/search), so the
+  // serp.html page is also served there; the same page at /serp.html is a non-results path.
+  const name = (url === '/' ? '/clean.html' : url === '/search' ? '/serp.html' : url);
   // Fixture pages live flat in pages/, except the hand-authored hard-benign
   // look-alikes in pages/hard-benign/ (tests/e2e/hard-benign.spec.js).
   const file = safeJoin(dir, name);

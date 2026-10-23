@@ -4,7 +4,7 @@
 // a classic-worker context (tests driving this file directly) falls back to
 // importScripts here. In the module SW `importScripts` is undefined — the
 // ReferenceError lands in the catch and the imports from sw.js already won.
-try { importScripts('../engine/constants.js', '../engine/trust.js', '../engine/decisions.js', '../engine/features.js', '../engine/risk_rules.js', '../engine/image_hash.js', '../engine/brand_icons.js', '../engine/report_payload.js', '../engine/engagement.js', '../engine/blockset.js', '../engine/bloom.js', '../engine/first_seen.js', '../engine/dnr_rules.js', '../engine/hotlist.js', '../engine/budget.js', '../ui/reasons.js', './stats.js', './blockstore.js', './update.js', './feedsync.js'); } catch (_) { /* deps already loaded by sw.js (Chrome) or the manifest (Firefox) */ }
+try { importScripts('../engine/constants.js', '../engine/trust.js', '../engine/decisions.js', '../engine/features.js', '../engine/risk_rules.js', '../engine/image_hash.js', '../engine/brand_icons.js', '../engine/report_payload.js', '../engine/engagement.js', '../engine/blockset.js', '../engine/bloom.js', '../engine/first_seen.js', '../engine/dnr_rules.js', '../engine/hotlist.js', '../engine/budget.js', '../engine/surface_log.js', '../ui/reasons.js', './stats.js', './blockstore.js', './update.js', './feedsync.js'); } catch (_) { /* deps already loaded by sw.js (Chrome) or the manifest (Firefox) */ }
 const api = globalThis.browser || globalThis.chrome;
 
 // Official ScamShield feed: rebuilt by GitHub Actions from public,
@@ -313,7 +313,7 @@ async function countStaticRules() {
 async function getStats() {
   await installedAtPromise;
   await privacyTotalPromise;
-  const cur = await api.storage.local.get(['statsDaily', 'pagesCheckedTotal', 'privacyFindingsTotal', 'threatsByType', 'installedAt']);
+  const cur = await api.storage.local.get(['statsDaily', 'pagesCheckedTotal', 'privacyFindingsTotal', 'threatsByType', 'installedAt', 'falseAlarms']);
   const s = await getSettings();
   const byType = (cur.threatsByType && typeof cur.threatsByType === 'object') ? cur.threatsByType : {};
   return {
@@ -323,6 +323,7 @@ async function getStats() {
     // seed (storage error), and never re-derives a real stored value.
     privacyFindingsTotal: globalThis.SSStats.privacyTotal(cur.privacyFindingsTotal, cur.statsDaily).total,
     threatsBlocked: Number(s.threatsBlocked) || 0,
+    falseAlarms: Number(cur.falseAlarms) || 0, // (0.15.0) local "This site is fine" taps
     threatsByType: byType,
     statsDaily: globalThis.SSStats.normalize(cur.statsDaily),
     feedRuleCount: Number(s.lastOtaCount) || await countStaticRules()
@@ -770,7 +771,8 @@ async function addTrust(domain, via, tabId) {
   // Trusting a flagged site is a strong false-positive signal — auto-queue it
   // the same way "Report a mistake" does, but only when the user has opted
   // in to community reporting, and never block the trust itself on it.
-  if (tabId != null) reportTrustMistake(tabId).catch(() => {});
+  // via:'mistake' already sent its own userReport (content_script reportMistake) — don't queue a second one.
+  if (tabId != null && via !== 'mistake') reportTrustMistake(tabId).catch(() => {});
   return { ok: true, allowlist: next.allowlist, domain: d };
 }
 async function removeTrust(domain) {
@@ -1813,6 +1815,50 @@ function updateQuietSite(domain, fn) {
   });
 }
 
+// ---- Surface log (0.15.0) ----
+// `surfaceLog` is a LOCAL, UNSYNCED ring ({ts, host, kind}, cap 300) of every in-page
+// surface actually shown, separate from the threat `history` so threat stats are
+// unchanged. Same serialized read-modify-write as quietSites so concurrent appends
+// (banner + hidden-blocks + toast on one load) never clobber each other.
+let surfaceChain = Promise.resolve();
+function queueSurface(run) {
+  const result = surfaceChain.then(run, run);
+  surfaceChain = result.then(() => {}, () => {});
+  return result;
+}
+async function readSurfaceLog() {
+  try {
+    const cur = await api.storage.local.get('surfaceLog');
+    return Array.isArray(cur.surfaceLog) ? cur.surfaceLog : [];
+  } catch (_) { return []; }
+}
+function recordSurface(host, kind) {
+  return queueSurface(async () => {
+    try {
+      const L = globalThis.SSSurfaceLog;
+      const cur = await readSurfaceLog();
+      const next = L.appendRow(cur, { host, kind }, Date.now());
+      if (next === cur) return { ok: false };
+      await api.storage.local.set({ surfaceLog: next });
+      return { ok: true };
+    } catch (_) { return { ok: false }; } // logging is best-effort
+  });
+}
+// Local counter of "This site is fine" taps (unsynced; surfaced in getStats).
+function bumpFalseAlarm() {
+  return queueStats(async () => {
+    try {
+      const cur = await api.storage.local.get('falseAlarms');
+      await api.storage.local.set({ falseAlarms: (Number(cur.falseAlarms) || 0) + 1 });
+    } catch (_) { /* best-effort */ }
+  });
+}
+// Plain-text support dump; the formatter is pure (engine/surface_log.js), this only gathers inputs.
+async function copyDiagnostics() {
+  const s = await getSettings();
+  return globalThis.SSSurfaceLog.formatDiagnostics({ version: manifestVersion(), settings: s, rows: await readSurfaceLog() });
+}
+
 api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   (async () => {
     switch (msg && msg.type) {
@@ -2086,6 +2132,17 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         const r = await updateQuietSite(msg.domain, () => ({ entry: null }));
         sendResponse({ ok: !!r }); break;
       }
+      case 'surfaceShown': {
+        // Host comes from the sender tab, never from the message (a page cannot forge another site's row).
+        const h = hostOfSender(sender) || (typeof msg.host === 'string' ? msg.host : '');
+        sendResponse(await recordSurface(h, msg.kind)); break;
+      }
+      case 'getSurfaceLog':
+        sendResponse(await readSurfaceLog()); break;
+      case 'copyDiagnostics':
+        sendResponse({ text: await copyDiagnostics() }); break;
+      case 'falseAlarm':
+        await bumpFalseAlarm(); sendResponse({ ok: true }); break;
       case 'getQuietSites':
         sendResponse(await readQuietSites()); break;
       case 'getTabStats': {
@@ -2109,4 +2166,4 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 // module-scoped. Re-attach the debug/test surface that used to live on the
 // classic worker's global scope — the e2e suite drives these via
 // worker.evaluate, and they're handy in the SW console.
-Object.assign(globalThis, { DEFAULT_FEED_URL, FEED_META_URL, getSettings, setSettings, handleUserReport, runOtaUpdate, flushReports, queueReport, exportSettings, sanitizeImport, pushSync, pullSync, getStats, bumpStat, ensurePrivacyTotal, ensureInstalledAt, getReviewAsk, getReviewAskContext, setReviewAsk, sanitizeReviewAsk, ensureReviewAsk, importReviewAsk, getLangDict, loadLangDict, isValidLang, runFeedUpdate, applyInstallMigrations, fetchExactShardEntries, checkFeedHost, isPopularHost, checkFeedBatchHosts, normalizeFeedHost, checkRiskHosting, checkNrdHost, applyNetworkRules, syncAllowRules, ensureNetworkRules, handleDnrBlocked, applyPendingUpdate, requestStoreUpdateCheck, getUpdateState, setUpdateState, runHotUpdate, applyHotRules, getHotStatus, addTrust, removeTrust, awaitBootReady });
+Object.assign(globalThis, { DEFAULT_FEED_URL, FEED_META_URL, getSettings, setSettings, handleUserReport, runOtaUpdate, flushReports, queueReport, exportSettings, sanitizeImport, pushSync, pullSync, getStats, bumpStat, recordSurface, readSurfaceLog, copyDiagnostics, ensurePrivacyTotal, ensureInstalledAt, getReviewAsk, getReviewAskContext, setReviewAsk, sanitizeReviewAsk, ensureReviewAsk, importReviewAsk, getLangDict, loadLangDict, isValidLang, runFeedUpdate, applyInstallMigrations, fetchExactShardEntries, checkFeedHost, isPopularHost, checkFeedBatchHosts, normalizeFeedHost, checkRiskHosting, checkNrdHost, applyNetworkRules, syncAllowRules, ensureNetworkRules, handleDnrBlocked, applyPendingUpdate, requestStoreUpdateCheck, getUpdateState, setUpdateState, runHotUpdate, applyHotRules, getHotStatus, addTrust, removeTrust, awaitBootReady });

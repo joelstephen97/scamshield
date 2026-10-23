@@ -21,7 +21,7 @@ const Blockset = require('../../engine/blockset');
 
 const FEED_DIR = path.join(__dirname, 'feed-fixtures');
 const FEED_BASE_URL = 'http://localhost:5599/feed/';
-const SERP_URL = BASE_HTTPS.replace('localhost', 'www.google.com') + '/serp.html';
+const SERP_URL = BASE_HTTPS.replace('localhost', 'www.google.com') + '/search';
 
 const BLOCK_DOMAIN = 'serp-badge-block-fixture.example';
 const WARN_DOMAIN = 'serp-badge-warn-fixture.example';
@@ -137,4 +137,23 @@ test('turning serpCheck off suppresses all per-result badges', async ({ context 
   // this test actually exercised the shared serpCheck gate, not a fluke.
   await expect(page.locator('.scamshield-serp')).toHaveCount(0);
   await sw.evaluate(() => setSettings({ serpCheck: true }));
+});
+
+// (0.15.0, Task 8) SERP gating: only a real results page gets badges. The same fixture on a
+// mail.google.com host (Gmail is not a result list) gets none, and a badge logs one serp-dot row.
+test('a mail.google.com page gets no serp badges even with a block-set link; /search does and logs serp-dot', async ({ context }) => {
+  const sw = context.serviceWorkers()[0];
+  await installFeed(sw);
+  await sw.evaluate(() => chrome.storage.local.remove('surfaceLog'));
+  const mail = await context.newPage();
+  await mail.goto(`${BASE_HTTPS.replace('localhost', 'mail.google.com')}/serp.html?block=${BLOCK_DOMAIN}&warn=${WARN_DOMAIN}`);
+  await mail.waitForTimeout(2500);
+  await expect(mail.locator('.scamshield-serp-badge')).toHaveCount(0);
+  await expect(mail.locator('.scamshield-serp')).toHaveCount(0);
+  await mail.close();
+  const page = await context.newPage();
+  await page.goto(`${SERP_URL}?block=${BLOCK_DOMAIN}`);
+  await expect(page.locator('.scamshield-serp-badge')).toHaveCount(1, { timeout: 8000 });
+  await expect.poll(async () => (await sw.evaluate(() => readSurfaceLog())).filter((r) => r.kind === 'serp-dot').length).toBe(1);
+  await page.close();
 });

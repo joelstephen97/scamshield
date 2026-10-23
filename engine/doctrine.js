@@ -69,5 +69,16 @@
     return tier;
   }
 
-  return { surfaceTier, isUserContentHost, effectivePopular, credentialFlags, isLookalikeReason, STOP_FLAGS, CONFIDENT_FLAGS, USER_CONTENT_HOSTS };
+
+  // (0.15.0) SERP dots only on a real results page: Gmail, Docs, Maps and News on google.* are not result lists.
+  const SERP_HOST = /(^|\.)(google\.[a-z.]+|bing\.com|duckduckgo\.com|search\.brave\.com|ecosia\.org)$/i;
+  function isSerpPage(hostname, pathname, search) {
+    const h = String(hostname || '').toLowerCase(), p = String(pathname || '/'), q = String(search || '');
+    if (!SERP_HOST.test(h)) return false;
+    if (/(^|\.)duckduckgo\.com$/.test(h)) return (p === '/' || p === '/html' || p === '/html/') && /[?&]q=[^&]/.test(q);
+    if (/^(mail|docs|maps|news)\./.test(h)) return false;
+    return p === '/search';
+  }
+
+  return { isSerpPage, SERP_HOST, surfaceTier, isUserContentHost, effectivePopular, credentialFlags, isLookalikeReason, STOP_FLAGS, CONFIDENT_FLAGS, USER_CONTENT_HOSTS };
 });
