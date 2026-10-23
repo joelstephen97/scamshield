@@ -41,6 +41,9 @@ function showTab(name, userInitiated) {
   // and getStats can trail the last bump by a moment, so the dashboard re-reads
   // on every activation instead of rendering a snapshot taken at page load.
   if (name === 'stats') loadStats();
+  if (name === 'surfaces') loadSurfaces();
+  // On a phone the sidebar is a horizontal strip: keep the current tab in view (0.15.0, Task 18).
+  try { const cur = document.querySelector('nav a.cur'); if (cur && cur.scrollIntoView) cur.scrollIntoView({ block: 'nearest', inline: 'nearest' }); } catch (_) {}
 }
 for (const a of document.querySelectorAll('nav a')) a.addEventListener('click', (e) => { e.preventDefault(); showTab(a.dataset.tab, true); });
 $('brandmark').insertAdjacentHTML('afterbegin', '<img class="ic" src="assets/icons/icon32.png" alt="" width="16" height="16">');
@@ -111,6 +114,7 @@ async function load() {
   setSwitch('leakyform', s.leakyFormGuard !== false); setSwitch('fingerprint', s.fingerprintDetect !== false); setSwitch('notifyguard', s.notificationGuard !== false);
   setSwitch('shop', s.shopGuard !== false); setSwitch('serp', s.serpCheck !== false);
   setSwitch('qrscan', s.qrAutoScan !== false);
+  setSwitch('linkguard', s.linkGuard !== false); setSwitch('adguard', s.adGuard !== false);
   setSwitch('sync', s.syncEnabled === true);
   syncHotSub();
   $('net-feed').textContent = s.otaUrl ? (s.lastOtaAt ? F.relTime(s.lastOtaAt, undefined, UI_LANG) : T('receiptOnInstall12h', null, 'on install + every 12h')) : T('receiptDisabled', null, 'disabled');
@@ -161,6 +165,7 @@ async function load() {
     hotRej.hidden = !(hot && hot.rejectReason);
   }
   const h = await send('getHistory'); renderHistory((h && h.history) || []);
+  renderQuiet(await send('getQuietSites'));
 }
 function li(text, meta, btnText, onClick) {
   const el = document.createElement('li'); const t = document.createElement('span'); t.textContent = text; el.appendChild(t);
@@ -220,6 +225,49 @@ function renderMuted(muted) {
   if (!rows.length) { $('mutedlist').appendChild(li(T('optNoneYet', null, 'None yet'))); return; }
   for (const r of rows) $('mutedlist').appendChild(tenantApexBadge(li(r.domain, `${MUTE_KIND(r.kind)} · ${stamp(r.at)}`, T('warnAgain', null, 'Warn again'), async () => { await send('unmuteWarning', { domain: r.domain, kind: r.kind }); load(); }), r.domain));
 }
+// Quiet sites (0.15.0, Task 18): domains where the interruption budget (engine/budget.js) is holding ScamShield back after
+// repeated dismissals. Only ACTIVE quiet windows are listed; "Remove" sends unquietSite so the next warning is allowed.
+function renderQuiet(map) {
+  const ul = $('quietlist'); ul.replaceChildren();
+  const now = Date.now();
+  const rows = Object.entries(map && typeof map === 'object' ? map : {})
+    .filter(([, e]) => e && Number(e.quietUntil) > now)
+    .sort((a, b) => Number(b[1].quietUntil) - Number(a[1].quietUntil));
+  if (!rows.length) { ul.appendChild(li(T('optNoneYet', null, 'None yet'))); return; }
+  for (const [d, e] of rows) {
+    const until = intlDate({ day: 'numeric', month: 'short' }).format(new Date(Number(e.quietUntil)));
+    const row = li(d, T('fmtQuietUntil', [bidi(until)], 'quiet until ' + until), T('remove', null, 'Remove'), async () => { await send('unquietSite', { domain: d }); load(); });
+    row.dataset.domain = d;
+    const btn = row.querySelector('button'); btn.classList.add('remove'); btn.setAttribute('aria-label', T('fmtRemoveSite', [bidi(d)], 'Remove ' + d));
+    ul.appendChild(tenantApexBadge(row, d));
+  }
+}
+// "What ScamShield showed" (0.15.0, Task 18): the local surface log, so a false alarm is never invisible. Every kind has a
+// human label; a kind this build does not know yet (a newer log read by an older page) falls back to the raw kind.
+const SURFACE_KIND = (k) => T('surfaceKind_' + String(k).replace(/-/g, '_'), null, String(k));
+function renderSurfaces(rows) {
+  const ul = $('surfacelist'); ul.replaceChildren();
+  const list = Array.isArray(rows) ? rows : [];
+  $('copydiag').disabled = false; $('clearsurf').disabled = !list.length;
+  if (!list.length) { ul.appendChild(li(T('surfacesEmpty', null, 'Nothing shown yet.'))); return; }
+  for (const r of list.slice(0, 300)) {
+    const el = document.createElement('li'); el.dataset.kind = r.kind;
+    const host = document.createElement('span'); host.className = 'host'; host.textContent = r.host || T('unknownSite', null, 'unknown site');
+    const kind = document.createElement('span'); kind.className = 'tag'; kind.textContent = SURFACE_KIND(r.kind);
+    const time = document.createElement('time'); time.className = 'meta'; time.textContent = stamp(r.ts);
+    el.append(time, host, kind); ul.appendChild(el);
+  }
+}
+async function loadSurfaces() { renderSurfaces(await send('getSurfaceLog')); }
+$('copydiag').addEventListener('click', async () => {
+  const r = await send('copyDiagnostics');
+  const text = r && typeof r.text === 'string' ? r.text : '';
+  if (!text) return;
+  try { window.__ssLastDiagnostics = text; } catch (_) {} // e2e hook, like popup.js's __ssLastCopyReport
+  const ok = R && R.copyToClipboard ? await R.copyToClipboard(text) : false;
+  if (ok) flash(T('toastCopied', null, 'Copied'));
+});
+$('clearsurf').addEventListener('click', async () => { await send('clearSurfaceLog'); await loadSurfaces(); flash(T('surfacesCleared', null, 'Log cleared')); });
 function renderHistory(list) {
   $('history').replaceChildren();
   if (!list.length) { $('history').appendChild(li(T('optNothingYetGood', null, 'Nothing yet — that’s a good thing.'))); return; }
@@ -231,6 +279,7 @@ bindSwitch('clickfix', 'clickFixGuard'); bindSwitch('fakeupdate', 'fakeUpdateGua
 bindSwitch('leakyform', 'leakyFormGuard'); bindSwitch('fingerprint', 'fingerprintDetect'); bindSwitch('notifyguard', 'notificationGuard');
 bindSwitch('shop', 'shopGuard'); bindSwitch('serp', 'serpCheck');
 bindSwitch('qrscan', 'qrAutoScan');
+bindSwitch('linkguard', 'linkGuard'); bindSwitch('adguard', 'adGuard');
 $('sync').addEventListener('change', async () => { const r = await send('setSync', { on: $('sync').checked }); $('sync').closest('.switch').classList.toggle('on', $('sync').checked); flash($('sync').checked ? (r && r.ok ? T('toastSyncOn', null, 'Sync on') : T('toastSyncUnavailable', null, 'Sync unavailable')) : T('toastSyncOff', null, 'Sync off')); });
 $('exportbtn').addEventListener('click', async () => {
   const data = await send('exportSettings');
@@ -326,11 +375,25 @@ function renderBars(ser) {
   const hs = SV.heights(ser.bars);
   ser.bars.forEach((bar, i) => {
     const b = document.createElement('div'); b.className = 'b' + (bar.threats > 0 ? ' hit' : '');
-    const tip = document.createElement('span'); tip.className = 'tip'; tip.textContent = barTip(bar);
+    // The tooltip is a described-by target on a focusable bar (roving tabindex: one tab stop, arrows move), so keyboard
+    // and touch users reach it - it used to open on mouse hover only (0.15.0, Task 18).
+    b.tabIndex = i === 0 ? 0 : -1; b.setAttribute('aria-describedby', 'st-tip-' + i);
+    const tip = document.createElement('span'); tip.className = 'tip'; tip.id = 'st-tip-' + i; tip.setAttribute('role', 'tooltip'); tip.textContent = barTip(bar);
     const fill = document.createElement('i'); fill.style.height = hs[i] + '%';
     b.append(tip, fill); wrap.appendChild(b);
   });
 }
+$('st-bars').addEventListener('keydown', (e) => {
+  const bars = [...$('st-bars').querySelectorAll('.b')]; const i = bars.indexOf(document.activeElement);
+  if (i < 0) return;
+  const rtl = document.documentElement.dir === 'rtl';
+  const step = e.key === 'ArrowRight' ? (rtl ? -1 : 1) : e.key === 'ArrowLeft' ? (rtl ? 1 : -1) : e.key === 'Home' ? -i : e.key === 'End' ? bars.length - 1 - i : 0;
+  if (!step) return;
+  e.preventDefault();
+  const n = bars[Math.max(0, Math.min(bars.length - 1, i + step))];
+  for (const b of bars) b.tabIndex = b === n ? 0 : -1;
+  n.focus();
+});
 function renderCats(byType) {
   const wrap = $('st-cats'); wrap.replaceChildren();
   for (const row of SV.catRows(byType)) {
@@ -425,6 +488,20 @@ for (const b of document.querySelectorAll('#statsseg button')) {
   });
 }
 
+// Every switch gets an accessible name and description (0.15.0, Task 18): the <label class="switch"> wraps only the
+// checkbox and a decoration, so without this a screen reader announced an unnamed checkbox.
+function labelSwitches() {
+  let n = 0;
+  for (const row of document.querySelectorAll('.setrow')) {
+    const input = row.querySelector('input[type="checkbox"]'); const t = row.querySelector('.t');
+    if (!input || !t) continue;
+    const title = t.querySelector(':scope > b'); const hint = t.querySelector(':scope > span');
+    n++;
+    if (title) { title.id = title.id || 'swl-' + n; input.setAttribute('aria-labelledby', title.id); }
+    if (hint) { hint.id = hint.id || 'swd-' + n; input.setAttribute('aria-describedby', hint.id); }
+  }
+}
+labelSwitches();
 showTab((location.hash || '#protection').slice(1).replace(/[^a-z]/g, '') || 'protection');
 load();
 // The override dictionary (ui/i18n.js) arrives asynchronously, so everything

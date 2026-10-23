@@ -133,7 +133,7 @@ test("What's new dismisses and stays dismissed after reload; Escape closes the t
   await expect(popup.locator('#trustmenu')).toBeHidden();
 });
 
-test('popup layout: body is the scroll container, so a classic scrollbar can never clip the right edge', async ({ context, extensionId }) => {
+test('popup layout: the document scrolls, width is capped at 380px, and a classic scrollbar never clips the right edge', async ({ context, extensionId }) => {
   const page = await context.newPage(); await page.goto(BASE + '/safe.html');
   // 0.8.0: #support only renders when the footer's rotation lands on the
   // support slot. Step parity can't be relied on — a reload can interrupt an
@@ -160,12 +160,11 @@ test('popup layout: body is the scroll container, so a classic scrollbar can nev
       bodyClientWidth: b.clientWidth
     };
   });
-  // The scrollbar must live INSIDE the 340px body box (content reflows), never on
-  // the viewport (fixed 340px html would be clipped by the scrollbar/gutter).
-  expect(m.bodyScrolls).toBe(true);
-  expect(m.viewportScrolls).toBe(false);
-  expect(m.docHeight).toBeLessThanOrEqual(601);
-  expect(m.htmlBoxWidth).toBe(340);
+  // 0.15.0 (Task 18): the fixed 340px box and min/max heights are gone. The document grows and scrolls itself, the
+  // popup is at most 380px wide, and a classic scrollbar must never push content past the viewport edge.
+  expect(m.viewportScrolls).toBe(true);
+  expect(m.htmlBoxWidth).toBeLessThanOrEqual(380);
+  expect(m.htmlBoxWidth).toBeGreaterThanOrEqual(320);
   expect(m.bodyHorizontalOverflow).toBeLessThanOrEqual(0);
   expect(m.supportRight).toBeLessThanOrEqual(m.bodyClientWidth + 1);
 });

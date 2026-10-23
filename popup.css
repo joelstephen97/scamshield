@@ -1,15 +1,19 @@
-/* html fixes the popup window's width; body does the scrolling so a classic
-   scrollbar takes its ~15px from INSIDE the 340px box (content reflows) instead
-   of shrinking the viewport and clipping the fixed-width page at the right. */
-html{width:340px;overflow:hidden}
-body{width:100%;min-height:420px;max-height:600px;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column}
-body>*{flex-shrink:0} /* children keep natural height; body scrolls instead of squishing them */
-.hdr{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--surface);border-bottom:1px solid var(--hair)}
-.hdr .brand{display:flex;align-items:center;gap:7px;font-weight:600;font-size:14px}
+/* (0.15.0, Task 18) The popup is as wide as its window allows, 320-380px (clamp(320px,100%,380px); written as
+   width/max-width/min-width because 100vw would include a classic scrollbar and overflow by its width): a 320px phone-width window used to clip the
+   header because the box was a fixed 340px. No fixed min/max height either - the popup grows with its content and the
+   browser's own popup cap scrolls it, so nothing is cut off at the bottom. Firefox Android shows the popup as a full
+   page, so a coarse pointer takes the whole width. */
+html{width:380px;max-width:100%;min-width:min(320px,100%);overflow-x:hidden}
+@media (pointer:coarse){html{width:100%}}
+body{width:100%;overflow-x:hidden;display:flex;flex-direction:column}
+body>*{flex-shrink:0}
+.hdr{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;padding:10px 12px;background:var(--surface);border-bottom:1px solid var(--hair)}
+.hdr .brand{display:flex;align-items:center;gap:7px;font-weight:600;font-size:14px;min-width:0}
 .hdr .brand svg{color:var(--accent)}
 .hdr .ver{font-size:11px;color:var(--muted);background:var(--unknown-bg);padding:2px 6px;border-radius:var(--chip)}
-.hdr .sp{flex:1}
-.hdr .gear{color:var(--muted);display:inline-flex}
+.hdr .sp{flex:1;min-width:0}
+.hdr .gear{color:var(--muted);display:inline-flex;background:transparent;border:0;padding:2px;border-radius:var(--chip);cursor:pointer}
+.hdr .gear:hover,.hdr .gear:focus-visible{color:var(--accent)}
 /* Popup header language switcher (0.7.1) — same chrome as the gear (a bare
    icon, no button box), positioned between the On toggle and Settings. The
    dropdown mirrors the Trust menu (.menu .dd) but is anchored to the RIGHT
@@ -18,7 +22,7 @@ body>*{flex-shrink:0} /* children keep natural height; body scrolls instead of s
    would run off the popup's 340px edge. */
 .hdr .globe{background:transparent;border:0;padding:2px;color:var(--muted);display:inline-flex;cursor:pointer;border-radius:var(--chip)}
 .hdr .globe:hover,.hdr .globe:focus-visible{color:var(--accent)}
-.langmenu .dd{left:auto;right:0;min-width:190px;max-height:260px;overflow-y:auto}
+.langmenu .dd{inset-inline-start:auto;inset-inline-end:0;min-width:190px;max-width:calc(100vw - 24px);max-height:260px;overflow-y:auto}
 /* Fix (review round 1): `right:0` is a PHYSICAL offset, but `.hdr`'s flex row
    mirrors under dir=rtl (the browser flows flex items along the inline axis,
    which reverses with the document direction) — so under ar/ur this button
@@ -27,7 +31,6 @@ body>*{flex-shrink:0} /* children keep natural height; body scrolls instead of s
    running off the 340px popup entirely (clipped by html{overflow-x:hidden}).
    Flip the anchor for RTL: extend from the button's LEFT edge rightward
    instead, which stays on screen at the button's mirrored position. */
-html[dir="rtl"] .langmenu .dd{left:0;right:auto}
 .langitem{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .langitem .chk{color:var(--accent);flex:none;width:12px;text-align:center}
 .dditem.cur{background:var(--accent-soft);color:var(--accent)}
@@ -38,7 +41,7 @@ html[dir="rtl"] .langmenu .dd{left:0;right:auto}
 .status.mini .ico{width:28px;height:28px}
 .siteacts{min-height:30px;flex-wrap:wrap}
 .dd:not([hidden]){display:flex;flex-direction:column}
-.dditem{text-align:left;border:0;background:transparent;color:var(--text);padding:7px 10px;border-radius:var(--chip);font:inherit;cursor:pointer}
+.dditem{text-align:start;border:0;background:transparent;color:var(--text);padding:7px 10px;border-radius:var(--chip);font:inherit;cursor:pointer}
 .dditem:hover,.dditem:focus-visible{background:var(--accent-soft);color:var(--accent)}
 .morewrap{margin-top:8px}
 details.card>summary{list-style:none;cursor:pointer}
@@ -97,3 +100,30 @@ html[dir="rtl"] .chev::before{content:'‹'}
    panel-scoped action rather than competing with the evidence rows above. */
 #whyfoot{display:flex;justify-content:flex-end;margin-top:6px}
 #whyfoot .btn{font-size:12px;padding:4px 6px}
+
+/* Link-looking buttons (0.15.0, Task 18): "What's new" and "Support" were <a href="#">; they act, so they are buttons. */
+.ui button.linkbtn{background:transparent;border:0;padding:0;margin:0;font:inherit;color:var(--accent);cursor:pointer;text-align:start}
+.ui button.linkbtn:hover,.ui button.linkbtn:focus-visible{text-decoration:underline}
+.whatsnew span{flex:1;min-width:0}
+/* Danger and warn chips (0.15.0, Task 18): a dangerous reason reads red, a warn-tier reason amber; brand stays green. */
+.chip.danger{background:var(--danger-bg);color:var(--danger)}
+.chip.warn{background:var(--warn-bg);color:var(--warn)}
+/* "This site is fine" confirm + Undo ack (0.15.0, Task 18). */
+.status .finebox,.status .ack{grid-column:1/-1}
+.finebox p{margin:0 0 8px}
+.finebtns{display:flex;gap:8px;flex-wrap:wrap}
+.ack{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:12.5px}
+.ack span{flex:1;min-width:0;overflow-wrap:anywhere}
+.status h3,.status p{overflow-wrap:anywhere}
+.hist li .h{min-width:0}
+.siteacts{flex-wrap:wrap}
+#whypanel .end{flex-wrap:wrap}
+.disc .lbl{min-width:0;overflow-wrap:anywhere}
+/* Touch (0.15.0, Task 18): every target at least 44px high under a coarse pointer. */
+@media (pointer:coarse){
+  .ui .btn,.ui button,.ui .actionrow,.hdr .gear,.hdr .globe,.dditem,.ui button.linkbtn,.footacts .footlink,details.card>summary{min-height:44px}
+  .hdr .gear,.hdr .globe{min-width:44px;justify-content:center;align-items:center}
+  .switch{min-height:44px}
+  .ui button.linkbtn,.footacts .footlink,.foot a{display:inline-flex;align-items:center}
+  .actionrow,details.card>summary{display:flex;align-items:center}
+}

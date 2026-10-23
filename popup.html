@@ -1,4 +1,4 @@
-<!doctype html><html data-i18n-doctitle="extShortName"><head><meta charset="utf-8"><title>ScamShield</title>
+<!doctype html><html lang="en" data-i18n-doctitle="extShortName"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>ScamShield</title>
 <link rel="stylesheet" href="ui/tokens.css"><link rel="stylesheet" href="popup.css"></head>
 <body class="ui">
 <header class="hdr">
@@ -8,7 +8,7 @@
     <button id="langbtn" type="button" class="globe" aria-haspopup="menu" aria-expanded="false" title="Language" aria-label="Language" data-i18n-title="optLang" data-i18n-aria="optLang"></button>
     <div class="dd" id="langdd" role="menu" hidden></div>
   </span>
-  <a id="opts" href="#" class="gear" title="Settings" aria-label="Settings" data-i18n-title="settings" data-i18n-aria="settings"></a>
+  <button id="opts" type="button" class="gear" title="Settings" aria-label="Settings" data-i18n-title="settings" data-i18n-aria="settings"></button>
 </header>
 <main class="body">
   <section id="status" class="card status unknown" aria-live="polite">
@@ -17,7 +17,13 @@
     <div class="acts" id="acts">
       <button id="leave" class="btn danger" hidden data-i18n="leaveThisPage">Leave this page</button>
       <button id="rescue" class="btn" hidden data-i18n="takeMeToRealSite">Take me to the real site</button>
+      <button id="fine" class="btn" type="button" hidden data-i18n="mistakeSiteFine">This site is fine</button>
     </div>
+    <div class="finebox" id="finebox" role="group" aria-labelledby="finetext" hidden>
+      <p id="finetext"></p>
+      <div class="finebtns"><button id="fineyes" class="btn primary" type="button" data-i18n="popupFineYes">Yes, it's fine</button><button id="finecancel" class="btn" type="button" data-i18n="cancel">Cancel</button></div>
+    </div>
+    <div class="ack" id="ack" role="status" hidden><span id="acktext"></span><button id="ackundo" class="btn ghost" type="button" data-i18n="undo">Undo</button></div>
   </section>
   <details id="whypanel" class="card" hidden>
     <summary class="disc">
@@ -60,7 +66,7 @@
     <div class="msgrow"><button id="msgbtn" class="btn primary" data-i18n="check">Check</button><span class="hint" data-i18n="checkedOnDevice">Checked on your device only</span></div>
     <div id="msgresult" hidden><div id="msgstatus" class="status safe mini"><div class="ico" id="msgicon"></div><div><h3 id="msglevel"></h3><p id="msgwhy"></p></div></div></div>
   </details>
-  <section id="whatsnew" class="card whatsnew" hidden><span data-i18n="whatsNewBanner">New in 0.6: ClickFix &amp; fake-update blocking, privacy tools, fake-shop checks, 20 languages.</span><a id="whatsnewlink" href="#" data-i18n="whatsNewLink">What's new</a><button id="whatsnewx" class="btn ghost" aria-label="Dismiss" data-i18n-aria="ariaDismiss">✕</button></section>
+  <section id="whatsnew" class="card whatsnew" hidden><span data-i18n="whatsNewBanner">New in 0.6: ClickFix &amp; fake-update blocking, privacy tools, fake-shop checks, 20 languages.</span><button id="whatsnewlink" type="button" class="linkbtn" data-i18n="whatsNewLink">What's new</button><button id="whatsnewx" class="btn ghost" aria-label="Dismiss" data-i18n-aria="ariaDismiss">✕</button></section>
 </main>
 <footer class="foot" id="foot">
   <div id="askcard" class="footslot stack" hidden>
@@ -72,7 +78,7 @@
     </div>
   </div>
   <div id="foottrust" class="footslot" hidden><span class="lock" id="lockline" data-i18n="footerTrustLine">Made on-device. No data leaves your browser.</span></div>
-  <div id="footsupport" class="footslot" hidden><a id="support" href="#" data-i18n="support">Support</a></div>
+  <div id="footsupport" class="footslot" hidden><button id="support" type="button" class="linkbtn" data-i18n="support">Support</button></div>
 </footer>
 <div class="toast" id="toast" role="status"></div>
 <script src="engine/constants.js"></script><script src="background/stats.js"></script><script src="engine/features.js"></script>

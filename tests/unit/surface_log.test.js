@@ -45,3 +45,16 @@ test('isSerpPage: only real results pages of search engines', () => {
     ['duckduckgo.com', '/', '?ia=web'], ['www.bing.com', '/', ''], ['example.com', '/search', '?q=a']];
   for (const [h, p, s] of n) assert.equal(D.isSerpPage(h, p, s), false, h + p + s);
 });
+
+// (0.15.0, Task 18) Options labels every logged kind through surfaceKind_<kind with - as _>; a kind added to
+// the allowlist without a label would show up raw in "What ScamShield showed" in every language.
+test('every surface-log kind has an i18n label key in every locale', () => {
+  const fs = require('node:fs'); const path = require('node:path');
+  const dir = path.join(__dirname, '../../_locales');
+  for (const loc of fs.readdirSync(dir)) {
+    const f = path.join(dir, loc, 'messages.json');
+    if (!fs.existsSync(f)) continue;
+    const m = JSON.parse(fs.readFileSync(f, 'utf8'));
+    for (const k of L.KINDS) assert.ok(m['surfaceKind_' + k.replace(/-/g, '_')], loc + ': missing label for kind ' + k);
+  }
+});

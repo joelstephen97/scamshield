@@ -30,11 +30,11 @@ function timeOfDay(ts) {
   try { return d.toLocaleTimeString(UI_LANG, opts); } catch (_) { return d.toLocaleTimeString('en', opts); }
 }
 
-let tab = null, domain = null, settings = null, verdict = null, level = 'unknown';
+let tab = null, domain = null, settings = null, verdict = null, level = 'unknown', curHost = '', quiet = false, warned = false;
 
 function renderStatus(level, host, summary, levelTextOverride) {
   $('status').className = 'card status ' + level;
-  $('statusicon').innerHTML = I.shield(level); $('level').textContent = levelTextOverride || levelLabel(level); $('host').textContent = host || '';
+  $('statusicon').innerHTML = I.shield(level); $('level').textContent = levelTextOverride || levelLabel(level); $('host').textContent = host || ''; $('host').title = host || '';
   $('summary').hidden = !summary; $('summary').textContent = summary || '';
 }
 // Evidence chips are driven by the reason's own `kind` (link|brand|page|wallet|
@@ -47,12 +47,13 @@ const chipLabel = (kind) => T('chip' + kind.charAt(0).toUpperCase() + kind.slice
 // there are no reasons to show, which — 0.14.0 (Task 8) — now includes every
 // safe/unknown verdict: a weak incidental signal (e.g. clean-login.html's
 // randomHost quirk) isn't worth a panel on a page that already reads as safe.
-function renderEvidence(reasons, level) {
+function renderEvidence(reasons, level, isQuiet) {
   const ul = $('reasons'); ul.replaceChildren();
-  const list = (level === 'safe' || level === 'unknown') ? [] : (reasons || []).slice(0, 5);
+  // (0.15.0, Task 18) A quiet-tier page lists its top 3 signals under the calm "not enough to warn you" line.
+  const list = (level === 'safe' || level === 'unknown') ? [] : (reasons || []).slice(0, isQuiet ? 3 : 5);
   for (const r of list) {
     const kind = R.reasonKind(r);
-    const li = document.createElement('li'); const chip = document.createElement('span'); chip.className = 'chip' + (kind === 'brand' ? ' brand' : '');
+    const li = document.createElement('li'); const chip = document.createElement('span'); chip.className = 'chip' + (level === 'dangerous' && !isQuiet ? ' danger' : level === 'suspicious' && !isQuiet ? ' warn' : kind === 'brand' ? ' brand' : '');
     chip.textContent = chipLabel(kind);
     const span = document.createElement('span'); span.textContent = R.resolveReason(r); li.append(chip, span); ul.appendChild(li);
   }
@@ -64,7 +65,7 @@ function renderEvidence(reasons, level) {
   // dangerous/suspicious warning, never on a safe page's incidental weak
   // signal (e.g. clean-login.html's randomHost quirk still opens the panel
   // with a signal count, but nothing worth sharing).
-  $('whyfoot').hidden = !(level === 'dangerous' || level === 'suspicious');
+  $('whyfoot').hidden = isQuiet || !(level === 'dangerous' || level === 'suspicious');
 }
 // Builds the same plain-text "Copy report" summary as content/actions.js's
 // buildReportText(), from the popup's own module-scope `verdict`/`level`/
@@ -87,23 +88,48 @@ function copyReportText() {
 // getVerdict() answer, then again by pollVerdict() if that first answer was
 // null (the SW hadn't scanned the page yet, or was evicted and lost it).
 function renderVerdictUI(host) {
+  curHost = host;
   const checking = !!settings.enabled && verdict == null;
   level = !settings.enabled ? 'unknown' : (verdict ? (verdict.level || 'safe') : 'unknown');
   const brand = verdict && verdict.brand ? brandName(verdict.brand) : null;
-  renderStatus(level, host,
-    !settings.enabled ? T('popupPausedSummary', null, 'Protection is paused — turn it on to resume.') :
-    checking ? '' :
-    level === 'dangerous' ? (brand ? T('popupBrandDangerSummary', [bidi(brand)], `Looks like ${brand}, but isn't. Don't enter your password here.`) : T('popupDangerSummary', null, "Don't enter passwords or card details here.")) :
-    level === 'suspicious' ? T('popupSuspiciousSummary', null, 'Take care before typing anything here.') : '',
-    checking ? T('popupChecking', null, 'Checking…') : undefined);
-  renderEvidence(verdict && verdict.reasons, level);
-  $('leave').hidden = level !== 'dangerous';
+  // (0.15.0, Task 18) The SW now sends the page's surface tier with the verdict. A QUIET page whose level is still
+  // suspicious/dangerous had signals that did not earn an interruption: say so calmly instead of "Suspicious page".
+  // A safe verdict with a weak incidental signal stays the plain safe card (0.14.0), and a verdict without a tier
+  // (older SW state) keeps the pre-0.15.0 rendering.
+  quiet = !!settings.enabled && !!verdict && verdict.tier === 'quiet' && (level === 'suspicious' || level === 'dangerous') && !!(verdict.reasons && verdict.reasons.length);
+  warned = !!settings.enabled && !quiet && (level === 'suspicious' || level === 'dangerous');
+  if (quiet) {
+    renderStatus('unknown', host, T('popupQuietSummary', null, 'A few unusual signs \u2014 not enough to warn you'), T('popupQuietLevel', null, 'No warning needed'));
+  } else {
+    renderStatus(level, host,
+      !settings.enabled ? T('popupPausedSummary', null, 'Protection is paused \u2014 turn it on to resume.') :
+      checking ? '' :
+      level === 'dangerous' ? (brand ? T('popupBrandDangerSummary', [bidi(brand)], `Looks like ${brand}, but isn't. Don't enter your password here.`) : T('popupDangerSummary', null, "Don't enter passwords or card details here.")) :
+      level === 'suspicious' ? T('popupSuspiciousSummary', null, 'Take care before typing anything here.') : '',
+      checking ? T('popupChecking', null, 'Checking\u2026') : undefined);
+  }
+  renderEvidence(verdict && verdict.reasons, level, quiet);
+  if (quiet) $('whypanel').open = true;
+  $('leave').hidden = !(level === 'dangerous' && !quiet && settings.enabled);
   $('leave').textContent = T('leaveThisPage', null, 'Leave this page');
   const rescueUrl = verdict && verdict.brand && SS.BRAND_DOMAINS[verdict.brand] ? 'https://' + SS.BRAND_DOMAINS[verdict.brand][0] + '/' : null;
-  $('rescue').hidden = !(level === 'dangerous' && rescueUrl); if (rescueUrl) $('rescue').textContent = T('takeMeToReal', [bidi(brand)], 'Take me to the real ' + brand);
+  $('rescue').hidden = !(level === 'dangerous' && !quiet && settings.enabled && rescueUrl); if (rescueUrl) $('rescue').textContent = T('takeMeToReal', [bidi(brand)], 'Take me to the real ' + brand);
+  // "This site is fine" (0.15.0, Task 18): only where a warning was actually shown, and never for a bare tenant apex.
+  const fineOk = warned && !(SS.isTenantApex && SS.isTenantApex(domain)) && !(settings.allowlist || []).includes(domain);
+  if (!fineOk) $('finebox').hidden = true;
+  $('fine').hidden = !fineOk || !$('finebox').hidden || !$('ack').hidden;
   $('reportbtn').hidden = checking;
-  if (!checking) $('reportbtn').querySelector('.lbl').textContent = level === 'safe' || level === 'unknown' ? T('reportScam', null, 'Report: this is a scam') : T('reportSafe', null, 'Report: this is safe');
+  if (!checking) $('reportbtn').querySelector('.lbl').textContent = !warned ? T('reportScam', null, 'Report: this is a scam') : T('reportSafe', null, 'Report: this is safe');
   renderFooter(level);
+}
+// Terminal state for a page ScamShield cannot read (browser pages, the web store, PDFs, a discarded tab): after the
+// poll gives up, say so plainly instead of leaving "Checking..." on screen forever.
+function renderCantCheck(host) {
+  quiet = false; warned = false; level = 'unknown';
+  renderStatus('unknown', host, T('popupCantCheckHint', null, "ScamShield can't read this page. Browser pages, the web store and PDFs aren't scanned."), T('popupCantCheck', null, "Can't check this page"));
+  $('whypanel').hidden = true; $('leave').hidden = true; $('rescue').hidden = true; $('fine').hidden = true; $('finebox').hidden = true;
+  $('reportbtn').hidden = true;
+  renderFooter('unknown');
 }
 // Earned review ask (0.7.0): a quiet card below the status card, shown only
 // after ui/review.js's pure predicate says it's earned (2nd real block, 7+
@@ -214,6 +240,7 @@ async function pollVerdict(host) {
     const v = await send('getVerdict', { tabId: tab.id });
     if (v != null) { verdict = v; renderVerdictUI(host); return; }
   }
+  if (verdict == null && settings.enabled) renderCantCheck(host);
 }
 function renderTrust() {
   const paused = settings.pausedSites && settings.pausedSites[domain];
@@ -325,8 +352,15 @@ async function init() {
   settings = await settingsPromise;
   if (!settings) { renderStatus('unknown', '', T('toastExtensionError', null, 'Extension error — try reopening.')); return; }
   $('enabled').checked = !!settings.enabled; $('enabledwrap').classList.toggle('on', !!settings.enabled); $('enabledlbl').textContent = settings.enabled ? T('on', null, 'On') : T('paused', null, 'Paused');
-  $('enabled').addEventListener('change', async () => { settings = await send('setSettings', { patch: { enabled: $('enabled').checked } }); $('enabledwrap').classList.toggle('on', !!settings.enabled); $('enabledlbl').textContent = settings.enabled ? T('on', null, 'On') : T('paused', null, 'Paused'); });
-  $('opts').addEventListener('click', (e) => { e.preventDefault(); api.runtime.openOptionsPage(); });
+  $('enabled').addEventListener('change', async () => {
+    settings = await send('setSettings', { patch: { enabled: $('enabled').checked } }); $('enabledwrap').classList.toggle('on', !!settings.enabled); $('enabledlbl').textContent = settings.enabled ? T('on', null, 'On') : T('paused', null, 'Paused');
+    // (0.15.0, Task 18) The card under the switch must follow it: paused text when off, a fresh verdict when back on.
+    if (domain) {
+      if (!settings.enabled) renderVerdictUI(curHost);
+      else { verdict = await send('getVerdict', { tabId: tab.id }); renderVerdictUI(curHost); if (verdict == null) pollVerdict(curHost); }
+    }
+  });
+  $('opts').addEventListener('click', () => { api.runtime.openOptionsPage(); });
   // Language switcher (0.7.1): wired unconditionally (unlike the Trust menu
   // below, which only exists on http(s) tabs) — switching language has
   // nothing to do with which site the popup happened to open over.
@@ -334,13 +368,13 @@ async function init() {
   $('langbtn').addEventListener('click', (e) => { e.stopPropagation(); setLangMenu($('langdd').hidden); });
   document.addEventListener('click', (e) => { if (!$('langdd').hidden && !$('langdd').contains(e.target) && e.target !== $('langbtn')) setLangMenu(false); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('langdd').hidden) { setLangMenu(false); $('langbtn').focus(); } });
-  $('support').addEventListener('click', (e) => { e.preventDefault(); api.tabs.create({ url: 'https://github.com/sponsors/joelstephen97' }); });
+  $('support').addEventListener('click', () => { api.tabs.create({ url: 'https://github.com/sponsors/joelstephen97' }); });
   // openOptionsPage() cannot carry a #hash, so the Statistics deep link opens
   // the options page as a normal tab (options_page/options_ui both open in a
   // tab already) and lets the tab router pick the section up from the hash.
   $('viewall').addEventListener('click', (e) => { e.preventDefault(); api.tabs.create({ url: api.runtime.getURL('options.html#stats') }); window.close(); });
   await initReviewAsk();
-  if (settings.whatsNewSeen !== '0.14.0') { $('whatsnew').hidden = false; $('whatsnewlink').addEventListener('click', (e) => { e.preventDefault(); api.tabs.create({ url: 'https://github.com/joelstephen97/scamshield/blob/main/CHANGELOG.md' }); }); $('whatsnewx').addEventListener('click', async () => { $('whatsnew').hidden = true; await send('setSettings', { patch: { whatsNewSeen: '0.14.0' } }); }); }
+  if (settings.whatsNewSeen !== '0.14.0') { $('whatsnew').hidden = false; $('whatsnewlink').addEventListener('click', () => { api.tabs.create({ url: 'https://github.com/joelstephen97/scamshield/blob/main/CHANGELOG.md' }); }); $('whatsnewx').addEventListener('click', async () => { $('whatsnew').hidden = true; await send('setSettings', { patch: { whatsNewSeen: '0.14.0' } }); }); }
 
   tab = await currentTab();
   // Two hero counters (0.8.0), replacing the old this-site/all-time tile row:
@@ -358,7 +392,7 @@ async function init() {
   const http = tab && tab.url && /^https?:/.test(tab.url);
   if (!http) {
     const protocol = tab && tab.url ? new URL(tab.url).protocol.replace(':', '') : '';
-    renderStatus('unknown', protocol ? T('fmtProtocolPage', [bidi(protocol)], protocol + ' page') : '', T('popupNotHttp', null, "Browser pages and the web store aren't scanned."));
+    renderStatus('unknown', protocol ? T('fmtProtocolPage', [bidi(protocol)], protocol + ' page') : '', T('popupCantCheckHint', null, "ScamShield can't read this page. Browser pages, the web store and PDFs aren't scanned."), T('popupCantCheck', null, "Can't check this page"));
     await footerVariantPromise;
     renderFooter('unknown');
     renderHistory(); return;
@@ -393,12 +427,18 @@ async function init() {
   // would double-bind this Trust handler onto every language item too.
   for (const b of document.querySelectorAll('#trustmenu .dditem')) b.addEventListener('click', async () => {
     const r = await send('pauseSite', { domain, choice: b.dataset.choice }); setTrustMenu(false);
-    settings = await send('getSettings'); renderTrust(); toast(r && r.until ? T('toastPausedForNow', null, 'Paused for now') : T('paused', null, 'Paused'));
+    settings = await send('getSettings'); renderTrust(); renderVerdictUI(curHost); toast(r && r.until ? T('toastPausedForNow', null, 'Paused for now') : T('paused', null, 'Paused'));
+    // The menu button that held focus is now hidden: land on the control that replaced it (0.15.0, Task 18).
+    if (!$('trusted').hidden) $('untrust').focus();
   });
-  $('untrust').addEventListener('click', async () => { await send('unpauseSite', { domain }); settings = await send('getSettings'); renderTrust(); toast(T('toastResumed', null, 'Protection resumed')); });
+  $('untrust').addEventListener('click', async () => {
+    await send('unpauseSite', { domain }); settings = await send('getSettings'); renderTrust(); renderVerdictUI(curHost); toast(T('toastResumed', null, 'Protection resumed'));
+    if (!$('trust').hidden) $('trust').focus();
+  });
+  wireSiteFine();
 
   $('reportbtn').addEventListener('click', async () => {
-    const r = await send('userReport', { label: level === 'safe' || level === 'unknown' ? 'scam' : 'false_positive', tabId: tab.id });
+    const r = await send('userReport', { label: !warned ? 'scam' : 'false_positive', tabId: tab.id });
     $('reportbtn').hidden = true; $('reportdone').hidden = false; $('reportdone').textContent = r && r.via === 'relay' ? T('toastThanksSent', null, 'Thanks — sent') : T('toastThanksNoted', null, 'Thanks — noted');
   });
 
@@ -406,6 +446,32 @@ async function init() {
   renderHistoryList((h && h.history) || []);
   renderPrivacy((pf && pf.findings) || []);
   renderShop(shop || { flags: [] });
+}
+// "This site is fine" (0.15.0, Task 18): mirrors the in-page control (Task 12) - report as a false positive, count the
+// false alarm, trust the scoped host via:'mistake' - with an inline confirm instead of the in-page arm delay (the popup
+// is extension-origin, so a page cannot click it), and an Undo ack.
+function wireSiteFine() {
+  $('fine').addEventListener('click', () => {
+    $('finetext').textContent = T('popupFineConfirm', [bidi(domain)], 'Trust ' + domain + ' and stop warning about it?');
+    $('fine').hidden = true; $('finebox').hidden = false; $('finecancel').focus();
+  });
+  $('finecancel').addEventListener('click', () => { $('finebox').hidden = true; $('fine').hidden = false; $('fine').focus(); });
+  $('fineyes').addEventListener('click', async () => {
+    $('fineyes').disabled = true;
+    await send('trustSite', { domain, via: 'mistake' });
+    send('falseAlarm');
+    settings = await send('getSettings'); renderTrust();
+    $('finebox').hidden = true; $('fineyes').disabled = false;
+    $('acktext').textContent = T('ackTrusted', [bidi(domain)], "ScamShield won't flag " + domain + ' again.');
+    $('ack').hidden = false; $('fine').hidden = true; $('ackundo').focus();
+    // Last: with community reporting off this opens a GitHub issue tab, which closes the popup.
+    send('userReport', { label: 'false_positive', tabId: tab.id });
+  });
+  $('ackundo').addEventListener('click', async () => {
+    await send('untrustSite', { domain });
+    settings = await send('getSettings'); renderTrust();
+    $('ack').hidden = true; renderVerdictUI(curHost); if (!$('fine').hidden) $('fine').focus();
+  });
 }
 function renderShop(shop) {
   const flags = (shop && shop.flags) || [];
@@ -445,7 +511,7 @@ function renderHistoryList(list) {
   if (!list.length) return; $('recent').hidden = false; const ul = $('hist'); ul.replaceChildren();
   for (const e of list.slice(0, 3)) {
     const li = document.createElement('li'); const chip = document.createElement('span'); chip.className = 'chip' + (e.kind === 'page' ? '' : ' brand'); chip.textContent = chipLabel(e.kind);
-    const hs = document.createElement('span'); hs.className = 'h'; hs.textContent = e.host || T('unknownSite', null, 'unknown site'); const t = document.createElement('time'); t.textContent = F.relTime(e.ts, undefined, UI_LANG);
+    const hs = document.createElement('span'); hs.className = 'h'; hs.textContent = e.host || T('unknownSite', null, 'unknown site'); hs.title = hs.textContent; const t = document.createElement('time'); t.textContent = F.relTime(e.ts, undefined, UI_LANG);
     li.append(chip, hs, t); ul.appendChild(li);
   }
 }
@@ -480,9 +546,9 @@ function wireQrScan() {
       : T('fmtQrScanFoundCount', [bidi(String(results.length))], results.length + ' QR codes found');
     for (const r of results.slice(0, 10)) {
       const li = document.createElement('li');
-      const chip = document.createElement('span'); chip.className = 'chip' + (r.level === 'dangerous' ? ' brand' : ''); chip.textContent = levelLabel(r.level);
+      const chip = document.createElement('span'); chip.className = 'chip' + (r.level === 'dangerous' ? ' danger' : r.level === 'suspicious' ? ' warn' : ''); chip.textContent = levelLabel(r.level);
       let host = r.host; if (!host) { try { host = new URL(r.url).hostname; } catch (_) { host = r.url; } }
-      const span = document.createElement('span'); span.textContent = host;
+      const span = document.createElement('span'); span.textContent = host; span.title = host;
       li.append(chip, span); ul.appendChild(li);
     }
   });

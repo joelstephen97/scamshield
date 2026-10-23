@@ -41,6 +41,11 @@
       const R = reasons();
       const rtl = R ? R.isRTL() : false;
       document.documentElement.setAttribute('dir', rtl ? 'rtl' : 'ltr');
+      // (0.15.0, Task 18) <html lang> follows the UI language too (screen-reader voice, hyphenation, font
+      // selection): the override when one is installed, else the browser's own UI language.
+      let tag = '';
+      try { tag = R && R.overrideLanguage && R.overrideLanguage() ? R.intlTag(R.overrideLanguage()) : String(api.i18n.getUILanguage() || ''); } catch (_) {}
+      if (tag) document.documentElement.setAttribute('lang', tag);
     } catch (_) {}
   }
 

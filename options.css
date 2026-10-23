@@ -1,35 +1,72 @@
-.shell{display:grid;grid-template-columns:208px 1fr;min-height:100vh}
-nav{background:var(--surface);border-right:1px solid var(--hair);padding:16px 12px;display:flex;flex-direction:column;gap:2px;position:sticky;top:0;height:100vh}
+/* (0.15.0, Task 18) A centred 1100px container: sticky sidebar + a content column capped at 760px, so a 2560px monitor
+   shows the same calm layout as a laptop instead of a stretched one. */
+.shell{display:grid;grid-template-columns:208px minmax(0,1fr);max-width:1100px;margin-inline:auto;min-height:100vh}
+nav{background:var(--surface);border-inline-end:1px solid var(--hair);padding:16px 12px;display:flex;flex-direction:column;gap:2px;position:sticky;top:0;height:100vh}
 nav .brand{display:flex;align-items:center;gap:8px;font-weight:600;font-size:15px;padding:4px 8px 14px}
 nav .brand svg{color:var(--accent)}
 nav a{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--chip);color:var(--text);text-decoration:none;font-size:13px}
 nav a.cur{background:var(--accent-soft);color:var(--accent);font-weight:600}
+nav a{min-width:0;overflow-wrap:anywhere}
 nav .sp{flex:1} nav .ver{font-size:11px;color:var(--muted);padding:0 10px}
-main{padding:24px 28px;max-width:760px}
+main{padding:24px 28px;max-width:760px;min-width:0}
 main a{color:var(--accent)} main a:visited{color:var(--accent)}
 main h2{font-size:18px;font-weight:600;margin:0 0 4px} main h3{font-size:13px;color:var(--muted);margin:16px 0 6px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
 .lead{color:var(--muted);font-size:13px;margin:0 0 16px;max-width:62ch}
-.setrow{display:flex;align-items:flex-start;gap:16px;padding:12px 14px;background:var(--surface);border:1px solid var(--hair);border-radius:var(--radius);margin-bottom:8px}
-.setrow .t{flex:1} .setrow .t>b{display:block;font-weight:600;font-size:13px} .setrow .t>span{display:block;color:var(--muted);font-size:12px;margin-top:2px;max-width:60ch}
+.setrow{display:flex;flex-wrap:nowrap;align-items:flex-start;gap:8px 16px;padding:12px 14px;background:var(--surface);border:1px solid var(--hair);border-radius:var(--radius);margin-bottom:8px}
+/* A switch stays beside its label (the label text wraps first); rows with a select or buttons may wrap their control below. */
+.setrow:has(>select),.setrow:has(>span:not(.t)){flex-wrap:wrap}
+.setrow .t{flex:1 1 0;min-width:0;overflow-wrap:anywhere}
+.setrow:has(>select) .t,.setrow:has(>span:not(.t)) .t{flex-basis:220px} .setrow>.switch,.setrow>select,.setrow>span:not(.t){flex:none;margin-inline-start:auto} .setrow .t>b{display:block;font-weight:600;font-size:13px} .setrow .t>span{display:block;color:var(--muted);font-size:12px;margin-top:2px;max-width:60ch}
 .exp{border:0;background:none;color:var(--accent);font:inherit;font-size:12px;padding:0;margin-top:4px;cursor:pointer}
 .hint{color:var(--muted);font-size:12px;margin-top:6px;max-width:60ch}
 .list{list-style:none;padding:0;margin:0} .list li{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 12px;background:var(--surface);border:1px solid var(--hair);border-radius:var(--radius);margin-bottom:6px;font-size:13px}
 .list li .meta{color:var(--muted);font-size:12px}
 .list li .tag{color:var(--accent);background:var(--accent-soft);font-size:11px;padding:2px 8px;border-radius:var(--chip);white-space:nowrap}
-.list li>span:first-child{flex:1;min-width:0;overflow-wrap:break-word}
+.list li>span:first-child{flex:1;min-width:0;overflow-wrap:anywhere}
+.list li{flex-wrap:wrap}
 .feedline{display:flex;align-items:center;gap:8px;font-size:13px;margin:0 0 12px} .feedline .dot{width:8px;height:8px;border-radius:50%;background:var(--unknown)} .feedline .dot.ok{background:var(--safe)}
 .adv summary{cursor:pointer;color:var(--accent);font-size:13px} .row{display:flex;gap:8px;align-items:center;margin:10px 0} .row input{flex:1;font:inherit;border:1px solid var(--hair);border-radius:var(--chip);background:var(--surface);color:var(--text);padding:6px 8px}
 select{font:inherit;border:1px solid var(--hair);border-radius:var(--chip);background:var(--surface);color:var(--text);padding:5px 8px}
 .grp{border:1px solid var(--hair);border-radius:var(--radius);margin-bottom:8px;background:var(--surface);overflow:hidden}
 .grp>summary{cursor:pointer;list-style:none;padding:12px 14px;display:flex;flex-direction:column;gap:2px}
 .grp>summary::-webkit-details-marker{display:none}
-.grp>summary::after{content:"▸";position:absolute;right:16px;color:var(--muted);transition:transform .12s}
-.grp[open]>summary::after{transform:rotate(90deg)}
+.grp>summary::after{content:"▸";position:absolute;inset-inline-end:16px;color:var(--muted);transition:transform .12s}
+/* The closed chevron points along the reading direction (mirrored in RTL); open points down in both. */
+html[dir="rtl"] .grp>summary::after{transform:scaleX(-1)}
+.grp[open]>summary::after,html[dir="rtl"] .grp[open]>summary::after{transform:rotate(90deg)}
+.grp>summary{padding-inline-end:36px}
 .grp>summary{position:relative}
 .grp>summary>b{font-weight:600;font-size:13px} .grp>summary>span{color:var(--muted);font-size:12px;max-width:56ch}
 .grp .setrow{margin:0 12px 8px;background:var(--bg,transparent)}
 .grp[open]>summary{border-bottom:1px solid var(--hair);margin-bottom:8px}
-@media (max-width:720px){.shell{grid-template-columns:1fr}nav{position:static;height:auto;flex-direction:row;flex-wrap:wrap;border-right:0;border-bottom:1px solid var(--hair)}nav .brand{width:100%}nav .sp,nav .ver{display:none}}
+/* Phone (<600px): the sidebar becomes a scrollable tab strip pinned to the top. */
+@media (max-width:599px){
+  .shell{grid-template-columns:minmax(0,1fr)}
+  nav{position:sticky;top:0;z-index:3;height:auto;flex-direction:row;flex-wrap:nowrap;align-items:center;overflow-x:auto;overscroll-behavior-x:contain;border-inline-end:0;border-bottom:1px solid var(--hair);padding:6px 8px;gap:4px;scrollbar-width:thin}
+  nav .brand{padding:4px 8px;flex:none}
+  nav a{flex:none;white-space:nowrap}
+  nav .sp,nav .ver{display:none}
+  main{padding:16px}
+  .grp .setrow{margin-inline:8px}
+}
+/* Tablet (600-1023px): keep the sidebar but narrower. */
+@media (min-width:600px) and (max-width:1023px){.shell{grid-template-columns:176px minmax(0,1fr)}main{padding:20px 20px}}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}
+.list.surf li .meta{white-space:nowrap}
+.list.surf li .host{flex:1 1 140px;min-width:0;overflow-wrap:anywhere}
+.list li .tag.warn{background:var(--warn-bg);color:var(--warn)}
+/* Chart tooltips open on focus as well as hover, so keyboard and touch users reach them (0.15.0, Task 18). */
+.bars .b:focus .tip,.bars .b:focus-visible .tip{opacity:1}
+.bars .b:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+/* Touch (0.15.0, Task 18): every target at least 44px under a coarse pointer, 32px with a fine one. */
+.ui .btn,.ui button,nav a,select,.seg button{min-height:32px}
+@media (pointer:coarse){
+  .ui .btn,.ui button,nav a,select,.seg button,.exp,.adv summary,.grp>summary{min-height:44px}
+  .switch{min-height:44px;min-width:44px;justify-content:center}
+  nav a{display:flex;align-items:center}
+  .exp{padding-block:10px}
+  .list li{min-height:44px}
+}
 
 /* ---------- Statistics tab (dashboard) ---------- */
 #tab-stats .dhead{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px}
@@ -55,14 +92,14 @@ select{font:inherit;border:1px solid var(--hair);border-radius:var(--chip);backg
 .bars .b.hit::after{content:"";position:absolute;top:-8px;left:50%;transform:translateX(-50%);width:7px;height:7px;border-radius:50%;background:var(--danger)}
 .axis{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:6px;font-variant-numeric:tabular-nums}
 .legendline{display:flex;gap:14px;align-items:center;flex-wrap:wrap;font-size:11px;color:var(--muted);margin-top:10px}
-.legendline .sw{display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--accent);opacity:.75;margin-right:5px;vertical-align:-1px}
-.legendline .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--danger);margin-right:5px;vertical-align:0}
+.legendline .sw{display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--accent);opacity:.75;margin-inline-end:5px;vertical-align:-1px}
+.legendline .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--danger);margin-inline-end:5px;vertical-align:0}
 .catlist{display:flex;flex-direction:column;gap:9px}
 .cat{display:grid;grid-template-columns:minmax(0,110px) 1fr auto;gap:8px;align-items:center;font-size:12px}
 .cat>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .cat .track{height:10px;border-radius:5px;background:var(--unknown-bg);overflow:hidden}
 .cat .fill{height:100%;background:var(--accent);border-radius:5px}
-.cat b{font-variant-numeric:tabular-nums;font-weight:600;text-align:right;min-width:24px}
+.cat b{font-variant-numeric:tabular-nums;font-weight:600;text-align:end;min-width:24px}
 .recent{margin-top:14px}
 .recent ul{list-style:none;margin:0;padding:0}
 .recent li{display:flex;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--hair);font-size:12px}
@@ -75,3 +112,4 @@ select{font:inherit;border:1px solid var(--hair);border-radius:var(--chip);backg
 .pill.info{background:var(--accent-soft);color:var(--accent)}
 .dfoot{margin:14px 0 0;font-size:11px;color:var(--muted);display:flex;gap:6px;align-items:center}
 @media (max-width:720px){.charts{grid-template-columns:1fr}}
+@media (min-width:1920px){main{font-size:14px}}

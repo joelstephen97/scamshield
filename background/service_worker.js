@@ -84,6 +84,8 @@ const DEFAULTS = {
   syncEnabled: false,        // mirror settings to chrome.storage.sync (opt-in)
   uiLang: 'auto',            // 'auto' (follow the browser) | one of SSReasons.LOCALES
   hotListEnabled: true,      // 0.13.0: hourly hot-list redirect rules (block tier only)
+  linkGuard: true,           // 0.15.0: mark links to known scam sites on pages (content reads `!== false`)
+  adGuard: true,             // 0.15.0: collapse scam ads (content reads `!== false`)
   mutedWarnings: {}          // 0.14.0: domain -> kind -> { via, at }; "Don't warn me on this site" per warning kind
 };
 
@@ -1958,8 +1960,11 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
           frameVerdicts.set(tabId, fv);
           if (firstTopReport) bumpStat('checked');
           const effective = rankOf(fv.sub) > rankOf(fv.top) ? fv.sub : fv.top;
-          lastVerdict.set(tabId, effective);
-          persistVerdict(tabId, effective);
+          // (0.15.0, Task 18) The popup explains a QUIET page calmly, so the loudest tier rides with the
+          // verdict (copy, never mutating the frame split) and survives SW eviction via persistVerdict.
+          const withTier = effective ? Object.assign({}, effective, { tier: fv.tier || 'quiet' }) : effective;
+          lastVerdict.set(tabId, withTier);
+          persistVerdict(tabId, withTier);
           if (msg.report && !fromSubframe) lastReportInput.set(tabId, msg.report);
           // Auto-reports describe the frame that detected the scam (sender.url
           // is the frame's own URL; for the top frame it equals the tab URL).
@@ -2162,6 +2167,9 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         sendResponse(await readSurfaceLog()); break;
       case 'copyDiagnostics':
         sendResponse({ text: await copyDiagnostics() }); break;
+      // (0.15.0, Task 18) Options "Clear": empties the local surface log (serialized with appends).
+      case 'clearSurfaceLog':
+        sendResponse(await queueSurface(async () => { try { await api.storage.local.set({ surfaceLog: [] }); return { ok: true }; } catch (_) { return { ok: false }; } })); break;
       case 'falseAlarm':
         await bumpFalseAlarm(); sendResponse({ ok: true }); break;
       case 'getQuietSites':

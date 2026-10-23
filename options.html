@@ -1,4 +1,4 @@
-<!doctype html><html data-i18n-doctitle="optDocTitle"><head><meta charset="utf-8"><title>ScamShield Settings</title>
+<!doctype html><html lang="en" data-i18n-doctitle="optDocTitle"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>ScamShield Settings</title>
 <link rel="stylesheet" href="ui/tokens.css"><link rel="stylesheet" href="options.css"></head>
 <body class="ui">
 <div class="shell">
@@ -7,6 +7,7 @@
   <a href="#protection" data-tab="protection" class="cur" role="tab" aria-selected="true" aria-controls="tab-protection" data-i18n="tabProtection">Protection</a>
   <a href="#trusted" data-tab="trusted" role="tab" aria-selected="false" aria-controls="tab-trusted" data-i18n="tabTrusted">Paused sites</a>
   <a href="#history" data-tab="history" role="tab" aria-selected="false" aria-controls="tab-history" data-i18n="tabHistory">History</a>
+  <a href="#surfaces" data-tab="surfaces" role="tab" aria-selected="false" aria-controls="tab-surfaces" data-i18n="tabSurfaces">What ScamShield showed</a>
   <a href="#stats" data-tab="stats" role="tab" aria-selected="false" aria-controls="tab-stats" data-i18n="tabStats">Statistics</a>
   <a href="#feed" data-tab="feed" role="tab" aria-selected="false" aria-controls="tab-feed" data-i18n="tabFeed">Threat feed</a>
   <a href="#about" data-tab="about" role="tab" aria-selected="false" aria-controls="tab-about" data-i18n="tabAbout">About</a>
@@ -23,6 +24,8 @@
     <div class="setrow"><div class="t"><b data-i18n="optClickfix">Fake-CAPTCHA / "paste this" blocker</b><span data-i18n="optClickfixHint">Stops pages that tell you to press Win+R and paste a command (ClickFix malware).</span></div><label class="switch" for="clickfix"><input type="checkbox" id="clickfix" class="sr"><i></i></label></div>
     <div class="setrow"><div class="t"><b data-i18n="optFakeupdate">Fake browser-update blocker</b><span data-i18n="optFakeupdateHint">Blocks pages pretending your browser needs an update so you download malware.</span></div><label class="switch" for="fakeupdate"><input type="checkbox" id="fakeupdate" class="sr"><i></i></label></div>
     <div class="setrow"><div class="t"><b data-i18n="optHide">Hide scam content</b><span data-i18n="optHideHint">Greys out "you've won a prize" blocks inside otherwise normal pages.</span></div><label class="switch" for="hide"><input type="checkbox" id="hide" class="sr"><i></i></label></div>
+    <div class="setrow"><div class="t"><b data-i18n="optLinkGuard">Mark scam links on pages</b><span data-i18n="optLinkGuardHint">Tags links that lead to known scam sites and asks before opening them.</span></div><label class="switch" for="linkguard"><input type="checkbox" id="linkguard" class="sr"><i></i></label></div>
+    <div class="setrow"><div class="t"><b data-i18n="optAdGuard">Hide scam ads</b><span data-i18n="optAdGuardHint">Collapses ads that lead to known scam sites.</span></div><label class="switch" for="adguard"><input type="checkbox" id="adguard" class="sr"><i></i></label></div>
     <div class="setrow"><div class="t"><b data-i18n="optQrScan">Scan QR codes automatically</b><span data-i18n="optQrScanHint">Decodes QR codes in large images on the page and checks their destination before you scan them with your phone — the on-device counter to "quishing" (QR-code phishing) emails. You can also scan any page on demand from the popup.</span></div><label class="switch" for="qrscan"><input type="checkbox" id="qrscan" class="sr"><i></i></label></div>
   </details>
 
@@ -57,10 +60,16 @@
   <h3 data-i18n="trustedAlways">Always</h3><ul id="allowlist" class="list"></ul>
   <h3 data-i18n="trustedForAWhile">For a while</h3><ul id="pausedlist" class="list"></ul>
   <h3 data-i18n="mutedWarnings">Muted warnings</h3><ul id="mutedlist" class="list"></ul>
+  <h3 id="h-quiet" data-i18n="optQuietSites">Quiet sites</h3><p class="hint" id="quiethint" data-i18n="optQuietSitesHint">You dismissed warnings on these sites, so ScamShield stays quiet there for a while. Remove one to hear from it again.</p><ul id="quietlist" class="list" aria-labelledby="h-quiet"></ul>
 </section>
 <section id="tab-history" class="tab" hidden role="tabpanel" aria-labelledby="h-history">
   <h2 id="h-history" tabindex="-1" data-i18n="historyTitle">Protection history</h2><p class="lead" data-i18n="historyLead">Stored only on this device (site names, never full addresses).</p>
   <ul id="history" class="list"></ul><button id="clearhist" class="btn" data-i18n="clearHistory">Clear history</button>
+</section>
+<section id="tab-surfaces" class="tab" hidden role="tabpanel" aria-labelledby="h-surfaces">
+  <h2 id="h-surfaces" tabindex="-1" data-i18n="tabSurfaces">What ScamShield showed</h2><p class="lead" data-i18n="surfacesLead">Every warning or notice ScamShield put on a page, newest first. Stored only on this device.</p>
+  <div class="btnrow"><button id="copydiag" class="btn" type="button" data-i18n="surfacesCopy">Copy diagnostics</button><button id="clearsurf" class="btn" type="button" data-i18n="surfacesClear">Clear</button></div>
+  <ul id="surfacelist" class="list surf" aria-labelledby="h-surfaces"></ul>
 </section>
 <section id="tab-stats" class="tab" hidden role="tabpanel" aria-labelledby="h-stats">
   <div class="dhead">
@@ -78,7 +87,7 @@
   <div class="charts">
     <div class="panel">
       <h4 id="st-charttitle" data-i18n="statsChartTitle7d">Pages checked · last 7 days</h4>
-      <div class="bars" id="st-bars" role="img"></div>
+      <div class="bars" id="st-bars" role="group"></div>
       <div class="axis"><span id="st-axstart"></span><span data-i18n="statsAxisToday">Today</span></div>
       <div class="legendline"><span><span class="sw"></span><span data-i18n="statsLegendChecked">Pages checked</span></span><span><span class="dot"></span><span data-i18n="statsLegendThreat">Threat stopped that day</span></span></div>
     </div>
