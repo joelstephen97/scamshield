@@ -40,9 +40,11 @@ function readSites(file, limit) {
   return urls.slice(0, Number.isFinite(limit) ? limit : undefined);
 }
 
-// ONE place that defines "an in-page surface". Runs in the page. Today: any element whose class
-// contains "scamshield" or has a token starting "ss-". Part 2 moves surfaces into shadow hosts; add
-// their host selector here and nowhere else.
+// ONE place that defines "an in-page surface". Runs in the page: a <scamshield-surface> shadow host,
+// or any element carrying a class token that starts "scamshield-" (light-DOM surfaces, hidden blocks,
+// SERP dots, link/ad marks). Bare "ss-" tokens are NOT counted: sites use them too (vnexpress.net's
+// scroll library ships ss-container/ss-wrapper), and every ScamShield ss-* node sits inside a
+// scamshield-* container or a shadow host anyway.
 function collectSurfaces() {
   const out = [];
   const isSurface = (el) => {
@@ -51,8 +53,7 @@ function collectSurfaces() {
     // pierces every open shadowRoot, and the host itself counts as a surface.
     if (el.localName === 'scamshield-surface') return 'scamshield-surface';
     if (!cls) return null;
-    if (/scamshield/i.test(cls)) return cls;
-    return cls.split(/\s+/).some((c) => c.startsWith('ss-')) ? cls : null;
+    return cls.split(/\s+/).some((c) => c.startsWith('scamshield-')) ? cls : null;
   };
   const walk = (root) => {
     for (const el of root.querySelectorAll('*')) {
