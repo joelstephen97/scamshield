@@ -62,22 +62,74 @@ test('canary for escalate-only: an ordinary site whose sign-in dialog opens late
   expect((await read()).tier).toBe('quiet');
 });
 
-test('a warning dismissed on this page is not shown again by a later rescan', async ({ context }) => {
+const LATE_DIALOG = () => {
+  const d = document.createElement('dialog');
+  d.innerHTML = '<input type="password" placeholder="Password">';
+  document.body.appendChild(d); d.show();
+};
+const badgeOf = async (sw, urlPart) => {
+  const tabs = await sw.evaluate(() => chrome.tabs.query({}));
+  const tab = tabs.filter((t) => (t.url || '').includes(urlPart)).pop();
+  return sw.evaluate((id) => chrome.action.getBadgeText({ tabId: id }), tab.id);
+};
+
+test('an explicit pause ("Hide for an hour") is respected: a later rescan runs, shows nothing and leaves the badge alone', async ({ context }) => {
+  const sw = context.serviceWorkers()[0];
   const page = await context.newPage();
   const read = await extReader(context, page, VARS);
   await page.goto(LOOKALIKE + '/phishing-login.html');
   await expect(page.locator('.scamshield-banner')).toBeVisible({ timeout: 8000 });
+  await page.locator('.scamshield-banner .ss-x').click(); // storable host: this pauses the site
+  await expect(page.locator('.scamshield-banner')).toHaveCount(0);
+  await expect.poll(() => sw.evaluate(async () => Object.keys((await getSettings()).pausedSites || {}).length), { timeout: 5000 }).toBeGreaterThan(0);
+  const before = await badgeOf(sw, 'phishing-login.html');
+  // Spy: any badge write after this point would be a verdict report from the rescan.
+  await sw.evaluate(() => { globalThis.__badgeCalls = []; const o = chrome.action.setBadgeText.bind(chrome.action); chrome.action.setBadgeText = (a, ...r) => { globalThis.__badgeCalls.push(a); return o(a, ...r); }; });
+  await page.evaluate(LATE_DIALOG);
+  await expect.poll(async () => (await read()).rescans, { timeout: 5000 }).toBeGreaterThanOrEqual(1); // the rescan ran...
+  await page.waitForTimeout(1500);
+  await expect(page.locator('.scamshield-banner')).toHaveCount(0);       // ...showed nothing
+  await expect(page.locator('.scamshield-interstitial')).toHaveCount(0);
+  expect(await badgeOf(sw, 'phishing-login.html')).toBe(before);          // ...and reported no 'safe' downgrade
+  expect(await sw.evaluate(() => globalThis.__badgeCalls)).toEqual([]);   // (no badge write at all)
+});
+
+// A bare tenant apex (pages.dev) cannot store a pause, so the X only dismisses this page: the one path where "dismissed" is
+// page-local state. A non-escalating late trigger must not bring the banner back; a jump to 'stop' still shows its interstitial.
+test('dismissed (not paused) warn: a late dialog does not re-show it, a late seed-phrase field still escalates to the stop interstitial', async ({ context }) => {
+  const page = await context.newPage();
+  const read = await extReader(context, page, VARS);
+  await page.goto('https://pages.dev:5600/phishing-login.html');
+  await expect(page.locator('.scamshield-banner')).toBeVisible({ timeout: 8000 });
   await page.locator('.scamshield-banner .ss-x').click();
   await expect(page.locator('.scamshield-banner')).toHaveCount(0);
-  // A late dialog with a password field triggers a rescan.
-  await page.evaluate(() => {
-    const d = document.createElement('dialog');
-    d.innerHTML = '<input type="password" placeholder="Password">';
-    document.body.appendChild(d); d.show();
-  });
+  await page.evaluate(LATE_DIALOG);
   await expect.poll(async () => (await read()).rescans, { timeout: 5000 }).toBeGreaterThanOrEqual(1);
   await page.waitForTimeout(1000);
   await expect(page.locator('.scamshield-banner')).toHaveCount(0);
+  await expect(page.locator('.scamshield-interstitial')).toHaveCount(0);
+  await page.evaluate(() => {
+    const d = document.createElement('div');
+    d.innerHTML = '<h1>Restore your wallet</h1><p>Enter your 12-word recovery phrase below to validate your wallet and claim your bonus.</p><form><textarea name="phrase" rows="3" placeholder="recovery phrase words separated by spaces"></textarea><button type="submit">Validate</button></form>';
+    document.body.appendChild(d);
+  });
+  await expect(page.locator('.scamshield-interstitial')).toBeVisible({ timeout: 10000 });
+  expect((await read()).tier).toBe('stop');
+});
+
+test('iframe-only triggers have their own small cap and do not spend the 5-per-page budget', async ({ context }) => {
+  const page = await context.newPage();
+  const read = await extReader(context, page, { rescans: 'window.__ssRescanStats.rescans' });
+  await page.goto(BASE + '/rescan-benign-dialog.html');
+  await expect.poll(async () => (await read()).rescans, { timeout: 8000 }).toBe(0);
+  for (let i = 0; i < 4; i++) {
+    await page.evaluate(() => { const f = document.createElement('iframe'); f.width = 320; f.height = 320; f.srcdoc = '<p>x</p>'; document.body.appendChild(f); });
+    await page.waitForTimeout(3300);
+  }
+  expect((await read()).rescans).toBeLessThanOrEqual(2);
+  // a dialog afterwards still gets its rescan
+  await page.evaluate(() => { const d = document.createElement('dialog'); document.body.appendChild(d); d.show(); });
+  await expect.poll(async () => (await read()).rescans, { timeout: 6000 }).toBeGreaterThan(2 - 1);
 });
 
 test('limits: a flood of triggers causes at most 5 rescans and none closer than 3 s', async ({ context }) => {

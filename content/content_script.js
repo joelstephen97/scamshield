@@ -144,16 +144,16 @@
   // <scamshield-surface> hosts are skipped. Bounded (600 hosts) so a component-heavy page cannot make it costly.
   function deepQueryAll(sel, rootNode) {
     const out = [];
-    let budget = 600;
+    let hostBudget = 600, visits = 20000;
     (function walk(r) {
       try { for (const n of r.querySelectorAll(sel)) out.push(n); } catch (_) {}
-      let hosts; try { hosts = r.querySelectorAll('*'); } catch (_) { return; }
-      for (const h of hosts) {
-        if (budget <= 0) return;
-        const sr = h.shadowRoot;
-        if (!sr) continue;
-        if (h.localName === 'scamshield-surface') continue;
-        budget--; walk(sr);
+      // A TreeWalker visits elements without building a NodeList of the whole page; only shadow hosts are descended into.
+      let tw; try { tw = document.createTreeWalker(r, 1 /* SHOW_ELEMENT */); } catch (_) { return; }
+      for (let n = tw.nextNode(); n; n = tw.nextNode()) {
+        if (--visits <= 0 || hostBudget <= 0) return;
+        const sr = n.shadowRoot;
+        if (!sr || n.localName === 'scamshield-surface') continue;
+        hostBudget--; walk(sr);
       }
     })(rootNode || document);
     return out;
@@ -1145,6 +1145,7 @@
     }
     // Trusted (built-in safe list or user allowlist): report safe, do nothing else.
     if (isTrustedHost(location.hostname, settings)) {
+      if (rescan) return; // (0.15.0, Task 17b) paused/trusted mid-page: leave the site alone, and never report 'safe' over the badge
       if (IS_TOP) await send('reportVerdict', { verdict: { level: 'safe', score: 0, reasons: [], modelUsed: false } });
       return;
     }
@@ -1396,8 +1397,9 @@
       };
     } catch (_) { report = null; }
     await send('reportVerdict', { verdict, report, subframe: !IS_TOP, tier });
-    // A warning the user already dismissed on this page stays dismissed (the tier and badge still update above).
-    if (rescan && pageDismissed) { formGuardReasons.splice(0, formGuardReasons.length, ...(verdict.reasons || [])); return; }
+    // A warning the user already dismissed on this page stays dismissed (the tier and badge still update above), except that a
+    // jump to 'stop' still shows its interstitial. An explicit pause/trust is handled earlier: a paused site returns silently.
+    if (rescan && pageDismissed && tier !== 'stop') { formGuardReasons.splice(0, formGuardReasons.length, ...(verdict.reasons || [])); return; }
     const interrupts = tier === 'stop' || tier === 'warn';
     if (interrupts && verdict.level === 'dangerous') send('bumpThreats');
 
@@ -1445,38 +1447,41 @@
   // navigation resets the counter. The observer callback only queues nodes; every check runs in the debounced
   // pass, on at most 30 candidates, so a busy page pays nothing per mutation.
   const tierRank = (t) => (t === 'stop' ? 2 : t === 'warn' ? 1 : 0);
-  let pageDismissed = false, rescanStarted = false, rescanCount = 0, rescanLast = 0, rescanTimer = 0, rescanGapTimer = 0, rescanRunning = false;
+  let pageDismissed = false, rescanStarted = false, rescanCount = 0, rescanLast = 0, rescanTimer = 0, rescanGapTimer = 0, rescanRunning = false, rescanIframeCount = 0, rescanPendingKind = '', rescanMo = null;
   const rescanQueue = new Set();
   const RESCAN_MAX = 5, RESCAN_GAP = 3000, RESCAN_DEBOUNCE = 500, RESCAN_BATCH = 30;
-  const RESCAN_FIELD_SEL = 'input[type="password"], input[autocomplete="cc-number"], input[autocomplete="cc-csc"]';
+  const RESCAN_FIELD_SEL = 'input[type="password"], input[autocomplete="cc-number"], input[autocomplete="cc-csc"], textarea[name*="phrase" i], textarea[placeholder*="phrase" i], textarea[name*="seed" i], textarea[placeholder*="seed" i], textarea[placeholder*="recovery" i]';
+  // Cap policy (Task 17b review): only a trigger with a credential/seed field, a dialog or an overlay spends the 5-per-page
+  // budget. A big iframe alone is cheap to check but weak evidence, so it has its own small cap and cannot starve the rest.
+  const RESCAN_IFRAME_MAX = 2;
   const RESCAN_STYLE_HINT = /fixed|sticky/i, RESCAN_CLASS_HINT = /overlay|modal|popup|lightbox|backdrop|fixed|sticky|alert|warning|dialog/i;
   const rescanStats = { triggers: 0, rescans: 0, triggerMs: 0 };
   try { window.__ssRescanStats = rescanStats; } catch (_) {}
 
   function rescanCandidateHits(el, vw, vh) {
-    if (!el || el.nodeType !== 1 || el.localName === 'scamshield-surface' || !el.isConnected) return false;
+    if (!el || el.nodeType !== 1 || el.localName === 'scamshield-surface' || !el.isConnected) return '';
     const tag = el.localName;
-    if (tag === 'dialog' || el.getAttribute('role') === 'dialog' || el.getAttribute('role') === 'alertdialog') return el.getClientRects().length > 0;
-    if (tag === 'iframe') { const r = el.getBoundingClientRect(); return r.width >= 300 && r.height >= 300; }
+    if (tag === 'dialog' || el.getAttribute('role') === 'dialog' || el.getAttribute('role') === 'alertdialog') return el.getClientRects().length > 0 ? 'dialog' : '';
+    if (tag === 'iframe') { const r = el.getBoundingClientRect(); return r.width >= 300 && r.height >= 300 ? 'iframe' : ''; }
     // A new visible password / card field: in this element, its subtree, or its own open shadow root.
     let fields = null;
-    if (tag === 'input') fields = el.matches(RESCAN_FIELD_SEL) ? [el] : null;
+    if (tag === 'input' || tag === 'textarea') fields = el.matches(RESCAN_FIELD_SEL) ? [el] : null;
     else {
       const f = Array.from(el.querySelectorAll(RESCAN_FIELD_SEL));
       if (el.shadowRoot && el.localName !== 'scamshield-surface') for (const x of deepQueryAll(RESCAN_FIELD_SEL, el.shadowRoot)) f.push(x);
       fields = f.length ? f : null;
     }
-    if (fields) for (const f of fields) if (f.getClientRects().length > 0 && !f.disabled && f.type !== 'hidden') return true;
+    if (fields) for (const f of fields) if (f.getClientRects().length > 0 && !f.disabled && f.type !== 'hidden') return 'field';
     // A fixed/sticky element covering at least half the viewport: only when an inline style or class hints at it.
     const cls = typeof el.className === 'string' ? el.className : '';
     if (RESCAN_STYLE_HINT.test(el.getAttribute('style') || '') || RESCAN_CLASS_HINT.test(cls)) {
       const r = el.getBoundingClientRect();
       if (r.width * r.height >= 0.5 * vw * vh) {
         const pos = getComputedStyle(el).position;
-        if (pos === 'fixed' || pos === 'sticky') return true;
+        if (pos === 'fixed' || pos === 'sticky') return 'overlay';
       }
     }
-    return false;
+    return '';
   }
 
   function rescanPass() {
@@ -1484,29 +1489,38 @@
     const t0 = performance.now();
     const vw = window.innerWidth || 0, vh = window.innerHeight || 0;
     const nodes = Array.from(rescanQueue).slice(0, RESCAN_BATCH); rescanQueue.clear();
-    let hit = false;
-    for (const el of nodes) { try { if (rescanCandidateHits(el, vw, vh)) { hit = true; break; } } catch (_) {} }
+    let kind = '';
+    for (const el of nodes) {
+      try { const k = rescanCandidateHits(el, vw, vh); if (k && (!kind || kind === 'iframe')) kind = k; if (kind && kind !== 'iframe') break; } catch (_) {}
+    }
     rescanStats.triggerMs += performance.now() - t0;
-    if (!hit) return;
+    if (!kind) return;
     rescanStats.triggers++;
-    launchRescan();
+    launchRescan(kind);
   }
-  function launchRescan() {
-    if (rescanCount >= RESCAN_MAX || rescanRunning) return;
+  function launchRescan(kind) {
+    if (kind && (!rescanPendingKind || rescanPendingKind === 'iframe')) rescanPendingKind = kind;
+    kind = rescanPendingKind;
+    if (rescanRunning) return;
+    const iframeOnly = kind === 'iframe';
+    if (iframeOnly ? rescanIframeCount >= RESCAN_IFRAME_MAX : rescanCount >= RESCAN_MAX) return;
     const wait = RESCAN_GAP - (Date.now() - rescanLast);
     if (wait > 0) { // at most one per 3 s: go once the gap has passed
       if (!rescanGapTimer) rescanGapTimer = setTimeout(() => { rescanGapTimer = 0; launchRescan(); }, wait);
       return;
     }
-    rescanCount++; rescanLast = Date.now(); rescanRunning = true;
+    rescanPendingKind = '';
+    if (iframeOnly) rescanIframeCount++; else rescanCount++;
+    rescanLast = Date.now(); rescanRunning = true;
     rescanStats.rescans++;
+    if (rescanCount >= RESCAN_MAX && rescanMo) { rescanMo.disconnect(); rescanMo = null; } // budget spent: stop watching
     run({ rescan: true }).catch(() => {}).then(() => { rescanRunning = false; });
   }
 
   function startRescanWatch() {
-    if (!('MutationObserver' in root) || !document.documentElement) return;
+    if (!('MutationObserver' in root) || !document.documentElement || rescanMo) return;
     const queue = (n) => { if (rescanQueue.size < 200 && n && n.nodeType === 1) rescanQueue.add(n); };
-    const mo = new MutationObserver((records) => {
+    const mo = rescanMo = new MutationObserver((records) => {
       for (const rec of records) {
         if (rec.type === 'attributes') queue(rec.target);
         else for (const n of rec.addedNodes) queue(n);
@@ -1528,7 +1542,7 @@
     // them rather than staying exhausted for the rest of the tab's life.
     serpBadgeBudget = SERP_BADGE_CAP;
     clipboardSeen.clear();
-    rescanCount = 0; rescanLast = 0; pageDismissed = false; pageTier = null; // (0.15.0, Task 17b) a new SPA page gets a fresh rescan budget
+    rescanCount = 0; rescanIframeCount = 0; rescanLast = 0; pageDismissed = false; pageTier = null; if (rescanStarted) { try { startRescanWatch(); } catch (_) {} } // (0.15.0, Task 17b) a new SPA page gets a fresh rescan budget
     navTimer = setTimeout(() => { if (SS && SS.actions) SS.actions.clearAll(); run(); }, 400);
   });
 

@@ -26,7 +26,11 @@ test('the rescan keeps its limits (500 ms debounce, 1 per 3 s, 5 per page) and m
   const src = read('content/content_script.js');
   assert.ok(/RESCAN_MAX = 5, RESCAN_GAP = 3000, RESCAN_DEBOUNCE = 500/.test(src));
   assert.ok(/if \(rescan && tierRank\(tier\) <= tierRank\(pageTier\)\) return;/.test(src), 'no downgrade, no repeat');
-  assert.ok(/if \(rescan && pageDismissed\)/.test(src), 'a dismissed warning stays dismissed');
+  assert.ok(/if \(rescan && pageDismissed && tier !== 'stop'\)/.test(src), 'a dismissed warning stays dismissed, but a jump to stop still shows');
+  assert.ok(/if \(rescan\) return;[^\n]*never report 'safe'/.test(src), 'a paused/trusted site returns silently on a rescan (no safe report over the badge)');
+  assert.ok(/RESCAN_IFRAME_MAX = 2/.test(src), 'iframe-only triggers have their own cap');
+  assert.ok(/rescanMo\.disconnect\(\)/.test(src), 'the observer is disconnected once the budget is spent');
+  assert.ok(!/querySelectorAll\('\*'\)/.test(src.slice(src.indexOf('function deepQueryAll'), src.indexOf('function deepQueryAll') + 900)), 'deepQueryAll does not build a NodeList of every element');
   assert.ok(/rescanCount = 0;/.test(src), 'an SPA navigation resets the counter');
   assert.ok(/localName === 'scamshield-surface'/.test(src), 'our own surface hosts are skipped');
 });

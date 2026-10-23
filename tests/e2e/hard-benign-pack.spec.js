@@ -90,6 +90,41 @@ for (const [name, url, act] of BENIGN) {
   });
 }
 
+// --- Mutation pass (Task 17b): reveal hidden login/frames AFTER load -----------------------------
+// The mid-scroll rescan must never add a false positive. Each page below hides a login modal / verification frame;
+// a script reveals it after load (which fires the rescan trigger) and the page must stay completely quiet.
+const REVEAL = [
+  ['footer-social-login: hidden login modal revealed', `${HB}/footer-social-login.html`,
+    () => { const m = document.getElementById('login-modal'); m.style.display = 'block'; m.style.position = 'fixed'; m.style.inset = '0'; m.style.background = '#fff'; }],
+  ['challenge: hidden verification frame revealed', `${HB}/challenge.html`,
+    () => { const f = document.querySelector('iframe'); f.style.display = 'block'; f.width = 400; f.height = 400; }],
+  ['news-with-ads: hidden tracking frame revealed', `${HB}/news-with-ads.html`,
+    () => { const f = document.querySelector('iframe[style*="display:none"]'); f.style.display = 'block'; f.width = 400; f.height = 400; }],
+];
+for (const [name, url, reveal] of REVEAL) {
+  test(`hard-benign mutation: ${name} stays quiet (rescan ran, no surface, badge empty)`, async ({ context }) => {
+    const sw = context.serviceWorkers()[0];
+    await sw.evaluate(() => awaitBootReady());
+    await sw.evaluate(() => chrome.storage.local.remove('surfaceLog'));
+    const page = await context.newPage();
+    const read = await openWithIsolatedReader(context, page, url);
+    await expect(page.locator('h1')).toBeVisible();
+    await page.bringToFront();
+    await page.waitForTimeout(2500);
+    await expect.poll(() => read('window.__ssLastTier'), { timeout: 8000 }).toBe('quiet');
+    await page.evaluate(reveal);
+    await expect.poll(() => read('window.__ssRescanStats && window.__ssRescanStats.rescans'), { timeout: 6000 }).toBeGreaterThanOrEqual(1); // it really rescanned
+    await page.waitForTimeout(2000);
+    expect(await read('window.__ssLastTier')).toBe('quiet');
+    for (const sel of SURFACES) await expect(page.locator(sel), sel).toHaveCount(0);
+    const tabId = await tabIdFor(sw, url);
+    expect(await sw.evaluate((id) => chrome.action.getBadgeText({ tabId: id }), tabId)).toBe('');
+    const rows = await sw.evaluate(() => readSurfaceLog());
+    expect(rows, 'surfaceLog rows: ' + JSON.stringify(rows)).toEqual([]);
+    await page.close();
+  });
+}
+
 // --- Canaries: the doctrine must not have silenced real scams ---------------------------------
 const BASE = 'http://localhost:5599';
 
