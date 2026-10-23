@@ -1,0 +1,8 @@
+# Sites known to show bot-challenge pages ("unusual activity" + hidden iframe). Must stay quiet.
+https://www.etsy.com/
+https://www.forbes.com/
+https://www.ticketmaster.com/
+https://www.zillow.com/
+https://www.g2.com/
+https://www.wayfair.com/
+https://www.nike.com/
