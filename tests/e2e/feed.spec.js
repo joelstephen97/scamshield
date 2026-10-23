@@ -297,7 +297,7 @@ test('a dyndns-listed host records suspicious-tier evidence but stays quiet: no 
 // 0.14.1 (Task 8 fix round): the feed/risk/NRD lookups are requested together,
 // but each keeps its own full timeout budget from where it is awaited. A cold
 // SW whose one-time Blockstore load takes 4 s (> the 3 s risk/NRD caps) must
-// still deliver the dyndns evidence ï¿½ the budget must not start at send time.
+// still deliver the dyndns evidence — the budget must not start at send time.
 test('slow SW (Blockstore.get +4s): risk-table evidence still reaches the verdict', async ({ context }) => {
   const sw = context.serviceWorkers()[0];
   await installFeed(sw);

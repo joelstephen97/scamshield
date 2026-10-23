@@ -58,3 +58,11 @@ test('normalizeCopyText + copyMatches: whitespace-insensitive full-text comparis
   assert.strictEqual(copyMatches('abc', []), false);
 });
 
+
+test('clipboardTier: a strong ClickFix lure beats a matching selection (0.15.0 fix round)', () => {
+  const T = clipboardTier;
+  assert.strictEqual(T({ level: 'dangerous', clickfixLevel: 'dangerous', userGesture: true, selectionMatches: true, strongLure: true }), 'block');
+  assert.strictEqual(T({ level: 'dangerous', clickfixLevel: 'dangerous', userGesture: true, selectionMatches: true, strongLure: false }), 'none');
+  assert.strictEqual(T({ level: 'dangerous', clickfixLevel: 'none', userGesture: true, selectionMatches: true, strongLure: true }), 'notice');
+  assert.strictEqual(T({ level: 'safe', clickfixLevel: 'dangerous', userGesture: true, selectionMatches: true, strongLure: true }), 'none');
+});

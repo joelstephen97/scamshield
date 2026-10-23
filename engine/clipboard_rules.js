@@ -46,8 +46,11 @@
   function clipboardTier(input) {
     const s = input || {};
     if (!s.level || s.level === 'safe') return 'none';
-    if (s.userGesture === true && s.selectionMatches === true) return 'none';
-    if (s.clickfixLevel === 'dangerous' && (s.userGesture === false || s.selectionMatches === false)) return 'block';
+    // A matching copy is trusted only when the page carries no strong ClickFix lure (Win+R, captcha claim,
+    // paste-then-Enter); with one, a dangerous payload is blocked even if the user "selected" it.
+    const strong = s.strongLure === true;
+    if (s.userGesture === true && s.selectionMatches === true && !strong) return 'none';
+    if (s.clickfixLevel === 'dangerous' && (s.userGesture === false || s.selectionMatches === false || strong)) return 'block';
     return s.userGesture === true ? 'notice' : 'warn';
   }
   // Whitespace-insensitive comparison helpers (pure, so unit-testable). `candidates` are the

@@ -1,0 +1,15 @@
+<!doctype html><meta charset="utf-8"><title>Almost there</title>
+<h1>Almost there</h1>
+<div class="snippet"><pre id="cmd" style="padding:8px;border:1px solid #888"></pre><button id="copy" type="button">Copy</button></div>
+<div id="lure"></div>
+<script>
+  // ClickFix with a VISIBLE command box: the copied text equals the visible <pre>, but at copy time the
+  // page carries a strong lure (Win+R / verify you are human / paste then Enter). The lure is added on
+  // click so the block is attributable to the copy path, not the page-load scan. Payload built at runtime.
+  var pre = document.getElementById('cmd');
+  pre.textContent = ['power', 'shell', ' -en', 'c', ' SQBFAFgA'].join('');
+  document.getElementById('copy').onclick = function () {
+    document.getElementById('lure').textContent = 'Press Win+R, paste, press Enter to verify you are human.';
+    try { navigator.clipboard.writeText(pre.textContent); } catch (e) {}
+  };
+</script>

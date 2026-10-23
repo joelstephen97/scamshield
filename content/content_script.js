@@ -115,19 +115,64 @@
   for (const type of ['pointerdown', 'click']) {
     document.addEventListener(type, (ev) => { if (ev && ev.isTrusted) lastClickTarget = ev.target; }, true);
   }
+  // (0.15.0) "Visibly rendered": a page can hide an element a hundred ways, so a candidate must have a
+  // real size, sit inside the document, and not be transparent / clipped / invisible-text on itself or
+  // any of its 5 nearest ancestors. Fails closed (false) on any error.
   const isShown = (el) => {
     try {
-      if (!el || !el.getClientRects || !el.getClientRects().length) return false;
-      const cs = getComputedStyle(el);
-      return cs.visibility !== 'hidden' && cs.display !== 'none';
+      if (!el || el.nodeType !== 1 || !el.getBoundingClientRect) return false;
+      const r = el.getBoundingClientRect();
+      if (r.width < 8 || r.height < 8) return false;
+      const de = document.documentElement;
+      const left = r.left + (window.scrollX || 0), top = r.top + (window.scrollY || 0);
+      if (left + r.width <= 0 || top + r.height <= 0) return false;
+      if (left >= Math.max(de.scrollWidth, window.innerWidth) || top >= Math.max(de.scrollHeight, window.innerHeight)) return false;
+      let opacity = 1, node = el;
+      for (let i = 0; i < 6 && node && node.nodeType === 1; i++, node = node.parentElement) {
+        const cs = getComputedStyle(node);
+        if (cs.display === 'none' || cs.visibility === 'hidden' || cs.visibility === 'collapse') return false;
+        opacity *= parseFloat(cs.opacity);
+        if (!(opacity >= 0.1)) return false;
+        if (/^rect\(\s*0(px)?[ ,]+0(px)?[ ,]+0(px)?[ ,]+0(px)?\s*\)$/i.test(cs.clip || '')) return false;
+        if (/^inset\(\s*(50|100)%/i.test(cs.clipPath || '')) return false;
+        if (i === 0) {
+          if (parseFloat(cs.fontSize) < 4) return false;
+          const m = /rgba\([^)]*,\s*([0-9.]+)\s*\)$/.exec(cs.color || '');
+          if (m && parseFloat(m[1]) < 0.1) return false;
+        }
+      }
+      return true;
     } catch (_) { return false; }
   };
+  // (0.15.0) The live selection is a candidate only if a trusted selectionchange followed a trusted
+  // pointer/key event within 3 s (a user selecting), the selection has not changed since, and it sits in
+  // a visibly rendered element. A page that calls addRange() on a hidden node fails the visibility test.
+  let lastTrustedInputAt = 0, trustedSelText = null;
+  const noteInput = (ev) => { if (ev && ev.isTrusted) lastTrustedInputAt = Date.now(); };
+  for (const type of ['pointerdown', 'pointerup', 'keydown', 'keyup']) document.addEventListener(type, noteInput, true);
+  document.addEventListener('pointermove', (ev) => { if (ev && ev.isTrusted && ev.buttons) lastTrustedInputAt = Date.now(); }, true);
+  document.addEventListener('selectionchange', (ev) => {
+    try {
+      if (!ev || !ev.isTrusted) return;
+      trustedSelText = Date.now() - lastTrustedInputAt < 3000 ? String(getSelection()) : null;
+    } catch (_) { trustedSelText = null; }
+  }, true);
+  function trustedSelection() {
+    try {
+      const sel = getSelection();
+      const text = String(sel || '');
+      if (!text || trustedSelText === null || text !== trustedSelText || !sel.rangeCount) return '';
+      const c = sel.getRangeAt(0).commonAncestorContainer;
+      const el = c && c.nodeType === 1 ? c : (c && c.parentElement);
+      return isShown(el) ? text : '';
+    } catch (_) { return ''; }
+  }
   // Texts the user could plausibly have copied: the live selection, the clicked element, and the
   // VISIBLE <pre>/<code> blocks in the clicked element's nearby container (a Copy button sits
   // next to its code block, a few levels up at most).
   function copyCandidates() {
     const out = [];
-    try { out.push(String(getSelection ? getSelection() : '')); } catch (_) {}
+    out.push(trustedSelection());
     const el = lastClickTarget && lastClickTarget.nodeType === 1 ? lastClickTarget : null;
     if (!el) return out;
     const text = (n) => (n && (n.innerText || n.textContent)) || '';
@@ -173,7 +218,7 @@
     if (settings.clipboardGuard === false && settings.clickFixGuard === false) return;
     if (isTrustedHost(location.hostname, settings)) return;
     const detail = (e && e.detail) || {};
-    let cf = { level: 'none', reasons: [], flags: [] };
+    let cf = { level: 'none', reasons: [], flags: [], strongLure: false };
     // ClickFix escalation (0.6.0): a dangerous clipboard payload PLUS
     // paste-and-run instructions in the page text = the fake-CAPTCHA malware
     // pattern. Neutralise the clipboard and block the interaction outright.
@@ -190,7 +235,7 @@
     // (0.15.0) selectionMatches is computed HERE from the DOM, never taken from the MAIN-world
     // event: did the user copy exactly what they selected / what the clicked button's code block shows?
     const selectionMatches = userGesture && SS.copyMatches ? SS.copyMatches(detail.full || detail.sample, copyCandidates()) : false;
-    const tier = SS.clipboardTier({ level: detail.level, clickfixLevel: cf.level, userGesture, selectionMatches });
+    const tier = SS.clipboardTier({ level: detail.level, clickfixLevel: cf.level, userGesture, selectionMatches, strongLure: cf.strongLure === true });
     // 'none' also covers a matching user copy: we never overwrite the clipboard in that case.
     if (tier === 'none') return;
     if (tier === 'block' && SS.actions.dangerInterstitial) {

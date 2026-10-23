@@ -17,13 +17,25 @@
   const RUN_TARGET_RE = /\b(run\s+(dialog|box|window|command|prompt)|powershell|windows\s+terminal|command\s+prompt|cmd(\.exe)?\b)/i;
   const CAPTCHA_RE = /\b(verify\s+(that\s+)?you\s*('?re|\s*are)\s+(a\s+)?human|i\s*('?m|\s*am)\s+not\s+a\s+robot|robot\s+verification|human\s+verification|verification\s+(step|required|id)|captcha)\b/i;
 
+  // (0.15.0) "paste, then press Enter" - the tail of every ClickFix instruction list.
+  const PASTE_ENTER_RE = /\b(paste|ctrl\s*(\+|plus|and|,)\s*v)\b[^.\n]{0,80}\b(press\s+)?(the\s+)?enter\b/i;
+  // Strong lure: Win+R / Run dialog, a captcha / "verify you are human" / "I'm not a robot" claim, or a
+  // paste-then-Enter instruction. Weak tokens (a bare "PowerShell", a lone "paste") do not count, so a
+  // docs page that says "Open PowerShell and run:" is never a strong lure. A user-made copy of a
+  // matching command is only trusted when this is false.
+  function hasStrongLure(text) {
+    const t = String(text || '');
+    return WIN_RUN_RE.test(t) || /\brun\s+(dialog|box|window)\b/i.test(t) || CAPTCHA_RE.test(t) || PASTE_ENTER_RE.test(t);
+  }
+
   function scoreClickFix(input) {
     const s = input || {};
     const text = String(s.text || '');
     const reasons = [];
     const flags = [];
     const winRun = WIN_RUN_RE.test(text);
-    const paste = PASTE_RE.test(text);
+    const pasteEnter = PASTE_ENTER_RE.test(text);
+    const paste = PASTE_RE.test(text) || pasteEnter;
     const runTarget = RUN_TARGET_RE.test(text);
     const captcha = CAPTCHA_RE.test(text);
     const instructionHits = (winRun ? 1 : 0) + (paste ? 1 : 0) + (runTarget ? 1 : 0);
@@ -48,8 +60,8 @@
     }
     if (level === 'dangerous') flags.push('clickfix');
     if (captcha && level !== 'none') reasons.push({ code: 'clickfixCaptchaDisguise', kind: 'clipboard' });
-    return { level, reasons, flags };
+    return { level, reasons, flags, strongLure: hasStrongLure(text) };
   }
 
-  return { scoreClickFix };
+  return { scoreClickFix, hasStrongLure };
 });

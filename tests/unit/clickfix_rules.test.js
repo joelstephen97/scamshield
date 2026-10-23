@@ -45,3 +45,16 @@ test('clipboard payload alone (no instructions) stays suspicious — the toast p
   const r = scoreClickFix({ text: 'Welcome to our download portal.', clipboardLevel: 'dangerous' });
   assert.equal(r.level, 'suspicious');
 });
+
+test('strongLure: Win+R, captcha claim or paste-then-Enter count; weak tokens do not (0.15.0)', () => {
+  const { scoreClickFix, hasStrongLure } = require('../../engine/clickfix_rules');
+  for (const t of ['Press Win+R, paste, press Enter to verify you are human', 'Press Windows + R', "Click I'm not a robot", 'Paste it and press Enter', 'Then Ctrl+V and hit Enter']) {
+    assert.strictEqual(hasStrongLure(t), true, t);
+  }
+  for (const t of ['Open PowerShell and run:', 'Paste it into your terminal', 'Copy the command', '', null]) {
+    assert.strictEqual(hasStrongLure(t), false, String(t));
+  }
+  assert.strictEqual(scoreClickFix({ text: 'Open PowerShell and run:', clipboardLevel: 'dangerous' }).strongLure, false);
+  const r = scoreClickFix({ text: 'Press Win+R, paste, press Enter to verify you are human', clipboardLevel: 'dangerous' });
+  assert.strictEqual(r.strongLure, true); assert.strictEqual(r.level, 'dangerous');
+});

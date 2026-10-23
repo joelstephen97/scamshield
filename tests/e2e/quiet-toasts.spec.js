@@ -74,3 +74,22 @@ test('shop findings never raise the verdict even when the shop is genuinely risk
   const v = await verdictFor(sw, 'fake-shop.html');
   expect(!v || v.level === 'safe', `verdict ${v && v.level}`).toBe(true);
 });
+
+test('canary: a VISIBLE command box + Copy under a Win+R / verify-you-are-human lure still blocks', async ({ context }) => {
+  const page = await context.newPage();
+  await page.goto(BASE + '/clipboard-clickfix-visible.html');
+  await page.bringToFront();
+  await page.waitForTimeout(2500);
+  await expect(page.locator('.scamshield-interstitial')).toHaveCount(0); // the block comes from the copy, not the load
+  await page.click('#copy');
+  await expect(page.locator('.scamshield-interstitial')).toBeVisible({ timeout: 8000 });
+});
+
+test('canary: a payload that matches a transparent <pre> (and a programmatic selection of it) is not the user\'s own copy', async ({ context }) => {
+  const page = await context.newPage();
+  await page.goto(BASE + '/clipboard-clickfix-hiddenpre.html');
+  await page.bringToFront();
+  await page.waitForTimeout(1500);
+  await page.click('#c');
+  await expect(page.locator('.scamshield-interstitial')).toBeVisible({ timeout: 8000 });
+});
