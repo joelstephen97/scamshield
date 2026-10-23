@@ -17,15 +17,17 @@
   const RUN_TARGET_RE = /\b(run\s+(dialog|box|window|command|prompt)|powershell|windows\s+terminal|command\s+prompt|cmd(\.exe)?\b)/i;
   const CAPTCHA_RE = /\b(verify\s+(that\s+)?you\s*('?re|\s*are)\s+(a\s+)?human|i\s*('?m|\s*am)\s+not\s+a\s+robot|robot\s+verification|human\s+verification|verification\s+(step|required|id)|captcha)\b/i;
 
-  // (0.15.0) "paste, then press Enter" - the tail of every ClickFix instruction list.
+  // (0.15.0) "paste, then press Enter" - the tail of every ClickFix instruction list. Scoring only:
+  // install docs say the same thing, so it is NOT a strong lure.
   const PASTE_ENTER_RE = /\b(paste|ctrl\s*(\+|plus|and|,)\s*v)\b[^.\n]{0,80}\b(press\s+)?(the\s+)?enter\b/i;
-  // Strong lure: Win+R / Run dialog, a captcha / "verify you are human" / "I'm not a robot" claim, or a
-  // paste-then-Enter instruction. Weak tokens (a bare "PowerShell", a lone "paste") do not count, so a
-  // docs page that says "Open PowerShell and run:" is never a strong lure. A user-made copy of a
-  // matching command is only trusted when this is false.
+  // Strong lure: a Win+R key-combo / Run dialog instruction, or a human-verification pretext. Nothing
+  // else: not a bare "captcha", not "paste ... press Enter" (install docs), not a bare "PowerShell".
+  // A user-made copy of a matching command is trusted only when this is false.
+  const STRONG_WINR_RE = /\bwin(dows)?\s*(logo\s*)?(\+|key\s*\+)\s*r\b|⊞\s*\+\s*r\b|\brun\s+(dialog|box)\b/i;
+  const STRONG_PRETEXT_RE = /\b(verify\s+(that\s+)?you\s*('?re|\s*are)\s+(a\s+)?human|i\s*('?m|\s*am)\s+not\s+a\s+robot|complete\s+the\s+(captcha|verification)|human\s+verification|verification\s+steps?)\b/i;
   function hasStrongLure(text) {
     const t = String(text || '');
-    return WIN_RUN_RE.test(t) || /\brun\s+(dialog|box|window)\b/i.test(t) || CAPTCHA_RE.test(t) || PASTE_ENTER_RE.test(t);
+    return STRONG_WINR_RE.test(t) || STRONG_PRETEXT_RE.test(t);
   }
 
   function scoreClickFix(input) {

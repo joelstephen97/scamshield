@@ -93,3 +93,32 @@ test('canary: a payload that matches a transparent <pre> (and a programmatic sel
   await page.click('#c');
   await expect(page.locator('.scamshield-interstitial')).toBeVisible({ timeout: 8000 });
 });
+
+test('canary: a transparent <textarea> laid over the button holds the payload - the click does not make it the user\'s copy', async ({ context }) => {
+  const page = await context.newPage();
+  await page.goto(BASE + '/clipboard-clickfix-overlay.html');
+  await page.bringToFront();
+  await page.waitForTimeout(1500);
+  await page.locator('#c').click({ force: true });
+  await expect(page.locator('.scamshield-interstitial')).toBeVisible({ timeout: 8000 });
+});
+
+test('canary: a selection from a visible empty node to the end of a transparent <pre> is not trusted', async ({ context }) => {
+  const page = await context.newPage();
+  await page.goto(BASE + '/clipboard-clickfix-range.html');
+  await page.bringToFront();
+  await page.waitForTimeout(1500);
+  await page.click('#c');
+  await expect(page.locator('.scamshield-interstitial')).toBeVisible({ timeout: 8000 });
+});
+
+test('install docs ("Paste the following into PowerShell and press Enter" + visible <pre> + Copy) stay silent', async ({ context }) => {
+  const page = await context.newPage();
+  await page.goto(`${BASE_HTTPS}/hard-benign/scoop-install.html`);
+  await page.bringToFront();
+  await page.waitForTimeout(2500);
+  await page.click('#copy');
+  await expect(page.locator('#done')).toHaveText('Copied');
+  await page.waitForTimeout(2000);
+  await expectNoSurface(page);
+});

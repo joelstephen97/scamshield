@@ -144,27 +144,34 @@
       return true;
     } catch (_) { return false; }
   };
-  // (0.15.0) The live selection is a candidate only if a trusted selectionchange followed a trusted
-  // pointer/key event within 3 s (a user selecting), the selection has not changed since, and it sits in
-  // a visibly rendered element. A page that calls addRange() on a hidden node fails the visibility test.
-  let lastTrustedInputAt = 0, trustedSelText = null;
+  // (0.15.0) The live selection is a candidate only if the LATEST selectionchange was trusted and followed
+  // a trusted pointer/key event within 3 s (a user selecting), and the selected text is exactly the text
+  // of ONE visibly rendered code block holding both ends of the range. A page that addRange()s a hidden
+  // node, or a range from a visible empty node to the end of a hidden one, fails that block test.
+  let lastTrustedInputAt = 0, selChangeTrusted = false;
   const noteInput = (ev) => { if (ev && ev.isTrusted) lastTrustedInputAt = Date.now(); };
   for (const type of ['pointerdown', 'pointerup', 'keydown', 'keyup']) document.addEventListener(type, noteInput, true);
   document.addEventListener('pointermove', (ev) => { if (ev && ev.isTrusted && ev.buttons) lastTrustedInputAt = Date.now(); }, true);
   document.addEventListener('selectionchange', (ev) => {
     try {
       if (!ev || !ev.isTrusted) return;
-      trustedSelText = Date.now() - lastTrustedInputAt < 3000 ? String(getSelection()) : null;
-    } catch (_) { trustedSelText = null; }
+      selChangeTrusted = Date.now() - lastTrustedInputAt < 3000;
+    } catch (_) { selChangeTrusted = false; }
   }, true);
+  const CODE_BLOCK_SEL = 'pre,code,samp,kbd,textarea,input';
+  const blockText = (n) => (n && ((n.matches && n.matches('textarea,input') ? n.value : '') || n.innerText || n.textContent)) || '';
+  const normText = (t) => String(t == null ? '' : t).replace(/\s+/g, ' ').trim();
   function trustedSelection() {
     try {
       const sel = getSelection();
       const text = String(sel || '');
-      if (!text || trustedSelText === null || text !== trustedSelText || !sel.rangeCount) return '';
-      const c = sel.getRangeAt(0).commonAncestorContainer;
-      const el = c && c.nodeType === 1 ? c : (c && c.parentElement);
-      return isShown(el) ? text : '';
+      if (!text || !selChangeTrusted || !sel.rangeCount) return '';
+      const r = sel.getRangeAt(0);
+      const elOf = (n) => (n && n.nodeType === 1 ? n : (n && n.parentElement));
+      const a = elOf(r.startContainer), b = elOf(r.endContainer);
+      const block = a && a.closest ? a.closest(CODE_BLOCK_SEL) : null;
+      if (!block || !block.contains(b) || !isShown(block)) return '';
+      return normText(blockText(block)) === normText(text) ? text : '';
     } catch (_) { return ''; }
   }
   // Texts the user could plausibly have copied: the live selection, the clicked element, and the
@@ -175,14 +182,16 @@
     out.push(trustedSelection());
     const el = lastClickTarget && lastClickTarget.nodeType === 1 ? lastClickTarget : null;
     if (!el) return out;
-    const text = (n) => (n && (n.innerText || n.textContent)) || '';
-    if (el.matches && el.matches('pre,code,input,textarea')) out.push(text(el) || el.value || '');
+    const text = blockText;
+    // The clicked element counts only if it is itself visibly rendered: a transparent <pre>/<textarea>
+    // laid over a button catches the click and can hold any payload.
+    if (el.matches && el.matches(CODE_BLOCK_SEL) && isShown(el)) out.push(text(el));
     let node = el;
     for (let i = 0; i < 4 && node && node.nodeType === 1 && node !== document.body; i++, node = node.parentElement) {
-      if (node.matches && node.matches('pre,code') && isShown(node)) out.push(text(node));
+      if (node.matches && node.matches(CODE_BLOCK_SEL) && isShown(node)) out.push(text(node));
       if (node.querySelectorAll) {
         let n = 0;
-        for (const b of node.querySelectorAll('pre,code')) {
+        for (const b of node.querySelectorAll(CODE_BLOCK_SEL)) {
           if (++n > 8) break;
           if (isShown(b)) out.push(text(b));
         }
