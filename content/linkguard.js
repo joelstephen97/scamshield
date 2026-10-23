@@ -12,7 +12,9 @@
   let started = false;
   let live = null; // set by start(): the synchronous cache lookup popup interception uses
 
-  // deps: { send(type, extra), surface(kind, once), t(key, subs, fallback), isTrusted(host) }
+  // deps: { send(type, extra), surface(kind, once), t(key, subs, fallback), isTrusted(host), passive? }
+  // passive (0.15.0, Task 17a): the ad guard's lookup only (verdict cache + batched SW lookup + budget): no link marking,
+  // no click interception, no observer. Used when the user switched the link guard off but kept the ad guard on.
   function start(deps) {
     if (started) return false;
     const R = SS.linkRules;
@@ -24,6 +26,7 @@
 
     const cache = new Map();          // host -> 'block' | 'warn' | null (page lifetime)
     const inflight = new Set();       // hosts asked and not yet answered
+    const pending = new Map();        // host -> Promise of the lookup that will answer it (for request())
     const waiting = new Map();        // host -> Set<anchor> to mark on answer
     const budget = R.newHostBudget(HOSTS_PER_MINUTE, 60000);
     let rootsQueue = [], anchorQueue = new Set(), timer = 0, idleId = 0, working = false;
@@ -68,7 +71,13 @@
       for (const a of rootNode.querySelectorAll('a[href]')) { if (anchorQueue.size >= QUEUE_ANCHORS) break; anchorQueue.add(a); }
     }
 
-    async function lookup(hosts) {
+    function lookup(hosts) {
+      const p = lookupNow(hosts);
+      for (const h of hosts) pending.set(h, p);
+      p.then(() => { for (const h of hosts) if (pending.get(h) === p) pending.delete(h); });
+      return p;
+    }
+    async function lookupNow(hosts) {
       for (const h of hosts) inflight.add(h);
       let results = null;
       try { const res = await deps.send('checkFeedBatch', { hosts }); results = res && res.results; } catch (_) { results = null; }
@@ -131,7 +140,7 @@
       rootsQueue.push(node);
     }
 
-    try {
+    if (!deps.passive) try {
       const mo = new MutationObserver((records) => {
         for (const rec of records) {
           if (rec.type === 'attributes') { if (rec.target.tagName === 'A') { anchorQueue.add(rec.target); } continue; }
@@ -141,8 +150,7 @@
       });
       mo.observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['href'] });
     } catch (_) { return false; }
-    enqueue(document.documentElement);
-    schedule();
+    if (!deps.passive) { enqueue(document.documentElement); schedule(); }
 
     // Synchronous verdict for a host (0.15.0, Task 16): 'block' | 'warn' | null. An unknown host answers null AND
     // queues one lookup (through the same budget and batch rules), so the next attempt is decided.
@@ -157,6 +165,21 @@
           } catch (_) { /* best effort */ }
         }
         return null;
+      },
+      // Verdicts for several hosts at once (0.15.0, Task 17a): Promise<Map host -> 'block'|'warn'|null>. Reuses this
+      // guard's cache, in-flight lookups, 50-host batches and 200 hosts/min budget. A host the budget refused (or a
+      // failed lookup) is simply absent from the map: unknown, not clean. The caller retries later.
+      async request(hosts) {
+        const out = new Map();
+        const want = Array.from(new Set((hosts || []).filter((h) => typeof h === 'string' && h)));
+        // One planning pass only: a failed lookup must not burn more budget on the same hosts.
+        const need = want.filter((h) => !cache.has(h) && !pending.has(h));
+        const plan = R.planBatch(need, cache, budget, Date.now(), BATCH);
+        if (plan.length) lookup(plan);
+        const waits = want.filter((h) => pending.has(h)).map((h) => pending.get(h));
+        if (waits.length) await Promise.all(waits);
+        for (const h of want) if (cache.has(h)) out.set(h, cache.get(h));
+        return out;
       }
     };
 
@@ -205,9 +228,13 @@
         onOpen: () => openTarget(a, snap)
       });
     }
-    for (const type of ['click', 'auxclick', 'keydown']) document.addEventListener(type, onEvent, true);
+    if (!deps.passive) for (const type of ['click', 'auxclick', 'keydown']) document.addEventListener(type, onEvent, true);
     return true;
   }
 
-  SS.linkGuard = { start, levelOf: (host) => (live ? live.levelOf(host) : null) };
+  SS.linkGuard = {
+    start,
+    levelOf: (host) => (live ? live.levelOf(host) : null),
+    request: (hosts) => (live ? live.request(hosts) : Promise.resolve(new Map()))
+  };
 })(typeof globalThis !== 'undefined' ? globalThis : self);

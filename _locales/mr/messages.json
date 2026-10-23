@@ -453,5 +453,7 @@
   "linkOpenAnyway": { "message": "तरीही उघडा" },
   "linkBlockedToast": { "message": "ब्लॉक केलेली लिंक — ScamShield ने थांबवली" },
   "popupBlockedToast": { "message": "ScamShield ने या पेजला ब्लॉक केलेली साइट उघडण्यापासून रोखले" },
-  "popunderBlockedToast": { "message": "ScamShield ने या पेजला नवीन विंडो उघडण्यापासून रोखले" }
+  "popunderBlockedToast": { "message": "ScamShield ने या पेजला नवीन विंडो उघडण्यापासून रोखले" },
+  "adHiddenTag": { "message": "फसवी जाहिरात लपवली" },
+  "adHiddenShow": { "message": "दाखवा" }
 }

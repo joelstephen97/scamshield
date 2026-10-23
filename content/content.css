@@ -28,3 +28,13 @@ a.scamshield-link-warn::after{background:#FFF1D6;color:#9A5B00;border:1px solid 
 /* Image-card anchors (display block/flex/grid): the pill is a corner badge, so nothing moves. */
 a.scamshield-link-card{position:relative}
 a.scamshield-link-card::after{position:absolute;inset-block-start:6px;inset-inline-end:6px;margin:0;z-index:1}
+
+/* Scam-ad tag (0.15.0, Task 17a): a collapsed ad becomes a slim bar the width of the ad. Logical properties, own background (dark pages). */
+.scamshield-ad-collapsed{display:none!important}
+.scamshield-ad-hidden{box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;gap:.75em;min-block-size:28px;max-inline-size:100%;margin-block:4px;padding-block:2px;padding-inline:10px;border:1px solid #9B1C1C;border-radius:6px;background:#FDE8E6;color:#9B1C1C;font:600 12px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;text-align:start;letter-spacing:0;text-transform:none;overflow:hidden}
+.scamshield-ad-hidden button{all:unset;box-sizing:border-box;cursor:pointer;padding-block:1px;padding-inline:8px;border:1px solid currentColor;border-radius:999px;font:inherit;text-decoration:none}
+.scamshield-ad-hidden button:focus-visible{outline:2px solid currentColor;outline-offset:2px}
+@media (pointer:coarse){.scamshield-ad-hidden button{min-block-size:44px;min-inline-size:44px;display:inline-flex;align-items:center;justify-content:center}}
+@media (prefers-color-scheme:dark){.scamshield-ad-hidden{background:#3A1514;color:#FF8A80;border-color:#FF8A80}}
+/* Inside an ad iframe the same tag is an opaque tile over the whole frame. */
+.scamshield-ad-hidden.scamshield-ad-tile{position:fixed;inset:0;z-index:2147483647;margin:0;border-radius:0;border-width:0;justify-content:center;flex-wrap:wrap}

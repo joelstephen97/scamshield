@@ -1,0 +1,28 @@
+<!doctype html><meta charset="utf-8"><title>Ad guard fixture</title>
+<style>body{font:16px system-ui;margin:24px;max-width:760px}.slot{display:block;width:300px;min-height:80px;margin:12px 0;border:1px solid #ccc;padding:6px}</style>
+<h1>Local news</h1>
+<!-- Ad containers (fixture markup of the big networks); every one has a real box so it renders. -->
+<ins class="adsbygoogle slot" id="ad-link"><a href="https://www.googleadservices.com/pagead/aclk?sa=L&amp;adurl=http%3A%2F%2Fscamshield-test-blocked.example%2Foffer">Great deal, click here</a></ins>
+<div class="slot" data-ad-slot="1234" id="ad-two"><p>Congratulations, you won! Claim your prize now.</p><a href="http://adguard-clean-one.example/x">Continue</a></div>
+<div class="slot" data-ad-slot="5678" id="ad-one"><p>You won a free sticker pack.</p><a href="http://adguard-clean-two.example/x">Continue</a></div>
+<div class="OUTBRAIN slot" id="ad-none"><p>Ten quiet villages to visit</p><a href="http://adguard-clean-three.example/x">Read</a></div>
+<div class="mgbox slot" id="ad-popular"><p>Encyclopedia sponsor</p><a href="https://en.wikipedia.org/wiki/Scam">Learn more</a></div>
+<div class="slot" id="ad-plain-link"><p>A normal page box (not an ad container) that links to the blocked sentinel</p><a href="http://scamshield-test-blocked.example/plain">sentinel link</a></div>
+<article id="article">
+  <h2>Retiree describes the investment pitch that nearly cost her savings</h2>
+  <p>"They told me you won a prize, then promised guaranteed returns and that I could double your money in a week," she said. Investigators say you won nothing; the phrases are textbook.</p>
+</article>
+<iframe id="adframe" width="300" height="250" src="/adguard-frame.html?scam=1" style="border:0"></iframe>
+<iframe id="cleanframe" width="300" height="250" src="/adguard-frame.html" style="border:0"></iframe>
+<iframe id="bigframe" width="600" height="400" src="/adguard-frame.html?scam=1" style="border:0"></iframe>
+<script>
+  var p = new URLSearchParams(location.search);
+  if (p.get('late') === '1') {
+    setTimeout(function () {
+      var d = document.createElement('div');
+      d.className = 'trc_rbox_container slot'; d.id = 'ad-late';
+      d.innerHTML = '<a href="http://scamshield-test-blocked.example/late">Sponsored story</a>';
+      document.body.appendChild(d);
+    }, 2500);
+  }
+</script>

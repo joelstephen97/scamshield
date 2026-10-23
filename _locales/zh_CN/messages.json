@@ -453,5 +453,7 @@
   "linkOpenAnyway": { "message": "仍然打开" },
   "linkBlockedToast": { "message": "已拦截的链接 — ScamShield 已阻止" },
   "popupBlockedToast": { "message": "ScamShield 已阻止此页面打开被拦截的网站" },
-  "popunderBlockedToast": { "message": "ScamShield 已阻止此页面打开新窗口" }
+  "popunderBlockedToast": { "message": "ScamShield 已阻止此页面打开新窗口" },
+  "adHiddenTag": { "message": "已隐藏诈骗广告" },
+  "adHiddenShow": { "message": "显示" }
 }

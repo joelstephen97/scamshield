@@ -453,5 +453,7 @@
   "linkOpenAnyway": { "message": "پھر بھی کھولیں" },
   "linkBlockedToast": { "message": "بلاک کیا گیا لنک — ScamShield نے روک دیا" },
   "popupBlockedToast": { "message": "ScamShield نے اس صفحے کو بلاک شدہ سائٹ کھولنے سے روک دیا" },
-  "popunderBlockedToast": { "message": "ScamShield نے اس صفحے کو نئی ونڈو کھولنے سے روک دیا" }
+  "popunderBlockedToast": { "message": "ScamShield نے اس صفحے کو نئی ونڈو کھولنے سے روک دیا" },
+  "adHiddenTag": { "message": "دھوکہ دہی والا اشتہار چھپا دیا گیا" },
+  "adHiddenShow": { "message": "دکھائیں" }
 }

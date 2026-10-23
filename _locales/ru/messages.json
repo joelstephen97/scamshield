@@ -453,5 +453,7 @@
   "linkOpenAnyway": { "message": "Всё равно открыть" },
   "linkBlockedToast": { "message": "Заблокированная ссылка — ScamShield остановил переход" },
   "popupBlockedToast": { "message": "ScamShield не дал этой странице открыть заблокированный сайт" },
-  "popunderBlockedToast": { "message": "ScamShield не дал этой странице открыть новое окно" }
+  "popunderBlockedToast": { "message": "ScamShield не дал этой странице открыть новое окно" },
+  "adHiddenTag": { "message": "Мошенническая реклама скрыта" },
+  "adHiddenShow": { "message": "Показать" }
 }

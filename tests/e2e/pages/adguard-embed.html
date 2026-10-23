@@ -1,0 +1,7 @@
+<!doctype html><meta charset="utf-8"><title>Ad guard embed fixture</title>
+<h1>An ordinary page embedding third-party pieces</h1>
+<script>
+  var host = new URLSearchParams(location.search).get('host');
+  document.write('<iframe id="sf" width="300" height="250" src="http://' + host + ':5599/adguard-inner.html"></iframe>');
+  document.write('<script src="http://' + host + ':5599/adguard-ad.js"><\/script>');
+</script>

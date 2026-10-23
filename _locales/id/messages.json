@@ -453,5 +453,7 @@
   "linkOpenAnyway": { "message": "Tetap buka" },
   "linkBlockedToast": { "message": "Tautan diblokir — ScamShield menghentikannya" },
   "popupBlockedToast": { "message": "ScamShield mencegah halaman ini membuka situs yang diblokir" },
-  "popunderBlockedToast": { "message": "ScamShield mencegah halaman ini membuka jendela baru" }
+  "popunderBlockedToast": { "message": "ScamShield mencegah halaman ini membuka jendela baru" },
+  "adHiddenTag": { "message": "Iklan penipuan disembunyikan" },
+  "adHiddenShow": { "message": "Tampilkan" }
 }

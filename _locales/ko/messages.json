@@ -453,5 +453,7 @@
   "linkOpenAnyway": { "message": "그래도 열기" },
   "linkBlockedToast": { "message": "차단된 링크 — ScamShield가 막았습니다" },
   "popupBlockedToast": { "message": "ScamShield가 이 페이지의 차단된 사이트 열기를 막았습니다" },
-  "popunderBlockedToast": { "message": "ScamShield가 이 페이지의 새 창 열기를 막았습니다" }
+  "popunderBlockedToast": { "message": "ScamShield가 이 페이지의 새 창 열기를 막았습니다" },
+  "adHiddenTag": { "message": "사기 광고를 숨겼습니다" },
+  "adHiddenShow": { "message": "보기" }
 }

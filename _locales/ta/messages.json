@@ -453,5 +453,7 @@
   "linkOpenAnyway": { "message": "இருந்தும் திற" },
   "linkBlockedToast": { "message": "தடுக்கப்பட்ட இணைப்பு — ScamShield நிறுத்தியது" },
   "popupBlockedToast": { "message": "தடுக்கப்பட்ட தளத்தை இந்தப் பக்கம் திறப்பதை ScamShield நிறுத்தியது" },
-  "popunderBlockedToast": { "message": "இந்தப் பக்கம் புதிய சாளரத்தைத் திறப்பதை ScamShield நிறுத்தியது" }
+  "popunderBlockedToast": { "message": "இந்தப் பக்கம் புதிய சாளரத்தைத் திறப்பதை ScamShield நிறுத்தியது" },
+  "adHiddenTag": { "message": "மோசடி விளம்பரம் மறைக்கப்பட்டது" },
+  "adHiddenShow": { "message": "காட்டு" }
 }

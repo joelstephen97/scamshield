@@ -453,5 +453,7 @@
   "linkOpenAnyway": { "message": "Trotzdem öffnen" },
   "linkBlockedToast": { "message": "Blockierter Link — ScamShield hat ihn gestoppt" },
   "popupBlockedToast": { "message": "ScamShield hat verhindert, dass diese Seite eine blockierte Website öffnet" },
-  "popunderBlockedToast": { "message": "ScamShield hat verhindert, dass diese Seite ein neues Fenster öffnet" }
+  "popunderBlockedToast": { "message": "ScamShield hat verhindert, dass diese Seite ein neues Fenster öffnet" },
+  "adHiddenTag": { "message": "Betrügerische Werbung ausgeblendet" },
+  "adHiddenShow": { "message": "Anzeigen" }
 }

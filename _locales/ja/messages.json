@@ -453,5 +453,7 @@
   "linkOpenAnyway": { "message": "それでも開く" },
   "linkBlockedToast": { "message": "ブロックされたリンク — ScamShield が停止しました" },
   "popupBlockedToast": { "message": "ScamShield がこのページによるブロック済みサイトの表示を止めました" },
-  "popunderBlockedToast": { "message": "ScamShield がこのページによる新しいウィンドウの表示を止めました" }
+  "popunderBlockedToast": { "message": "ScamShield がこのページによる新しいウィンドウの表示を止めました" },
+  "adHiddenTag": { "message": "詐欺広告を非表示にしました" },
+  "adHiddenShow": { "message": "表示" }
 }

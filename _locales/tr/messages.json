@@ -453,5 +453,7 @@
   "linkOpenAnyway": { "message": "Yine de aç" },
   "linkBlockedToast": { "message": "Engellenen bağlantı — ScamShield durdurdu" },
   "popupBlockedToast": { "message": "ScamShield bu sayfanın engellenmiş bir siteyi açmasını durdurdu" },
-  "popunderBlockedToast": { "message": "ScamShield bu sayfanın yeni bir pencere açmasını durdurdu" }
+  "popunderBlockedToast": { "message": "ScamShield bu sayfanın yeni bir pencere açmasını durdurdu" },
+  "adHiddenTag": { "message": "Dolandırıcılık reklamı gizlendi" },
+  "adHiddenShow": { "message": "Göster" }
 }

@@ -1,0 +1,9 @@
+<!doctype html><meta charset="utf-8"><title>Ad frame</title>
+<body style="margin:0;font:14px system-ui;background:#eef">
+<a id="ad-anchor" style="display:block;padding:20px"></a>
+<script>
+  var scam = /[?&]scam=1/.test(location.search);
+  var a = document.getElementById('ad-anchor');
+  a.href = scam ? 'http://scamshield-test-blocked.example/frame-offer' : 'http://adguard-clean-frame.example/offer';
+  a.textContent = 'Special offer inside the ad frame';
+</script>

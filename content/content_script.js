@@ -37,9 +37,9 @@
   // host + kind only) so false alarms are visible. Fire-and-forget; the SW takes the host from the sender tab.
   // Kinds that fire per event (wallet requests, form submits) are logged once per page load.
   const surfaceOnce = new Set();
-  function surface(kind, once) {
+  function surface(kind, once, extra) {
     if (once) { if (surfaceOnce.has(kind)) return; surfaceOnce.add(kind); }
-    send('surfaceShown', { kind, host: location.hostname });
+    send('surfaceShown', Object.assign({ kind, host: location.hostname }, extra));
   }
   // (0.15.0) "Report a mistake": relay the report (SW gates it on opt-in) and bump the local falseAlarms
   // counter and nothing else, so it is safe for the toasts to call it directly. The banner's "This site is fine"
@@ -1077,6 +1077,8 @@
     // when they hold something phishable — keeps all_frames near-free on
     // ad-heavy pages (dozens of tiny/empty iframes early-exit here).
     if (!IS_TOP) {
+      // Ad-sized frame with links to a listed site: cover it (0.15.0). Costs nothing until the frame has a link.
+      if (SS.adGuard && SS.adGuard.looksLikeAdFrame()) { try { SS.adGuard.startFrame({ send, t, isTrusted: (h, st) => isTrustedHost(h, st) }); } catch (_) {} }
       if (window.innerWidth < 80 || window.innerHeight < 80) return;
       if (!document.querySelector('form, input[type="password"]')) return;
     }
@@ -1091,6 +1093,14 @@
     if (IS_TOP && settings.linkGuard !== false && SS.linkGuard) {
       popupSettings = settings;
       try { SS.linkGuard.start({ send, surface, t, isTrusted: (h) => isTrustedHost(h, settings) }); } catch (_) {}
+    }
+    // Scam-ad hiding (0.15.0, Task 17a): only ads that lead to a listed site or read like a scam are collapsed. It
+    // reuses the link guard's lookup; with the link guard switched off, that lookup runs passive (no marks, no clicks).
+    if (IS_TOP && settings.adGuard !== false && SS.adGuard) {
+      try {
+        if (settings.linkGuard === false) SS.linkGuard.start({ send, surface, t, isTrusted: (h) => isTrustedHost(h, settings), passive: true });
+        SS.adGuard.start({ surface, t, isTrusted: (h) => isTrustedHost(h, settings) });
+      } catch (_) {}
     }
     // Sponsored-search check runs even on (trusted) search-engine hosts.
     if (IS_TOP && settings.serpCheck !== false && SS.isSerpPage(location.hostname, location.pathname, location.search)) {

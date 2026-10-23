@@ -35,6 +35,7 @@ function contentTypeFor(file) {
   if (ext === '.ico') return 'image/x-icon';
   if (ext === '.json') return 'application/json';
   if (ext === '.html') return 'text/html';
+  if (ext === '.js') return 'application/javascript';
   return 'application/octet-stream';
 }
 
