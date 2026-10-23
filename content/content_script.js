@@ -112,6 +112,20 @@
     return keys.some((k) => ((settings && settings.allowlist) || []).includes(k));
   }
 
+  // The user's own exemption for a page host (paused or allowlisted), without the built-in safe-domain list.
+  function userExempt(host, settings) {
+    if (!host) return false;
+    const keys = scopeKeysOf(host);
+    if (SS && SS.isPaused && keys.some((k) => SS.isPaused(settings && settings.pausedSites, k, Date.now()))) return true;
+    return keys.some((k) => ((settings && settings.allowlist) || []).includes(k));
+  }
+  // The top page's host as seen from a sub-frame: ancestorOrigins (Chrome), else the referrer.
+  function topHostFromFrame() {
+    try { const ao = location.ancestorOrigins; if (ao && ao.length) return new URL(ao[ao.length - 1]).hostname; } catch (_) {}
+    try { if (document.referrer) return new URL(document.referrer).hostname; } catch (_) {}
+    return '';
+  }
+
   // "Don't warn me on this site" (0.14.0): one implementation for every toast kind.
   function muteHandler(kind) {
     return async () => {
@@ -1078,7 +1092,7 @@
     // ad-heavy pages (dozens of tiny/empty iframes early-exit here).
     if (!IS_TOP) {
       // Ad-sized frame with links to a listed site: cover it (0.15.0). Costs nothing until the frame has a link.
-      if (SS.adGuard && SS.adGuard.looksLikeAdFrame()) { try { SS.adGuard.startFrame({ send, t, isTrusted: (h, st) => isTrustedHost(h, st) }); } catch (_) {} }
+      if (SS.adGuard && SS.adGuard.looksLikeAdFrame()) { try { SS.adGuard.startFrame({ send, t, isTrusted: (h, st) => isTrustedHost(h, st), pageExempt: (st) => userExempt(topHostFromFrame(), st) }); } catch (_) {} }
       if (window.innerWidth < 80 || window.innerHeight < 80) return;
       if (!document.querySelector('form, input[type="password"]')) return;
     }
@@ -1096,7 +1110,7 @@
     }
     // Scam-ad hiding (0.15.0, Task 17a): only ads that lead to a listed site or read like a scam are collapsed. It
     // reuses the link guard's lookup; with the link guard switched off, that lookup runs passive (no marks, no clicks).
-    if (IS_TOP && settings.adGuard !== false && SS.adGuard) {
+    if (IS_TOP && settings.adGuard !== false && SS.adGuard && !userExempt(location.hostname, settings)) {
       try {
         if (settings.linkGuard === false) SS.linkGuard.start({ send, surface, t, isTrusted: (h) => isTrustedHost(h, settings), passive: true });
         SS.adGuard.start({ surface, t, isTrusted: (h) => isTrustedHost(h, settings) });

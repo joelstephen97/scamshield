@@ -843,7 +843,8 @@ async function runOtaUpdate() {
     //   MAX_ALLOW              = 1000  (paused/trusted sites)
     //   hot redirect chunks    <=    5  (12,000 hosts at CHUNK=2500)
     //   MAX_PATH_RULES         =  300  (hot path tier)
-    //   slack                  ~  183
+    //   hot sub_frame/script   <=    5  (0.15.0 SUB_BASE chunks, same 12,000 hosts)
+    //   slack                  ~  178
     const filters = data.rules.slice(0, Math.max(0, dnrCap - 1500)).map((r) => String(r.urlFilter || r));
     // 0.14.1: the download always happens; only the APPLY is gated on the
     // master switch. While off the list is parked in storage so turning

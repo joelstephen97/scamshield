@@ -19,6 +19,21 @@
     '[aria-label="Advertisement" i]', '[data-ad-slot]'
   ].join(',');
 
+  // The generic selectors also match ordinary page wrappers, so they get a stricter text cap (see tooBigForAd).
+  const AD_GENERIC_SELECTOR = '[aria-label="Advertisement" i],[data-ad-slot]';
+  const AD_SPECIFIC_SELECTOR = AD_SELECTOR.split(',').filter((x) => x !== '[data-ad-slot]' && x !== '[aria-label="Advertisement" i]').join(',');
+  // What an ad container must NOT contain (it is page content then) and its largest plausible size.
+  const CONTENT_SELECTOR = 'article,main,h1,form,[role="main"],[role="article"]';
+  const MAX_AD_HEIGHT = 1000, MAX_AD_VIEWPORT_SHARE = 0.6, MAX_GENERIC_TEXT = 600;
+  // rect: {width, height}; vw/vh: viewport. generic: matched ONLY by a generic selector.
+  function tooBigForAd(rect, vw, vh, generic, textLength) {
+    if (!rect) return true;
+    if (rect.height > MAX_AD_HEIGHT) return true;
+    if (vw > 0 && vh > 0 && rect.width * rect.height > MAX_AD_VIEWPORT_SHARE * vw * vh) return true;
+    if (generic && textLength > MAX_GENERIC_TEXT) return true;
+    return false;
+  }
+
   // Each pattern is a list of alternatives, or (celebrity-crypto) an all-of pair. Matching goes through
   // matchScamPhrases (word boundaries, apostrophe-aware), so "you won't" is not "you won". A pattern counts
   // once however often it repeats; a container needs two DIFFERENT patterns.
@@ -70,5 +85,5 @@
     return AD_SIZES.some((s) => Math.abs(s[0] - w) <= 6 && Math.abs(s[1] - h) <= 6);
   }
 
-  return { AD_SELECTOR, SCAM_AD_PATTERNS, matchedPatterns, scamAdTextHit, adDestination, shouldCollapse, isAdSized, AD_SIZES };
+  return { AD_GENERIC_SELECTOR, AD_SPECIFIC_SELECTOR, CONTENT_SELECTOR, tooBigForAd, AD_SELECTOR, SCAM_AD_PATTERNS, matchedPatterns, scamAdTextHit, adDestination, shouldCollapse, isAdSized, AD_SIZES };
 });

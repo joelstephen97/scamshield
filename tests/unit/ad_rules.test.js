@@ -76,3 +76,14 @@ test('isAdSized: standard IAB sizes within a few px; articles and full-page fram
 test('surface log accepts ad-hidden', () => {
   assert.strictEqual(SL.appendRow([], { kind: 'ad-hidden', host: 'news.example' }, 1).length, 1);
 });
+
+test('tooBigForAd: page-sized, tall, or (generic selectors only) text-heavy containers are not ads', () => {
+  const ok = { width: 300, height: 250 };
+  assert.strictEqual(A.tooBigForAd(ok, 1280, 800, false, 0), false);
+  assert.strictEqual(A.tooBigForAd({ width: 300, height: 1200 }, 1280, 3000, false, 0), true, 'taller than 1000px');
+  assert.strictEqual(A.tooBigForAd({ width: 1200, height: 600 }, 1280, 800, false, 0), true, 'over 60% of the viewport');
+  assert.strictEqual(A.tooBigForAd(ok, 1280, 800, true, 601), true, 'generic selector + long text');
+  assert.strictEqual(A.tooBigForAd(ok, 1280, 800, false, 5000), false, 'specific ad selectors have no text cap');
+  assert.strictEqual(A.tooBigForAd(null, 1280, 800, false, 0), true);
+  assert.ok(A.CONTENT_SELECTOR.includes('article') && A.CONTENT_SELECTOR.includes('[role="main"]'));
+});

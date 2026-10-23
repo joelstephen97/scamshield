@@ -42,7 +42,10 @@
     const SEL = A.AD_SELECTOR;
     const collapsed = new Map();      // container -> tag
     const restored = new WeakSet();   // containers the user chose to show: never collapsed again
-    const retry = new Set();          // containers whose hosts the budget refused
+    const retry = new Set();          // containers whose hosts the budget refused, or that were hidden at scan time
+    const hiddenSeen = new WeakSet(); // hidden containers already given their one later round
+    const hiddenLater = new Set();    // hidden at scan time: drained only by the 3 s timer, never by an unrelated round
+    let hiddenTimer = 0;
     let rootsQueue = [], timer = 0, idleId = 0, working = false, retryTimer = 0, retries = 0, hiddenCount = 0;
 
     function outermost(el) {
@@ -69,10 +72,28 @@
       return hosts;
     }
 
-    function collapse(el) {
+    // Size/ancestor guard (0.15.0): a matched container that holds page content or is page-sized is a wrapper, not an ad.
+    // The only layout read is ONE getBoundingClientRect per matched container. Returns the rect, null (skip),
+    // or 'hidden' (not rendered now: one later round).
+    function vet(el) {
+      try {
+        if (el.querySelector(A.CONTENT_SELECTOR)) return null;
+        if (el.getClientRects().length === 0) return 'hidden';
+        const r = el.getBoundingClientRect();
+        const generic = el.matches(A.AD_GENERIC_SELECTOR) && !el.matches(A.AD_SPECIFIC_SELECTOR);
+        const vw = root.innerWidth || document.documentElement.clientWidth || 0, vh = root.innerHeight || document.documentElement.clientHeight || 0;
+        if (A.tooBigForAd(r, vw, vh, generic, generic ? (el.textContent || '').length : 0)) return null;
+        return r;
+      } catch (_) { return null; }
+    }
+    function armHidden() {
+      if (hiddenTimer) return;
+      hiddenTimer = setTimeout(() => { hiddenTimer = 0; for (const el of hiddenLater) retry.add(el); hiddenLater.clear(); schedule(); }, 3000);
+    }
+
+    function collapse(el, rect) {
       if (collapsed.has(el) || restored.has(el) || !el.isConnected || !el.parentNode) return false;
-      if (el.getClientRects().length === 0) return false; // not rendered: nothing to hide
-      const w = el.getBoundingClientRect().width;
+      const w = rect.width;
       const tag = buildTag(document, deps, () => {
         restored.add(el);
         collapsed.delete(el);
@@ -99,17 +120,20 @@
         const list = [];
         for (const el of found) {
           if (!el.isConnected || collapsed.has(el) || restored.has(el)) continue;
-          list.push(el);
+          const rect = vet(el);
+          if (rect === 'hidden') { if (!hiddenSeen.has(el)) { hiddenSeen.add(el); hiddenLater.add(el); armHidden(); } continue; }
+          if (!rect) continue;
+          list.push({ el, rect });
           if (list.length >= ROUND_CONTAINERS) break;
         }
-        const work = list.map((el) => ({ el, hosts: destinationsOf(el), text: (el.textContent || '').slice(0, MAX_TEXT) }));
+        const work = list.map(({ el, rect }) => ({ el, rect, hosts: destinationsOf(el), text: (el.textContent || '').slice(0, MAX_TEXT) }));
         const allHosts = new Set();
         for (const w of work) for (const h of w.hosts) allHosts.add(h);
         const levels = allHosts.size ? await G.request(Array.from(allHosts)) : new Map();
         let before = hiddenCount;
         for (const w of work) {
           const lv = Array.from(w.hosts).map((h) => levels.get(h) || null);
-          if (A.shouldCollapse({ levels: lv, text: w.text })) collapse(w.el);
+          if (A.shouldCollapse({ levels: lv, text: w.text })) collapse(w.el, w.rect);
           else if (Array.from(w.hosts).some((h) => !levels.has(h))) retry.add(w.el); // unknown (budget/SW), not clean
         }
         if (hiddenCount > before) deps.surface('ad-hidden', true, { count: hiddenCount });
@@ -170,6 +194,7 @@
       try {
         if (!settings) settings = await deps.send('getSettings');
         if (!settings || !settings.enabled || settings.adGuard === false) { done = true; return; }
+        if (typeof deps.pageExempt === 'function' && deps.pageExempt(settings)) { done = true; return; } // the user trusted/paused the top page
         const hosts = new Set();
         let n = 0;
         for (const a of anchors) {

@@ -1,0 +1,18 @@
+<!doctype html><meta charset="utf-8"><title>Ad guard wrapper fixture</title>
+<style>body{font:16px system-ui;margin:24px;max-width:760px}.slot{display:block;width:300px;min-height:80px;margin:12px 0;border:1px solid #ccc;padding:6px}</style>
+<!-- Hard benign: page wrappers that happen to carry ad-ish attributes. Nothing here may be collapsed. -->
+<div id="wrap-slot" data-ad-slot="layout-main">
+  <article id="story-a"><h1>Retiree describes the pitch</h1><p>"They said you won a prize and I could double your money," she said.</p>
+  <p><a href="http://scamshield-test-blocked.example/story">related link</a></p></article>
+</div>
+<section id="wrap-aria" aria-label="Advertisement">
+  <article id="story-b"><h2>Second story</h2><p>You won nothing. Double your money schemes are textbook.</p>
+  <p><a href="http://scamshield-test-blocked.example/story2">related link</a></p></article>
+</section>
+<div id="wrap-text" data-ad-slot="text-heavy"><p id="long-text"></p><a href="http://scamshield-test-blocked.example/t">x</a></div>
+<script>document.getElementById('long-text').textContent = 'you won double your money. ' + 'lorem ipsum dolor sit amet '.repeat(40);</script>
+<!-- Positive canary: a small real ad slot on the same page. -->
+<ins class="adsbygoogle slot" id="ad-small"><a href="http://scamshield-test-blocked.example/offer">Great deal</a></ins>
+<!-- Hidden at scan time, shown 1 s later: still collapsed (one later round). -->
+<ins class="adsbygoogle slot" id="ad-hidden-first" style="display:none"><a href="http://scamshield-test-blocked.example/h">Hidden first</a></ins>
+<script>setTimeout(function(){document.getElementById('ad-hidden-first').style.display='block';},1000);</script>

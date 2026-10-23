@@ -159,6 +159,31 @@ test('an ad-sized iframe whose own link leads to a listed site is covered by a t
   await expect(scam.locator('.scamshield-ad-tile')).toHaveCount(0);
 });
 
+test('hard benign: page wrappers carrying data-ad-slot / aria-label=Advertisement around an article are untouched; a small ad on the same page is collapsed', async ({ context }) => {
+  const sw = context.serviceWorkers()[0];
+  await installFeed(sw, [SENTINEL]);
+  const page = await context.newPage();
+  await page.goto('http://localhost:5599/adguard-wrapper.html');
+  await expect(page.locator('#ad-small')).toBeHidden({ timeout: 7000 }); // positive canary: the guard ran
+  await expect(collapsedTags(page)).toHaveCount(2, { timeout: 9000 }); // #ad-hidden-first: hidden at scan time, collapsed one round later
+  for (const id of ['wrap-slot', 'wrap-aria', 'wrap-text', 'story-a', 'story-b']) await expect(page.locator('#' + id), id).toBeVisible();
+  await expect(page.locator('#ad-hidden-first')).toBeHidden();
+  expect(await collapsedTags(page).count()).toBe(2);
+});
+
+test('a user-paused or trusted top page gets no ad hiding and no iframe tile', async ({ context }) => {
+  const sw = context.serviceWorkers()[0];
+  await installFeed(sw, [SENTINEL]);
+  await sw.evaluate(() => setSettings({ allowlist: ['localhost'] }));
+  const page = await context.newPage();
+  await page.goto(PAGE);
+  await expect(page.locator('#ad-plain-link a')).toHaveClass(/scamshield-link-block/, { timeout: 7000 }); // canary: the link guard ran
+  await page.waitForTimeout(6000);              // past the frame's 1.5 s and 4 s checks
+  await expect(page.locator('#ad-link')).toBeVisible();
+  await expect(page.locator('#ad-two')).toBeVisible();
+  await expect(page.frameLocator('#adframe').locator('.scamshield-ad-tile')).toHaveCount(0);
+});
+
 async function resetHits() { await fetch(HITS_URL + '/reset', { method: 'POST' }); }
 async function hitsFor(host) {
   const all = await (await fetch(HITS_URL)).json();
