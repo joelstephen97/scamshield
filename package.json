@@ -46,6 +46,7 @@
     "release:notes": "node tools/release-notes.js"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
     "@playwright/test": "^1.48.0",
     "chrome-webstore-upload-cli": "^4.0.1",
     "linkedom": "^0.18.13",

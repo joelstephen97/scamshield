@@ -85,3 +85,9 @@ body{font:13px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 .toast{position:fixed;left:50%;bottom:12px;transform:translateX(-50%);background:var(--text);color:var(--ground);padding:6px 12px;border-radius:var(--chip);font-size:12px;opacity:0;transition:opacity .12s}
 .toast.show{opacity:1}
+
+/* (0.15.0, Task 19) Touch: every button-like target is at least 44x44 CSS px under a coarse pointer (Firefox for Android,
+   tablets). Fine pointers keep the compact sizes. */
+@media (pointer: coarse){
+  .ui button,.ui .btn,.ui a.btn{min-block-size:44px;min-inline-size:44px}
+}

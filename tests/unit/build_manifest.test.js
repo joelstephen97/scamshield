@@ -30,7 +30,7 @@ function htmlAssetRefs(htmlPath) {
   return refs.filter((r) => !/^https?:\/\//.test(r));
 }
 
-for (const htmlFile of ['popup.html', 'options.html', 'onboarding.html']) {
+for (const htmlFile of ['popup.html', 'options.html', 'onboarding.html', 'blocked.html', 'demo.html']) {
   test(`${htmlFile}: script/link targets exist and are covered by SHARED`, () => {
     const refs = htmlAssetRefs(path.join(ROOT, htmlFile));
     for (const r of refs) {

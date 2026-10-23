@@ -408,12 +408,14 @@
         onTrustedClick(fine, () => { fine.textContent = t('thanks', null, 'Thanks'); fine.disabled = true; x.onReport && x.onReport(); closeMenu(true); });
       }
       const copyBtn = copyReportButton(verdict); onTrustedClick(copyBtn, () => closeMenu(true));
-      for (const b of [trust, fine, copyBtn]) if (b) b.setAttribute('role', 'menuitem');
       // Visible row (Hick): danger = filled primary (rescue, else Leave) + outlined Leave (when rescue is primary) + ⋯ + ✕;
       // suspicious = outlined Trust + ⋯ + ✕ (nothing filled on a suspicious page). Trust (danger), "This site is fine", Copy live in the menu.
       if (danger) { if (rescue) { acts.append(rescue, leave); } else { leave.classList.add('primary'); acts.appendChild(leave); } if (trust) menu.appendChild(trust); }
       else if (trust) acts.appendChild(trust);
       menu.append(fine, copyBtn);
+      // (0.15.0, Task 19) role=menuitem only on what really sits inside the role=menu: on the suspicious banner Trust is a plain
+      // button in the visible row, and a menuitem outside a menu is an axe 'aria-required-parent' (critical) violation.
+      for (const b of [trust, fine, copyBtn]) if (b && menu.contains(b)) b.setAttribute('role', 'menuitem');
       // The brand comparison sits INSIDE .ss-text under the reason (second line only when a brand is known).
       if (verdict.brandLabel && verdict.brandUrl) { const cmp = compareRow(verdict.brandLabel, verdict.brandUrl); if (cmp) text.appendChild(cmp); }
       const moreBtn = button('ss-more', '⋯'); moreBtn.setAttribute('aria-label', t('moreActions', null, 'More actions')); moreBtn.setAttribute('aria-haspopup', 'menu'); moreBtn.setAttribute('aria-expanded', 'false');

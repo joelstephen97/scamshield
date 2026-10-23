@@ -10,6 +10,12 @@
 // catch exactly like an in-page dangerous verdict: threatsBlocked (the
 // earned-review threshold), the stats ring, and the protection history.
 // Reloads inside a minute are collapsed by the worker, not here.
+//
+// (0.15.0, Task 19) A second way in: blocked.html?r=escalated#<url>. The service worker sends a page that kept
+// hiding our warning here (escalateBlocked). That page was NOT on any list, so this form says what really
+// happened ("kept hiding the warning"), skips the list-source line and never sends 'dnrBlocked' (it is not a
+// feed/DNR catch: no threatsBlocked, stats or history row). The redirect form without a query is unchanged, and
+// the hash is still the whole original URL in both.
 'use strict';
 const api = globalThis.browser || globalThis.chrome;
 const SS = globalThis.ScamShield, I = globalThis.SSIcons, R = globalThis.SSReasons, i18n = globalThis.SSi18n;
@@ -26,6 +32,8 @@ function blockedUrl() {
   try { const u = new URL(raw); if (/^https?:$/.test(u.protocol)) return u; } catch (_) {}
   return null;
 }
+// 'r' lives in the query string, before the hash, so an old-style blocked.html#<url> keeps parsing exactly as before.
+const escalated = (() => { try { return new URLSearchParams(location.search).get('r') === 'escalated'; } catch (_) { return false; } })();
 const target = blockedUrl();
 const host = target ? target.hostname : '';
 const domain = host ? registrable(host) : '';
@@ -33,7 +41,10 @@ const domain = host ? registrable(host) : '';
 function render(info) {
   try { $('hico').innerHTML = I && I.shield ? I.shield('dangerous') : ''; } catch (_) {}
   $('url').textContent = target ? target.href : '';
-  if (host) {
+  if (host && escalated) {
+    $('lead').textContent = T('blockedLeadEscalated', null, 'ScamShield closed this page because it kept hiding the warning.');
+    $('src').hidden = true;
+  } else if (host) {
     // 0.13.0 (Task 11): a hot-list catch (freshly reported, <48h) gets its
     // own lead copy — handleDnrBlocked() tells us via info.kind whether the
     // host came from the hourly hot list rather than the daily feed/static
@@ -43,10 +54,10 @@ function render(info) {
       ? T('blockedLeadHot', [bidi(host)], host + ' was reported for phishing in the last two days, so the page was stopped before it could load. Nothing ran and nothing you typed was sent.')
       : T('blockedLead', [bidi(host)], host + " is on ScamShield's list of known scam and malicious sites, so the page was stopped before it could load. Nothing ran and nothing you typed was sent.");
   }
-  const sources = info && Array.isArray(info.sources) ? info.sources.filter((s) => typeof s === 'string' && s) : [];
+  const sources = !escalated && info && Array.isArray(info.sources) ? info.sources.filter((s) => typeof s === 'string' && s) : [];
   if (sources.length) { $('src').removeAttribute('data-i18n'); $('src').textContent = T('blockedListedBy', [bidi(sources.slice(0, 4).join(', '))], 'Listed by ' + sources.slice(0, 4).join(', ')); }
   const fp = 'https://github.com/joelstephen97/scamshield/issues/new?title=' + encodeURIComponent('False positive: ' + host) +
-    '&body=' + encodeURIComponent('Site: ' + (target ? target.href : '') + '\n\nWhat ScamShield said: blocked (known scam domain)\n\nWhat it should have said: \n');
+    '&body=' + encodeURIComponent('Site: ' + (target ? target.href : '') + '\n\nWhat ScamShield said: ' + (escalated ? 'closed the page (it kept hiding the warning)' : 'blocked (known scam domain)') + '\n\nWhat it should have said: \n');
   $('mistake').href = fp;
 }
 
@@ -61,14 +72,14 @@ $('copy').addEventListener('click', async () => {
   const text = [
     T('copyReportHeader', [hostText], '⚠ ScamShield flagged this site: ' + host),
     T('copyReportVerdict', [lvl], 'Verdict: ' + lvl),
-    T('blockedListedGeneric', null, "Listed in ScamShield's block list of confirmed scam domains."),
+    escalated ? T('blockedLeadEscalated', null, 'ScamShield closed this page because it kept hiding the warning.') : T('blockedListedGeneric', null, "Listed in ScamShield's block list of confirmed scam domains."),
     T('copyReportFooter', null, 'Checked on-device by ScamShield — free, open-source: https://joelstephen97.github.io/scamshield/')
   ].join('\n');
   try { await navigator.clipboard.writeText(text); $('copy').textContent = T('toastCopied', null, 'Copied'); } catch (_) {}
 });
 // 0.14.1: the worker refuses to store a pause / trust for a bare tenant apex
 // ('wordpress.com'), so those two controls are not offered there.
-if (domain && SS && SS.isTenantApex && SS.isTenantApex(domain)) { for (const id of ['visit', 'trust']) { const b = $(id); if (b) b.hidden = true; } }
+if (domain && SS && SS.isTenantApex && SS.isTenantApex(domain)) { for (const id of ['visit', 'visitHint', 'trust']) { const b = $(id); if (b) b.hidden = true; } }
 $('visit').addEventListener('click', async (e) => {
   e.preventDefault();
   if (!target || !domain) return;
@@ -94,7 +105,9 @@ $('trust').addEventListener('click', async (e) => {
 (async () => {
   if (i18n && i18n.ready) { try { await i18n.ready; } catch (_) {} }
   render(null);
-  if (!target) return;
+  // Initial focus is the safe action: a keyboard or screen-reader user lands on "Go back", never on "Visit anyway".
+  try { $('back').focus(); } catch (_) {}
+  if (!target || escalated) return;
   const info = await send('dnrBlocked', { url: target.href });
   render(info);
 })();

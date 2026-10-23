@@ -1,16 +1,36 @@
 <!doctype html><html lang="en" data-i18n-doctitle="blockedDocTitle"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Site blocked by ScamShield</title><link rel="stylesheet" href="ui/tokens.css">
-<style>main{max-width:620px;margin:56px auto;padding:0 20px}h1{font-size:24px;font-weight:600;margin:0 0 8px;display:flex;align-items:center;gap:10px}
-.lead{font-size:15px;margin:0 0 18px;max-width:62ch;line-height:1.5}.addr{background:var(--surface);border:1px solid var(--hair);border-radius:var(--radius);padding:12px 14px;margin:0 0 14px}
-.addr .lbl{font-size:12px;color:var(--muted);margin:0 0 4px}.addr .url{font:13px/1.4 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;word-break:break-all;margin:0;direction:ltr;unicode-bidi:isolate}
-.src{font-size:13px;color:var(--muted);margin:0 0 20px;line-height:1.5}.actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.actions .btn{min-height:32px}
-.small{margin-top:22px;font-size:13px;color:var(--muted);line-height:1.6}.small a{color:var(--muted)}.foot{margin-top:28px;font-size:12px;color:var(--muted)}
-.ic{width:36px;height:36px;flex:none;border-radius:10px;background:var(--danger-bg);color:var(--danger);display:grid;place-items:center}.ic svg{width:20px;height:20px}.danger{color:var(--danger,#b42318)}</style></head>
+<style>
+/* (0.15.0, Task 19) Logical properties only; the card is vertically centred on tall screens and top-aligned when the
+   content is taller than the viewport (grid + align-content:safe center never clips the heading above the fold). */
+main{box-sizing:border-box;min-block-size:100vh;min-block-size:100dvh;max-inline-size:640px;margin-inline:auto;padding-block:max(24px,env(safe-area-inset-top,0px)) max(24px,env(safe-area-inset-bottom,0px));padding-inline:max(20px,env(safe-area-inset-left,0px)) max(20px,env(safe-area-inset-right,0px));display:grid;align-content:center;align-content:safe center}
+h1{font-size:24px;line-height:1.25;font-weight:600;margin:0 0 10px;display:flex;align-items:center;gap:12px}
+.lead{font-size:15px;margin:0 0 18px;max-inline-size:62ch;line-height:1.55}
+.addr{background:var(--surface);border:1px solid var(--hair);border-radius:var(--radius);padding:12px 14px;margin:0 0 14px}
+.addr .lbl{font-size:12px;color:var(--muted);margin:0 0 4px}
+.addr .url{font:13px/1.4 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;overflow-wrap:anywhere;word-break:break-all;margin:0;direction:ltr;text-align:start;unicode-bidi:isolate}
+.src{font-size:13px;color:var(--muted);margin:0 0 20px;line-height:1.5}
+.actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.actions .btn{min-block-size:36px;padding-inline:16px}
+.more{margin-block-start:20px;display:flex;flex-direction:column;align-items:flex-start;gap:2px;font-size:13px;color:var(--muted);line-height:1.5}
+.more .row{display:flex;flex-wrap:wrap;align-items:center;column-gap:6px}
+.ui button.linkbtn,.ui a.linkbtn{background:none;border:0;border-radius:var(--chip);padding:6px 4px;min-block-size:32px;color:var(--text);text-decoration:underline;text-underline-offset:3px;cursor:pointer;display:inline-flex;align-items:center;font:inherit;font-size:13px}
+.more .hint{color:var(--muted)}
+.foot{margin-block:24px 0;font-size:12px;color:var(--muted)}
+.ic{inline-size:36px;block-size:36px;flex:none;border-radius:10px;background:var(--danger-bg);color:var(--danger);display:grid;place-items:center}.ic svg{inline-size:20px;block-size:20px}
+@media (pointer:coarse){.actions .btn,.ui button.linkbtn,.ui a.linkbtn{min-block-size:44px;min-inline-size:44px}.actions .btn{padding-inline:18px}}
+@media (max-width:480px){.actions .btn{flex:1 1 100%}h1{font-size:21px}}
+@media (min-width:1920px){main{max-inline-size:760px}h1{font-size:30px}.lead{font-size:18px}.addr .url{font-size:15px}.src,.more,.ui button.linkbtn{font-size:15px}.foot{font-size:14px}}
+</style></head>
 <body class="ui"><main>
 <h1 id="h"><span class="ic" id="hico" aria-hidden="true"></span><span data-i18n="blockedTitle">ScamShield blocked this site</span></h1>
 <p class="lead" id="lead">This site is on ScamShield's list of known scam and malicious sites, so the page was stopped before it could load. Nothing ran and nothing you typed was sent.</p>
 <div class="addr"><p class="lbl" data-i18n="blockedAddress">Blocked address</p><p class="url" id="url"></p></div>
 <p class="src" id="src" data-i18n="blockedListedGeneric">Listed in ScamShield's block list of confirmed scam domains.</p>
-<div class="actions"><button class="btn primary" id="back" data-i18n="blockedGoBack">Go back to safety</button><button class="btn" id="copy" data-i18n="copyReportBtn">Copy report</button></div>
-<p class="small"><a href="#" id="visit" data-i18n="blockedVisitAnyway">Visit anyway (not recommended)</a> · <span data-i18n="blockedVisitHint">Opens the site with ScamShield paused on it for 1 hour.</span><br><a href="#" id="trust" data-i18n="blockedTrustSite">Not a scam? Trust this site</a> · <a href="#" id="mistake" target="_blank" rel="noopener" data-i18n="reportMistake">Report a mistake</a></p>
+<div class="actions"><button type="button" class="btn primary" id="back" data-i18n="blockedGoBack">Go back to safety</button><button type="button" class="btn" id="copy" data-i18n="copyReportBtn">Copy report</button></div>
+<div class="more">
+<div class="row"><button type="button" class="linkbtn" id="visit" aria-describedby="visitHint" data-i18n="blockedVisitAnyway">Visit anyway (not recommended)</button></div>
+<span class="hint" id="visitHint" data-i18n="blockedVisitHint">Opens the site with ScamShield paused on it for 1 hour.</span>
+<div class="row"><button type="button" class="linkbtn" id="trust" data-i18n="blockedTrustSite">Not a scam? Trust this site</button><span aria-hidden="true">·</span><a class="linkbtn" href="#" id="mistake" target="_blank" rel="noopener" data-i18n="reportMistake">Report a mistake</a></div>
+</div>
 <p class="foot" data-i18n="blockedFooter">Blocked on your device. Nothing about this page was sent anywhere.</p>
 </main><script src="engine/constants.js"></script><script src="engine/trust.js"></script><script src="ui/icons.js"></script><script src="ui/theme.js"></script><script src="ui/reasons.js"></script><script src="ui/i18n.js"></script><script src="ui/blocked.js"></script></body></html>

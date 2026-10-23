@@ -77,8 +77,10 @@ test('body.inert returns to false when the interstitial is dismissed', async ({ 
   await page.close();
 });
 
-test('page script dialog.close() reopens it; the 4th close escalates to blocked.html', async ({ context }) => {
+test('page script dialog.close() reopens it; the 4th close escalates to blocked.html', async ({ context, extensionId }) => {
   const page = await interstitial(context);
+  const sw = context.serviceWorkers()[0];
+  const blockedBefore = await sw.evaluate(() => getSettings().then((s) => s.threatsBlocked || 0));
   const close = () => page.evaluate((s) => { const h = document.querySelector(s); if (h) h.shadowRoot.querySelector('dialog').close(); return !!h; }, IHOST);
   for (let i = 0; i < 3; i++) {
     expect(await close()).toBe(true);
@@ -86,7 +88,24 @@ test('page script dialog.close() reopens it; the 4th close escalates to blocked.
     expect((await state(page, IHOST)).inert).toBe(true);
   }
   await close();
-  await expect.poll(() => page.url(), { timeout: 8000 }).toContain('/blocked.html#' + BASE + '/seed-phrase.html');
+  // (0.15.0, Task 19) The escalation says WHY (?r=escalated) and the page tells the truth: it was not stopped before
+  // loading, it kept hiding the warning. It is not a feed/DNR catch, so nothing is counted.
+  await expect.poll(() => page.url(), { timeout: 8000 }).toBe('chrome-extension://' + extensionId + '/blocked.html?r=escalated#' + BASE + '/seed-phrase.html');
+  await expect(page.locator('#lead')).toHaveText('ScamShield closed this page because it kept hiding the warning.');
+  await expect(page.locator('#lead')).not.toContainText('before it could load');
+  await expect(page.locator('#src')).toBeHidden();
+  await expect(page.locator('#back')).toBeFocused();
+  await expect(page.locator('#url')).toHaveText(BASE + '/seed-phrase.html');
+  await page.waitForTimeout(800); // a dnrBlocked round trip, if the page wrongly sent one, would have landed by now
+  expect(await sw.evaluate(() => getSettings().then((s) => s.threatsBlocked || 0))).toBe(blockedBefore);
+  const hist = await sw.evaluate(async () => ((await chrome.storage.local.get('history')).history || []).filter((h) => h.kind === 'blocklist').length);
+  expect(hist).toBe(0);
+  // Canary for the other direction: the old-style hash-only form (what the DNR redirect produces) is still the list-catch wording.
+  const legacy = await context.newPage();
+  await legacy.goto('chrome-extension://' + extensionId + '/blocked.html#' + encodeURIComponent('http://block-feed-fixture.example:5599/clean.html'));
+  await expect(legacy.locator('#lead')).toContainText('known scam and malicious sites');
+  await expect(legacy.locator('#src')).toBeVisible();
+  await legacy.close();
   await page.close();
 });
 

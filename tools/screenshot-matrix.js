@@ -87,9 +87,15 @@ const PAGE_SURFACES = {
 };
 
 // Extension pages: [file, hash]. The popup is handled separately (it reads the active tab).
+// 0.15.0 (Task 19): blocked (list form + the escalated form), the three onboarding steps, the demo (banner + stop page) and
+// goodbye (a static Pages file; the page reads ?lang= so the matrix can shoot its inline dictionary: see below).
 const EXT_PAGES = {
-  options: ['options.html', ''], blocked: ['blocked.html', '#' + encodeURIComponent(BASE + '/clean.html?ref=matrix')],
-  onboarding: ['onboarding.html', ''], goodbye: ['goodbye.html', '']
+  options: ['options.html', ''],
+  blocked: ['blocked.html', '#' + encodeURIComponent(BASE + '/clean.html?ref=matrix')],
+  'blocked-escalated': ['blocked.html?r=escalated', '#' + encodeURIComponent(BASE + '/seed-phrase.html')],
+  onboarding: ['onboarding.html', ''], 'onboarding-2': ['onboarding.html', '#2'], 'onboarding-3': ['onboarding.html', '#3'],
+  demo: ['demo.html', ''], 'demo-stop': ['demo.html', ''],
+  goodbye: ['goodbye.html', '']
 };
 const SURFACES = [...Object.keys(PAGE_SURFACES), 'popup', 'popup-natural', ...Object.keys(EXT_PAGES)];
 const selected = (only) => SURFACES.filter((n) => !only || only.some((o) => n === o || n.startsWith(o + '-')));
@@ -115,7 +121,15 @@ async function capture(ctx, sw, id, name, v, outFile) {
       await host.goto(BASE + '/phishing-login.html'); await sleep(900);
       await page.goto(`chrome-extension://${id}/popup.html`); await host.bringToFront(); await page.reload();
       await page.locator('body').waitFor(); v.cleanup = () => host.close();
-    } else { const [f, hash] = EXT_PAGES[name]; await page.goto(`chrome-extension://${id}/${f}${hash}`); }
+    } else {
+      const [f, hash] = EXT_PAGES[name];
+      // goodbye.html picks its language from the browser; ?lang= forces the one under test (and a version for the headline).
+      const q = name === 'goodbye' ? '?v=0.15.0&lang=' + v.lang : '';
+      // goodbye.html runs an inline script, which an extension page's CSP blocks: open it from disk, as GitHub Pages serves it.
+      const url = name === 'goodbye' ? require('url').pathToFileURL(path.join(EXT, f)).href : `chrome-extension://${id}/${f}`;
+      await page.goto(`${url}${q}${hash}`);
+      if (name === 'demo-stop') { await page.click('#tabStop'); await waitSel(page, '.scamshield-interstitial'); }
+    }
     await sleep(800);
     fs.mkdirSync(path.dirname(outFile), { recursive: true });
     // Viewport, not element: overflow and mispositioning must be visible.
@@ -178,7 +192,7 @@ function contactSheet(outDir, shots) {
             const h = name === 'popup-natural' ? 600 : (w < 600 ? 812 : 900);
             const file = `${w}-${scheme}-${lang}${touch ? (meta ? '-touch-meta' : '-touch-nometa') : ''}.png`;
             const rel = `screenshots/${name}/${file}`;
-            try { await capture(ctx, sw, id, name, { w, h, scheme, meta }, path.join(outDir, rel)); shots.push({ surface: name, rel, label: `${name} ${file}` }); console.log('  ok  ', rel); }
+            try { await capture(ctx, sw, id, name, { w, h, scheme, meta, lang }, path.join(outDir, rel)); shots.push({ surface: name, rel, label: `${name} ${file}` }); console.log('  ok  ', rel); }
             catch (e) { failed++; console.log('  FAIL', rel, '-', String(e.message).split('\n')[0]); }
           }
         }

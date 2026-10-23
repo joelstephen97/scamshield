@@ -84,3 +84,48 @@ test('the packaged static ruleset domains are covered by the redirect rules on b
     return red.some((r) => r.condition.requestDomains.includes('scamshield-test-blocked.example'));
   })), { timeout: 8000 }).toBe(true);
 });
+
+// ---- 0.15.0 (Task 19): the rebuilt block page ------------------------------------------------------------------
+test('block page: "Go back" has initial focus; Visit anyway and Trust are real buttons; the card is vertically centred', async ({ context, extensionId }) => {
+  const page = await context.newPage();
+  await page.setViewportSize({ width: 1280, height: 1000 });
+  await page.goto(`chrome-extension://${extensionId}/blocked.html#${encodeURIComponent(URL)}`);
+  await expect(page.locator('#back')).toBeFocused();
+  for (const id of ['visit', 'trust', 'back', 'copy']) expect(await page.locator('#' + id).evaluate((n) => n.tagName)).toBe('BUTTON');
+  // Centred on a tall screen: the content block sits around the middle of the viewport, not hugging the top.
+  const box = await page.locator('h1').boundingBox();
+  const foot = await page.locator('.foot').boundingBox();
+  const mid = (box.y + foot.y + foot.height) / 2;
+  expect(mid).toBeGreaterThan(500 - 160);
+  expect(mid).toBeLessThan(500 + 160);
+  // Tab order starts at the safe action; the risky ones come after it.
+  await page.keyboard.press('Tab');
+  expect(await page.evaluate(() => document.activeElement.id)).toBe('copy');
+});
+
+test('block page: every control is at least 44x44 under a coarse pointer, and no horizontal scroll at 320px', async ({ context, extensionId }) => {
+  const page = await context.newPage();
+  await page.setViewportSize({ width: 320, height: 640 });
+  const cdp = await context.newCDPSession(page);
+  await cdp.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 });
+  await page.goto(`chrome-extension://${extensionId}/blocked.html#${encodeURIComponent(URL)}`);
+  expect(await page.evaluate(() => matchMedia('(pointer:coarse)').matches)).toBe(true);
+  for (const sel of ['#back', '#copy', '#visit', '#trust', '#mistake']) {
+    const b = await page.locator(sel).boundingBox();
+    expect(b.height, sel + ' height').toBeGreaterThanOrEqual(43.5);
+    expect(b.width, sel + ' width').toBeGreaterThanOrEqual(43.5);
+  }
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+});
+
+test('block page in Arabic: dir=rtl, the address stays left-to-right, and nothing overflows', async ({ context, extensionId }) => {
+  const sw = context.serviceWorkers()[0];
+  await sw.evaluate(() => setSettings({ uiLang: 'ar' }));
+  const page = await context.newPage();
+  await page.setViewportSize({ width: 320, height: 640 });
+  await page.goto(`chrome-extension://${extensionId}/blocked.html#${encodeURIComponent(URL)}`);
+  await expect(page.locator('html')).toHaveAttribute('dir', 'rtl');
+  expect(await page.locator('#url').evaluate((n) => getComputedStyle(n).direction)).toBe('ltr');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+  await sw.evaluate(() => setSettings({ uiLang: 'auto' }));
+});

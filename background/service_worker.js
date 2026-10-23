@@ -2191,12 +2191,14 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       }
       // (0.15.0, Task 13) The interstitial was defeated by page script (dialog closed / host removed past its caps):
       // send the top frame to the same block page the DNR redirect uses (blocked.html#<url>). The URL is the sender
-      // tab's own, never the message's, so a message cannot aim this at another site.
+      // tab's own, never the message's, so a message cannot aim this at another site. (0.15.0, Task 19) '?r=escalated' tells the page
+      // WHY it is there: this page was not on a list, it kept hiding our warning, so the block page says that, and does not
+      // report a 'dnrBlocked' catch (no threatsBlocked / stats / history row). The DNR redirect form (no query) is unchanged.
       case 'escalateBlocked': {
         const tabId = sender.tab && sender.tab.id;
         const top = sender.frameId === 0 || sender.frameId == null;
         const url = (sender.tab && sender.tab.url) || '';
-        if (tabId != null && top && /^https?:/i.test(url)) { try { await api.tabs.update(tabId, { url: api.runtime.getURL('blocked.html') + '#' + url }); } catch (_) {} }
+        if (tabId != null && top && /^https?:/i.test(url)) { try { await api.tabs.update(tabId, { url: api.runtime.getURL('blocked.html') + '?r=escalated#' + url }); } catch (_) {} }
         sendResponse({ ok: true }); break;
       }
       // (0.15.0, Task 15) "Open anyway" on a link to a block-list site. A navigation started by the page itself
