@@ -19,7 +19,6 @@
         "engine/constants.js",
         "engine/trust.js",
         "engine/decisions.js",
-        "model/url-model.js",
         "engine/features.js",
         "engine/brand_match.js",
         "engine/site_signals.js",
@@ -38,10 +37,8 @@
         "ui/reasons.js",
         "engine/url_model.js",
         "engine/page_features.js",
-        "model/page-content.js",
         "engine/page_model.js",
         "engine/image_hash.js",
-        "engine/qr.js",
         "content/surfaces/styles.js",
         "content/surfaces/primitives.js",
         "content/actions.js",
@@ -50,6 +47,16 @@
         "content/content_script.js"
       ],
       "css": ["content/content.css"]
+    },
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "run_at": "document_idle",
+      "all_frames": false,
+      "js": [
+        "model/url-model.js",
+        "model/page-content.js",
+        "engine/qr.js"
+      ]
     },
     {
       "matches": ["http://*/*", "https://*/*"],

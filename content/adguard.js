@@ -111,6 +111,7 @@
     async function round() {
       if (working) return;
       working = true;
+      const P = SS.perf; let t0 = P ? P.now() : 0; // (0.15.0, Task 17b) main-thread time of each synchronous stretch
       try {
         const found = new Set();
         const roots = rootsQueue; rootsQueue = [];
@@ -129,7 +130,9 @@
         const work = list.map(({ el, rect }) => ({ el, rect, hosts: destinationsOf(el), text: (el.textContent || '').slice(0, MAX_TEXT) }));
         const allHosts = new Set();
         for (const w of work) for (const h of w.hosts) allHosts.add(h);
+        if (P) { P.rec(t0); t0 = 0; }
         const levels = allHosts.size ? await G.request(Array.from(allHosts)) : new Map();
+        if (P) t0 = P.now();
         let before = hiddenCount;
         for (const w of work) {
           const lv = Array.from(w.hosts).map((h) => levels.get(h) || null);
@@ -141,7 +144,7 @@
           retryTimer = setTimeout(() => { retryTimer = 0; retries++; schedule(); }, RETRY_MS);
         }
       } catch (_) { /* best effort, never break the page */ }
-      finally { working = false; }
+      finally { working = false; if (P && t0) P.rec(t0); }
       if (rootsQueue.length) schedule();
     }
     function schedule() {

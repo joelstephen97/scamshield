@@ -9,6 +9,15 @@
   'use strict';
   const SS = root.ScamShield = root.ScamShield || {};
   const HOSTS_PER_MINUTE = 200, BATCH = 50, ROUND_ANCHORS = 400, QUEUE_ROOTS = 500, QUEUE_ANCHORS = 4000;
+  // (0.15.0, Task 17b) Main-thread cost of the guards, for the perf budget test: window.__ssPerf = {batches, maxMs, totalMs}
+  // in the isolated world. Each "batch" is one synchronous stretch of work (no awaits inside it), timed with
+  // performance.now(). Shared with the ad guard (loaded after this file); numbers only, nothing leaves the page.
+  const perf = SS.perf = SS.perf || (function () {
+    const P = { batches: 0, maxMs: 0, totalMs: 0 };
+    try { root.__ssPerf = P; } catch (_) {}
+    const now = () => (root.performance && root.performance.now ? root.performance.now() : Date.now());
+    return { now, rec(t0) { const d = now() - t0; P.batches++; P.totalMs += d; if (d > P.maxMs) P.maxMs = d; }, stats: P };
+  })();
   let started = false;
   let live = null; // set by start(): the synchronous cache lookup popup interception uses
 
@@ -81,6 +90,11 @@
       for (const h of hosts) inflight.add(h);
       let results = null;
       try { const res = await deps.send('checkFeedBatch', { hosts }); results = res && res.results; } catch (_) { results = null; }
+      const t0 = perf.now();
+      try { applyResults(hosts, results); } finally { perf.rec(t0); }
+      return !!results;
+    }
+    function applyResults(hosts, results) {
       for (const h of hosts) {
         inflight.delete(h);
         if (!results) { waiting.delete(h); continue; } // SW unreachable: retry on a later sighting
@@ -89,12 +103,12 @@
         const set = waiting.get(h); waiting.delete(h);
         if (level && set) for (const a of set) mark(a, level);
       }
-      return !!results;
     }
 
     async function round() {
       if (working) return;
       working = true;
+      let t0 = perf.now();
       try {
         const roots = rootsQueue; rootsQueue = [];
         for (const r of roots) collect(r);
@@ -110,6 +124,7 @@
           set.add(a);
           if (!inflight.has(d.host)) need.push(d.host);
         }
+        perf.rec(t0); t0 = 0;
         let failed = false;
         for (;;) {
           const hosts = R.planBatch(need.filter((h) => !inflight.has(h)), cache, budget, Date.now(), BATCH);
@@ -124,7 +139,7 @@
         }
         if (deferred.size) armRetry(failed ? 30000 : 60000);
       } catch (_) { /* best effort, never break the page */ }
-      finally { working = false; }
+      finally { working = false; if (t0) perf.rec(t0); }
       if (rootsQueue.length || anchorQueue.size) schedule();
     }
 

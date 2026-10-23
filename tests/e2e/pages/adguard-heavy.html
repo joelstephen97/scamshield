@@ -1,0 +1,21 @@
+<!doctype html><meta charset="utf-8"><title>Ad-heavy page</title>
+<!-- Perf-budget fixture (0.15.0, Task 17b): 200 links and 20 ad slots; fixture hosts only. -->
+<style>.slot{width:300px;height:100px;margin:4px;display:inline-block;overflow:hidden}</style>
+<h1>Ad-heavy page</h1>
+<div id="links"></div>
+<div id="ads"></div>
+<script>
+var L = '';
+for (var i = 0; i < 200; i++) L += '<p><a href="http://news-' + (i % 120) + '.perf-fixture.example/story/' + i + '">Story number ' + i + '</a></p>';
+document.getElementById('links').innerHTML = L;
+var A = '';
+for (var j = 0; j < 20; j++) A += '<ins class="adsbygoogle slot" data-ad-slot="' + j + '"><a href="http://ads-' + j + '.perf-fixture.example/click?id=' + j + '">Sponsored offer ' + j + '</a></ins>';
+document.getElementById('ads').innerHTML = A;
+window.addMore = function () {
+  var l = ''; for (var i = 0; i < 100; i++) l += '<p><a href="http://more-' + i + '.perf-fixture.example/x">More ' + i + '</a></p>';
+  var d = document.createElement('div'); d.innerHTML = l; document.body.appendChild(d);
+  var a = document.createElement('div');
+  for (var j = 0; j < 10; j++) a.innerHTML += '<ins class="adsbygoogle slot"><a href="http://moread-' + j + '.perf-fixture.example/c">Sponsored ' + j + '</a></ins>';
+  document.body.appendChild(a);
+};
+</script>
