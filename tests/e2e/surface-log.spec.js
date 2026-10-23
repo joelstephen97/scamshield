@@ -40,7 +40,7 @@ test('getSurfaceLog message returns the ring', async ({ context }) => {
   await opt.close(); await page.close();
 });
 
-test('Report a mistake on a banner trusts the site with via:mistake and counts a false alarm', async ({ context }) => {
+test('Report a mistake on a banner counts a false alarm and does NOT allowlist the site', async ({ context }) => {
   const sw = context.serviceWorkers()[0];
   await sw.evaluate(() => chrome.storage.local.remove('falseAlarms'));
   const page = await context.newPage();
@@ -49,10 +49,26 @@ test('Report a mistake on a banner trusts the site with via:mistake and counts a
   await page.waitForTimeout(350);
   await openMore(page.locator('.scamshield-banner'));
   await page.locator('.scamshield-banner .ss-report').click();
-  await expect.poll(async () => (await sw.evaluate(() => getSettings())).allowlist.includes(HOST)).toBe(true);
-  const s = await sw.evaluate(() => getSettings());
-  expect(s.allowlistMeta[HOST].via).toBe('mistake');
   await expect.poll(async () => (await sw.evaluate(() => getStats())).falseAlarms).toBe(1);
-  await sw.evaluate((h) => removeTrust(h), HOST);
+  await page.waitForTimeout(500);
+  const s = await sw.evaluate(() => getSettings());
+  expect(s.allowlist).not.toContain(HOST);
+  expect((s.allowlistMeta || {})[HOST]).toBeUndefined();
+  await page.close();
+});
+
+test('a page-script click() on the mistake control neither allowlists nor counts', async ({ context }) => {
+  const sw = context.serviceWorkers()[0];
+  await sw.evaluate(() => chrome.storage.local.remove('falseAlarms'));
+  const page = await context.newPage();
+  await page.goto(BANNER_URL);
+  await expect(page.locator('.scamshield-banner.danger')).toBeVisible({ timeout: 8000 });
+  await page.waitForTimeout(350);
+  await openMore(page.locator('.scamshield-banner'));
+  await page.evaluate(() => document.querySelector('.scamshield-banner .ss-report').click());
+  await page.waitForTimeout(800);
+  const s = await sw.evaluate(() => getSettings());
+  expect(s.allowlist).not.toContain(HOST);
+  expect((await sw.evaluate(() => getStats())).falseAlarms).toBe(0);
   await page.close();
 });

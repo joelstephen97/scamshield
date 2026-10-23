@@ -35,12 +35,20 @@
 
   // (0.15.0) Local surface log: every in-page surface actually shown is recorded (SW `surfaceLog`,
   // host + kind only) so false alarms are visible. Fire-and-forget; the SW takes the host from the sender tab.
-  function surface(kind) { send('surfaceShown', { kind, host: location.hostname }); }
-  // (0.15.0) "Report a mistake" == "This site is fine": relay the report (SW gates it on opt-in), trust
-  // the site via the one shared trust message with via:'mistake', and bump the local falseAlarms counter.
+  // Kinds that fire per event (wallet requests, form submits) are logged once per page load.
+  const surfaceOnce = new Set();
+  function surface(kind, once) {
+    if (once) { if (surfaceOnce.has(kind)) return; surfaceOnce.add(kind); }
+    send('surfaceShown', { kind, host: location.hostname });
+  }
+  // (0.15.0) "Report a mistake": relay the report (SW gates it on opt-in) and bump the local falseAlarms
+  // counter. It deliberately does NOT trust the site: until part 2 moves surfaces into a closed shadow root
+  // they live in the page DOM, so page script could .click() this button and allowlist itself, and on a
+  // stop-tier surface a confused tap would silently trust a real scam. Trust stays on extension-origin
+  // surfaces (popup, blocked.html, the armed "Trust this site" flow). The SW still accepts via:'mistake'
+  // in addTrust for part 2, which will call it with a gesture proof.
   function reportMistake() {
     send('userReport', { label: 'false_positive' });
-    send('trustSite', { domain: scopeOf(location.hostname), via: 'mistake' });
     send('falseAlarm');
   }
 
@@ -226,7 +234,7 @@
     if (!settings || !settings.enabled || settings.walletGuard === false) { reply(detail.id, true); return; }
     if (isTrustedHost(location.hostname, settings)) { reply(detail.id, true); return; }
     if (!SS || !SS.actions) { reply(detail.id, true); return; }
-    surface('wallet');
+    surface('wallet', true);
     SS.actions.walletConfirmOverlay(detail, (allow, meta) => {
       reply(detail.id, allow);
       if (!allow && !(meta && meta.collision)) send('bumpThreats', { kind: 'wallet' });
@@ -780,7 +788,7 @@
         ev.preventDefault(); ev.stopPropagation();
         const reason = { code: 'crossOriginCredPost', kind: 'page', params: [destHost] };
         if (SS.actions && SS.actions.crossOriginCredToast) {
-          surface('form-guard');
+          surface('form-guard', true);
           // form.submit() is the isolated world's native (unhooked) method, so
           // "Submit anyway" really submits without re-triggering this listener —
           // same technique guardForms uses for its own "Submit anyway".
@@ -964,6 +972,7 @@
       onReport: () => send('userReport', { label: 'false_positive' }),
       noTrust: true
     });
+    surface('banner'); // (0.15.0) QR destination banner is a banner for the surface log
   }
 
   // Popup-initiated scan (primary surface): popup.js messages the active
@@ -1080,15 +1089,16 @@
       formGuardReasons.splice(0, formGuardReasons.length, ...(prov.reasons || []));
     } catch (_) { formGuardReasons.length = 0; }
     if (foreignForms.length) {
+      // (0.15.0) The submit overlay lives in actions.js (frozen). A listener registered BEFORE the guard's
+      // counts overlays, one registered AFTER it (same capture phase, so it runs once the guard has
+      // finished) logs only if the count grew, i.e. the guard really rendered its own overlay.
+      let before = 0;
+      const fresh = foreignForms.filter((f) => !f.__ssSurfaceLogged);
+      const pre = () => { before = document.querySelectorAll('.scamshield-overlay').length; };
+      const post = () => { if (document.querySelectorAll('.scamshield-overlay').length > before) surface('form-guard', true); };
+      for (const f of fresh) { f.__ssSurfaceLogged = true; f.addEventListener('submit', pre, true); f.addEventListener('scamshield:formsubmit', pre, true); }
       SS.actions.guardForms(foreignForms, formGuardReasons, reportMistake);
-      // (0.15.0) The submit overlay lives in actions.js (frozen); log it from a listener registered AFTER the
-      // guard's, so by the time it runs the overlay is up. Only when it really rendered.
-      for (const f of foreignForms) {
-        if (f.__ssSurfaceLogged) continue; f.__ssSurfaceLogged = true;
-        const logIfShown = () => { if (document.querySelector('.scamshield-overlay')) surface('form-guard'); };
-        f.addEventListener('submit', logIfShown, true);
-        f.addEventListener('scamshield:formsubmit', logIfShown, true);
-      }
+      for (const f of fresh) { f.addEventListener('submit', post, true); f.addEventListener('scamshield:formsubmit', post, true); }
     }
     // Reuses leakyFormGuard (0.10.0, Task C2): the closest existing warn-tier
     // "form leak before/at submit" toggle — see task-c2-report.md for why no
