@@ -87,7 +87,7 @@
         ['c', 'd', 'e'].includes(fuzzy.rule);
       if (fuzzy && !duplicatesForeignSuffix) {
         score += FUZZY_BRAND_WEIGHT[fuzzy.grade] || 0;
-        reasons.push({ code: 'brandFuzzyMatch', kind: 'brand', params: [C.brandDisplayName(fuzzy.brand)] });
+        reasons.push({ code: 'brandFuzzyMatch', kind: 'brand', params: [C.brandDisplayName(fuzzy.brand)], grade: fuzzy.grade }); // grade: read by engine/doctrine.js (0.15.0)
       }
     }
 

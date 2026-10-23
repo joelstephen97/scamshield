@@ -33,14 +33,14 @@ test('a lone fuzzy brand hit (strongest grade, no other URL evidence) reaches su
   // "talabat" (not in the frozen brandLookalike's fixed 19-brand list) as a
   // bare subdomain label — isolates the NEW signal from every other rule.
   const r = scoreUrl('https://talabat.abc-shop.com/');
-  assert.deepEqual(r.reasons, [{ code: 'brandFuzzyMatch', kind: 'brand', params: ['Talabat'] }]);
+  assert.deepEqual(r.reasons, [{ code: 'brandFuzzyMatch', kind: 'brand', params: ['Talabat'], grade: 'strongest' }]);
   assert.ok(r.score >= 0.5, 'expected at least suspicious');
   assert.ok(r.score < 0.8, 'a lone fuzzy hit must not reach dangerous on its own');
 });
 
 test('a lone fuzzy brand hit (strong grade: TLD-swap) also stays isolated and sub-dangerous', () => {
   const r = scoreUrl('https://talabat.info/');
-  assert.deepEqual(r.reasons, [{ code: 'brandFuzzyMatch', kind: 'brand', params: ['Talabat'] }]);
+  assert.deepEqual(r.reasons, [{ code: 'brandFuzzyMatch', kind: 'brand', params: ['Talabat'], grade: 'strong' }]);
   assert.ok(r.score >= 0.5 && r.score < 0.8);
 });
 

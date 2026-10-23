@@ -33,7 +33,7 @@ const test = base.extend({
         // (tests/e2e/feed.spec.js and serp-badges.spec.js both assume this
         // host is unreachable; without the mapping that assumption only held
         // by accident, on sandboxes with no egress at all).
-        '--host-resolver-rules=MAP amazon.ae 127.0.0.1, MAP accounts.google.com 127.0.0.1, MAP shop.contoso-fixture.com 127.0.0.1, MAP portal-hr-benefits.fixture 127.0.0.1, MAP www.aramex.com 127.0.0.1, MAP secure-paypa1-login.com 127.0.0.1, MAP www.google.com 127.0.0.1, MAP raw.githubusercontent.com 127.0.0.1, MAP block-feed-fixture.example 127.0.0.1, MAP warn-feed-fixture.example 127.0.0.1, MAP fp-feed-fixture.example 127.0.0.1, MAP clean-feed-fixture.example 127.0.0.1, MAP talabat.xy.com 127.0.0.1, MAP a.b.c.d.deep.example 127.0.0.1, MAP risk-abused-tld-fixture.riskfixturetld 127.0.0.1, MAP risk-dyndns-fixture.example 127.0.0.1, MAP dyndns-subdomain.risk-dyndns-fixture.example 127.0.0.1, MAP unverified-0.example 127.0.0.1, MAP unverified-1.example 127.0.0.1, MAP unverified-2.example 127.0.0.1, MAP unverified-3.example 127.0.0.1, MAP unverified-4.example 127.0.0.1, MAP unverified-5.example 127.0.0.1, MAP unverified-6.example 127.0.0.1, MAP unverified-7.example 127.0.0.1, MAP serp-badge-block-fixture.example 127.0.0.1, MAP serp-badge-warn-fixture.example 127.0.0.1, MAP card-exfil-fixture.example 127.0.0.1, MAP checkout.stripe.com 127.0.0.1, MAP nrd-fixture.example 127.0.0.1, MAP nrd-established.example 127.0.0.1, MAP zx9qplwkdvbtnfhrjyec8sm2.risk-hoster-fixture.example 127.0.0.1, MAP hot-fixture.example 127.0.0.1, MAP hot-path-fixture.example 127.0.0.1:5599, MAP trusted-hot.example 127.0.0.1, MAP www.hdfc.bank.in 127.0.0.1:5600, MAP www.icici.bank.in 127.0.0.1:5600, MAP www.doi.org 127.0.0.1:5600, MAP leaky-fixture.example 127.0.0.1, MAP www.leaky-fixture.example 127.0.0.1, MAP a.pages.dev 127.0.0.1, MAP b.pages.dev 127.0.0.1, MAP c.pages.dev 127.0.0.1'
+        '--host-resolver-rules=MAP amazon.ae 127.0.0.1, MAP accounts.google.com 127.0.0.1, MAP shop.contoso-fixture.com 127.0.0.1, MAP portal-hr-benefits.fixture 127.0.0.1, MAP www.aramex.com 127.0.0.1, MAP secure-paypa1-login.com 127.0.0.1, MAP www.google.com 127.0.0.1, MAP raw.githubusercontent.com 127.0.0.1, MAP block-feed-fixture.example 127.0.0.1, MAP warn-feed-fixture.example 127.0.0.1, MAP fp-feed-fixture.example 127.0.0.1, MAP clean-feed-fixture.example 127.0.0.1, MAP talabat.xy.com 127.0.0.1, MAP a.b.c.d.deep.example 127.0.0.1, MAP risk-abused-tld-fixture.riskfixturetld 127.0.0.1, MAP risk-dyndns-fixture.example 127.0.0.1, MAP dyndns-subdomain.risk-dyndns-fixture.example 127.0.0.1, MAP unverified-0.example 127.0.0.1, MAP unverified-1.example 127.0.0.1, MAP unverified-2.example 127.0.0.1, MAP unverified-3.example 127.0.0.1, MAP unverified-4.example 127.0.0.1, MAP unverified-5.example 127.0.0.1, MAP unverified-6.example 127.0.0.1, MAP unverified-7.example 127.0.0.1, MAP serp-badge-block-fixture.example 127.0.0.1, MAP serp-badge-warn-fixture.example 127.0.0.1, MAP card-exfil-fixture.example 127.0.0.1, MAP checkout.stripe.com 127.0.0.1, MAP nrd-fixture.example 127.0.0.1, MAP nrd-established.example 127.0.0.1, MAP zx9qplwkdvbtnfhrjyec8sm2.risk-hoster-fixture.example 127.0.0.1, MAP hot-fixture.example 127.0.0.1, MAP hot-path-fixture.example 127.0.0.1:5599, MAP trusted-hot.example 127.0.0.1, MAP www.hdfc.bank.in 127.0.0.1:5600, MAP www.icici.bank.in 127.0.0.1:5600, MAP www.doi.org 127.0.0.1:5600, MAP leaky-fixture.example 127.0.0.1, MAP www.leaky-fixture.example 127.0.0.1, MAP a.pages.dev 127.0.0.1, MAP b.pages.dev 127.0.0.1, MAP c.pages.dev 127.0.0.1, MAP paypa1-secure-login.com 127.0.0.1, MAP scare.dropbox.com 127.0.0.1'
       ]
     });
     for (let i = 0; i < 30 && !context.serviceWorkers()[0]; i++) await new Promise((r) => setTimeout(r, 100));
@@ -77,4 +77,26 @@ async function openMore(scope) {
 async function openDetails(page) {
   await page.locator('.ss-details summary').click();
 }
-module.exports = { test, EXTENSION_PATH, BASE_HTTPS, openMore, openDetails };
+
+// 0.15.0 doctrine: evidence with no confident flag is recorded (verdict level
+// 'suspicious') but never interrupts: tier 'quiet', no banner, no interstitial.
+// Returns the recorded verdict. Reads the isolated-world globals over CDP.
+async function expectQuietSuspicious(context, page, url, timeout = 8000) {
+  const { expect } = require('@playwright/test');
+  const cdp = await context.newCDPSession(page);
+  const ctxs = [];
+  cdp.on('Runtime.executionContextCreated', (e) => ctxs.push(e.context));
+  await cdp.send('Runtime.enable');
+  await page.goto(url);
+  const read = async (expression) => {
+    const c = ctxs.find((x) => x.auxData && x.auxData.type === 'isolated' && /^chrome-extension:\/\//.test(x.origin || ''));
+    return c ? cdp.send('Runtime.evaluate', { expression, contextId: c.id, returnByValue: true }).then((r) => r.result.value).catch(() => null) : null;
+  };
+  await expect.poll(() => read('window.__ssLastTier'), { timeout }).toBe('quiet');
+  const verdict = await read('JSON.parse(JSON.stringify(window.__ssLastVerdict))');
+  expect(verdict.level).toBe('suspicious');
+  await expect(page.locator('.scamshield-banner')).toHaveCount(0);
+  await expect(page.locator('.scamshield-interstitial')).toHaveCount(0);
+  return verdict;
+}
+module.exports = { test, EXTENSION_PATH, BASE_HTTPS, openMore, openDetails, expectQuietSuspicious };

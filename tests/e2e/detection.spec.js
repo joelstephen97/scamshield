@@ -169,6 +169,23 @@ test('tech-support scare page shows escape overlay', async ({ context }) => {
   await expect(page.locator('.scamshield-overlay')).toBeVisible({ timeout: 8000 });
 });
 
+// 0.15.0: popular hosts never get the overlay, but user-content hosts of a popular
+// registrable (dropbox.com) are not shielded, so a tech-scam page there still does.
+test('tech-support scare page on a user-content host of a popular site (dropbox.com) still shows the overlay', async ({ context }) => {
+  const sw = context.serviceWorkers()[0];
+  // Prove the premise: the registrable IS popular, so only the user-content exemption lets the overlay through.
+  expect(await sw.evaluate(() => isPopularHost('scare.dropbox.com'))).toBe(true);
+  const page = await context.newPage();
+  await page.goto('http://scare.dropbox.com:5599/techscam.html');
+  await expect(page.locator('.scamshield-overlay')).toBeVisible({ timeout: 8000 });
+});
+test('tech-support scare page on a popular host (www.google.com) is shielded: no overlay', async ({ context }) => {
+  const page = await context.newPage();
+  await page.goto('http://www.google.com:5599/techscam.html');
+  await page.waitForTimeout(2500);
+  await expect(page.locator('.scamshield-overlay')).toHaveCount(0);
+});
+
 // --- techscam.js Permissions-Policy 'unload' guard (v0.11.0, Task P5) ------
 // Real, reported bug: on a document whose Permissions-Policy disallows
 // 'unload' (e.g. Gmail), content/detectors/techscam.js's beforeunload-

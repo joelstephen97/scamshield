@@ -48,7 +48,7 @@ for (const [name, verdict, c, expected] of table) {
 
 test('STOP_FLAGS and CONFIDENT_FLAGS are exported with the specified members', () => {
   assert.deepStrictEqual([...D.STOP_FLAGS].sort(), ['clickfix', 'delivery-fee-scam', 'fake-browser-update', 'feed-block', 'seed-phrase-harvest']);
-  assert.deepStrictEqual([...D.CONFIDENT_FLAGS].sort(), ['brand-impersonation-content', 'brand-impersonation-tenant', 'brand-impersonation-visual', 'credential-form-foreign-domain', 'feed-warn-corroborated']);
+  assert.deepStrictEqual([...D.CONFIDENT_FLAGS].sort(), ['brand-impersonation-content', 'brand-impersonation-tenant', 'brand-impersonation-visual', 'brand-lookalike-credential', 'credential-form-foreign-domain', 'feed-warn-corroborated', 'nrd-credential']);
 });
 
 test('isUserContentHost: exact, subdomain, www, case-insensitive', () => {
@@ -62,4 +62,44 @@ test('isUserContentHost: exact, subdomain, www, case-insensitive', () => {
 test('USER_CONTENT_HOSTS lists the ruled hosts', () => {
   assert.strictEqual(D.USER_CONTENT_HOSTS.length, 18);
   assert.ok(D.USER_CONTENT_HOSTS.includes('firebasestorage.googleapis.com'));
+});
+
+// --- credential-backed confident flags (0.15.0 fix round 1) ---
+const cf = (o) => D.credentialFlags(Object.assign({ verdictFlags: [], urlReasons: [], hasPasswordField: true, popular: false, host: 'example.test' }, o));
+test('nrd-credential: new-domain + password, not popular', () => {
+  assert.deepStrictEqual(cf({ verdictFlags: ['new-domain'] }), ['nrd-credential']);
+});
+test('nrd-credential: not without a password field, not on popular, but yes on a user-content host', () => {
+  assert.deepStrictEqual(cf({ verdictFlags: ['new-domain'], hasPasswordField: false }), []);
+  assert.deepStrictEqual(cf({ verdictFlags: ['new-domain'], popular: true }), []);
+  assert.deepStrictEqual(cf({ verdictFlags: ['new-domain'], popular: true, host: 'x.sharepoint.com' }), ['nrd-credential']);
+  assert.deepStrictEqual(cf({}), []);
+});
+test('brand-lookalike-credential: grades and codes', () => {
+  const r = (code, grade) => [{ code, grade }];
+  assert.deepStrictEqual(cf({ urlReasons: r('brandFuzzyMatch', 'strong') }), ['brand-lookalike-credential']);
+  assert.deepStrictEqual(cf({ urlReasons: r('brandFuzzyMatch', 'strongest') }), ['brand-lookalike-credential']);
+  assert.deepStrictEqual(cf({ urlReasons: r('brandFuzzyMatch', 'weak') }), []);
+  assert.deepStrictEqual(cf({ urlReasons: r('brandFuzzyMatch') }), []);
+  for (const c of ['brandLookalike', 'brandForeignSuffix', 'idnHomograph']) assert.deepStrictEqual(cf({ urlReasons: r(c) }), ['brand-lookalike-credential'], c);
+  assert.deepStrictEqual(cf({ urlReasons: r('manySubdomains') }), []);
+});
+test('brand-lookalike-credential: needs password and non-popular', () => {
+  const urlReasons = [{ code: 'brandLookalike' }];
+  assert.deepStrictEqual(cf({ urlReasons, hasPasswordField: false }), []);
+  assert.deepStrictEqual(cf({ urlReasons, popular: true }), []);
+  assert.deepStrictEqual(cf({ urlReasons, verdictFlags: ['new-domain'] }), ['nrd-credential', 'brand-lookalike-credential']);
+});
+test('new flags are warn-tier, never stop', () => {
+  for (const f of ['nrd-credential', 'brand-lookalike-credential']) {
+    assert.ok(D.CONFIDENT_FLAGS.includes(f)); assert.ok(!D.STOP_FLAGS.includes(f));
+    assert.strictEqual(D.surfaceTier(v('suspicious', [f]), ctx()), 'warn');
+    assert.strictEqual(D.surfaceTier(v('dangerous', [f]), ctx()), 'warn');
+    assert.strictEqual(D.surfaceTier(v('suspicious', [f]), ctx({ popular: true })), 'quiet');
+  }
+});
+test('effectivePopular', () => {
+  assert.strictEqual(D.effectivePopular(true, 'www.google.com'), true);
+  assert.strictEqual(D.effectivePopular(true, 'sites.google.com'), false);
+  assert.strictEqual(D.effectivePopular(false, 'a.test'), false);
 });

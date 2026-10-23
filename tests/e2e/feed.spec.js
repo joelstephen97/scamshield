@@ -6,7 +6,7 @@
 // which is Node-requireable) and served by the tiny /feed/ static route
 // added to tests/e2e/server.js — the same pattern the task brief describes
 // for a format the existing HTML-page fixture route can't serve.
-const { test } = require('./fixtures');
+const { test, expectQuietSuspicious } = require('./fixtures');
 const { expect } = require('@playwright/test');
 const fs = require('fs');
 const path = require('path');
@@ -16,26 +16,6 @@ const Blockset = require('../../engine/blockset');
 
 const BASE = 'http://localhost:5599';
 
-// 0.15.0 doctrine: risk-table / NRD evidence has no confident flag, so it is
-// recorded (suspicious verdict) but never interrupts: tier 'quiet', no banner,
-// no interstitial. Returns the recorded verdict for further assertions.
-async function expectQuietSuspicious(context, page, url, timeout = 8000) {
-  const cdp = await context.newCDPSession(page);
-  const ctxs = [];
-  cdp.on('Runtime.executionContextCreated', (e) => ctxs.push(e.context));
-  await cdp.send('Runtime.enable');
-  await page.goto(url);
-  const read = async (expression) => {
-    const c = ctxs.find((x) => x.auxData && x.auxData.type === 'isolated' && /^chrome-extension:\/\//.test(x.origin || ''));
-    return c ? cdp.send('Runtime.evaluate', { expression, contextId: c.id, returnByValue: true }).then((r) => r.result.value).catch(() => null) : null;
-  };
-  await expect.poll(() => read('window.__ssLastTier'), { timeout }).toBe('quiet');
-  const verdict = await read('JSON.parse(JSON.stringify(window.__ssLastVerdict))');
-  expect(verdict.level).toBe('suspicious');
-  await expect(page.locator('.scamshield-banner')).toHaveCount(0);
-  await expect(page.locator('.scamshield-interstitial')).toHaveCount(0);
-  return verdict;
-}
 const FEED_DIR = path.join(__dirname, 'feed-fixtures');
 const FEED_BASE_URL = BASE + '/feed/';
 
@@ -406,7 +386,7 @@ test('an NRD-listed, first-time-visited domain with no other signal stays quiet 
   await expect(page.locator('.scamshield-banner')).toHaveCount(0);
 });
 
-test('an NRD-listed, first-time-visited domain WITH a password field (corroborated) records suspicious evidence with the strengthened wording but stays quiet (0.15.0)', async ({ context }) => {
+test('an NRD-listed, first-time-visited domain WITH a password field (corroborated) gets a warn-tier banner (nrd-credential) with the strengthened wording (0.15.0)', async ({ context }) => {
   const sw = context.serviceWorkers()[0];
   await installFeed(sw);
   const page = await context.newPage();
@@ -416,8 +396,22 @@ test('an NRD-listed, first-time-visited domain WITH a password field (corroborat
   // (also used by detection.spec.js / popup.spec.js as a documented "safe
   // on its own" fixture) supplies exactly that: a same-origin password
   // form, no other malicious signal.
-  const v = await expectQuietSuspicious(context, page, `http://${NRD_DOMAIN}:5599/clean-login.html`); // never escalates past suspicious alone
-  expect((v.reasonCodes || []).some((c) => /nrd|newDomain|newlyRegistered/i.test(c)), JSON.stringify(v.reasonCodes)).toBe(true);
+  const cdp = await context.newCDPSession(page);
+  const ctxs = [];
+  cdp.on('Runtime.executionContextCreated', (e) => ctxs.push(e.context));
+  await cdp.send('Runtime.enable');
+  await page.goto(`http://${NRD_DOMAIN}:5599/clean-login.html`);
+  await expect(page.locator('.scamshield-interstitial')).toHaveCount(0); // never escalates past suspicious alone
+  const banner = page.locator('.scamshield-banner.suspicious');
+  await expect(banner).toBeVisible({ timeout: 8000 });
+  await expect(banner.locator('.ss-text span').first()).toContainText(/newly-registered-domains/i);
+  await expect(banner.locator('.ss-text span').first()).toContainText(/never visited it before/i);
+  const ext = ctxs.find((x) => x.auxData && x.auxData.type === 'isolated' && /^chrome-extension:\/\//.test(x.origin || ''));
+  const r = await cdp.send('Runtime.evaluate', { contextId: ext.id, returnByValue: true, expression: 'JSON.stringify({ tier: window.__ssLastTier, flags: window.__ssLastVerdict.flags, codes: window.__ssLastVerdict.reasonCodes })' });
+  const got = JSON.parse(r.result.value);
+  expect(got.tier).toBe('warn');
+  expect(got.flags).toContain('nrd-credential');
+  expect(got.codes).toContain('newDomainUnvisited');
 });
 
 test('a clean domain (no nrd.bloom hit) gets no evidence chip', async ({ context }) => {

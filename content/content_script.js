@@ -167,7 +167,7 @@
   // alarm-sound ad is not a scam page). One checkFeed per page, cached.
   let popularP = null;
   const isPopularHere = () => {
-    if (!popularP) popularP = withTimeout(send('checkFeed', { host: location.hostname }), 5000).then((r) => !!(r && r.popular === true)).catch(() => false);
+    if (!popularP) popularP = withTimeout(send('checkFeed', { host: location.hostname }), 5000).then((r) => !!(r && r.popular === true) && !(SS.isUserContentHost && SS.isUserContentHost(location.hostname))).catch(() => false);
     return popularP;
   };
   window.addEventListener('scamshield:techscam-signal', async (e) => {
@@ -1096,6 +1096,13 @@
       if (eng && eng.engaged) {
         verdict = Object.assign({}, verdict, { level: 'safe', reasons: [], reasonCodes: [], suppressed: 'engagement' });
       }
+    }
+    // Credential-backed confident flags (0.15.0): new-domain / brand-lookalike evidence
+    // only earns a warning when the page also asks for a password. The password check
+    // lives in this one place (Task 4 will swap in a visible-field check).
+    if (verdict.level !== 'safe' && SS.credentialFlags) {
+      const credFlags = SS.credentialFlags({ verdictFlags: verdict.flags, urlReasons: urlRules && urlRules.reasons, hasPasswordField: !!(signals && signals.hasPasswordField), popular: feedPopular, host: location.hostname });
+      if (credFlags.length) verdict = Object.assign({}, verdict, { flags: credFlags.concat(verdict.flags || []) });
     }
     // Warning doctrine (0.15.0): one pure function decides stop / warn / quiet.
     const tier = SS.surfaceTier(verdict, { popular: feedPopular, strictMode: settings.strictMode === true, isTop: IS_TOP, host: location.hostname });
