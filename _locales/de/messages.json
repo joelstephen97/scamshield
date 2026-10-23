@@ -441,5 +441,6 @@
   "reason_newDomainUnvisited": { "message": "Die Domain steht auf einer Liste neu registrierter Domains – die meisten Betrugsseiten sind nur wenige Tage alt, und du hast sie noch nie besucht." },
   "continueOnce": { "message": "Öffnet diese Seite einmalig. ScamShield bleibt eingeschaltet." },
   "bannerHideDay": { "message": "Für einen Tag ausblenden" },
-  "bannerHideHour": { "message": "Für eine Stunde ausblenden" }
+  "bannerHideHour": { "message": "Für eine Stunde ausblenden" },
+  "mistakeSiteFine": { "message": "Diese Seite ist harmlos" }
 }

@@ -441,5 +441,6 @@
   "reason_newDomainUnvisited": { "message": "Domain appears on a newly-registered-domains list — most scam sites are only days old, and you have never visited it before." },
   "continueOnce": { "message": "Continues to this page once. ScamShield stays on." },
   "bannerHideDay": { "message": "Hide for a day" },
-  "bannerHideHour": { "message": "Hide for an hour" }
+  "bannerHideHour": { "message": "Hide for an hour" },
+  "mistakeSiteFine": { "message": "This site is fine" }
 }

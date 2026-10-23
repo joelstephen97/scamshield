@@ -441,5 +441,6 @@
   "reason_newDomainUnvisited": { "message": "ڈومین نئے رجسٹرڈ ڈومینز کی فہرست میں شامل ہے — زیادہ تر دھوکہ سائٹس صرف چند دن پرانی ہوتی ہیں، اور آپ اس پر پہلے کبھی نہیں گئے۔" },
   "continueOnce": { "message": "اس صفحے پر صرف ایک بار جاتا ہے۔ ScamShield چالو رہتا ہے۔" },
   "bannerHideDay": { "message": "ایک دن کے لیے چھپائیں" },
-  "bannerHideHour": { "message": "ایک گھنٹے کے لیے چھپائیں" }
+  "bannerHideHour": { "message": "ایک گھنٹے کے لیے چھپائیں" },
+  "mistakeSiteFine": { "message": "یہ سائٹ ٹھیک ہے" }
 }

@@ -441,5 +441,6 @@
   "reason_newDomainUnvisited": { "message": "Alan adı yakın zamanda kaydedilmiş alan adları listesinde görünüyor — dolandırıcılık sitelerinin çoğu yalnızca birkaç günlüktür. Ayrıca bu siteyi daha önce hiç ziyaret etmediniz." },
   "continueOnce": { "message": "Bu sayfaya yalnızca bir kez devam eder. ScamShield açık kalır." },
   "bannerHideDay": { "message": "Bir günlüğüne gizle" },
-  "bannerHideHour": { "message": "Bir saatliğine gizle" }
+  "bannerHideHour": { "message": "Bir saatliğine gizle" },
+  "mistakeSiteFine": { "message": "Bu site güvenli" }
 }

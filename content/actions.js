@@ -224,7 +224,9 @@
     // invoke the stashed teardown before ripping the node out — otherwise a
     // SPA route change (scamshield:navigate) that catches the menu open
     // leaks both listeners forever.
-    document.querySelectorAll('.' + NS + '-banner').forEach((n) => { if (n.__ssTeardown) n.__ssTeardown(); n.remove(); });
+    // (0.15.0) the banner lives in a shadow host now; its menu teardown is module state, not a DOM property.
+    if (bannerTeardown) { bannerTeardown(); bannerTeardown = null; }
+    surfaces().unmount('banner');
     // 0.14.1: never the wallet overlay — removing it without a decision would
     // strand (and, on the MAIN side, eventually fail open) a pending request.
     document.querySelectorAll('.' + NS + '-overlay:not(.' + NS + '-wallet)').forEach((n) => n.remove());
@@ -338,78 +340,124 @@
   const TRUST_ARM_MS = 300;
   function trustButton(onAllow) {
     const btn = button('ss-trust', t('trustThisSite', null, 'Trust this site'));
-    if (onAllow) {
-      let armedAt = performance.now();
-      // Fix round 2: on the danger banner the trust button lives inside the ⋯
-      // menu, so it is unreachable (hidden) until the menu opens — by then the
-      // 300ms arm has long since elapsed and the guard protects nothing. The
-      // caller re-arms it at the moment it becomes reachable.
-      btn.__ssRearm = () => { armedAt = performance.now(); };
-      onTrustedClick(btn, (e) => { if (performance.now() < armedAt + TRUST_ARM_MS) return; onAllow(e); });
-    }
+    // Fix round 2: on the danger banner the trust button lives inside the ⋯ menu, so it is unreachable (hidden)
+    // until the menu opens — by then the 300ms arm has long since elapsed and the guard protects nothing. The
+    // caller re-arms it (btn.__ssRearm) at the moment it becomes reachable.
+    if (onAllow) armedClick(btn, onAllow);
     return btn;
   }
+  // Arms a control against instant clicks: ignores a (trusted) click until TRUST_ARM_MS after render, and
+  // after every __ssRearm() (see trustButton for why the menu re-arms on open). Shared by "Trust this
+  // site" and "This site is fine", the two controls that allowlist the site from a banner.
+  function armedClick(btn, onAllow) {
+    let armedAt = performance.now();
+    btn.__ssRearm = () => { armedAt = performance.now(); };
+    onTrustedClick(btn, (e) => { if (performance.now() < armedAt + TRUST_ARM_MS) return; onAllow(e); });
+    return btn;
+  }
+  // The open banner's menu teardown (document-level listeners), reachable from clearAll().
+  let bannerTeardown = null;
   function showBanner(verdict, extra) {
-    if (document.querySelector('.' + NS + '-banner')) return;
+    const S = surfaces();
+    if (S.isMounted('banner')) return;
     const x = extra || {}; const danger = verdict.level === 'dangerous';
-    const bar = el('div', NS + '-banner ' + (danger ? 'danger' : 'suspicious'));
-    bar.setAttribute('role', danger ? 'alert' : 'status'); setDir(bar);
-    const text = el('div', 'ss-text');
-    const head = verdict.brandLabel ? (danger ? t('bannerDangerBrand', [bidi(verdict.brandLabel)], 'Dangerous page — looks like ' + verdict.brandLabel + ", but isn't") : t('bannerTakeCare', null, 'Take care on this site')) : (danger ? t('bannerDanger', null, 'Dangerous page') : t('bannerTakeCare', null, 'Take care on this site'));
-    const reason = el('span', 'ss-reason', reasonText(verdict.reasons[0]) || (danger ? t('popupDangerSummary', null, "Don't enter passwords or card details here.") : t('popupSuspiciousSummary', null, 'Take care before typing anything here.')));
-    text.append(el('b', null, head), reason);
-    const more = (verdict.reasons || []).slice(1, 4);
-    if (more.length) { const why = el('button', 'ss-why', t('whyShort', null, 'Why?')); why.type = 'button'; why.setAttribute('aria-expanded', 'false'); onTrustedClick(why, () => { const ul = el('ul', 'ss-why-list'); for (const r of more) ul.appendChild(el('li', null, reasonText(r))); reason.after(ul); why.remove(); }); reason.appendChild(why); }
-    bar.append(tile(danger ? 'danger' : 'warn'), text);
-    const acts = el('div', 'ss-acts'); const menu = el('div', 'ss-menu'); menu.setAttribute('role', 'menu'); menu.hidden = true;
-    const leave = button('ss-leave', t('leaveThisPage', null, 'Leave this page')); onTrustedClick(leave, () => { bar.__ssTeardown && bar.__ssTeardown(); x.onLeave ? x.onLeave() : history.back(); });
-    const rescue = verdict.brandUrl ? button('ss-rescue', t('takeMeToReal', [bidi(verdict.brandLabel || 'site')], 'Take me to the real ' + (verdict.brandLabel || 'site')), { primary: true }) : null;
-    if (rescue) onTrustedClick(rescue, () => { bar.__ssTeardown && bar.__ssTeardown(); location.href = verdict.brandUrl; });
-    // Single guarded listener (not two): bar.remove() lives inside onAllow
-    // itself, right before the await, so the banner still disappears the
-    // instant a real trusted click lands — same UX as before, one fewer
-    // unguarded listener to audit.
-    // 0.13.0 final review: `noTrust` (the QR-scan surface) used to render a
-    // "Trust this site" button that merely dismissed the banner — a label
-    // that lied about what the click did. The button is simply not rendered
-    // there now; "Dismiss" (the ✕) is the honest control for that surface.
-    const trust = (x.noTrust || !canStore()) ? null : trustButton(async () => { bar.__ssTeardown && bar.__ssTeardown(); bar.remove(); const domain = regDomain(); await send('trustSite', { domain, via: x.trustVia || 'banner' }); ackSurface({ text: t('ackTrusted', [bidi(domain)], "ScamShield won't flag " + domain + ' again.'), onUndo: () => send('untrustSite', { domain }), restore: () => showBanner(verdict, extra) }); });
-    const report = button('ss-report', t('reportMistake', null, 'Report a mistake')); onTrustedClick(report, () => { report.textContent = t('thanks', null, 'Thanks'); report.disabled = true; x.onReport && x.onReport(); closeMenu(); });
-    const copyBtn = copyReportButton(verdict); onTrustedClick(copyBtn, () => closeMenu());
-    // Visible row (Hick): danger = filled primary (rescue, else Leave) + outlined Leave (when rescue is primary) + ⋯ + ✕;
-    // suspicious = outlined Trust + ⋯ + ✕ (nothing filled on a suspicious page). Trust (danger), Report, Copy live in the menu.
-    if (danger) { if (rescue) { acts.append(rescue, leave); } else { leave.classList.add('primary'); acts.appendChild(leave); } if (trust) menu.appendChild(trust); }
-    else if (trust) acts.appendChild(trust);
-    menu.append(report, copyBtn);
-    // The brand comparison sits INSIDE .ss-text under the reason (second line only when a brand is known).
-    if (verdict.brandLabel && verdict.brandUrl) { const cmp = compareRow(verdict.brandLabel, verdict.brandUrl); if (cmp) text.appendChild(cmp); }
-    const moreBtn = button('ss-more', '⋯'); moreBtn.setAttribute('aria-label', t('moreActions', null, 'More actions')); moreBtn.setAttribute('aria-haspopup', 'menu'); moreBtn.setAttribute('aria-expanded', 'false');
-    const closeMenu = () => { menu.hidden = true; moreBtn.setAttribute('aria-expanded', 'false'); document.removeEventListener('click', onDoc, true); document.removeEventListener('keydown', onKey, true); };
-    // The two document-level listeners above are armed only while the menu
-    // is open, but the bar can also leave the DOM without ever going through
-    // closeMenu (Trust's onAllow, Leave/rescue navigating away, or clearAll()
-    // on a SPA route change) — fix round 1: any of those must still tear the
-    // listeners down, or a long-lived tab accumulates one pair of capture-
-    // phase document listeners per banner ever shown. Stashing the teardown
-    // on the element lets clearAll() (which only holds the DOM node, not this
-    // closure) reach it too.
-    bar.__ssTeardown = closeMenu;
-    // (0.14.1) isTrusted: page script can dispatchEvent(new KeyboardEvent('keydown',{key:'Escape'})) to dismiss a warning; only a real keypress counts.
-    const onDoc = (e) => { if (!acts.contains(e.target)) closeMenu(); }; const onKey = (e) => { if (!e.isTrusted) return; if (e.key === 'Escape') closeMenu(); };
-    // Escape must close the menu the instant it's open, so its listener
-    // attaches synchronously here. Only the outside-click listener is
-    // deferred a tick — otherwise the very click that opened the menu would
-    // immediately bubble to document and close it right back.
-    onTrustedClick(moreBtn, () => { if (menu.hidden) { menu.hidden = false; moreBtn.setAttribute('aria-expanded', 'true'); trust && trust.__ssRearm && trust.__ssRearm(); document.addEventListener('keydown', onKey, true); setTimeout(() => { document.addEventListener('click', onDoc, true); }, 0); } else closeMenu(); });
-    // (0.14.1) The ✕ says what it does. On a bare tenant apex canStore() is false, so ✕ only dismisses
-    // this page (nothing is stored) and must not claim "for a day/an hour" — it keeps the generic label.
-    const choice = danger ? '1h' : '1d';
-    const closeLabel = !canStore() ? t('ariaDismiss', null, 'Dismiss') : danger ? t('bannerHideHour', null, 'Hide for an hour') : t('bannerHideDay', null, 'Hide for a day');
-    const close = button('ss-x', ''); const glyph = el('span', 'ss-x-glyph', '✕'); glyph.setAttribute('aria-hidden', 'true'); close.append(glyph, el('span', 'ss-x-label', closeLabel));
-    close.setAttribute('aria-label', closeLabel); close.title = closeLabel;
-    onTrustedClick(close, () => { closeMenu(); bar.remove(); if (!x.noTrust && x.onHide && canStore()) x.onHide(choice); });
-    acts.append(moreBtn, close, menu); bar.appendChild(acts);
-    (document.body || document.documentElement).appendChild(bar);
+    let closeMenu = () => {};
+    // (0.15.0, Task 12) Built inside the 'banner' shadow host: a floating card at the top centre on >=600px and
+    // a bottom sheet on phones (content/surfaces/styles.js). Hiding unmounts the host.
+    S.mount('banner', () => {
+      const bar = el('div', NS + '-banner ' + (danger ? 'danger' : 'suspicious'));
+      bar.setAttribute('role', danger ? 'alert' : 'status'); setDir(bar);
+      const text = el('div', 'ss-text');
+      const head = verdict.brandLabel ? (danger ? t('bannerDangerBrand', [bidi(verdict.brandLabel)], 'Dangerous page — looks like ' + verdict.brandLabel + ", but isn't") : t('bannerTakeCare', null, 'Take care on this site')) : (danger ? t('bannerDanger', null, 'Dangerous page') : t('bannerTakeCare', null, 'Take care on this site'));
+      const reason = el('span', 'ss-reason', reasonText(verdict.reasons[0]) || (danger ? t('popupDangerSummary', null, "Don't enter passwords or card details here.") : t('popupSuspiciousSummary', null, 'Take care before typing anything here.')));
+      text.append(el('b', null, head), reason);
+      // "Why?" toggles the extra reasons (aria-expanded) instead of being a one-way reveal.
+      const more = (verdict.reasons || []).slice(1, 4);
+      if (more.length) {
+        const why = el('button', 'ss-why', t('whyShort', null, 'Why?')); why.type = 'button'; why.setAttribute('aria-expanded', 'false');
+        const ul = el('ul', 'ss-why-list'); ul.hidden = true; for (const r of more) ul.appendChild(el('li', null, reasonText(r)));
+        onTrustedClick(why, () => { ul.hidden = !ul.hidden; why.setAttribute('aria-expanded', ul.hidden ? 'false' : 'true'); });
+        reason.appendChild(why); text.appendChild(ul);
+      }
+      bar.append(tile(danger ? 'danger' : 'warn'), text);
+      const acts = el('div', 'ss-acts'); const menu = el('div', 'ss-menu'); menu.setAttribute('role', 'menu'); menu.hidden = true;
+      const dismiss = () => { closeMenu(); S.unmount('banner'); };
+      const leave = button('ss-leave', t('leaveThisPage', null, 'Leave this page')); onTrustedClick(leave, () => { closeMenu(); x.onLeave ? x.onLeave() : history.back(); });
+      const rescue = verdict.brandUrl ? button('ss-rescue', t('takeMeToReal', [bidi(verdict.brandLabel || 'site')], 'Take me to the real ' + (verdict.brandLabel || 'site')), { primary: true }) : null;
+      if (rescue) onTrustedClick(rescue, () => { closeMenu(); location.href = verdict.brandUrl; });
+      // `noTrust` (the QR-scan surface) renders no trust control: the page and the flagged destination are
+      // different domains, so a click must never allowlist the QR's possibly-scam destination.
+      const trustable = !x.noTrust && canStore();
+      const ack = (domain, restore) => ackSurface({ text: t('ackTrusted', [bidi(domain)], "ScamShield won't flag " + domain + ' again.'), onUndo: () => send('untrustSite', { domain }), restore });
+      const trust = trustable ? trustButton(async () => { dismiss(); const domain = regDomain(); await send('trustSite', { domain, via: x.trustVia || 'banner' }); ack(domain, () => showBanner(verdict, extra)); }) : null;
+      // "This site is fine" (0.15.0, Task 12): the mistake control. It reports (userReport false_positive +
+      // falseAlarm via x.onReport), THEN trusts the site (via:'mistake') and shows the ack with Undo. Because it
+      // allowlists, it passes the same gates as Trust: isTrusted + insideCard (onTrustedClick) and the arm
+      // delay, which restarts each time the menu opens. Where trust is unavailable (QR surface, bare tenant
+      // apex) it stays the report-only "Report a mistake".
+      const fine = button('ss-report', trustable ? t('mistakeSiteFine', null, 'This site is fine') : t('reportMistake', null, 'Report a mistake'));
+      if (trustable) {
+        armedClick(fine, async () => { dismiss(); x.onReport && x.onReport(); const domain = regDomain(); await send('trustSite', { domain, via: 'mistake' }); ack(domain, () => showBanner(verdict, extra)); });
+      } else {
+        onTrustedClick(fine, () => { fine.textContent = t('thanks', null, 'Thanks'); fine.disabled = true; x.onReport && x.onReport(); closeMenu(true); });
+      }
+      const copyBtn = copyReportButton(verdict); onTrustedClick(copyBtn, () => closeMenu(true));
+      for (const b of [trust, fine, copyBtn]) if (b) b.setAttribute('role', 'menuitem');
+      // Visible row (Hick): danger = filled primary (rescue, else Leave) + outlined Leave (when rescue is primary) + ⋯ + ✕;
+      // suspicious = outlined Trust + ⋯ + ✕ (nothing filled on a suspicious page). Trust (danger), "This site is fine", Copy live in the menu.
+      if (danger) { if (rescue) { acts.append(rescue, leave); } else { leave.classList.add('primary'); acts.appendChild(leave); } if (trust) menu.appendChild(trust); }
+      else if (trust) acts.appendChild(trust);
+      menu.append(fine, copyBtn);
+      // The brand comparison sits INSIDE .ss-text under the reason (second line only when a brand is known).
+      if (verdict.brandLabel && verdict.brandUrl) { const cmp = compareRow(verdict.brandLabel, verdict.brandUrl); if (cmp) text.appendChild(cmp); }
+      const moreBtn = button('ss-more', '⋯'); moreBtn.setAttribute('aria-label', t('moreActions', null, 'More actions')); moreBtn.setAttribute('aria-haspopup', 'menu'); moreBtn.setAttribute('aria-expanded', 'false');
+      const items = () => Array.from(menu.querySelectorAll('[role=menuitem]')).filter((b) => !b.disabled);
+      // Menu keyboard model (0.15.0): ArrowUp/Down move (wrapping), Home/End jump, Escape closes, and focus
+      // returns to the ⋯ trigger on close. Keys count only when trusted (page script can dispatch KeyboardEvents).
+      // The document listeners exist only while the menu is open and are removed on every exit path (item
+      // activation, Trust/Leave/rescue, ✕, clearAll()), so a long-lived tab never accumulates them.
+      const onDoc = (e) => { const path = e.composedPath ? e.composedPath() : []; if (!path.includes(acts)) closeMenu(); };
+      const onKey = (e) => {
+        if (!e.isTrusted) return;
+        if (e.key === 'Escape') { e.preventDefault(); closeMenu(true); return; }
+        const list = items(); if (!list.length) return;
+        const at = list.indexOf(bar.getRootNode().activeElement);
+        let next = null;
+        if (e.key === 'ArrowDown') next = list[(at + 1) % list.length];
+        else if (e.key === 'ArrowUp') next = list[(at <= 0 ? list.length : at) - 1];
+        else if (e.key === 'Home') next = list[0];
+        else if (e.key === 'End') next = list[list.length - 1];
+        if (next) { e.preventDefault(); next.focus(); }
+      };
+      closeMenu = (refocus) => {
+        const wasOpen = !menu.hidden;
+        menu.hidden = true; moreBtn.setAttribute('aria-expanded', 'false');
+        document.removeEventListener('click', onDoc, true); document.removeEventListener('keydown', onKey, true);
+        if (refocus === true && wasOpen) { try { moreBtn.focus(); } catch (_) {} }
+      };
+      bannerTeardown = () => closeMenu();
+      onTrustedClick(moreBtn, () => {
+        if (!menu.hidden) { closeMenu(true); return; }
+        menu.hidden = false; moreBtn.setAttribute('aria-expanded', 'true');
+        for (const b of [trust, fine]) b && b.__ssRearm && b.__ssRearm(); // unreachable until now, so the arm window restarts here
+        document.addEventListener('keydown', onKey, true);
+        setTimeout(() => { document.addEventListener('click', onDoc, true); }, 0); // not the click that opened it
+        const first = items()[0]; if (first) first.focus();
+      });
+      // ArrowDown on the trigger opens the menu too (Enter/Space already click it).
+      moreBtn.addEventListener('keydown', (e) => { if (e.isTrusted && e.key === 'ArrowDown' && menu.hidden) { e.preventDefault(); moreBtn.click(); } });
+      // (0.14.1) The ✕ says what it does. On a bare tenant apex canStore() is false, so ✕ only dismisses
+      // this page (nothing is stored) and must not claim "for a day/an hour": it keeps the generic label.
+      // (0.15.0) The label text is visible from 600px; on a phone the ✕ is a 44px icon button and the
+      // aria-label (always present) carries the meaning.
+      const choice = danger ? '1h' : '1d';
+      const closeLabel = !canStore() ? t('ariaDismiss', null, 'Dismiss') : danger ? t('bannerHideHour', null, 'Hide for an hour') : t('bannerHideDay', null, 'Hide for a day');
+      const close = button('ss-x', ''); const glyph = el('span', 'ss-x-glyph', '✕'); glyph.setAttribute('aria-hidden', 'true'); close.append(glyph, el('span', 'ss-x-label', closeLabel));
+      close.setAttribute('aria-label', closeLabel); close.title = closeLabel;
+      onTrustedClick(close, () => { dismiss(); if (!x.noTrust && x.onHide && canStore()) x.onHide(choice); });
+      acts.append(moreBtn, close, menu); bar.appendChild(acts);
+      return bar;
+    }, { topLayer: 'popover', theme, onShown: x.onShown });
   }
 
   // Full-page interstitial (0.6.0) — the interaction-blocking tier, reserved
@@ -532,14 +580,19 @@
     });
   }
 
+  // Returns how many blocks were newly hidden (already-hidden nodes are skipped), so the caller logs the surface
+  // from this count instead of counting DOM nodes before and after (0.15.0).
   function hideScamBlocks(blocks) {
+    let n = 0;
     blocks.forEach((node) => {
       if (node.classList.contains(NS + '-hidden-block')) return;
+      n++;
       node.classList.add(NS + '-hidden-block');
       const tag = el('div', NS + '-hidden-tag', t('guardHiddenTag', null, 'Hidden by ScamShield'));
       setDir(tag);
       node.appendChild(tag);
     });
+    return n;
   }
 
   function walletConfirmOverlay(detail, onDecision) {

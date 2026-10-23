@@ -441,5 +441,6 @@
   "reason_newDomainUnvisited": { "message": "ডোমেনটি সদ্য-নিবন্ধিত ডোমেনের তালিকায় দেখা যাচ্ছে — বেশিরভাগ প্রতারণার সাইট মাত্র কয়েক দিনের পুরনো, এবং আপনি এটিতে আগে কখনও যাননি।" },
   "continueOnce": { "message": "এই পেজে একবার যাবে। ScamShield চালু থাকবে।" },
   "bannerHideDay": { "message": "একদিনের জন্য লুকান" },
-  "bannerHideHour": { "message": "এক ঘণ্টার জন্য লুকান" }
+  "bannerHideHour": { "message": "এক ঘণ্টার জন্য লুকান" },
+  "mistakeSiteFine": { "message": "এই সাইটটি নিরাপদ" }
 }

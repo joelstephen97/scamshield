@@ -441,5 +441,6 @@
   "reason_newDomainUnvisited": { "message": "డొమైన్ కొత్తగా నమోదైన డొమైన్‌ల జాబితాలో కనిపిస్తోంది — చాలా మోసపు సైట్‌లు కొన్ని రోజుల వయసు మాత్రమే కలిగి ఉంటాయి, మరియు మీరు దీన్ని ఇంతకు ముందు ఎప్పుడూ సందర్శించలేదు." },
   "continueOnce": { "message": "ఈ పేజీకి ఒక్కసారి మాత్రమే వెళ్తుంది. ScamShield ఆన్‌లోనే ఉంటుంది." },
   "bannerHideDay": { "message": "ఒక రోజు దాచండి" },
-  "bannerHideHour": { "message": "ఒక గంట దాచండి" }
+  "bannerHideHour": { "message": "ఒక గంట దాచండి" },
+  "mistakeSiteFine": { "message": "ఈ సైట్ సురక్షితమే" }
 }

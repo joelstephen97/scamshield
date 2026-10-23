@@ -441,5 +441,6 @@
   "reason_newDomainUnvisited": { "message": "يظهر هذا النطاق في قائمة النطاقات المسجَّلة حديثًا — معظم مواقع الاحتيال لا يتجاوز عمرها بضعة أيام، ولم تزر هذا الموقع من قبل." },
   "continueOnce": { "message": "ينقلك إلى هذه الصفحة مرة واحدة. يبقى ScamShield قيد التشغيل." },
   "bannerHideDay": { "message": "إخفاء ليوم واحد" },
-  "bannerHideHour": { "message": "إخفاء لمدة ساعة" }
+  "bannerHideHour": { "message": "إخفاء لمدة ساعة" },
+  "mistakeSiteFine": { "message": "هذا الموقع آمن" }
 }

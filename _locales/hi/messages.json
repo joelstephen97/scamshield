@@ -441,5 +441,6 @@
   "reason_newDomainUnvisited": { "message": "डोमेन नए-पंजीकृत डोमेन की सूची में दिखता है — ज़्यादातर घोटाला साइटें बस कुछ ही दिन पुरानी होती हैं, और आप इस पर पहले कभी नहीं गए।" },
   "continueOnce": { "message": "इस पेज पर सिर्फ़ एक बार जाने देता है। ScamShield चालू रहता है।" },
   "bannerHideDay": { "message": "एक दिन के लिए छिपाएँ" },
-  "bannerHideHour": { "message": "एक घंटे के लिए छिपाएँ" }
+  "bannerHideHour": { "message": "एक घंटे के लिए छिपाएँ" },
+  "mistakeSiteFine": { "message": "यह साइट ठीक है" }
 }

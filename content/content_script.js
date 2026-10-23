@@ -42,11 +42,9 @@
     send('surfaceShown', { kind, host: location.hostname });
   }
   // (0.15.0) "Report a mistake": relay the report (SW gates it on opt-in) and bump the local falseAlarms
-  // counter. It deliberately does NOT trust the site: until part 2 moves surfaces into a closed shadow root
-  // they live in the page DOM, so page script could .click() this button and allowlist itself, and on a
-  // stop-tier surface a confused tap would silently trust a real scam. Trust stays on extension-origin
-  // surfaces (popup, blocked.html, the armed "Trust this site" flow). The SW still accepts via:'mistake'
-  // in addTrust for part 2, which will call it with a gesture proof.
+  // counter and nothing else, so it is safe for the toasts to call it directly. The banner's "This site is fine"
+  // control calls it AND then trusts the site (trustSite via:'mistake'), but only behind the same gates as Trust:
+  // a real click (isTrusted) on a control sitting inside the shadow-hosted card, plus the arm delay (actions.js).
   function reportMistake() {
     send('userReport', { label: 'false_positive' });
     send('falseAlarm');
@@ -970,9 +968,9 @@
     SS.actions.showBanner(verdict, {
       onLeave: () => { SS.actions.clearAll(); },
       onReport: () => send('userReport', { label: 'false_positive' }),
-      noTrust: true
+      noTrust: true,
+      onShown: surface // (0.15.0) logged from inside the surface mount, once per real show
     });
-    surface('banner'); // (0.15.0) QR destination banner is a banner for the surface log
   }
 
   // Popup-initiated scan (primary surface): popup.js messages the active
@@ -1320,7 +1318,7 @@
         verdict.brandUrl = 'https://' + SS.BRAND_DOMAINS[verdict.brand][0] + '/';
         verdict.brandLabel = SS.brandDisplayName ? SS.brandDisplayName(verdict.brand) : verdict.brand;
       }
-      const handlers = { onLeave: () => send('leaveTab'), onReport: reportMistake, onHide: (choice) => { send('warnDismissed', { domain: pageDomain }); return send('pauseSite', { domain: pageDomain, choice }); } };
+      const handlers = { onLeave: () => send('leaveTab'), onReport: reportMistake, onShown: surface, onHide: (choice) => { send('warnDismissed', { domain: pageDomain }); return send('pauseSite', { domain: pageDomain, choice }); } };
       if (tier === 'stop' && SS.actions.dangerInterstitial) {
         SS.actions.dangerInterstitial(verdict, handlers);
         surface('interstitial');
@@ -1328,7 +1326,7 @@
         // Interruption budget (0.15.0): at most one banner per site per day, quiet after two
         // dismissals. Fails open (a failed/slow budget call still warns); badge stays '!'.
         const budget = await withTimeout(send('warnBudget', { domain: pageDomain }), 2000).catch(() => null);
-        if (!budget || budget.allow !== false) { SS.actions.showBanner(verdict, handlers); surface('banner'); }
+        if (!budget || budget.allow !== false) SS.actions.showBanner(verdict, handlers);
       }
       // One-time-ever support ask, only after ScamShield visibly earned it.
       if (verdict.level === 'dangerous' && !settings.supportAskShown && SS.actions.supportToast) {
@@ -1344,10 +1342,8 @@
     formGuardReasons.splice(0, formGuardReasons.length, ...(verdict.reasons || []));
     // (0.15.0) Hide page blocks only on pages already warned about; never on quiet/safe ones.
     if (settings.hideScamContent && scamBlocks.length && IS_TOP && interrupts) {
-      const hiddenBefore = document.querySelectorAll('.scamshield-hidden-block').length;
-      SS.actions.hideScamBlocks(scamBlocks);
-      // Only when at least one block was newly hidden (hideScamBlocks skips already-hidden nodes, so a re-run logs nothing).
-      if (document.querySelectorAll('.scamshield-hidden-block').length > hiddenBefore) surface('hidden-blocks');
+      // hideScamBlocks returns how many blocks it newly hid (it skips already-hidden nodes), so a re-run logs nothing.
+      if (SS.actions.hideScamBlocks(scamBlocks) > 0) surface('hidden-blocks');
     }
   }
 

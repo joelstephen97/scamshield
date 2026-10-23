@@ -441,5 +441,6 @@
   "reason_newDomainUnvisited": { "message": "このドメインは新規登録ドメインリストに載っています — 詐欺サイトの多くは登録からわずか数日です。また、あなたはこのサイトを一度も訪れたことがありません。" },
   "continueOnce": { "message": "このページを一度だけ開きます。ScamShieldはオンのままです。" },
   "bannerHideDay": { "message": "1日非表示" },
-  "bannerHideHour": { "message": "1時間非表示" }
+  "bannerHideHour": { "message": "1時間非表示" },
+  "mistakeSiteFine": { "message": "このサイトは問題ありません" }
 }

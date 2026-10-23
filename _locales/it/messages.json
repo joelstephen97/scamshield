@@ -441,5 +441,6 @@
   "reason_newDomainUnvisited": { "message": "Il dominio compare in un elenco di domini registrati di recente — la maggior parte dei siti truffa ha solo pochi giorni di vita, e non l'hai mai visitato prima." },
   "continueOnce": { "message": "Apre questa pagina una sola volta. ScamShield resta attivo." },
   "bannerHideDay": { "message": "Nascondi per un giorno" },
-  "bannerHideHour": { "message": "Nascondi per un'ora" }
+  "bannerHideHour": { "message": "Nascondi per un'ora" },
+  "mistakeSiteFine": { "message": "Questo sito è sicuro" }
 }

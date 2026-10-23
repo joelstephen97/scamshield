@@ -441,5 +441,6 @@
   "reason_newDomainUnvisited": { "message": "Tên miền xuất hiện trong danh sách các tên miền mới đăng ký — hầu hết các trang lừa đảo chỉ mới vài ngày tuổi, và bạn chưa từng truy cập trang này." },
   "continueOnce": { "message": "Chỉ mở trang này một lần. ScamShield vẫn bật." },
   "bannerHideDay": { "message": "Ẩn trong một ngày" },
-  "bannerHideHour": { "message": "Ẩn trong một giờ" }
+  "bannerHideHour": { "message": "Ẩn trong một giờ" },
+  "mistakeSiteFine": { "message": "Trang này an toàn" }
 }

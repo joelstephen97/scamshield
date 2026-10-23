@@ -441,5 +441,6 @@
   "reason_newDomainUnvisited": { "message": "O domínio aparece em uma lista de domínios registrados recentemente — a maioria dos sites de golpe tem apenas alguns dias, e você nunca o visitou antes." },
   "continueOnce": { "message": "Abre esta página uma única vez. O ScamShield continua ativado." },
   "bannerHideDay": { "message": "Ocultar por um dia" },
-  "bannerHideHour": { "message": "Ocultar por uma hora" }
+  "bannerHideHour": { "message": "Ocultar por uma hora" },
+  "mistakeSiteFine": { "message": "Este site é seguro" }
 }

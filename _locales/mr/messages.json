@@ -441,5 +441,6 @@
   "reason_newDomainUnvisited": { "message": "डोमेन नव्याने नोंदणीकृत डोमेनच्या यादीत दिसते — बहुतेक फसवणूक साइट्स फक्त काही दिवसांच्याच जुन्या असतात, आणि तुम्ही याला याआधी कधीही भेट दिलेली नाही." },
   "continueOnce": { "message": "या पेजवर फक्त एकदा नेते. ScamShield चालूच राहते." },
   "bannerHideDay": { "message": "एका दिवसासाठी लपवा" },
-  "bannerHideHour": { "message": "एका तासासाठी लपवा" }
+  "bannerHideHour": { "message": "एका तासासाठी लपवा" },
+  "mistakeSiteFine": { "message": "ही साइट ठीक आहे" }
 }

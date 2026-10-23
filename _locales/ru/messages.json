@@ -441,5 +441,6 @@
   "reason_newDomainUnvisited": { "message": "Домен есть в списке недавно зарегистрированных доменов — большинству мошеннических сайтов всего несколько дней, а вы ни разу его не посещали." },
   "continueOnce": { "message": "Открывает эту страницу один раз. ScamShield остаётся включённым." },
   "bannerHideDay": { "message": "Скрыть на день" },
-  "bannerHideHour": { "message": "Скрыть на час" }
+  "bannerHideHour": { "message": "Скрыть на час" },
+  "mistakeSiteFine": { "message": "Этот сайт безопасен" }
 }

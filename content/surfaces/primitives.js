@@ -46,7 +46,12 @@
       if (!e.isTrusted) return;
       let card = cardArg;
       if (!card) { try { card = cards.get(node.getRootNode()); } catch (_) { card = null; } }
-      if (card && !insideCard(node, card)) return;
+      // A popup menu (role=menu) inside the card hangs below it by design, so its items are checked against the
+      // menu's own box (the menu itself must be a descendant of the card, i.e. ours, not a page node).
+      if (card && !insideCard(node, card)) {
+        const menu = node.closest && node.closest('[role=menu]');
+        if (!(menu && card.contains(menu) && insideCard(node, menu))) return;
+      }
       fn(e);
     });
   }
@@ -111,6 +116,9 @@
     live.set(kind, rec);
     place(rec);
     watch();
+    // (0.15.0) onShown(kind): the surface log is written from here, once per real mount, so callers no longer
+    // infer "it was shown" from before/after DOM counts or listener order. A throwing callback never breaks the mount.
+    if (typeof o.onShown === 'function') { try { o.onShown(kind); } catch (_) {} }
     return { host, root: shadow, card, close() { if (live.get(kind) === rec) unmount(kind); else { rec.closing = true; try { host.remove(); } catch (_) {} } } };
   }
 

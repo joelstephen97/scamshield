@@ -82,9 +82,10 @@ test('banner: synthetic (untrusted) clicks on Trust this site do nothing, even a
   // review). Wait that out FIRST, so the synthetic clicks below are rejected
   // by the isTrusted guard alone — not merely by the arm window.
   await page.waitForTimeout(350);
-  await page.evaluate(() => document.querySelector('.scamshield-banner .ss-trust').click());
+  // (0.15.0) the banner lives in the open shadow root of <scamshield-surface data-kind=banner>.
+  await page.evaluate(() => document.querySelector('scamshield-surface[data-kind=banner]').shadowRoot.querySelector('.ss-trust').click());
   await page.evaluate(() => {
-    document.querySelector('.scamshield-banner .ss-trust').dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    document.querySelector('scamshield-surface[data-kind=banner]').shadowRoot.querySelector('.ss-trust').dispatchEvent(new MouseEvent('click', { bubbles: true }));
   });
   await page.waitForTimeout(200); // let a wrongly-fired async trust round trip settle, if any
   expect((await sw.evaluate(() => getSettings())).allowlist).not.toContain(HOST);

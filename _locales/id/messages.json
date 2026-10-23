@@ -441,5 +441,6 @@
   "reason_newDomainUnvisited": { "message": "Domain muncul dalam daftar domain yang baru didaftarkan — sebagian besar situs penipuan hanya berusia beberapa hari, dan Anda belum pernah mengunjunginya." },
   "continueOnce": { "message": "Membuka halaman ini satu kali. ScamShield tetap aktif." },
   "bannerHideDay": { "message": "Sembunyikan selama sehari" },
-  "bannerHideHour": { "message": "Sembunyikan selama satu jam" }
+  "bannerHideHour": { "message": "Sembunyikan selama satu jam" },
+  "mistakeSiteFine": { "message": "Situs ini aman" }
 }

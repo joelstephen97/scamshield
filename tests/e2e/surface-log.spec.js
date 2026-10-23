@@ -40,7 +40,7 @@ test('getSurfaceLog message returns the ring', async ({ context }) => {
   await opt.close(); await page.close();
 });
 
-test('Report a mistake on a banner counts a false alarm and does NOT allowlist the site', async ({ context }) => {
+test('"This site is fine" on a banner counts a false alarm, then allowlists after a trusted click, with Undo', async ({ context }) => {
   const sw = context.serviceWorkers()[0];
   await sw.evaluate(() => chrome.storage.local.remove('falseAlarms'));
   const page = await context.newPage();
@@ -48,12 +48,17 @@ test('Report a mistake on a banner counts a false alarm and does NOT allowlist t
   await expect(page.locator('.scamshield-banner.danger')).toBeVisible({ timeout: 8000 });
   await page.waitForTimeout(350);
   await openMore(page.locator('.scamshield-banner'));
+  await expect(page.locator('.scamshield-banner .ss-report')).toHaveText('This site is fine');
   await page.locator('.scamshield-banner .ss-report').click();
   await expect.poll(async () => (await sw.evaluate(() => getStats())).falseAlarms).toBe(1);
-  await page.waitForTimeout(500);
-  const s = await sw.evaluate(() => getSettings());
-  expect(s.allowlist).not.toContain(HOST);
-  expect((s.allowlistMeta || {})[HOST]).toBeUndefined();
+  await expect.poll(async () => (await sw.evaluate(() => getSettings())).allowlist.includes(HOST), { timeout: 5000 }).toBe(true);
+  expect(((await sw.evaluate(() => getSettings())).allowlistMeta || {})[HOST].via).toBe('mistake');
+  await expect(page.locator('.scamshield-banner')).toHaveCount(0);
+  await expect(page.locator('.scamshield-ack')).toContainText(/won't flag/i);
+  // Undo reverses it and re-opens the banner.
+  await page.locator('.scamshield-ack .ss-undo').click();
+  await expect.poll(async () => (await sw.evaluate(() => getSettings())).allowlist.includes(HOST), { timeout: 5000 }).toBe(false);
+  await expect(page.locator('.scamshield-banner.danger')).toBeVisible();
   await page.close();
 });
 
@@ -65,10 +70,18 @@ test('a page-script click() on the mistake control neither allowlists nor counts
   await expect(page.locator('.scamshield-banner.danger')).toBeVisible({ timeout: 8000 });
   await page.waitForTimeout(350);
   await openMore(page.locator('.scamshield-banner'));
-  await page.evaluate(() => document.querySelector('.scamshield-banner .ss-report').click());
+  const synth = () => page.evaluate(() => {
+    const b = document.querySelector('scamshield-surface[data-kind=banner]').shadowRoot.querySelector('.ss-report');
+    b.click(); b.dispatchEvent(new MouseEvent('click', { bubbles: true, composed: true }));
+  });
+  await synth();
   await page.waitForTimeout(800);
   const s = await sw.evaluate(() => getSettings());
   expect(s.allowlist).not.toContain(HOST);
   expect((await sw.evaluate(() => getStats())).falseAlarms).toBe(0);
+  await expect(page.locator('.scamshield-banner.danger')).toBeVisible();
+  // Positive canary: the same control, clicked for real, does work.
+  await page.locator('.scamshield-banner .ss-report').click();
+  await expect.poll(async () => (await sw.evaluate(() => getSettings())).allowlist.includes(HOST), { timeout: 5000 }).toBe(true);
   await page.close();
 });
