@@ -447,3 +447,16 @@ test('every reason code emitted by the engine is in the EN table with a valid ki
   }
   assert.ok(found >= 40, 'expected the engine to emit 40+ coded reasons, found ' + found);
 });
+
+// ---- 0.15.0: singular/plural source count, no "source(s)" ----
+test('feedBlock/feedWarn use the singular key for a count of 1 and never print "source(s)"', () => {
+  const strip = (t) => t.replace(/[⁦⁩]/g, '');
+  const one = strip(R.resolveReason({ code: 'feedBlock', params: ['1'] }));
+  const many = strip(R.resolveReason({ code: 'feedBlock', params: ['3'] }));
+  assert.match(one, /1 independent source\.$/);
+  assert.match(many, /3 independent sources\.$/);
+  assert.match(strip(R.resolveReason({ code: 'feedWarn', params: ['1'] })), /\(1 source\)/);
+  assert.match(strip(R.resolveReason({ code: 'feedWarn', params: ['2'] })), /\(2 sources\)/);
+  assert.match(R.reasonToEnglish({ code: 'feedWarn', params: ['1'] }), /\(1 source\)/);
+  for (const t of Object.values(R.EN)) assert.ok(!/\(s\)/.test(t), t);
+});

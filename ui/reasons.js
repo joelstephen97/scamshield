@@ -43,8 +43,11 @@
     // engine/site_signals.js gatewaySignal — unlisted gateway/redirect signal (0.13.0, Task 10)
     gatewayRedirect: 'This page was reached through a short redirect link on $1 that led to a completely different site — a common scam-gateway pattern.',
     // background/service_worker.js — v0.9 threat-feed matcher (Task B2)
-    feedBlock: "This domain matches ScamShield's threat feed, confirmed by $1 independent source(s).",
-    feedWarn: "This domain matches a lower-confidence entry in ScamShield's threat feed ($1 source(s)) — proceed carefully.",
+    feedBlock: "This domain matches ScamShield's threat feed, confirmed by $1 independent sources.",
+    // (0.15.0) singular wording for a count of 1 (picked by feedCode below), so no "source(s)" in any locale.
+    feedBlockOne: "This domain matches ScamShield's threat feed, confirmed by $1 independent source.",
+    feedWarn: "This domain matches a lower-confidence entry in ScamShield's threat feed ($1 sources) — proceed carefully.",
+    feedWarnOne: "This domain matches a lower-confidence entry in ScamShield's threat feed ($1 source) — proceed carefully.",
     // background/service_worker.js checkNrdHost() — "new site" signal (0.10.0, Task C3)
     newDomain: 'Domain appears on a newly-registered-domains list — most scam sites are only days old.',
     // 0.14.1: its own sentence (not a "$1" English tail) so every locale words it naturally.
@@ -244,6 +247,12 @@
     return out;
   }
 
+  // (0.15.0) feedBlock/feedWarn carry a source count in params[0]; a count of 1 uses the "...One" key.
+  function feedCode(r) {
+    if ((r.code === 'feedBlock' || r.code === 'feedWarn') && r.params && String(r.params[0]) === '1') return r.code + 'One';
+    return r.code;
+  }
+
   // Localised text for one reason. Legacy plain-string reasons (verdicts cached
   // by an older version) pass straight through. Params (hostnames, brand
   // names, phrases, URLs) are wrapped in bidi isolates so they read correctly
@@ -253,20 +262,20 @@
     if (!r || !r.code) return '';
     const params = (r.params || []).map(String);
     const isolated = params.map(bidiWrap);
-    const over = tOverride('reason_' + r.code, isolated);
+    const over = tOverride('reason_' + feedCode(r), isolated);
     if (over) return over;
     const api = i18n();
     if (api) {
-      try { const m = api.getMessage('reason_' + r.code, isolated); if (m) return m; } catch (_) {}
+      try { const m = api.getMessage('reason_' + feedCode(r), isolated); if (m) return m; } catch (_) {}
     }
-    return subst(EN[r.code] || r.code, params, true);
+    return subst(EN[feedCode(r)] || r.code, params, true);
   }
 
   // English regardless of UI locale — for GitHub issue bodies.
   function reasonToEnglish(r) {
     if (typeof r === 'string') return r;
     if (!r || !r.code) return '';
-    return subst(EN[r.code] || r.code, r.params || []);
+    return subst(EN[feedCode(r)] || r.code, r.params || []);
   }
 
   // Evidence-chip category. 'page' is the neutral default.

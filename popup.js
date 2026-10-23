@@ -169,9 +169,13 @@ async function initReviewAsk() {
   const ctx = await send('getReviewAsk');
   if (!ctx) return;
   const ra = ctx.reviewAsk || {};
+  // (0.15.0) newest warn/stop surface, from the local surface log; failure just means "none known".
+  let lastSurfaceAt = 0;
+  try { lastSurfaceAt = REVIEW.lastWarnStopAt(await send('getSurfaceLog')); } catch (_) { /* best-effort */ }
   reviewCount = settings.threatsBlocked || 0;
   reviewEligible = REVIEW.eligible({
     threatsBlocked: reviewCount, installedAt: ctx.installedAt, now: Date.now(),
+    lastFalseAlarmAt: ctx.lastFalseAlarmAt, lastSurfaceAt,
     state: ra.state, snoozeUntil: ra.snoozeUntil, asks: ra.asks
   });
 }
@@ -374,7 +378,7 @@ async function init() {
   // tab already) and lets the tab router pick the section up from the hash.
   $('viewall').addEventListener('click', (e) => { e.preventDefault(); api.tabs.create({ url: api.runtime.getURL('options.html#stats') }); window.close(); });
   await initReviewAsk();
-  if (settings.whatsNewSeen !== '0.14.0') { $('whatsnew').hidden = false; $('whatsnewlink').addEventListener('click', () => { api.tabs.create({ url: 'https://github.com/joelstephen97/scamshield/blob/main/CHANGELOG.md' }); }); $('whatsnewx').addEventListener('click', async () => { $('whatsnew').hidden = true; await send('setSettings', { patch: { whatsNewSeen: '0.14.0' } }); }); }
+  if (settings.whatsNewSeen !== '0.15.0') { $('whatsnew').hidden = false; $('whatsnewlink').addEventListener('click', () => { api.tabs.create({ url: 'https://github.com/joelstephen97/scamshield/blob/main/CHANGELOG.md' }); }); $('whatsnewx').addEventListener('click', async () => { $('whatsnew').hidden = true; await send('setSettings', { patch: { whatsNewSeen: '0.15.0' } }); }); }
 
   tab = await currentTab();
   // Two hero counters (0.8.0), replacing the old this-site/all-time tile row:

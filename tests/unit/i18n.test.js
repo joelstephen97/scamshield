@@ -269,3 +269,18 @@ test('0.15.0 task 19: onboarding no longer carries region-specific copy', () => 
     for (const [k, v] of Object.entries(data)) if (k.startsWith('ob')) assert.ok(!/UAE|الإمارات/.test(v.message), `${loc}: ${k} mentions UAE`);
   }
 });
+
+// --- 0.15.0 release keys: present in all 20 locales, translated, no "(s)" plural hack ---
+test('0.15.0 what\'s-new and singular/plural keys exist in every locale, differ from English, and avoid "(s)"', () => {
+  const keys = ['whatsNewLine1', 'whatsNewLine2', 'reason_feedBlock', 'reason_feedBlockOne', 'reason_feedWarn', 'reason_feedWarnOne'];
+  assert.ok(!enKeys.has('whatsNewBanner'), 'stale whatsNewBanner should be gone');
+  for (const loc of EXPECTED) {
+    const data = JSON.parse(fs.readFileSync(path.join(LOCALES_DIR, loc, 'messages.json'), 'utf8'));
+    for (const k of keys) {
+      assert.ok(data[k] && data[k].message, `${loc}: missing ${k}`);
+      if (loc !== 'en') assert.notEqual(data[k].message, EN[k].message, `${loc}: ${k} is an English copy`);
+      assert.ok(!/\(s\)|\(ов\)|fonte\/i|\(stwa\)/.test(data[k].message), `${loc}: ${k} still uses a "(s)" plural hack`);
+    }
+    for (const k of ['reason_feedBlockOne', 'reason_feedWarnOne']) assert.ok(/\$COUNT\$/.test(data[k].message), `${loc}: ${k} lost $COUNT$`);
+  }
+});
