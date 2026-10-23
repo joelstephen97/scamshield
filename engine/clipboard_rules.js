@@ -39,15 +39,24 @@
     }
   }
 
-  // 0.14.0 tiering. The ollama.com case: a user clicks "copy" on an install
-  // page, the payload is a real shell command, but there are no paste-and-run
-  // instructions — that is a notice, not a threat. Only the ClickFix pattern
-  // (payload + instructions) is the interstitial/"block" tier.
+  // 0.14.0 tiering, reworked in 0.15.0. A user who copies what they selected (or what the
+  // button's neighbouring <pre> shows) chose that text: never a warning, never an overwrite.
+  // Only a page that wrote something the user did NOT select, on a ClickFix-shaped page, is
+  // 'block'. 'notice' is kept as a tier name but maps to no surface in content_script.js.
   function clipboardTier(input) {
     const s = input || {};
     if (!s.level || s.level === 'safe') return 'none';
-    if (s.clickfixLevel === 'dangerous') return 'block';
+    if (s.userGesture === true && s.selectionMatches === true) return 'none';
+    if (s.clickfixLevel === 'dangerous' && (s.userGesture === false || s.selectionMatches === false)) return 'block';
     return s.userGesture === true ? 'notice' : 'warn';
   }
-  return { analyzeClipboardWrite, clipboardTier };
+  // Whitespace-insensitive comparison helpers (pure, so unit-testable). `candidates` are the
+  // texts the user could have copied: the selection, the clicked element, its code block.
+  function normalizeCopyText(t) { return String(t == null ? '' : t).replace(/\s+/g, ' ').trim(); }
+  function copyMatches(payload, candidates) {
+    const p = normalizeCopyText(payload);
+    if (!p) return false;
+    return (candidates || []).some((c) => normalizeCopyText(c) === p);
+  }
+  return { analyzeClipboardWrite, clipboardTier, normalizeCopyText, copyMatches };
 });

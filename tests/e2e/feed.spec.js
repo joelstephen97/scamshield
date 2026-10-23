@@ -232,7 +232,7 @@ test('a 40-bit hit not confirmed by its exact shard downgrades to no-hit (false-
   await expect(page.locator('.scamshield-banner')).toHaveCount(0);
 });
 
-test('a block hit whose exact shard is unavailable fails toward caution: warn, unverified, no negative cache', async ({ context }) => {
+test('a block hit whose exact shard is unavailable stays quiet in the page: hit warn + unverified, no negative cache, no banner', async ({ context }) => {
   const sw = context.serviceWorkers()[0];
   await installFeed(sw);
   // No exact-<byte>.jsonl.gz exists for this domain â†’ the shard fetch 404s.
@@ -244,8 +244,9 @@ test('a block hit whose exact shard is unavailable fails toward caution: warn, u
   expect(again).toEqual({ hit: 'warn', sources: [], unverified: true });
   const page = await context.newPage();
   await page.goto(`http://${UNVERIFIED_DOMAIN}:5599/`);
-  const banner = page.locator('.scamshield-banner.suspicious');
-  await expect(banner).toBeVisible({ timeout: 8000 });
+  // (0.15.0) an unverified hit carries feed-warn-unverified: reason only, no banner, no interstitial.
+  await page.waitForTimeout(2500);
+  await expect(page.locator('.scamshield-banner')).toHaveCount(0);
   await expect(page.locator('.scamshield-interstitial')).toHaveCount(0);
 });
 
@@ -296,7 +297,7 @@ test('a dyndns-listed host records suspicious-tier evidence but stays quiet: no 
 // 0.14.1 (Task 8 fix round): the feed/risk/NRD lookups are requested together,
 // but each keeps its own full timeout budget from where it is awaited. A cold
 // SW whose one-time Blockstore load takes 4 s (> the 3 s risk/NRD caps) must
-// still deliver the dyndns evidence — the budget must not start at send time.
+// still deliver the dyndns evidence ï¿½ the budget must not start at send time.
 test('slow SW (Blockstore.get +4s): risk-table evidence still reaches the verdict', async ({ context }) => {
   const sw = context.serviceWorkers()[0];
   await installFeed(sw);

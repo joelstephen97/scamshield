@@ -124,26 +124,32 @@ test('brand-visual phishing shows a danger banner', async ({ context }) => {
   await expect(page.locator('.scamshield-banner')).toBeVisible({ timeout: 8000 });
 });
 
-test('clipboard hijack shows a warning toast', async ({ context }) => {
+test('clipboard hijack with no user gesture shows a warning toast', async ({ context }) => {
+  // (0.15.0) a click-driven copy is never a toast any more; only a background write is.
+  const page = await context.newPage();
+  await page.goto(BASE + '/clipboard-auto.html');
+  // Wait idle: Playwright's own locator polling runs with a user gesture, which would turn the write into a user copy.
+  await page.waitForTimeout(4000);
+  await expect(page.locator('.scamshield-toast')).toBeVisible({ timeout: 4000 });
+});
+
+test('clipboard: a click-driven copy is silent (0.15.0, was a notice toast)', async ({ context }) => {
   const page = await context.newPage();
   await page.goto(BASE + '/clipboard.html');
   await page.bringToFront();
   await page.click('#c');
-  await expect(page.locator('.scamshield-toast')).toBeVisible({ timeout: 6000 });
+  await page.waitForTimeout(1200);
+  await expect(page.locator('.scamshield-toast')).toHaveCount(0);
+  await expect(page.locator('.scamshield-interstitial')).toHaveCount(0);
 });
 
-test('clipboard: a user-initiated copy of a shell command is a notice, shown once per page, never counted as a threat', async ({ context }) => {
+test('clipboard: a user-initiated copy of a shell command shows no toast and is never counted as a threat', async ({ context }) => {
   const page = await context.newPage(); const sw = context.serviceWorkers()[0];
   await context.grantPermissions(['clipboard-read', 'clipboard-write'], { origin: BASE });
   await page.goto(BASE + '/clipboard-copy-button.html');
   const before = (await sw.evaluate(() => getSettings())).threatsBlocked || 0;
-  await page.click('#c'); await expect(page.locator('.scamshield-toast')).toBeVisible({ timeout: 6000 });
-  await expect(page.locator('.scamshield-toast')).toHaveAttribute('role', 'status');
-  // Controller ruling: `.ss-x` only exists after Task 4's toast rebuild; the
-  // current clipboardToast's dismiss button is the last (only) button, and
-  // stays the last button once Task 4 adds a leading mute button, so this
-  // selector passes both before and after Task 4.
-  await page.locator('.scamshield-toast button').last().click(); await expect(page.locator('.scamshield-toast')).toHaveCount(0);
+  // (0.15.0) 'notice' toasts for user-gesture copies are gone: clicking Copy never warns.
+  await page.click('#c'); await page.waitForTimeout(1200); await expect(page.locator('.scamshield-toast')).toHaveCount(0);
   await page.click('#c'); await page.waitForTimeout(800); await expect(page.locator('.scamshield-toast')).toHaveCount(0);
   expect((await sw.evaluate(() => getSettings())).threatsBlocked || 0).toBe(before);
   await page.close();

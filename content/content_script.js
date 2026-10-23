@@ -104,6 +104,48 @@
     };
   }
 
+  // (0.15.0) The page's final warning tier ('quiet' | 'warn' | 'stop'), set at the end of run().
+  // null = not known yet. Toasts that are not the verdict itself (leaky form, notification
+  // lure) show only on an already-warned page; before run() finishes they stay quiet.
+  let pageTier = null;
+  const pageWarned = () => pageTier === 'warn' || pageTier === 'stop';
+  // (0.15.0) Last real (isTrusted) pointer target: lets the clipboard bridge tell "the user clicked
+  // Copy next to a visible code block" from "the page wrote something the user never saw".
+  let lastClickTarget = null;
+  for (const type of ['pointerdown', 'click']) {
+    document.addEventListener(type, (ev) => { if (ev && ev.isTrusted) lastClickTarget = ev.target; }, true);
+  }
+  const isShown = (el) => {
+    try {
+      if (!el || !el.getClientRects || !el.getClientRects().length) return false;
+      const cs = getComputedStyle(el);
+      return cs.visibility !== 'hidden' && cs.display !== 'none';
+    } catch (_) { return false; }
+  };
+  // Texts the user could plausibly have copied: the live selection, the clicked element, and the
+  // VISIBLE <pre>/<code> blocks in the clicked element's nearby container (a Copy button sits
+  // next to its code block, a few levels up at most).
+  function copyCandidates() {
+    const out = [];
+    try { out.push(String(getSelection ? getSelection() : '')); } catch (_) {}
+    const el = lastClickTarget && lastClickTarget.nodeType === 1 ? lastClickTarget : null;
+    if (!el) return out;
+    const text = (n) => (n && (n.innerText || n.textContent)) || '';
+    if (el.matches && el.matches('pre,code,input,textarea')) out.push(text(el) || el.value || '');
+    let node = el;
+    for (let i = 0; i < 4 && node && node.nodeType === 1 && node !== document.body; i++, node = node.parentElement) {
+      if (node.matches && node.matches('pre,code') && isShown(node)) out.push(text(node));
+      if (node.querySelectorAll) {
+        let n = 0;
+        for (const b of node.querySelectorAll('pre,code')) {
+          if (++n > 8) break;
+          if (isShown(b)) out.push(text(b));
+        }
+      }
+    }
+    return out;
+  }
+
   // --- MAIN-world detector bridges (registered once; re-injection guard above) ---
   // (0.14.1) Firefox: an object built here and handed to a MAIN-world listener
   // is an Xray-wrapped cross-compartment object, so the page-side hook reads
@@ -145,7 +187,11 @@
     // navigator.userActivation is read here, in the isolated world, off the
     // same document's real activation state, so the page cannot influence it.
     const userGesture = !!(navigator.userActivation && navigator.userActivation.isActive);
-    const tier = SS.clipboardTier({ level: detail.level, clickfixLevel: cf.level, userGesture });
+    // (0.15.0) selectionMatches is computed HERE from the DOM, never taken from the MAIN-world
+    // event: did the user copy exactly what they selected / what the clicked button's code block shows?
+    const selectionMatches = userGesture && SS.copyMatches ? SS.copyMatches(detail.full || detail.sample, copyCandidates()) : false;
+    const tier = SS.clipboardTier({ level: detail.level, clickfixLevel: cf.level, userGesture, selectionMatches });
+    // 'none' also covers a matching user copy: we never overwrite the clipboard in that case.
     if (tier === 'none') return;
     if (tier === 'block' && SS.actions.dangerInterstitial) {
       try { await navigator.clipboard.writeText(t('guardClipboardBlockedPayload', null, 'Blocked by ScamShield — this site put a dangerous command on your clipboard. Do not paste it anywhere.')); } catch (_) { /* overwrite is best-effort */ }
@@ -154,6 +200,8 @@
       send('bumpThreats', { kind: 'clipboard' });
       return;
     }
+    // (0.15.0) 'notice' (a user-gesture copy) maps to no surface at all; only no-gesture writes toast.
+    if (tier === 'notice') return;
     if (settings.clipboardGuard === false) return;
     if (isMutedHere(settings.mutedWarnings, 'clipboard')) return;
     const key = detail.level + '|' + (detail.sample || '');
@@ -208,7 +256,8 @@
     const text = d.kind === 'plain'
       ? t('guardLeakyFormPlain', [bidi(d.destHost)], 'This site sent your email/phone to ' + d.destHost + ' in plain text — before you pressed submit.')
       : t('guardLeakyFormHashed', [bidi(d.destHost), bidi(d.kind.toUpperCase())], 'This site sent your email/phone to ' + d.destHost + ' as a hashed (' + d.kind.toUpperCase() + ') identifier — before you pressed submit.');
-    if (SS.actions && SS.actions.privacyToast) {
+    // (0.15.0) the toast only on an already-warned page; elsewhere the popup lists the finding.
+    if (pageWarned() && SS.actions && SS.actions.privacyToast) {
       SS.actions.privacyToast({ title: t('leakTitle', null, 'Your details left this page before you pressed Send'), text, muteKind: 'leak', onMute: muteHandler('leak') });
     }
     send('privacyFinding', { finding: { kind: 'leaky-form', host: d.destHost, detail: d.kind } });
@@ -232,7 +281,7 @@
     // continue / prove you are human" copy is the classic push-scam trick.
     const bt = (document.body ? document.body.innerText : '').toLowerCase();
     if (/allow.{0,20}(to (continue|proceed|verify|watch|download)|if you are not a robot|to confirm you are human)|click\s+allow/i.test(bt)) {
-      if (SS.actions && SS.actions.privacyToast) {
+      if (pageWarned() && SS.actions && SS.actions.privacyToast) {
         SS.actions.privacyToast({ level: 'warn', title: t('notifyLureTitle', null, "Don't click Allow here"), text: t('guardNotifyLure', null, 'This site is trying to get notification permission using a "click Allow to continue" trick. You can safely Block it.'), muteKind: 'notify', onMute: muteHandler('notify') });
       }
       send('privacyFinding', { finding: { kind: 'notify-lure', host: location.hostname, detail: '' } });
@@ -420,14 +469,19 @@
   // --- Fake-shop signal collection (0.6.0), badge/popup tier only ---
   function parseCountdownSeconds() {
     // Find a MM:SS / HH:MM:SS countdown; return the largest total seconds seen.
+    // (0.15.0) Clock times (opening hours, "5:30 pm"), <time> elements and video durations are not
+    // countdowns; the text rules live in SS.countdownSecondsFromText (engine/shop_rules.js).
     let best = 0, scanned = 0;
+    if (!SS.countdownSecondsFromText) return 0;
     for (const el of document.querySelectorAll('[class*="countdown" i],[class*="timer" i],[id*="countdown" i],time,span,div,b')) {
       if (++scanned > 400) break;
+      if (el.closest('time,video,[class*="duration" i]')) continue;
+      const par = el.parentElement;
+      if (par && par.querySelector && par.querySelector('video')) continue;
       const t = (el.textContent || '').trim();
-      const m = t.match(/\b(\d{1,2}):(\d{2})(?::(\d{2}))?\b/);
-      if (!m) continue;
-      const secs = m[3] ? (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) : (+m[1]) * 60 + (+m[2]);
-      if (secs > best && secs <= 48 * 3600) best = secs;
+      if (!t || t.length > 80) continue;
+      const secs = SS.countdownSecondsFromText(t);
+      if (secs > best) best = secs;
     }
     return best;
   }
@@ -714,7 +768,7 @@
         verdict = Object.assign({}, verdict, {
           level: 'suspicious', score: Math.max(verdict.score, 0.6),
           reasons: [reason].concat(verdict.reasons || []), reasonCodes: [reason.code].concat(verdict.reasonCodes || []),
-          flags: ['feed-warn'].concat(verdict.flags || [])
+          flags: (feedHit.unverified === true ? ['feed-warn-unverified'] : ['feed-warn', 'feed-warn-verified']).concat(verdict.flags || [])
         });
       }
     } catch (_) { /* feed check is best-effort */ }
@@ -1044,12 +1098,14 @@
       } else if (feedHit && feedHit.hit === 'warn' && verdict.level !== 'dangerous') {
         // An unverified hit (exact shard unavailable) has no source list yet
         // — floor the count at 1 so the warning never reads "0 sources".
+        // (0.15.0) Unverified = reason only, flag feed-warn-unverified (quiet unless other evidence
+        // makes it dangerous); a verified hit carries feed-warn + feed-warn-verified.
         const reason = { code: 'feedWarn', kind: 'link', params: [String(Math.max(1, (feedHit.sources || []).length))] };
         verdict = Object.assign({}, verdict, {
           level: 'suspicious', score: Math.max(verdict.score, 0.6),
           reasons: [reason].concat(verdict.reasons || []),
           reasonCodes: [reason.code].concat(verdict.reasonCodes || []),
-          flags: ['feed-warn'].concat(verdict.flags || [])
+          flags: (feedHit.unverified === true ? ['feed-warn-unverified'] : ['feed-warn', 'feed-warn-verified']).concat(verdict.flags || [])
         });
       }
     } catch (_) { /* feed check is best-effort — never blocks the rest of the scan */ }
@@ -1099,22 +1155,14 @@
     verdict = SS.promoteFeedWarn(verdict, signals, urlRules, domRules);
 
     // Fake-shop check (0.6.0) — top frame, storefront pages only. Reported to
-    // the popup's shopping card; a strong result nudges the verdict to at most
-    // suspicious (never a full-screen block — these signals are probabilistic).
+    // the popup's shopping card ONLY (0.15.0): shop findings never change the verdict level —
+    // they are probabilistic and an ordinary shop ("bank transfer", opening hours) tripped them.
     if (IS_TOP && settings.shopGuard !== false && SS.scoreShop) {
       try {
         const shop = await collectShop((document.body ? document.body.innerText : ''), location.hostname);
         const sr = SS.scoreShop(shop);
         if (sr.flags.length) {
           send('shopFindings', { flags: sr.flags, level: sr.level });
-          if (sr.level === 'suspicious' && verdict.level === 'safe') {
-            // The shop detail sentence leads the evidence list; keep reasonCodes
-            // (used by the report payload) in step with reasons.
-            const shopReason = { code: 'shop_' + sr.flags[0].code + '_detail', kind: 'shop' };
-            verdict = Object.assign({}, verdict, { level: 'suspicious', score: Math.max(verdict.score, 0.55),
-              reasons: [shopReason].concat(verdict.reasons || []),
-              reasonCodes: [shopReason.code].concat(verdict.reasonCodes || []) });
-          }
         }
       } catch (_) { /* shop check is best-effort */ }
     }
@@ -1154,6 +1202,7 @@
     // Warning doctrine (0.15.0): one pure function decides stop / warn / quiet.
     const tier = SS.surfaceTier(verdict, { popular: feedPopular, strictMode: settings.strictMode === true, isTop: IS_TOP, host: location.hostname });
     try { window.__ssLastVerdict = verdict; window.__ssLastTier = tier; } catch (_) {}
+    pageTier = tier;
     let report = null;
     try {
       report = {

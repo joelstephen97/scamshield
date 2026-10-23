@@ -2,9 +2,24 @@ const { test } = require('./fixtures');
 const { expect } = require('@playwright/test');
 const BASE = 'http://localhost:5599';
 
-test('leaky form: typing an email that is beaconed to a third party warns before submit', async ({ context, extensionId }) => {
+test('leaky form on a safe page: no toast, but the popup Privacy card lists it (0.15.0)', async ({ context, extensionId }) => {
   const page = await context.newPage();
   await page.goto(BASE + '/leaky-form.html');
+  await page.waitForTimeout(1500); // run() has finished: the page is known-quiet
+  await page.fill('#email', 'jane.doe@example.com');
+  await page.waitForTimeout(1500);
+  await expect(page.locator('.scamshield-toast')).toHaveCount(0);
+  const popup = await context.newPage();
+  await popup.goto(`chrome-extension://${extensionId}/popup.html`);
+  await page.bringToFront(); await popup.reload();
+  await expect(popup.locator('#privacycard')).toBeVisible({ timeout: 5000 });
+  await expect(popup.locator('#privacylist')).toContainText(/tracker\.example/);
+});
+
+test('leaky form on an already-warned page: typing an email that is beaconed to a third party warns before submit', async ({ context, extensionId }) => {
+  const page = await context.newPage();
+  await page.goto(BASE + '/leaky-form-phish.html');
+  await expect(page.locator('.scamshield-banner.danger')).toBeVisible({ timeout: 8000 });
   await page.fill('#email', 'jane.doe@example.com');
   // The in-page toast appears without any submit.
   const toast = page.locator('.scamshield-toast');

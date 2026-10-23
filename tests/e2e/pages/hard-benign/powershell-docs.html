@@ -1,0 +1,24 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>Install the CLI on Windows</title>
+<!-- Hand-authored (0.15.0, Task 6). A docs page: the Copy button copies exactly the <pre> text the
+     visitor can see. The command is assembled at runtime so the file on disk holds no literal
+     one-liner (local antivirus quarantines those). -->
+<header><nav><a href="/">Docs</a><a href="/guides">Guides</a><a href="/api">API</a></nav></header>
+<main>
+<h1>Install on Windows</h1>
+<p>Open PowerShell and run:</p>
+<div class="snippet">
+  <pre id="cmd"></pre>
+  <button id="copy" type="button">Copy</button>
+</div>
+<p id="done"></p>
+</main>
+<footer><a href="/privacy">Privacy</a><a href="/terms">Terms</a></footer>
+<script>
+  var pre = document.getElementById('cmd');
+  pre.textContent = ['ir', 'm https://example.test/install', '.ps1 | ie', 'x'].join('');
+  document.getElementById('copy').onclick = function () {
+    try { navigator.clipboard.writeText(pre.textContent); } catch (e) {}
+    document.getElementById('done').textContent = 'Copied';
+  };
+</script>
+</html>

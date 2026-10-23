@@ -13,14 +13,15 @@
 
   // Decisive, near-zero-FP flags: block the interaction outright.
   const STOP_FLAGS = ['feed-block', 'clickfix', 'seed-phrase-harvest', 'fake-browser-update', 'delivery-fee-scam'];
-  // Flags confident enough to show a banner at "suspicious". `feed-warn` joins
-  // them only once the hit was verified (`feed-warn-verified`, set by Task 6);
-  // until then a plain feed-warn counts as confident (see FEED_FLAGS).
-  const CONFIDENT_FLAGS = ['feed-warn-corroborated', 'brand-impersonation-content', 'brand-impersonation-visual', 'brand-impersonation-tenant', 'credential-form-foreign-domain',
+  // Flags confident enough to show a banner at "suspicious". A feed "warn" hit counts only once
+  // it was verified against the exact shard (`feed-warn-verified`, set by content_script.js);
+  // an unverified hit carries `feed-warn-unverified`, which is in no list here, so it stays
+  // quiet unless other evidence makes the verdict dangerous (0.15.0).
+  const CONFIDENT_FLAGS = ['feed-warn-verified', 'feed-warn-corroborated', 'brand-impersonation-content', 'brand-impersonation-visual', 'brand-impersonation-tenant', 'credential-form-foreign-domain',
     // (0.15.0) added by credentialFlags(): corroborated, non-popular evidence + a credential field.
     'nrd-credential', 'brand-lookalike-credential'];
   // Feed intel still counts on popular sites: a validated list hit is not a heuristic.
-  const FEED_FLAGS = ['feed-warn-verified', 'feed-warn-corroborated', 'feed-warn'];
+  const FEED_FLAGS = ['feed-warn-verified', 'feed-warn-corroborated'];
 
   // (0.15.0) USER_CONTENT_HOSTS / isUserContentHost live in engine/constants.js (single source of
   // truth; isSafeHost needs them and constants.js loads first). Re-exported unchanged below.
@@ -61,7 +62,7 @@
     const popular = effectivePopular(c.popular, c.host);
     if (popular && !has(STOP_FLAGS) && !has(FEED_FLAGS)) return 'quiet';
     if (verdict.level === 'dangerous') tier = 'warn';
-    else if (verdict.level === 'suspicious' && (has(CONFIDENT_FLAGS) || has(['feed-warn-verified']) || has(['feed-warn']))) tier = 'warn';
+    else if (verdict.level === 'suspicious' && has(CONFIDENT_FLAGS)) tier = 'warn';
     else tier = 'quiet';
     // Strict mode raises a warning to a stop; it never lifts quiet.
     if (c.strictMode === true && tier === 'warn') tier = 'stop';

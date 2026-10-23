@@ -17,6 +17,9 @@
       window.dispatchEvent(new CustomEvent('scamshield:clipboard-alert', {
         detail: {
           level: verdict.level, reasons: verdict.reasons, sample: String(sample || '').slice(0, 120),
+          // (0.15.0) the full written text (capped) so the isolated world can compare it with what the
+          // user actually selected / clicked. The comparison itself is never trusted from here.
+          full: String(sample || '').slice(0, 4096),
           // 0.14.0: was this write inside a real click/keypress handler? Chrome
           // only lets a copy through user activation anyway, but a page can
           // call writeText from a timer chained off an earlier gesture — this

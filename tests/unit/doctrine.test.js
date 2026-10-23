@@ -20,14 +20,17 @@ const table = [
   ['rule 3: popular + brand-impersonation-content -> quiet', v('dangerous', ['brand-impersonation-content']), ctx({ popular: true }), 'quiet'],
   ['rule 3: popular + credential-form-foreign-domain -> quiet', v('dangerous', ['credential-form-foreign-domain']), ctx({ popular: true }), 'quiet'],
   ['rule 3: popular + unflagged dangerous -> quiet', v('dangerous'), ctx({ popular: true }), 'quiet'],
-  ['rule 3: popular + feed-warn -> warn', v('suspicious', ['feed-warn']), ctx({ popular: true }), 'warn'],
+  ['rule 3: popular + unverified feed-warn -> quiet', v('suspicious', ['feed-warn']), ctx({ popular: true }), 'quiet'],
+  ['rule 3: popular + feed-warn-unverified -> quiet', v('suspicious', ['feed-warn-unverified']), ctx({ popular: true }), 'quiet'],
   ['rule 3: popular + feed-warn-verified -> warn', v('suspicious', ['feed-warn-verified']), ctx({ popular: true }), 'warn'],
-  ['rule 3: popular + feed-warn-corroborated dangerous -> warn', v('dangerous', ['feed-warn-corroborated', 'feed-warn']), ctx({ popular: true }), 'warn'],
+  ['rule 3: popular + feed-warn-corroborated dangerous -> warn', v('dangerous', ['feed-warn-corroborated', 'feed-warn', 'feed-warn-verified']), ctx({ popular: true }), 'warn'],
   ['rule 4: dangerous with a non-listed flag -> warn', v('dangerous', ['wallet-drainer']), ctx(), 'warn'],
   ['rule 4: dangerous no flags -> warn', v('dangerous'), ctx(), 'warn'],
   ['rule 5: suspicious + brand-impersonation-visual -> warn', v('suspicious', ['brand-impersonation-visual']), ctx(), 'warn'],
   ['rule 5: suspicious + tenant -> warn', v('suspicious', ['brand-impersonation-tenant']), ctx(), 'warn'],
-  ['rule 5: suspicious + feed-warn -> warn', v('suspicious', ['feed-warn']), ctx(), 'warn'],
+  ['rule 5: suspicious + verified feed-warn -> warn', v('suspicious', ['feed-warn', 'feed-warn-verified']), ctx(), 'warn'],
+  ['rule 5: suspicious + unverified feed-warn -> quiet', v('suspicious', ['feed-warn-unverified']), ctx(), 'quiet'],
+  ['rule 5: unverified feed-warn on a dangerous verdict still warns', v('dangerous', ['feed-warn-unverified']), ctx(), 'warn'],
   ['rule 6: non-popular suspicious no flags -> quiet', v('suspicious'), ctx(), 'quiet'],
   ['rule 6: suspicious with unrelated flag -> quiet', v('suspicious', ['new-domain']), ctx(), 'quiet'],
   ['rule 7: strict + quiet -> quiet', v('suspicious'), ctx({ strictMode: true }), 'quiet'],
@@ -48,7 +51,7 @@ for (const [name, verdict, c, expected] of table) {
 
 test('STOP_FLAGS and CONFIDENT_FLAGS are exported with the specified members', () => {
   assert.deepStrictEqual([...D.STOP_FLAGS].sort(), ['clickfix', 'delivery-fee-scam', 'fake-browser-update', 'feed-block', 'seed-phrase-harvest']);
-  assert.deepStrictEqual([...D.CONFIDENT_FLAGS].sort(), ['brand-impersonation-content', 'brand-impersonation-tenant', 'brand-impersonation-visual', 'brand-lookalike-credential', 'credential-form-foreign-domain', 'feed-warn-corroborated', 'nrd-credential']);
+  assert.deepStrictEqual([...D.CONFIDENT_FLAGS].sort(), ['brand-impersonation-content', 'brand-impersonation-tenant', 'brand-impersonation-visual', 'brand-lookalike-credential', 'credential-form-foreign-domain', 'feed-warn-corroborated', 'feed-warn-verified', 'nrd-credential']);
 });
 
 test('isUserContentHost: exact, subdomain, www, case-insensitive', () => {

@@ -17,16 +17,18 @@ const { expect } = require('@playwright/test');
 
 const BASE = 'http://localhost:5599';
 
+// (0.15.0) The clipboard toast now exists only for a background write (no user gesture), so these
+// use clipboard-auto.html. Playwright's own locator polling carries a user gesture, so the specs wait
+// idle (waitForTimeout) until the toast is up before touching it.
 test('toast: Don\'t warn here mutes the kind on the site, survives reload, Undo unmutes', async ({ context }) => {
   const page = await context.newPage(); const sw = context.serviceWorkers()[0];
-  await context.grantPermissions(['clipboard-read', 'clipboard-write'], { origin: BASE });
-  await page.goto(BASE + '/clipboard-copy-button.html'); await page.click('#c');
+  await page.goto(BASE + '/clipboard-auto.html'); await page.waitForTimeout(3500);
   await page.locator('.scamshield-toast .ss-mute').click();
   await expect(page.locator('.scamshield-ack')).toContainText(/won't show this warning/);
   expect((await sw.evaluate(() => getSettings())).mutedWarnings.localhost.clipboard.via).toBe('clipboard-toast');
-  await page.reload(); await page.click('#c'); await page.waitForTimeout(800); await expect(page.locator('.scamshield-toast')).toHaveCount(0);
+  await page.reload(); await page.waitForTimeout(3500); await expect(page.locator('.scamshield-toast')).toHaveCount(0);
   // Undo path:
-  await sw.evaluate(() => setSettings({ mutedWarnings: {} })); await page.reload(); await page.click('#c'); await expect(page.locator('.scamshield-toast')).toBeVisible();
+  await sw.evaluate(() => setSettings({ mutedWarnings: {} })); await page.reload(); await page.waitForTimeout(3500); await expect(page.locator('.scamshield-toast')).toBeVisible();
   await page.locator('.scamshield-toast .ss-mute').click(); await page.locator('.scamshield-ack .ss-undo').click();
   await expect.poll(async () => JSON.stringify((await sw.evaluate(() => getSettings())).mutedWarnings)).toBe('{}'); await page.close();
 });
@@ -34,7 +36,9 @@ test('toast: Don\'t warn here mutes the kind on the site, survives reload, Undo 
 test('mute is per kind: muting clipboard does not silence the leaky-form toast', async ({ context }) => {
   const page = await context.newPage(); const sw = context.serviceWorkers()[0];
   await sw.evaluate(() => setSettings({ mutedWarnings: { localhost: { clipboard: { via: 't', at: 1 } } } }));
-  await page.goto(BASE + '/leaky-form.html'); await page.fill('#email', 'jane.doe@example.com');
+  // 0.15.0: the leaky-form toast shows only on an already-warned page.
+  await page.goto(BASE + '/leaky-form-phish.html'); await expect(page.locator('.scamshield-banner.danger')).toBeVisible({ timeout: 8000 });
+  await page.fill('#email', 'jane.doe@example.com');
   await expect(page.locator('.scamshield-toast')).toContainText(/before you pressed/i, { timeout: 8000 }); await page.close();
 });
 

@@ -30,11 +30,31 @@ test('normal text is safe', () => {
   assert.strictEqual(analyzeClipboardWrite(null).level, 'safe');
 });
 
-test('clipboardTier: safe → none, clickfix → block, gesture → notice, no gesture → warn', () => {
-  assert.strictEqual(clipboardTier({ level: 'safe', clickfixLevel: 'dangerous', userGesture: true }), 'none');
-  assert.strictEqual(clipboardTier({ level: 'dangerous', clickfixLevel: 'dangerous', userGesture: true }), 'block');
-  assert.strictEqual(clipboardTier({ level: 'dangerous', clickfixLevel: 'suspicious', userGesture: true }), 'notice');
-  assert.strictEqual(clipboardTier({ level: 'suspicious', clickfixLevel: 'none', userGesture: true }), 'notice');
-  assert.strictEqual(clipboardTier({ level: 'dangerous', clickfixLevel: 'none', userGesture: false }), 'warn');
-  assert.strictEqual(clipboardTier({}), 'none');
+test('clipboardTier table (0.15.0): selectionMatches decides, gesture-copies never notice', () => {
+  const T = clipboardTier;
+  assert.strictEqual(T({ level: 'safe', clickfixLevel: 'dangerous', userGesture: true, selectionMatches: false }), 'none');
+  // The user chose to copy what they saw: nothing, even for a shell command or a clickfix-looking page.
+  assert.strictEqual(T({ level: 'dangerous', clickfixLevel: 'none', userGesture: true, selectionMatches: true }), 'none');
+  assert.strictEqual(T({ level: 'dangerous', clickfixLevel: 'dangerous', userGesture: true, selectionMatches: true }), 'none');
+  // A page that wrote something other than what the user selected is the ClickFix shape.
+  assert.strictEqual(T({ level: 'dangerous', clickfixLevel: 'dangerous', userGesture: true, selectionMatches: false }), 'block');
+  assert.strictEqual(T({ level: 'dangerous', clickfixLevel: 'dangerous', userGesture: false, selectionMatches: false }), 'block');
+  assert.strictEqual(T({ level: 'dangerous', clickfixLevel: 'dangerous', userGesture: false }), 'block');
+  // Without a verified mismatch a gesture copy is not blocked.
+  assert.strictEqual(T({ level: 'dangerous', clickfixLevel: 'dangerous', userGesture: true }), 'notice');
+  assert.strictEqual(T({ level: 'dangerous', clickfixLevel: 'suspicious', userGesture: true, selectionMatches: false }), 'notice');
+  assert.strictEqual(T({ level: 'suspicious', clickfixLevel: 'none', userGesture: true, selectionMatches: false }), 'notice');
+  assert.strictEqual(T({ level: 'dangerous', clickfixLevel: 'none', userGesture: false }), 'warn');
+  assert.strictEqual(T({ level: 'dangerous', clickfixLevel: 'none', userGesture: false, selectionMatches: true }), 'warn');
+  assert.strictEqual(T({}), 'none');
 });
+
+test('normalizeCopyText + copyMatches: whitespace-insensitive full-text comparison', () => {
+  const { normalizeCopyText, copyMatches } = require('../../engine/clipboard_rules');
+  assert.strictEqual(normalizeCopyText('  a \n\t b  '), 'a b');
+  assert.strictEqual(copyMatches('irm x | iex', ['Open it', 'irm  x |\n iex']), true);
+  assert.strictEqual(copyMatches('irm x | iex', ['something else', '']), false);
+  assert.strictEqual(copyMatches('', ['', '']), false);
+  assert.strictEqual(copyMatches('abc', []), false);
+});
+
