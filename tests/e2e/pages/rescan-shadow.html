@@ -1,0 +1,14 @@
+<!doctype html><meta charset="utf-8"><title>PayPal - Log in</title>
+<!-- Same kit, but the login step is a web component with an OPEN shadow root (0.15.0, Task 17b). -->
+<h1>PayPal</h1>
+<p>Log in to your PayPal account to continue.</p>
+<button id="next" type="button">Next</button>
+<div id="mount"></div>
+<script>
+document.getElementById('next').addEventListener('click', function () {
+  var host = document.createElement('login-step');
+  var sr = host.attachShadow({ mode: 'open' });
+  sr.innerHTML = '<form><input type="password" name="pw" placeholder="Password"><button type="submit">Log in</button></form>';
+  document.getElementById('mount').appendChild(host);
+});
+</script>

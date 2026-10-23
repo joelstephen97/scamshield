@@ -140,6 +140,24 @@
   // lure) show only on an already-warned page; before run() finishes they stay quiet.
   let pageTier = null;
   const pageWarned = () => pageTier === 'warn' || pageTier === 'stop';
+  // (0.15.0, Task 17b) querySelectorAll that also looks inside OPEN shadow roots of page components. Our own
+  // <scamshield-surface> hosts are skipped. Bounded (600 hosts) so a component-heavy page cannot make it costly.
+  function deepQueryAll(sel, rootNode) {
+    const out = [];
+    let budget = 600;
+    (function walk(r) {
+      try { for (const n of r.querySelectorAll(sel)) out.push(n); } catch (_) {}
+      let hosts; try { hosts = r.querySelectorAll('*'); } catch (_) { return; }
+      for (const h of hosts) {
+        if (budget <= 0) return;
+        const sr = h.shadowRoot;
+        if (!sr) continue;
+        if (h.localName === 'scamshield-surface') continue;
+        budget--; walk(sr);
+      }
+    })(rootNode || document);
+    return out;
+  }
   // (0.15.0) Last real (isTrusted) pointer target: lets the clipboard bridge tell "the user clicked
   // Copy next to a visible code block" from "the page wrote something the user never saw".
   let lastClickTarget = null;
@@ -499,14 +517,16 @@
     const isVisiblePassword = (inp) => {
       if (inp.disabled) return false;
       if (!(inp.offsetWidth > 0 || inp.getClientRects().length)) return false;
-      if (inp.closest('[hidden],[aria-hidden="true"]')) return false;
-      for (let el = inp; el && el.nodeType === 1; el = el.parentElement) {
+      // Walks up through shadow boundaries (el.parentElement stops at a shadow root, so hop to its host).
+      for (let el = inp; el && el.nodeType === 1; el = el.parentElement || (el.getRootNode && el.getRootNode().host) || null) {
+        if (el.matches('[hidden],[aria-hidden="true"]')) return false;
         const cs = getComputedStyle(el);
         if (cs.display === 'none' || cs.visibility === 'hidden') return false;
       }
       return true;
     };
-    const visiblePasswords = [...document.querySelectorAll('input[type="password"]')].filter(isVisiblePassword);
+    // (0.15.0, Task 17b) Password fields inside OPEN shadow roots of page components count too (login widgets).
+    const visiblePasswords = deepQueryAll('input[type="password"]').filter(isVisiblePassword);
     const hasVisiblePasswordField = visiblePasswords.length > 0;
     // (0.15.0) Logo alts count only when logo-sized AND in the header region or next to a
     // visible password field (its form / nearest section|main|dialog). [aria-label] is
@@ -1085,7 +1105,8 @@
   // time, run() rewrites it in place as the verdict firms up (0.14.1).
   const formGuardReasons = [];
 
-  async function run() {
+  async function run(opts) {
+    const rescan = !!(opts && opts.rescan); // (0.15.0, Task 17b) mid-scroll re-check: may only escalate
     if (!SS || typeof SS.scoreUrl !== 'function') return; // engine not loaded
     // Sub-frame gate: only frames a user can actually interact with, and only
     // when they hold something phishable — keeps all_frames near-free on
@@ -1104,20 +1125,20 @@
     // Live link guard (0.15.0, Task 15): marks links to known scam sites as they appear and asks before opening
     // one. Runs on every top-frame page, trusted ones included (feeds and mail are where the links arrive);
     // destinations the user trusts or that are popular are skipped inside it.
-    if (IS_TOP && settings.linkGuard !== false && SS.linkGuard) {
+    if (!rescan && IS_TOP && settings.linkGuard !== false && SS.linkGuard) {
       popupSettings = settings;
       try { SS.linkGuard.start({ send, surface, t, isTrusted: (h) => isTrustedHost(h, settings) }); } catch (_) {}
     }
     // Scam-ad hiding (0.15.0, Task 17a): only ads that lead to a listed site or read like a scam are collapsed. It
     // reuses the link guard's lookup; with the link guard switched off, that lookup runs passive (no marks, no clicks).
-    if (IS_TOP && settings.adGuard !== false && SS.adGuard && !userExempt(location.hostname, settings)) {
+    if (!rescan && IS_TOP && settings.adGuard !== false && SS.adGuard && !userExempt(location.hostname, settings)) {
       try {
         if (settings.linkGuard === false) SS.linkGuard.start({ send, surface, t, isTrusted: (h) => isTrustedHost(h, settings), passive: true });
         SS.adGuard.start({ surface, t, isTrusted: (h) => isTrustedHost(h, settings) });
       } catch (_) {}
     }
     // Sponsored-search check runs even on (trusted) search-engine hosts.
-    if (IS_TOP && settings.serpCheck !== false && SS.isSerpPage(location.hostname, location.pathname, location.search)) {
+    if (!rescan && IS_TOP && settings.serpCheck !== false && SS.isSerpPage(location.hostname, location.pathname, location.search)) {
       // (0.15.0) results pages only: Gmail, Docs, Maps and News on google.* get nothing.
       try { checkSerp(); } catch (_) {}
       try { annotateSerpResults(); ensureSerpBadgeObserver(); } catch (_) {}
@@ -1131,7 +1152,7 @@
     // only. Fire-and-forget — a QR decode pass must never delay the rest of
     // this page's own verdict — and scheduled onto idle time so it never
     // competes with the checks below for the main thread.
-    if (IS_TOP && settings.qrAutoScan !== false && typeof SS.jsQR === 'function') {
+    if (!rescan && IS_TOP && settings.qrAutoScan !== false && typeof SS.jsQR === 'function') {
       scheduleIdle(() => autoScanQr(settings));
       try { ensureQrAutoScanObserver(settings); } catch (_) {}
     }
@@ -1315,7 +1336,7 @@
     // Fake-shop check (0.6.0) — top frame, storefront pages only. Reported to
     // the popup's shopping card ONLY (0.15.0): shop findings never change the verdict level —
     // they are probabilistic and an ordinary shop ("bank transfer", opening hours) tripped them.
-    if (IS_TOP && settings.shopGuard !== false && SS.scoreShop) {
+    if (!rescan && IS_TOP && settings.shopGuard !== false && SS.scoreShop) {
       try {
         const shop = await collectShop((document.body ? document.body.innerText : ''), location.hostname);
         const sr = SS.scoreShop(shop);
@@ -1359,6 +1380,9 @@
     }
     // Warning doctrine (0.15.0): one pure function decides stop / warn / quiet.
     const tier = SS.surfaceTier(verdict, { popular: feedPopular, strictMode: settings.strictMode === true, isTop: IS_TOP, host: location.hostname });
+    // Mid-scroll rescan (0.15.0, Task 17b): only a HIGHER tier than the one already decided goes on. A rescan never
+    // downgrades, never re-reports an unchanged page, and never adds a warning the first scan did not have.
+    if (rescan && tierRank(tier) <= tierRank(pageTier)) return;
     try { window.__ssLastVerdict = verdict; window.__ssLastTier = tier; } catch (_) {}
     pageTier = tier;
     // Tell the MAIN-world guard (popunder / fullscreen / notification-prompt suppression is warn/stop only).
@@ -1372,6 +1396,8 @@
       };
     } catch (_) { report = null; }
     await send('reportVerdict', { verdict, report, subframe: !IS_TOP, tier });
+    // A warning the user already dismissed on this page stays dismissed (the tier and badge still update above).
+    if (rescan && pageDismissed) { formGuardReasons.splice(0, formGuardReasons.length, ...(verdict.reasons || [])); return; }
     const interrupts = tier === 'stop' || tier === 'warn';
     if (interrupts && verdict.level === 'dangerous') send('bumpThreats');
 
@@ -1381,10 +1407,11 @@
         verdict.brandUrl = 'https://' + SS.BRAND_DOMAINS[verdict.brand][0] + '/';
         verdict.brandLabel = SS.brandDisplayName ? SS.brandDisplayName(verdict.brand) : verdict.brand;
       }
-      const handlers = { onLeave: () => send('leaveTab'), onReport: reportMistake, onShown: surface, onHide: (choice) => { send('warnDismissed', { domain: pageDomain }); return send('pauseSite', { domain: pageDomain, choice }); } };
+      const onShown = rescan ? (kind, once) => surface(kind, once, { rescan: true }) : surface;
+      const handlers = { onLeave: () => send('leaveTab'), onReport: reportMistake, onShown, onDismiss: () => { pageDismissed = true; }, onHide: (choice) => { send('warnDismissed', { domain: pageDomain }); return send('pauseSite', { domain: pageDomain, choice }); } };
       if (tier === 'stop' && SS.actions.dangerInterstitial) {
         SS.actions.dangerInterstitial(verdict, handlers);
-        surface('interstitial');
+        onShown('interstitial');
       } else {
         // Interruption budget (0.15.0): at most one banner per site per day, quiet after two
         // dismissals. Fails open (a failed/slow budget call still warns); badge stays '!'.
@@ -1408,6 +1435,85 @@
       // hideScamBlocks returns how many blocks it newly hid (it skips already-hidden nodes), so a re-run logs nothing.
       if (SS.actions.hideScamBlocks(scamBlocks) > 0) surface('hidden-blocks');
     }
+    if (!rescan && IS_TOP && !rescanStarted) { rescanStarted = true; try { startRescanWatch(); } catch (_) {} }
+  }
+
+  // ---- Mid-scroll rescan (0.15.0, Task 17b) --------------------------------------------------------------
+  // A multi-step phishing kit shows its password field only after "Next", and scareware paints its overlay a
+  // moment after load. A cheap observer notices such late arrivals and re-runs the SAME scoring (run({rescan})),
+  // which may only ESCALATE the tier. Limits: 500 ms debounce, at most 1 per 3 s, at most 5 per page; an SPA
+  // navigation resets the counter. The observer callback only queues nodes; every check runs in the debounced
+  // pass, on at most 30 candidates, so a busy page pays nothing per mutation.
+  const tierRank = (t) => (t === 'stop' ? 2 : t === 'warn' ? 1 : 0);
+  let pageDismissed = false, rescanStarted = false, rescanCount = 0, rescanLast = 0, rescanTimer = 0, rescanGapTimer = 0, rescanRunning = false;
+  const rescanQueue = new Set();
+  const RESCAN_MAX = 5, RESCAN_GAP = 3000, RESCAN_DEBOUNCE = 500, RESCAN_BATCH = 30;
+  const RESCAN_FIELD_SEL = 'input[type="password"], input[autocomplete="cc-number"], input[autocomplete="cc-csc"]';
+  const RESCAN_STYLE_HINT = /fixed|sticky/i, RESCAN_CLASS_HINT = /overlay|modal|popup|lightbox|backdrop|fixed|sticky|alert|warning|dialog/i;
+  const rescanStats = { triggers: 0, rescans: 0, triggerMs: 0 };
+  try { window.__ssRescanStats = rescanStats; } catch (_) {}
+
+  function rescanCandidateHits(el, vw, vh) {
+    if (!el || el.nodeType !== 1 || el.localName === 'scamshield-surface' || !el.isConnected) return false;
+    const tag = el.localName;
+    if (tag === 'dialog' || el.getAttribute('role') === 'dialog' || el.getAttribute('role') === 'alertdialog') return el.getClientRects().length > 0;
+    if (tag === 'iframe') { const r = el.getBoundingClientRect(); return r.width >= 300 && r.height >= 300; }
+    // A new visible password / card field: in this element, its subtree, or its own open shadow root.
+    let fields = null;
+    if (tag === 'input') fields = el.matches(RESCAN_FIELD_SEL) ? [el] : null;
+    else {
+      const f = Array.from(el.querySelectorAll(RESCAN_FIELD_SEL));
+      if (el.shadowRoot && el.localName !== 'scamshield-surface') for (const x of deepQueryAll(RESCAN_FIELD_SEL, el.shadowRoot)) f.push(x);
+      fields = f.length ? f : null;
+    }
+    if (fields) for (const f of fields) if (f.getClientRects().length > 0 && !f.disabled && f.type !== 'hidden') return true;
+    // A fixed/sticky element covering at least half the viewport: only when an inline style or class hints at it.
+    const cls = typeof el.className === 'string' ? el.className : '';
+    if (RESCAN_STYLE_HINT.test(el.getAttribute('style') || '') || RESCAN_CLASS_HINT.test(cls)) {
+      const r = el.getBoundingClientRect();
+      if (r.width * r.height >= 0.5 * vw * vh) {
+        const pos = getComputedStyle(el).position;
+        if (pos === 'fixed' || pos === 'sticky') return true;
+      }
+    }
+    return false;
+  }
+
+  function rescanPass() {
+    rescanTimer = 0;
+    const t0 = performance.now();
+    const vw = window.innerWidth || 0, vh = window.innerHeight || 0;
+    const nodes = Array.from(rescanQueue).slice(0, RESCAN_BATCH); rescanQueue.clear();
+    let hit = false;
+    for (const el of nodes) { try { if (rescanCandidateHits(el, vw, vh)) { hit = true; break; } } catch (_) {} }
+    rescanStats.triggerMs += performance.now() - t0;
+    if (!hit) return;
+    rescanStats.triggers++;
+    launchRescan();
+  }
+  function launchRescan() {
+    if (rescanCount >= RESCAN_MAX || rescanRunning) return;
+    const wait = RESCAN_GAP - (Date.now() - rescanLast);
+    if (wait > 0) { // at most one per 3 s: go once the gap has passed
+      if (!rescanGapTimer) rescanGapTimer = setTimeout(() => { rescanGapTimer = 0; launchRescan(); }, wait);
+      return;
+    }
+    rescanCount++; rescanLast = Date.now(); rescanRunning = true;
+    rescanStats.rescans++;
+    run({ rescan: true }).catch(() => {}).then(() => { rescanRunning = false; });
+  }
+
+  function startRescanWatch() {
+    if (!('MutationObserver' in root) || !document.documentElement) return;
+    const queue = (n) => { if (rescanQueue.size < 200 && n && n.nodeType === 1) rescanQueue.add(n); };
+    const mo = new MutationObserver((records) => {
+      for (const rec of records) {
+        if (rec.type === 'attributes') queue(rec.target);
+        else for (const n of rec.addedNodes) queue(n);
+      }
+      if (rescanQueue.size && !rescanTimer) rescanTimer = setTimeout(rescanPass, RESCAN_DEBOUNCE);
+    });
+    mo.observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'class', 'hidden', 'open'] });
   }
 
   let lastUrl = location.href;
@@ -1422,6 +1528,7 @@
     // them rather than staying exhausted for the rest of the tab's life.
     serpBadgeBudget = SERP_BADGE_CAP;
     clipboardSeen.clear();
+    rescanCount = 0; rescanLast = 0; pageDismissed = false; pageTier = null; // (0.15.0, Task 17b) a new SPA page gets a fresh rescan budget
     navTimer = setTimeout(() => { if (SS && SS.actions) SS.actions.clearAll(); run(); }, 400);
   });
 

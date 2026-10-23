@@ -1,0 +1,7 @@
+<!doctype html><meta charset="utf-8"><title>Acme Notes</title>
+<!-- An ordinary page whose sign-in dialog opens late: the rescan runs but must add no warning. -->
+<h1>Acme Notes</h1>
+<p>Your notes, everywhere.</p>
+<button id="open" type="button">Sign in</button>
+<dialog id="d"><form onsubmit="return false"><label>Email <input name="e"></label><label>Password <input type="password" name="p"></label><button>Sign in</button></form></dialog>
+<script>document.getElementById('open').addEventListener('click', function () { document.getElementById('d').showModal(); });</script>

@@ -457,7 +457,7 @@
       const closeLabel = !canStore() ? t('ariaDismiss', null, 'Dismiss') : danger ? t('bannerHideHour', null, 'Hide for an hour') : t('bannerHideDay', null, 'Hide for a day');
       const close = button('ss-x', ''); const glyph = el('span', 'ss-x-glyph', '✕'); glyph.setAttribute('aria-hidden', 'true'); close.append(glyph, el('span', 'ss-x-label', closeLabel));
       close.setAttribute('aria-label', closeLabel); close.title = closeLabel;
-      onTrustedClick(close, () => { dismiss(); if (!x.noTrust && x.onHide && canStore()) x.onHide(choice); });
+      onTrustedClick(close, () => { dismiss(); if (x.onDismiss) { try { x.onDismiss(); } catch (_) {} } /* (0.15.0, Task 17b) always, even where nothing is stored: a mid-scroll rescan must not re-show it */ if (!x.noTrust && x.onHide && canStore()) x.onHide(choice); });
       acts.append(moreBtn, close, menu); bar.appendChild(acts);
       return bar;
     }, { topLayer: 'popover', theme, onShown: x.restore ? undefined : x.onShown }); // (0.15.0) an Undo restore is not a new showing: no second surface-log row

