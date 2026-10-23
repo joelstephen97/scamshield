@@ -75,7 +75,7 @@
     // double-count it (see below).
     const fsx = BM && BM.brandForeignSuffix && BM.brandForeignSuffix(host);
     if (BM && BM.allowlistBrandMatch && !BM.allowlistBrandMatch(host)) {
-      const fuzzy = BM.fuzzyBrandMatch(host);
+      const fuzzy = BM.fuzzyBrandMatch(host, riskTlds);
       // 0.13.0 final review: for "roblox.com.do" the fuzzy TLD-swap grade
       // (rule c) and brandForeignSuffix are the SAME observation — an exact
       // brand SLD under a suffix the brand doesn't use — and stacking

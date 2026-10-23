@@ -213,12 +213,14 @@
 
   // (0.15.0) Exact brand SLD on a ccTLD-shaped, non-abused suffix of a brand that has
   // regional storefronts. Shared shape with heuristics.js isOnBrand's exactBrandCc.
-  function isRegionalSite(brand, suffix) {
+  function isRegionalSite(brand, suffix, riskTlds) {
     const sfx = String(suffix || '');
     if (!sfx) return false;
     const tld = sfx.split('.').pop();
     const ccShaped = (C.MULTI_LABEL_SUFFIXES || []).includes(sfx) || tld.length === 2;
     if (!ccShaped || (C.SUSPICIOUS_TLDS || []).includes(tld)) return false;
+    // (0.15.0) a TLD the feed's abused-TLD table lists is never a "regional site" (paypal.su).
+    if (riskTlds && typeof riskTlds === 'object' && typeof riskTlds['.' + tld] === 'number') return false;
     const b = BRANDS_BY_KEY && BRANDS_BY_KEY[brand];
     return !(b && b.ccPolicy === 'closed');
   }
@@ -231,7 +233,7 @@
   // own label. Returns `{ grade, rule }` (rule 'a'..'e') or null — callers
   // that need to know WHICH rule fired (engine/heuristics.js dedupes rules
   // c/d/e against brandForeignSuffix, which is the same evidence) read it.
-  function gradeAgainst(brand, form, hostForm, subLabels, sld, suffix) {
+  function gradeAgainst(brand, form, hostForm, subLabels, sld, suffix, riskTlds) {
     // Rules (a)/(b) match the raw brand KEY as a whole token, so they need a
     // key long enough to be distinctive: a 2-3 letter key (fab, icp, ups,
     // ing, dib, du) hits every hyphenated host that happens to contain those
@@ -268,7 +270,7 @@
     // storefronts, so no grade at all (mirrors isOnBrand's exactBrandCc in heuristics.js).
     // Closed brands (roblox.com.do) keep the grade and brandForeignSuffix.
     if (sld === form) {
-      if (isRegionalSite(brand, suffix)) return null;
+      if (isRegionalSite(brand, suffix, riskTlds)) return null;
       return { grade: 'strong', rule: 'c' };
     }
     // d) homoglyph substitution match (exact, after normalising).
@@ -286,7 +288,7 @@
   // CALLERS MUST check allowlistBrandMatch(host) first and skip this entirely
   // on a hit — this function assumes the host is not already on a real
   // brand domain (requirement 2's short-circuit).
-  function fuzzyBrandMatch(host) {
+  function fuzzyBrandMatch(host, riskTlds) {
     const h = String(host || '').toLowerCase();
     const hostForm = fuzzyForm(h);
     // No whole-form length floor here: the SLD floor lives inside
@@ -299,7 +301,7 @@
     const subLabels = labels.slice(0, Math.max(0, labels.length - domainLabelCount));
     let best = null;
     for (const { brand, form } of candidates()) {
-      const g = gradeAgainst(brand, form, hostForm, subLabels, parts.sld, parts.suffix);
+      const g = gradeAgainst(brand, form, hostForm, subLabels, parts.sld, parts.suffix, riskTlds);
       if (!g) continue;
       if (!best || GRADE_RANK[g.grade] > GRADE_RANK[best.grade]) best = { brand, grade: g.grade, rule: g.rule };
     }

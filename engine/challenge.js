@@ -16,9 +16,12 @@
   const SHORT_BODY = 600;
 
   // features: { title, textSample (short visible text), bodyTextLength,
-  //             frameHosts: iframe/script src hosts (host or host+path strings) }
+  //             frameHosts: iframe/script src hosts (host or host+path strings),
+  //             hasCredentialField: a visible password or card input }
   function isChallengePage(features) {
     const f = features || {};
+    // (0.15.0) A visible login/card form is never a bot gate: a lookalike phish can quote the wording.
+    if (f.hasCredentialField) return false;
     const words = String(f.title || '') + ' ' + String(f.textSample || '');
     if (!CHALLENGE_WORDING.test(words)) return false;
     const frames = Array.isArray(f.frameHosts) ? f.frameHosts : [];

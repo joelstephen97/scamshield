@@ -1139,7 +1139,7 @@
           try { const u = new URL(el.getAttribute('src'), location.href); frameHosts.push(u.hostname + u.pathname); } catch (_) {}
           if (frameHosts.length >= 60) break;
         }
-        if (SS.isChallengePage({ title: document.title, textSample: txt.slice(0, 600), bodyTextLength: txt.trim().length, frameHosts })) {
+        if (SS.isChallengePage({ title: document.title, textSample: txt.slice(0, 600), bodyTextLength: txt.trim().length, frameHosts, hasCredentialField: !!(signals.hasVisiblePasswordField || signals.hasCardInput) })) {
           verdict = Object.assign({}, verdict, { level: 'safe', reasons: [], reasonCodes: [], suppressed: 'challenge' });
         }
       } catch (_) { /* best-effort */ }

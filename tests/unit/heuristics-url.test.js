@@ -120,3 +120,10 @@ test('scoreUrl reports riskScore equal to the riskAbusedTld weight when it hits,
   const stock = scoreUrl('https://example.top/');
   assert.ok(Math.abs((withTable.score - stock.score) - withTable.riskScore) < 1e-9);
 });
+
+test('an abused TLD from the feed table is never "regional" (0.15.0)', () => {
+  const risk = { '.su': 0.3 };
+  assert.ok(scoreUrl('https://paypal.su/', risk).reasons.some((x) => x.code === 'brandFuzzyMatch'));
+  assert.ok(!scoreUrl('https://www.paypal.de/', risk).reasons.some((x) => x.code === 'brandFuzzyMatch'));
+  assert.ok(!scoreUrl('https://paypal.su/').reasons.some((x) => x.code === 'brandFuzzyMatch'));
+});

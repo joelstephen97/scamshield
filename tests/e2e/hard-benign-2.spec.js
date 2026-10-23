@@ -91,3 +91,10 @@ test('a user-content host of a safe registrable (sites.google.com) is still chec
   await page.goto('http://sites.google.com:5599/techscam.html');
   await expect(page.locator('.scamshield-overlay')).toBeVisible({ timeout: 10000 });
 });
+
+// Recall negative: challenge wording + a visible login form on a lookalike host is still a warning.
+test('challenge wording with a visible password form on a lookalike host still warns (no challenge override)', async ({ context }) => {
+  const page = await context.newPage();
+  await page.goto(`https://paypa1-verify-human.com:5600/challenge-phish.html`);
+  await expect(page.locator('.scamshield-banner')).toBeVisible({ timeout: 8000 });
+});

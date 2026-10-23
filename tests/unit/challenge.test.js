@@ -32,3 +32,7 @@ test('handles missing input', () => {
 test('long body is never short-circuited by an unrelated short sample', () => {
   assert.strictEqual(isChallengePage({ title: 'Blog', textSample: long.slice(0, 200), bodyTextLength: long.length, frameHosts: [] }), false);
 });
+
+test('a visible credential field disables the challenge override (lookalike phish quoting the wording)', () => {
+  assert.strictEqual(isChallengePage({ title: 'Verify you are human', textSample: 'verify you are human', bodyTextLength: 100, frameHosts: ['hcaptcha.com'], hasCredentialField: true }), false);
+});
