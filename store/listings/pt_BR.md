@@ -84,16 +84,15 @@ Números concretos, não adjetivos: 20 idiomas com tradução completa de menus,
 
 Código-fonte, política de privacidade e rastreador de problemas: github.com/joelstephen97/scamshield
 
-## What's new (0.13.0)
+## What's new (0.15.0)
 
-• Uma lista urgente a cada hora. Além da lista de ameaças reconstruída diariamente, o ScamShield agora baixa uma vez por hora uma lista curta de sites denunciados nas últimas 48 horas. Um site de golpe que surgiu hoje de manhã costuma ser bloqueado antes de carregar, cerca de uma hora depois da denúncia. É o mesmo arquivo público para todo mundo, baixado como qualquer outro arquivo: sem conta, e nada sobre você ou sua navegação vai a lugar nenhum.
-
-• Confiar neste site, a partir de qualquer aviso. O banner, o aviso em tela cheia e a página de bloqueio agora trazem um "Não é golpe? Confiar neste site" em um clique, com desfazer caso você aperte sem querer. Os sites em que você confiou a partir de um aviso ficam marcados assim nas configurações, então você sempre vê como cada um entrou na lista.
-
-• Mais marcas cobertas. O detector de imitações agora conhece mais de 300 marcas, então mais telas de login falsas de bancos, entregas e jogos são reconhecidas pelo nome além do logotipo.
-
-• Menos alarmes falsos em sites reais. Sites legítimos de bancos, órgãos públicos e empresas que usam um endereço de tipo nacional (por exemplo o domínio .bank.in do próprio banco) não recebem mais um aviso.
-
-• Medido, não prometido: em 134 páginas de phishing recentes, o ScamShield 0.13.0 bloqueou 56 % antes de carregarem e interrompeu 69 % no total, sem uma única requisição a qualquer servidor do ScamShield. Método em docs/benchmark.md.
+• Bem menos alarmes falsos. Sites populares, sites regionais, domínios do Google por país, páginas de verificação anti-robô e feeds com login feito não são mais sinalizados. Páginas comuns não mostram nada, e achados menores aparecem só no popup.
+• Discreto por padrão. No máximo um aviso por site por dia, e um site que você dispensa duas vezes fica em silêncio por 30 dias. Você pode desfazer em Opções.
+• Novo botão "Este site é seguro" nos avisos e no popup.
+• Proteção enquanto você rola a página. Links de golpe são marcados e pedem confirmação antes de abrir. Anúncios de golpe são ocultados (não é um bloqueador de anúncios geral). As páginas não conseguem mais abrir sites bloqueados por conta própria, e frames e scripts de golpe de sites da lista são bloqueados.
+• Falsas telas de login que aparecem depois que a página carrega agora também são detectadas.
+• Avisos redesenhados que se ajustam a celulares, tablets, notebooks e telas ultralargas, nos modos claro, escuro e da direita para a esquerda.
+• "O que o ScamShield mostrou" em Opções, com um botão para copiar o diagnóstico, e um novo guia inicial com um aviso de demonstração.
+• Suporte ao Firefox para Android e melhorias de acessibilidade.
 
 Nenhuma permissão nova. Continuam sendo storage, declarativeNetRequest, alarms e acesso http/https, os mesmos de todas as versões desde a 0.3.1.

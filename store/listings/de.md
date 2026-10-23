@@ -84,16 +84,15 @@ Harte Zahlen, keine Werbeversprechen: 20 Sprachen mit vollständig übersetzten 
 
 Quellcode, Datenschutzerklärung und Fehler-Tracker: github.com/joelstephen97/scamshield
 
-## What's new (0.13.0)
+## What's new (0.15.0)
 
-• Eine stündlich aktualisierte Kurzliste. Neben der täglich neu erstellten Bedrohungsliste lädt ScamShield jetzt einmal pro Stunde eine kleine Liste von Seiten herunter, die in den letzten 48 Stunden gemeldet wurden. Eine Betrugsseite, die heute Morgen aufgetaucht ist, wird meist schon rund eine Stunde nach der Meldung gestoppt, bevor sie laden kann. Es ist dieselbe öffentliche Datei für alle, geladen wie jeder andere Download: kein Konto, und nichts über dich oder dein Surfverhalten geht irgendwohin.
-
-• Dieser Seite vertrauen, aus jeder Warnung heraus. Das Banner, die ganzseitige Warnung und die Blockseite haben jetzt alle ein "Kein Betrug? Dieser Seite vertrauen" mit einem Klick, samt Rückgängig, falls du es versehentlich drückst. Seiten, denen du aus einer Warnung heraus vertraut hast, sind in den Einstellungen entsprechend markiert, sodass du immer siehst, wie jede einzelne dorthin gelangt ist.
-
-• Mehr abgedeckte Marken. Die Nachahmer-Prüfung kennt jetzt über 300 Marken, sodass mehr gefälschte Anmeldeseiten von Banken, Zustelldiensten und Spieleanbietern nicht nur am Logo, sondern auch am Namen erkannt werden.
-
-• Weniger Fehlalarme auf echten Seiten. Echte Seiten von Banken, Behörden und Unternehmen mit einer länderspezifischen Adresse (etwa der eigenen .bank.in-Domain einer Bank) bekommen kein Warnbanner mehr.
-
-• Gemessen statt behauptet: Bei 134 frischen Phishing-Seiten hat ScamShield 0.13.0 56 % blockiert, bevor sie geladen wurden, und insgesamt 69 % gestoppt — ohne eine einzige Anfrage an irgendeinen ScamShield-Server. Methode: docs/benchmark.md.
+• Deutlich weniger Fehlalarme. Beliebte Seiten, regionale Seiten, Google-Länderdomains, Bot-Prüfseiten und Feeds nach dem Login werden nicht mehr markiert. Normale Seiten zeigen nichts an, kleinere Funde erscheinen nur im Popup.
+• Standardmäßig leise. Höchstens eine Warnung pro Seite und Tag, und eine Seite, die du zweimal wegklickst, bleibt 30 Tage still. Das lässt sich in den Optionen rückgängig machen.
+• Neu: die Schaltfläche "Diese Seite ist in Ordnung" in Warnungen und im Popup.
+• Schutz beim Scrollen. Betrugslinks werden markiert und fragen vor dem Öffnen nach. Betrugsanzeigen werden ausgeblendet (das ist kein allgemeiner Werbeblocker). Seiten können keine gesperrten Seiten mehr von selbst öffnen, und Betrugs-Frames und -Skripte von gelisteten Seiten werden blockiert.
+• Falsche Anmeldeseiten, die erst nach dem Laden erscheinen, werden jetzt auch erkannt.
+• Neu gestaltete Warnungen, die auf Smartphones, Tablets, Laptops und Ultrabreit-Monitore passen, in hellem und dunklem Design und von rechts nach links.
+• "Was ScamShield gezeigt hat" in den Optionen, mit einer Schaltfläche zum Kopieren der Diagnose, dazu eine neue Starthilfe mit Beispielwarnung.
+• Unterstützung für Firefox für Android und Verbesserungen bei der Barrierefreiheit.
 
 Keine neuen Berechtigungen. Weiterhin storage, declarativeNetRequest, alarms und http/https-Zugriff, wie in jeder Version seit 0.3.1.

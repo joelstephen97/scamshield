@@ -84,16 +84,15 @@ Des chiffres concrets, pas des adjectifs : 20 langues avec traduction complète 
 
 Code source, politique de confidentialité et suivi des problèmes : github.com/joelstephen97/scamshield
 
-## What's new (0.13.0)
+## What's new (0.15.0)
 
-• Une liste urgente toutes les heures. En plus de la liste des menaces reconstruite chaque jour, ScamShield télécharge désormais, une fois par heure, une courte liste des sites signalés au cours des 48 dernières heures. Un site frauduleux apparu ce matin est généralement bloqué avant de pouvoir se charger, environ une heure après son signalement. C'est le même fichier public pour tout le monde, téléchargé comme n'importe quel fichier : aucun compte, et rien vous concernant ni concernant votre navigation ne part où que ce soit.
-
-• Faire confiance à ce site, depuis n'importe quel avertissement. La bannière, l'avertissement plein écran et la page de blocage proposent maintenant tous un « Ce n'est pas une arnaque ? Faire confiance à ce site » en un clic, avec annulation si vous appuyez dessus par erreur. Les sites approuvés depuis un avertissement sont signalés comme tels dans les paramètres, pour que vous voyiez toujours comment chacun est arrivé dans la liste.
-
-• Plus de marques couvertes. Le détecteur de sosies connaît désormais plus de 300 marques : davantage de fausses pages de connexion bancaires, de livraison ou de jeu sont repérées par le nom autant que par le logo.
-
-• Moins de fausses alertes sur les vrais sites. Les sites authentiques de banques, d'administrations et d'entreprises qui utilisent une adresse de type national (par exemple le domaine .bank.in propre à une banque) ne déclenchent plus de bannière.
-
-• Mesuré, pas affirmé : sur 134 pages d'hameçonnage récentes, ScamShield 0.13.0 en a bloqué 56 % avant leur chargement et en a arrêté 69 % au total, sans une seule requête vers un serveur ScamShield. Méthode : docs/benchmark.md.
+• Beaucoup moins de fausses alertes. Les sites populaires, les sites régionaux, les domaines Google par pays, les pages de vérification anti-robots et les fils après connexion ne sont plus signalés. Les pages ordinaires n'affichent rien, et les constats mineurs apparaissent seulement dans la fenêtre contextuelle.
+• Discret par défaut. Au plus un avertissement par site et par jour, et un site que vous écartez deux fois reste silencieux pendant 30 jours. Vous pouvez l'annuler dans les Options.
+• Nouveau bouton « Ce site est sûr » dans les avertissements et dans la fenêtre contextuelle.
+• Protection pendant le défilement. Les liens frauduleux sont marqués et demandent confirmation avant de s'ouvrir. Les publicités frauduleuses sont masquées (ce n'est pas un bloqueur de publicités général). Les pages ne peuvent plus ouvrir d'elles-mêmes des sites bloqués, et les cadres et scripts frauduleux de sites listés sont bloqués.
+• Les fausses pages de connexion qui apparaissent après le chargement sont désormais repérées aussi.
+• Avertissements repensés, adaptés aux téléphones, tablettes, ordinateurs portables et écrans ultra-larges, en thème clair, sombre et de droite à gauche.
+• « Ce que ScamShield a affiché » dans les Options, avec un bouton pour copier le diagnostic, et un nouveau guide de démarrage avec un avertissement de démonstration.
+• Prise en charge de Firefox pour Android et améliorations d'accessibilité.
 
 Aucune nouvelle autorisation. Toujours storage, declarativeNetRequest, alarms et l'accès http/https, comme dans chaque version depuis la 0.3.1.

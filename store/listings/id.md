@@ -84,16 +84,15 @@ Angka pasti, bukan kata sifat: 20 bahasa dengan terjemahan lengkap untuk menu, p
 
 Kode sumber, kebijakan privasi, dan pelacak masalah: github.com/joelstephen97/scamshield
 
-## What's new (0.13.0)
+## What's new (0.15.0)
 
-• Daftar terkini setiap jam. Selain daftar ancaman yang disusun ulang setiap hari, ScamShield kini mengunduh daftar pendek berisi situs yang dilaporkan dalam 48 jam terakhir, sekali tiap jam. Situs penipuan yang muncul pagi ini biasanya sudah dihentikan sebelum sempat dimuat, sekitar satu jam setelah dilaporkan. Berkasnya bersifat publik dan sama untuk semua orang, diunduh seperti unduhan berkas biasa: tanpa akun, dan tidak ada apa pun tentang Anda atau penjelajahan Anda yang dikirim ke mana pun.
-
-• Percayai situs ini, dari peringatan mana pun. Spanduk, peringatan satu layar penuh, dan halaman pemblokiran kini sama-sama menyediakan "Bukan penipuan? Percayai situs ini" dalam satu klik, lengkap dengan urungkan bila Anda menekannya tanpa sengaja. Situs yang Anda percayai lewat peringatan diberi tanda di Pengaturan, jadi Anda selalu tahu bagaimana masing-masing bisa masuk daftar.
-
-• Cakupan merek lebih luas. Pemeriksa tiruan kini mengenal lebih dari 300 merek, sehingga makin banyak halaman masuk palsu bank, jasa kirim, dan gim yang tertangkap lewat nama, bukan cuma lewat logo.
-
-• Lebih sedikit alarm palsu di situs asli. Situs asli bank, instansi pemerintah, dan perusahaan yang memakai alamat bergaya negara (misalnya domain .bank.in milik sebuah bank) tidak lagi memunculkan spanduk peringatan.
-
-• Diukur, bukan diklaim: dari 134 halaman phishing baru, ScamShield 0.13.0 memblokir 56 % sebelum halaman termuat dan menghentikan 69 % secara keseluruhan, tanpa satu pun permintaan ke server ScamShield mana pun — metode ada di docs/benchmark.md.
+• Jauh lebih sedikit peringatan palsu. Situs populer, situs regional, domain negara Google, halaman pemeriksaan bot, dan feed setelah login tidak lagi ditandai. Halaman biasa tidak menampilkan apa pun, dan temuan kecil hanya muncul di popup.
+• Tenang secara default. Paling banyak satu peringatan per situs per hari, dan situs yang Anda tutup dua kali akan diam selama 30 hari. Anda bisa membatalkannya di Opsi.
+• Tombol baru "Situs ini aman" di peringatan dan di popup.
+• Perlindungan saat Anda menggulir. Tautan penipuan ditandai dan meminta konfirmasi sebelum dibuka. Iklan penipuan disembunyikan (ini bukan pemblokir iklan umum). Halaman tidak bisa lagi membuka situs terblokir sendiri, dan frame serta skrip penipuan dari situs dalam daftar diblokir.
+• Halaman login palsu yang muncul setelah halaman selesai dimuat kini juga terdeteksi.
+• Peringatan yang dirancang ulang agar pas di ponsel, tablet, laptop, dan layar ultra-lebar, dalam tampilan terang, gelap, dan kanan-ke-kiri.
+• "Yang ditampilkan ScamShield" di Opsi, dengan tombol untuk menyalin diagnostik, plus panduan awal baru dengan peringatan contoh.
+• Dukungan Firefox untuk Android dan perbaikan aksesibilitas.
 
 Tidak ada izin baru. Tetap storage, declarativeNetRequest, alarms, dan akses http/https, sama seperti setiap versi sejak 0.3.1.

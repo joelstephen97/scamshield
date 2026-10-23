@@ -84,16 +84,15 @@ Con số cụ thể, không phải mỹ từ: 20 ngôn ngữ với đầy đủ 
 
 Mã nguồn, chính sách quyền riêng tư và trình theo dõi lỗi: github.com/joelstephen97/scamshield
 
-## What's new (0.13.0)
+## What's new (0.15.0)
 
-• Danh sách khẩn mỗi giờ. Bên cạnh danh sách mối đe dọa được dựng lại hằng ngày, ScamShield nay tải về mỗi giờ một danh sách ngắn các trang bị báo cáo trong 48 giờ qua. Một trang lừa đảo xuất hiện sáng nay thường đã bị chặn trước khi kịp tải, trong khoảng một giờ sau khi bị báo cáo. Đó là cùng một tệp công khai cho mọi người, tải về như mọi tệp khác: không cần tài khoản, và không có gì về bạn hay việc duyệt web của bạn đi đâu cả.
-
-• Tin cậy trang này, từ mọi cảnh báo. Thanh cảnh báo, cảnh báo toàn màn hình và trang chặn nay đều có nút "Không phải lừa đảo? Tin cậy trang này" chỉ một lần bấm, kèm hoàn tác nếu bạn lỡ tay. Những trang bạn đã tin cậy từ một cảnh báo được gắn nhãn như vậy trong Cài đặt, nên bạn luôn thấy được từng trang đã vào danh sách bằng cách nào.
-
-• Phủ nhiều thương hiệu hơn. Bộ kiểm tra trang nhái nay biết hơn 300 thương hiệu, nên nhiều trang đăng nhập giả mạo của ngân hàng, dịch vụ giao hàng và trò chơi bị phát hiện qua tên chứ không chỉ qua logo.
-
-• Ít báo động nhầm hơn trên trang thật. Các trang thật của ngân hàng, cơ quan nhà nước và doanh nghiệp dùng địa chỉ theo kiểu quốc gia (chẳng hạn tên miền .bank.in của chính một ngân hàng) không còn hiện thanh cảnh báo nữa.
-
-• Đo đạc, không phải tuyên bố: trên 134 trang lừa đảo mới, ScamShield 0.13.0 đã chặn 56 % trước khi chúng kịp tải và ngăn lại 69 % tổng cộng, không gửi một yêu cầu nào tới bất kỳ máy chủ ScamShield nào — phương pháp có trong docs/benchmark.md.
+• Ít cảnh báo sai hơn nhiều. Trang phổ biến, trang khu vực, tên miền quốc gia của Google, trang kiểm tra bot và luồng nội dung sau khi đăng nhập không còn bị gắn cờ. Trang thông thường không hiện gì, còn phát hiện nhỏ chỉ xuất hiện trong cửa sổ bật lên.
+• Mặc định yên lặng. Tối đa một cảnh báo mỗi trang mỗi ngày, và trang bạn đóng hai lần sẽ im lặng 30 ngày. Bạn có thể hoàn tác trong Tùy chọn.
+• Nút mới "Trang này an toàn" trên cảnh báo và trong cửa sổ bật lên.
+• Bảo vệ khi bạn cuộn trang. Liên kết lừa đảo được đánh dấu và hỏi trước khi mở. Quảng cáo lừa đảo bị ẩn (đây không phải trình chặn quảng cáo thông thường). Trang không thể tự mở các trang bị chặn nữa, và khung cùng tập lệnh lừa đảo từ các trang trong danh sách bị chặn.
+• Trang đăng nhập giả xuất hiện sau khi trang đã tải xong giờ cũng bị phát hiện.
+• Cảnh báo được thiết kế lại để vừa với điện thoại, máy tính bảng, laptop và màn hình siêu rộng, ở giao diện sáng, tối và từ phải sang trái.
+• Mục "ScamShield đã hiển thị gì" trong Tùy chọn, có nút sao chép thông tin chẩn đoán, cùng hướng dẫn khởi động mới có cảnh báo mẫu.
+• Hỗ trợ Firefox cho Android và cải thiện khả năng tiếp cận.
 
 Không thêm quyền mới. Vẫn là storage, declarativeNetRequest, alarms và quyền truy cập http/https, giống mọi phiên bản kể từ 0.3.1.

@@ -108,14 +108,15 @@ Hard numbers, not adjectives: 20 languages with full menu, warning and settings 
 
 Source code, privacy policy and issue tracker: github.com/joelstephen97/scamshield
 
-## What's new (0.14.1)
+## What's new (0.15.0)
 
-• Brand-new scam sites stay blocked. The hourly list of fresh phishing and scam sites used to lapse for a few hours whenever an update ran late. It now keeps protecting you until the next one arrives, and a broken or suspicious update is thrown out before it can block anything.
-• Trusting one site trusts only that site. On free website hosts, "Trust this site" used to cover every site on the same platform, scam pages included. Now it covers just the one you picked.
-• Off means off. Turning ScamShield off now pauses site blocking as well as the warnings, and switching it off on one computer no longer switches it off on your others.
-• Safer crypto wallet checks. A wallet request now waits for your answer instead of going through on its own after a few seconds.
-• Better at catching phishing pages hidden on free code-hosting sites.
-• Warning buttons say what they do. The ✕ on the warning bar now tells you whether it hides the warning for an hour or for a day, in all 20 languages.
-• If you clear the feed address in Settings, ScamShield downloads nothing, and it stays that way after every update.
+• Far fewer false warnings. Popular sites, regional sites, Google country domains, bot-check pages and logged-in feeds are no longer flagged. Ordinary pages show nothing, and minor findings appear only in the popup.
+• Quiet by default. At most one warning per site per day, and a site you dismiss twice stays quiet for 30 days. You can undo that in Options.
+• A new "This site is fine" button on warnings and in the popup.
+• Protection while you scroll. Scam links are marked and ask before opening. Scam ads are hidden (this is not a general ad blocker). Pages can no longer pop open blocked sites, and scam frames and scripts from listed sites are blocked.
+• Fake logins that appear after a page has loaded are now caught too.
+• Redesigned warnings that fit phones, tablets, laptops and ultra-wide screens, in light, dark and right-to-left layouts.
+• "What ScamShield showed" in Options, with a button to copy diagnostics, plus a new first-run guide with a demo warning.
+• Firefox for Android support and accessibility fixes.
 
 No new permissions. Still storage, declarativeNetRequest, alarms and http/https access, the same as every version since 0.3.1, and still nothing about your browsing leaves your computer.

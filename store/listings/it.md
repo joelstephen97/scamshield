@@ -84,16 +84,15 @@ Numeri concreti, non aggettivi: 20 lingue con traduzione completa di menu, avvis
 
 Codice sorgente, informativa sulla privacy e tracciamento dei problemi: github.com/joelstephen97/scamshield
 
-## What's new (0.13.0)
+## What's new (0.15.0)
 
-• Un elenco urgente ogni ora. Oltre all'elenco delle minacce ricostruito ogni giorno, ScamShield scarica ora una volta all'ora un breve elenco dei siti segnalati nelle ultime 48 ore. Un sito truffa comparso stamattina viene di solito bloccato prima di potersi caricare, entro circa un'ora dalla segnalazione. È lo stesso file pubblico per tutti, scaricato come qualsiasi altro file: nessun account, e nulla che riguardi te o la tua navigazione va da qualche parte.
-
-• Considera affidabile questo sito, da qualsiasi avviso. Il banner, l'avviso a schermo intero e la pagina di blocco offrono ora tutti un "Non è una truffa? Considera affidabile questo sito" in un clic, con annullamento se lo premi per sbaglio. I siti resi affidabili da un avviso sono contrassegnati come tali nelle impostazioni, così vedi sempre come ciascuno è finito nell'elenco.
-
-• Più marchi coperti. Il controllo dei sosia conosce ora oltre 300 marchi, quindi vengono riconosciute più pagine di accesso false di banche, corrieri e giochi, sia dal nome sia dal logo.
-
-• Meno falsi allarmi sui siti veri. I siti autentici di banche, enti pubblici e aziende che usano un indirizzo di tipo nazionale (per esempio il dominio .bank.in di una banca) non ricevono più un banner di avviso.
-
-• Misurato, non dichiarato: su 134 pagine di phishing recenti ScamShield 0.13.0 ne ha bloccate il 56 % prima del caricamento e ne ha fermate il 69 % in totale, senza una sola richiesta a un server ScamShield. Metodo: docs/benchmark.md.
+• Molti meno falsi allarmi. I siti popolari, i siti regionali, i domini Google per paese, le pagine di verifica anti-bot e i feed dopo l'accesso non vengono più segnalati. Le pagine normali non mostrano nulla, e le segnalazioni minori compaiono solo nel popup.
+• Silenzioso per impostazione predefinita. Al massimo un avviso per sito al giorno, e un sito che chiudi due volte resta in silenzio per 30 giorni. Puoi annullare dalle Opzioni.
+• Nuovo pulsante "Questo sito è sicuro" negli avvisi e nel popup.
+• Protezione mentre scorri. I link truffa vengono contrassegnati e chiedono conferma prima di aprirsi. Gli annunci truffa vengono nascosti (non è un blocco pubblicità generico). Le pagine non possono più aprire da sole siti bloccati, e i frame e gli script truffa dei siti in elenco vengono bloccati.
+• Ora vengono individuati anche i finti accessi che compaiono dopo il caricamento della pagina.
+• Avvisi ridisegnati che si adattano a telefoni, tablet, portatili e schermi ultra-larghi, in tema chiaro, scuro e da destra a sinistra.
+• "Cosa ha mostrato ScamShield" nelle Opzioni, con un pulsante per copiare la diagnostica, e una nuova guida iniziale con un avviso dimostrativo.
+• Supporto per Firefox per Android e miglioramenti di accessibilità.
 
 Nessun nuovo permesso. Sempre storage, declarativeNetRequest, alarms e accesso http/https, come in ogni versione dalla 0.3.1.

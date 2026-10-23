@@ -84,16 +84,15 @@ Sıfatlar değil somut sayılar: menü, uyarı ve ayarların tamamı çevrilmiş
 
 Kaynak kod, gizlilik politikası ve hata takip sistemi: github.com/joelstephen97/scamshield
 
-## What's new (0.13.0)
+## What's new (0.15.0)
 
-• Saatlik acil liste. Her gün yeniden oluşturulan tehdit listesinin yanı sıra ScamShield artık saatte bir, son 48 saat içinde bildirilen sitelerin kısa bir listesini indiriyor. Bu sabah ortaya çıkan bir dolandırıcılık sitesi, bildirilmesinden yaklaşık bir saat sonra genellikle yüklenemeden durduruluyor. Herkes için aynı olan açık bir dosya, herhangi bir dosya indirmesi gibi alınıyor: hesap yok ve sizinle ya da gezinmenizle ilgili hiçbir şey hiçbir yere gitmiyor.
-
-• Her uyarıdan bu siteye güvenme. Şerit uyarı, tam sayfa uyarı ve engelleme sayfası artık tek tıkla "Dolandırıcılık değil mi? Bu siteye güven" seçeneği sunuyor; yanlışlıkla bastıysanız geri alabiliyorsunuz. Bir uyarıdan güvendiğiniz siteler ayarlarda böyle etiketleniyor, böylece her birinin listeye nasıl girdiğini her zaman görebiliyorsunuz.
-
-• Daha geniş marka kapsamı. Benzer görünüm denetimi artık 300'den fazla markayı tanıyor; sahte banka, kargo ve oyun giriş sayfaları yalnızca logodan değil addan da yakalanıyor.
-
-• Gerçek sitelerde daha az yanlış alarm. Ülkeye özgü bir adres kullanan gerçek banka, kamu kurumu ve şirket siteleri (örneğin bir bankanın kendi .bank.in alan adı) artık uyarı şeridi almıyor.
-
-• İddia değil, ölçüm: 134 taze kimlik avı sayfasının 56 %'ini ScamShield 0.13.0 daha yüklenmeden engelledi, toplamda 69 %'ini durdurdu; herhangi bir ScamShield sunucusuna tek bir istek bile gitmedi. Yöntem docs/benchmark.md dosyasında.
+• Yanlış uyarılar çok azaldı. Popüler siteler, bölgesel siteler, Google ülke alan adları, bot doğrulama sayfaları ve oturum açıldıktan sonraki akışlar artık işaretlenmiyor. Sıradan sayfalar hiçbir şey göstermiyor, küçük bulgular yalnızca açılır pencerede görünüyor.
+• Varsayılan olarak sessiz. Site başına günde en fazla bir uyarı, iki kez kapattığınız site 30 gün sessiz kalır. Bunu Seçenekler'den geri alabilirsiniz.
+• Uyarılarda ve açılır pencerede yeni bir "Bu site sorunsuz" düğmesi.
+• Kaydırırken koruma. Dolandırıcılık bağlantıları işaretlenir ve açmadan önce sorar. Dolandırıcılık reklamları gizlenir (genel bir reklam engelleyici değildir). Sayfalar artık engellenmiş siteleri kendiliğinden açamaz, listedeki sitelerden gelen dolandırıcılık çerçeveleri ve betikleri engellenir.
+• Sayfa yüklendikten sonra beliren sahte girişler de artık yakalanıyor.
+• Telefonlara, tabletlere, dizüstü bilgisayarlara ve ultra geniş ekranlara uyan yeniden tasarlanmış uyarılar; açık, koyu ve sağdan sola düzenlerle.
+• Seçenekler'de "ScamShield'ın gösterdikleri" bölümü ve tanılama bilgisini kopyalama düğmesi, ayrıca demo uyarılı yeni bir ilk kullanım rehberi.
+• Android için Firefox desteği ve erişilebilirlik iyileştirmeleri.
 
 Yeni izin yok. Yine storage, declarativeNetRequest, alarms ve http/https erişimi; 0.3.1'den bu yana her sürümdeki gibi.
