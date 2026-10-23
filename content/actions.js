@@ -89,9 +89,22 @@
   // behalf. `Event.isTrusted` is set by the browser itself and cannot be
   // spoofed by page script — only a real user input (mouse/keyboard/CDP,
   // which is how Playwright's locator.click() drives it too) sets it true.
-  function onTrustedClick(node, fn) {
-    node.addEventListener('click', (e) => { if (!e.isTrusted) return; fn(e); });
-  }
+  // (0.15.0) The implementation moved to content/surfaces/primitives.js so shadow-hosted surfaces can
+  // also check click geometry (the button must sit inside its card); light-DOM nodes keep isTrusted only.
+  const surfaces = () => root.ScamShield.surfaces;
+  function onTrustedClick(node, fn) { surfaces().onTrustedClick(node, fn); }
+
+  // Theme (0.15.0): the Options theme (auto|light|dark) is a synced setting that lives in
+  // storage.local.settings. Read it once and follow changes, so every host gets data-theme without a
+  // round trip at show time. content_script.js also hands it over via setTheme() when it loads settings.
+  let theme = 'auto';
+  const goodTheme = (v) => (v === 'dark' || v === 'light' ? v : 'auto');
+  function setTheme(v) { theme = goodTheme(v); }
+  try {
+    api.storage.local.get('settings').then((cur) => { if (cur && cur.settings) setTheme(cur.settings.theme); }).catch(() => {});
+    api.storage.onChanged.addListener((ch, area) => { if (area === 'local' && ch.settings && ch.settings.newValue) setTheme(ch.settings.newValue.theme); });
+  } catch (_) { /* torn-down extension context */ }
+  const reducedMotion = () => { try { return !!(root.matchMedia && root.matchMedia('(prefers-reduced-motion: reduce)').matches); } catch (_) { return false; } };
 
   // --- Shared surface primitives (0.14.0, Task 4) ---------------------------
   // tile()/button()/timer()/toast() are the building blocks every toast below
@@ -105,7 +118,9 @@
   function timer(node, ms, onDone) {
     let left = ms, started = Date.now(), handle = null, done = false;
     const bar = node.querySelector('.ss-prog i');
-    const paint = () => { if (bar) { bar.style.transition = 'none'; bar.style.transform = 'scaleX(' + (left / ms) + ')'; requestAnimationFrame(() => { bar.style.transition = 'transform ' + left + 'ms linear'; bar.style.transform = 'scaleX(0)'; }); } };
+    // (0.15.0) reduced motion: no drain animation, the bar stays a static full-width hairline.
+    const still = reducedMotion();
+    const paint = () => { if (bar && still) { bar.style.transition = 'none'; bar.style.transform = 'none'; return; } if (bar) { bar.style.transition = 'none'; bar.style.transform = 'scaleX(' + (left / ms) + ')'; requestAnimationFrame(() => { bar.style.transition = 'transform ' + left + 'ms linear'; bar.style.transform = 'scaleX(0)'; }); } };
     // Fix round 2: re-entrancy guard. mouseleave and focusout can both fire for
     // the same "pointer and focus left" gesture; without the `handle != null`
     // check the second one stacks a SECOND setTimeout on top of the first and
@@ -113,47 +128,45 @@
     const start = () => { if (done || handle != null) return; started = Date.now(); handle = setTimeout(() => { done = true; onDone(); }, left); paint(); };
     const pause = () => { if (done || handle == null) return; clearTimeout(handle); handle = null; left = Math.max(0, left - (Date.now() - started)); if (bar) { bar.style.transition = 'none'; bar.style.transform = 'scaleX(' + (left / ms) + ')'; } };
     node.addEventListener('mouseenter', pause); node.addEventListener('focusin', pause);
+    // (0.15.0) touch has no hover: a real tap on the toast body pauses it too (resumes like hover does).
+    node.addEventListener('pointerdown', (e) => { if (e.isTrusted) pause(); });
+    const focusInside = () => node.contains(node.getRootNode().activeElement);
     // Fix round 1: a mouseleave must not resume the timer while keyboard
     // focus is still inside the surface (e.g. tabbing through its buttons
     // with the pointer elsewhere) — same "stays paused while focus is
     // inside" guard focusout already has.
-    node.addEventListener('mouseleave', () => { if (!node.contains(document.activeElement)) start(); });
-    node.addEventListener('focusout', () => { if (!node.contains(document.activeElement)) start(); });
+    node.addEventListener('mouseleave', () => { if (!focusInside()) start(); });
+    node.addEventListener('focusout', () => { if (!focusInside()) start(); });
     start();
     return { cancel: () => { done = true; clearTimeout(handle); } };
   }
-  // Controller ruling (0.14.0, Task 4 fix round): toast() replaces only an
-  // existing .scamshield-toast, NEVER a .scamshield-ack — the support toast
-  // fires 1.5s after a dangerous verdict and must not wipe the Undo bar that
-  // a trust click just raised. ackSurface (below) is itself built via toast(),
-  // so calling it still clears whatever plain toast was on screen.
+  // Controller ruling (0.14.0, Task 4 fix round): a plain toast never replaces the ack — the support
+  // toast fires 1.5s after a dangerous verdict and must not wipe the Undo bar a trust click just
+  // raised. (0.15.0) Each lives in its own shadow host ('toast' / 'ack'), so that now holds by
+  // construction: mounting one kind replaces only that kind. ackSurface (below) is built via toast()
+  // with `ack: true`, which swaps the host kind and keeps both root classes for the shared styling.
   function toast(opts) {
     const o = opts || {};
-    // Fix round 1: ackSurface's bar now carries BOTH `scamshield-toast` and
-    // `scamshield-ack` (so it keeps the .ss-title/.ss-acts styling that is
-    // scoped under `.scamshield-toast .ss-X` in content.css) — so this dedupe
-    // must explicitly exclude `.scamshield-ack` or it would remove the Undo
-    // bar itself, regressing ruling 1 (a toast never replaces the ack).
-    document.querySelectorAll('.' + NS + '-toast:not(.' + NS + '-ack)').forEach((n) => n.remove()); // one plain toast at a time
-    const box = el('div', NS + '-toast ' + (o.kind || 'info'));
-    box.setAttribute('role', o.role || 'status'); setDir(box);
-    box.append(tile(o.kind === 'notice' ? 'info' : (o.kind || 'info')), el('div', 'ss-title', o.title || ''));
-    if (o.body) box.append(el('div', 'ss-body', o.body));
-    const acts = el('div', 'ss-acts');
-    for (const a of (o.actions || [])) { const b = button(a.cls || '', a.label, { primary: !!a.primary }); onTrustedClick(b, () => { a.onClick && a.onClick(); if (a.closes !== false) close(); }); acts.appendChild(b); }
-    if (o.muteKind && o.onMute && canStore()) { const m = button('ss-mute', t('dontWarnHere', null, "Don't warn me on this site"), { quiet: true }); onTrustedClick(m, () => { close(); o.onMute(); }); acts.appendChild(m); }
-    const x = button('ss-x', '✕'); x.setAttribute('aria-label', t('ariaDismiss', null, 'Dismiss')); onTrustedClick(x, close); acts.appendChild(x);
-    box.appendChild(acts);
-    let tm = null;
-    if (!o.persist) { const p = el('div', 'ss-prog'); p.setAttribute('aria-hidden', 'true'); p.appendChild(el('i')); box.appendChild(p); }
-    // Fix round 2: close() is idempotent and safe to call from the timer —
-    // tm.cancel() on an ALREADY-fired timer just clearTimeout()s a spent
-    // handle (a no-op) and flips `done`, and box.remove() on a detached node
-    // is a no-op too.
-    function close() { if (tm) tm.cancel(); box.remove(); o.onClose && o.onClose(); }
-    (document.body || document.documentElement).appendChild(box);
-    // Fix round 2: the auto-hide must go through close(), not box.remove(), so
-    // o.onClose fires whether the surface was dismissed or simply timed out.
+    const S = surfaces();
+    let box = null, tm = null, handle = null;
+    // close() is idempotent: tm.cancel() on a spent timer is a no-op, and so is removing a gone host.
+    function close() { if (tm) tm.cancel(); if (handle) handle.close(); o.onClose && o.onClose(); }
+    handle = S.mount(o.ack ? 'ack' : 'toast', () => {
+      box = el('div', NS + '-toast ' + (o.ack ? NS + '-ack ' : '') + (o.kind || 'info'));
+      box.setAttribute('role', o.role || 'status'); setDir(box);
+      box.append(tile(o.kind === 'notice' ? 'info' : (o.kind || 'info')), el('div', 'ss-title', o.title || ''));
+      if (o.body) box.append(el('div', 'ss-body', o.body));
+      const acts = el('div', 'ss-acts');
+      for (const a of (o.actions || [])) { const b = button(a.cls || '', a.label, { primary: !!a.primary }); onTrustedClick(b, () => { a.onClick && a.onClick(); if (a.closes !== false) close(); }); acts.appendChild(b); }
+      if (o.muteKind && o.onMute && canStore()) { const m = button('ss-mute', t('dontWarnHere', null, "Don't warn me on this site"), { quiet: true }); onTrustedClick(m, () => { close(); o.onMute(); }); acts.appendChild(m); }
+      // (0.15.0) mistake control: only when the caller can actually report; omitted otherwise.
+      if (typeof o.onReport === 'function') { const r = button('ss-report', t('reportMistake', null, 'Report a mistake'), { quiet: true }); onTrustedClick(r, () => { r.textContent = t('thanks', null, 'Thanks'); r.disabled = true; o.onReport(); }); acts.appendChild(r); }
+      const x = button('ss-x', '✕'); x.setAttribute('aria-label', t('ariaDismiss', null, 'Dismiss')); onTrustedClick(x, close); acts.appendChild(x);
+      box.appendChild(acts);
+      if (!o.persist) { const p = el('div', 'ss-prog'); p.setAttribute('aria-hidden', 'true'); p.appendChild(el('i')); box.appendChild(p); }
+      return box;
+    }, { topLayer: 'popover', theme });
+    // The auto-hide goes through close() so o.onClose fires whether dismissed or timed out.
     if (!o.persist) tm = timer(box, o.timeoutMs || 10000, close);
     return box;
   }
@@ -290,7 +303,6 @@
       onUndo = () => send('untrustSite', { domain });
       restore = restoreArg;
     }
-    const old = document.querySelector('.' + NS + '-ack'); if (old) old.remove();
     // Built on the same toast() primitive as every other surface (tile 'ok',
     // title, .ss-undo action). Fix round 1: ADD the .scamshield-ack class
     // rather than replacing the root class outright — .ss-title's font-weight
@@ -305,10 +317,9 @@
     // 2.2.1 pause-on-hover/focus still applies, so Undo is always reachable
     // for as long as the user is actually pointing at or tabbed into it.
     const bar = toast({
-      kind: 'ok', timeoutMs: 10000, title: text,
+      ack: true, kind: 'ok', timeoutMs: 10000, title: text,
       actions: [{ cls: 'ss-undo', label: t('undo', null, 'Undo'), onClick: async () => { await onUndo(); restore && restore(); } }]
     });
-    bar.classList.add(NS + '-ack');
     return bar;
   }
   // `onAllow` null/undefined → a plain button with no click behaviour of its
@@ -452,7 +463,7 @@
   // fires right when a "Trust this site" click is landing, and wiping the
   // Undo bar out from under the user would be far worse than skipping the ask.
   function supportToast() {
-    if (document.querySelector('.' + NS + '-toast') || document.querySelector('.' + NS + '-ack')) return;
+    if (surfaces().isMounted('toast') || surfaces().isMounted('ack')) return;
     return toast({
       kind: 'ok', title: t('toastSupportAsk', null, 'ScamShield just protected you — it’s free and runs on your device. Chip in? ❤'),
       actions: [{ cls: 'ss-support', label: t('supportOpen', null, 'Open'), onClick: () => window.open('https://github.com/sponsors/joelstephen97', '_blank', 'noopener') }],
@@ -592,7 +603,7 @@
     return toast({
       kind: 'warn', role: 'status', title: d.title || '',
       body: d.text || t('guardPrivacyFallback', null, 'A privacy issue was detected on this page.'),
-      muteKind: d.muteKind, onMute: d.onMute
+      muteKind: d.muteKind, onMute: d.onMute, onReport: d.onReport
     });
   }
 
@@ -605,7 +616,7 @@
   // informational — this toast persists (no timer) and carries an explicit
   // "Submit anyway" so a legitimate but unlisted cross-origin post isn't
   // silently stuck forever. `onMute` (0.14.0) is the 'credpost' mute handler.
-  function crossOriginCredToast(reason, onProceed, onMute) {
+  function crossOriginCredToast(reason, onProceed, onMute, onReport) {
     return toast({
       kind: 'danger', role: 'alert', persist: true,
       title: t('credPostTitle', null, 'This form sends what you type to another site'),
@@ -614,7 +625,7 @@
         { cls: 'ss-keep', label: t('keepMyDetails', null, 'Keep my details'), primary: true },
         { cls: 'ss-send', label: t('submitAnyway', null, 'Submit anyway'), onClick: onProceed }
       ],
-      muteKind: 'credpost', onMute
+      muteKind: 'credpost', onMute, onReport
     });
   }
 
@@ -638,14 +649,14 @@
         body: isAddr
           ? t('clipboardNoticeAddrBody', null, 'Check it matches the address you expected before sending anything.')
           : t('clipboardNoticeCmdBody', null, 'Only run it if you trust this site. Real sites never ask you to paste commands to "verify" anything.'),
-        muteKind: 'clipboard', onMute: d.onMute
+        muteKind: 'clipboard', onMute: d.onMute, onReport: d.onReport
       });
     }
     return toast({
       kind: 'warn', role: 'status',
       title: t('clipboardWarnTitle', [host], d.host + ' changed your clipboard on its own'),
       body: reasonText(reason) || t('guardClipboardFallback', null, 'A site changed your clipboard.'),
-      muteKind: 'clipboard', onMute: d.onMute
+      muteKind: 'clipboard', onMute: d.onMute, onReport: d.onReport
     });
   }
 
@@ -675,5 +686,5 @@
   }
 
   root.ScamShield = root.ScamShield || {};
-  root.ScamShield.actions = { showBanner, guardForms, hideScamBlocks, clearAll, walletConfirmOverlay, clipboardToast, techScamEscapeOverlay, supportToast, dangerInterstitial, armDelayed, privacyToast, crossOriginCredToast, ackSurface };
+  root.ScamShield.actions = { showBanner, guardForms, hideScamBlocks, clearAll, walletConfirmOverlay, clipboardToast, techScamEscapeOverlay, supportToast, dangerInterstitial, armDelayed, privacyToast, crossOriginCredToast, ackSurface, setTheme };
 })(typeof globalThis !== 'undefined' ? globalThis : self);

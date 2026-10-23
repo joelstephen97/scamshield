@@ -1,7 +1,7 @@
-.scamshield-banner,.scamshield-overlay,.scamshield-toast,.scamshield-ack{--ss-surface:#fff;--ss-text:#15211B;--ss-muted:#5E6F67;--ss-hair:#DFE7E2;--ss-accent:#0B6E4F;--ss-danger:#B42318;--ss-warn:#9A5B00;--ss-warn-bg:#FFF1D6;--ss-radius:10px;--ss-chip:6px;--ss-danger-bg:#FDE9E7;--ss-accent-soft:#E3F1EA;--ss-safe:#1B7F3B;--ss-safe-bg:#E5F4EA;--ss-ground:#F5F8F6;--ss-unknown-bg:#EEF1EF;
+.scamshield-banner,.scamshield-overlay{--ss-surface:#fff;--ss-text:#15211B;--ss-muted:#5E6F67;--ss-hair:#DFE7E2;--ss-accent:#0B6E4F;--ss-danger:#B42318;--ss-warn:#9A5B00;--ss-warn-bg:#FFF1D6;--ss-radius:10px;--ss-chip:6px;--ss-danger-bg:#FDE9E7;--ss-accent-soft:#E3F1EA;--ss-safe:#1B7F3B;--ss-safe-bg:#E5F4EA;--ss-ground:#F5F8F6;--ss-unknown-bg:#EEF1EF;
   font:13px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ss-text);box-sizing:border-box}
-.scamshield-banner *,.scamshield-overlay *,.scamshield-toast *,.scamshield-ack *{box-sizing:border-box;font:inherit}
-@media (prefers-color-scheme: dark){.scamshield-banner,.scamshield-overlay,.scamshield-toast,.scamshield-ack{--ss-surface:#171F1B;--ss-text:#E7EEEA;--ss-muted:#9AAAA2;--ss-hair:#27342D;--ss-accent:#3FB489;--ss-danger:#F87171;--ss-warn:#FBBF24;--ss-warn-bg:#2A2110;--ss-danger-bg:#2D1513;--ss-accent-soft:#16302A;--ss-safe:#4ADE80;--ss-safe-bg:#10281A;--ss-ground:#0F1513;--ss-unknown-bg:#1F2623}}
+.scamshield-banner *,.scamshield-overlay *{box-sizing:border-box;font:inherit}
+@media (prefers-color-scheme: dark){.scamshield-banner,.scamshield-overlay{--ss-surface:#171F1B;--ss-text:#E7EEEA;--ss-muted:#9AAAA2;--ss-hair:#27342D;--ss-accent:#3FB489;--ss-danger:#F87171;--ss-warn:#FBBF24;--ss-warn-bg:#2A2110;--ss-danger-bg:#2D1513;--ss-accent-soft:#16302A;--ss-safe:#4ADE80;--ss-safe-bg:#10281A;--ss-ground:#0F1513;--ss-unknown-bg:#1F2623}}
 /* Full-width bar pinned to the top edge (browser-infobar position). One row;
    a second line appears only when a brand comparison is shown. */
 .scamshield-banner{position:fixed;top:0;left:0;right:0;z-index:2147483647;min-height:56px;display:flex;align-items:flex-start;gap:12px;padding:10px 16px;box-shadow:0 2px 12px rgba(0,0,0,.18)}
@@ -74,35 +74,17 @@
 .scamshield-interstitial .ss-trust-link,.scamshield-interstitial .ss-dt .ss-report{background:none;border:0;color:var(--ss-muted);text-decoration:underline;text-underline-offset:2px;cursor:pointer;padding:0;min-height:24px;font:inherit;margin:0}
 .scamshield-interstitial .ss-dt .ss-report:disabled{text-decoration:none;cursor:default}
 .scamshield-interstitial .ss-foot{margin-top:22px;font-size:12px;color:var(--ss-muted)}
-/* Toast family + trust acknowledgement (0.14.0, Task 4) — shared primitives:
-   tile() (icon), button() (.ss-btn), timer() (hover/focus-paused auto-hide).
-   .scamshield-ack reuses the same surface/shape as .scamshield-toast (its
-   root class is swapped onto a toast()-built element, not a separate
-   template) so the trust "won't flag again" + Undo bar matches visually. */
-.scamshield-toast,.scamshield-ack{position:fixed;right:12px;bottom:12px;z-index:2147483647;width:380px;max-width:calc(100vw - 24px);background:var(--ss-surface);color:var(--ss-text);border:1px solid var(--ss-hair);border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.22),0 1px 2px rgba(0,0,0,.08);padding:12px 12px 10px;display:grid;grid-template-columns:36px 1fr;gap:4px 12px;align-items:start}
-.scamshield-ack{grid-template-columns:36px 1fr auto;align-items:center}
+/* Toasts and the trust acknowledgement moved into shadow hosts (0.15.0, content/surfaces/styles.js).
+   The shared tile / button / comparison primitives below stay until the banner and dialogs move too (Tasks 12-13). */
 .ss-tile{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;flex:none}
 .ss-tile svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 .ss-tile.danger{background:var(--ss-danger-bg);color:var(--ss-danger)}.ss-tile.warn{background:var(--ss-warn-bg);color:var(--ss-warn)}.ss-tile.info{background:var(--ss-accent-soft);color:var(--ss-accent)}.ss-tile.ok{background:var(--ss-safe-bg);color:var(--ss-safe)}
-.scamshield-toast .ss-title{font-weight:600;line-height:1.3;padding-top:2px}
-.scamshield-toast .ss-body{grid-column:2;color:var(--ss-muted);font-size:13px;line-height:1.45}
-.scamshield-toast .ss-acts{grid-column:2;display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:8px}
-.scamshield-toast .ss-acts .ss-x{margin-left:auto}
-/* The ack bar is a 3-column grid (tile | text | actions) and carries BOTH
-   root classes, so `.scamshield-toast .ss-acts{grid-column:2}` above would
-   otherwise drop Undo ✕ onto a second row under the text. Same specificity,
-   declared later, so these win: tile | text | Undo ✕ on one row. */
-.scamshield-ack .ss-title{grid-column:2}
-.scamshield-ack .ss-acts{grid-column:3;margin-top:0}
-.scamshield-toast .ss-prog{grid-column:1/-1;height:2px;background:var(--ss-hair);border-radius:2px;margin-top:8px;overflow:hidden}
-.scamshield-toast .ss-prog i{display:block;height:100%;width:100%;background:var(--ss-accent);opacity:.6;transform-origin:left;transition:transform linear}
 .ss-btn{display:inline-flex;align-items:center;justify-content:center;min-height:32px;min-width:24px;padding:0 12px;border-radius:8px;border:1px solid var(--ss-hair);background:var(--ss-surface);color:var(--ss-text);font-weight:500;cursor:pointer;white-space:nowrap;line-height:1.2}
 .ss-btn.primary{background:var(--ss-accent);color:#fff;border-color:var(--ss-accent);font-weight:600}
 .ss-btn.quiet{border-color:transparent;background:transparent;color:var(--ss-accent)}
 .ss-btn.ss-x,.ss-btn.ss-more{width:32px;padding:0;border-color:transparent;background:transparent;color:var(--ss-muted);font-size:16px}
 .ss-btn:focus-visible{outline:2px solid var(--ss-accent);outline-offset:2px}
 .ss-btn:disabled{opacity:.55;cursor:not-allowed}
-@media (prefers-reduced-motion:reduce){.scamshield-toast .ss-prog i{transition:none}}
 .ss-compare{display:flex;gap:8px;align-items:center;margin-top:8px;padding:8px 10px;border:1px solid var(--ss-hair);border-radius:var(--ss-chip);background:var(--ss-surface);color:var(--ss-text);max-width:100%;overflow:hidden}
 .ss-compare small{display:block;font-size:11px;color:var(--ss-muted)}
 .ss-compare b{font-weight:600;word-break:break-all}

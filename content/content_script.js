@@ -283,7 +283,7 @@
     if (clipboardSeen.has(key)) return; clipboardSeen.add(key);
     // notice/warn tiers are informational: no threat count, no history row.
     surface('toast-clipboard');
-    SS.actions.clipboardToast({ tier, level: detail.level, reasons: detail.reasons, host: location.hostname, onMute: muteHandler('clipboard') });
+    SS.actions.clipboardToast({ tier, level: detail.level, reasons: detail.reasons, host: location.hostname, onMute: muteHandler('clipboard'), onReport: reportMistake });
   });
   let techSignal = { dialogFloodCount: 0, fullscreenOnLoad: false, beforeUnloadCount: 0, alarmAudio: false };
   let techShown = false;
@@ -336,7 +336,7 @@
     // (0.15.0) the toast only on an already-warned page; elsewhere the popup lists the finding.
     if (pageWarned() && SS.actions && SS.actions.privacyToast) {
       surface('toast-leak');
-      SS.actions.privacyToast({ title: t('leakTitle', null, 'Your details left this page before you pressed Send'), text, muteKind: 'leak', onMute: muteHandler('leak') });
+      SS.actions.privacyToast({ title: t('leakTitle', null, 'Your details left this page before you pressed Send'), text, muteKind: 'leak', onMute: muteHandler('leak'), onReport: reportMistake });
     }
     send('privacyFinding', { finding: { kind: 'leaky-form', host: d.destHost, detail: d.kind } });
   });
@@ -361,7 +361,7 @@
     if (/allow.{0,20}(to (continue|proceed|verify|watch|download)|if you are not a robot|to confirm you are human)|click\s+allow/i.test(bt)) {
       if (pageWarned() && SS.actions && SS.actions.privacyToast) {
         surface('toast-notify');
-        SS.actions.privacyToast({ level: 'warn', title: t('notifyLureTitle', null, "Don't click Allow here"), text: t('guardNotifyLure', null, 'This site is trying to get notification permission using a "click Allow to continue" trick. You can safely Block it.'), muteKind: 'notify', onMute: muteHandler('notify') });
+        SS.actions.privacyToast({ level: 'warn', title: t('notifyLureTitle', null, "Don't click Allow here"), text: t('guardNotifyLure', null, 'This site is trying to get notification permission using a "click Allow to continue" trick. You can safely Block it.'), muteKind: 'notify', onMute: muteHandler('notify'), onReport: reportMistake });
       }
       send('privacyFinding', { finding: { kind: 'notify-lure', host: location.hostname, detail: '' } });
     }
@@ -792,7 +792,7 @@
           // form.submit() is the isolated world's native (unhooked) method, so
           // "Submit anyway" really submits without re-triggering this listener —
           // same technique guardForms uses for its own "Submit anyway".
-          SS.actions.crossOriginCredToast(reason, () => form.submit(), muteHandler('credpost'));
+          SS.actions.crossOriginCredToast(reason, () => form.submit(), muteHandler('credpost'), reportMistake);
         } else {
           form.submit(); // never trap the user behind a UI that failed to load
         }
@@ -1047,6 +1047,7 @@
     }
     const settings = await send('getSettings');
     if (!settings || !settings.enabled) return;
+    if (SS.actions && SS.actions.setTheme) SS.actions.setTheme(settings.theme); // (0.15.0) surfaces follow the Options theme
     const pageDomain = scopeOf(location.hostname); // 0.14.1: engagement + pause are per tenant host
     // Sponsored-search check runs even on (trusted) search-engine hosts.
     if (IS_TOP && settings.serpCheck !== false && SS.isSerpPage(location.hostname, location.pathname, location.search)) {

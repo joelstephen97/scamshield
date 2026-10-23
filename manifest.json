@@ -40,6 +40,8 @@
         "engine/page_model.js",
         "engine/image_hash.js",
         "engine/qr.js",
+        "content/surfaces/styles.js",
+        "content/surfaces/primitives.js",
         "content/actions.js",
         "content/content_script.js"
       ],

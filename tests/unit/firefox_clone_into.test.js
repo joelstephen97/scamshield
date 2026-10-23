@@ -73,6 +73,8 @@ function load({ withClone }) {
   if (withClone) ctx.cloneInto = (o, target) => { cloned.push({ o, target }); return { __cloned: true, ...o }; };
   vm.createContext(ctx);
   vm.runInContext(read('ui/reasons.js'), ctx);
+  vm.runInContext(read('content/surfaces/styles.js'), ctx);
+  vm.runInContext(read('content/surfaces/primitives.js'), ctx);
   vm.runInContext(read('content/actions.js'), ctx);
   vm.runInContext(read('content/content_script.js'), ctx);
   return { ctx, win, listeners, dispatched, cloned };
