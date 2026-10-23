@@ -442,5 +442,6 @@
   "continueOnce": { "message": "Chỉ mở trang này một lần. ScamShield vẫn bật." },
   "bannerHideDay": { "message": "Ẩn trong một ngày" },
   "bannerHideHour": { "message": "Ẩn trong một giờ" },
-  "mistakeSiteFine": { "message": "Trang này an toàn" }
+  "mistakeSiteFine": { "message": "Trang này an toàn" },
+  "continueUnsafe": { "message": "Tiếp tục vào trang này (không an toàn)" }
 }

@@ -442,5 +442,6 @@
   "continueOnce": { "message": "이 페이지로 한 번만 이동합니다. ScamShield는 계속 켜져 있습니다." },
   "bannerHideDay": { "message": "하루 동안 숨기기" },
   "bannerHideHour": { "message": "1시간 동안 숨기기" },
-  "mistakeSiteFine": { "message": "이 사이트는 안전합니다" }
+  "mistakeSiteFine": { "message": "이 사이트는 안전합니다" },
+  "continueUnsafe": { "message": "이 사이트로 계속 (안전하지 않음)" }
 }

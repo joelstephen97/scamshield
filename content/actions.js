@@ -229,7 +229,9 @@
     surfaces().unmount('banner');
     // 0.14.1: never the wallet overlay — removing it without a decision would
     // strand (and, on the MAIN side, eventually fail open) a pending request.
-    document.querySelectorAll('.' + NS + '-overlay:not(.' + NS + '-wallet)').forEach((n) => n.remove());
+    // (0.15.0) The interstitial and the other dialogs are shadow-hosted <dialog>s; unmounting restores body.inert.
+    surfaces().unmount('interstitial');
+    if (!walletOpen) surfaces().unmount('dialog');
     document.querySelectorAll('.' + NS + '-hidden-block').forEach((n) => {
       n.classList.remove(NS + '-hidden-block');
       const t = n.querySelector('.' + NS + '-hidden-tag'); if (t) t.remove();
@@ -357,6 +359,7 @@
   }
   // The open banner's menu teardown (document-level listeners), reachable from clearAll().
   let bannerTeardown = null;
+  let walletOpen = false; // the 'dialog' host currently holds a pending wallet confirmation (clearAll must not drop it)
   function showBanner(verdict, extra) {
     const S = surfaces();
     if (S.isMounted('banner')) return;
@@ -389,7 +392,7 @@
       // different domains, so a click must never allowlist the QR's possibly-scam destination.
       const trustable = !x.noTrust && canStore();
       const ack = (domain, restore) => ackSurface({ text: t('ackTrusted', [bidi(domain)], "ScamShield won't flag " + domain + ' again.'), onUndo: () => send('untrustSite', { domain }), restore });
-      const trust = trustable ? trustButton(async () => { dismiss(); const domain = regDomain(); await send('trustSite', { domain, via: x.trustVia || 'banner' }); ack(domain, () => showBanner(verdict, extra)); }) : null;
+      const trust = trustable ? trustButton(async () => { dismiss(); const domain = regDomain(); await send('trustSite', { domain, via: x.trustVia || 'banner' }); ack(domain, () => showBanner(verdict, Object.assign({}, extra, { restore: true }))); }) : null;
       // "This site is fine" (0.15.0, Task 12): the mistake control. It reports (userReport false_positive +
       // falseAlarm via x.onReport), THEN trusts the site (via:'mistake') and shows the ack with Undo. Because it
       // allowlists, it passes the same gates as Trust: isTrusted + insideCard (onTrustedClick) and the arm
@@ -397,7 +400,7 @@
       // apex) it stays the report-only "Report a mistake".
       const fine = button('ss-report', trustable ? t('mistakeSiteFine', null, 'This site is fine') : t('reportMistake', null, 'Report a mistake'));
       if (trustable) {
-        armedClick(fine, async () => { dismiss(); x.onReport && x.onReport(); const domain = regDomain(); await send('trustSite', { domain, via: 'mistake' }); ack(domain, () => showBanner(verdict, extra)); });
+        armedClick(fine, async () => { dismiss(); x.onReport && x.onReport(); const domain = regDomain(); await send('trustSite', { domain, via: 'mistake' }); ack(domain, () => showBanner(verdict, Object.assign({}, extra, { restore: true }))); });
       } else {
         onTrustedClick(fine, () => { fine.textContent = t('thanks', null, 'Thanks'); fine.disabled = true; x.onReport && x.onReport(); closeMenu(true); });
       }
@@ -457,7 +460,109 @@
       onTrustedClick(close, () => { dismiss(); if (!x.noTrust && x.onHide && canStore()) x.onHide(choice); });
       acts.append(moreBtn, close, menu); bar.appendChild(acts);
       return bar;
-    }, { topLayer: 'popover', theme, onShown: x.onShown });
+    }, { topLayer: 'popover', theme, onShown: x.restore ? undefined : x.onShown }); // (0.15.0) an Undo restore is not a new showing: no second surface-log row
+  }
+
+  // --- Modal dialogs (0.15.0, Task 13) -----------------------------------------
+  // The interstitial and the form-guard / wallet / tech-scam dialogs are native <dialog>s opened with
+  // showModal() inside a shadow host (content/surfaces/primitives.js): top layer, the rest of the page inert
+  // natively, Tab trapped, focus returned. On top of that:
+  //  - body.inert is also set (and the PREVIOUS value restored), so assistive tech and page script focus can't
+  //    reach the page. The host sits on <html>, not in <body>, so the dialog itself stays interactive. A counter
+  //    makes the LAST dialog to close restore it if two ever stack.
+  //  - a page script that closes the dialog (dialog.close(), Escape twice without a gesture) is undone: we track
+  //    our own closes with a flag and re-showModal() after any other close, at most 3 times; after that the
+  //    surface is torn down cleanly (inert restored) rather than left half-open.
+  //  - Escape arrives as the dialog `cancel` event (and a trusted keydown); each surface maps it to its old
+  //    Escape behaviour, or none (the interstitial is a stop page, not dismissible).
+  let inertDepth = 0, inertPrev = false;
+  function inertOn() {
+    if (inertDepth++ > 0) return;
+    try { const b = document.body; if (b) { inertPrev = b.inert === true; b.inert = true; } } catch (_) {}
+  }
+  function inertOff() {
+    if (inertDepth === 0) return;
+    if (--inertDepth > 0) return;
+    try { const b = document.body; if (b) b.inert = inertPrev; } catch (_) {}
+  }
+  // A sub-frame under 200x200 CSS px (an ad / captcha frame) has no room for a dialog; the service worker
+  // already handles the badge and the stop for frames, so the frame itself shows nothing.
+  function tinyFrame() {
+    try { return window !== window.top && (window.innerWidth < 200 || window.innerHeight < 200); } catch (_) { return true; }
+  }
+  const FOCUSABLE = 'button, summary, a[href], input, select, textarea, [tabindex]';
+  // o: { role, label, onEscape(ctl), onGiveUp(ctl), onDetached(), onUnmount(), onShown() }
+  // fill(dialog, ctl) builds the card, appends it to the dialog and returns { card, safe } (the .ss-card, and the
+  // control that takes initial focus: the safe action).
+  function modal(kind, cls, o, fill) {
+    const S = surfaces();
+    let dlg = null, safe = null, handle = null, ours = false, held = false, reopened = 0;
+    const release = () => { if (held) { held = false; inertOff(); } };
+    const ctl = {
+      dialog: null,
+      close() {
+        ours = true;
+        try { if (dlg && dlg.open) dlg.close(); } catch (_) {}
+        release();
+        if (handle) handle.close(); else S.unmount(kind);
+      }
+    };
+    const show = () => {
+      if (!dlg || !dlg.isConnected || ours) return;
+      try { if (document.fullscreenElement && document.exitFullscreen) { const p = document.exitFullscreen(); if (p && p.catch) p.catch(() => {}); } } catch (_) {}
+      try {
+        // A host the page removed and we re-attached keeps `open` but lost its modal state.
+        if (dlg.hasAttribute('open') && !dlg.matches(':modal')) dlg.removeAttribute('open');
+        if (!dlg.open) dlg.showModal();
+      } catch (_) {}
+      if (!held) { held = true; inertOn(); }
+      try { if (safe) safe.focus(); } catch (_) {}
+    };
+    const focusables = () => Array.from(dlg.querySelectorAll(FOCUSABLE)).filter((n) => {
+      if (n.disabled || n.getAttribute('tabindex') === '-1') return false;
+      const d = n.closest('details');
+      if (d && !d.open && !(n.tagName === 'SUMMARY' && n.parentNode === d)) return false; // folded away
+      return n.getClientRects().length > 0;
+    });
+    // The native modal dialog already keeps Tab inside, but it can hand focus to the browser UI; wrap explicitly.
+    const trap = (e) => {
+      const list = focusables(); if (!list.length) return;
+      const act = dlg.getRootNode().activeElement;
+      const at = list.indexOf(act);
+      if (e.shiftKey) { if (at <= 0) { e.preventDefault(); list[list.length - 1].focus(); } }
+      else if (at === -1 || at === list.length - 1) { e.preventDefault(); list[0].focus(); }
+    };
+    const esc = () => { if (!ours && typeof o.onEscape === 'function') o.onEscape(ctl); };
+    handle = S.mount(kind, () => {
+      dlg = el('dialog', cls);
+      if (o.role) dlg.setAttribute('role', o.role);
+      if (o.label) dlg.setAttribute('aria-label', o.label);
+      setDir(dlg);
+      const built = fill(dlg, ctl);
+      safe = built.safe;
+      dlg.addEventListener('keydown', (e) => {
+        if (!e.isTrusted) return; // a page can dispatch KeyboardEvents; only real keys count
+        if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); esc(); }
+        else if (e.key === 'Tab') trap(e);
+      });
+      dlg.addEventListener('cancel', (e) => { e.preventDefault(); if (e.isTrusted) esc(); });
+      dlg.addEventListener('close', () => {
+        if (ours) return;
+        if (reopened < 3) { reopened++; show(); return; }
+        if (typeof o.onGiveUp === 'function') o.onGiveUp(ctl);
+        ctl.close();
+      });
+      return { el: dlg, card: built.card };
+    }, {
+      theme, onShown: o.onShown, onAttach: show, onDetached: o.onDetached,
+      onUnmount: () => { ours = true; release(); if (typeof o.onUnmount === 'function') o.onUnmount(); }
+    });
+    ctl.dialog = dlg;
+    show();
+    return ctl;
+  }
+  function trustAck(domain, restore) {
+    return ackSurface({ text: t('ackTrusted', [bidi(domain)], "ScamShield won't flag " + domain + ' again.'), onUndo: () => send('untrustSite', { domain }), restore });
   }
 
   // Full-page interstitial (0.6.0) — the interaction-blocking tier, reserved
@@ -467,43 +572,64 @@
   // on signals with an essentially zero legitimate base rate. The headline
   // varies mildly between showings (polymorphism resists habituation) and the
   // escape hatch is delayed a few seconds.
+  // (0.15.0, Task 13) A <dialog> in the 'interstitial' shadow host. The "Continue to this site (unsafe)" countdown
+  // starts when Details is OPENED (not at build, when nobody can see it), and Trust / "This site is fine" re-arm on
+  // every toggle. Escape does nothing: this is a stop page.
   function dangerInterstitial(verdict, x) {
-    if (document.querySelector('.' + NS + '-interstitial')) return;
+    const S = surfaces();
+    if (S.isMounted('interstitial') || tinyFrame()) return;
     x = x || {};
     const HEADS = [
       t('interstitialHead1', null, 'Stop — this page is trying to scam you'),
       t('interstitialHead2', null, 'Hold on — this looks like a scam page'),
       t('interstitialHead3', null, "Don't go further — scam warning")
     ];
-    const ov = el('div', NS + '-overlay ' + NS + '-interstitial'); ov.setAttribute('role', 'alertdialog'); ov.setAttribute('aria-modal', 'true'); ov.setAttribute('aria-label', t('ariaScamWarning', null, 'Scam warning')); setDir(ov);
-    const card = el('div', 'ss-card'); const head = el('div', 'ss-head'); const h3 = el('h3', null, HEADS[Math.floor(Math.random() * HEADS.length)]); head.append(tile('danger'), h3); card.append(head);
-    card.append(el('p', 'ss-lead', reasonText(verdict.reasons[0]) || t('interstitialFallback', null, 'This page matches the pattern of a known scam.')));
-    // Address box, same as blocked.html: label + the page URL, LTR-isolated.
-    const addr = el('div', 'ss-addr'); addr.append(el('small', null, t('thisPage', null, 'This page')), el('code', null, location.href.slice(0, 200))); card.append(addr);
-    if (verdict.brandLabel && verdict.brandUrl) { const cmp = compareRow(verdict.brandLabel, verdict.brandUrl); if (cmp) card.appendChild(cmp); }
-    const ul = el('ul', 'ss-evidence'); for (const r of (verdict.reasons || []).slice(1, 4)) { const li = el('li'); li.append(el('span', 'ss-chip', t('chipWhy', null, 'Why')), el('span', null, reasonText(r))); ul.appendChild(li); } if (ul.children.length) card.appendChild(ul);
-    card.append(el('p', 'ss-sub', t('interstitialReassure', null, "If you already typed a password or card number on this page, change it now.")));
-    const actions = el('div', 'ss-actions'); const leave = button('ss-primary', t('leaveThisPage', null, 'Leave this page')); onTrustedClick(leave, () => { x.onLeave ? x.onLeave() : history.back(); }); actions.append(leave);
-    const copyBtn = copyReportButton(verdict); actions.append(copyBtn);
-    // Fix round 2: append, not prepend — the row reads Leave, Copy report,
-    // "Go to the real site", so the recommended action stays first.
-    if (verdict.brandUrl) { const rescue = button('ss-rescue-ghost', t('takeMeToReal', [bidi(verdict.brandLabel || 'site')], 'Go to the real ' + (verdict.brandLabel || 'site'))); onTrustedClick(rescue, () => { location.href = verdict.brandUrl; }); actions.append(rescue); }
-    card.append(actions);
-    const details = el('details', 'ss-details'); const sum = el('summary', null, t('detailsAndOptions', null, 'Details and other options')); details.append(sum);
-    const row1 = el('div', 'ss-dt'); const stay = button('ss-danger-ghost', t('continueAnyway', null, 'Continue anyway')); armDelayed(stay, 3);
-    // Continue = pause this site for 1 hour (the block page's "Visit anyway" rule), never a permanent trust.
-    onTrustedClick(stay, () => { ov.remove(); if (canStore()) send('pauseSite', { domain: regDomain(), choice: '1h' }); if (x.onDismiss) x.onDismiss(); });
-    // 0.14.1: on a bare tenant-apex host nothing is stored (canStore() false), so Continue only proceeds once.
-    const consequence = canStore() ? t('continuePausesHour', null, 'Pauses ScamShield on this site for 1 hour.') : t('continueOnce', null, 'Continues to this page once. ScamShield stays on.');
-    row1.append(stay, el('span', 'ss-consequence', consequence)); details.append(row1);
-    const row2 = el('div', 'ss-dt');
-    const trust = (x.noTrust || !canStore()) ? null : trustButton(async () => { ov.remove(); const domain = regDomain(); await send('trustSite', { domain, via: x.trustVia || 'interstitial' }); ackSurface({ text: t('ackTrusted', [bidi(domain)], "ScamShield won't flag " + domain + ' again.'), onUndo: () => send('untrustSite', { domain }), restore: () => dangerInterstitial(verdict, x) }); });
-    if (trust) { trust.className = 'ss-trust ss-trust-link'; trust.textContent = t('blockedTrustSite', null, 'Not a scam? Trust this site'); row2.append(trust); }
-    const rep = el('button', 'ss-report', t('reportMistake', null, 'Report a mistake')); rep.type = 'button'; onTrustedClick(rep, () => { rep.textContent = t('thanks', null, 'Thanks'); rep.disabled = true; x.onReport && x.onReport(); });
-    row2.append(rep); details.append(row2); card.append(details);
-    // 0.14.1: not blockedFooter — that text says nothing was sent, which is true of blocked.html only.
-    card.append(el('p', 'ss-foot', t('interstitialFooter', null, "ScamShield checked this page on your device.")));
-    ov.append(card); document.documentElement.appendChild(ov); leave.focus();
+    const trustable = !x.noTrust && canStore();
+    modal('interstitial', NS + '-overlay ' + NS + '-interstitial', { role: 'alertdialog', label: t('ariaScamWarning', null, 'Scam warning'), onEscape: null }, (dlg, ctl) => {
+      const card = el('div', 'ss-card'); const head = el('div', 'ss-head'); const h3 = el('h3', null, HEADS[Math.floor(Math.random() * HEADS.length)]); head.append(tile('danger'), h3); card.append(head);
+      card.append(el('p', 'ss-lead', reasonText(verdict.reasons[0]) || t('interstitialFallback', null, 'This page matches the pattern of a known scam.')));
+      // Address box, same as blocked.html: label + the page URL, LTR-isolated.
+      const addr = el('div', 'ss-addr'); addr.append(el('small', null, t('thisPage', null, 'This page')), el('code', null, location.href.slice(0, 200))); card.append(addr);
+      if (verdict.brandLabel && verdict.brandUrl) { const cmp = compareRow(verdict.brandLabel, verdict.brandUrl); if (cmp) card.appendChild(cmp); }
+      const ul = el('ul', 'ss-evidence'); for (const r of (verdict.reasons || []).slice(1, 4)) { const li = el('li'); li.append(el('span', 'ss-chip', t('chipWhy', null, 'Why')), el('span', null, reasonText(r))); ul.appendChild(li); } if (ul.children.length) card.appendChild(ul);
+      card.append(el('p', 'ss-sub', t('interstitialReassure', null, "If you already typed a password or card number on this page, change it now.")));
+      const actions = el('div', 'ss-actions'); const leave = button('ss-primary', t('leaveThisPage', null, 'Leave this page')); onTrustedClick(leave, () => { x.onLeave ? x.onLeave() : history.back(); }); actions.append(leave);
+      const copyBtn = copyReportButton(verdict); actions.append(copyBtn);
+      // Fix round 2: append, not prepend — the row reads Leave, Copy report,
+      // "Go to the real site", so the recommended action stays first.
+      if (verdict.brandUrl) { const rescue = button('ss-rescue-ghost', t('takeMeToReal', [bidi(verdict.brandLabel || 'site')], 'Go to the real ' + (verdict.brandLabel || 'site'))); onTrustedClick(rescue, () => { location.href = verdict.brandUrl; }); actions.append(rescue); }
+      card.append(actions);
+      const details = el('details', 'ss-details'); const sum = el('summary', null, t('detailsAndOptions', null, 'Details and other options')); details.append(sum);
+      const row1 = el('div', 'ss-dt');
+      const stayLabel = t('continueUnsafe', null, 'Continue to this site (unsafe)');
+      const stay = button('ss-danger-ghost', stayLabel); stay.disabled = true; // armed (3 s) each time Details opens
+      // Continue = pause this site for 1 hour (the block page's "Visit anyway" rule), never a permanent trust.
+      onTrustedClick(stay, () => { ctl.close(); if (canStore()) send('pauseSite', { domain: regDomain(), choice: '1h' }); if (x.onDismiss) x.onDismiss(); });
+      // 0.14.1: on a bare tenant-apex host nothing is stored (canStore() false), so Continue only proceeds once.
+      const consequence = canStore() ? t('continuePausesHour', null, 'Pauses ScamShield on this site for 1 hour.') : t('continueOnce', null, 'Continues to this page once. ScamShield stays on.');
+      row1.append(stay, el('span', 'ss-consequence', consequence)); details.append(row1);
+      const row2 = el('div', 'ss-dt');
+      const trust = trustable ? trustButton(async () => { ctl.close(); const domain = regDomain(); await send('trustSite', { domain, via: x.trustVia || 'interstitial' }); trustAck(domain, () => dangerInterstitial(verdict, x)); }) : null;
+      if (trust) { trust.className = 'ss-trust ss-trust-link'; trust.textContent = t('blockedTrustSite', null, 'Not a scam? Trust this site'); row2.append(trust); }
+      // "This site is fine" (0.15.0, Task 12): reports, THEN trusts (via:'mistake') with an Undo ack, behind the same gates as Trust.
+      // Where trust is unavailable (bare tenant apex, QR surface) it stays the report-only "Report a mistake".
+      const fine = el('button', 'ss-report', trustable ? t('mistakeSiteFine', null, 'This site is fine') : t('reportMistake', null, 'Report a mistake')); fine.type = 'button';
+      if (trustable) armedClick(fine, async () => { ctl.close(); x.onReport && x.onReport(); const domain = regDomain(); await send('trustSite', { domain, via: 'mistake' }); trustAck(domain, () => dangerInterstitial(verdict, x)); });
+      else onTrustedClick(fine, () => { fine.textContent = t('thanks', null, 'Thanks'); fine.disabled = true; x.onReport && x.onReport(); });
+      row2.append(fine); details.append(row2); card.append(details);
+      let stopCount = null;
+      details.addEventListener('toggle', () => {
+        if (stopCount) { stopCount(); stopCount = null; }
+        if (details.open) {
+          stopCount = armDelayed(stay, 3);
+          for (const b of [trust, fine]) b && b.__ssRearm && b.__ssRearm(); // the arm window restarts whenever Details opens
+        } else { stay.disabled = true; stay.textContent = stayLabel; }
+      });
+      // 0.14.1: not blockedFooter — that text says nothing was sent, which is true of blocked.html only.
+      card.append(el('p', 'ss-foot', t('interstitialFooter', null, "ScamShield checked this page on your device.")));
+      dlg.append(card);
+      return { card, safe: leave };
+    });
   }
 
   // One-time-ever, shown 1.5s after a dangerous page was blocked. Controller
@@ -511,7 +637,7 @@
   // fires right when a "Trust this site" click is landing, and wiping the
   // Undo bar out from under the user would be far worse than skipping the ask.
   function supportToast() {
-    if (surfaces().isMounted('toast') || surfaces().isMounted('ack')) return;
+    if (surfaces().isMounted('toast') || surfaces().isMounted('ack') || surfaces().isMounted('interstitial') || surfaces().isMounted('dialog')) return; // (0.15.0) a toast behind a modal dialog is inert
     return toast({
       kind: 'ok', title: t('toastSupportAsk', null, 'ScamShield just protected you — it’s free and runs on your device. Chip in? ❤'),
       actions: [{ cls: 'ss-support', label: t('supportOpen', null, 'Open'), onClick: () => window.open('https://github.com/sponsors/joelstephen97', '_blank', 'noopener') }],
@@ -529,51 +655,53 @@
   // for below. content/content_script.js's guardExfilForms (the cross-origin
   // credential/card exfil toast) listens for the same event to close the
   // identical bypass for its own submits (Task P5).
-  function guardForms(foreignForms, reasons, onReport) {
+  // (0.15.0, Task 13) The overlay is a <dialog> in the 'dialog' shadow host; `onShown` is called once per real
+  // showing (the surface log), so callers no longer count DOM nodes around the submit.
+  function guardForms(foreignForms, reasons, onReport, onShown) {
     foreignForms.forEach((form) => {
       if (form.__scamshieldGuarded) return;
       form.__scamshieldGuarded = true;
       const onSubmit = (ev) => {
+        // No room for a dialog in a tiny frame: do nothing there (the service worker covers frames).
+        if (tinyFrame()) return;
         ev.preventDefault(); ev.stopPropagation();
-        if (document.querySelector('.' + NS + '-overlay')) return;
-        const ov = el('div', NS + '-overlay');
-        ov.setAttribute('role', 'dialog');
-        ov.setAttribute('aria-modal', 'true');
-        ov.setAttribute('aria-label', t('ariaPhishingWarning', null, 'Possible phishing warning'));
-        setDir(ov);
-        const card = el('div', 'ss-card');
+        const S = surfaces();
+        if (S.isMounted('dialog') || S.isMounted('interstitial')) return;
         let dest = '';
         try { dest = new URL(form.getAttribute('action') || location.href, location.href).hostname; } catch (_) {}
-        card.append(
-          el('h3', null, t('phishingStop', null, 'Stop — possible phishing')),
-          el('p', null, dest
-            ? t('guardFormDestKnown', [bidi(dest), bidi(location.hostname)], 'This form sends your password to ' + dest + ', not to ' + location.hostname + '. Sending a password to a different website is how scammers steal logins.')
-            : t('guardFormDestUnknown', null, 'This form sends your password to a different website than the one you are visiting. This is a common way scammers steal logins.'))
-        );
-        const ul = el('ul', 'ss-evidence');
-        for (const r of (reasons || []).slice(0, 3)) { const li = el('li'); li.append(el('span', 'ss-chip', t('chipPage', null, 'Page')), el('span', null, reasonText(r))); ul.appendChild(li); }
-        card.appendChild(ul);
-        const actions = el('div', 'ss-actions');
-        const back = button('ss-primary', t('cancelRecommended', null, 'Cancel (recommended)'));
-        const close = () => { document.removeEventListener('keydown', onKey, true); ov.remove(); };
-        const onKey = (e) => { if (!e.isTrusted) return; if (e.key === 'Escape') { e.preventDefault(); close(); } };
-        // Fix round 2: all three controls are trusted-click guarded like every
-        // other in-page control. The armDelayed() countdown alone was not
-        // enough — page script could simply wait out the 3s and then
-        // .click() "Submit anyway" itself, posting the password to the
-        // attacker's host with no user involvement at all.
-        onTrustedClick(back, close);
-        const go = button('ss-danger-ghost', t('submitAnyway', null, 'Submit anyway'));
-        armDelayed(go, 3);
-        // form.submit() here runs the isolated world's native (unhooked) method,
-        // so it really submits without re-triggering this guard.
-        onTrustedClick(go, () => { document.removeEventListener('keydown', onKey, true); ov.remove(); form.submit(); });
-        actions.append(back, go);
-        const rep = button('ss-report', t('reportMistake', null, 'Report a mistake')); onTrustedClick(rep, () => { rep.textContent = t('thanks', null, 'Thanks'); rep.disabled = true; onReport && onReport(); }); actions.prepend(rep);
-        card.append(actions); ov.append(card);
-        document.documentElement.appendChild(ov);
-        document.addEventListener('keydown', onKey, true);
-        back.focus();
+        modal('dialog', NS + '-overlay', {
+          role: 'dialog', label: t('ariaPhishingWarning', null, 'Possible phishing warning'),
+          onEscape: (ctl) => ctl.close(),
+          onShown: () => { if (typeof onShown === 'function') onShown('form-guard'); }
+        }, (dlg, ctl) => {
+          const card = el('div', 'ss-card');
+          card.append(
+            el('h3', null, t('phishingStop', null, 'Stop — possible phishing')),
+            el('p', null, dest
+              ? t('guardFormDestKnown', [bidi(dest), bidi(location.hostname)], 'This form sends your password to ' + dest + ', not to ' + location.hostname + '. Sending a password to a different website is how scammers steal logins.')
+              : t('guardFormDestUnknown', null, 'This form sends your password to a different website than the one you are visiting. This is a common way scammers steal logins.'))
+          );
+          const ul = el('ul', 'ss-evidence');
+          for (const r of (reasons || []).slice(0, 3)) { const li = el('li'); li.append(el('span', 'ss-chip', t('chipPage', null, 'Page')), el('span', null, reasonText(r))); ul.appendChild(li); }
+          card.appendChild(ul);
+          const actions = el('div', 'ss-actions');
+          const back = button('ss-primary', t('cancelRecommended', null, 'Cancel (recommended)'));
+          // Fix round 2: all three controls are trusted-click guarded like every
+          // other in-page control. The armDelayed() countdown alone was not
+          // enough — page script could simply wait out the 3s and then
+          // .click() "Submit anyway" itself, posting the password to the
+          // attacker's host with no user involvement at all.
+          onTrustedClick(back, () => ctl.close());
+          const go = button('ss-danger-ghost', t('submitAnyway', null, 'Submit anyway'));
+          armDelayed(go, 3);
+          // form.submit() here runs the isolated world's native (unhooked) method,
+          // so it really submits without re-triggering this guard.
+          onTrustedClick(go, () => { ctl.close(); form.submit(); });
+          actions.append(back, go);
+          const rep = button('ss-report', t('reportMistake', null, 'Report a mistake')); onTrustedClick(rep, () => { rep.textContent = t('thanks', null, 'Thanks'); rep.disabled = true; onReport && onReport(); }); actions.prepend(rep);
+          card.append(actions); dlg.append(card);
+          return { card, safe: back };
+        });
       };
       form.addEventListener('submit', onSubmit, true);
       form.addEventListener('scamshield:formsubmit', onSubmit, true);
@@ -595,8 +723,15 @@
     return n;
   }
 
-  function walletConfirmOverlay(detail, onDecision) {
-    if (document.querySelector('.' + NS + '-overlay')) {
+  // (0.15.0, Task 13) A <dialog> in the 'dialog' host. Every way it can end without a trusted "Proceed anyway"
+  // is a denial, never an approval: Cancel, Escape, the page removing the host (onDetached returns false so the
+  // primitive does not re-attach it) and the page closing the dialog more than 3 times. `onReport` (optional)
+  // adds the report-only "Report a mistake".
+  function walletConfirmOverlay(detail, onDecision, onReport) {
+    const S = surfaces();
+    // A frame too small for a dialog cannot ask: deny (synthetic, like a collision), never approve.
+    if (tinyFrame()) { onDecision(false, { collision: true }); return; }
+    if (S.isMounted('dialog') || S.isMounted('interstitial')) {
       // Another warning is already on screen. Deny, never silently approve —
       // a drainer could fire a decoy request first and slip the real one
       // through the collision path. The dApp receives a standard user-rejected
@@ -606,37 +741,34 @@
       onDecision(false, { collision: true });
       return;
     }
-    const ov = el('div', NS + '-overlay ' + NS + '-wallet');
-    ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true');
-    ov.setAttribute('aria-label', t('walletRiskyTitle', null, 'Risky wallet request'));
-    setDir(ov);
-    const card = el('div', 'ss-card');
-    const head = el('div', 'ss-head'); const h3 = el('h3', null, t('walletRiskyTitle', null, 'Risky wallet request')); head.append(tile('warn'), h3);
-    card.append(head,
-      el('p', null, reasonText(detail.reasons && detail.reasons[0]) || t('guardWalletFallback', null, 'This site is requesting a sensitive wallet action.')),
-      el('p', 'ss-sub', t('walletRiskyBody', null, 'If you did not expect this, cancel. Drainers use these requests to steal your crypto.')));
-    const actions = el('div', 'ss-actions');
-    const cancel = button('ss-primary', t('cancelRecommended', null, 'Cancel (recommended)'));
-    const proceed = button('ss-danger-ghost', t('proceedAnyway', null, 'Proceed anyway'));
-    armDelayed(proceed, 3);
     let decided = false;
-    const watch = new MutationObserver(() => {
-      // 0.14.1: removed without a trusted decision = page script dismissed it
-      // (done() sets `decided` first). Treat as Cancel, never as approval.
-      if (!decided && !ov.isConnected) { decided = true; stop(); onDecision(false); }
+    const decide = (allow) => { if (decided) return; decided = true; walletOpen = false; onDecision(allow); };
+    walletOpen = true;
+    const ctl = modal('dialog', NS + '-overlay ' + NS + '-wallet', {
+      role: 'dialog', label: t('walletRiskyTitle', null, 'Risky wallet request'),
+      onEscape: () => { decide(false); ctl.close(); },
+      onDetached: () => false,       // removed by page script = denied (0.14.1), not re-attached
+      onUnmount: () => decide(false) // any other end without a trusted decision is a denial too
+    }, (dlg, c) => {
+      const card = el('div', 'ss-card');
+      const head = el('div', 'ss-head'); const h3 = el('h3', null, t('walletRiskyTitle', null, 'Risky wallet request')); head.append(tile('warn'), h3);
+      card.append(head,
+        el('p', null, reasonText(detail.reasons && detail.reasons[0]) || t('guardWalletFallback', null, 'This site is requesting a sensitive wallet action.')),
+        el('p', 'ss-sub', t('walletRiskyBody', null, 'If you did not expect this, cancel. Drainers use these requests to steal your crypto.')));
+      const actions = el('div', 'ss-actions');
+      const cancel = button('ss-primary', t('cancelRecommended', null, 'Cancel (recommended)'));
+      const proceed = button('ss-danger-ghost', t('proceedAnyway', null, 'Proceed anyway'));
+      armDelayed(proceed, 3);
+      const done = (allow) => { decide(allow); c.close(); };
+      // Fix round 2: trusted-click guarded — a drainer page must not be able to
+      // .click() "Proceed anyway" for the user once the 3s arm has elapsed.
+      onTrustedClick(cancel, () => done(false));
+      onTrustedClick(proceed, () => done(true));
+      actions.append(cancel, proceed);
+      if (typeof onReport === 'function') { const rep = button('ss-report', t('reportMistake', null, 'Report a mistake')); onTrustedClick(rep, () => { rep.textContent = t('thanks', null, 'Thanks'); rep.disabled = true; onReport(); }); actions.append(rep); }
+      card.append(actions); dlg.append(card);
+      return { card, safe: cancel };
     });
-    const stop = () => { watch.disconnect(); document.removeEventListener('keydown', onKey, true); };
-    const done = (allow) => { if (decided) return; decided = true; stop(); ov.remove(); onDecision(allow); };
-    const onKey = (e) => { if (!e.isTrusted) return; if (e.key === 'Escape') { e.preventDefault(); done(false); } };
-    // Fix round 2: trusted-click guarded — a drainer page must not be able to
-    // .click() "Proceed anyway" for the user once the 3s arm has elapsed.
-    onTrustedClick(cancel, () => done(false));
-    onTrustedClick(proceed, () => done(true));
-    actions.append(cancel, proceed); card.append(actions); ov.append(card);
-    document.documentElement.appendChild(ov);
-    watch.observe(document, { childList: true });
-    watch.observe(document.documentElement, { childList: true });
-    document.addEventListener('keydown', onKey, true); cancel.focus();
     // Tell the MAIN-world hook the warning is on screen so its 8 s fail-open
     // timer stops and the request waits for the user.
     // (0.14.1) cloneInto on Firefox so the MAIN-world hook can read detail.id
@@ -713,29 +845,30 @@
     });
   }
 
-  function techScamEscapeOverlay(verdict, onLeave) {
-    if (document.querySelector('.' + NS + '-overlay')) return;
-    const ov = el('div', NS + '-overlay');
-    ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true');
-    ov.setAttribute('aria-label', t('techScamTitle', null, 'Possible tech-support scam'));
-    setDir(ov);
-    const card = el('div', 'ss-card');
-    const head = el('div', 'ss-head'); const h3 = el('h3', null, t('techScamTitle', null, 'Possible tech-support scam')); head.append(tile('danger'), h3);
-    card.append(head,
-      el('p', null, reasonText(verdict.reasons && verdict.reasons[0]) || t('guardTechScamFallback', null, 'This page is using scare tactics.')),
-      el('p', 'ss-sub', t('techScamBody', null, 'This is a web page, not your computer — your computer is fine. Real security warnings never lock your screen or show a phone number. Do not call, and do not pay.')));
-    const actions = el('div', 'ss-actions');
-    const leave = button('ss-primary', t('getMeOut', null, 'Get me out (close this page)'));
-    const stay = button('', t('dismiss', null, 'Dismiss'));
-    const close = () => { document.removeEventListener('keydown', onKey, true); ov.remove(); };
-    const onKey = (e) => { if (!e.isTrusted) return; if (e.key === 'Escape') { e.preventDefault(); close(); } };
-    // Fix round 2: trusted-click guarded — a tech-support scam page must not be
-    // able to dismiss its own warning overlay by synthesising a Dismiss click.
-    onTrustedClick(leave, () => { close(); onLeave && onLeave(); });
-    onTrustedClick(stay, close);
-    actions.append(leave, stay); card.append(actions); ov.append(card);
-    document.documentElement.appendChild(ov);
-    document.addEventListener('keydown', onKey, true); leave.focus();
+  function techScamEscapeOverlay(verdict, onLeave, onReport) {
+    const S = surfaces();
+    if (tinyFrame() || S.isMounted('dialog') || S.isMounted('interstitial')) return;
+    modal('dialog', NS + '-overlay', {
+      role: 'dialog', label: t('techScamTitle', null, 'Possible tech-support scam'),
+      onEscape: (ctl) => ctl.close()
+    }, (dlg, ctl) => {
+      const card = el('div', 'ss-card');
+      const head = el('div', 'ss-head'); const h3 = el('h3', null, t('techScamTitle', null, 'Possible tech-support scam')); head.append(tile('danger'), h3);
+      card.append(head,
+        el('p', null, reasonText(verdict.reasons && verdict.reasons[0]) || t('guardTechScamFallback', null, 'This page is using scare tactics.')),
+        el('p', 'ss-sub', t('techScamBody', null, 'This is a web page, not your computer — your computer is fine. Real security warnings never lock your screen or show a phone number. Do not call, and do not pay.')));
+      const actions = el('div', 'ss-actions');
+      const leave = button('ss-primary', t('getMeOut', null, 'Get me out (close this page)'));
+      const stay = button('', t('dismiss', null, 'Dismiss'));
+      // Fix round 2: trusted-click guarded — a tech-support scam page must not be
+      // able to dismiss its own warning overlay by synthesising a Dismiss click.
+      onTrustedClick(leave, () => { ctl.close(); onLeave && onLeave(); });
+      onTrustedClick(stay, () => ctl.close());
+      actions.append(leave, stay);
+      if (typeof onReport === 'function') { const rep = button('ss-report', t('reportMistake', null, 'Report a mistake')); onTrustedClick(rep, () => { rep.textContent = t('thanks', null, 'Thanks'); rep.disabled = true; onReport(); }); actions.append(rep); }
+      card.append(actions); dlg.append(card);
+      return { card, safe: leave };
+    });
   }
 
   root.ScamShield = root.ScamShield || {};

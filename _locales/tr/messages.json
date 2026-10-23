@@ -442,5 +442,6 @@
   "continueOnce": { "message": "Bu sayfaya yalnızca bir kez devam eder. ScamShield açık kalır." },
   "bannerHideDay": { "message": "Bir günlüğüne gizle" },
   "bannerHideHour": { "message": "Bir saatliğine gizle" },
-  "mistakeSiteFine": { "message": "Bu site güvenli" }
+  "mistakeSiteFine": { "message": "Bu site güvenli" },
+  "continueUnsafe": { "message": "Bu siteye devam et (güvenli değil)" }
 }

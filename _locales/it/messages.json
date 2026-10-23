@@ -442,5 +442,6 @@
   "continueOnce": { "message": "Apre questa pagina una sola volta. ScamShield resta attivo." },
   "bannerHideDay": { "message": "Nascondi per un giorno" },
   "bannerHideHour": { "message": "Nascondi per un'ora" },
-  "mistakeSiteFine": { "message": "Questo sito è sicuro" }
+  "mistakeSiteFine": { "message": "Questo sito è sicuro" },
+  "continueUnsafe": { "message": "Continua su questo sito (non sicuro)" }
 }

@@ -442,5 +442,6 @@
   "continueOnce": { "message": "Membuka halaman ini satu kali. ScamShield tetap aktif." },
   "bannerHideDay": { "message": "Sembunyikan selama sehari" },
   "bannerHideHour": { "message": "Sembunyikan selama satu jam" },
-  "mistakeSiteFine": { "message": "Situs ini aman" }
+  "mistakeSiteFine": { "message": "Situs ini aman" },
+  "continueUnsafe": { "message": "Lanjut ke situs ini (tidak aman)" }
 }

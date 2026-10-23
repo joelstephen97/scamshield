@@ -236,7 +236,7 @@
     SS.actions.walletConfirmOverlay(detail, (allow, meta) => {
       reply(detail.id, allow);
       if (!allow && !(meta && meta.collision)) send('bumpThreats', { kind: 'wallet' });
-    });
+    }, reportMistake);
   });
   const clipboardSeen = new Set(); // per page load: level|sample — the same copy button never re-toasts
   window.addEventListener('scamshield:clipboard-alert', async (e) => {
@@ -312,7 +312,7 @@
         // in the MAIN world, then actually leave via the service worker.
         try { window.dispatchEvent(new CustomEvent('scamshield:techscam-escape')); } catch (_) {}
         send('leaveTab');
-      });
+      }, reportMistake);
       send('reportVerdict', { verdict: { level: 'dangerous', score: r.score, reasons: r.reasons, reasonCodes: r.reasons.map((x) => x.code), flags: r.flags || [], modelUsed: false }, subframe: !IS_TOP, tier: 'stop' });
       send('bumpThreats', { kind: 'techscam' });
     }
@@ -1088,16 +1088,8 @@
       formGuardReasons.splice(0, formGuardReasons.length, ...(prov.reasons || []));
     } catch (_) { formGuardReasons.length = 0; }
     if (foreignForms.length) {
-      // (0.15.0) The submit overlay lives in actions.js (frozen). A listener registered BEFORE the guard's
-      // counts overlays, one registered AFTER it (same capture phase, so it runs once the guard has
-      // finished) logs only if the count grew, i.e. the guard really rendered its own overlay.
-      let before = 0;
-      const fresh = foreignForms.filter((f) => !f.__ssSurfaceLogged);
-      const pre = () => { before = document.querySelectorAll('.scamshield-overlay').length; };
-      const post = () => { if (document.querySelectorAll('.scamshield-overlay').length > before) surface('form-guard', true); };
-      for (const f of fresh) { f.__ssSurfaceLogged = true; f.addEventListener('submit', pre, true); f.addEventListener('scamshield:formsubmit', pre, true); }
-      SS.actions.guardForms(foreignForms, formGuardReasons, reportMistake);
-      for (const f of fresh) { f.addEventListener('submit', post, true); f.addEventListener('scamshield:formsubmit', post, true); }
+      // (0.15.0) guardForms logs the surface itself (once per page) from the dialog it actually shows, so no DOM counting here.
+      SS.actions.guardForms(foreignForms, formGuardReasons, reportMistake, () => surface('form-guard', true));
     }
     // Reuses leakyFormGuard (0.10.0, Task C2): the closest existing warn-tier
     // "form leak before/at submit" toggle — see task-c2-report.md for why no

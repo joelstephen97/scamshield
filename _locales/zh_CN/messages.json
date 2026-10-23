@@ -442,5 +442,6 @@
   "continueOnce": { "message": "仅继续访问此页面一次。ScamShield 保持开启。" },
   "bannerHideDay": { "message": "隐藏一天" },
   "bannerHideHour": { "message": "隐藏一小时" },
-  "mistakeSiteFine": { "message": "此网站没问题" }
+  "mistakeSiteFine": { "message": "此网站没问题" },
+  "continueUnsafe": { "message": "继续访问此网站(不安全)" }
 }

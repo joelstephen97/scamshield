@@ -65,17 +65,70 @@
     '.scamshield-banner .ss-menu .ss-btn{text-align:start;border-color:transparent;background:transparent;color:var(--ss-text);justify-content:flex-start;border-radius:6px;white-space:normal}\n' +
     '.scamshield-banner .ss-menu .ss-btn:hover,.scamshield-banner .ss-menu .ss-btn:focus-visible{background:var(--ss-accent-soft);color:var(--ss-accent);outline-offset:-2px}\n' +
     '@media (max-width:599px){\n' +
-    '.scamshield-banner{inset-block-start:auto;inset-block-end:0;inset-inline:0;margin-inline:0;inline-size:auto;flex-wrap:wrap;border-start-start-radius:var(--ss-radius);border-start-end-radius:var(--ss-radius);border-end-start-radius:0;border-end-end-radius:0;padding-block-end:max(12px,env(safe-area-inset-bottom,0px));padding-inline:max(14px,env(safe-area-inset-left,0px)) max(14px,env(safe-area-inset-right,0px))}\n' +
+    '.scamshield-banner{inset-block-start:auto;inset-block-end:0;inset-inline:0;margin-inline:0;inline-size:auto;flex-wrap:wrap;border-start-start-radius:var(--ss-radius);border-start-end-radius:var(--ss-radius);border-end-start-radius:0;border-end-end-radius:0;padding-block-end:max(12px,env(safe-area-inset-bottom,0px));padding-inline:max(14px,env(safe-area-inset-left,0px)) max(14px,env(safe-area-inset-right,0px));max-block-size:calc(100dvh - 24px);overflow:auto}\n' +
+    '.scamshield-banner[dir=rtl]{padding-inline:max(14px,env(safe-area-inset-right,0px)) max(14px,env(safe-area-inset-left,0px))}\n' +
     '.scamshield-banner .ss-acts{flex:1 1 100%;inline-size:100%;align-self:stretch;justify-content:flex-start}\n' +
     '.scamshield-banner .ss-acts>.ss-btn{flex:1 1 auto;min-block-size:44px;min-inline-size:44px}\n' +
     '.scamshield-banner .ss-acts>.ss-more,.scamshield-banner .ss-acts>.ss-x{flex:0 0 auto}\n' +
     '.scamshield-banner .ss-x .ss-x-label{display:none}.scamshield-banner .ss-btn.ss-x{inline-size:44px;padding:0}\n' +
-    '.scamshield-banner .ss-menu{inset-block-start:auto;inset-block-end:calc(100% + 8px)}\n' +
+    '.scamshield-banner .ss-menu{position:static;flex:1 1 100%;inline-size:100%;max-inline-size:none;margin-block-start:4px;box-shadow:none}\n' +
     '.scamshield-banner .ss-menu .ss-btn{min-block-size:44px}\n' +
     '}\n';
 
-  // Filled in by Task 13 (interstitial and dialogs move onto the host then).
-  const dialog = '';
+  // Interstitial + dialogs (0.15.0, Task 13): a native <dialog> opened with showModal() (top layer, the rest of the page
+  // inert). The <dialog> is the full-viewport frame; its .ss-card is centred in it and scrolls on its own, so a long
+  // translation can never push a button off-screen. Logical properties only; --ss-on-accent keeps the dark primary readable.
+  const dialog =
+    ".scamshield-overlay{position:fixed;inset:0;margin:0;padding:12px;border:0;inline-size:100%;block-size:100%;max-inline-size:none;max-block-size:none;background:transparent;color:var(--ss-text);overflow:hidden;font:13px/1.45 system-ui,-apple-system,\"Segoe UI\",Roboto,sans-serif}\n" +
+    ".scamshield-overlay[open]{display:flex;align-items:center;justify-content:center}\n" +
+    ".scamshield-overlay::backdrop{background:rgba(10,16,13,.55)}\n" +
+    ".scamshield-overlay .ss-card{box-sizing:border-box;inline-size:min(560px,100vw - 32px);max-block-size:calc(100dvh - 24px);overflow:auto;overscroll-behavior:contain;background:var(--ss-surface);color:var(--ss-text);padding:20px;border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.4);font-size:clamp(13px,.45vw + 8.5px,18px);overflow-wrap:anywhere}\n" +
+    ".scamshield-overlay .ss-head{display:flex;gap:12px;align-items:center;margin-block-end:10px}\n" +
+    ".scamshield-overlay h3{margin:0;font-size:1.3em;font-weight:600;line-height:1.25;letter-spacing:-.01em;color:var(--ss-text)}\n" +
+    ".scamshield-overlay p{margin:0;font-size:1.04em}.scamshield-overlay .ss-sub{color:var(--ss-muted);font-size:1em;margin-block-start:10px}\n" +
+    ".scamshield-overlay .ss-evidence{list-style:none;margin:12px 0 0;padding:0}.scamshield-overlay .ss-evidence li{padding:7px 0;border-block-start:1px solid var(--ss-hair);display:flex;gap:8px;font-size:1em}.scamshield-overlay .ss-evidence li:first-child{border-block-start:0;padding-block-start:0}\n" +
+    ".scamshield-overlay .ss-chip{font-size:.85em;line-height:1;padding:4px 7px;border-radius:6px;background:var(--ss-unknown-bg);color:var(--ss-muted);flex:none;block-size:fit-content}\n" +
+    ".scamshield-overlay .ss-actions{display:flex;gap:8px;margin-block-start:14px;justify-content:flex-end;align-items:center;flex-wrap:wrap}\n" +
+    ".scamshield-overlay .ss-btn{white-space:normal;text-align:center;min-inline-size:0;max-inline-size:100%}\n" +
+    ".scamshield-overlay .ss-primary{background:var(--ss-accent);color:var(--ss-on-accent);border-color:var(--ss-accent);font-weight:600}\n" +
+    ".scamshield-overlay .ss-rescue-ghost{color:var(--ss-accent);border-color:var(--ss-accent);font-weight:600}\n" +
+    ".scamshield-overlay .ss-danger-ghost{color:var(--ss-danger);border-color:var(--ss-danger)}\n" +
+    ".scamshield-overlay .ss-report{margin-inline-end:auto;border-color:transparent;color:var(--ss-accent)}\n" +
+    ".scamshield-overlay .ss-btn:focus-visible,.scamshield-overlay summary:focus-visible{outline:2px solid var(--ss-accent);outline-offset:2px}\n" +
+    "/* Interstitial = full-viewport STOP PAGE (blocked.html layout): an opaque dialog, the card centred in it. */\n" +
+    ".scamshield-interstitial{background:var(--ss-ground)}\n" +
+    ".scamshield-interstitial .ss-card{background:transparent;box-shadow:none;border-radius:0;padding:24px}\n" +
+    ".scamshield-interstitial h3{font-size:1.7em;line-height:1.2}\n" +
+    ".scamshield-interstitial .ss-lead{font-size:1.12em;line-height:1.5;margin-block-end:12px;max-inline-size:60ch}\n" +
+    ".scamshield-interstitial .ss-addr{background:var(--ss-surface);border:1px solid var(--ss-hair);border-radius:10px;padding:10px 12px;margin-block-end:12px}\n" +
+    ".scamshield-interstitial .ss-addr small{display:block;font-size:.85em;color:var(--ss-muted);letter-spacing:.06em;text-transform:uppercase;margin-block-end:3px}\n" +
+    ".scamshield-interstitial .ss-addr code{font:.96em/1.4 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;word-break:break-all;direction:ltr;unicode-bidi:isolate}\n" +
+    ".scamshield-interstitial .ss-evidence{margin:0 0 12px}.scamshield-interstitial .ss-evidence li{font-size:1.04em}\n" +
+    ".scamshield-interstitial .ss-sub{margin:0 0 16px}\n" +
+    ".scamshield-interstitial .ss-actions{justify-content:flex-start;gap:10px;margin-block-start:0}\n" +
+    ".scamshield-interstitial .ss-actions .ss-btn{min-block-size:36px;padding:0 16px}\n" +
+    ".scamshield-interstitial .ss-copy{border:1px solid var(--ss-hair);color:var(--ss-text);background:var(--ss-surface)}\n" +
+    ".scamshield-interstitial .ss-details{margin-block-start:18px;border-block-start:1px solid var(--ss-hair);padding-block-start:12px}\n" +
+    ".scamshield-interstitial .ss-details summary{cursor:pointer;color:var(--ss-muted);font-size:1em;list-style:none;display:flex;justify-content:space-between;min-block-size:24px;align-items:center}\n" +
+    ".scamshield-interstitial .ss-details summary::-webkit-details-marker{display:none}.scamshield-interstitial .ss-details summary::after{content:\"\\25BE\"}.scamshield-interstitial .ss-details[open] summary::after{content:\"\\25B4\"}\n" +
+    ".scamshield-interstitial .ss-dt{display:flex;flex-wrap:wrap;gap:8px 16px;margin-block-start:10px;align-items:center;font-size:1em}\n" +
+    ".scamshield-interstitial .ss-dt .ss-danger-ghost{min-block-size:32px}\n" +
+    ".scamshield-interstitial .ss-consequence{color:var(--ss-muted);font-size:.96em}\n" +
+    ".scamshield-interstitial .ss-trust-link,.scamshield-interstitial .ss-dt .ss-report{background:none;border:0;color:var(--ss-muted);text-decoration:underline;text-underline-offset:2px;cursor:pointer;padding:0;min-block-size:24px;font:inherit;margin:0}\n" +
+    ".scamshield-interstitial .ss-dt .ss-report:disabled{text-decoration:none;cursor:default}\n" +
+    ".scamshield-interstitial .ss-foot{margin-block-start:22px;font-size:.92em;color:var(--ss-muted)}\n" +
+    "@media (min-width:1920px){.scamshield-overlay .ss-card{inline-size:min(680px,100vw - 32px);padding:28px}.scamshield-interstitial .ss-card{padding:32px}}\n" +
+    "@media (pointer: coarse){.scamshield-interstitial .ss-trust-link,.scamshield-interstitial .ss-dt .ss-report,.scamshield-interstitial .ss-details summary{min-block-size:44px;min-inline-size:44px}.scamshield-interstitial .ss-dt .ss-danger-ghost{min-block-size:44px}}\n" +
+    "@media (max-width:599px){\n" +
+    ".scamshield-overlay{padding:12px}\n" +
+    ".scamshield-overlay .ss-card{padding:16px}.scamshield-interstitial .ss-card{padding:16px 12px}\n" +
+    ".scamshield-overlay .ss-actions{flex-direction:column;align-items:stretch}\n" +
+    ".scamshield-overlay .ss-actions .ss-btn{inline-size:100%;min-block-size:44px;margin:0}\n" +
+    ".scamshield-interstitial .ss-dt{flex-direction:column;align-items:stretch;gap:8px}\n" +
+    ".scamshield-interstitial .ss-dt .ss-danger-ghost{inline-size:100%;min-block-size:44px;white-space:normal}\n" +
+    ".scamshield-interstitial .ss-trust-link,.scamshield-interstitial .ss-dt .ss-report{min-block-size:44px;text-align:start}\n" +
+    ".scamshield-interstitial .ss-details summary{min-block-size:44px}\n" +
+    "}\n";
 
   // Toast family + trust acknowledgement. The ack carries both root classes (it is a toast-shaped bar).
   const toast =

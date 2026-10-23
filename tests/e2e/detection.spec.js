@@ -47,6 +47,8 @@ test('seed-phrase harvesting page gets the blocking interstitial with a delayed 
   // The risky choice starts disabled (enforced delay), the safe one is focused.
   const cont = inter.locator('.ss-danger-ghost');
   await expect(cont).toBeDisabled();
+  // (0.15.0) the countdown starts when Details opens, not at build.
+  await inter.locator('.ss-details summary').click();
   await expect(cont).toBeEnabled({ timeout: 6000 });
 });
 
@@ -424,7 +426,7 @@ test('wallet overlay survives an SPA navigation', async ({ context }) => {
 });
 test('wallet overlay removed by page script denies the request (4001)', async ({ context }) => {
   const page = await openSlowDrainer(context);
-  await page.evaluate(() => document.querySelector('.scamshield-overlay').remove());
+  await page.evaluate(() => document.querySelector('scamshield-surface[data-kind=dialog]').remove()); // the overlay lives in a shadow host now (0.15.0)
   await expect.poll(() => page.evaluate(() => window.__settled), { timeout: 5000 }).toBe(4001);
   expect(await page.evaluate(() => window.__reached)).toBe(false);
   await page.close();
@@ -437,6 +439,8 @@ test('banner has Leave + Report actions and the overlay has evidence rows', asyn
   await expect(page.locator('.scamshield-banner .ss-report')).toBeVisible();
   await page.fill('input[name="pw"]', 'x'); await page.click('button[type="submit"]');
   await expect(page.locator('.scamshield-overlay .ss-evidence li')).not.toHaveCount(0);
+  // (0.15.0) the form guard is a modal <dialog> now: the banner behind it is inert until the dialog is dismissed.
+  await page.click('.scamshield-overlay .ss-primary'); await expect(page.locator('.scamshield-overlay')).toHaveCount(0);
   await page.click('.scamshield-banner .ss-leave');
   await expect.poll(() => page.url(), { timeout: 5000 }).not.toContain('phishing-login');
 });

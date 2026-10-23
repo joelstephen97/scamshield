@@ -67,14 +67,28 @@
     return true;
   }
 
+  // (0.15.0, Task 13) A surface can hook its own lifecycle: onDetached (page removed the host; return false
+  // to NOT re-attach, e.g. the wallet confirm treats removal as a denial), onAttach (host put back, so a
+  // <dialog> can showModal() again) and onUnmount (every exit path, once: restores body.inert etc.).
+  function ended(rec) {
+    if (rec.ended) return;
+    rec.ended = true;
+    if (rec.opts && typeof rec.opts.onUnmount === 'function') { try { rec.opts.onUnmount(); } catch (_) {} }
+  }
   function onMutations() {
     const now = Date.now();
     for (const rec of Array.from(live.values())) {
       if (rec.closing || rec.host.isConnected) continue;
+      const o = rec.opts || {};
+      if (typeof o.onDetached === 'function') {
+        let keep = true;
+        try { keep = o.onDetached() !== false; } catch (_) { keep = true; }
+        if (!keep) { rec.closing = true; live.delete(rec.kind); ended(rec); continue; }
+      }
       rec.stamps = rec.stamps.filter((s) => now - s < REATTACH_WINDOW_MS);
-      if (rec.stamps.length >= REATTACH_MAX) { live.delete(rec.kind); continue; } // give up silently
+      if (rec.stamps.length >= REATTACH_MAX) { live.delete(rec.kind); ended(rec); continue; } // give up
       rec.stamps.push(now);
-      place(rec);
+      if (place(rec) && typeof o.onAttach === 'function') { try { o.onAttach(); } catch (_) {} }
     }
     if (!live.size && observer) { observer.disconnect(); observer = null; }
   }
@@ -88,6 +102,7 @@
     const rec = live.get(kind);
     if (!rec) return;
     rec.closing = true; live.delete(kind);
+    ended(rec); // before the node leaves, so a surface can close its own <dialog> with its own flag set
     try { rec.host.remove(); } catch (_) {}
     if (!live.size && observer) { observer.disconnect(); observer = null; }
   }
@@ -96,7 +111,7 @@
     return !!(rec && !rec.closing);
   }
 
-  // kind: banner|interstitial|toast|ack|dialog. buildFn(shadowRoot) returns the card element.
+  // kind: banner|interstitial|toast|ack|dialog. buildFn(shadowRoot) returns the card element (or { el, card }).
   // A second mount of the same kind replaces the first (state is module-level, never a DOM query).
   function mount(kind, buildFn, opts) {
     const o = opts || {};
@@ -110,16 +125,21 @@
     if (o.topLayer === 'popover') host.setAttribute('popover', 'manual');
     const shadow = host.attachShadow({ mode: 'open' });
     applyCss(shadow, [css.base || '', css[kind === 'ack' ? 'toast' : kind === 'interstitial' ? 'dialog' : kind] || '']);
-    const card = buildFn(shadow);
-    if (card) { if (card.parentNode !== shadow) shadow.appendChild(card); cards.set(shadow, card); }
-    const rec = { kind, host, shadow, card, closing: false, stamps: [], topLayer: o.topLayer };
+    // buildFn returns the top node, or { el, card } when the node the click-geometry check should use (the
+    // dialog's .ss-card) is not the node that goes into the shadow root (the full-viewport <dialog>).
+    const built = buildFn(shadow);
+    const top = built && built.el ? built.el : built;
+    const card = built && built.el ? built.card : built;
+    if (top) { if (top.parentNode !== shadow) shadow.appendChild(top); }
+    if (card) cards.set(shadow, card);
+    const rec = { kind, host, shadow, card, closing: false, stamps: [], topLayer: o.topLayer, opts: o, ended: false };
     live.set(kind, rec);
     place(rec);
     watch();
     // (0.15.0) onShown(kind): the surface log is written from here, once per real mount, so callers no longer
     // infer "it was shown" from before/after DOM counts or listener order. A throwing callback never breaks the mount.
     if (typeof o.onShown === 'function') { try { o.onShown(kind); } catch (_) {} }
-    return { host, root: shadow, card, close() { if (live.get(kind) === rec) unmount(kind); else { rec.closing = true; try { host.remove(); } catch (_) {} } } };
+    return { host, root: shadow, card, close() { if (live.get(kind) === rec) unmount(kind); else { rec.closing = true; ended(rec); try { host.remove(); } catch (_) {} } } };
   }
 
   const api = { mount, unmount, isMounted, onTrustedClick, insideCard };

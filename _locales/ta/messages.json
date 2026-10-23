@@ -442,5 +442,6 @@
   "continueOnce": { "message": "இந்தப் பக்கத்துக்கு ஒரு முறை மட்டும் செல்லும். ScamShield இயக்கத்திலேயே இருக்கும்." },
   "bannerHideDay": { "message": "ஒரு நாளுக்கு மறைக்கவும்" },
   "bannerHideHour": { "message": "ஒரு மணி நேரத்துக்கு மறைக்கவும்" },
-  "mistakeSiteFine": { "message": "இந்தத் தளம் பாதுகாப்பானது" }
+  "mistakeSiteFine": { "message": "இந்தத் தளம் பாதுகாப்பானது" },
+  "continueUnsafe": { "message": "இந்தத் தளத்துக்குத் தொடர்க (பாதுகாப்பற்றது)" }
 }

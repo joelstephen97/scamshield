@@ -442,5 +442,6 @@
   "continueOnce": { "message": "このページを一度だけ開きます。ScamShieldはオンのままです。" },
   "bannerHideDay": { "message": "1日非表示" },
   "bannerHideHour": { "message": "1時間非表示" },
-  "mistakeSiteFine": { "message": "このサイトは問題ありません" }
+  "mistakeSiteFine": { "message": "このサイトは問題ありません" },
+  "continueUnsafe": { "message": "このサイトに進む(危険)" }
 }

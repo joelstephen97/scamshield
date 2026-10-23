@@ -442,5 +442,6 @@
   "continueOnce": { "message": "ఈ పేజీకి ఒక్కసారి మాత్రమే వెళ్తుంది. ScamShield ఆన్‌లోనే ఉంటుంది." },
   "bannerHideDay": { "message": "ఒక రోజు దాచండి" },
   "bannerHideHour": { "message": "ఒక గంట దాచండి" },
-  "mistakeSiteFine": { "message": "ఈ సైట్ సురక్షితమే" }
+  "mistakeSiteFine": { "message": "ఈ సైట్ సురక్షితమే" },
+  "continueUnsafe": { "message": "ఈ సైట్‌కు కొనసాగండి (సురక్షితం కాదు)" }
 }

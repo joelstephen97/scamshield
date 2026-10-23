@@ -442,5 +442,6 @@
   "continueOnce": { "message": "इस पेज पर सिर्फ़ एक बार जाने देता है। ScamShield चालू रहता है।" },
   "bannerHideDay": { "message": "एक दिन के लिए छिपाएँ" },
   "bannerHideHour": { "message": "एक घंटे के लिए छिपाएँ" },
-  "mistakeSiteFine": { "message": "यह साइट ठीक है" }
+  "mistakeSiteFine": { "message": "यह साइट ठीक है" },
+  "continueUnsafe": { "message": "इस साइट पर जाएँ (असुरक्षित)" }
 }

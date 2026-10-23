@@ -442,5 +442,6 @@
   "continueOnce": { "message": "ينقلك إلى هذه الصفحة مرة واحدة. يبقى ScamShield قيد التشغيل." },
   "bannerHideDay": { "message": "إخفاء ليوم واحد" },
   "bannerHideHour": { "message": "إخفاء لمدة ساعة" },
-  "mistakeSiteFine": { "message": "هذا الموقع آمن" }
+  "mistakeSiteFine": { "message": "هذا الموقع آمن" },
+  "continueUnsafe": { "message": "المتابعة إلى هذا الموقع (غير آمن)" }
 }
