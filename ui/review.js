@@ -20,8 +20,14 @@
   'use strict';
 
   const DAY = 86400000;
-  const INSTALL_AGE_DAYS = 7;     // minimum days since install before we ever ask
-  const THREATS_THRESHOLD = 2;    // minimum all-time blocks before we ever ask (never on the 1st — could be a false positive)
+  const INSTALL_AGE_DAYS = 14;    // minimum days since install before we ever ask (0.15.0: was 7)
+  const THREATS_THRESHOLD = 1;    // at least one Stop-tier event (0.15.0: was 2; the false-alarm rule below now guards a bad first stop)
+  const FALSE_ALARM_DAYS = 14;    // (0.15.0) any "This site is fine" tap in this window means we were noisy: don't ask
+  const SURFACE_QUIET_MS = 10 * 60 * 1000; // (0.15.0) never within 10 minutes of any warn or stop surface
+  // Surfaces that interrupt (warn or stop). Passive marks (SERP dot, greyed
+  // blocks, hidden ads, notify toast) don't count as a warning for this rule.
+  const WARN_STOP_KINDS = ['banner', 'interstitial', 'toast-clipboard', 'toast-leak', 'techscam', 'wallet',
+    'form-guard', 'link-block', 'link-warn', 'link-confirm', 'popup-block'];
   const SNOOZE_DAYS = 90;         // "Maybe later" snooze length
   const MAX_ASKS = 2;             // "asks" (Maybe-later count) at or above this stops re-asking forever
   // Chrome Web Store review tab, and (0.14.1) the AMO reviews page now that the
@@ -36,8 +42,10 @@
 
   // eligible ⇔ ALL of:
   //  (0.14.1: no browser gate — Firefox has an AMO listing, so it is asked under the same rules)
-  //  - threatsBlocked >= 2
-  //  - now - installedAt >= 7 days
+  //  - threatsBlocked >= 1 (a Stop-tier event)
+  //  - now - installedAt >= 14 days
+  //  - no "This site is fine" tap (lastFalseAlarmAt) in the last 14 days
+  //  - no warn/stop surface (lastSurfaceAt) in the last 10 minutes
   //  - state === 'pending', OR (state === 'snoozed' AND now >= snoozeUntil AND asks < 2)
   // 'rated' and 'declined' are permanent — never eligible again.
   function eligible(input) {
@@ -45,6 +53,8 @@
     if (num(o.threatsBlocked) < THREATS_THRESHOLD) return false;
     const now = typeof o.now === 'number' && Number.isFinite(o.now) ? o.now : Date.now();
     if (now - num(o.installedAt) < INSTALL_AGE_DAYS * DAY) return false;
+    if (num(o.lastFalseAlarmAt) > 0 && now - num(o.lastFalseAlarmAt) < FALSE_ALARM_DAYS * DAY) return false;
+    if (num(o.lastSurfaceAt) > 0 && now - num(o.lastSurfaceAt) < SURFACE_QUIET_MS) return false;
     if (o.state === 'pending') return true;
     if (o.state === 'snoozed') return now >= num(o.snoozeUntil) && num(o.asks) < MAX_ASKS;
     return false; // 'rated' | 'declined' | anything else
@@ -68,6 +78,15 @@
     return isChromeFromManifest(manifest) ? CWS_REVIEW_URL : AMO_REVIEW_URL;
   }
 
+  // Newest ts among warn/stop rows of the surface log (rows are {ts, host, kind}); 0 when none.
+  function lastWarnStopAt(rows) {
+    let best = 0;
+    for (const r of Array.isArray(rows) ? rows : []) {
+      if (r && WARN_STOP_KINDS.indexOf(r.kind) !== -1 && num(r.ts) > best) best = num(r.ts);
+    }
+    return best;
+  }
+
   // Render-gate: even an eligible profile never gets the ask beneath an
   // active warning ("please review us" under a dangerous/suspicious verdict
   // is the exact pattern the design explicitly rejects) — the eligible state
@@ -78,5 +97,5 @@
     return !!isEligible && level !== 'dangerous' && level !== 'suspicious';
   }
 
-  return { DAY, INSTALL_AGE_DAYS, THREATS_THRESHOLD, SNOOZE_DAYS, MAX_ASKS, CWS_REVIEW_URL, AMO_REVIEW_URL, eligible, isChromeFromManifest, reviewUrl, shouldShowCard };
+  return { DAY, INSTALL_AGE_DAYS, THREATS_THRESHOLD, SNOOZE_DAYS, MAX_ASKS, FALSE_ALARM_DAYS, SURFACE_QUIET_MS, WARN_STOP_KINDS, lastWarnStopAt, CWS_REVIEW_URL, AMO_REVIEW_URL, eligible, isChromeFromManifest, reviewUrl, shouldShowCard };
 });

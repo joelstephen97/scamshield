@@ -15,7 +15,7 @@ async function openPopupOn(context, extensionId, page) {
 }
 
 // Earned review ask (0.7.0): the popup shows a quiet ask-card only once a
-// profile has both a real 2nd block and a week-old install. Seeded directly
+// profile has both a real 2nd block and a two-week-old install. Seeded directly
 // in storage.local via the SW (like stats.spec.js does for installedAt)
 // rather than actually causing two real blocks — the eligibility predicate
 // itself is unit-tested in tests/unit/review.test.js; this only checks the
@@ -26,15 +26,15 @@ async function seedEligible(sw) {
   // profile first loads the unpacked extension. Flushing it once here first
   // guarantees that onInstalled-triggered call has landed before this test
   // overwrites installedAt directly — otherwise it can race in and clobber
-  // the seeded 8-day-old value back to "now" after this function returns.
+  // the seeded 15-day-old value back to "now" after this function returns.
   await sw.evaluate(() => ensureInstalledAt());
-  await sw.evaluate((eightDaysAgo) => Promise.all([
-    chrome.storage.local.set({ installedAt: eightDaysAgo }),
+  await sw.evaluate((fifteenDaysAgo) => Promise.all([
+    chrome.storage.local.set({ installedAt: fifteenDaysAgo }),
     setSettings({ threatsBlocked: 2 })
-  ]), Date.now() - 8 * DAY);
+  ]), Date.now() - 15 * DAY);
 }
 
-test('earned review ask: shows after the 2nd block + 7-day install, with the count in the text; No thanks hides it permanently', async ({ context, extensionId }) => {
+test('earned review ask: shows after a block + 15-day install, with the count in the text; No thanks hides it permanently', async ({ context, extensionId }) => {
   const sw = context.serviceWorkers()[0];
   await seedEligible(sw);
 
@@ -62,6 +62,24 @@ test('earned review ask: shows after the 2nd block + 7-day install, with the cou
   await expect(popup2.locator('#askcard')).toBeHidden();
   const ra = await sw.evaluate(() => getReviewAsk());
   expect(ra.state).toBe('declined');
+});
+
+test('earned review ask (0.15.0): a warning in the last 10 minutes or a "This site is fine" tap in the last 14 days keeps it away', async ({ context, extensionId }) => {
+  const sw = context.serviceWorkers()[0];
+  await seedEligible(sw);
+  // Canary: with neither signal the card shows (seedEligible alone is covered by the first test).
+  const open = async () => { const p = await context.newPage(); await p.goto(`chrome-extension://${extensionId}/popup.html`); return p; };
+  await sw.evaluate(() => recordSurface('scam.example', 'interstitial'));
+  const p1 = await open();
+  await expect(p1.locator('#foottrust, #footsupport').first()).toBeAttached();
+  await expect(p1.locator('#askcard')).toBeHidden();
+  await sw.evaluate(() => chrome.storage.local.set({ surfaceLog: [] }));
+  const p2 = await open();
+  await expect(p2.locator('#askcard')).toBeVisible();
+  await sw.evaluate(() => chrome.storage.local.set({ lastFalseAlarmAt: Date.now() - 3 * 24 * 3600 * 1000 }));
+  const p3 = await open();
+  await expect(p3.locator('#foottrust, #footsupport').first()).toBeAttached();
+  await expect(p3.locator('#askcard')).toBeHidden();
 });
 
 test('earned review ask: Maybe later snoozes ~90 days, hides the card, and stays hidden on reopen', async ({ context, extensionId }) => {

@@ -254,9 +254,11 @@ async function getReviewAsk() {
 async function getReviewAskContext() {
   await installedAtPromise;
   const ra = await getReviewAsk();
-  const cur = await api.storage.local.get('installedAt');
+  const cur = await api.storage.local.get(['installedAt', 'lastFalseAlarmAt']);
   const installedAt = (typeof cur.installedAt === 'number' && cur.installedAt > 0) ? cur.installedAt : Date.now();
-  return { reviewAsk: ra, installedAt };
+  // (0.15.0) The ask must not follow a false-alarm tap: hand the popup the last "This site is
+  // fine" time (the warn/stop surface time comes from getSurfaceLog; the rule is pure, in ui/review.js).
+  return { reviewAsk: ra, installedAt, lastFalseAlarmAt: Number(cur.lastFalseAlarmAt) || 0 };
 }
 function setReviewAsk(action) {
   return queueReviewAsk(async () => {
@@ -1875,7 +1877,8 @@ function bumpFalseAlarm() {
   return queueStats(async () => {
     try {
       const cur = await api.storage.local.get('falseAlarms');
-      await api.storage.local.set({ falseAlarms: (Number(cur.falseAlarms) || 0) + 1 });
+      // lastFalseAlarmAt (0.15.0): the review ask stays away for 14 days after a tap.
+      await api.storage.local.set({ falseAlarms: (Number(cur.falseAlarms) || 0) + 1, lastFalseAlarmAt: Date.now() });
     } catch (_) { /* best-effort */ }
   });
 }
