@@ -298,9 +298,9 @@
   // `ackSurface({ text, onUndo, restore })` used by muteHandler (Task 2) and
   // Task 4's redesigned toasts. Both render the same bar.
   function ackSurface(arg, restoreArg) {
-    let text, onUndo, restore;
+    let text, onUndo, restore, onReport;
     if (arg && typeof arg === 'object') {
-      text = arg.text; onUndo = arg.onUndo; restore = arg.restore;
+      text = arg.text; onUndo = arg.onUndo; restore = arg.restore; onReport = arg.onReport;
     } else {
       const domain = arg;
       text = t('ackTrusted', [bidi(domain)], "ScamShield won't flag " + domain + ' again.');
@@ -322,6 +322,9 @@
     // for as long as the user is actually pointing at or tabbed into it.
     const bar = toast({
       ack: true, kind: 'ok', timeoutMs: 10000, title: text,
+      // (0.15.0, Task 18) "This site is fine" reports silently; this optional button sends the deliberate report
+      // (non-quiet, so it may open the GitHub issue when community reporting is off). toast() renders it behind onTrustedClick.
+      onReport: typeof onReport === 'function' ? () => onReport({ explicit: true }) : undefined,
       actions: [{ cls: 'ss-undo', label: t('undo', null, 'Undo'), onClick: async () => { await onUndo(); restore && restore(); } }]
     });
     return bar;
@@ -391,7 +394,7 @@
       // `noTrust` (the QR-scan surface) renders no trust control: the page and the flagged destination are
       // different domains, so a click must never allowlist the QR's possibly-scam destination.
       const trustable = !x.noTrust && canStore();
-      const ack = (domain, restore) => ackSurface({ text: t('ackTrusted', [bidi(domain)], "ScamShield won't flag " + domain + ' again.'), onUndo: () => send('untrustSite', { domain }), restore });
+      const ack = (domain, restore, onReport) => ackSurface({ text: t('ackTrusted', [bidi(domain)], "ScamShield won't flag " + domain + ' again.'), onUndo: () => send('untrustSite', { domain }), restore, onReport });
       const trust = trustable ? trustButton(async () => { dismiss(); const domain = regDomain(); await send('trustSite', { domain, via: x.trustVia || 'banner' }); ack(domain, () => showBanner(verdict, Object.assign({}, extra, { restore: true }))); }) : null;
       // "This site is fine" (0.15.0, Task 12): the mistake control. It reports (userReport false_positive +
       // falseAlarm via x.onReport), THEN trusts the site (via:'mistake') and shows the ack with Undo. Because it
@@ -400,7 +403,7 @@
       // apex) it stays the report-only "Report a mistake".
       const fine = button('ss-report', trustable ? t('mistakeSiteFine', null, 'This site is fine') : t('reportMistake', null, 'Report a mistake'));
       if (trustable) {
-        armedClick(fine, async () => { dismiss(); x.onReport && x.onReport(); const domain = regDomain(); await send('trustSite', { domain, via: 'mistake' }); ack(domain, () => showBanner(verdict, Object.assign({}, extra, { restore: true }))); });
+        armedClick(fine, async () => { dismiss(); x.onReport && x.onReport({ quiet: true }); const domain = regDomain(); await send('trustSite', { domain, via: 'mistake' }); ack(domain, () => showBanner(verdict, Object.assign({}, extra, { restore: true })), x.onReport); });
       } else {
         onTrustedClick(fine, () => { fine.textContent = t('thanks', null, 'Thanks'); fine.disabled = true; x.onReport && x.onReport(); closeMenu(true); });
       }
@@ -582,8 +585,8 @@
     show();
     return ctl;
   }
-  function trustAck(domain, restore) {
-    return ackSurface({ text: t('ackTrusted', [bidi(domain)], "ScamShield won't flag " + domain + ' again.'), onUndo: () => send('untrustSite', { domain }), restore });
+  function trustAck(domain, restore, onReport) {
+    return ackSurface({ text: t('ackTrusted', [bidi(domain)], "ScamShield won't flag " + domain + ' again.'), onUndo: () => send('untrustSite', { domain }), restore, onReport });
   }
 
   // Full-page interstitial (0.6.0) — the interaction-blocking tier, reserved
@@ -635,7 +638,7 @@
       // "This site is fine" (0.15.0, Task 12): reports, THEN trusts (via:'mistake') with an Undo ack, behind the same gates as Trust.
       // Where trust is unavailable (bare tenant apex, QR surface) it stays the report-only "Report a mistake".
       const fine = el('button', 'ss-report', trustable ? t('mistakeSiteFine', null, 'This site is fine') : t('reportMistake', null, 'Report a mistake')); fine.type = 'button';
-      if (trustable) armedClick(fine, async () => { ctl.close(); x.onReport && x.onReport(); const domain = regDomain(); await send('trustSite', { domain, via: 'mistake' }); trustAck(domain, () => dangerInterstitial(verdict, x)); });
+      if (trustable) armedClick(fine, async () => { ctl.close(); x.onReport && x.onReport({ quiet: true }); const domain = regDomain(); await send('trustSite', { domain, via: 'mistake' }); trustAck(domain, () => dangerInterstitial(verdict, x), x.onReport); });
       else onTrustedClick(fine, () => { fine.textContent = t('thanks', null, 'Thanks'); fine.disabled = true; x.onReport && x.onReport(); });
       row2.append(fine); details.append(row2); card.append(details);
       let stopCount = null;

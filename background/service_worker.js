@@ -725,6 +725,9 @@ async function handleUserReport(msg, sender) {
   if (!url || !/^https?:/.test(url)) return { ok: false, via: 'off' };
   let host; try { host = new URL(url).hostname; } catch (_) { return { ok: false, via: 'off' }; }
   if (!s.reportingOptIn || !s.reportUrl) {
+    // (0.15.0, Task 18) `quiet`: the implicit report behind "This site is fine" never opens a GitHub tab; only the
+    // deliberate "Report a mistake" paths do.
+    if (msg.quiet === true) return { ok: false, via: 'off' };
     const issueUrl = githubIssueUrl(host, verdict);
     try { await api.tabs.create({ url: issueUrl }); } catch (_) {}
     return { ok: true, via: 'github', issueUrl };

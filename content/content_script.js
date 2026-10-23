@@ -45,9 +45,10 @@
   // counter and nothing else, so it is safe for the toasts to call it directly. The banner's "This site is fine"
   // control calls it AND then trusts the site (trustSite via:'mistake'), but only behind the same gates as Trust:
   // a real click (isTrusted) on a control sitting inside the shadow-hosted card, plus the arm delay (actions.js).
-  function reportMistake() {
-    send('userReport', { label: 'false_positive' });
-    send('falseAlarm');
+  function reportMistake(opts) {
+    // (0.15.0, Task 18) opts.quiet: the implicit report behind "This site is fine" must not open a GitHub tab.
+    send('userReport', { label: 'false_positive', quiet: !!(opts && opts.quiet === true) });
+    if (!(opts && opts.explicit === true)) send('falseAlarm'); // the ack's own button follows a quiet report that already counted
   }
 
   function needsPageAnalysis(signals, urlRules, domRules) {

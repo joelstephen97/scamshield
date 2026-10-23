@@ -1,7 +1,7 @@
 // tests/e2e/popup-options.spec.js — 0.15.0 Task 18: popup (quiet-tier message, "This site is fine", terminal
 // "Can't check" state, phone width) and Options (Quiet sites, surface log + Copy diagnostics, new guard toggles,
 // layout at phone / ultra-wide, switch labelling).
-const { test, BASE_HTTPS } = require('./fixtures');
+const { test, BASE_HTTPS, openMore } = require('./fixtures');
 const { expect } = require('@playwright/test');
 
 const BASE = 'http://localhost:5599';
@@ -151,7 +151,9 @@ test('options: What ScamShield showed lists labelled rows, Copy diagnostics copi
     { ts: Date.now() - 1000, host: 'b.example', kind: 'link-block' },
     { ts: Date.now() - 2000, host: 'c.example', kind: 'ad-hidden' },
     { ts: Date.now() - 3000, host: 'd.example', kind: 'future-kind' }] }));
-  const page = await context.newPage(); await page.goto(`chrome-extension://${extensionId}/options.html#surfaces`);
+  const page = await context.newPage();
+  await page.addInitScript(() => { window.__cap = ''; try { Object.defineProperty(navigator, 'clipboard', { value: { writeText: (t) => { window.__cap = t; return Promise.resolve(); } } }); } catch (_) {} });
+  await page.goto(`chrome-extension://${extensionId}/options.html#surfaces`);
   const rows = page.locator('#surfacelist li');
   await expect(rows).toHaveCount(4);
   await expect(rows.nth(0)).toContainText('a.example'); await expect(rows.nth(0)).toContainText('Warning banner');
@@ -159,8 +161,8 @@ test('options: What ScamShield showed lists labelled rows, Copy diagnostics copi
   await expect(rows.nth(2)).toContainText('Scam ad hidden');
   await expect(rows.nth(3)).toContainText('future-kind'); // unknown kind falls back to the raw kind
   await page.click('#copydiag');
-  await expect.poll(() => page.evaluate(() => window.__ssLastDiagnostics || '')).toContain('banner');
-  const text = await page.evaluate(() => window.__ssLastDiagnostics);
+  await expect.poll(() => page.evaluate(() => window.__cap || '')).toContain('banner');
+  const text = await page.evaluate(() => window.__cap);
   expect(text).toContain('link-block'); expect(text).not.toContain('/');
   await page.click('#clearsurf');
   await expect(page.locator('#surfacelist li')).toHaveCount(1);
@@ -182,4 +184,38 @@ test('options at 2560px: a centred 1100px shell with a content column of at most
   await page.goto(`chrome-extension://${extensionId}/options.html`);
   const m = await page.evaluate(() => { const s = document.querySelector('.shell').getBoundingClientRect(); const mn = document.querySelector('main').getBoundingClientRect(); return { sx: s.x, sw: s.width, mw: mn.width }; });
   expect(m.sw).toBeLessThanOrEqual(1100); expect(m.sx).toBeGreaterThan(600); expect(m.mw).toBeLessThanOrEqual(760);
+});
+
+// Controller ruling (fix round 1): the implicit report behind "This site is fine" never opens a GitHub tab when community
+// reporting is off; only the ack's own "Report a mistake" button (a deliberate report) may.
+test('popup "This site is fine" opens no tab with reporting off; the ack Report button does', async ({ context, extensionId }) => {
+  const page = await context.newPage(); await page.goto(BASE + '/brand-visual.html'); await page.waitForTimeout(800);
+  const popup = await openPopup(context, extensionId, page);
+  await expect(popup.locator('#status')).toHaveClass(/dangerous/, { timeout: 5000 });
+  const before = context.pages().length;
+  await popup.click('#fine'); await popup.click('#fineyes');
+  await expect(popup.locator('#ack')).toBeVisible();
+  await popup.waitForTimeout(1500);
+  expect(context.pages().length).toBe(before);
+  expect(await context.serviceWorkers()[0].evaluate(() => getSettings().then((s) => s.allowlist.length))).toBe(1);
+  const [issue] = await Promise.all([context.waitForEvent('page'), popup.click('#ackreport')]);
+  expect(issue.url()).toContain('github.com');
+});
+
+test('in-page "This site is fine" opens no tab with reporting off; the ack Report button does', async ({ context }) => {
+  const sw = context.serviceWorkers()[0];
+  const HOST = 'secure-paypa1-login.com';
+  const page = await context.newPage();
+  await page.goto(`http://${HOST}:5599/phishing-login.html`);
+  await expect(page.locator('.scamshield-banner.danger')).toBeVisible({ timeout: 8000 });
+  await page.waitForTimeout(350);
+  await openMore(page.locator('.scamshield-banner'));
+  const before = context.pages().length;
+  await page.locator('.scamshield-banner .ss-report').click();
+  await expect.poll(async () => (await sw.evaluate(() => getSettings())).allowlist.includes(HOST), { timeout: 5000 }).toBe(true);
+  await expect(page.locator('.scamshield-ack .ss-report')).toBeVisible();
+  await page.waitForTimeout(1500);
+  expect(context.pages().length).toBe(before);
+  const [issue] = await Promise.all([context.waitForEvent('page'), page.locator('.scamshield-ack .ss-report').click()]);
+  expect(issue.url()).toContain('github.com');
 });

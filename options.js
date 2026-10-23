@@ -262,10 +262,9 @@ async function loadSurfaces() { renderSurfaces(await send('getSurfaceLog')); }
 $('copydiag').addEventListener('click', async () => {
   const r = await send('copyDiagnostics');
   const text = r && typeof r.text === 'string' ? r.text : '';
-  if (!text) return;
-  try { window.__ssLastDiagnostics = text; } catch (_) {} // e2e hook, like popup.js's __ssLastCopyReport
-  const ok = R && R.copyToClipboard ? await R.copyToClipboard(text) : false;
-  if (ok) flash(T('toastCopied', null, 'Copied'));
+  const ok = text && R && R.copyToClipboard ? await R.copyToClipboard(text) : false;
+  if (ok) { try { document.documentElement.dataset.ssDiagCopied = String(text.length); } catch (_) {} flash(T('toastCopied', null, 'Copied')); }
+  else flash(T('toastExtensionError', null, 'Extension error — try reopening.'));
 });
 $('clearsurf').addEventListener('click', async () => { await send('clearSurfaceLog'); await loadSurfaces(); flash(T('surfacesCleared', null, 'Log cleared')); });
 function renderHistory(list) {
@@ -495,10 +494,12 @@ function labelSwitches() {
   for (const row of document.querySelectorAll('.setrow')) {
     const input = row.querySelector('input[type="checkbox"]'); const t = row.querySelector('.t');
     if (!input || !t) continue;
-    const title = t.querySelector(':scope > b'); const hint = t.querySelector(':scope > span');
+    const title = t.querySelector(':scope > b');
     n++;
     if (title) { title.id = title.id || 'swl-' + n; input.setAttribute('aria-labelledby', title.id); }
-    if (hint) { hint.id = hint.id || 'swd-' + n; input.setAttribute('aria-describedby', hint.id); }
+    const hints = [...t.querySelectorAll(':scope > span')];
+    hints.forEach((h, k) => { h.id = h.id || 'swd-' + n + '-' + k; });
+    if (hints.length) input.setAttribute('aria-describedby', hints.map((h) => h.id).join(' '));
   }
 }
 labelSwitches();

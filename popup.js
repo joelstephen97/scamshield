@@ -463,9 +463,15 @@ function wireSiteFine() {
     settings = await send('getSettings'); renderTrust();
     $('finebox').hidden = true; $('fineyes').disabled = false;
     $('acktext').textContent = T('ackTrusted', [bidi(domain)], "ScamShield won't flag " + domain + ' again.');
+    $('ackreport').textContent = T('reportMistake', null, 'Report a mistake'); $('ackreport').disabled = false;
     $('ack').hidden = false; $('fine').hidden = true; $('ackundo').focus();
-    // Last: with community reporting off this opens a GitHub issue tab, which closes the popup.
+    // Quiet: with community reporting off this sends nothing and opens no tab (0.15.0, Task 18).
+    send('userReport', { label: 'false_positive', tabId: tab.id, quiet: true });
+  });
+  // Optional, deliberate report: only this button may open the GitHub issue (reporting off).
+  $('ackreport').addEventListener('click', () => {
     send('userReport', { label: 'false_positive', tabId: tab.id });
+    $('ackreport').textContent = T('thanks', null, 'Thanks'); $('ackreport').disabled = true;
   });
   $('ackundo').addEventListener('click', async () => {
     await send('untrustSite', { domain });
