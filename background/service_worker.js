@@ -1438,6 +1438,32 @@ async function fetchExactShardEntries(urls, hash40) {
   if (!buf) return null;
   try { return await gunzipJsonl(buf); } catch (_) { return null; }
 }
+// Popular-site set (0.15.0): rules/popular40.bin, the Tranco top-50k
+// registrable domains as sorted 40-bit hashes. Bundled and extension-local, so
+// the fetch below is not network egress. Lazy + cached: one read per SW life.
+let popularSetPromise = null;
+function loadPopularSet() {
+  if (!popularSetPromise) {
+    popularSetPromise = fetch(api.runtime.getURL('rules/popular40.bin'))
+      .then((r) => r.arrayBuffer())
+      .then((buf) => globalThis.Blockset.open(buf))
+      .catch(() => { popularSetPromise = null; return null; });
+  }
+  return popularSetPromise;
+}
+// True when the host's registrable domain is in the popular set. Later tasks
+// use it to forbid heuristic-only warnings on popular sites. Never throws.
+async function isPopularHost(host) {
+  try {
+    const normalized = normalizeFeedHost(host);
+    if (!normalized) return false;
+    const set = await loadPopularSet();
+    if (!set) return false;
+    const reg = globalThis.ScamShield.registrableDomain(normalized);
+    const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(reg));
+    return globalThis.Blockset.has(set, globalThis.Blockset.hash40FromBytes(new Uint8Array(digest)));
+  } catch (_) { return false; }
+}
 async function checkFeedHost(host) {
   const normalized = normalizeFeedHost(host);
   if (!normalized) return { hit: null };
@@ -1962,7 +1988,7 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       case 'checkForFeedUpdates':
         sendResponse(await runFeedUpdate()); break;
       case 'checkFeed':
-        sendResponse(await checkFeedHost(msg.host)); break;
+        { const [feed, popular] = await Promise.all([checkFeedHost(msg.host), isPopularHost(msg.host)]); sendResponse(Object.assign({}, feed, { popular })); } break;
       case 'checkFeedBatch':
         sendResponse(await checkFeedBatchHosts(msg.hosts)); break;
       case 'getHotStatus':
@@ -2019,4 +2045,4 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 // module-scoped. Re-attach the debug/test surface that used to live on the
 // classic worker's global scope — the e2e suite drives these via
 // worker.evaluate, and they're handy in the SW console.
-Object.assign(globalThis, { DEFAULT_FEED_URL, FEED_META_URL, getSettings, setSettings, handleUserReport, runOtaUpdate, flushReports, queueReport, exportSettings, sanitizeImport, pushSync, pullSync, getStats, bumpStat, ensurePrivacyTotal, ensureInstalledAt, getReviewAsk, getReviewAskContext, setReviewAsk, sanitizeReviewAsk, ensureReviewAsk, importReviewAsk, getLangDict, loadLangDict, isValidLang, runFeedUpdate, applyInstallMigrations, fetchExactShardEntries, checkFeedHost, checkFeedBatchHosts, normalizeFeedHost, checkRiskHosting, checkNrdHost, applyNetworkRules, syncAllowRules, ensureNetworkRules, handleDnrBlocked, applyPendingUpdate, requestStoreUpdateCheck, getUpdateState, setUpdateState, runHotUpdate, applyHotRules, getHotStatus, addTrust, removeTrust, awaitBootReady });
+Object.assign(globalThis, { DEFAULT_FEED_URL, FEED_META_URL, getSettings, setSettings, handleUserReport, runOtaUpdate, flushReports, queueReport, exportSettings, sanitizeImport, pushSync, pullSync, getStats, bumpStat, ensurePrivacyTotal, ensureInstalledAt, getReviewAsk, getReviewAskContext, setReviewAsk, sanitizeReviewAsk, ensureReviewAsk, importReviewAsk, getLangDict, loadLangDict, isValidLang, runFeedUpdate, applyInstallMigrations, fetchExactShardEntries, checkFeedHost, isPopularHost, checkFeedBatchHosts, normalizeFeedHost, checkRiskHosting, checkNrdHost, applyNetworkRules, syncAllowRules, ensureNetworkRules, handleDnrBlocked, applyPendingUpdate, requestStoreUpdateCheck, getUpdateState, setUpdateState, runHotUpdate, applyHotRules, getHotStatus, addTrust, removeTrust, awaitBootReady });

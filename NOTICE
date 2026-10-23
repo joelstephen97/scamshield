@@ -45,3 +45,13 @@ contributes no detection logic of its own.
 
 A copy of the Apache License 2.0 is available at:
 https://www.apache.org/licenses/LICENSE-2.0
+
+Tranco (popular-site list)
+--------------------------
+https://tranco-list.eu
+
+rules/popular40.bin holds 40-bit hashes of the Tranco top-50,000 registrable
+domains (list recorded in rules/popular.meta.json), used on-device so popular
+sites never get heuristic-only warnings. Le Pochat, V., Van Goethem, T.,
+Tajalizadehkhoob, S., Korczynski, M., Joosen, W. "Tranco: A Research-Oriented
+Top Sites Ranking Hardened Against Manipulation", NDSS 2019.

@@ -436,3 +436,18 @@ test('a domain seen locally for 30+ days suppresses the NRD signal even though i
   await expect(page.locator('.scamshield-interstitial')).toHaveCount(0);
   await expect(page.locator('.scamshield-banner')).toHaveCount(0);
 });
+
+// 0.15.0: the checkFeed response carries `popular` (Tranco top-50k registrable
+// set) so later tasks can forbid heuristic-only warnings on popular sites.
+test('checkFeed reports popular: true for wikipedia.org hosts and false for an unknown host', async ({ context, extensionId }) => {
+  const sw = context.serviceWorkers()[0];
+  await sw.evaluate(() => awaitBootReady());
+  const ext = await context.newPage();
+  await ext.goto(`chrome-extension://${extensionId}/options.html`);
+  const ask = (host) => ext.evaluate((h) => chrome.runtime.sendMessage({ type: 'checkFeed', host: h }), host);
+  expect((await ask('www.wikipedia.org')).popular).toBe(true);
+  expect((await ask('en.wikipedia.org')).popular).toBe(true);
+  const unknown = await ask('phish-fixture-xyz.example');
+  expect(unknown.popular).toBe(false);
+  expect(unknown.hit).toBeNull();
+});
