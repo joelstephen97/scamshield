@@ -443,5 +443,6 @@
   "bannerHideDay": { "message": "ایک دن کے لیے چھپائیں" },
   "bannerHideHour": { "message": "ایک گھنٹے کے لیے چھپائیں" },
   "mistakeSiteFine": { "message": "یہ سائٹ ٹھیک ہے" },
-  "continueUnsafe": { "message": "اس سائٹ پر جائیں (غیر محفوظ)" }
+  "continueUnsafe": { "message": "اس سائٹ پر جائیں (غیر محفوظ)" },
+  "frameFormBlocked": { "message": "ScamShield نے ایک ایمبیڈڈ فریم کے اندر سائن اِن فارم روک دیا کیونکہ وہ آپ کا پاس ورڈ دوسری سائٹ کو بھیج رہا تھا" }
 }

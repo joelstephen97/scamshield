@@ -443,5 +443,6 @@
   "bannerHideDay": { "message": "একদিনের জন্য লুকান" },
   "bannerHideHour": { "message": "এক ঘণ্টার জন্য লুকান" },
   "mistakeSiteFine": { "message": "এই সাইটটি নিরাপদ" },
-  "continueUnsafe": { "message": "এই সাইটে যান (অনিরাপদ)" }
+  "continueUnsafe": { "message": "এই সাইটে যান (অনিরাপদ)" },
+  "frameFormBlocked": { "message": "ScamShield একটি এম্বেড করা ফ্রেমের ভেতরের সাইন-ইন ফর্ম আটকেছে, কারণ এটি আপনার পাসওয়ার্ড অন্য সাইটে পাঠাচ্ছিল" }
 }

@@ -77,7 +77,7 @@ test('body.inert returns to false when the interstitial is dismissed', async ({ 
   await page.close();
 });
 
-test('page script dialog.close() reopens it; the 4th close tears it down and frees the page', async ({ context }) => {
+test('page script dialog.close() reopens it; the 4th close escalates to blocked.html', async ({ context }) => {
   const page = await interstitial(context);
   const close = () => page.evaluate((s) => { const h = document.querySelector(s); if (h) h.shadowRoot.querySelector('dialog').close(); return !!h; }, IHOST);
   for (let i = 0; i < 3; i++) {
@@ -86,8 +86,7 @@ test('page script dialog.close() reopens it; the 4th close tears it down and fre
     expect((await state(page, IHOST)).inert).toBe(true);
   }
   await close();
-  await expect(page.locator(IHOST)).toHaveCount(0);
-  expect(await page.evaluate(() => document.body.inert)).toBe(false);
+  await expect.poll(() => page.url(), { timeout: 8000 }).toContain('/blocked.html#' + BASE + '/seed-phrase.html');
   await page.close();
 });
 
@@ -151,15 +150,18 @@ test('"This site is fine" on the interstitial reports, trusts via:mistake and of
   await page.close();
 });
 
-test('a frame under 200x200 shows no dialog (form guard); a normal frame does', async ({ context }) => {
+test('a credential form in a frame under 200x200 is still blocked (no navigation), and the top frame explains', async ({ context }) => {
   const page = await context.newPage();
   await page.goto(BASE + '/iframe-phish-tiny.html');
   await page.waitForTimeout(2500);
   const fr = page.frameLocator('#fr');
-  await fr.locator('input[name="pw"]').fill('x');
-  await fr.locator('button[type="submit"]').click({ force: true, noWaitAfter: true }).catch(() => {});
-  await page.waitForTimeout(1500);
-  await expect(fr.locator('.scamshield-overlay')).toHaveCount(0);
+  const frame = page.frames().find((f) => f.url().endsWith('/phishing-login.html'));
+  await fr.locator('input[name="pw"]').fill('hunter2');
+  await fr.locator('input[name="pw"]').press('Enter');
+  await expect(page.locator('.scamshield-toast')).toContainText(/embedded frame/i, { timeout: 8000 });
+  await page.waitForTimeout(1000);
+  expect(frame.url()).toBe(BASE + '/phishing-login.html'); // the POST to evil-collector.tk never navigated the frame
+  await expect(fr.locator('.scamshield-overlay')).toHaveCount(0); // nothing rendered inside the frame itself
   await page.close();
   const big = await context.newPage();
   await big.goto(BASE + '/iframe-phish.html');
@@ -167,7 +169,7 @@ test('a frame under 200x200 shows no dialog (form guard); a normal frame does', 
   const bf = big.frameLocator('#fr');
   await bf.locator('input[name="pw"]').fill('x');
   await bf.locator('button[type="submit"]').click();
-  await expect(bf.locator('.scamshield-overlay')).toBeVisible({ timeout: 8000 }); // canary
+  await expect(bf.locator('.scamshield-overlay')).toBeVisible({ timeout: 8000 }); // canary: a normal frame gets the dialog
   await big.close();
 });
 

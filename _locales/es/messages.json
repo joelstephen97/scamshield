@@ -443,5 +443,6 @@
   "bannerHideDay": { "message": "Ocultar por un día" },
   "bannerHideHour": { "message": "Ocultar por una hora" },
   "mistakeSiteFine": { "message": "Este sitio es seguro" },
-  "continueUnsafe": { "message": "Continuar a este sitio (no seguro)" }
+  "continueUnsafe": { "message": "Continuar a este sitio (no seguro)" },
+  "frameFormBlocked": { "message": "ScamShield bloqueó un formulario de inicio de sesión dentro de un marco incrustado porque envía tu contraseña a otro sitio" }
 }

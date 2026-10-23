@@ -443,5 +443,6 @@
   "bannerHideDay": { "message": "Masquer pendant un jour" },
   "bannerHideHour": { "message": "Masquer pendant une heure" },
   "mistakeSiteFine": { "message": "Ce site est fiable" },
-  "continueUnsafe": { "message": "Continuer vers ce site (risqué)" }
+  "continueUnsafe": { "message": "Continuer vers ce site (risqué)" },
+  "frameFormBlocked": { "message": "ScamShield a bloqué un formulaire de connexion dans un cadre intégré car il envoie votre mot de passe à un autre site" }
 }

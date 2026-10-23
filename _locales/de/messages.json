@@ -443,5 +443,6 @@
   "bannerHideDay": { "message": "Für einen Tag ausblenden" },
   "bannerHideHour": { "message": "Für eine Stunde ausblenden" },
   "mistakeSiteFine": { "message": "Diese Seite ist harmlos" },
-  "continueUnsafe": { "message": "Weiter zu dieser Seite (unsicher)" }
+  "continueUnsafe": { "message": "Weiter zu dieser Seite (unsicher)" },
+  "frameFormBlocked": { "message": "ScamShield hat ein Anmeldeformular in einem eingebetteten Frame blockiert, weil es Ihr Passwort an eine andere Website sendet" }
 }

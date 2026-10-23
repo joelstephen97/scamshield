@@ -443,5 +443,6 @@
   "bannerHideDay": { "message": "एक दिन के लिए छिपाएँ" },
   "bannerHideHour": { "message": "एक घंटे के लिए छिपाएँ" },
   "mistakeSiteFine": { "message": "यह साइट ठीक है" },
-  "continueUnsafe": { "message": "इस साइट पर जाएँ (असुरक्षित)" }
+  "continueUnsafe": { "message": "इस साइट पर जाएँ (असुरक्षित)" },
+  "frameFormBlocked": { "message": "ScamShield ने एम्बेडेड फ़्रेम के अंदर एक साइन-इन फ़ॉर्म रोका, क्योंकि वह आपका पासवर्ड किसी दूसरी साइट को भेज रहा था" }
 }

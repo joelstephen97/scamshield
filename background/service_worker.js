@@ -2150,6 +2150,22 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         const SS = globalThis.ScamShield;
         sendResponse({ siteCount: list.filter((e) => SS.scopeDomain(e.host) === msg.domain).length }); break;
       }
+      // (0.15.0, Task 13) A tiny sub-frame cannot show a dialog, so it asks the SW to tell the TOP frame (which can).
+      case 'relayToTop': {
+        const tabId = sender.tab && sender.tab.id;
+        if (tabId != null && msg.kind === 'frameFormBlocked') { try { await api.tabs.sendMessage(tabId, { type: 'frameFormBlocked' }, { frameId: 0 }); } catch (_) {} }
+        sendResponse({ ok: true }); break;
+      }
+      // (0.15.0, Task 13) The interstitial was defeated by page script (dialog closed / host removed past its caps):
+      // send the top frame to the same block page the DNR redirect uses (blocked.html#<url>). The URL is the sender
+      // tab's own, never the message's, so a message cannot aim this at another site.
+      case 'escalateBlocked': {
+        const tabId = sender.tab && sender.tab.id;
+        const top = sender.frameId === 0 || sender.frameId == null;
+        const url = (sender.tab && sender.tab.url) || '';
+        if (tabId != null && top && /^https?:/i.test(url)) { try { await api.tabs.update(tabId, { url: api.runtime.getURL('blocked.html') + '#' + url }); } catch (_) {} }
+        sendResponse({ ok: true }); break;
+      }
       case 'leaveTab': {
         const tabId = msg.tabId != null ? msg.tabId : (sender.tab && sender.tab.id);
         try { await api.tabs.goBack(tabId); } catch (_) { try { await api.tabs.update(tabId, { url: 'about:blank' }); } catch (_2) {} }

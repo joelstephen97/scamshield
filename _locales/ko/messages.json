@@ -443,5 +443,6 @@
   "bannerHideDay": { "message": "하루 동안 숨기기" },
   "bannerHideHour": { "message": "1시간 동안 숨기기" },
   "mistakeSiteFine": { "message": "이 사이트는 안전합니다" },
-  "continueUnsafe": { "message": "이 사이트로 계속 (안전하지 않음)" }
+  "continueUnsafe": { "message": "이 사이트로 계속 (안전하지 않음)" },
+  "frameFormBlocked": { "message": "ScamShield가 삽입된 프레임 안의 로그인 양식을 차단했습니다. 비밀번호를 다른 사이트로 보내기 때문입니다" }
 }

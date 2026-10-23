@@ -86,7 +86,10 @@
         if (!keep) { rec.closing = true; live.delete(rec.kind); ended(rec); continue; }
       }
       rec.stamps = rec.stamps.filter((s) => now - s < REATTACH_WINDOW_MS);
-      if (rec.stamps.length >= REATTACH_MAX) { live.delete(rec.kind); ended(rec); continue; } // give up
+      if (rec.stamps.length >= REATTACH_MAX) { // give up; a surface that must not just vanish (the interstitial) escalates first
+        if (typeof o.onGaveUp === 'function') { try { o.onGaveUp(); } catch (_) {} }
+        live.delete(rec.kind); ended(rec); continue;
+      }
       rec.stamps.push(now);
       if (place(rec) && typeof o.onAttach === 'function') { try { o.onAttach(); } catch (_) {} }
     }

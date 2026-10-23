@@ -443,5 +443,6 @@
   "bannerHideDay": { "message": "Ẩn trong một ngày" },
   "bannerHideHour": { "message": "Ẩn trong một giờ" },
   "mistakeSiteFine": { "message": "Trang này an toàn" },
-  "continueUnsafe": { "message": "Tiếp tục vào trang này (không an toàn)" }
+  "continueUnsafe": { "message": "Tiếp tục vào trang này (không an toàn)" },
+  "frameFormBlocked": { "message": "ScamShield đã chặn một biểu mẫu đăng nhập trong khung nhúng vì nó gửi mật khẩu của bạn đến trang khác" }
 }

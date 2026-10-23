@@ -443,5 +443,6 @@
   "bannerHideDay": { "message": "एका दिवसासाठी लपवा" },
   "bannerHideHour": { "message": "एका तासासाठी लपवा" },
   "mistakeSiteFine": { "message": "ही साइट ठीक आहे" },
-  "continueUnsafe": { "message": "या साइटवर जा (असुरक्षित)" }
+  "continueUnsafe": { "message": "या साइटवर जा (असुरक्षित)" },
+  "frameFormBlocked": { "message": "ScamShield ने एम्बेड केलेल्या फ्रेममधील साइन-इन फॉर्म रोखला, कारण तो तुमचा पासवर्ड दुसऱ्या साइटला पाठवत होता" }
 }

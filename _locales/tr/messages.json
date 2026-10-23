@@ -443,5 +443,6 @@
   "bannerHideDay": { "message": "Bir günlüğüne gizle" },
   "bannerHideHour": { "message": "Bir saatliğine gizle" },
   "mistakeSiteFine": { "message": "Bu site güvenli" },
-  "continueUnsafe": { "message": "Bu siteye devam et (güvenli değil)" }
+  "continueUnsafe": { "message": "Bu siteye devam et (güvenli değil)" },
+  "frameFormBlocked": { "message": "ScamShield, gömülü bir çerçevedeki oturum açma formunu engelledi çünkü parolanızı başka bir siteye gönderiyordu" }
 }

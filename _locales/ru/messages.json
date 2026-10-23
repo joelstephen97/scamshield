@@ -443,5 +443,6 @@
   "bannerHideDay": { "message": "Скрыть на день" },
   "bannerHideHour": { "message": "Скрыть на час" },
   "mistakeSiteFine": { "message": "Этот сайт безопасен" },
-  "continueUnsafe": { "message": "Перейти на этот сайт (небезопасно)" }
+  "continueUnsafe": { "message": "Перейти на этот сайт (небезопасно)" },
+  "frameFormBlocked": { "message": "ScamShield заблокировал форму входа во встроенном фрейме, потому что она отправляет ваш пароль на другой сайт" }
 }

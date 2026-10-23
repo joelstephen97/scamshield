@@ -443,5 +443,6 @@
   "bannerHideDay": { "message": "Hide for a day" },
   "bannerHideHour": { "message": "Hide for an hour" },
   "mistakeSiteFine": { "message": "This site is fine" },
-  "continueUnsafe": { "message": "Continue to this site (unsafe)" }
+  "continueUnsafe": { "message": "Continue to this site (unsafe)" },
+  "frameFormBlocked": { "message": "ScamShield blocked a sign-in form inside an embedded frame because it sends your password to another site" }
 }

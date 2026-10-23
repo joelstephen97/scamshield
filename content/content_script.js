@@ -978,6 +978,12 @@
   // permission beyond the tab id popup.js already has). Only the top frame
   // answers — an all_frames re-injection into an ad iframe must never race
   // the real answer or scan content the user never sees.
+  // (0.15.0, Task 13) A <200x200 sub-frame blocked a credential form silently and asked the SW to tell us (the top frame).
+  api.runtime.onMessage.addListener((msg) => {
+    if (!msg || msg.type !== 'frameFormBlocked' || !IS_TOP || !SS || !SS.actions || !SS.actions.frameFormBlockedToast) return undefined;
+    SS.actions.frameFormBlockedToast(() => surface('form-guard', true));
+    return undefined;
+  });
   api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     if (!msg || msg.type !== 'scanQrCodes' || !IS_TOP) return undefined;
     (async () => {
@@ -1322,8 +1328,8 @@
       }
       // One-time-ever support ask, only after ScamShield visibly earned it.
       if (verdict.level === 'dangerous' && !settings.supportAskShown && SS.actions.supportToast) {
-        send('setSettings', { patch: { supportAskShown: true } });
-        setTimeout(() => SS.actions.supportToast(), 1500);
+        // (0.15.0) the one-time flag is spent only when the ask really shows (it is skipped behind a modal / over an ack).
+        setTimeout(() => { if (SS.actions.supportToast()) send('setSettings', { patch: { supportAskShown: true } }); }, 1500);
       }
     }
     // The form guard runs in every frame — blocking a submit inside a

@@ -477,14 +477,28 @@
   //    Escape behaviour, or none (the interstitial is a stop page, not dismissible).
   let inertDepth = 0, inertPrev = false;
   function inertOn() {
+    const b = document.body;
+    if (!b) return; // nothing to make inert yet: do not count a hold we cannot release
     if (inertDepth++ > 0) return;
-    try { const b = document.body; if (b) { inertPrev = b.inert === true; b.inert = true; } } catch (_) {}
+    try { inertPrev = b.inert === true; b.inert = true; } catch (_) {}
   }
   function inertOff() {
     if (inertDepth === 0) return;
     if (--inertDepth > 0) return;
     try { const b = document.body; if (b) b.inert = inertPrev; } catch (_) {}
   }
+  // Safety net: if the page is inert by us but no modal is mounted any more (a dialog torn down by a path we did not
+  // see, a bfcache restore), give the page back. Not while an escalation to blocked.html is in flight.
+  let escalating = false;
+  function inertSweep() {
+    try {
+      if (inertDepth === 0 || escalating) return;
+      const S = root.ScamShield && root.ScamShield.surfaces;
+      if (S && (S.isMounted('interstitial') || S.isMounted('dialog'))) return;
+      inertDepth = 0; if (document.body) document.body.inert = inertPrev;
+    } catch (_) {}
+  }
+  try { window.addEventListener('pageshow', inertSweep); document.addEventListener('visibilitychange', inertSweep); } catch (_) {}
   // A sub-frame under 200x200 CSS px (an ad / captcha frame) has no room for a dialog; the service worker
   // already handles the badge and the stop for frames, so the frame itself shows nothing.
   function tinyFrame() {
@@ -496,14 +510,14 @@
   // control that takes initial focus: the safe action).
   function modal(kind, cls, o, fill) {
     const S = surfaces();
-    let dlg = null, safe = null, handle = null, ours = false, held = false, reopened = 0;
+    let dlg = null, safe = null, handle = null, ours = false, held = false, hold = false, reopened = 0;
     const release = () => { if (held) { held = false; inertOff(); } };
     const ctl = {
       dialog: null,
       close() {
         ours = true;
         try { if (dlg && dlg.open) dlg.close(); } catch (_) {}
-        release();
+        if (!hold) release();
         if (handle) handle.close(); else S.unmount(kind);
       }
     };
@@ -515,7 +529,7 @@
         if (dlg.hasAttribute('open') && !dlg.matches(':modal')) dlg.removeAttribute('open');
         if (!dlg.open) dlg.showModal();
       } catch (_) {}
-      if (!held) { held = true; inertOn(); }
+      if (!held && dlg.open) { held = true; inertOn(); } // only count a hold the dialog really took
       try { if (safe) safe.focus(); } catch (_) {}
     };
     const focusables = () => Array.from(dlg.querySelectorAll(FOCUSABLE)).filter((n) => {
@@ -531,6 +545,13 @@
       const at = list.indexOf(act);
       if (e.shiftKey) { if (at <= 0) { e.preventDefault(); list[list.length - 1].focus(); } }
       else if (at === -1 || at === list.length - 1) { e.preventDefault(); list[0].focus(); }
+    };
+    // Defeated by page script (closed past 3 reopenings, or host re-attach cap): let the surface escalate (the
+    // interstitial asks the SW for blocked.html) and keep body.inert until that navigation, with a timed release as fallback.
+    const escalate = () => {
+      if (typeof o.onGiveUp !== 'function' || hold) return;
+      hold = true; escalating = true; o.onGiveUp(ctl);
+      setTimeout(() => { hold = false; escalating = false; release(); }, 4000);
     };
     const esc = () => { if (!ours && typeof o.onEscape === 'function') o.onEscape(ctl); };
     handle = S.mount(kind, () => {
@@ -549,13 +570,13 @@
       dlg.addEventListener('close', () => {
         if (ours) return;
         if (reopened < 3) { reopened++; show(); return; }
-        if (typeof o.onGiveUp === 'function') o.onGiveUp(ctl);
+        escalate();
         ctl.close();
       });
       return { el: dlg, card: built.card };
     }, {
-      theme, onShown: o.onShown, onAttach: show, onDetached: o.onDetached,
-      onUnmount: () => { ours = true; release(); if (typeof o.onUnmount === 'function') o.onUnmount(); }
+      theme, onShown: o.onShown, onAttach: show, onDetached: o.onDetached, onGaveUp: escalate,
+      onUnmount: () => { ours = true; if (!hold) release(); if (typeof o.onUnmount === 'function') o.onUnmount(); }
     });
     ctl.dialog = dlg;
     show();
@@ -585,7 +606,7 @@
       t('interstitialHead3', null, "Don't go further — scam warning")
     ];
     const trustable = !x.noTrust && canStore();
-    modal('interstitial', NS + '-overlay ' + NS + '-interstitial', { role: 'alertdialog', label: t('ariaScamWarning', null, 'Scam warning'), onEscape: null }, (dlg, ctl) => {
+    modal('interstitial', NS + '-overlay ' + NS + '-interstitial', { role: 'alertdialog', label: t('ariaScamWarning', null, 'Scam warning'), onEscape: null, onGiveUp: () => { send('escalateBlocked', { url: location.href }); } }, (dlg, ctl) => {
       const card = el('div', 'ss-card'); const head = el('div', 'ss-head'); const h3 = el('h3', null, HEADS[Math.floor(Math.random() * HEADS.length)]); head.append(tile('danger'), h3); card.append(head);
       card.append(el('p', 'ss-lead', reasonText(verdict.reasons[0]) || t('interstitialFallback', null, 'This page matches the pattern of a known scam.')));
       // Address box, same as blocked.html: label + the page URL, LTR-isolated.
@@ -637,12 +658,18 @@
   // fires right when a "Trust this site" click is landing, and wiping the
   // Undo bar out from under the user would be far worse than skipping the ask.
   function supportToast() {
-    if (surfaces().isMounted('toast') || surfaces().isMounted('ack') || surfaces().isMounted('interstitial') || surfaces().isMounted('dialog')) return; // (0.15.0) a toast behind a modal dialog is inert
-    return toast({
+    if (surfaces().isMounted('toast') || surfaces().isMounted('ack') || surfaces().isMounted('interstitial') || surfaces().isMounted('dialog')) return false; // (0.15.0) a toast behind a modal dialog is inert
+    toast({
       kind: 'ok', title: t('toastSupportAsk', null, 'ScamShield just protected you — it’s free and runs on your device. Chip in? ❤'),
       actions: [{ cls: 'ss-support', label: t('supportOpen', null, 'Open'), onClick: () => window.open('https://github.com/sponsors/joelstephen97', '_blank', 'noopener') }],
       timeoutMs: 20000
     });
+    return true;
+  }
+  // (0.15.0, Task 13) Top-frame explanation for a credential form a tiny sub-frame blocked silently.
+  function frameFormBlockedToast(onShown) {
+    toast({ kind: 'danger', role: 'alert', title: t('frameFormBlocked', null, 'ScamShield blocked a sign-in form inside an embedded frame because it sends your password to another site'), timeoutMs: 15000 });
+    if (typeof onShown === 'function') onShown();
   }
 
   // Intercept submit on password forms that post off-domain.
@@ -662,9 +689,15 @@
       if (form.__scamshieldGuarded) return;
       form.__scamshieldGuarded = true;
       const onSubmit = (ev) => {
-        // No room for a dialog in a tiny frame: do nothing there (the service worker covers frames).
-        if (tinyFrame()) return;
         ev.preventDefault(); ev.stopPropagation();
+        // No room for a dialog in a tiny frame (an ad / hidden iframe): the credential POST is still blocked, silently,
+        // the stop verdict goes to the SW (badge + history) and the TOP frame, which has room, is told so it can explain.
+        if (tinyFrame()) {
+          const rs = Array.isArray(reasons) ? reasons : [];
+          send('reportVerdict', { verdict: { level: 'dangerous', score: 0.9, reasons: rs, reasonCodes: rs.map((r) => r && r.code).filter(Boolean), flags: ['credential-form-foreign-domain'], modelUsed: false }, subframe: true, tier: 'stop' });
+          send('relayToTop', { kind: 'frameFormBlocked' });
+          return;
+        }
         const S = surfaces();
         if (S.isMounted('dialog') || S.isMounted('interstitial')) return;
         let dest = '';
@@ -872,5 +905,5 @@
   }
 
   root.ScamShield = root.ScamShield || {};
-  root.ScamShield.actions = { showBanner, guardForms, hideScamBlocks, clearAll, walletConfirmOverlay, clipboardToast, techScamEscapeOverlay, supportToast, dangerInterstitial, armDelayed, privacyToast, crossOriginCredToast, ackSurface, setTheme };
+  root.ScamShield.actions = { showBanner, guardForms, hideScamBlocks, clearAll, walletConfirmOverlay, clipboardToast, techScamEscapeOverlay, supportToast, dangerInterstitial, armDelayed, privacyToast, crossOriginCredToast, ackSurface, setTheme, frameFormBlockedToast };
 })(typeof globalThis !== 'undefined' ? globalThis : self);

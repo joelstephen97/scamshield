@@ -443,5 +443,6 @@
   "bannerHideDay": { "message": "Sembunyikan selama sehari" },
   "bannerHideHour": { "message": "Sembunyikan selama satu jam" },
   "mistakeSiteFine": { "message": "Situs ini aman" },
-  "continueUnsafe": { "message": "Lanjut ke situs ini (tidak aman)" }
+  "continueUnsafe": { "message": "Lanjut ke situs ini (tidak aman)" },
+  "frameFormBlocked": { "message": "ScamShield memblokir formulir masuk di dalam frame tersemat karena mengirim kata sandi Anda ke situs lain" }
 }
