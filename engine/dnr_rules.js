@@ -29,6 +29,10 @@
 //                          listing (e.g. `rb.gy/88c5r3`), so a shortener or
 //                          free-hosting host only redirects on the exact
 //                          reported path, not the whole domain.
+//   SUB_BASE      600000+  (0.15.0) `block` rules for the hot list's hosts, resource
+//                          types sub_frame + script only, so a scam iframe or script
+//                          from a listed host does not load inside a legitimate page.
+//                          A redirect cannot do this (blocked.html is not web-accessible).
 //
 // UMD like the rest of engine/: attaches SSDnr to globalThis for the worker
 // and exports for Node.
@@ -44,6 +48,7 @@
   const ALLOW_BASE = 300000;
   const HOT_BASE = 400000;     // hourly hot list, redirect rules, same shape as REDIRECT_BASE
   const PATH_BASE = 500000;    // per-URL regex redirect rules for path-only listings
+  const SUB_BASE = 600000;     // (0.15.0) sub_frame + script block rules for hot-list hosts
   const RANGE = 100000;
   const CHUNK = 2500;          // domains per redirect rule (5,000 installed fine in Chrome 140; halved for headroom)
   const MAX_ALLOW = 1000;      // paused/trusted domains that get a network-level allow
@@ -68,8 +73,24 @@
   function buildBlockRules(filters) {
     return (filters || []).map((f, i) => ({
       id: BLOCK_BASE + i, priority: 1, action: { type: 'block' },
-      condition: { urlFilter: String(f), resourceTypes: ['main_frame', 'sub_frame'] }
+      // (0.15.0) + script: a listed host's script does not run inside a legitimate page either.
+      condition: { urlFilter: String(f), resourceTypes: ['main_frame', 'sub_frame', 'script'] }
     }));
+  }
+
+  // (0.15.0) One block rule per CHUNK hot-list domains, for sub_frame + script requests only (the main-frame
+  // navigation keeps its redirect to blocked.html). Same priority as the feed block rules, below ALLOW.
+  function buildSubresourceBlockRules(domains, base) {
+    const b = typeof base === 'number' ? base : SUB_BASE;
+    const uniq = [...new Set([...(domains || [])].filter(Boolean).map((d) => String(d).toLowerCase()))];
+    const rules = [];
+    for (let i = 0; i < uniq.length; i += CHUNK) {
+      rules.push({
+        id: b + rules.length, priority: 1, action: { type: 'block' },
+        condition: { requestDomains: uniq.slice(i, i + CHUNK), resourceTypes: ['sub_frame', 'script'] }
+      });
+    }
+    return rules;
   }
 
   // domains: any iterable of hostnames (duplicates and nulls tolerated).
@@ -130,7 +151,7 @@
     const uniq = kept.slice(0, MAX_ALLOW);
     return uniq.map((d, i) => ({
       id: ALLOW_BASE + i, priority: 3, action: { type: 'allow' },
-      condition: { urlFilter: '||' + d + '^', resourceTypes: ['main_frame', 'sub_frame'] }
+      condition: { urlFilter: '||' + d + '^', resourceTypes: ['main_frame', 'sub_frame', 'script'] }
     }));
   }
 
@@ -145,7 +166,7 @@
   }
 
   return {
-    BLOCK_BASE, REDIRECT_BASE, ALLOW_BASE, HOT_BASE, PATH_BASE, RANGE, CHUNK, MAX_ALLOW, MAX_PATH_RULES,
-    domainOfFilter, inRange, escapeRegex, buildBlockRules, buildRedirectRules, buildPathRedirectRules, buildAllowRules, exemptDomains, isTenantApex
+    BLOCK_BASE, REDIRECT_BASE, ALLOW_BASE, HOT_BASE, PATH_BASE, SUB_BASE, RANGE, CHUNK, MAX_ALLOW, MAX_PATH_RULES,
+    domainOfFilter, inRange, escapeRegex, buildBlockRules, buildSubresourceBlockRules, buildRedirectRules, buildPathRedirectRules, buildAllowRules, exemptDomains, isTenantApex
   };
 });

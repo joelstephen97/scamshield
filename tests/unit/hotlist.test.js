@@ -104,9 +104,12 @@ test('guardHot: apexes, tenant platforms and bare public suffixes are dropped as
 test('hotRules + hotRuleIds: HOT_BASE redirect chunks then PATH_BASE regex rules', () => {
   const target = 'chrome-extension://abc/blocked.html';
   const rules = H.hotRules({ domains: ['a.example', 'b.example'], paths: [{ h: 'rb.gy', p: '/x' }] }, target);
-  assert.deepStrictEqual(rules.map((r) => r.id), [D.HOT_BASE, D.PATH_BASE]);
+  // (0.15.0) plus one SUB_BASE block rule for the same hosts' sub_frame + script requests.
+  assert.deepStrictEqual(rules.map((r) => r.id), [D.HOT_BASE, D.PATH_BASE, D.SUB_BASE]);
   assert.deepStrictEqual(rules[0].condition.requestDomains, ['a.example', 'b.example']);
-  assert.deepStrictEqual(H.hotRuleIds([{ id: 100000 }, { id: 400003 }, { id: 500010 }, { id: 300000 }]), [400003, 500010]);
+  assert.deepStrictEqual(rules[2].action, { type: 'block' });
+  assert.deepStrictEqual(rules[2].condition, { requestDomains: ['a.example', 'b.example'], resourceTypes: ['sub_frame', 'script'] });
+  assert.deepStrictEqual(H.hotRuleIds([{ id: 100000 }, { id: 400003 }, { id: 500010 }, { id: 300000 }, { id: 600001 }, { id: 700000 }]), [400003, 500010, 600001]);
 });
 
 // ---- 0.14.1 client-side kill switch ----------------------------------------

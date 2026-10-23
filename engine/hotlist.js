@@ -191,10 +191,11 @@
   }
 
   function hotRules(guarded, targetUrl) {
-    return [...D.buildRedirectRules(guarded.domains, targetUrl, D.HOT_BASE), ...D.buildPathRedirectRules(guarded.paths, targetUrl)];
+    // (0.15.0) + a sub_frame/script block for the same domains (SUB_BASE).
+    return [...D.buildRedirectRules(guarded.domains, targetUrl, D.HOT_BASE), ...D.buildPathRedirectRules(guarded.paths, targetUrl), ...D.buildSubresourceBlockRules(guarded.domains, D.SUB_BASE)];
   }
   function hotRuleIds(existing) {
-    return (existing || []).filter((r) => D.inRange(r.id, D.HOT_BASE) || D.inRange(r.id, D.PATH_BASE)).map((r) => r.id);
+    return (existing || []).filter((r) => D.inRange(r.id, D.HOT_BASE) || D.inRange(r.id, D.PATH_BASE) || D.inRange(r.id, D.SUB_BASE)).map((r) => r.id);
   }
   return { MAX_DOMAINS, WINDOW_MS, MAX_STALE_MS, MAX_TRUSTED_HOSTS, MAX_GROWTH_FACTOR, GROWTH_FLOOR, MAX_GROWTH_REJECTS, parseHot, isStale, isExpired, guardHot, assessHot, isProtectedHost, guardOtaFilters, hotRules, hotRuleIds };
 });
