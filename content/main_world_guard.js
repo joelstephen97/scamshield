@@ -29,14 +29,18 @@
   }
   window.addEventListener('popstate', emitNav);
 
-  // (C) Popup / redirect interception (0.15.0, Task 16). Best effort: a page can restore the prototypes, and
+  // (C) Popup / redirect interception (0.15.0, Task 16). Blocked-host refusal depends on the isolated world's
+  // link-guard cache, so it is off when the link guard is off (settings.linkGuard === false). Best effort: a page can restore the prototypes, and
   // DNR stays the hard gate for known-bad hosts. Everything is try/catch and falls back to the native call; the
   // only page data read is the URL argument. The decision comes back synchronously through a cancelable event
   // (the same pattern as formsubmit): the isolated world vetoes only a destination already cached as 'block'.
   // The URL crosses as a plain string (safe on Firefox without cloneInto).
   let tier = ''; // 'warn' | 'stop' | '' - set by the isolated world; a closure variable, never on window
   try {
-    window.addEventListener('scamshield:tier', (e) => { try { tier = (e && typeof e.detail === 'string') ? e.detail : ''; } catch (_) { tier = ''; } });
+    window.addEventListener('scamshield:tier', (e) => {
+      // One-way: once warn/stop is accepted a later lower tier (a page forging '') is ignored.
+      try { const d = e && e.detail; if (d === 'warn' || d === 'stop') tier = (tier === 'stop' || d === 'stop') ? 'stop' : 'warn'; } catch (_) { /* keep */ }
+    });
   } catch (_) { /* ignore */ }
   const warned = () => tier === 'warn' || tier === 'stop';
   function noteBlocked(reason) {
@@ -95,9 +99,10 @@
 
   // On a warned page: no forced fullscreen, and a notification prompt resolves 'default' without asking.
   try {
-    const nativeFs = Element.prototype.requestFullscreen;
-    if (typeof nativeFs === 'function') {
-      Element.prototype.requestFullscreen = function () {
+    for (const name of ['requestFullscreen', 'webkitRequestFullscreen']) {
+      const nativeFs = Element.prototype[name];
+      if (typeof nativeFs !== 'function') continue;
+      Element.prototype[name] = function () {
         try { if (warned()) { noteBlocked('fullscreen'); return Promise.resolve(); } } catch (_) { /* native */ }
         return nativeFs.apply(this, arguments);
       };

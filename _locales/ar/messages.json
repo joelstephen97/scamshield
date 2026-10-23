@@ -452,5 +452,6 @@
   "linkGoBack": { "message": "رجوع" },
   "linkOpenAnyway": { "message": "فتح على أي حال" },
   "linkBlockedToast": { "message": "رابط محظور — أوقفه ScamShield" },
-  "popupBlockedToast": { "message": "منع ScamShield هذه الصفحة من فتح موقع محظور" }
+  "popupBlockedToast": { "message": "منع ScamShield هذه الصفحة من فتح موقع محظور" },
+  "popunderBlockedToast": { "message": "منع ScamShield هذه الصفحة من فتح نافذة جديدة" }
 }

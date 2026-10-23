@@ -831,6 +831,11 @@
     toast({ kind: 'danger', role: 'alert', title: t('popupBlockedToast', null, 'ScamShield stopped this page from opening a blocked site'), timeoutMs: 6000 });
     return true;
   }
+  function popunderBlockedToast() {
+    if (tinyFrame()) return false;
+    toast({ kind: 'danger', role: 'alert', title: t('popunderBlockedToast', null, 'ScamShield stopped this page from opening a new window'), timeoutMs: 6000 });
+    return true;
+  }
   function linkConfirm(o) {
     const S = surfaces();
     if (!linkConfirmAvailable()) return false;
@@ -952,5 +957,5 @@
   }
 
   root.ScamShield = root.ScamShield || {};
-  root.ScamShield.actions = { showBanner, guardForms, hideScamBlocks, clearAll, walletConfirmOverlay, clipboardToast, techScamEscapeOverlay, supportToast, dangerInterstitial, armDelayed, privacyToast, crossOriginCredToast, ackSurface, setTheme, frameFormBlockedToast, linkConfirm, linkConfirmAvailable, linkBlockedToast, popupBlockedToast };
+  root.ScamShield.actions = { showBanner, guardForms, hideScamBlocks, clearAll, walletConfirmOverlay, clipboardToast, techScamEscapeOverlay, supportToast, dangerInterstitial, armDelayed, privacyToast, crossOriginCredToast, ackSurface, setTheme, frameFormBlockedToast, linkConfirm, linkConfirmAvailable, linkBlockedToast, popupBlockedToast, popunderBlockedToast };
 })(typeof globalThis !== 'undefined' ? globalThis : self);

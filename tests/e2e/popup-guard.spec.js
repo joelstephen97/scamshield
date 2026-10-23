@@ -38,6 +38,7 @@ async function installFeed(sw, blockDomains) {
   fs.writeFileSync(path.join(FEED_DIR, 'meta.json'), JSON.stringify(meta));
   await sw.evaluate((url) => runFeedUpdate(url), FEED_BASE_URL + 'meta.json');
 }
+const popunderToast = (page) => page.locator('.scamshield-toast', { hasText: 'stopped this page from opening a new window' });
 const toast = (page) => page.locator('.scamshield-toast', { hasText: 'stopped this page from opening a blocked site' });
 const tryOpen = (page, url) => page.evaluate((u) => { const w = window.open(u, '_blank'); return w === null ? 'null' : 'window'; }, url);
 
@@ -96,10 +97,46 @@ test('on a warned page a no-gesture window.open is refused, a clicked one works,
   // page transient activation, so stay silent until the timer (6.5 s after load) has fired, then look once.
   await page.waitForTimeout(7500);
   await expect(page.locator('body')).toHaveAttribute('data-auto', 'refused');
-  await expect(toast(page)).toBeVisible({ timeout: 4000 });
+  await expect(popunderToast(page)).toBeVisible({ timeout: 4000 }); // honest copy: a new window, not a blocked site
+  await expect(toast(page)).toHaveCount(0);
   await page.click('#open-ok');                                 // a real click carries activation: a user's open
   await expect(page).toHaveTitle('opened');
   await page.click('#fs');                                      // forced fullscreen never enters on a warned page
   await page.waitForTimeout(1200);
   expect(await page.evaluate(() => !!document.fullscreenElement)).toBe(false);
+});
+
+test('a warned page cannot downgrade the tier by dispatching scamshield:tier with an empty detail', async ({ context }) => {
+  const page = await context.newPage();
+  await page.goto(BASE + '/popup-guard-warn.html');
+  await expect(page.locator('.scamshield-banner, .scamshield-interstitial').first()).toBeVisible({ timeout: 8000 });
+  await page.evaluate(() => { window.dispatchEvent(new CustomEvent('scamshield:tier', { detail: '' })); });
+  await page.waitForTimeout(7500); // past the load activation window; the page's own timer popunder is still refused
+  await expect(page.locator('body')).toHaveAttribute('data-auto', 'refused');
+});
+
+test('a user-trusted destination is never vetoed or looked up, even when the feed lists it', async ({ context }) => {
+  const sw = context.serviceWorkers()[0];
+  await installFeed(sw, [SENTINEL]);
+  await sw.evaluate((d) => setSettings({ allowlist: [d] }), SENTINEL);
+  const page = await context.newPage();
+  await page.goto(BASE + '/popup-guard.html');
+  await page.waitForTimeout(1500);
+  expect(await tryOpen(page, 'http://' + SENTINEL + '/one')).toBe('window');
+  await page.waitForTimeout(2000); // a lookup, had one been queued, would have landed
+  expect(await tryOpen(page, 'http://' + SENTINEL + '/two')).toBe('window');
+  await expect(toast(page)).toHaveCount(0);
+});
+
+test('on a user-trusted page the guard stands aside completely', async ({ context }) => {
+  const sw = context.serviceWorkers()[0];
+  await installFeed(sw, [SENTINEL]);
+  await sw.evaluate(() => setSettings({ allowlist: ['localhost'] }));
+  const page = await context.newPage();
+  await page.goto(BASE + '/popup-guard.html');
+  await page.waitForTimeout(1500);
+  await tryOpen(page, 'http://' + SENTINEL + '/one');
+  await page.waitForTimeout(2500);
+  expect(await tryOpen(page, 'http://' + SENTINEL + '/two')).toBe('window');
+  await expect(toast(page)).toHaveCount(0);
 });

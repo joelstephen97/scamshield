@@ -452,5 +452,6 @@
   "linkGoBack": { "message": "返回" },
   "linkOpenAnyway": { "message": "仍然打开" },
   "linkBlockedToast": { "message": "已拦截的链接 — ScamShield 已阻止" },
-  "popupBlockedToast": { "message": "ScamShield 已阻止此页面打开被拦截的网站" }
+  "popupBlockedToast": { "message": "ScamShield 已阻止此页面打开被拦截的网站" },
+  "popunderBlockedToast": { "message": "ScamShield 已阻止此页面打开新窗口" }
 }

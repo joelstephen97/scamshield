@@ -452,5 +452,6 @@
   "linkGoBack": { "message": "Kembali" },
   "linkOpenAnyway": { "message": "Tetap buka" },
   "linkBlockedToast": { "message": "Tautan diblokir — ScamShield menghentikannya" },
-  "popupBlockedToast": { "message": "ScamShield mencegah halaman ini membuka situs yang diblokir" }
+  "popupBlockedToast": { "message": "ScamShield mencegah halaman ini membuka situs yang diblokir" },
+  "popunderBlockedToast": { "message": "ScamShield mencegah halaman ini membuka jendela baru" }
 }

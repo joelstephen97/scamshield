@@ -452,5 +452,6 @@
   "linkGoBack": { "message": "戻る" },
   "linkOpenAnyway": { "message": "それでも開く" },
   "linkBlockedToast": { "message": "ブロックされたリンク — ScamShield が停止しました" },
-  "popupBlockedToast": { "message": "ScamShield がこのページによるブロック済みサイトの表示を止めました" }
+  "popupBlockedToast": { "message": "ScamShield がこのページによるブロック済みサイトの表示を止めました" },
+  "popunderBlockedToast": { "message": "ScamShield がこのページによる新しいウィンドウの表示を止めました" }
 }

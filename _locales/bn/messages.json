@@ -452,5 +452,6 @@
   "linkGoBack": { "message": "ফিরে যান" },
   "linkOpenAnyway": { "message": "তবুও খুলুন" },
   "linkBlockedToast": { "message": "ব্লক করা লিংক — ScamShield এটি থামিয়েছে" },
-  "popupBlockedToast": { "message": "ScamShield এই পেজটিকে ব্লক করা সাইট খুলতে বাধা দিয়েছে" }
+  "popupBlockedToast": { "message": "ScamShield এই পেজটিকে ব্লক করা সাইট খুলতে বাধা দিয়েছে" },
+  "popunderBlockedToast": { "message": "ScamShield এই পেজটিকে নতুন উইন্ডো খুলতে বাধা দিয়েছে" }
 }

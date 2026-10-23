@@ -352,22 +352,26 @@
   // destination may open: only a host the link guard already cached as 'block' is vetoed (preventDefault);
   // an unknown host is allowed and looked up, so the next attempt is refused. Detail is a plain string.
   let popupToastAt = 0;
-  function popupBlocked() {
+  let popupSettings = null; // set once the link guard starts; the veto is off until then
+  function popupBlocked(kind) {
     if (Date.now() - popupToastAt < 3000) return; // a page looping window.open must not stack toasts
     popupToastAt = Date.now();
-    if (SS && SS.actions && SS.actions.popupBlockedToast && SS.actions.popupBlockedToast()) surface('popup-block');
+    const fn = SS && SS.actions && SS.actions[kind === 'popunder' ? 'popunderBlockedToast' : 'popupBlockedToast'];
+    if (fn && fn()) surface('popup-block');
   }
   window.addEventListener('scamshield:open', (e) => {
     try {
       const R = SS && SS.linkRules, G = SS && SS.linkGuard;
-      if (!R || !G || typeof e.detail !== 'string') return;
+      if (!R || !G || !popupSettings || typeof e.detail !== 'string') return;
+      if (isTrustedHost(location.hostname, popupSettings)) return; // a trusted page is never second-guessed
       const d = R.destination(e.detail, location.href, location.hostname);
-      if (d && d.host && G.levelOf(d.host) === 'block') e.preventDefault();
+      if (!d || !d.host || isTrustedHost(d.host, popupSettings)) return; // a trusted destination: no veto, no lookup (as DNR allows it)
+      if (G.levelOf(d.host) === 'block') e.preventDefault();
     } catch (_) { /* allow */ }
   });
   // Fired by the MAIN guard after it refused (a blocked destination always; popunder / fullscreen / notification
   // only reach here on a warn/stop page, because the guard only acts then).
-  window.addEventListener('scamshield:popup-blocked', (e) => { if (e.detail === 'blocked-open' || e.detail === 'popunder') popupBlocked(); }); // fullscreen / notification refusals stay silent
+  window.addEventListener('scamshield:popup-blocked', (e) => { if (e.detail === 'blocked-open' || e.detail === 'popunder') popupBlocked(e.detail); }); // fullscreen / notification refusals stay silent
   window.addEventListener('scamshield:notify-request', async () => {
     const settings = await send('getSettings');
     if (!settings || !settings.enabled || settings.notificationGuard === false) return;
@@ -1085,6 +1089,7 @@
     // one. Runs on every top-frame page, trusted ones included (feeds and mail are where the links arrive);
     // destinations the user trusts or that are popular are skipped inside it.
     if (IS_TOP && settings.linkGuard !== false && SS.linkGuard) {
+      popupSettings = settings;
       try { SS.linkGuard.start({ send, surface, t, isTrusted: (h) => isTrustedHost(h, settings) }); } catch (_) {}
     }
     // Sponsored-search check runs even on (trusted) search-engine hosts.

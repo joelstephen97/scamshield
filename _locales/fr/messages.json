@@ -452,5 +452,6 @@
   "linkGoBack": { "message": "Retour" },
   "linkOpenAnyway": { "message": "Ouvrir quand même" },
   "linkBlockedToast": { "message": "Lien bloqué — ScamShield l’a arrêté" },
-  "popupBlockedToast": { "message": "ScamShield a empêché cette page d'ouvrir un site bloqué" }
+  "popupBlockedToast": { "message": "ScamShield a empêché cette page d'ouvrir un site bloqué" },
+  "popunderBlockedToast": { "message": "ScamShield a empêché cette page d'ouvrir une nouvelle fenêtre" }
 }
