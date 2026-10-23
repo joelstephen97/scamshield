@@ -210,20 +210,6 @@
     }
   },
   {
-    "id": 16,
-    "priority": 1,
-    "action": {
-      "type": "block"
-    },
-    "condition": {
-      "urlFilter": "||weeblysite.com^",
-      "resourceTypes": [
-        "main_frame",
-        "sub_frame"
-      ]
-    }
-  },
-  {
     "id": 17,
     "priority": 1,
     "action": {
@@ -434,20 +420,6 @@
     }
   },
   {
-    "id": 32,
-    "priority": 1,
-    "action": {
-      "type": "block"
-    },
-    "condition": {
-      "urlFilter": "||qrco.de^",
-      "resourceTypes": [
-        "main_frame",
-        "sub_frame"
-      ]
-    }
-  },
-  {
     "id": 33,
     "priority": 1,
     "action": {
@@ -455,20 +427,6 @@
     },
     "condition": {
       "urlFilter": "||vulidity.de^",
-      "resourceTypes": [
-        "main_frame",
-        "sub_frame"
-      ]
-    }
-  },
-  {
-    "id": 34,
-    "priority": 1,
-    "action": {
-      "type": "block"
-    },
-    "condition": {
-      "urlFilter": "||typedream.app^",
       "resourceTypes": [
         "main_frame",
         "sub_frame"
@@ -518,20 +476,6 @@
     }
   },
   {
-    "id": 38,
-    "priority": 1,
-    "action": {
-      "type": "block"
-    },
-    "condition": {
-      "urlFilter": "||webcindario.com^",
-      "resourceTypes": [
-        "main_frame",
-        "sub_frame"
-      ]
-    }
-  },
-  {
     "id": 39,
     "priority": 1,
     "action": {
@@ -567,34 +511,6 @@
     },
     "condition": {
       "urlFilter": "||dqb.buzz^",
-      "resourceTypes": [
-        "main_frame",
-        "sub_frame"
-      ]
-    }
-  },
-  {
-    "id": 42,
-    "priority": 1,
-    "action": {
-      "type": "block"
-    },
-    "condition": {
-      "urlFilter": "||framer.website^",
-      "resourceTypes": [
-        "main_frame",
-        "sub_frame"
-      ]
-    }
-  },
-  {
-    "id": 43,
-    "priority": 1,
-    "action": {
-      "type": "block"
-    },
-    "condition": {
-      "urlFilter": "||wasmer.app^",
       "resourceTypes": [
         "main_frame",
         "sub_frame"
@@ -826,20 +742,6 @@
     }
   },
   {
-    "id": 60,
-    "priority": 1,
-    "action": {
-      "type": "block"
-    },
-    "condition": {
-      "urlFilter": "||dynv6.net^",
-      "resourceTypes": [
-        "main_frame",
-        "sub_frame"
-      ]
-    }
-  },
-  {
     "id": 61,
     "priority": 1,
     "action": {
@@ -861,34 +763,6 @@
     },
     "condition": {
       "urlFilter": "||auth.properties^",
-      "resourceTypes": [
-        "main_frame",
-        "sub_frame"
-      ]
-    }
-  },
-  {
-    "id": 63,
-    "priority": 1,
-    "action": {
-      "type": "block"
-    },
-    "condition": {
-      "urlFilter": "||my.id^",
-      "resourceTypes": [
-        "main_frame",
-        "sub_frame"
-      ]
-    }
-  },
-  {
-    "id": 64,
-    "priority": 1,
-    "action": {
-      "type": "block"
-    },
-    "condition": {
-      "urlFilter": "||replit.app^",
       "resourceTypes": [
         "main_frame",
         "sub_frame"
@@ -1043,20 +917,6 @@
     },
     "condition": {
       "urlFilter": "||schweiz-axaych79.de^",
-      "resourceTypes": [
-        "main_frame",
-        "sub_frame"
-      ]
-    }
-  },
-  {
-    "id": 76,
-    "priority": 1,
-    "action": {
-      "type": "block"
-    },
-    "condition": {
-      "urlFilter": "||dothome.co.kr^",
       "resourceTypes": [
         "main_frame",
         "sub_frame"
@@ -1302,34 +1162,6 @@
     }
   },
   {
-    "id": 94,
-    "priority": 1,
-    "action": {
-      "type": "block"
-    },
-    "condition": {
-      "urlFilter": "||goo.su^",
-      "resourceTypes": [
-        "main_frame",
-        "sub_frame"
-      ]
-    }
-  },
-  {
-    "id": 95,
-    "priority": 1,
-    "action": {
-      "type": "block"
-    },
-    "condition": {
-      "urlFilter": "||contabostorage.com^",
-      "resourceTypes": [
-        "main_frame",
-        "sub_frame"
-      ]
-    }
-  },
-  {
     "id": 96,
     "priority": 1,
     "action": {
@@ -1365,20 +1197,6 @@
     },
     "condition": {
       "urlFilter": "||metabusinessconsultancy.co.uk^",
-      "resourceTypes": [
-        "main_frame",
-        "sub_frame"
-      ]
-    }
-  },
-  {
-    "id": 99,
-    "priority": 1,
-    "action": {
-      "type": "block"
-    },
-    "condition": {
-      "urlFilter": "||craftum.io^",
       "resourceTypes": [
         "main_frame",
         "sub_frame"
@@ -1470,20 +1288,6 @@
     }
   },
   {
-    "id": 106,
-    "priority": 1,
-    "action": {
-      "type": "block"
-    },
-    "condition": {
-      "urlFilter": "||us.cc^",
-      "resourceTypes": [
-        "main_frame",
-        "sub_frame"
-      ]
-    }
-  },
-  {
     "id": 107,
     "priority": 1,
     "action": {
@@ -1491,20 +1295,6 @@
     },
     "condition": {
       "urlFilter": "||90533.xyz^",
-      "resourceTypes": [
-        "main_frame",
-        "sub_frame"
-      ]
-    }
-  },
-  {
-    "id": 108,
-    "priority": 1,
-    "action": {
-      "type": "block"
-    },
-    "condition": {
-      "urlFilter": "||framer.app^",
       "resourceTypes": [
         "main_frame",
         "sub_frame"
@@ -1743,20 +1533,6 @@
     },
     "condition": {
       "urlFilter": "||91.92.47.8^",
-      "resourceTypes": [
-        "main_frame",
-        "sub_frame"
-      ]
-    }
-  },
-  {
-    "id": 126,
-    "priority": 1,
-    "action": {
-      "type": "block"
-    },
-    "condition": {
-      "urlFilter": "||ct.ws^",
       "resourceTypes": [
         "main_frame",
         "sub_frame"
@@ -3549,20 +3325,6 @@
     },
     "condition": {
       "urlFilter": "||107.173.9.105^",
-      "resourceTypes": [
-        "main_frame",
-        "sub_frame"
-      ]
-    }
-  },
-  {
-    "id": 255,
-    "priority": 1,
-    "action": {
-      "type": "block"
-    },
-    "condition": {
-      "urlFilter": "||za.com^",
       "resourceTypes": [
         "main_frame",
         "sub_frame"
@@ -5922,20 +5684,6 @@
     }
   },
   {
-    "id": 424,
-    "priority": 1,
-    "action": {
-      "type": "block"
-    },
-    "condition": {
-      "urlFilter": "||happysrv.de^",
-      "resourceTypes": [
-        "main_frame",
-        "sub_frame"
-      ]
-    }
-  },
-  {
     "id": 425,
     "priority": 1,
     "action": {
@@ -6755,20 +6503,6 @@
     },
     "condition": {
       "urlFilter": "||91.143.172.196^",
-      "resourceTypes": [
-        "main_frame",
-        "sub_frame"
-      ]
-    }
-  },
-  {
-    "id": 484,
-    "priority": 1,
-    "action": {
-      "type": "block"
-    },
-    "condition": {
-      "urlFilter": "||bt.cn^",
       "resourceTypes": [
         "main_frame",
         "sub_frame"
