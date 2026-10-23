@@ -38,6 +38,10 @@ const BENIGN = [
   ['captcha-iframe', `${HB}/captcha-iframe.html`],
 ];
 
+// PRIMARY signal is the empty surfaceLog below: it records every surface the content script raises
+// whatever DOM it uses (shadow host or not). These selectors are the belt-and-braces DOM check; each
+// class is real: banner/toast are built in content/actions.js, overlay/hidden-block in content_script.js,
+// interstitial is covered by the canaries (same selector must show for a real scam).
 const SURFACES = ['.scamshield-banner', '.scamshield-overlay', '.scamshield-interstitial', '.scamshield-toast', '[class*="scamshield-hidden"]'];
 
 // Reads a global from the extension's isolated world (content scripts) over CDP, as expectQuietSuspicious does.
@@ -75,6 +79,8 @@ for (const [name, url, act] of BENIGN) {
     await page.waitForTimeout(2000);
     // tier: quiet (a safe verdict is quiet too). A null here would mean the script never scored the page.
     await expect.poll(() => read('window.__ssLastTier'), { timeout: 8000 }).toBe('quiet');
+    await page.waitForTimeout(1500); // final settle: a late rescan / toast must not slip past
+    expect(await read('window.__ssLastTier')).toBe('quiet');
     for (const sel of SURFACES) await expect(page.locator(sel), sel).toHaveCount(0);
     const tabId = await tabIdFor(sw, url);
     expect(await sw.evaluate((id) => chrome.action.getBadgeText({ tabId: id }), tabId)).toBe('');
