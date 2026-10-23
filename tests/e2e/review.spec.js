@@ -146,6 +146,9 @@ test('earned review ask: suppressed under an active dangerous warning; shows onc
   // profile is otherwise eligible.
   await expect(popupOnBad.locator('#askcard')).toBeHidden();
 
+  // (0.15.0) the dangerous page above just showed a warning, so the ask also waits out the
+  // 10-minute quiet window; forget that surface to model "opened later on a clean page".
+  await sw.evaluate(() => chrome.storage.local.set({ surfaceLog: [] }));
   const clean = await context.newPage();
   await clean.goto(BASE + '/clean.html');
   await clean.waitForTimeout(500);
