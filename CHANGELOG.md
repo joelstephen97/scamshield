@@ -2,6 +2,41 @@
 
 All notable changes to ScamShield. Versions are git tags (`vX.Y.Z`); the version on the [Chrome Web Store](https://chromewebstore.google.com/detail/fojjjofjimbfoddafoampojopijnlihl) may lag a tag by a few days while Google reviews it. Privacy-relevant changes are also reflected in the [privacy policy](https://joelstephen97.github.io/scamshield/privacy.html).
 
+## 0.15.0 — 2026-10-24
+
+ScamShield was warning on ordinary pages, and that is the opposite of what it
+is for. This release makes it quiet until it matters, and adds protection while
+you scroll.
+
+### Changed
+- **Far fewer false warnings.** Popular sites, regional sites, Google country
+  domains, bot-check pages and logged-in feeds are no longer flagged. Ordinary
+  pages show nothing, and minor findings appear only in the popup.
+- **At most one warning per site per day.** A site you dismiss twice goes quiet
+  for 30 days. You can undo that in Options → Quiet sites.
+- **A new "This site is fine" button** on warnings and in the popup.
+- **Redesigned warnings** that fit phones, tablets, laptops and ultra-wide
+  screens, in light and dark, and for right-to-left languages.
+- **The page is checked again** when a fake login appears after it has loaded.
+- **The review request is rarer and calmer.** It only appears after ScamShield
+  has stopped something, at least 14 days after you installed it, never within
+  14 days of a "This site is fine" tap, and never right after a warning.
+
+### Added
+- **Scam links are marked as you scroll** and ask before opening.
+- **Scam ads are hidden.** This is not a general ad blocker.
+- **Pages can no longer pop open blocked sites.** Scam iframes and scripts from
+  listed sites are blocked too.
+- **"What ScamShield showed" in Options**, with Copy diagnostics, so you can see
+  exactly what it did and share it if something looks wrong.
+- **New onboarding** with a demo warning.
+- **Firefox for Android support.**
+
+### Fixed
+- Accessibility fixes across the popup, Options and the warnings.
+- The warning that a site is in the threat feed now reads "1 source" or
+  "2 sources" instead of "source(s)".
+
 ## 0.14.1 — 2026-10-09
 
 ### Fixed

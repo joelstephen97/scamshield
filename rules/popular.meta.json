@@ -1,7 +1,7 @@
 {
   "source": "Tranco",
   "listId": "tranco-top-1m-2026-10-23",
-  "generatedAt": "2026-10-23T06:41:18.276Z",
+  "generatedAt": "2026-10-23T23:32:46.433Z",
   "count": 50000,
   "excludedPlatforms": [
     "000webhostapp.com",
@@ -16,6 +16,7 @@
     "carrd.co",
     "cloudflare-ipfs.com",
     "cloudfront.net",
+    "ct.ws",
     "ddns.net",
     "duckdns.org",
     "dweb.link",
@@ -30,12 +31,14 @@
     "glitch.me",
     "godaddysites.com",
     "googleusercontent.com",
+    "happysrv.de",
     "herokuapp.com",
     "hopto.org",
     "hstn.me",
     "ipfs.io",
     "jimdosite.com",
     "koyeb.app",
+    "my.id",
     "myportfolio.com",
     "myshopify.com",
     "mystrikingly.com",
@@ -63,6 +66,7 @@
     "trycloudflare.com",
     "tumblr.com",
     "typedream.app",
+    "us.cc",
     "vercel.app",
     "vercel.com",
     "web.app",
@@ -76,6 +80,7 @@
     "wordpress.com",
     "workers.dev",
     "yolasite.com",
+    "za.com",
     "zya.me"
   ]
 }
