@@ -23,7 +23,7 @@ const EXTRA_PLATFORMS = [
   'sharepoint.com', 'notion.site', 'framer.app', 'framer.website', 'bubbleapps.io', 'tumblr.com', 'wixstudio.com',
   'jimdosite.com', 'yolasite.com', 'weeblysite.com', 'mystrikingly.com', 'myportfolio.com', 'pythonanywhere.com',
   'ddns.net', 'no-ip.org', 'hopto.org', 'tilda.ws', 'webflow.com', 'typedream.app', 'softr.app', 'ngrok.app',
-  'netlify.com', 'onrender.com', 'vercel.com', 'cloudflare-ipfs.com', 'ipfs.io', 'dweb.link'
+  'my.id', 'za.com', 'us.cc', 'ct.ws', 'happysrv.de', 'netlify.com', 'onrender.com', 'vercel.com', 'cloudflare-ipfs.com', 'ipfs.io', 'dweb.link'
 ];
 
 // CSV text ("rank,domain" per line, rank order) -> array of domains.

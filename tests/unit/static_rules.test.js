@@ -38,6 +38,8 @@ test('no rule blocks a tenant-platform apex or a hosting-platform apex', () => {
   for (const r of rules) for (const d of domainsOf(r)) assert.ok(!platforms.has(d), d + ' (rule ' + r.id + ') is a platform apex');
 });
 
+// Regression guard only (0.15.0): build-popular excludes blocked apexes from the bin by
+// construction, so this cannot catch a blocked popular apex; the Tranco top-100k pass did.
 test('no rule blocks a popular registrable domain (bundled Tranco top-50k set)', () => {
   for (const r of rules) for (const d of domainsOf(r)) assert.ok(!B.has(popular, h40(d)), d + ' (rule ' + r.id + ') is a popular site');
 });
