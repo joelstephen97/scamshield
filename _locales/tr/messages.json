@@ -444,5 +444,11 @@
   "bannerHideHour": { "message": "Bir saatliğine gizle" },
   "mistakeSiteFine": { "message": "Bu site güvenli" },
   "continueUnsafe": { "message": "Bu siteye devam et (güvenli değil)" },
-  "frameFormBlocked": { "message": "ScamShield, gömülü bir çerçevedeki oturum açma formunu engelledi çünkü parolanızı başka bir siteye gönderiyordu" }
+  "frameFormBlocked": { "message": "ScamShield, gömülü bir çerçevedeki oturum açma formunu engelledi çünkü parolanızı başka bir siteye gönderiyordu" },
+  "linkPillBlock": { "message": "Engellenen bağlantı" },
+  "linkPillWarn": { "message": "Riskli bağlantı" },
+  "linkConfirmBlock": { "message": "Bu bağlantı ScamShield engelleme listesindeki bir siteye gidiyor" },
+  "linkConfirmWarn": { "message": "Bu bağlantı riskli görünüyor" },
+  "linkGoBack": { "message": "Geri dön" },
+  "linkOpenAnyway": { "message": "Yine de aç" }
 }

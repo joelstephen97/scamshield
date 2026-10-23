@@ -33,6 +33,7 @@
         "engine/verdict.js",
         "engine/doctrine.js",
         "engine/challenge.js",
+        "engine/linkguard_rules.js",
         "ui/reasons.js",
         "engine/url_model.js",
         "engine/page_features.js",
@@ -43,6 +44,7 @@
         "content/surfaces/styles.js",
         "content/surfaces/primitives.js",
         "content/actions.js",
+        "content/linkguard.js",
         "content/content_script.js"
       ],
       "css": ["content/content.css"]

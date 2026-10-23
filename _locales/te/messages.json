@@ -444,5 +444,11 @@
   "bannerHideHour": { "message": "ఒక గంట దాచండి" },
   "mistakeSiteFine": { "message": "ఈ సైట్ సురక్షితమే" },
   "continueUnsafe": { "message": "ఈ సైట్‌కు కొనసాగండి (సురక్షితం కాదు)" },
-  "frameFormBlocked": { "message": "ఎంబెడ్ చేసిన ఫ్రేమ్‌లోని సైన్-ఇన్ ఫారం మీ పాస్‌వర్డ్‌ను మరొక సైట్‌కు పంపుతున్నందున ScamShield దాన్ని నిరోధించింది" }
+  "frameFormBlocked": { "message": "ఎంబెడ్ చేసిన ఫ్రేమ్‌లోని సైన్-ఇన్ ఫారం మీ పాస్‌వర్డ్‌ను మరొక సైట్‌కు పంపుతున్నందున ScamShield దాన్ని నిరోధించింది" },
+  "linkPillBlock": { "message": "బ్లాక్ చేసిన లింక్" },
+  "linkPillWarn": { "message": "ప్రమాదకర లింక్" },
+  "linkConfirmBlock": { "message": "ఈ లింక్ ScamShield బ్లాక్ జాబితాలోని సైట్‌కు వెళ్తుంది" },
+  "linkConfirmWarn": { "message": "ఈ లింక్ ప్రమాదకరంగా కనిపిస్తోంది" },
+  "linkGoBack": { "message": "వెనక్కి వెళ్లండి" },
+  "linkOpenAnyway": { "message": "అయినా తెరవండి" }
 }

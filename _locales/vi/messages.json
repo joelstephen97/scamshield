@@ -444,5 +444,11 @@
   "bannerHideHour": { "message": "Ẩn trong một giờ" },
   "mistakeSiteFine": { "message": "Trang này an toàn" },
   "continueUnsafe": { "message": "Tiếp tục vào trang này (không an toàn)" },
-  "frameFormBlocked": { "message": "ScamShield đã chặn một biểu mẫu đăng nhập trong khung nhúng vì nó gửi mật khẩu của bạn đến trang khác" }
+  "frameFormBlocked": { "message": "ScamShield đã chặn một biểu mẫu đăng nhập trong khung nhúng vì nó gửi mật khẩu của bạn đến trang khác" },
+  "linkPillBlock": { "message": "Liên kết bị chặn" },
+  "linkPillWarn": { "message": "Liên kết rủi ro" },
+  "linkConfirmBlock": { "message": "Liên kết này dẫn đến một trang trong danh sách chặn của ScamShield" },
+  "linkConfirmWarn": { "message": "Liên kết này trông có rủi ro" },
+  "linkGoBack": { "message": "Quay lại" },
+  "linkOpenAnyway": { "message": "Vẫn mở" }
 }

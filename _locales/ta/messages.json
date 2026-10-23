@@ -444,5 +444,11 @@
   "bannerHideHour": { "message": "ஒரு மணி நேரத்துக்கு மறைக்கவும்" },
   "mistakeSiteFine": { "message": "இந்தத் தளம் பாதுகாப்பானது" },
   "continueUnsafe": { "message": "இந்தத் தளத்துக்குத் தொடர்க (பாதுகாப்பற்றது)" },
-  "frameFormBlocked": { "message": "உட்பொதிந்த சட்டத்தினுள் இருந்த உள்நுழைவு படிவம் உங்கள் கடவுச்சொல்லை வேறொரு தளத்துக்கு அனுப்புவதால் ScamShield அதைத் தடுத்தது" }
+  "frameFormBlocked": { "message": "உட்பொதிந்த சட்டத்தினுள் இருந்த உள்நுழைவு படிவம் உங்கள் கடவுச்சொல்லை வேறொரு தளத்துக்கு அனுப்புவதால் ScamShield அதைத் தடுத்தது" },
+  "linkPillBlock": { "message": "தடுக்கப்பட்ட இணைப்பு" },
+  "linkPillWarn": { "message": "ஆபத்தான இணைப்பு" },
+  "linkConfirmBlock": { "message": "இந்த இணைப்பு ScamShield தடுப்புப் பட்டியலில் உள்ள தளத்திற்குச் செல்கிறது" },
+  "linkConfirmWarn": { "message": "இந்த இணைப்பு ஆபத்தாகத் தெரிகிறது" },
+  "linkGoBack": { "message": "திரும்பிச் செல்" },
+  "linkOpenAnyway": { "message": "இருந்தும் திற" }
 }

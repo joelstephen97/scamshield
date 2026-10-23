@@ -11,7 +11,7 @@
   const CAP = 300;
   const DIAG_ROWS = 100;
   const KINDS = ['banner', 'interstitial', 'toast-clipboard', 'toast-leak', 'toast-notify', 'techscam',
-    'hidden-blocks', 'serp-dot', 'wallet', 'form-guard'];
+    'hidden-blocks', 'serp-dot', 'wallet', 'form-guard', 'link-block', 'link-warn', 'link-confirm'];
 
   // Newest first, capped. Returns the new list, or the old one when the row is invalid.
   function appendRow(list, row, now) {

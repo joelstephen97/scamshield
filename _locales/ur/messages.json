@@ -444,5 +444,11 @@
   "bannerHideHour": { "message": "ایک گھنٹے کے لیے چھپائیں" },
   "mistakeSiteFine": { "message": "یہ سائٹ ٹھیک ہے" },
   "continueUnsafe": { "message": "اس سائٹ پر جائیں (غیر محفوظ)" },
-  "frameFormBlocked": { "message": "ScamShield نے ایک ایمبیڈڈ فریم کے اندر سائن اِن فارم روک دیا کیونکہ وہ آپ کا پاس ورڈ دوسری سائٹ کو بھیج رہا تھا" }
+  "frameFormBlocked": { "message": "ScamShield نے ایک ایمبیڈڈ فریم کے اندر سائن اِن فارم روک دیا کیونکہ وہ آپ کا پاس ورڈ دوسری سائٹ کو بھیج رہا تھا" },
+  "linkPillBlock": { "message": "بلاک کیا گیا لنک" },
+  "linkPillWarn": { "message": "خطرناک لنک" },
+  "linkConfirmBlock": { "message": "یہ لنک ScamShield کی بلاک فہرست والی سائٹ پر جاتا ہے" },
+  "linkConfirmWarn": { "message": "یہ لنک خطرناک لگتا ہے" },
+  "linkGoBack": { "message": "واپس جائیں" },
+  "linkOpenAnyway": { "message": "پھر بھی کھولیں" }
 }

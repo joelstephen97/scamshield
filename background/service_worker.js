@@ -4,7 +4,7 @@
 // a classic-worker context (tests driving this file directly) falls back to
 // importScripts here. In the module SW `importScripts` is undefined — the
 // ReferenceError lands in the catch and the imports from sw.js already won.
-try { importScripts('../engine/constants.js', '../engine/trust.js', '../engine/decisions.js', '../engine/features.js', '../engine/risk_rules.js', '../engine/image_hash.js', '../engine/brand_icons.js', '../engine/report_payload.js', '../engine/engagement.js', '../engine/blockset.js', '../engine/bloom.js', '../engine/first_seen.js', '../engine/dnr_rules.js', '../engine/hotlist.js', '../engine/budget.js', '../engine/surface_log.js', '../ui/reasons.js', './stats.js', './blockstore.js', './update.js', './feedsync.js'); } catch (_) { /* deps already loaded by sw.js (Chrome) or the manifest (Firefox) */ }
+try { importScripts('../engine/constants.js', '../engine/trust.js', '../engine/decisions.js', '../engine/features.js', '../engine/brand_match.js', '../engine/risk_rules.js', '../engine/image_hash.js', '../engine/brand_icons.js', '../engine/report_payload.js', '../engine/engagement.js', '../engine/blockset.js', '../engine/bloom.js', '../engine/first_seen.js', '../engine/dnr_rules.js', '../engine/hotlist.js', '../engine/budget.js', '../engine/surface_log.js', '../ui/reasons.js', './stats.js', './blockstore.js', './update.js', './feedsync.js'); } catch (_) { /* deps already loaded by sw.js (Chrome) or the manifest (Firefox) */ }
 const api = globalThis.browser || globalThis.chrome;
 
 // Official ScamShield feed: rebuilt by GitHub Actions from public,
@@ -1515,9 +1515,14 @@ async function checkFeedHost(host) {
 // carry dozens of them. Also folds in the risk.json abused-TLD+dyndns/hoster
 // "combo" checkRiskHosting() computes one host at a time, so the content
 // script needs exactly one message for every signal a badge can show.
-// Returns { results: { <the exact host string the caller sent>: 'block' |
-// 'warn' | null } } — keyed on the caller's own strings (not the normalized
-// form) so content_script.js never has to duplicate normalizeFeedHost().
+// Returns { results: { <the exact host string the caller sent>: {
+//   level: 'block' | 'warn' | null,   // hot list, feed block/warn sets, risk combo
+//   popular: bool,                     // registrable is in the popular-50k set (user-content hosts excepted)
+//   lookalike: bool                    // strong/strongest fuzzyBrandMatch (settings.riskTlds aware)
+// } } } — keyed on the caller's own strings (not the normalized form) so
+// content_script.js never has to duplicate normalizeFeedHost(). (0.15.0, Task
+// 15: the value used to be the bare level string. Consumers: the SERP badge
+// pipeline and the live link guard in content/, both updated with it.)
 async function checkFeedBatchHosts(hosts) {
   const list = globalThis.ScamShield.dedupeCapped(Array.isArray(hosts) ? hosts.filter((h) => typeof h === 'string') : [], 50);
   const out = {};
@@ -1534,12 +1539,27 @@ async function checkFeedBatchHosts(hosts) {
   const risk = rec && rec.riskTables;
   const dyndnsSet = risk && Array.isArray(risk.dyndns) ? new Set(risk.dyndns) : null;
   const hostersSet = risk && Array.isArray(risk.hosters) ? new Set(risk.hosters) : null;
+  let riskTlds = null;
+  try { riskTlds = (await getSettings()).riskTlds || null; } catch (_) { riskTlds = null; }
+
+  // popular + lookalike for one host (0.15.0). A lookalike is a strong/strongest brand match on a host that
+  // is not the brand's own domain; a popular host is never asked (it cannot be one, and the guard ignores it).
+  async function annotate(raw, normalized, level) {
+    let popular = false, lookalike = false;
+    if (normalized) {
+      popular = (await isPopularHost(normalized)) && !(SS.isUserContentHost && SS.isUserContentHost(normalized));
+      if (!popular && SS.fuzzyBrandMatch && SS.allowlistBrandMatch && !SS.allowlistBrandMatch(normalized)) {
+        try { const f = SS.fuzzyBrandMatch(normalized, riskTlds); lookalike = !!f && (f.grade === 'strongest' || f.grade === 'strong'); } catch (_) { lookalike = false; }
+      }
+    }
+    out[raw] = { level, popular, lookalike };
+  }
 
   for (const raw of list) {
     const normalized = normalizeFeedHost(raw);
     let category = null;
     if (normalized && (hotHostSet.has(normalized) || hotHostSet.has(normalizeFeedHost(SS.registrableDomain(normalized))))) {
-      out[raw] = 'block'; continue;
+      await annotate(raw, normalized, 'block'); continue;
     }
     if (normalized && (blockSet || warnSet || dyndnsSet || hostersSet)) {
       try {
@@ -1557,7 +1577,7 @@ async function checkFeedBatchHosts(hosts) {
         }
       } catch (_) { category = null; }
     }
-    out[raw] = category;
+    await annotate(raw, normalized, category);
   }
   return { results: out };
 }
@@ -2153,6 +2173,7 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       // (0.15.0, Task 13) A tiny sub-frame cannot show a dialog, so it asks the SW to tell the TOP frame (which can).
       case 'relayToTop': {
         const tabId = sender.tab && sender.tab.id;
+        if (sender.frameId === 0) { sendResponse({ ok: false }); break; } // (0.15.0) the top frame needs no relay to itself
         if (tabId != null && msg.kind === 'frameFormBlocked') { try { await api.tabs.sendMessage(tabId, { type: 'frameFormBlocked' }, { frameId: 0 }); } catch (_) {} }
         sendResponse({ ok: true }); break;
       }
@@ -2164,6 +2185,19 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         const top = sender.frameId === 0 || sender.frameId == null;
         const url = (sender.tab && sender.tab.url) || '';
         if (tabId != null && top && /^https?:/i.test(url)) { try { await api.tabs.update(tabId, { url: api.runtime.getURL('blocked.html') + '#' + url }); } catch (_) {} }
+        sendResponse({ ok: true }); break;
+      }
+      // (0.15.0, Task 15) "Open anyway" on a link to a block-list site. A navigation started by the page itself
+      // to a DNR-redirected host ends on Chrome's ERR_BLOCKED_BY_CLIENT (the block page is not web-accessible, by
+      // design), so the content script asks us to open it browser-side and DNR lands on blocked.html. http(s) only,
+      // top frame of the sender tab only.
+      case 'openLink': {
+        const tabId = sender.tab && sender.tab.id;
+        const top = sender.frameId === 0 || sender.frameId == null;
+        const url = typeof msg.url === 'string' && msg.url.length <= 4096 ? msg.url : '';
+        if (tabId != null && top && /^https?:\/\//i.test(url)) {
+          try { if (msg.newTab) await api.tabs.create({ url, openerTabId: tabId, active: true }); else await api.tabs.update(tabId, { url }); } catch (_) {}
+        }
         sendResponse({ ok: true }); break;
       }
       case 'leaveTab': {

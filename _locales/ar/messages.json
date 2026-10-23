@@ -444,5 +444,11 @@
   "bannerHideHour": { "message": "إخفاء لمدة ساعة" },
   "mistakeSiteFine": { "message": "هذا الموقع آمن" },
   "continueUnsafe": { "message": "المتابعة إلى هذا الموقع (غير آمن)" },
-  "frameFormBlocked": { "message": "حظر ScamShield نموذج تسجيل دخول داخل إطار مضمّن لأنه يرسل كلمة مرورك إلى موقع آخر" }
+  "frameFormBlocked": { "message": "حظر ScamShield نموذج تسجيل دخول داخل إطار مضمّن لأنه يرسل كلمة مرورك إلى موقع آخر" },
+  "linkPillBlock": { "message": "رابط محظور" },
+  "linkPillWarn": { "message": "رابط خطير" },
+  "linkConfirmBlock": { "message": "يؤدي هذا الرابط إلى موقع مدرج في قائمة الحظر لدى ScamShield" },
+  "linkConfirmWarn": { "message": "يبدو هذا الرابط خطيراً" },
+  "linkGoBack": { "message": "رجوع" },
+  "linkOpenAnyway": { "message": "فتح على أي حال" }
 }

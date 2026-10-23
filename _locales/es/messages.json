@@ -444,5 +444,11 @@
   "bannerHideHour": { "message": "Ocultar por una hora" },
   "mistakeSiteFine": { "message": "Este sitio es seguro" },
   "continueUnsafe": { "message": "Continuar a este sitio (no seguro)" },
-  "frameFormBlocked": { "message": "ScamShield bloqueó un formulario de inicio de sesión dentro de un marco incrustado porque envía tu contraseña a otro sitio" }
+  "frameFormBlocked": { "message": "ScamShield bloqueó un formulario de inicio de sesión dentro de un marco incrustado porque envía tu contraseña a otro sitio" },
+  "linkPillBlock": { "message": "Enlace bloqueado" },
+  "linkPillWarn": { "message": "Enlace riesgoso" },
+  "linkConfirmBlock": { "message": "Este enlace lleva a un sitio de la lista de bloqueo de ScamShield" },
+  "linkConfirmWarn": { "message": "Este enlace parece arriesgado" },
+  "linkGoBack": { "message": "Volver" },
+  "linkOpenAnyway": { "message": "Abrir de todos modos" }
 }

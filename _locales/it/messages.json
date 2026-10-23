@@ -444,5 +444,11 @@
   "bannerHideHour": { "message": "Nascondi per un'ora" },
   "mistakeSiteFine": { "message": "Questo sito è sicuro" },
   "continueUnsafe": { "message": "Continua su questo sito (non sicuro)" },
-  "frameFormBlocked": { "message": "ScamShield ha bloccato un modulo di accesso in un frame incorporato perché invia la tua password a un altro sito" }
+  "frameFormBlocked": { "message": "ScamShield ha bloccato un modulo di accesso in un frame incorporato perché invia la tua password a un altro sito" },
+  "linkPillBlock": { "message": "Link bloccato" },
+  "linkPillWarn": { "message": "Link rischioso" },
+  "linkConfirmBlock": { "message": "Questo link porta a un sito nella lista di blocco di ScamShield" },
+  "linkConfirmWarn": { "message": "Questo link sembra rischioso" },
+  "linkGoBack": { "message": "Indietro" },
+  "linkOpenAnyway": { "message": "Apri comunque" }
 }

@@ -444,5 +444,11 @@
   "bannerHideHour": { "message": "1時間非表示" },
   "mistakeSiteFine": { "message": "このサイトは問題ありません" },
   "continueUnsafe": { "message": "このサイトに進む(危険)" },
-  "frameFormBlocked": { "message": "埋め込みフレーム内のログインフォームが、パスワードを別のサイトに送信するため、ScamShield がブロックしました" }
+  "frameFormBlocked": { "message": "埋め込みフレーム内のログインフォームが、パスワードを別のサイトに送信するため、ScamShield がブロックしました" },
+  "linkPillBlock": { "message": "ブロックされたリンク" },
+  "linkPillWarn": { "message": "危険なリンク" },
+  "linkConfirmBlock": { "message": "このリンクは ScamShield のブロックリストに載っているサイトに移動します" },
+  "linkConfirmWarn": { "message": "このリンクは危険そうです" },
+  "linkGoBack": { "message": "戻る" },
+  "linkOpenAnyway": { "message": "それでも開く" }
 }

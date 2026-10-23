@@ -701,6 +701,7 @@
   }
 
   let serpDotLogged = false;
+  let serpRiskTlds = null; // settings.riskTlds, for the local fuzzy fallback (0.15.0)
   async function annotateSerpResults() {
     // The observer outlives same-document navigation (results -> Maps/Mail), so re-check the page type.
     if (!SS.isSerpPage(location.hostname, location.pathname, location.search)) return;
@@ -720,12 +721,15 @@
         let painted = 0;
         for (const { a, host } of targets) {
           if (!a.isConnected) continue; // removed before the round trip resolved
-          const feedHit = feedResults[host];
+          // (0.15.0) The SW answers { level, popular, lookalike } per host; lookalike already used the feed's riskTlds.
+          const r = feedResults[host];
           let level = null;
-          if (feedHit === 'block') level = 'danger';
-          else if (feedHit === 'warn') level = 'caution';
-          else if (SS.fuzzyBrandMatch && SS.allowlistBrandMatch && !SS.allowlistBrandMatch(host)) {
-            const fuzzy = SS.fuzzyBrandMatch(host);
+          if (r && typeof r === 'object') {
+            if (r.level === 'block') level = 'danger';
+            else if (r.level === 'warn' || r.lookalike) level = 'caution';
+          } else if (SS.fuzzyBrandMatch && SS.allowlistBrandMatch && !SS.allowlistBrandMatch(host)) {
+            // SW unreachable: same local check as before, now with the riskTlds mirrored into settings.
+            const fuzzy = SS.fuzzyBrandMatch(host, serpRiskTlds);
             if (fuzzy && (fuzzy.grade === 'strongest' || fuzzy.grade === 'strong')) level = 'caution';
           }
           if (level) { paintSerpBadge(a, level); painted++; }
@@ -979,8 +983,11 @@
   // answers — an all_frames re-injection into an ad iframe must never race
   // the real answer or scan content the user never sees.
   // (0.15.0, Task 13) A <200x200 sub-frame blocked a credential form silently and asked the SW to tell us (the top frame).
+  let frameFormToastShown = false;
   api.runtime.onMessage.addListener((msg) => {
     if (!msg || msg.type !== 'frameFormBlocked' || !IS_TOP || !SS || !SS.actions || !SS.actions.frameFormBlockedToast) return undefined;
+    if (frameFormToastShown) return undefined; // (0.15.0) once per page: a page with many tiny frames must not stack toasts
+    frameFormToastShown = true;
     SS.actions.frameFormBlockedToast(() => surface('form-guard', true));
     return undefined;
   });
@@ -1051,8 +1058,15 @@
     }
     const settings = await send('getSettings');
     if (!settings || !settings.enabled) return;
+    serpRiskTlds = settings.riskTlds || null;
     if (SS.actions && SS.actions.setTheme) SS.actions.setTheme(settings.theme); // (0.15.0) surfaces follow the Options theme
     const pageDomain = scopeOf(location.hostname); // 0.14.1: engagement + pause are per tenant host
+    // Live link guard (0.15.0, Task 15): marks links to known scam sites as they appear and asks before opening
+    // one. Runs on every top-frame page, trusted ones included (feeds and mail are where the links arrive);
+    // destinations the user trusts or that are popular are skipped inside it.
+    if (IS_TOP && settings.linkGuard !== false && SS.linkGuard) {
+      try { SS.linkGuard.start({ send, surface, t, isTrusted: (h) => isTrustedHost(h, settings) }); } catch (_) {}
+    }
     // Sponsored-search check runs even on (trusted) search-engine hosts.
     if (IS_TOP && settings.serpCheck !== false && SS.isSerpPage(location.hostname, location.pathname, location.search)) {
       // (0.15.0) results pages only: Gmail, Docs, Maps and News on google.* get nothing.

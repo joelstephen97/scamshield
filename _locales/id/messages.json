@@ -444,5 +444,11 @@
   "bannerHideHour": { "message": "Sembunyikan selama satu jam" },
   "mistakeSiteFine": { "message": "Situs ini aman" },
   "continueUnsafe": { "message": "Lanjut ke situs ini (tidak aman)" },
-  "frameFormBlocked": { "message": "ScamShield memblokir formulir masuk di dalam frame tersemat karena mengirim kata sandi Anda ke situs lain" }
+  "frameFormBlocked": { "message": "ScamShield memblokir formulir masuk di dalam frame tersemat karena mengirim kata sandi Anda ke situs lain" },
+  "linkPillBlock": { "message": "Tautan diblokir" },
+  "linkPillWarn": { "message": "Tautan berisiko" },
+  "linkConfirmBlock": { "message": "Tautan ini menuju situs dalam daftar blokir ScamShield" },
+  "linkConfirmWarn": { "message": "Tautan ini tampak berisiko" },
+  "linkGoBack": { "message": "Kembali" },
+  "linkOpenAnyway": { "message": "Tetap buka" }
 }

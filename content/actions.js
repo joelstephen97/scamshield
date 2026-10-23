@@ -812,6 +812,39 @@
     } catch (_) {}
   }
 
+  // (0.15.0, Task 15) Live link guard confirm: a click on a link marked block/warn lands here instead of
+  // navigating. A <dialog> in the 'dialog' host; "Go back" is the default focus, and every way out except a
+  // trusted "Open anyway" (Escape, page removing the host, closing it) leaves the user where they were.
+  // o: { level: 'block'|'warn', host, onOpen(), onShown() }. Returns false when it could not be shown (another
+  // dialog is up, or a frame too small): the caller then lets the click through un-prompted only for warn.
+  function linkConfirm(o) {
+    const S = surfaces();
+    if (tinyFrame() || S.isMounted('dialog') || S.isMounted('interstitial')) return false;
+    const block = o.level === 'block';
+    const title = block
+      ? t('linkConfirmBlock', null, "This link goes to a site on ScamShield's block list")
+      : t('linkConfirmWarn', null, 'This link looks risky');
+    const ctl = modal('dialog', NS + '-overlay ' + NS + '-linkconfirm', {
+      role: 'alertdialog', label: title,
+      onEscape: () => ctl.close(),
+      onDetached: () => false, // removed by page script = stay on the page
+      onShown: o.onShown
+    }, (dlg, c) => {
+      const card = el('div', 'ss-card');
+      const head = el('div', 'ss-head'); head.append(tile(block ? 'danger' : 'warn'), el('h3', null, title));
+      card.append(head, el('p', 'ss-sub', bidi(o.host || '')));
+      const actions = el('div', 'ss-actions');
+      const back = button('ss-primary', t('linkGoBack', null, 'Go back'));
+      const open = button('ss-danger-ghost', t('linkOpenAnyway', null, 'Open anyway'));
+      onTrustedClick(back, () => c.close());
+      onTrustedClick(open, () => { c.close(); if (typeof o.onOpen === 'function') o.onOpen(); });
+      actions.append(back, open);
+      card.append(actions); dlg.append(card);
+      return { card, safe: back };
+    });
+    return true;
+  }
+
   // Privacy findings are informational (badge/popup tier), never blocking.
   // `detail.muteKind`/`onMute` (0.14.0) let the leaky-form/notify-lure
   // listeners in content_script.js offer the shared "Don't warn me on this
@@ -905,5 +938,5 @@
   }
 
   root.ScamShield = root.ScamShield || {};
-  root.ScamShield.actions = { showBanner, guardForms, hideScamBlocks, clearAll, walletConfirmOverlay, clipboardToast, techScamEscapeOverlay, supportToast, dangerInterstitial, armDelayed, privacyToast, crossOriginCredToast, ackSurface, setTheme, frameFormBlockedToast };
+  root.ScamShield.actions = { showBanner, guardForms, hideScamBlocks, clearAll, walletConfirmOverlay, clipboardToast, techScamEscapeOverlay, supportToast, dangerInterstitial, armDelayed, privacyToast, crossOriginCredToast, ackSurface, setTheme, frameFormBlockedToast, linkConfirm };
 })(typeof globalThis !== 'undefined' ? globalThis : self);

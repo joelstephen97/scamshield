@@ -444,5 +444,11 @@
   "bannerHideHour": { "message": "Скрыть на час" },
   "mistakeSiteFine": { "message": "Этот сайт безопасен" },
   "continueUnsafe": { "message": "Перейти на этот сайт (небезопасно)" },
-  "frameFormBlocked": { "message": "ScamShield заблокировал форму входа во встроенном фрейме, потому что она отправляет ваш пароль на другой сайт" }
+  "frameFormBlocked": { "message": "ScamShield заблокировал форму входа во встроенном фрейме, потому что она отправляет ваш пароль на другой сайт" },
+  "linkPillBlock": { "message": "Заблокированная ссылка" },
+  "linkPillWarn": { "message": "Опасная ссылка" },
+  "linkConfirmBlock": { "message": "Эта ссылка ведёт на сайт из списка блокировки ScamShield" },
+  "linkConfirmWarn": { "message": "Эта ссылка выглядит опасной" },
+  "linkGoBack": { "message": "Назад" },
+  "linkOpenAnyway": { "message": "Всё равно открыть" }
 }

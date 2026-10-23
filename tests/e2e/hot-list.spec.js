@@ -157,8 +157,8 @@ test('hot hosts are visible to the in-page feed check within the hour (SERP badg
   expect(hit.hit).toBe('block');
   expect(hit.hot).toBe(true);
   const batch = await sw.evaluate(() => checkFeedBatchHosts(['hot-fixture.example', 'clean-feed-fixture.example']));
-  expect(batch.results['hot-fixture.example']).toBe('block');
-  expect(batch.results['clean-feed-fixture.example']).toBeFalsy();
+  expect(batch.results['hot-fixture.example'].level).toBe('block'); // (0.15.0) { level, popular, lookalike }
+  expect(batch.results['clean-feed-fixture.example'].level).toBeFalsy();
 });
 
 test('client guard: SAFE_DOMAINS, real brand domains and the user allowlist never become hot rules', async ({ context }) => {

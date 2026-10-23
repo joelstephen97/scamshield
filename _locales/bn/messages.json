@@ -444,5 +444,11 @@
   "bannerHideHour": { "message": "এক ঘণ্টার জন্য লুকান" },
   "mistakeSiteFine": { "message": "এই সাইটটি নিরাপদ" },
   "continueUnsafe": { "message": "এই সাইটে যান (অনিরাপদ)" },
-  "frameFormBlocked": { "message": "ScamShield একটি এম্বেড করা ফ্রেমের ভেতরের সাইন-ইন ফর্ম আটকেছে, কারণ এটি আপনার পাসওয়ার্ড অন্য সাইটে পাঠাচ্ছিল" }
+  "frameFormBlocked": { "message": "ScamShield একটি এম্বেড করা ফ্রেমের ভেতরের সাইন-ইন ফর্ম আটকেছে, কারণ এটি আপনার পাসওয়ার্ড অন্য সাইটে পাঠাচ্ছিল" },
+  "linkPillBlock": { "message": "ব্লক করা লিংক" },
+  "linkPillWarn": { "message": "ঝুঁকিপূর্ণ লিংক" },
+  "linkConfirmBlock": { "message": "এই লিংক ScamShield-এর ব্লক তালিকার একটি সাইটে যায়" },
+  "linkConfirmWarn": { "message": "এই লিংকটি ঝুঁকিপূর্ণ মনে হচ্ছে" },
+  "linkGoBack": { "message": "ফিরে যান" },
+  "linkOpenAnyway": { "message": "তবুও খুলুন" }
 }

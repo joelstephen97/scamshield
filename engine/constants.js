@@ -662,7 +662,11 @@
   const SERP_REDIRECT_HOSTS = [
     { re: /(^|\.)google\.[a-z.]+$/i, path: /^\/(url|aclk)$/, params: ['q', 'url', 'adurl'] },
     { re: /(^|\.)bing\.com$/i, path: /^\/aclick$/, params: ['u'] },
-    { re: /(^|\.)duckduckgo\.com$/i, path: /^\/y\.js$/, params: ['uddg'] }
+    { re: /(^|\.)duckduckgo\.com$/i, path: /^\/y\.js$/, params: ['uddg'] },
+    // (0.15.0) Link-click wrappers the live link guard (content/linkguard.js) unwraps before looking a host up.
+    { re: /^lm?\.facebook\.com$/i, path: /^\/l\.php$/, params: ['u'] },
+    { re: /^l\.instagram\.com$/i, path: /^\/$/, params: ['u'] },
+    { re: /(^|\.)safelinks\.protection\.outlook\.com$/i, path: /^\/$/, params: ['url'] }
   ];
   function unwrapSerpRedirect(href, baseHref) {
     if (!href) return null;

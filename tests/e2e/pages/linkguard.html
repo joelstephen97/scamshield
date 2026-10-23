@@ -1,0 +1,30 @@
+<!doctype html><meta charset="utf-8"><title>Link guard fixture</title>
+<style>body{font:16px system-ui;margin:24px}li{margin:6px 0}</style>
+<h1>Feed</h1>
+<ul id="feed">
+  <li><a id="clean1" href="http://linkguard-clean-one.example/a">clean one</a></li>
+  <li><a id="clean2" href="http://linkguard-clean-two.example/b">clean two</a></li>
+  <li><a id="popular" href="https://en.wikipedia.org/wiki/Scam">a popular host that the fixture feed also lists</a></li>
+  <li><a id="wrapped" href="https://www.google.com/url?q=http%3A%2F%2Fscamshield-test-blocked.example%2Fwrapped&amp;sa=D">wrapped by a Google redirect</a></li>
+  <li><a id="same" href="/clean.html">same site</a></li>
+  <li><a id="mail" href="mailto:someone@example.com">mail</a></li>
+</ul>
+<script>
+  // ?late=1 : a link to the blocked sentinel appears 3 s after load (infinite scroll / comments).
+  // ?many=1 : 40 links to distinct clean hosts (a link-heavy page that must stay unmarked).
+  var p = new URLSearchParams(location.search);
+  if (p.get('late') === '1') {
+    setTimeout(function () {
+      var li = document.createElement('li');
+      li.innerHTML = '<a id="late" href="http://scamshield-test-blocked.example/late">inserted later</a>';
+      document.getElementById('feed').appendChild(li);
+    }, 3000);
+  }
+  if (p.get('many') === '1') {
+    for (var i = 0; i < 40; i++) {
+      var li = document.createElement('li');
+      li.innerHTML = '<a class="many" href="http://linkguard-many-' + i + '.example/p">many ' + i + '</a>';
+      document.getElementById('feed').appendChild(li);
+    }
+  }
+</script>

@@ -444,5 +444,11 @@
   "bannerHideHour": { "message": "隐藏一小时" },
   "mistakeSiteFine": { "message": "此网站没问题" },
   "continueUnsafe": { "message": "继续访问此网站(不安全)" },
-  "frameFormBlocked": { "message": "ScamShield 拦截了嵌入框架中的登录表单,因为它会把你的密码发送到另一个网站" }
+  "frameFormBlocked": { "message": "ScamShield 拦截了嵌入框架中的登录表单,因为它会把你的密码发送到另一个网站" },
+  "linkPillBlock": { "message": "已拦截的链接" },
+  "linkPillWarn": { "message": "有风险的链接" },
+  "linkConfirmBlock": { "message": "此链接指向 ScamShield 拦截名单中的网站" },
+  "linkConfirmWarn": { "message": "此链接看起来有风险" },
+  "linkGoBack": { "message": "返回" },
+  "linkOpenAnyway": { "message": "仍然打开" }
 }
