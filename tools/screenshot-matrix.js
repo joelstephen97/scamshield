@@ -5,7 +5,9 @@
  *   npm run screenshots:matrix -- [--out DIR] [--only a,b] [--widths 375,1440] [--langs en,ar]
  *                                 [--schemes light,dark] [--no-touch] [--headless]
  *
- * Output: <out>/screenshots/<surface>/<w>-<scheme>-<lang>[-touch].png + <out>/index.html.
+ * Touch shots are taken twice: -touch-nometa (the fixture page has no <meta viewport>, so the phone gets a ~980px layout
+ * viewport zoomed out, like most phishing kits) and -touch-meta (the same page served with one; server.js ?viewport=1).
+ * Output: <out>/screenshots/<surface>/<w>-<scheme>-<lang>[-touch-nometa|-touch-meta].png + <out>/index.html.
  * Default <out> is a fresh folder under the OS temp dir, never the repo. Fixtures only, no live sites.
  * --only matches a surface name or its prefix ("banner" = banner-warn + banner-danger). */
 const { chromium } = require('@playwright/test');
@@ -101,6 +103,10 @@ async function capture(ctx, sw, id, name, v, outFile) {
     await sw.evaluate(() => chrome.storage.local.remove(['quietSites', 'firstSeen']));
     // Reduced motion: the entrance animation and the toast progress bar would otherwise blur the shot.
     await page.emulateMedia({ colorScheme: v.scheme, reducedMotion: 'reduce' });
+    if (v.meta) { // serve every fixture page with <meta name="viewport"> (tests/e2e/server.js ?viewport=1)
+      const go = page.goto.bind(page);
+      page.goto = (url, o) => go(/^https?:/.test(url) ? url + (url.includes('?') ? '&' : '?') + 'viewport=1' : url, o);
+    }
     await page.setViewportSize({ width: v.w, height: v.h });
     if (PAGE_SURFACES[name]) await PAGE_SURFACES[name](ctx, page);
     else if (name === 'popup' || name === 'popup-natural') {
@@ -168,11 +174,11 @@ function contactSheet(outDir, shots) {
         for (const scheme of args.schemes) for (const name of names) {
           // The popup's natural 380px width is width-independent: shoot it once per scheme/lang (not per --widths).
           const ws = name === 'popup-natural' ? [380] : widths;
-          for (const w of ws) {
+          for (const w of ws) for (const meta of (touch ? [false, true] : [false])) {
             const h = name === 'popup-natural' ? 600 : (w < 600 ? 812 : 900);
-            const file = `${w}-${scheme}-${lang}${touch ? '-touch' : ''}.png`;
+            const file = `${w}-${scheme}-${lang}${touch ? (meta ? '-touch-meta' : '-touch-nometa') : ''}.png`;
             const rel = `screenshots/${name}/${file}`;
-            try { await capture(ctx, sw, id, name, { w, h, scheme }, path.join(outDir, rel)); shots.push({ surface: name, rel, label: `${name} ${file}` }); console.log('  ok  ', rel); }
+            try { await capture(ctx, sw, id, name, { w, h, scheme, meta }, path.join(outDir, rel)); shots.push({ surface: name, rel, label: `${name} ${file}` }); console.log('  ok  ', rel); }
             catch (e) { failed++; console.log('  FAIL', rel, '-', String(e.message).split('\n')[0]); }
           }
         }

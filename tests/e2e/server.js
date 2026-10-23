@@ -93,6 +93,13 @@ function handler(req, res) {
   if (!file) { res.writeHead(403); res.end('no'); return; }
   fs.readFile(file, (err, buf) => {
     if (err) { res.writeHead(404); res.end('nf'); return; }
+    // (0.15.0, Task 14b) ?viewport=1 serves the same fixture with <meta name="viewport"> prepended, so a spec or the
+    // screenshot matrix can compare a page with and without it. Every fixture is served without one by default.
+    if (/[?&]viewport=1/.test(req.url) && path.extname(file).toLowerCase() === '.html') {
+      // after the doctype, never before it (a leading node would push the page into quirks mode)
+      const meta = '<meta name="viewport" content="width=device-width, initial-scale=1">', html = buf.toString('utf8');
+      buf = Buffer.from(/^\s*<!doctype[^>]*>/i.test(html) ? html.replace(/^(\s*<!doctype[^>]*>)/i, '$1' + meta) : meta + html);
+    }
     res.writeHead(200, { 'content-type': contentTypeFor(file) }); res.end(buf);
   });
 }

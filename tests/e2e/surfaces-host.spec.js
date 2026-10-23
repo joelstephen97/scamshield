@@ -234,3 +234,76 @@ test('banner: dark theme - white text on the darker solid red; primary reads dan
   expect(c.pbg).toBe('rgb(255, 255, 255)'); expect(c.pcolor).toBe('rgb(185, 28, 28)');
   await page.close();
 });
+
+// ---------------------------------------------------------------------------------------------
+// (0.15.0, Task 14b) Zoomed-out touch pages. A phone page with no <meta viewport> gets a ~980px layout viewport shown
+// zoomed out; the surfaces must still render at device size. Own persistent context: isMobile + hasTouch (Chromium
+// accepts isMobile on a persistent context; the screenshot matrix launches the same way).
+const { chromium } = require('@playwright/test');
+const path = require('path');
+const { HOST_RULES } = require('../../tools/lib/ext-launch');
+const EXT = process.env.SCAMSHIELD_EXT_PATH ? path.resolve(process.env.SCAMSHIELD_EXT_PATH) : path.resolve(__dirname, '../..');
+const MOBILE = { w: 375, h: 812 };
+
+async function mobileContext() {
+  const ctx = await chromium.launchPersistentContext('', {
+    headless: false, isMobile: true, hasTouch: true, deviceScaleFactor: 2, viewport: { width: MOBILE.w, height: MOBILE.h },
+    args: ['--headless=new', `--disable-extensions-except=${EXT}`, `--load-extension=${EXT}`, '--no-first-run', '--disable-gpu', '--disable-dev-shm-usage', '--ignore-certificate-errors', '--host-resolver-rules=' + HOST_RULES]
+  });
+  for (let i = 0; i < 30 && !ctx.serviceWorkers()[0]; i++) await new Promise((r) => setTimeout(r, 100));
+  for (let i = 0; i < 50; i++) { const ob = ctx.pages().find((p) => p.url().includes('/onboarding.html')); if (ob) { await ob.close().catch(() => {}); break; } await new Promise((r) => setTimeout(r, 100)); }
+  return ctx;
+}
+// Everything measured in DEVICE CSS px: layout px x visualViewport.scale, relative to the visual viewport's origin.
+const deviceGeo = (page) => page.evaluate((sel) => {
+  const vv = window.visualViewport, root = document.querySelector(sel).shadowRoot;
+  const dev = (el) => { const r = el.getBoundingClientRect(); return { w: r.width * vv.scale, h: r.height * vv.scale, bottom: r.bottom * vv.scale, left: r.left * vv.scale, right: r.right * vv.scale }; };
+  return {
+    scale: vv.scale, innerWidth, deviceWidth: vv.width * vv.scale, deviceHeight: vv.height * vv.scale,
+    compact: document.querySelector(sel).hasAttribute('data-compact'),
+    card: dev(root.querySelector('.scamshield-banner')),
+    leave: dev(root.querySelector('.ss-leave')),
+    btns: Array.from(root.querySelectorAll('.ss-acts > button')).map((b) => dev(b).h)
+  };
+}, BHOST);
+
+for (const meta of [false, true]) {
+  test(`banner on a touch phone, page ${meta ? 'WITH' : 'WITHOUT'} <meta viewport>: ${meta ? 'no data-compact, ordinary bottom sheet' : 'data-compact, bottom sheet at device size'}`, async () => {
+    const ctx = await mobileContext();
+    try {
+      const page = await ctx.newPage();
+      await page.goto(BANNER + (meta ? '?viewport=1' : ''));
+      await expect(page.locator('.scamshield-banner')).toBeVisible({ timeout: 8000 });
+      await page.waitForTimeout(600);
+      const g = await deviceGeo(page);
+      expect(g.innerWidth > 900).toBe(!meta); // sanity: the no-meta page really is the 980px layout viewport
+      expect(g.compact).toBe(!meta);
+      expect(g.card.w).toBeGreaterThanOrEqual(g.deviceWidth * 0.9);
+      expect(Math.abs(g.card.bottom - g.deviceHeight)).toBeLessThanOrEqual(4); // bottom edge on the visual viewport's bottom
+      expect(g.leave.h).toBeGreaterThanOrEqual(43.5); // the Leave button is >= 44 device px tall
+      for (const h of g.btns) expect(h).toBeGreaterThanOrEqual(43.5);
+      // a real tap on Leave lands on the button (the host box must not eat or misplace input)
+      const box = await page.locator('.scamshield-banner .ss-leave').boundingBox();
+      expect(box.width).toBeGreaterThan(0);
+    } finally { await ctx.close(); }
+  });
+}
+
+test('banner on a no-meta touch phone follows the visual viewport when the user pinch-zooms', async () => {
+  const ctx = await mobileContext();
+  try {
+    const page = await ctx.newPage();
+    await page.goto(BANNER);
+    await expect(page.locator('.scamshield-banner')).toBeVisible({ timeout: 8000 });
+    await page.waitForTimeout(600);
+    const cdp = await ctx.newCDPSession(page);
+    await cdp.send('Emulation.setPageScaleFactor', { pageScaleFactor: 2.5 });
+    await page.waitForTimeout(500);
+    const g = await deviceGeo(page);
+    expect(g.compact).toBe(true);
+    expect(g.scale).toBeGreaterThan(1.5);
+    expect(g.card.w).toBeGreaterThanOrEqual(g.deviceWidth * 0.9);
+    expect(Math.abs(g.card.bottom - g.deviceHeight)).toBeLessThanOrEqual(4);
+    expect(g.leave.h).toBeGreaterThanOrEqual(43.5);
+  } finally { await ctx.close(); }
+});

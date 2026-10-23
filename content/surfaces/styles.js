@@ -8,6 +8,15 @@
   const LIGHT = '--ss-surface:#fff;--ss-text:#15211B;--ss-muted:#5E6F67;--ss-hair:#DFE7E2;--ss-accent:#0B6E4F;--ss-danger:#B42318;--ss-warn:#9A5B00;--ss-warn-bg:#FFF1D6;--ss-radius:10px;--ss-chip:6px;--ss-danger-bg:#FDE9E7;--ss-accent-soft:#E3F1EA;--ss-safe:#1B7F3B;--ss-safe-bg:#E5F4EA;--ss-ground:#F5F8F6;--ss-unknown-bg:#EEF1EF;--ss-on-accent:#fff;--ss-danger-solid:#B42318;';
   const DARK = '--ss-surface:#171F1B;--ss-text:#E7EEEA;--ss-muted:#9AAAA2;--ss-hair:#27342D;--ss-accent:#3FB489;--ss-danger:#F87171;--ss-warn:#FBBF24;--ss-warn-bg:#2A2110;--ss-danger-bg:#2D1513;--ss-accent-soft:#16302A;--ss-safe:#4ADE80;--ss-safe-bg:#10281A;--ss-ground:#0F1513;--ss-unknown-bg:#1F2623;--ss-on-accent:#06130E;--ss-danger-solid:#B91C1C;';
 
+  // Phone layout, emitted under BOTH the narrow-viewport media query and :host([data-compact]) (0.15.0, Task 14b).
+  // A page with no <meta viewport> gets a ~980px layout viewport on a phone, so the media query never matches;
+  // primitives.js then sets data-compact and zooms the card back to device size, and the same rule list applies.
+  // rules: [[selector, declarations], ...]; selectors may be comma lists (no commas inside parentheses).
+  const COMPACT = ':host([data-compact]) ';
+  const phone = (rules) =>
+    '@media (max-width:599px){\n' + rules.map((r) => r[0] + '{' + r[1] + '}').join('\n') + '\n}\n' +
+    rules.map((r) => r[0].split(',').map((x) => COMPACT + x.trim()).join(',') + '{' + r[1] + '}').join('\n') + '\n';
+
   // Shared by every surface: tokens (light default, dark by attribute or by OS when auto), box model,
   // and the tile / button / comparison primitives that actions.js builds.
   const base =
@@ -64,16 +73,20 @@
     '.scamshield-banner .ss-menu[hidden]{display:none}\n' +
     '.scamshield-banner .ss-menu .ss-btn{text-align:start;border-color:transparent;background:transparent;color:var(--ss-text);justify-content:flex-start;border-radius:6px;white-space:normal}\n' +
     '.scamshield-banner .ss-menu .ss-btn:hover,.scamshield-banner .ss-menu .ss-btn:focus-visible{background:var(--ss-accent-soft);color:var(--ss-accent);outline-offset:-2px}\n' +
-    '@media (max-width:599px){\n' +
-    '.scamshield-banner{inset-block-start:auto;inset-block-end:0;inset-inline:0;margin-inline:0;inline-size:auto;flex-wrap:wrap;border-start-start-radius:var(--ss-radius);border-start-end-radius:var(--ss-radius);border-end-start-radius:0;border-end-end-radius:0;padding-block-end:max(12px,env(safe-area-inset-bottom,0px));padding-inline:max(14px,env(safe-area-inset-left,0px)) max(14px,env(safe-area-inset-right,0px));max-block-size:calc(100dvh - 24px);overflow:auto}\n' +
-    '.scamshield-banner[dir=rtl]{padding-inline:max(14px,env(safe-area-inset-right,0px)) max(14px,env(safe-area-inset-left,0px))}\n' +
-    '.scamshield-banner .ss-acts{flex:1 1 100%;inline-size:100%;align-self:stretch;justify-content:flex-start}\n' +
-    '.scamshield-banner .ss-acts>.ss-btn{flex:1 1 auto;min-block-size:44px;min-inline-size:44px}\n' +
-    '.scamshield-banner .ss-acts>.ss-more,.scamshield-banner .ss-acts>.ss-x{flex:0 0 auto}\n' +
-    '.scamshield-banner .ss-x .ss-x-label{display:none}.scamshield-banner .ss-btn.ss-x{inline-size:44px;padding:0}\n' +
-    '.scamshield-banner .ss-menu{position:static;flex:1 1 100%;inline-size:100%;max-inline-size:none;margin-block-start:4px;box-shadow:none}\n' +
-    '.scamshield-banner .ss-menu .ss-btn{min-block-size:44px}\n' +
-    '}\n';
+    phone([
+    [".scamshield-banner", "inset-block-start:auto;inset-block-end:0;inset-inline:0;margin-inline:0;inline-size:auto;flex-wrap:wrap;border-start-start-radius:var(--ss-radius);border-start-end-radius:var(--ss-radius);border-end-start-radius:0;border-end-end-radius:0;padding-block-end:max(12px,env(safe-area-inset-bottom,0px));padding-inline:max(14px,env(safe-area-inset-left,0px)) max(14px,env(safe-area-inset-right,0px));max-block-size:calc(100dvh - 24px);overflow:auto"],
+    [".scamshield-banner[dir=rtl]", "padding-inline:max(14px,env(safe-area-inset-right,0px)) max(14px,env(safe-area-inset-left,0px))"],
+    [".scamshield-banner .ss-acts", "flex:1 1 100%;inline-size:100%;align-self:stretch;justify-content:flex-start"],
+    [".scamshield-banner .ss-acts>.ss-btn", "flex:1 1 auto;min-block-size:44px;min-inline-size:44px"],
+    [".scamshield-banner .ss-acts>.ss-more,.scamshield-banner .ss-acts>.ss-x", "flex:0 0 auto"],
+    [".scamshield-banner .ss-x .ss-x-label", "display:none"],
+    [".scamshield-banner .ss-btn.ss-x", "inline-size:44px;padding:0"],
+    [".scamshield-banner .ss-menu", "position:static;flex:1 1 100%;inline-size:100%;max-inline-size:none;margin-block-start:4px;box-shadow:none"],
+    [".scamshield-banner .ss-menu .ss-btn", "min-block-size:44px"]
+    ]) +
+    // data-compact only: the card is zoomed back to device size (--ss-z) and fills the host, which primitives.js pins to the
+    // visual viewport (so the sheet sits at the bottom of what the user sees). 100dvh would be the 980px layout viewport.
+    ':host([data-compact]) .scamshield-banner{zoom:var(--ss-z);pointer-events:auto;max-block-size:calc(100% - 24px)}\n';
 
   // Interstitial + dialogs (0.15.0, Task 13): a native <dialog> opened with showModal() (top layer, the rest of the page
   // inert). The <dialog> is the full-viewport frame; its .ss-card is centred in it and scrolls on its own, so a long
@@ -119,22 +132,28 @@
     ".scamshield-interstitial .ss-foot{margin-block-start:22px;font-size:.92em;color:var(--ss-muted)}\n" +
     "@media (min-width:1920px){.scamshield-overlay .ss-card{inline-size:min(680px,100vw - 32px);padding:28px}.scamshield-interstitial .ss-card{padding:32px}}\n" +
     "@media (pointer: coarse){.scamshield-interstitial .ss-trust-link,.scamshield-interstitial .ss-dt .ss-report,.scamshield-interstitial .ss-details summary{min-block-size:44px;min-inline-size:44px}.scamshield-interstitial .ss-dt .ss-danger-ghost{min-block-size:44px}}\n" +
-    "@media (max-width:599px){\n" +
-    ".scamshield-overlay{padding:12px}\n" +
-    ".scamshield-overlay .ss-card{padding:16px}.scamshield-interstitial .ss-card{padding:16px 12px}\n" +
-    ".scamshield-overlay .ss-actions{flex-direction:column;align-items:stretch}\n" +
-    ".scamshield-overlay .ss-actions .ss-btn{inline-size:100%;min-block-size:44px;margin:0}\n" +
-    ".scamshield-interstitial .ss-dt{flex-direction:column;align-items:stretch;gap:8px}\n" +
-    ".scamshield-interstitial .ss-dt .ss-danger-ghost{inline-size:100%;min-block-size:44px;white-space:normal}\n" +
-    ".scamshield-interstitial .ss-trust-link,.scamshield-interstitial .ss-dt .ss-report{min-block-size:44px;text-align:start}\n" +
-    ".scamshield-interstitial .ss-details summary{min-block-size:44px}\n" +
-    "}\n";
+    phone([
+    [".scamshield-overlay", "padding:12px"],
+    [".scamshield-overlay .ss-card", "padding:16px"],
+    [".scamshield-interstitial .ss-card", "padding:16px 12px"],
+    [".scamshield-overlay .ss-actions", "flex-direction:column;align-items:stretch"],
+    [".scamshield-overlay .ss-actions .ss-btn", "inline-size:100%;min-block-size:44px;margin:0"],
+    [".scamshield-interstitial .ss-dt", "flex-direction:column;align-items:stretch;gap:8px"],
+    [".scamshield-interstitial .ss-dt .ss-danger-ghost", "inline-size:100%;min-block-size:44px;white-space:normal"],
+    [".scamshield-interstitial .ss-trust-link,.scamshield-interstitial .ss-dt .ss-report", "min-block-size:44px;text-align:start"],
+    [".scamshield-interstitial .ss-details summary", "min-block-size:44px"]
+    ]) +
+    // data-compact only: the frame stays the full layout viewport (so the opaque interstitial covers everything); the card is
+    // zoomed to device size, sized from the visual viewport (--ss-vw/--ss-vh, unitless px) and moved onto its centre (--ss-dx/dy).
+    ":host([data-compact]) .scamshield-overlay{pointer-events:auto;padding:0}\n" +
+    ":host([data-compact]) .scamshield-overlay .ss-card{zoom:var(--ss-z);inline-size:calc(var(--ss-vw) * 1px / var(--ss-z) - 24px);max-block-size:calc(var(--ss-vh) * 1px / var(--ss-z) - 24px);transform:translate(calc(var(--ss-dx) * 1px / var(--ss-z)),calc(var(--ss-dy) * 1px / var(--ss-z)))}\n";
 
   // Toast family + trust acknowledgement. The ack carries both root classes (it is a toast-shaped bar).
   const toast =
     '.scamshield-toast,.scamshield-ack{position:fixed;inset-block-end:calc(12px + env(safe-area-inset-bottom,0px));inset-inline-end:calc(12px + env(safe-area-inset-right,0px));z-index:2147483647;inline-size:min(380px,calc(100vw - 24px));background:var(--ss-surface);color:var(--ss-text);font:13px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;border:1px solid var(--ss-hair);border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.22),0 1px 2px rgba(0,0,0,.08);padding:12px 12px 10px;display:grid;grid-template-columns:36px 1fr;gap:4px 12px;align-items:start}\n' +
     '.scamshield-ack{grid-template-columns:36px 1fr auto;align-items:center}\n' +
-    '@media (max-width:599px){.scamshield-toast,.scamshield-ack{inset-inline:calc(12px + env(safe-area-inset-left,0px)) calc(12px + env(safe-area-inset-right,0px));inline-size:auto}}\n' +
+    phone([[".scamshield-toast,.scamshield-ack", "inset-inline:calc(12px + env(safe-area-inset-left,0px)) calc(12px + env(safe-area-inset-right,0px));inline-size:auto"]]) +
+    ':host([data-compact]) .scamshield-toast,:host([data-compact]) .scamshield-ack{zoom:var(--ss-z);pointer-events:auto}\n' +
     '@media (prefers-reduced-motion: no-preference){.scamshield-toast,.scamshield-ack{animation:ss-in .18s ease-out}@keyframes ss-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}}\n' +
     '.scamshield-toast .ss-title{font-weight:600;line-height:1.3;padding-block-start:2px}\n' +
     '.scamshield-toast .ss-body{grid-column:2;color:var(--ss-muted);font-size:13px;line-height:1.45}\n' +
