@@ -451,5 +451,6 @@
   "linkConfirmWarn": { "message": "يبدو هذا الرابط خطيراً" },
   "linkGoBack": { "message": "رجوع" },
   "linkOpenAnyway": { "message": "فتح على أي حال" },
-  "linkBlockedToast": { "message": "رابط محظور — أوقفه ScamShield" }
+  "linkBlockedToast": { "message": "رابط محظور — أوقفه ScamShield" },
+  "popupBlockedToast": { "message": "منع ScamShield هذه الصفحة من فتح موقع محظور" }
 }

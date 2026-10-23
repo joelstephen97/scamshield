@@ -451,5 +451,6 @@
   "linkConfirmWarn": { "message": "Liên kết này trông có rủi ro" },
   "linkGoBack": { "message": "Quay lại" },
   "linkOpenAnyway": { "message": "Vẫn mở" },
-  "linkBlockedToast": { "message": "Liên kết bị chặn — ScamShield đã ngăn lại" }
+  "linkBlockedToast": { "message": "Liên kết bị chặn — ScamShield đã ngăn lại" },
+  "popupBlockedToast": { "message": "ScamShield đã chặn trang này mở một trang web bị chặn" }
 }

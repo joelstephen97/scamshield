@@ -451,5 +451,6 @@
   "linkConfirmWarn": { "message": "Questo link sembra rischioso" },
   "linkGoBack": { "message": "Indietro" },
   "linkOpenAnyway": { "message": "Apri comunque" },
-  "linkBlockedToast": { "message": "Link bloccato — ScamShield lo ha fermato" }
+  "linkBlockedToast": { "message": "Link bloccato — ScamShield lo ha fermato" },
+  "popupBlockedToast": { "message": "ScamShield ha impedito a questa pagina di aprire un sito bloccato" }
 }

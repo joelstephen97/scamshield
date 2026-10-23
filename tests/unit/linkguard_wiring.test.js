@@ -23,8 +23,8 @@ test('brand_match.js is loaded by every service-worker loader (checkFeedBatchHos
   assert.ok(/'\.\.\/engine\/brand_match\.js'/.test(read('background/service_worker.js')));
 });
 
-test('surface log accepts the three link kinds', () => {
-  for (const kind of ['link-block', 'link-warn', 'link-confirm']) {
+test('surface log accepts the link kinds and popup-block', () => {
+  for (const kind of ['link-block', 'link-warn', 'link-confirm', 'popup-block']) {
     assert.strictEqual(SL.appendRow([], { kind, host: 'example.com' }, 1).length, 1, kind);
   }
 });

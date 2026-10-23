@@ -348,6 +348,26 @@
     if (privacySeen.has(key)) return; privacySeen.add(key);
     send('privacyFinding', { finding: { kind: 'fingerprint', host, detail: (d.surfaces || []).join(',') } });
   });
+  // Popup / redirect interception (0.15.0, Task 16). The MAIN-world guard asks, synchronously, whether a
+  // destination may open: only a host the link guard already cached as 'block' is vetoed (preventDefault);
+  // an unknown host is allowed and looked up, so the next attempt is refused. Detail is a plain string.
+  let popupToastAt = 0;
+  function popupBlocked() {
+    if (Date.now() - popupToastAt < 3000) return; // a page looping window.open must not stack toasts
+    popupToastAt = Date.now();
+    if (SS && SS.actions && SS.actions.popupBlockedToast && SS.actions.popupBlockedToast()) surface('popup-block');
+  }
+  window.addEventListener('scamshield:open', (e) => {
+    try {
+      const R = SS && SS.linkRules, G = SS && SS.linkGuard;
+      if (!R || !G || typeof e.detail !== 'string') return;
+      const d = R.destination(e.detail, location.href, location.hostname);
+      if (d && d.host && G.levelOf(d.host) === 'block') e.preventDefault();
+    } catch (_) { /* allow */ }
+  });
+  // Fired by the MAIN guard after it refused (a blocked destination always; popunder / fullscreen / notification
+  // only reach here on a warn/stop page, because the guard only acts then).
+  window.addEventListener('scamshield:popup-blocked', (e) => { if (e.detail === 'blocked-open' || e.detail === 'popunder') popupBlocked(); }); // fullscreen / notification refusals stay silent
   window.addEventListener('scamshield:notify-request', async () => {
     const settings = await send('getSettings');
     if (!settings || !settings.enabled || settings.notificationGuard === false) return;
@@ -1312,6 +1332,8 @@
     const tier = SS.surfaceTier(verdict, { popular: feedPopular, strictMode: settings.strictMode === true, isTop: IS_TOP, host: location.hostname });
     try { window.__ssLastVerdict = verdict; window.__ssLastTier = tier; } catch (_) {}
     pageTier = tier;
+    // Tell the MAIN-world guard (popunder / fullscreen / notification-prompt suppression is warn/stop only).
+    try { window.dispatchEvent(new CustomEvent('scamshield:tier', { detail: pageWarned() ? tier : '' })); } catch (_) {}
     let report = null;
     try {
       report = {

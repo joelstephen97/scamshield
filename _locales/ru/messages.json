@@ -451,5 +451,6 @@
   "linkConfirmWarn": { "message": "Эта ссылка выглядит опасной" },
   "linkGoBack": { "message": "Назад" },
   "linkOpenAnyway": { "message": "Всё равно открыть" },
-  "linkBlockedToast": { "message": "Заблокированная ссылка — ScamShield остановил переход" }
+  "linkBlockedToast": { "message": "Заблокированная ссылка — ScamShield остановил переход" },
+  "popupBlockedToast": { "message": "ScamShield не дал этой странице открыть заблокированный сайт" }
 }

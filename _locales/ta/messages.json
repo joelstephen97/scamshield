@@ -451,5 +451,6 @@
   "linkConfirmWarn": { "message": "இந்த இணைப்பு ஆபத்தாகத் தெரிகிறது" },
   "linkGoBack": { "message": "திரும்பிச் செல்" },
   "linkOpenAnyway": { "message": "இருந்தும் திற" },
-  "linkBlockedToast": { "message": "தடுக்கப்பட்ட இணைப்பு — ScamShield நிறுத்தியது" }
+  "linkBlockedToast": { "message": "தடுக்கப்பட்ட இணைப்பு — ScamShield நிறுத்தியது" },
+  "popupBlockedToast": { "message": "தடுக்கப்பட்ட தளத்தை இந்தப் பக்கம் திறப்பதை ScamShield நிறுத்தியது" }
 }

@@ -451,5 +451,6 @@
   "linkConfirmWarn": { "message": "ఈ లింక్ ప్రమాదకరంగా కనిపిస్తోంది" },
   "linkGoBack": { "message": "వెనక్కి వెళ్లండి" },
   "linkOpenAnyway": { "message": "అయినా తెరవండి" },
-  "linkBlockedToast": { "message": "బ్లాక్ చేసిన లింక్ — ScamShield ఆపింది" }
+  "linkBlockedToast": { "message": "బ్లాక్ చేసిన లింక్ — ScamShield ఆపింది" },
+  "popupBlockedToast": { "message": "ScamShield ఈ పేజీ నిరోధించిన సైట్‌ను తెరవకుండా ఆపింది" }
 }

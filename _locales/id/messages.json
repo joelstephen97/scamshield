@@ -451,5 +451,6 @@
   "linkConfirmWarn": { "message": "Tautan ini tampak berisiko" },
   "linkGoBack": { "message": "Kembali" },
   "linkOpenAnyway": { "message": "Tetap buka" },
-  "linkBlockedToast": { "message": "Tautan diblokir — ScamShield menghentikannya" }
+  "linkBlockedToast": { "message": "Tautan diblokir — ScamShield menghentikannya" },
+  "popupBlockedToast": { "message": "ScamShield mencegah halaman ini membuka situs yang diblokir" }
 }

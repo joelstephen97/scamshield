@@ -10,6 +10,7 @@
   const SS = root.ScamShield = root.ScamShield || {};
   const HOSTS_PER_MINUTE = 200, BATCH = 50, ROUND_ANCHORS = 400, QUEUE_ROOTS = 500, QUEUE_ANCHORS = 4000;
   let started = false;
+  let live = null; // set by start(): the synchronous cache lookup popup interception uses
 
   // deps: { send(type, extra), surface(kind, once), t(key, subs, fallback), isTrusted(host) }
   function start(deps) {
@@ -143,6 +144,22 @@
     enqueue(document.documentElement);
     schedule();
 
+    // Synchronous verdict for a host (0.15.0, Task 16): 'block' | 'warn' | null. An unknown host answers null AND
+    // queues one lookup (through the same budget and batch rules), so the next attempt is decided.
+    live = {
+      levelOf(host) {
+        if (typeof host !== 'string' || !host) return null;
+        if (cache.has(host)) return cache.get(host);
+        if (!inflight.has(host)) {
+          try {
+            const hosts = R.planBatch([host], cache, budget, Date.now(), 1);
+            if (hosts.length) lookup(hosts);
+          } catch (_) { /* best effort */ }
+        }
+        return null;
+      }
+    };
+
     // ---- click interception --------------------------------------------------------------------------
     function anchorFor(e) {
       let path = [];
@@ -192,5 +209,5 @@
     return true;
   }
 
-  SS.linkGuard = { start };
+  SS.linkGuard = { start, levelOf: (host) => (live ? live.levelOf(host) : null) };
 })(typeof globalThis !== 'undefined' ? globalThis : self);

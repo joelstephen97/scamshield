@@ -451,5 +451,6 @@
   "linkConfirmWarn": { "message": "Bu bağlantı riskli görünüyor" },
   "linkGoBack": { "message": "Geri dön" },
   "linkOpenAnyway": { "message": "Yine de aç" },
-  "linkBlockedToast": { "message": "Engellenen bağlantı — ScamShield durdurdu" }
+  "linkBlockedToast": { "message": "Engellenen bağlantı — ScamShield durdurdu" },
+  "popupBlockedToast": { "message": "ScamShield bu sayfanın engellenmiş bir siteyi açmasını durdurdu" }
 }

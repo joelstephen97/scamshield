@@ -825,6 +825,12 @@
     toast({ kind: 'danger', role: 'alert', title: t('linkBlockedToast', null, 'Blocked link \u2014 ScamShield stopped it'), timeoutMs: 6000 });
     return true;
   }
+  // (0.15.0, Task 16) A page tried to open a blocked site (or, on a warned page, a popunder / forced fullscreen).
+  function popupBlockedToast() {
+    if (tinyFrame()) return false;
+    toast({ kind: 'danger', role: 'alert', title: t('popupBlockedToast', null, 'ScamShield stopped this page from opening a blocked site'), timeoutMs: 6000 });
+    return true;
+  }
   function linkConfirm(o) {
     const S = surfaces();
     if (!linkConfirmAvailable()) return false;
@@ -946,5 +952,5 @@
   }
 
   root.ScamShield = root.ScamShield || {};
-  root.ScamShield.actions = { showBanner, guardForms, hideScamBlocks, clearAll, walletConfirmOverlay, clipboardToast, techScamEscapeOverlay, supportToast, dangerInterstitial, armDelayed, privacyToast, crossOriginCredToast, ackSurface, setTheme, frameFormBlockedToast, linkConfirm, linkConfirmAvailable, linkBlockedToast };
+  root.ScamShield.actions = { showBanner, guardForms, hideScamBlocks, clearAll, walletConfirmOverlay, clipboardToast, techScamEscapeOverlay, supportToast, dangerInterstitial, armDelayed, privacyToast, crossOriginCredToast, ackSurface, setTheme, frameFormBlockedToast, linkConfirm, linkConfirmAvailable, linkBlockedToast, popupBlockedToast };
 })(typeof globalThis !== 'undefined' ? globalThis : self);

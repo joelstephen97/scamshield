@@ -451,5 +451,6 @@
   "linkConfirmWarn": { "message": "Este enlace parece arriesgado" },
   "linkGoBack": { "message": "Volver" },
   "linkOpenAnyway": { "message": "Abrir de todos modos" },
-  "linkBlockedToast": { "message": "Enlace bloqueado — ScamShield lo detuvo" }
+  "linkBlockedToast": { "message": "Enlace bloqueado — ScamShield lo detuvo" },
+  "popupBlockedToast": { "message": "ScamShield impidió que esta página abriera un sitio bloqueado" }
 }

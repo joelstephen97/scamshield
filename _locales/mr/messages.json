@@ -451,5 +451,6 @@
   "linkConfirmWarn": { "message": "ही लिंक धोकादायक वाटते" },
   "linkGoBack": { "message": "मागे जा" },
   "linkOpenAnyway": { "message": "तरीही उघडा" },
-  "linkBlockedToast": { "message": "ब्लॉक केलेली लिंक — ScamShield ने थांबवली" }
+  "linkBlockedToast": { "message": "ब्लॉक केलेली लिंक — ScamShield ने थांबवली" },
+  "popupBlockedToast": { "message": "ScamShield ने या पेजला ब्लॉक केलेली साइट उघडण्यापासून रोखले" }
 }
