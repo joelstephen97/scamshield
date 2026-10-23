@@ -450,5 +450,6 @@
   "linkConfirmBlock": { "message": "このリンクは ScamShield のブロックリストに載っているサイトに移動します" },
   "linkConfirmWarn": { "message": "このリンクは危険そうです" },
   "linkGoBack": { "message": "戻る" },
-  "linkOpenAnyway": { "message": "それでも開く" }
+  "linkOpenAnyway": { "message": "それでも開く" },
+  "linkBlockedToast": { "message": "ブロックされたリンク — ScamShield が停止しました" }
 }

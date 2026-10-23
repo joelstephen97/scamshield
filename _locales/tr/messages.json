@@ -450,5 +450,6 @@
   "linkConfirmBlock": { "message": "Bu bağlantı ScamShield engelleme listesindeki bir siteye gidiyor" },
   "linkConfirmWarn": { "message": "Bu bağlantı riskli görünüyor" },
   "linkGoBack": { "message": "Geri dön" },
-  "linkOpenAnyway": { "message": "Yine de aç" }
+  "linkOpenAnyway": { "message": "Yine de aç" },
+  "linkBlockedToast": { "message": "Engellenen bağlantı — ScamShield durdurdu" }
 }

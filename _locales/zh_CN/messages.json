@@ -450,5 +450,6 @@
   "linkConfirmBlock": { "message": "此链接指向 ScamShield 拦截名单中的网站" },
   "linkConfirmWarn": { "message": "此链接看起来有风险" },
   "linkGoBack": { "message": "返回" },
-  "linkOpenAnyway": { "message": "仍然打开" }
+  "linkOpenAnyway": { "message": "仍然打开" },
+  "linkBlockedToast": { "message": "已拦截的链接 — ScamShield 已阻止" }
 }

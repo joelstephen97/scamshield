@@ -450,5 +450,6 @@
   "linkConfirmBlock": { "message": "Ce lien mène à un site de la liste de blocage de ScamShield" },
   "linkConfirmWarn": { "message": "Ce lien semble risqué" },
   "linkGoBack": { "message": "Retour" },
-  "linkOpenAnyway": { "message": "Ouvrir quand même" }
+  "linkOpenAnyway": { "message": "Ouvrir quand même" },
+  "linkBlockedToast": { "message": "Lien bloqué — ScamShield l’a arrêté" }
 }

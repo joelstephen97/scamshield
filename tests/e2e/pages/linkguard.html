@@ -1,4 +1,5 @@
 <!doctype html><meta charset="utf-8"><title>Link guard fixture</title>
+<script>if (/[?&]base=1/.test(location.search)) document.write('<base href="http://scamshield-test-blocked.example/">');</script>
 <style>body{font:16px system-ui;margin:24px}li{margin:6px 0}</style>
 <h1>Feed</h1>
 <ul id="feed">
@@ -7,6 +8,8 @@
   <li><a id="popular" href="https://en.wikipedia.org/wiki/Scam">a popular host that the fixture feed also lists</a></li>
   <li><a id="wrapped" href="https://www.google.com/url?q=http%3A%2F%2Fscamshield-test-blocked.example%2Fwrapped&amp;sa=D">wrapped by a Google redirect</a></li>
   <li><a id="same" href="/clean.html">same site</a></li>
+  <li><a id="card" style="display:block;width:220px;height:60px" href="http://scamshield-test-blocked.example/card">an image card</a></li>
+  <li><a id="rel" href="relative-page">relative to the base</a></li>
   <li><a id="mail" href="mailto:someone@example.com">mail</a></li>
 </ul>
 <script>

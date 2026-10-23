@@ -25,3 +25,6 @@ a.scamshield-link-warn::after{background:#FFF1D6;color:#9A5B00;border:1px solid 
   a.scamshield-link-block::after{background:#3A1514;color:#FF8A80;border-color:#FF8A80}
   a.scamshield-link-warn::after{background:#2A2110;color:#FBBF24;border-color:#FBBF24}
 }
+/* Image-card anchors (display block/flex/grid): the pill is a corner badge, so nothing moves. */
+a.scamshield-link-card{position:relative}
+a.scamshield-link-card::after{position:absolute;inset-block-start:6px;inset-inline-end:6px;margin:0;z-index:1}

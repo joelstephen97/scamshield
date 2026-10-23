@@ -450,5 +450,6 @@
   "linkConfirmBlock": { "message": "ఈ లింక్ ScamShield బ్లాక్ జాబితాలోని సైట్‌కు వెళ్తుంది" },
   "linkConfirmWarn": { "message": "ఈ లింక్ ప్రమాదకరంగా కనిపిస్తోంది" },
   "linkGoBack": { "message": "వెనక్కి వెళ్లండి" },
-  "linkOpenAnyway": { "message": "అయినా తెరవండి" }
+  "linkOpenAnyway": { "message": "అయినా తెరవండి" },
+  "linkBlockedToast": { "message": "బ్లాక్ చేసిన లింక్ — ScamShield ఆపింది" }
 }

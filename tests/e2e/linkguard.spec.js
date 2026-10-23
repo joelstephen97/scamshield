@@ -126,7 +126,7 @@ test('a feed with 0 matches marks nothing on a link-heavy page (benign canary), 
   await installFeed(sw, [SENTINEL]);
   const page2 = await context.newPage();
   await page2.goto(PAGE + '?many=1');
-  await expect(page2.locator('[class*="scamshield-link-"]')).toHaveCount(1, { timeout: 7000 }); // only #wrapped
+  await expect(page2.locator('[class*="scamshield-link-"]')).toHaveCount(2, { timeout: 7000 }); // only #wrapped and #card
 });
 
 test('a blocked result on a search results page gets the link mark as well as the SERP dot', async ({ context }) => {
@@ -150,4 +150,40 @@ test('surface log records link-block once per page and link-confirm when the dia
   const kinds = () => sw.evaluate(async () => (((await chrome.storage.local.get('surfaceLog')).surfaceLog) || []).map((r) => r.kind));
   await expect.poll(kinds, { timeout: 5000 }).toContain('link-confirm'); // the log write is fire-and-forget
   expect((await kinds()).filter((k) => k === 'link-block').length).toBe(1);
+});
+
+test('the page swapping the href while the confirm is open cannot redirect "Open anyway" to another destination', async ({ context }) => {
+  const sw = context.serviceWorkers()[0];
+  await installFeed(sw, [SENTINEL]);
+  const page = await context.newPage();
+  await page.goto(PAGE);
+  await expect(page.locator('#wrapped')).toHaveClass(/scamshield-link-block/, { timeout: 7000 });
+  await page.locator('#wrapped').click();
+  await expect(confirmDialog(page)).toBeVisible();
+  await page.evaluate(() => { document.getElementById('wrapped').href = 'http://linkguard-swapped.example/evil'; });
+  await confirmDialog(page).getByRole('button', { name: 'Open anyway' }).click();
+  await expect(confirmDialog(page)).toHaveCount(0);
+  await page.waitForTimeout(1500);
+  expect(page.url()).toBe(PAGE); // nothing opened: neither the swapped URL nor the original
+  expect(context.pages().filter((p) => p.url().includes('linkguard-swapped')).length).toBe(0);
+});
+
+test('an image-card anchor (display:block) gets a corner badge, not a flow pill; an inline link keeps the flow pill', async ({ context }) => {
+  const sw = context.serviceWorkers()[0];
+  await installFeed(sw, [SENTINEL]);
+  const page = await context.newPage();
+  await page.goto(PAGE);
+  await expect(page.locator('#card')).toHaveClass(/scamshield-link-block/, { timeout: 7000 });
+  await expect(page.locator('#card')).toHaveClass(/scamshield-link-card/);
+  expect(await page.locator('#card').evaluate((a) => getComputedStyle(a, '::after').position)).toBe('absolute');
+  await expect(page.locator('#wrapped')).not.toHaveClass(/scamshield-link-card/);
+  expect(await page.locator('#wrapped').evaluate((a) => getComputedStyle(a, '::after').position)).toBe('static');
+});
+
+test('a relative link resolves through <base> (a.href), so it is looked up at its real host', async ({ context }) => {
+  const sw = context.serviceWorkers()[0];
+  await installFeed(sw, [SENTINEL]);
+  const page = await context.newPage();
+  await page.goto(PAGE + '?base=1');
+  await expect(page.locator('#rel')).toHaveClass(/scamshield-link-block/, { timeout: 7000 });
 });

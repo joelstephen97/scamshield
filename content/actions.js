@@ -817,9 +817,17 @@
   // trusted "Open anyway" (Escape, page removing the host, closing it) leaves the user where they were.
   // o: { level: 'block'|'warn', host, onOpen(), onShown() }. Returns false when it could not be shown (another
   // dialog is up, or a frame too small): the caller then lets the click through un-prompted only for warn.
+  function linkConfirmAvailable() { const S = surfaces(); return !(tinyFrame() || S.isMounted('dialog') || S.isMounted('interstitial')); }
+  // A blocked link stays blocked when the confirm cannot be shown; this says so. The toast host is a popover (top
+  // layer, opened after any dialog), so it shows over an open dialog too.
+  function linkBlockedToast() {
+    if (tinyFrame()) return false;
+    toast({ kind: 'danger', role: 'alert', title: t('linkBlockedToast', null, 'Blocked link \u2014 ScamShield stopped it'), timeoutMs: 6000 });
+    return true;
+  }
   function linkConfirm(o) {
     const S = surfaces();
-    if (tinyFrame() || S.isMounted('dialog') || S.isMounted('interstitial')) return false;
+    if (!linkConfirmAvailable()) return false;
     const block = o.level === 'block';
     const title = block
       ? t('linkConfirmBlock', null, "This link goes to a site on ScamShield's block list")
@@ -938,5 +946,5 @@
   }
 
   root.ScamShield = root.ScamShield || {};
-  root.ScamShield.actions = { showBanner, guardForms, hideScamBlocks, clearAll, walletConfirmOverlay, clipboardToast, techScamEscapeOverlay, supportToast, dangerInterstitial, armDelayed, privacyToast, crossOriginCredToast, ackSurface, setTheme, frameFormBlockedToast, linkConfirm };
+  root.ScamShield.actions = { showBanner, guardForms, hideScamBlocks, clearAll, walletConfirmOverlay, clipboardToast, techScamEscapeOverlay, supportToast, dangerInterstitial, armDelayed, privacyToast, crossOriginCredToast, ackSurface, setTheme, frameFormBlockedToast, linkConfirm, linkConfirmAvailable, linkBlockedToast };
 })(typeof globalThis !== 'undefined' ? globalThis : self);

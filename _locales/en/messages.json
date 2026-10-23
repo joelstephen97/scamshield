@@ -450,5 +450,6 @@
   "linkConfirmBlock": { "message": "This link goes to a site on ScamShield's block list" },
   "linkConfirmWarn": { "message": "This link looks risky" },
   "linkGoBack": { "message": "Go back" },
-  "linkOpenAnyway": { "message": "Open anyway" }
+  "linkOpenAnyway": { "message": "Open anyway" },
+  "linkBlockedToast": { "message": "Blocked link — ScamShield stopped it" }
 }

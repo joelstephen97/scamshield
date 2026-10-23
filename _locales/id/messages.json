@@ -450,5 +450,6 @@
   "linkConfirmBlock": { "message": "Tautan ini menuju situs dalam daftar blokir ScamShield" },
   "linkConfirmWarn": { "message": "Tautan ini tampak berisiko" },
   "linkGoBack": { "message": "Kembali" },
-  "linkOpenAnyway": { "message": "Tetap buka" }
+  "linkOpenAnyway": { "message": "Tetap buka" },
+  "linkBlockedToast": { "message": "Tautan diblokir — ScamShield menghentikannya" }
 }

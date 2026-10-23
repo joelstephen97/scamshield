@@ -43,7 +43,7 @@ test('relayToTop ignores the top frame; the top-frame listener shows the frame-f
 });
 
 test('every new locale key exists in all 20 locales with a non-English value', () => {
-  const keys = ['linkPillBlock', 'linkPillWarn', 'linkConfirmBlock', 'linkConfirmWarn', 'linkGoBack', 'linkOpenAnyway'];
+  const keys = ['linkPillBlock', 'linkPillWarn', 'linkConfirmBlock', 'linkConfirmWarn', 'linkGoBack', 'linkOpenAnyway', 'linkBlockedToast'];
   const en = JSON.parse(read('_locales/en/messages.json'));
   for (const loc of fs.readdirSync(path.join(root, '_locales'))) {
     const p = path.join('_locales', loc, 'messages.json');

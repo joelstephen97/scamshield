@@ -450,5 +450,6 @@
   "linkConfirmBlock": { "message": "இந்த இணைப்பு ScamShield தடுப்புப் பட்டியலில் உள்ள தளத்திற்குச் செல்கிறது" },
   "linkConfirmWarn": { "message": "இந்த இணைப்பு ஆபத்தாகத் தெரிகிறது" },
   "linkGoBack": { "message": "திரும்பிச் செல்" },
-  "linkOpenAnyway": { "message": "இருந்தும் திற" }
+  "linkOpenAnyway": { "message": "இருந்தும் திற" },
+  "linkBlockedToast": { "message": "தடுக்கப்பட்ட இணைப்பு — ScamShield நிறுத்தியது" }
 }

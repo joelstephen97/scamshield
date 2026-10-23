@@ -450,5 +450,6 @@
   "linkConfirmBlock": { "message": "يؤدي هذا الرابط إلى موقع مدرج في قائمة الحظر لدى ScamShield" },
   "linkConfirmWarn": { "message": "يبدو هذا الرابط خطيراً" },
   "linkGoBack": { "message": "رجوع" },
-  "linkOpenAnyway": { "message": "فتح على أي حال" }
+  "linkOpenAnyway": { "message": "فتح على أي حال" },
+  "linkBlockedToast": { "message": "رابط محظور — أوقفه ScamShield" }
 }

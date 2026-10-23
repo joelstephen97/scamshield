@@ -450,5 +450,6 @@
   "linkConfirmBlock": { "message": "यह लिंक ScamShield की ब्लॉक सूची वाली साइट पर जाता है" },
   "linkConfirmWarn": { "message": "यह लिंक जोखिम भरा लगता है" },
   "linkGoBack": { "message": "वापस जाएँ" },
-  "linkOpenAnyway": { "message": "फिर भी खोलें" }
+  "linkOpenAnyway": { "message": "फिर भी खोलें" },
+  "linkBlockedToast": { "message": "ब्लॉक किया गया लिंक — ScamShield ने इसे रोका" }
 }
