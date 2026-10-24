@@ -9,7 +9,9 @@
 (function (root) {
   'use strict';
   const SS = root.ScamShield = root.ScamShield || {};
-  const HOSTS_PER_MINUTE = 200, BATCH = 50, ROUND_ANCHORS = 400, QUEUE_ROOTS = 500, QUEUE_ANCHORS = 4000;
+  const HOSTS_PER_MINUTE = 200, BATCH = 50, ROUND_ANCHORS = 400, QUEUE_ROOTS = 500, QUEUE_ANCHORS = 4000, CHUNK = 100;
+  // A macrotask break: lets input, paint and the page's own scripts run between slices of a round.
+  const yieldToPage = () => new Promise((r) => setTimeout(r, 0));
   // (0.15.0, Task 17b) Main-thread cost of the guards, for the perf budget test: window.__ssPerf = {batches, maxMs, totalMs}
   // in the isolated world. Each "batch" is one synchronous stretch of work (no awaits inside it), timed with
   // performance.now(). Shared with the ad guard (loaded after this file); numbers only, nothing leaves the page.
@@ -200,7 +202,11 @@
         for (const a of anchors) { anchorQueue.delete(a); seen.add(a); }
         if (!anchorQueue.size && !rootsQueue.length) catchAllQueued = false;
         const need = [], pairs = [], stale = [];
+        // The anchors are read in slices of CHUNK with a yield to the page between slices, so one round never holds the main
+        // thread for long on a link-heavy page (the per-batch budget is 4 ms; a cold first pass over 400 links was close to it).
+        let n = 0;
         for (const a of anchors) {
+          if (++n % CHUNK === 0) { perf.rec(t0); t0 = 0; await yieldToPage(); t0 = perf.now(); }
           if (!a.isConnected) continue;
           const d = hostOf(a);
           if (!d) { if (a.hasAttribute('data-ss-pill')) pairs.push([a, null]); continue; }
