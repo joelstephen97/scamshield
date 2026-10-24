@@ -113,6 +113,37 @@ test('an ad inserted 2.5 s after load is collapsed too', async ({ context }) => 
   await expect(page.locator('#ad-late')).toBeHidden({ timeout: 8000 });
 });
 
+// 0.15.0 final fix B2: lifecycle across a same-document route change, and the user's exemption re-read each round.
+test('an SPA route change that removes a collapsed ad slot leaves no orphan "Scam ad hidden" tag', async ({ context }) => {
+  const sw = context.serviceWorkers()[0];
+  await installFeed(sw, [SENTINEL]);
+  const page = await context.newPage();
+  await page.goto('http://localhost:5599/adguard-spa.html');
+  await expect(collapsedTags(page)).toHaveCount(1, { timeout: 7000 });
+  await page.click('#route');
+  await expect(page.locator('#ad-link')).toHaveCount(0);
+  await expect(collapsedTags(page)).toHaveCount(0, { timeout: 4000 });
+  // and the next route's own ad is still handled
+  await page.click('#late');
+  await expect(page.locator('#ad-late-spa')).toBeHidden({ timeout: 8000 });
+  await expect(collapsedTags(page)).toHaveCount(1);
+});
+
+test('trusting the site after load: ads that arrive later are not collapsed and the collapsed one is released', async ({ context }) => {
+  const sw = context.serviceWorkers()[0];
+  await installFeed(sw, [SENTINEL]);
+  const page = await context.newPage();
+  await page.goto('http://localhost:5599/adguard-spa.html');
+  await expect(collapsedTags(page)).toHaveCount(1, { timeout: 7000 });
+  await sw.evaluate(() => setSettings({ allowlist: ['localhost'] }));
+  await page.click('#late');
+  await expect(page.locator('#ad-late-spa')).toBeVisible();
+  await page.waitForTimeout(3500);               // a round runs (idle timeout 1.5 s) and re-reads the exemption
+  await expect(page.locator('#ad-late-spa')).toBeVisible();
+  await expect(collapsedTags(page)).toHaveCount(0);
+  await expect(page.locator('#ad-link')).toBeVisible();
+});
+
 test('settings.adGuard === false leaves every ad alone; the link guard is independent of it', async ({ context }) => {
   const sw = context.serviceWorkers()[0];
   await installFeed(sw, [SENTINEL]);

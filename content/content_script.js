@@ -1139,7 +1139,9 @@
     if (!rescan && IS_TOP && settings.adGuard !== false && SS.adGuard && !userExempt(location.hostname, settings)) {
       try {
         if (settings.linkGuard === false) SS.linkGuard.start({ send, surface, t, isTrusted: (h) => isTrustedHost(h, settings), passive: true });
-        SS.adGuard.start({ surface, t, isTrusted: (h) => isTrustedHost(h, settings) });
+        SS.adGuard.start({ surface, t, isTrusted: (h) => isTrustedHost(h, settings),
+          // Re-read each round: trusting or pausing the site, or switching the ad guard off, takes effect without a reload.
+          exempt: async () => { const st = await send('getSettings'); return !st || !st.enabled || st.adGuard === false || userExempt(location.hostname, st); } });
       } catch (_) {}
     }
     // Sponsored-search check runs even on (trusted) search-engine hosts.

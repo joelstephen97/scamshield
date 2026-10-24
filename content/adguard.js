@@ -91,6 +91,26 @@
       hiddenTimer = setTimeout(() => { hiddenTimer = 0; for (const el of hiddenLater) retry.add(el); hiddenLater.clear(); schedule(); }, 3000);
     }
 
+    // Lifecycle (0.15.0, final fix B2). An SPA route change can remove an ad slot and leave its tag behind, or move the
+    // ad away from its tag. Drop every collapsed entry whose ad is gone or whose tag is no longer right before it, and
+    // delete tags (never the frame tile) that no longer sit in front of a collapsed ad.
+    function unCollapse(el, tag) {
+      try { if (el) el.classList.remove('scamshield-ad-collapsed'); } catch (_) {}
+      try { if (tag && tag.parentNode) tag.parentNode.removeChild(tag); } catch (_) {}
+    }
+    function cleanup() {
+      for (const [el, tag] of Array.from(collapsed)) {
+        if (!el.isConnected || !tag.isConnected || tag.nextElementSibling !== el) { collapsed.delete(el); unCollapse(el.isConnected ? el : null, tag); }
+      }
+      try {
+        for (const tag of document.querySelectorAll('.scamshield-ad-hidden')) {
+          const ad = tag.nextElementSibling;
+          if (!(ad && collapsed.get(ad) === tag)) tag.remove();
+        }
+      } catch (_) {}
+    }
+    function releaseAll() { for (const [el, tag] of Array.from(collapsed)) { collapsed.delete(el); unCollapse(el, tag); } }
+
     function collapse(el, rect) {
       if (collapsed.has(el) || restored.has(el) || !el.isConnected || !el.parentNode) return false;
       const w = rect.width;
@@ -113,19 +133,30 @@
       working = true;
       const P = SS.perf; let t0 = P ? P.now() : 0; // (0.15.0, Task 17b) main-thread time of each synchronous stretch
       try {
+        cleanup();
+        // The user may have trusted or paused this site since the last round (or switched the ad guard off): then the
+        // collapsed ads are released and nothing new is collapsed. One settings read, only when there is work to do.
+        if ((rootsQueue.length || retry.size) && typeof deps.exempt === 'function') {
+          let ex = false;
+          try { ex = await deps.exempt(); } catch (_) { ex = false; }
+          t0 = P ? P.now() : 0;
+          if (ex) { releaseAll(); rootsQueue = []; retry.clear(); return; }
+        }
         const found = new Set();
         const roots = rootsQueue; rootsQueue = [];
         for (const r of roots) containersOf(r, found);
         for (const el of retry) found.add(el);
         retry.clear();
         const list = [];
-        for (const el of found) {
+        const all = Array.from(found);
+        for (let i = 0; i < all.length; i++) {
+          const el = all[i];
+          if (list.length >= ROUND_CONTAINERS) { for (let j = i; j < all.length; j++) rootsQueue.push(all[j]); break; } // overflow: next round, not dropped
           if (!el.isConnected || collapsed.has(el) || restored.has(el)) continue;
           const rect = vet(el);
           if (rect === 'hidden') { if (!hiddenSeen.has(el)) { hiddenSeen.add(el); hiddenLater.add(el); armHidden(); } continue; }
           if (!rect) continue;
           list.push({ el, rect });
-          if (list.length >= ROUND_CONTAINERS) break;
         }
         const work = list.map(({ el, rect }) => ({ el, rect, hosts: destinationsOf(el), text: (el.textContent || '').slice(0, MAX_TEXT) }));
         const allHosts = new Set();
@@ -154,6 +185,15 @@
       timer = setTimeout(run, 250);
     }
 
+    // A same-document route change (the MAIN guard's pushState/popstate hooks): clean up stale tags now, give the new
+    // view a fresh retry budget and look at the whole document again.
+    try {
+      root.addEventListener('scamshield:navigate', () => {
+        cleanup(); retries = 0;
+        if (rootsQueue.length < QUEUE_ROOTS) rootsQueue.push(document.documentElement);
+        schedule();
+      });
+    } catch (_) {}
     try {
       const mo = new MutationObserver((records) => {
         for (const rec of records) for (const n of rec.addedNodes) if (n.nodeType === 1 && rootsQueue.length < QUEUE_ROOTS) rootsQueue.push(n);

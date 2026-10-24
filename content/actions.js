@@ -752,6 +752,7 @@
     let n = 0;
     blocks.forEach((node) => {
       if (node.classList.contains(NS + '-hidden-block')) return;
+      try { if (node.closest('.scamshield-ad-collapsed')) return; } catch (_) {} // already behind a collapsed scam ad: no second tag, no second log
       n++;
       node.classList.add(NS + '-hidden-block');
       const tag = el('div', NS + '-hidden-tag', t('guardHiddenTag', null, 'Hidden by ScamShield'));

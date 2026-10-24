@@ -1,0 +1,23 @@
+<!doctype html><meta charset="utf-8"><title>Ad guard SPA fixture</title>
+<style>body{font:16px system-ui;margin:24px;max-width:760px}.slot{display:block;width:300px;min-height:80px;margin:12px 0;border:1px solid #ccc;padding:6px}</style>
+<!-- A tiny single-page app: "route" swaps the whole view (ad slot included) and pushes a new URL; "late" appends another listed ad. -->
+<div id="view">
+  <h1>Local news</h1>
+  <ins class="adsbygoogle slot" id="ad-link"><a href="http://scamshield-test-blocked.example/offer">Great deal, click here</a></ins>
+  <p id="scam-line">You won a prize! Claim your reward now.</p>
+</div>
+<button id="route" type="button">Next page</button>
+<button id="late" type="button">Late ad</button>
+<script>
+  document.getElementById('route').addEventListener('click', function () {
+    history.pushState({}, '', '/adguard-spa/next');
+    document.getElementById('ad-link').remove();   // the router drops the slot but keeps its container (so the tag would be left behind)
+    document.querySelector('#view h1').textContent = 'Weather';
+  });
+  document.getElementById('late').addEventListener('click', function () {
+    var d = document.createElement('ins');
+    d.className = 'adsbygoogle slot'; d.id = 'ad-late-spa';
+    d.innerHTML = '<a href="http://scamshield-test-blocked.example/late2">Sponsored story</a>';
+    document.body.appendChild(d);
+  });
+</script>
