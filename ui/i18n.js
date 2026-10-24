@@ -22,9 +22,20 @@
   // so callers relying on a JS-literal fallback (T(key, subs, fallback) in
   // popup.js/options.js) actually get to use it instead of key-echo, and so
   // apply() below just leaves the HTML's own English text in place.
+  function uiLanguage() {
+    for (const a of [root.chrome, root.browser]) {
+      try { if (a && a.i18n && typeof a.i18n.getUILanguage === 'function') { const l = a.i18n.getUILanguage(); if (l) return l; } } catch (_) {}
+    }
+    return '';
+  }
   function t(key, subs) {
     try { const R = reasons(); if (R && R.tOverride) { const o = R.tOverride(key, subs); if (o) return o; } } catch (_) {}
-    try { const m = api.i18n.getMessage(key, subs); return m || ''; } catch (_) { return ''; }
+    // (0.15.0 final fix) Resolved per call across [chrome, browser]: a partial `browser` alias without `i18n` (or one that
+    // throws / returns '') must not hide a working `chrome.i18n`. First non-empty answer wins.
+    for (const api of [root.chrome, root.browser]) { // (shadows the module-level `api` on purpose)
+      try { if (api && api.i18n && typeof api.i18n.getMessage === 'function') { const m = api.i18n.getMessage(key, subs); if (m) return m; } } catch (_) {}
+    }
+    return '';
   }
   function apply(scope) {
     const el = scope || document;
@@ -44,7 +55,7 @@
       // (0.15.0, Task 18) <html lang> follows the UI language too (screen-reader voice, hyphenation, font
       // selection): the override when one is installed, else the browser's own UI language.
       let tag = '';
-      try { tag = R && R.overrideLanguage && R.overrideLanguage() ? R.intlTag(R.overrideLanguage()) : String(api.i18n.getUILanguage() || ''); } catch (_) {}
+      try { tag = R && R.overrideLanguage && R.overrideLanguage() ? R.intlTag(R.overrideLanguage()) : String(uiLanguage() || ''); } catch (_) {}
       if (tag) document.documentElement.setAttribute('lang', tag);
     } catch (_) {}
   }

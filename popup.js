@@ -96,7 +96,11 @@ function renderVerdictUI(host) {
   // suspicious/dangerous had signals that did not earn an interruption: say so calmly instead of "Suspicious page".
   // A safe verdict with a weak incidental signal stays the plain safe card (0.14.0), and a verdict without a tier
   // (older SW state) keeps the pre-0.15.0 rendering.
-  quiet = !!settings.enabled && !!verdict && verdict.tier === 'quiet' && (level === 'suspicious' || level === 'dangerous') && !!(verdict.reasons && verdict.reasons.length);
+  const quietTier = !!settings.enabled && !!verdict && verdict.tier === 'quiet' && (level === 'suspicious' || level === 'dangerous');
+  quiet = quietTier && !!(verdict.reasons && verdict.reasons.length);
+  // (0.15.0 final fix) A quiet page with NOTHING to list is just a page that did not earn a warning: the calm safe
+  // card, never the old "Suspicious page" with no evidence behind it.
+  if (quietTier && !quiet) level = 'safe';
   warned = !!settings.enabled && !quiet && (level === 'suspicious' || level === 'dangerous');
   if (quiet) {
     renderStatus('unknown', host, T('popupQuietSummary', null, 'A few unusual signs \u2014 not enough to warn you'), T('popupQuietLevel', null, 'No warning needed'));
@@ -170,8 +174,13 @@ async function initReviewAsk() {
   if (!ctx) return;
   const ra = ctx.reviewAsk || {};
   // (0.15.0) newest warn/stop surface, from the local surface log; failure just means "none known".
+  // Fails CLOSED: if the log cannot be read we cannot tell that no warning was shown recently, so no ask this open.
   let lastSurfaceAt = 0;
-  try { lastSurfaceAt = REVIEW.lastWarnStopAt(await send('getSurfaceLog')); } catch (_) { /* best-effort */ }
+  try {
+    const log = await send('getSurfaceLog');
+    if (!Array.isArray(log)) { reviewEligible = false; return; }
+    lastSurfaceAt = REVIEW.lastWarnStopAt(log);
+  } catch (_) { reviewEligible = false; return; }
   reviewCount = settings.threatsBlocked || 0;
   reviewEligible = REVIEW.eligible({
     threatsBlocked: reviewCount, installedAt: ctx.installedAt, now: Date.now(),
