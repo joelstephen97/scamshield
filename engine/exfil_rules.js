@@ -64,7 +64,8 @@
   // password / passwd / pass / pwd (word-bounded). A widget that sends only document.title / location.href has none.
   // Bare `.value` and bare `pass` are NOT corroboration (select boxes, "season pass"): the static flag is only a warn
   // banner and the runtime guard is the real protection, so precision wins here.
-  const READS_INPUT = /\.val\s*\(|\bFormData\s*\(|\b(?:password|passwd|pwd)\b/i;
+  // A message label glued to an escape ('\nPassword: ', '%0APassword') still counts: kits build their bot text that way.
+  const READS_INPUT = /\.val\s*\(|\bFormData\s*\(|(?:\b|\\[nrt]|%0[ad]|%20)(?:password|passwd|pwd)\b/i;
   function exfilCredentialScript(text) {
     const svc = exfilEndpointInText(text);
     if (!svc) return null;

