@@ -72,6 +72,8 @@ AUCH ENTHALTEN
 
 • Prüfung gesponserter Ergebnisse auf Suchseiten: markiert eine Anzeige, die woanders hinführt, als die angezeigte Seite verspricht.
 
+• Schutz beim Scrollen: Betrugslinks werden markiert, bevor du sie anklickst, und Betrugsanzeigen werden ausgeblendet (das ist kein allgemeiner Werbeblocker).
+
 • Strenger Modus: Ein Schalter blockiert sogar "verdächtige" Seiten im Vollbild mit einfacherer Sprache, ideal für ein weniger technikaffines Familienmitglied.
 
 • Deine Sprache: alle 20 Sprachen, wählbar im Popup oder in den Einstellungen, unabhängig von der Sprache deines Browsers.

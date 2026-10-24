@@ -72,6 +72,8 @@ CÒN CÓ GÌ NỮA
 
 • Kiểm tra kết quả được tài trợ trên trang tìm kiếm: gắn cờ quảng cáo dẫn đến nơi khác với trang web mà nó hiển thị.
 
+• Bảo vệ khi bạn cuộn trang: liên kết lừa đảo được đánh dấu trước khi bạn nhấp vào, và quảng cáo lừa đảo bị ẩn đi (đây không phải là trình chặn quảng cáo thông thường).
+
 • Chế độ nghiêm ngặt: chỉ một nút bật/tắt để chặn toàn màn hình cả những trang "đáng ngờ" với lời giải thích đơn giản hơn, phù hợp cho người thân ít rành công nghệ.
 
 • Ngôn ngữ của bạn: đầy đủ 20 ngôn ngữ, chọn từ popup hoặc Cài đặt, không phụ thuộc vào ngôn ngữ của trình duyệt.

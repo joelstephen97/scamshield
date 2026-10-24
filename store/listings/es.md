@@ -72,6 +72,8 @@ TAMBIÉN INCLUYE
 
 • Verificación de resultados patrocinados en páginas de búsqueda: marca un anuncio que lleva a un sitio distinto del que muestra.
 
+• Protección mientras te desplazas: los enlaces fraudulentos se marcan antes de que hagas clic y los anuncios fraudulentos se ocultan (no es un bloqueador de anuncios general).
+
 • Modo estricto: un solo interruptor bloquea a pantalla completa incluso las páginas "sospechosas", con un lenguaje más simple, ideal para un familiar menos familiarizado con la tecnología.
 
 • Tu idioma: los 20 idiomas disponibles se eligen desde la ventana emergente o desde Configuración, sin depender del idioma de tu navegador.

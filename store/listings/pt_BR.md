@@ -72,6 +72,8 @@ TAMBÉM INCLUÍDO
 
 • Verificação de resultados patrocinados nas páginas de pesquisa: sinaliza um anúncio que leva a um site diferente do que ele mostra.
 
+• Proteção enquanto você rola a página: links de golpe são marcados antes de você clicar e anúncios de golpe são ocultados (não é um bloqueador de anúncios geral).
+
 • Modo estrito: uma opção bloqueia em tela cheia até páginas "suspeitas", com uma linguagem mais simples, ideal para um familiar menos confiante com tecnologia.
 
 • Seu idioma: todos os 20 idiomas, escolhidos pelo popup ou pelas Configurações, independentemente do idioma do seu navegador.

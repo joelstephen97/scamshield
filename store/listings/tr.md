@@ -72,6 +72,8 @@ AYRICA İÇİNDE
 
 • Arama sayfalarında sponsorlu sonuç kontrolü: gösterdiği siteden farklı bir yere giden bir reklamı işaretler.
 
+• Kaydırırken koruma: dolandırıcılık bağlantıları siz tıklamadan önce işaretlenir ve dolandırıcılık reklamları gizlenir (genel bir reklam engelleyici değildir).
+
 • Sıkı mod: tek bir anahtar, teknolojiye daha az hakim bir aile üyesi için "şüpheli" sayfaları bile daha basit bir dille tam ekran engeller.
 
 • Diliniz: tarayıcınızın dilinden bağımsız olarak açılır pencereden veya Ayarlar'dan seçebileceğiniz 20 dilin tamamı.

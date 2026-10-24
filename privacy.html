@@ -52,6 +52,8 @@
 <li>a per-site marker so that an automatic report (if you opted in) is sent at most once per site per day;</li>
 <li>the queue of reports waiting to be sent (only while reporting is on; discarded the moment you turn it off);</li>
 <li>a small count of how often you visit each site (registrable domain only), used to quieten low-confidence warnings on sites you use a lot — capped, pruned, and never transmitted;</li>
+<li>a per-site <em>quiet sites</em> record: how many times you dismissed a warning on a site (registrable domain or tenant host only) and until when that site stays quiet, so a site you dismiss twice is not warned about again for a while — local only, capped, never transmitted, and listed (with a Remove button) in Settings;</li>
+<li>the <em>What ScamShield showed</em> log in Settings: the last 300 times a warning, notice or marker appeared, as <em>hostname + kind + time</em> only — never full addresses or page content; local only, capped, never transmitted, and cleared with the Clear button there;</li>
 <li>a per-site record of a shop countdown timer's starting value, used only to notice a "sale ends" timer that fakes urgency by resetting on every visit;</li>
 <li>statistics counters for the Statistics tab: pages checked, daily activity buckets (kept for 90 days), threats by type, and privacy findings — plus a since-install lifetime total for each — all local, all on-device, never transmitted;</li>
 <li>review-ask state (whether you've been asked, snoozed, declined, or already rated) so the earned review prompt is shown at most as described in Settings and never repeated after you decline it;</li>

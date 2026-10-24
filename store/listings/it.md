@@ -72,6 +72,8 @@ ANCHE INCLUSO
 
 • Controllo dei risultati sponsorizzati nelle pagine di ricerca: segnala un annuncio che porta a un sito diverso da quello mostrato.
 
+• Protezione mentre scorri: i link truffa vengono contrassegnati prima che tu faccia clic e gli annunci truffa vengono nascosti (non è un blocco pubblicità generico).
+
 • Modalità rigorosa: un solo interruttore blocca a schermo intero anche le pagine "sospette", con un linguaggio più semplice, pensata per un familiare meno esperto di tecnologia.
 
 • La tua lingua: tutte le 20 lingue disponibili, scelte dal popup o dalle Impostazioni, indipendentemente dalla lingua del tuo browser.

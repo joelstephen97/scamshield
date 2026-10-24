@@ -72,6 +72,8 @@ JUGA TERSEDIA
 
 • Pemeriksaan hasil bersponsor di halaman pencarian: menandai iklan yang mengarah ke tempat lain selain situs yang ditampilkannya.
 
+• Perlindungan saat Anda menggulir: tautan penipuan ditandai sebelum Anda mengkliknya, dan iklan penipuan disembunyikan (ini bukan pemblokir iklan umum).
+
 • Mode ketat: satu sakelar memblokir layar penuh bahkan untuk halaman "mencurigakan", dengan bahasa yang lebih sederhana, cocok untuk anggota keluarga yang kurang percaya diri dengan teknologi.
 
 • Bahasa Anda: tersedia dalam 20 bahasa, dapat dipilih dari popup atau Pengaturan, terlepas dari bahasa browser Anda.

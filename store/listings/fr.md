@@ -72,6 +72,8 @@ Oui, et il n'y a aucun piège. ScamShield ne fait tourner aucun serveur à vous 
 
 • Vérification des résultats sponsorisés sur les pages de recherche : signale une publicité qui mène ailleurs que le site affiché.
 
+• Protection pendant que vous faites défiler : les liens frauduleux sont signalés avant que vous cliquiez, et les publicités frauduleuses sont masquées (ce n'est pas un bloqueur de publicités général).
+
 • Mode strict : un seul interrupteur bloque en plein écran même les pages « suspectes », avec un texte plus simple, pour un proche moins à l'aise avec la technologie.
 
 • Votre langue : les 20 langues disponibles, à choisir dans la fenêtre de l'extension ou les paramètres, indépendamment de la langue de votre navigateur.

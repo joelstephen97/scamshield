@@ -96,6 +96,8 @@ ALSO INSIDE
 
 • Sponsored-result check on search pages: flags an ad that goes somewhere other than the site it shows.
 
+• Protection while you scroll: scam links are marked before you click them, and scam ads are hidden (this is not a general ad blocker).
+
 • Strict mode: one toggle blocks even "suspicious" pages full-screen with simpler wording, for a less tech-confident family member.
 
 • Your language: all 20 languages, picked from the popup or Settings, independent of your browser's language.
