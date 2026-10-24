@@ -26,7 +26,7 @@ WAS BLOCKIERT WIRD
 
 • Crypto-Wallet-Drainer. Warnt vor riskanten Freigaben und Blindsignaturen, einschließlich Konto-Delegationen und Multi-Wallet-Anfragen, und blockiert Versuche, deine Wiederherstellungsphrase zu stehlen.
 
-• Tech-Support-Betrug. Ein Vollbild-Block für Seiten wie "Ihr PC ist infiziert, rufen Sie diese Nummer an", mit einem Ein-Klick-Ausstieg, der zuerst die Bildschirmsperre und die Zurück-Button-Falle der Seite entschärft.
+• Tech-Support-Betrug. Ein Vollbild-Block für Seiten wie "Dein PC ist infiziert, ruf diese Nummer an", mit einem Ein-Klick-Ausstieg, der zuerst die Bildschirmsperre und die Zurück-Button-Falle der Seite entschärft.
 
 • ClickFix und Zwischenablage-Angriffe. Ein gefälschter "Bestätige, dass du ein Mensch bist"-Check, der dich dazu bringen will, einen Befehl in Windows Run einzufügen. ScamShield ersetzt den bösartigen Text in der Zwischenablage und blockiert die Seite, bevor sie ausgeführt werden kann.
 
