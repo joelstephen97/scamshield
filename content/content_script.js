@@ -614,11 +614,34 @@
     const hasCardInput = !!document.querySelector(CARD_INPUT_SEL);
     // (final fix A) a rendered card field: with a brand-lookalike host it counts like a visible password field.
     const hasVisibleCardInput = hasCardInput && [...document.querySelectorAll(CARD_INPUT_SEL)].slice(0, 20).some((n) => n.type !== 'hidden' && !n.disabled && isShown(n));
+    // A password box that is NOT paired with a username field is a page gate (a no-code builder's "password protected page"),
+    // not a login. Paired = a visible text/email/tel input that looks like a username shares the password's form, or (no form)
+    // its nearest common container within 3 levels. A card field counts as a pair on its own. The engine keeps a lone
+    // gate quiet only on hasLoginPair === false; everything else (no password at all, a pair, a card) is true.
+    const USER_FIELD_RE = /user|e-?mail|login|phone|account|(^|[^a-z])id([^a-z]|$)/i;
+    const looksLikeUsername = (i) => {
+      try {
+        const type = String(i.type || 'text').toLowerCase();
+        if (!['text', 'email', 'tel', 'search', ''].includes(type) || !isVisiblePassword(i)) return false;
+        if (type === 'email' || type === 'tel') return true;
+        return USER_FIELD_RE.test([i.name, i.id, i.autocomplete, i.placeholder, i.getAttribute('aria-label')].join(' '));
+      } catch (_) { return false; }
+    };
+    const pairedWith = (p) => {
+      const scopeHas = (n) => n && n.querySelectorAll && Array.from(n.querySelectorAll('input')).some((i) => i !== p && looksLikeUsername(i));
+      const form = p.closest('form');
+      if (form) return scopeHas(form);
+      let n = p.parentElement;
+      for (let k = 0; k < 3 && n; k++, n = n.parentElement) if (scopeHas(n)) return true;
+      const rt = p.getRootNode && p.getRootNode();
+      return !!(rt && rt.nodeType === 11 && scopeHas(rt)); // a login widget in an open shadow root
+    };
+    const hasLoginPair = !visiblePasswords.length || hasVisibleCardInput || visiblePasswords.some(pairedWith);
     const deliveryFeeText = /(redeliver|redelivery|customs|clearance|delivery|shipping|postage)\s+fee|unpaid\s+(postage|customs|fee)|pay\s+(a\s+)?(small\s+)?fee|schedule.{0,24}redelivery/i.test(bodyText);
 
     return {
       signals: {
-        pageHost, hasPasswordField: passwordForms.length > 0, hasVisiblePasswordField, hasVisibleCardInput, passwordFormActions, hiddenIframeCount, scamPhrases,
+        pageHost, hasPasswordField: passwordForms.length > 0, hasVisiblePasswordField, hasVisibleCardInput, hasLoginPair, passwordFormActions, hiddenIframeCount, scamPhrases,
         titleBrand, ogSiteName, faviconHost, logoAltBrands, seedPhraseForm,
         clickfix, fakeUpdate, hasCardInput, deliveryFeeText
       },

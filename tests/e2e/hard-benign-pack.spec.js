@@ -180,3 +180,17 @@ test('the same typosquat host with NO password field stays quiet (final fix A, C
   await page.waitForTimeout(2500);
   for (const sel of SURFACES) await expect(page.locator(sel)).toHaveCount(0);
 });
+
+// 0.15.0 final fix B: R3 tenant-credential needs a login PAIR; a builder's password-protected page (one password box) stays quiet.
+test('a no-code builder tenant (acme.framer.app) with a password-only "password protected" gate stays quiet', async ({ context }) => {
+  const page = await context.newPage();
+  await page.goto('https://acme.framer.app:5600/framer-gate.html');
+  await page.waitForTimeout(2500);
+  for (const sel of SURFACES) await expect(page.locator(sel)).toHaveCount(0);
+});
+
+test('the same builder tenant with an email + password login warns (positive twin)', async ({ context }) => {
+  const page = await context.newPage();
+  await page.goto('https://acme.framer.app:5600/framer-login.html');
+  await expect(page.locator('.scamshield-banner, .scamshield-interstitial').first()).toBeVisible({ timeout: 8000 });
+});
