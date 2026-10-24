@@ -91,7 +91,18 @@ function build(target, manifestFile, zipName) {
   const zipPath = path.join(DIST, zipName);
   if (fs.existsSync(zipPath)) fs.unlinkSync(zipPath);
   zipDir(staging, zipPath);
-  fs.rmSync(staging, { recursive: true });
+  // The unpacked copy (dist/unpacked-<target>) is what benches, sweeps and SCAMSHIELD_EXT_PATH runs load. Replace it on
+  // every build, with a BUILD_INFO stamp, so a stale copy can never be tested as "the release" again.
+  const unpacked = path.join(DIST, 'unpacked-' + target);
+  if (fs.existsSync(unpacked)) fs.rmSync(unpacked, { recursive: true });
+  let sha = '';
+  try { sha = require('child_process').execSync('git rev-parse --short HEAD', { cwd: ROOT }).toString().trim(); } catch (_) {}
+  let dirty = false;
+  try { dirty = !!require('child_process').execSync('git status --porcelain -- ' + SHARED.join(' '), { cwd: ROOT }).toString().trim(); } catch (_) {}
+  fs.writeFileSync(path.join(staging, 'BUILD_INFO.txt'), `commit ${sha}${dirty ? ' (+uncommitted changes)' : ''}
+built ${new Date().toISOString()}
+`);
+  fs.renameSync(staging, unpacked);
   console.log('✅', zipName, '(' + (fs.statSync(zipPath).size / 1024).toFixed(1) + ' KB)');
   const mb = fs.statSync(zipPath).size / (1024 * 1024);
   // The 0.13.0 plan's constraint is a 2.0 MB target with a 2.5 MB hard cap:

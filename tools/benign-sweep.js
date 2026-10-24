@@ -6,7 +6,7 @@
 // Not part of CI (real network, real sites). Never touches the user's Chrome profile: a fresh temp
 // profile is used per run, Chrome runs with --lang=en-US.
 //
-// Usage: node tools/benign-sweep.js --sites tools/sweep-sites/tranco-500.txt [--out <file.jsonl>]
+// Usage: node tools/benign-sweep.js --sites tools/sweep-sites/tranco-500.txt [--out <file.jsonl>] [--start N]
 //        [--ext <path>] [--limit N] [--headless] [--no-update]
 // --headed is the default (browser automation is always visible); --headless is opt-in only.
 const { chromium } = require('@playwright/test');
@@ -25,6 +25,7 @@ function parseArgs(argv) {
     else if (k === '--out') a.out = argv[++i];
     else if (k === '--ext') a.ext = path.resolve(argv[++i]);
     else if (k === '--limit') a.limit = parseInt(argv[++i], 10);
+    else if (k === '--start') a.start = Math.max(1, parseInt(argv[++i], 10)); // 1-based site to resume from
     else if (k === '--headed') a.headless = false;
     else if (k === '--headless') a.headless = true;
     else if (k === '--no-update') a.update = false;
@@ -70,7 +71,13 @@ function collectSurfaces() {
 const HOST_DOWN = /ERR_NAME_NOT_RESOLVED|ERR_CONNECTION_(REFUSED|RESET|CLOSED|TIMED_OUT)|ERR_ADDRESS_UNREACHABLE|ERR_SSL|ERR_CERT/;
 
 async function visit(context, sw, url, makeReader) {
-  const page = await context.newPage();
+  // Chrome occasionally refuses Target.createTarget for a moment (a closing popup, a busy browser). Retry, then
+  // record the site as failed instead of aborting the whole sweep.
+  let page = null, openErr = null;
+  for (let k = 0; k < 4 && !page; k++) {
+    try { page = await context.newPage(); } catch (e) { openErr = e; await new Promise((r) => setTimeout(r, 2000 * (k + 1))); }
+  }
+  if (!page) return { url, finalUrl: null, surfaces: [], badge: '', verdict: null, tier: null, scanned: false, trusted: false, unscanned: false, navFailed: true, surfaceLog: [], errors: ['newPage: ' + String(openErr && openErr.message || openErr).slice(0, 120)] };
   const rec = { url, finalUrl: null, surfaces: [], badge: '', verdict: null, tier: null, scanned: false, trusted: false, unscanned: false, navFailed: false, surfaceLog: [], errors: [] };
   try {
     await page.bringToFront().catch(() => {});
@@ -162,7 +169,7 @@ async function makeReader(cdp) {
 
 async function main() {
   const args = parseArgs(process.argv);
-  const sites = readSites(args.sites, args.limit);
+  const sites = readSites(args.sites, args.limit).slice((args.start || 1) - 1);
   const profile = fs.mkdtempSync(path.join(os.tmpdir(), 'scamshield-sweep-profile-'));
   console.log(`sweep: ${sites.length} sites, headless=${args.headless}, ext=${args.ext}, out=${args.out}`);
   const servers = await startFixtureServers();
