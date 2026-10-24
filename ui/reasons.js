@@ -56,6 +56,9 @@
     credentialFormForeignDomain: 'A password form on this page sends your credentials to a different site.',
     // engine/constants.js crossOriginCredPostHost + content/content_script.js guardExfilForms (0.10.0, Task C2)
     crossOriginCredPost: 'This form sends your password or card details to $1 — a different site than the one you are on.',
+    // engine/heuristics.js scoreDom + content/content_script.js scamshield:exfil handler (0.15.0)
+    credentialExfilScript: "This page's code sends what you type to a $1 bot, a common way phishing kits steal logins.",
+    credentialExfilBlocked: 'This page tried to send the password you typed to a $1 bot. ScamShield blocked it.',
     hiddenIframes: 'Page contains hidden frames that may capture input.',
     scamPhrase: 'Page shows classic scam/giveaway language ("$1").',
     seedPhraseAsk: 'This page asks for your wallet recovery phrase — never enter it; this steals your funds.',
@@ -289,7 +292,7 @@
   // (0.15.0) Display order for every surface that picks a lead or lists reasons: decisive runtime/stop reasons first,
   // then feed hits, brand reasons, content/DOM reasons, and last the weak URL-shape reasons (noHttps, ipHost, ...).
   // Stable inside each group, pure, and it never mutates its input.
-  const DECISIVE_RE = /^(seedPhraseAsk|clickfix|techScam|fakeUpdate|deliveryFeeScam|wallet|crossOriginCredPost|qrCodeDestination|clipboardCommand|clipboardCryptoAddress)/;
+  const DECISIVE_RE = /^(seedPhraseAsk|clickfix|techScam|fakeUpdate|deliveryFeeScam|wallet|crossOriginCredPost|credentialExfilBlocked|qrCodeDestination|clipboardCommand|clipboardCryptoAddress)/;
   const URL_SHAPE = new Set(['noHttps', 'ipHost', 'atSymbol', 'punycodeHost', 'suspiciousTld', 'manySubdomains', 'urgencyKeywords',
     'randomHost', 'deepSubdomainChain', 'longHostLabel', 'longUrl', 'shortenerHost', 'riskAbusedTld', 'riskDynamicHost']);
   function reasonRank(r) {

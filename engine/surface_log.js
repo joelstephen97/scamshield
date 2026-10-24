@@ -12,7 +12,7 @@
   const DIAG_ROWS = 100;
   const DEDUPE_MS = 120000;
   const KINDS = ['banner', 'interstitial', 'toast-clipboard', 'toast-leak', 'toast-notify', 'techscam',
-    'hidden-blocks', 'serp-dot', 'wallet', 'form-guard', 'link-block', 'link-warn', 'link-confirm', 'popup-block', 'ad-hidden'];
+    'hidden-blocks', 'serp-dot', 'wallet', 'form-guard', 'link-block', 'link-warn', 'link-confirm', 'popup-block', 'ad-hidden', 'exfil-blocked'];
 
   // Newest first, capped. Returns the new list, or the old one when the row is invalid.
   function appendRow(list, row, now) {

@@ -1,0 +1,17 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>Contact us – Contoso Shop</title>
+<!-- A real pattern: a shop contact form that forwards name + message to the owner's Telegram bot. No password field. -->
+<main style="padding-top:260px"><h1>Contact us</h1>
+<form id="f" action="javascript:void(0);">
+  <input type="text" id="name" name="name" placeholder="your name">
+  <textarea id="msg" name="msg" placeholder="message"></textarea>
+  <button type="button" id="go">Send</button>
+</form>
+<p id="out">idle</p></main>
+<script>
+  document.getElementById('go').addEventListener('click', function () {
+    var text = 'name: ' + document.getElementById('name').value + '\nmessage: ' + document.getElementById('msg').value;
+    fetch('https://api.telegram.org/bot7123456789:AAHfixtureTokenForTests0123456789abcdefg/sendMessage',
+      { method: 'POST', mode: 'no-cors', body: new URLSearchParams({ chat_id: '-1001234567890', text: text }) })
+      .then(function () { document.getElementById('out').textContent = 'sent'; }, function () { document.getElementById('out').textContent = 'failed'; });
+  });
+</script></html>

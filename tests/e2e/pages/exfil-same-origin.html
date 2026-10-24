@@ -1,0 +1,15 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>Sign in – Contoso Shop</title>
+<!-- A password form whose script posts to its own origin (no bot endpoint anywhere on the page). -->
+<main style="padding-top:260px"><h1>Sign in</h1>
+<form id="f" action="javascript:void(0);">
+  <input type="email" id="email" name="email" autocomplete="username">
+  <input type="password" id="pw" name="pw" autocomplete="current-password">
+  <button type="button" id="go">Sign in</button>
+</form>
+<p id="out">idle</p></main>
+<script>
+  document.getElementById('go').addEventListener('click', function () {
+    fetch('/exfil-same-origin-login', { method: 'POST', body: new URLSearchParams({ email: document.getElementById('email').value, pw: document.getElementById('pw').value }) })
+      .then(function () { document.getElementById('out').textContent = 'sent'; }, function () { document.getElementById('out').textContent = 'failed'; });
+  });
+</script></html>

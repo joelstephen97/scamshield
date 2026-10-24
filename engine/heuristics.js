@@ -223,6 +223,15 @@
       reasons.push({ code: 'seedPhraseAsk', kind: 'wallet' });
     }
 
+    // Credential exfil script (0.15.0): inline script text names a Telegram bot / Discord webhook endpoint AND the page
+    // shows a visible password or card field. The endpoint alone is not evidence (a shop contact form messaging a bot
+    // is a real pattern), so without the visible credential field there is no reason and no flag.
+    if ((s.exfilScript === 'telegram' || s.exfilScript === 'discord') && (s.hasVisiblePasswordField || s.hasVisibleCardInput)) {
+      score = Math.max(score, 0.85);
+      flags.push('credential-exfil');
+      reasons.push({ code: 'credentialExfilScript', kind: 'page', params: [s.exfilScript === 'telegram' ? 'Telegram' : 'Discord'] });
+    }
+
     // ClickFix / fake-CAPTCHA instructions (0.6.0, engine/clickfix_rules.js).
     if (s.clickfix && s.clickfix.level === 'dangerous') {
       score = Math.max(score, 0.9);

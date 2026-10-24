@@ -100,6 +100,92 @@
     };
   } catch (_) { /* ignore */ }
 
+  // (D) Credential exfil to a Telegram bot / Discord webhook (0.15.0). Phishing kits POST the typed login straight to
+  // https://api.telegram.org/bot<id>:<token>/sendMessage (fetch, jQuery $.ajax = XHR, or sendBeacon). fetch, XHR
+  // open/send and sendBeacon are wrapped; when the destination is one of those two endpoints, a cancelable
+  // 'scamshield:exfil' event carries a JSON STRING {service, url, body} (body capped at 8 KB) to the isolated world,
+  // which cancels it only if a typed secret is in the request. Never cancelled otherwise: a contact form that
+  // messages a bot keeps working. Everything is try/catch and falls back to the native call.
+  // exfilServiceOf is a copy of engine/exfil_rules.js (engine files are not loaded in the MAIN world);
+  // tests/unit/exfil_rules.test.js runs both against one table.
+  try {
+    const TG_PATH = /^\/bot\d{5,}:[A-Za-z0-9_-]{30,}\/[A-Za-z]+$/;
+    const DC_PATH = /^\/api\/webhooks\/\d{5,}\/[A-Za-z0-9_-]{20,}(?:\/.*)?$/;
+    const exfilServiceOf = (url) => {
+      try {
+        const u = new URL(String(url));
+        if (u.protocol !== 'https:' || u.username || u.password) return null;
+        const h = u.hostname.toLowerCase();
+        if (h === 'api.telegram.org') return TG_PATH.test(u.pathname) ? 'telegram' : null;
+        if (h === 'discord.com' || h === 'discordapp.com') return DC_PATH.test(u.pathname) ? 'discord' : null;
+      } catch (_) { /* not a URL */ }
+      return null;
+    };
+    const bodyText = (b) => {
+      try {
+        if (typeof b === 'string') return b.slice(0, 8192);
+        if (typeof URLSearchParams === 'function' && b instanceof URLSearchParams) return b.toString().slice(0, 8192);
+        if (typeof FormData === 'function' && b instanceof FormData) {
+          let out = '';
+          for (const [k, v] of b.entries()) { out += k + '=' + (typeof v === 'string' ? v : '') + '&'; if (out.length >= 8192) break; }
+          return out.slice(0, 8192);
+        }
+      } catch (_) { /* '' */ }
+      return '';
+    };
+    // true = the isolated world cancelled the event (a typed secret is in the request): block it.
+    const exfilVetoed = (url, body) => {
+      try {
+        const service = exfilServiceOf(url);
+        if (!service) return false;
+        const detail = JSON.stringify({ service, url: String(url).slice(0, 2048), body: bodyText(body) });
+        return !window.dispatchEvent(new CustomEvent('scamshield:exfil', { detail, cancelable: true }));
+      } catch (_) { return false; }
+    };
+
+    const nativeFetch = window.fetch;
+    if (typeof nativeFetch === 'function') {
+      window.fetch = function (input, init) {
+        try {
+          const url = typeof Request === 'function' && input instanceof Request ? input.url : String(input);
+          if (exfilVetoed(url, init && init.body)) return Promise.reject(new TypeError('Failed to fetch'));
+        } catch (_) { /* native */ }
+        return nativeFetch.apply(this, arguments);
+      };
+    }
+
+    const XHR = window.XMLHttpRequest && window.XMLHttpRequest.prototype;
+    if (XHR && typeof XHR.open === 'function' && typeof XHR.send === 'function') {
+      const nativeXhrOpen = XHR.open, nativeXhrSend = XHR.send;
+      const urls = new WeakMap();
+      XHR.open = function (method, url) {
+        try { urls.set(this, url); } catch (_) { /* ignore */ }
+        return nativeXhrOpen.apply(this, arguments);
+      };
+      XHR.send = function (body) {
+        try {
+          if (urls.has(this) && exfilVetoed(new URL(String(urls.get(this)), document.baseURI).href, body)) {
+            const xhr = this;
+            try { Object.defineProperty(xhr, 'readyState', { value: 4, configurable: true }); Object.defineProperty(xhr, 'status', { value: 0, configurable: true }); } catch (_) { /* ignore */ }
+            setTimeout(() => {
+              for (const type of ['readystatechange', 'error', 'loadend']) { try { xhr.dispatchEvent(new Event(type)); } catch (_) { /* ignore */ } }
+            }, 0);
+            return undefined;
+          }
+        } catch (_) { /* native */ }
+        return nativeXhrSend.apply(this, arguments);
+      };
+    }
+
+    if (navigator && typeof navigator.sendBeacon === 'function') {
+      const nativeBeacon = navigator.sendBeacon;
+      navigator.sendBeacon = function (url, data) {
+        try { if (exfilVetoed(new URL(String(url), document.baseURI).href, data)) return false; } catch (_) { /* native */ }
+        return nativeBeacon.apply(this, arguments);
+      };
+    }
+  } catch (_) { /* ignore */ }
+
   // On a warned page: no forced fullscreen, and a notification prompt resolves 'default' without asking.
   try {
     for (const name of ['requestFullscreen', 'webkitRequestFullscreen']) {

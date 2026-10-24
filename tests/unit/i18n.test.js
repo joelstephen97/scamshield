@@ -272,7 +272,7 @@ test('0.15.0 task 19: onboarding no longer carries region-specific copy', () => 
 
 // --- 0.15.0 release keys: present in all 20 locales, translated, no "(s)" plural hack ---
 test('0.15.0 what\'s-new and singular/plural keys exist in every locale, differ from English, and avoid "(s)"', () => {
-  const keys = ['whatsNewLine1', 'whatsNewLine2', 'reason_feedBlock', 'reason_feedBlockOne', 'reason_feedWarn', 'reason_feedWarnOne'];
+  const keys = ['whatsNewLine1', 'whatsNewLine2', 'reason_feedBlock', 'reason_feedBlockOne', 'reason_feedWarn', 'reason_feedWarnOne', 'reason_credentialExfilScript', 'reason_credentialExfilBlocked'];
   assert.ok(!enKeys.has('whatsNewBanner'), 'stale whatsNewBanner should be gone');
   for (const loc of EXPECTED) {
     const data = JSON.parse(fs.readFileSync(path.join(LOCALES_DIR, loc, 'messages.json'), 'utf8'));

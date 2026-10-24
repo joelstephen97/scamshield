@@ -424,6 +424,54 @@
       if (G.levelOf(d.host) === 'block') e.preventDefault();
     } catch (_) { /* allow */ }
   });
+  // Credential exfil block (0.15.0). The MAIN guard (content/main_world_guard.js, section D) asks, synchronously, whether
+  // a request to a Telegram bot / Discord webhook may go out. It is cancelled only when a secret the user TYPED on this
+  // page (a password field's value, or a PAN-shaped card value) is in the URL or the body; a request that carries none
+  // (a contact form messaging a bot) is never touched. The decision must be synchronous, so it reads `exfilSettings`,
+  // primed at load and refreshed on any settings change. Not gated by the user's trust list (a trusted site leaking a
+  // typed password to a bot is compromised); only the master switch and a pause turn it off. While the settings have not
+  // arrived yet it blocks (a typed secret on its way to a bot is not a request to wait on).
+  let exfilSettings = null;
+  let exfilPrimed = false;
+  const refreshExfilSettings = () => { exfilPrimed = true; return send('getSettings').then((st) => { if (st) exfilSettings = st; }); };
+  try {
+    // The top frame primes at load; a sub-frame only on its first bot request (ad frames pay nothing).
+    if (IS_TOP) refreshExfilSettings();
+    if (api.storage && api.storage.onChanged) api.storage.onChanged.addListener((ch, area) => { if (area === 'local' && ch && ch.settings && exfilPrimed) refreshExfilSettings(); });
+  } catch (_) { /* no storage API in this context */ }
+  const exfilTold = new Set();
+  window.addEventListener('scamshield:exfil', (e) => {
+    try {
+      if (typeof e.detail !== 'string' || !SS || !SS.bodyCarriesSecret || !SS.exfilServiceOf) return;
+      if (!exfilPrimed) refreshExfilSettings();
+      const st = exfilSettings;
+      if (st && (!st.enabled || scopeKeysOf(location.hostname).some((k) => SS.isPaused && SS.isPaused(st.pausedSites, k, Date.now())))) return;
+      let d; try { d = JSON.parse(e.detail); } catch (_) { return; }
+      if (!d || typeof d.url !== 'string' || (d.service !== 'telegram' && d.service !== 'discord') || SS.exfilServiceOf(d.url) !== d.service) return; // re-judged here: the page can forge the event
+      const secrets = [];
+      for (const inp of deepQueryAll('input[type="password"]')) if (inp.value && inp.value.length >= 4) secrets.push(inp.value);
+      for (const inp of document.querySelectorAll(CARD_INPUT_SEL)) {
+        if (SS.isPanShaped && SS.isPanShaped(inp.value)) { secrets.push(inp.value); secrets.push(String(inp.value).replace(/\D/g, '')); }
+      }
+      if (!secrets.length) return;
+      let carried = SS.bodyCarriesSecret(String(d.body || ''), secrets) || SS.bodyCarriesSecret(d.url, secrets);
+      if (!carried) { // Telegram GET ?text=<secret>: compare against the decoded query values too
+        try { for (const [, v] of new URL(d.url).searchParams) if (secrets.some((s) => v.indexOf(s) !== -1)) { carried = true; break; } } catch (_) { /* url judged above */ }
+      }
+      if (!carried) return;
+      e.preventDefault();
+      const name = d.service === 'telegram' ? 'Telegram' : 'Discord';
+      const reason = { code: 'credentialExfilBlocked', kind: 'page', params: [name] };
+      if (SS.actions && SS.actions.dangerInterstitial) {
+        SS.actions.dangerInterstitial({ level: 'dangerous', reasons: [reason], flags: ['credential-exfil'] }, { onLeave: () => send('leaveTab'), onReport: reportMistake });
+        surface('exfil-blocked', true);
+      }
+      if (!exfilTold.has(d.service)) {
+        exfilTold.add(d.service);
+        send('privacyFinding', { finding: { kind: 'credential-exfil', host: d.service === 'telegram' ? 'api.telegram.org' : new URL(d.url).hostname, detail: d.service } });
+      }
+    } catch (_) { /* allow */ }
+  }, true);
   // Fired by the MAIN guard after it refused (a blocked destination always; popunder / fullscreen / notification
   // only reach here on a warn/stop page, because the guard only acts then).
   window.addEventListener('scamshield:popup-blocked', (e) => { if (e.detail === 'blocked-open' || e.detail === 'popunder') popupBlocked(e.detail); }); // fullscreen / notification refusals stay silent
@@ -637,13 +685,28 @@
       return !!(rt && rt.nodeType === 11 && scopeHas(rt)); // a login widget in an open shadow root
     };
     const hasLoginPair = !visiblePasswords.length || hasVisibleCardInput || visiblePasswords.some(pairedWith);
+    // (0.15.0) Credential exfil script: inline <script> text (no src, 300 KB in total) naming a Telegram bot or Discord
+    // webhook endpoint. Top frame only. The engine scores it only beside a visible password / card field.
+    let exfilScript = null;
+    if (IS_TOP && SS.exfilEndpointInText) {
+      try {
+        let left = SS.EXFIL_TEXT_CAP || 300 * 1024;
+        for (const sc of document.querySelectorAll('script:not([src])')) {
+          if (left <= 0) break;
+          const txt = (sc.textContent || '').slice(0, left);
+          left -= txt.length;
+          exfilScript = SS.exfilEndpointInText(txt);
+          if (exfilScript) break;
+        }
+      } catch (_) { exfilScript = null; }
+    }
     const deliveryFeeText = /(redeliver|redelivery|customs|clearance|delivery|shipping|postage)\s+fee|unpaid\s+(postage|customs|fee)|pay\s+(a\s+)?(small\s+)?fee|schedule.{0,24}redelivery/i.test(bodyText);
 
     return {
       signals: {
         pageHost, hasPasswordField: passwordForms.length > 0, hasVisiblePasswordField, hasVisibleCardInput, hasLoginPair, passwordFormActions, hiddenIframeCount, scamPhrases,
         titleBrand, ogSiteName, faviconHost, logoAltBrands, seedPhraseForm,
-        clickfix, fakeUpdate, hasCardInput, deliveryFeeText
+        clickfix, fakeUpdate, hasCardInput, deliveryFeeText, exfilScript
       },
       foreignForms, scamBlocks, exfilForms
     };

@@ -34,6 +34,7 @@
         "engine/challenge.js",
         "engine/linkguard_rules.js",
         "engine/ad_rules.js",
+        "engine/exfil_rules.js",
         "ui/reasons.js",
         "engine/url_model.js",
         "engine/page_features.js",

@@ -31,12 +31,14 @@
     // (0.15.0, Joel's call after bench Run 8) nrd-brand-host: a newly registered domain that carries a brand as its own
     // label or hyphen token (vinted-offer.info, paypal.secure-x.com) or an IDN homograph, on a non-popular host. No form needed:
     // lure and "offer" pages ask for nothing until the next click.
-    'nrd-brand-host'];
+    'nrd-brand-host',
+    // (0.15.0) credential-exfil: the page's inline script names a Telegram bot / Discord webhook AND shows a visible password or card field.
+    'credential-exfil'];
   // Feed intel still counts on popular sites: a validated list hit is not a heuristic.
   const FEED_FLAGS = ['feed-warn-verified', 'feed-warn-corroborated'];
   // Flags that need a credential field on the page. On a path-based publishing host (medium.com/@evil) the
   // popular shield is lifted for these only.
-  const CREDENTIAL_FLAGS = ['credential-form-foreign-domain', 'brand-impersonation-content', 'brand-impersonation-visual', 'brand-lookalike-credential', 'nrd-credential', 'insecure-credential', 'tenant-credential'];
+  const CREDENTIAL_FLAGS = ['credential-form-foreign-domain', 'brand-impersonation-content', 'brand-impersonation-visual', 'brand-lookalike-credential', 'nrd-credential', 'insecure-credential', 'tenant-credential', 'credential-exfil'];
 
   // (0.15.0) USER_CONTENT_HOSTS / isUserContentHost live in engine/constants.js (single source of
   // truth; isSafeHost needs them and constants.js loads first). Re-exported unchanged below.

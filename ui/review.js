@@ -27,7 +27,7 @@
   // Surfaces that interrupt (warn or stop). Passive marks (SERP dot, greyed
   // blocks, hidden ads, notify toast) don't count as a warning for this rule.
   const WARN_STOP_KINDS = ['banner', 'interstitial', 'toast-clipboard', 'toast-leak', 'techscam', 'wallet',
-    'form-guard', 'link-block', 'link-warn', 'link-confirm', 'popup-block'];
+    'form-guard', 'link-block', 'link-warn', 'link-confirm', 'popup-block', 'exfil-blocked'];
   const SNOOZE_DAYS = 90;         // "Maybe later" snooze length
   const MAX_ASKS = 2;             // "asks" (Maybe-later count) at or above this stops re-asking forever
   // Chrome Web Store review tab, and (0.14.1) the AMO reviews page now that the

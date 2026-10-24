@@ -470,6 +470,7 @@ test('primaryOrder: decisive first, then feed, brand, content, URL-shape; stable
   const out = R.primaryOrder(input).map((x) => x.code);
   assert.deepEqual(out, ['seedPhraseAsk', 'techScamScareText', 'feedWarn', 'brandFuzzyMatch', 'contentPhishingPattern', 'scamPhrase', 'noHttps', 'randomHost', 'ipHost']);
   assert.deepEqual(input, copy);
+  assert.equal(R.primaryOrder([r('scamPhrase', 'page'), r('credentialExfilScript', 'page'), r('credentialExfilBlocked', 'page'), r('noHttps')]).map((x) => x.code).join(), 'credentialExfilBlocked,scamPhrase,credentialExfilScript,noHttps');
   assert.deepEqual(R.primaryOrder(undefined), []);
   assert.equal(R.primaryOrder([r('noHttps'), r('crossOriginCredPost', 'page')])[0].code, 'crossOriginCredPost');
   assert.deepEqual(R.primaryOrder(['legacy text', r('ipHost')]), ['legacy text', r('ipHost')]);
