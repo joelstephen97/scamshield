@@ -62,6 +62,12 @@ const toastOn = (call) => async (ctx, page) => { const run = await openIso(ctx, 
 // Surfaces rendered into an in-page shadow host. Each trigger leaves the surface open on `page`.
 const PAGE_SURFACES = {
   'banner-danger': async (ctx, page) => { await page.goto(BASE + '/phishing-login.html'); await waitSel(page, '.scamshield-banner.danger'); },
+  // The brand-compare row ("This site" vs "Real PayPal") only shows for an impersonation verdict: a lookalike host on the fixture server.
+  'banner-danger-brand': async (ctx, page) => {
+    const run = await openIso(ctx, page, 'https://secure-paypa1-login.com:5600/clean.html');
+    await run(`ScamShield.actions.showBanner({ level: 'dangerous', score: 0.95, flags: ['brand-mismatch'], reasons: [{ code: 'brandMismatch', kind: 'url', params: ['PayPal'] }], reasonCodes: ['brandMismatch'], brand: 'paypal', brandUrl: 'https://paypal.com/', brandLabel: 'PayPal' }, { onLeave() {}, onReport() {}, onHide() {} })`);
+    await waitSel(page, '.scamshield-banner.danger .ss-compare');
+  },
   // 0.15.0: no static fixture yields a suspicious+confident verdict, so render the suspicious banner from the
   // isolated world with the same verdict shape content_script builds (copy-report.spec.js does the same).
   'banner-warn': async (ctx, page) => {
@@ -100,6 +106,33 @@ const EXT_PAGES = {
 const SURFACES = [...Object.keys(PAGE_SURFACES), 'popup', 'popup-natural', ...Object.keys(EXT_PAGES)];
 const selected = (only) => SURFACES.filter((n) => !only || only.some((o) => n === o || n.startsWith(o + '-')));
 
+// Language race guard (final fix B): the content script reads the UI dictionary when the page loads, so a shot taken
+// right after a language switch can show the previous language under the new file name. Before the screenshot, wait
+// until the page (light DOM or any open shadow root) shows at least one string of the REQUESTED language's dictionary
+// that is not also an English string; otherwise throw 'lang-not-applied' and the caller retries the whole shot.
+// Not applied to English (nothing to confirm) or to goodbye.html (a static page with its own inline dictionary).
+async function waitTranslated(page, sw, lang, name) {
+  if (lang === 'en' || name === 'goodbye') return;
+  const msgs = await sw.evaluate(async (l) => {
+    const r = await getLangDict(); if (!r || r.lang !== l) return null;
+    const en = await loadLangDict('en'); const enSet = new Set(Object.values(en || {}).map((v) => String((v && v.message) || v)));
+    return Object.values(r.dict).map((v) => String((v && v.message) || v)).filter((m) => m.length >= 6 && !/[$]\w/.test(m) && !enSet.has(m));
+  }, lang);
+  if (!msgs || !msgs.length) throw new Error('lang-not-applied: SW dictionary for ' + lang + ' not ready');
+  const deadline = Date.now() + 5000;
+  while (Date.now() < deadline) {
+    const hit = await page.evaluate((list) => {
+      const texts = []; const walk = (r) => { texts.push(r.textContent || ''); for (const n of r.querySelectorAll('*')) if (n.shadowRoot) walk(n.shadowRoot); };
+      walk(document);
+      const all = texts.join('\n').replace(/\s+/g, ' ');
+      return list.some((m) => all.includes(m.replace(/\s+/g, ' ')));
+    }, msgs).catch(() => false);
+    if (hit) return;
+    await sleep(250);
+  }
+  throw new Error('lang-not-applied: no ' + lang + ' string on ' + name);
+}
+
 // ---- capture ---------------------------------------------------------------------------------------
 async function capture(ctx, sw, id, name, v, outFile) {
   const page = await ctx.newPage();
@@ -131,6 +164,7 @@ async function capture(ctx, sw, id, name, v, outFile) {
       if (name === 'demo-stop') { await page.click('#tabStop'); await waitSel(page, '.scamshield-interstitial'); }
     }
     await sleep(800);
+    await waitTranslated(page, sw, v.lang, name);
     fs.mkdirSync(path.dirname(outFile), { recursive: true });
     // Viewport, not element: overflow and mispositioning must be visible.
     await page.screenshot({ path: outFile, fullPage: false });
@@ -192,8 +226,13 @@ function contactSheet(outDir, shots) {
             const h = name === 'popup-natural' ? 600 : (w < 600 ? 812 : 900);
             const file = `${w}-${scheme}-${lang}${touch ? (meta ? '-touch-meta' : '-touch-nometa') : ''}.png`;
             const rel = `screenshots/${name}/${file}`;
-            try { await capture(ctx, sw, id, name, { w, h, scheme, meta, lang }, path.join(outDir, rel)); shots.push({ surface: name, rel, label: `${name} ${file}` }); console.log('  ok  ', rel); }
-            catch (e) { failed++; console.log('  FAIL', rel, '-', String(e.message).split('\n')[0]); }
+            let done = false, lastErr = null;
+            for (let attempt = 0; attempt < 3 && !done; attempt++) {
+              try { await capture(ctx, sw, id, name, { w, h, scheme, meta, lang }, path.join(outDir, rel)); done = true; }
+              catch (e) { lastErr = e; if (!/^lang-not-applied/.test(String(e.message))) break; await sleep(400); } // a language race: shoot it again
+            }
+            if (done) { shots.push({ surface: name, rel, label: `${name} ${file}` }); console.log('  ok  ', rel); }
+            else { failed++; console.log('  FAIL', rel, '-', String(lastErr && lastErr.message).split('\n')[0]); }
           }
         }
       }

@@ -34,9 +34,11 @@
     '.ss-btn:focus-visible{outline:2px solid var(--ss-accent);outline-offset:2px}\n' +
     '.ss-btn:disabled{opacity:.55;cursor:not-allowed}\n' +
     '@media (pointer: coarse){.ss-btn{min-height:44px;min-width:44px}.ss-btn.ss-x,.ss-btn.ss-more{width:44px}}\n' +
-    '.ss-compare{display:flex;gap:8px;align-items:center;margin-top:8px;padding:8px 10px;border:1px solid var(--ss-hair);border-radius:var(--ss-chip);background:var(--ss-surface);color:var(--ss-text);max-inline-size:100%;overflow:hidden}\n' +
+    '.ss-compare{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center;margin-top:8px;padding:8px 10px;border:1px solid var(--ss-hair);border-radius:var(--ss-chip);background:var(--ss-surface);color:var(--ss-text);max-inline-size:100%;overflow:hidden}\n' +
     '.ss-compare small{display:block;font-size:11px;color:var(--ss-muted)}\n' +
-    '.ss-compare b{font-weight:600;word-break:break-all}\n' +
+    '.ss-compare b{font-weight:600;overflow-wrap:break-word;word-break:normal}\n' +
+    '.ss-compare .ss-cmp-fake,.ss-compare .ss-cmp-real{flex:1 1 auto;min-inline-size:0}\n' +
+    '@media (max-width:480px){.ss-compare{flex-direction:column;align-items:flex-start}.ss-compare .ss-cmp-fake,.ss-compare .ss-cmp-real{flex:none;max-inline-size:100%}.ss-compare .ss-cmp-vs{display:none}}\n' +
     '.ss-compare .ss-cmp-fake b{color:var(--ss-danger);text-decoration:line-through}\n' +
     '.ss-compare .ss-cmp-real b{color:var(--ss-accent)}\n' +
     '.ss-compare .ss-cmp-vs{color:var(--ss-muted);flex:none;font-weight:700}\n';
