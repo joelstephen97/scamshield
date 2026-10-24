@@ -13,6 +13,11 @@
 
   // Decisive, near-zero-FP flags: block the interaction outright.
   const STOP_FLAGS = ['feed-block', 'clickfix', 'seed-phrase-harvest', 'fake-browser-update', 'delivery-fee-scam'];
+  // (0.15.0 final fix A, I2/I3) On a popular registrable these three read as ordinary pages: a security-news
+  // article about a fake Chrome update, a wallet vendor's recovery help, a parcel-scam explainer. They are
+  // demoted to quiet there (the finding stays in the verdict and the popup). feed-block and clickfix (page-initiated
+  // write) stay unconditional; wallet drainer is its own runtime path and is never demoted.
+  const POPULAR_DEMOTED_STOP_FLAGS = ['seed-phrase-harvest', 'fake-browser-update', 'delivery-fee-scam'];
   // Flags confident enough to show a banner at "suspicious". A feed "warn" hit counts only once
   // it was verified against the exact shard (`feed-warn-verified`, set by content_script.js);
   // an unverified hit carries `feed-warn-unverified`, which is in no list here, so it stays
@@ -22,13 +27,26 @@
     'nrd-credential', 'brand-lookalike-credential'];
   // Feed intel still counts on popular sites: a validated list hit is not a heuristic.
   const FEED_FLAGS = ['feed-warn-verified', 'feed-warn-corroborated'];
+  // Flags that need a credential field on the page. On a path-based publishing host (medium.com/@evil) the
+  // popular shield is lifted for these only.
+  const CREDENTIAL_FLAGS = ['credential-form-foreign-domain', 'brand-impersonation-content', 'brand-impersonation-visual', 'brand-lookalike-credential', 'nrd-credential'];
 
   // (0.15.0) USER_CONTENT_HOSTS / isUserContentHost live in engine/constants.js (single source of
   // truth; isSafeHost needs them and constants.js loads first). Re-exported unchanged below.
-  const { USER_CONTENT_HOSTS, isUserContentHost } = C;
+  const { USER_CONTENT_HOSTS, isUserContentHost, isPathUserContentHost } = C;
 
+  // How far the popular guard shields this host:
+  //   'none'       not popular, or a user-content host (evil.gitbook.io, sites.google.com): no shield
+  //   'credential' popular, but a path-based publishing host: shielded EXCEPT credential-form flags
+  //   'full'       popular: heuristic and model signals can never warn
+  function popularMode(popular, host) {
+    if (!popular) return 'none';
+    if (isUserContentHost(host)) return 'none';
+    if (isPathUserContentHost && isPathUserContentHost(host)) return 'credential';
+    return 'full';
+  }
   // Popular guard input: user-content hosts of popular registrables are never shielded.
-  function effectivePopular(popular, host) { return !!popular && !isUserContentHost(host); }
+  function effectivePopular(popular, host) { return popularMode(popular, host) === 'full'; }
 
   // URL-rule reason codes that mean "the host imitates a brand". brandFuzzyMatch
   // counts only at grade strong/strongest (the weak grade is too noisy to warn on).
@@ -40,14 +58,22 @@
   }
 
   // Confident flags that need a credential field on a non-popular host (0.15.0):
-  //   nrd-credential: new-domain evidence + password field
-  //   brand-lookalike-credential: brand-imitating host + password field
-  // in = { verdictFlags, urlReasons, hasPasswordField, popular, host }
+  //   nrd-credential: new-domain evidence + a visible password/card field + CORROBORATION
+  //     (final fix A, I9: URL score >= 0.15, or a brand reason, or a foreign-action reason) -
+  //     a Bloom false positive on an old login page must not warn by itself.
+  //   brand-lookalike-credential: brand-imitating host + a visible password/card field
+  // in = { verdictFlags, urlReasons, urlScore, domReasons, hasPasswordField (a VISIBLE credential field), popular, host }
   function credentialFlags(i) {
     const out = [];
-    if (!i || !i.hasPasswordField || effectivePopular(i.popular, i.host)) return out;
-    if ((i.verdictFlags || []).includes('new-domain')) out.push('nrd-credential');
-    if ((i.urlReasons || []).some(isLookalikeReason)) out.push('brand-lookalike-credential');
+    if (!i || !i.hasPasswordField || popularMode(i.popular, i.host) === 'full') return out;
+    const urlReasons = i.urlReasons || [], domReasons = i.domReasons || [];
+    if ((i.verdictFlags || []).includes('new-domain')) {
+      const corroborated = (i.urlScore || 0) >= 0.15
+        || urlReasons.some((r) => r && r.kind === 'brand') || domReasons.some((r) => r && r.kind === 'brand')
+        || domReasons.some((r) => r && r.code === 'credentialFormForeignDomain');
+      if (corroborated) out.push('nrd-credential');
+    }
+    if (urlReasons.some(isLookalikeReason)) out.push('brand-lookalike-credential');
     return out;
   }
 
@@ -58,15 +84,58 @@
     const has = (list) => flags.some((f) => list.includes(f));
 
     let tier;
-    if (verdict.level === 'dangerous' && has(STOP_FLAGS)) return 'stop';
-    const popular = effectivePopular(c.popular, c.host);
-    if (popular && !has(STOP_FLAGS) && !has(FEED_FLAGS)) return 'quiet';
+    const mode = popularMode(c.popular, c.host);
+    // Popular hosts: the three text-lure stop flags are demoted (path-based hosts keep seed-phrase and
+    // delivery-fee, which need a real form field, but demote the fake-update wording that articles quote).
+    const demoted = mode === 'full' ? POPULAR_DEMOTED_STOP_FLAGS : mode === 'credential' ? ['fake-browser-update'] : [];
+    const stopFlags = STOP_FLAGS.filter((f) => !demoted.includes(f));
+    if (verdict.level === 'dangerous' && has(stopFlags)) return 'stop';
+    if (mode === 'full' && !has(FEED_FLAGS)) return 'quiet';
+    if (mode === 'credential' && !has(FEED_FLAGS) && !has(CREDENTIAL_FLAGS)) return 'quiet';
     if (verdict.level === 'dangerous') tier = 'warn';
     else if (verdict.level === 'suspicious' && has(CONFIDENT_FLAGS)) tier = 'warn';
     else tier = 'quiet';
     // Strict mode raises a warning to a stop; it never lifts quiet.
     if (c.strictMode === true && tier === 'warn') tier = 'stop';
     return tier;
+  }
+
+  // The final stage of the page pipeline (0.15.0 final fix A): everything that happens to a fused verdict
+  // between "the scorers are done" and "show / don't show", as ONE pure function so content_script.js and
+  // the tests cannot drift apart (a safe-level gate here once hid every one-edit brand typosquat).
+  //   1. bot-challenge suppression of a flag-less verdict - never when the URL imitates a brand (I8)
+  //   2. credential evidence: a non-popular page with a VISIBLE password/card field that also has a
+  //      brand-lookalike host is lifted to at least "suspicious" with the confident flag (C1)
+  //   3. the surface tier
+  // i = { urlRules, domRules, signals: { hasVisiblePasswordField, hasVisibleCardInput },
+  //       popular, host, strictMode, isTop, challengePage }
+  function finalizeVerdict(verdict, i) {
+    const x = i || {};
+    let v = verdict || { level: 'safe', score: 0, reasons: [], reasonCodes: [], flags: [] };
+    const urlReasons = (x.urlRules && x.urlRules.reasons) || [];
+    const domReasons = (x.domRules && x.domRules.reasons) || [];
+    if (v.level !== 'safe' && !(v.flags || []).length && x.challengePage === true && !urlReasons.some(isLookalikeReason)) {
+      v = Object.assign({}, v, { level: 'safe', reasons: [], reasonCodes: [], suppressed: 'challenge' });
+    }
+    const sg = x.signals || {};
+    const credFlags = credentialFlags({
+      verdictFlags: v.flags, urlReasons, urlScore: x.urlRules && x.urlRules.score, domReasons,
+      hasPasswordField: !!(sg.hasVisiblePasswordField || sg.hasVisibleCardInput), popular: x.popular, host: x.host
+    });
+    if (credFlags.length && v.suppressed !== 'engagement') {
+      const next = Object.assign({}, v, { flags: credFlags.concat((v.flags || []).filter((f) => !credFlags.includes(f))) });
+      if (credFlags.includes('brand-lookalike-credential') && next.level === 'safe') {
+        const have = new Set((next.reasons || []).map((r) => r && r.code));
+        const add = urlReasons.filter((r) => isLookalikeReason(r) && !have.has(r.code));
+        next.level = 'suspicious';
+        next.score = Math.max(next.score || 0, (C.THRESHOLDS && C.THRESHOLDS.suspicious) || 0.5);
+        next.reasons = add.concat(next.reasons || []);
+        next.reasonCodes = add.map((r) => r.code).concat(next.reasonCodes || []);
+      }
+      v = next;
+    }
+    const tier = surfaceTier(v, { popular: x.popular, strictMode: x.strictMode === true, isTop: x.isTop, host: x.host });
+    return { verdict: v, tier };
   }
 
 
@@ -80,5 +149,5 @@
     return p === '/search';
   }
 
-  return { isSerpPage, SERP_HOST, surfaceTier, isUserContentHost, effectivePopular, credentialFlags, isLookalikeReason, STOP_FLAGS, CONFIDENT_FLAGS, USER_CONTENT_HOSTS };
+  return { isSerpPage, SERP_HOST, surfaceTier, finalizeVerdict, isUserContentHost, isPathUserContentHost, popularMode, effectivePopular, credentialFlags, isLookalikeReason, STOP_FLAGS, CONFIDENT_FLAGS, CREDENTIAL_FLAGS, USER_CONTENT_HOSTS };
 });

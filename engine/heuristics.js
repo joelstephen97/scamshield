@@ -176,7 +176,9 @@
       // everything else is impersonation (brandForeignSuffix's DOM-side twin).
       // Open brands (the default) keep the old permissive behaviour.
       const b = (C.BRANDS_BY_KEY || {})[brandKey];
-      const exactBrandCc = parts.sld === brandKey && ccShaped && !(C.SUSPICIOUS_TLDS || []).includes(tld) &&
+      // (0.15.0 final fix A, I7) the static abused-ccTLD list applies here too: paypal.su is not "on brand".
+      const regionalOk = !(BM && BM.isRegionalSite) || BM.isRegionalSite(brandKey, parts.suffix) || !!(b && b.ccPolicy === 'closed' && (b.suffixes || []).includes(parts.suffix));
+      const exactBrandCc = parts.sld === brandKey && ccShaped && regionalOk && !(C.SUSPICIOUS_TLDS || []).includes(tld) &&
         (!b || b.ccPolicy !== 'closed' || (b.suffixes || []).includes(parts.suffix));
       return exactBrandCc || legit.some((d) => pageDomain === d || host.endsWith('.' + d));
     }
@@ -186,7 +188,8 @@
     // in the tenant label it is the AT&T/Bancaribe/Ledger kit shape the
     // 2026-09-06 bench missed 18 times — dangerous, brand set for the UI.
     const tenant = C.tenantLabel ? C.tenantLabel(s.pageHost) : null;
-    if (tenant && s.hasPasswordField) {
+    // (0.15.0 final fix A) a VISIBLE password field: a hidden login modal on a demo app is not a credential ask.
+    if (tenant && s.hasVisiblePasswordField) {
       score += 0.45;
       reasons.push({ code: 'credentialFormOnTenantHost', kind: 'page', params: [String(s.pageHost || '').slice(String(tenant).length + 1)] });
       const tb = BM && BM.tenantBrandToken ? BM.tenantBrandToken(tenant) : null;

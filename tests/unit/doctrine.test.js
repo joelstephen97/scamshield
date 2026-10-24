@@ -63,14 +63,16 @@ test('isUserContentHost: exact, subdomain, www, case-insensitive', () => {
   }
 });
 test('USER_CONTENT_HOSTS lists the ruled hosts', () => {
-  assert.strictEqual(D.USER_CONTENT_HOSTS.length, 18);
+  assert.strictEqual(D.USER_CONTENT_HOSTS.length, 43);
   assert.ok(D.USER_CONTENT_HOSTS.includes('firebasestorage.googleapis.com'));
 });
 
 // --- credential-backed confident flags (0.15.0 fix round 1) ---
-const cf = (o) => D.credentialFlags(Object.assign({ verdictFlags: [], urlReasons: [], hasPasswordField: true, popular: false, host: 'example.test' }, o));
+// urlScore 0.2: corroborated (final fix A, I9); the uncorroborated case is covered in final_fix_a.test.js
+const cf = (o) => D.credentialFlags(Object.assign({ verdictFlags: [], urlReasons: [], urlScore: 0.2, hasPasswordField: true, popular: false, host: 'example.test' }, o));
 test('nrd-credential: new-domain + password, not popular', () => {
   assert.deepStrictEqual(cf({ verdictFlags: ['new-domain'] }), ['nrd-credential']);
+  assert.deepStrictEqual(cf({ verdictFlags: ['new-domain'], urlScore: 0 }), []);
 });
 test('nrd-credential: not without a password field, not on popular, but yes on a user-content host', () => {
   assert.deepStrictEqual(cf({ verdictFlags: ['new-domain'], hasPasswordField: false }), []);
@@ -88,7 +90,7 @@ test('brand-lookalike-credential: grades and codes', () => {
   assert.deepStrictEqual(cf({ urlReasons: r('manySubdomains') }), []);
 });
 test('brand-lookalike-credential: needs password and non-popular', () => {
-  const urlReasons = [{ code: 'brandLookalike' }];
+  const urlReasons = [{ code: 'brandLookalike', kind: 'brand' }];
   assert.deepStrictEqual(cf({ urlReasons, hasPasswordField: false }), []);
   assert.deepStrictEqual(cf({ urlReasons, popular: true }), []);
   assert.deepStrictEqual(cf({ urlReasons, verdictFlags: ['new-domain'] }), ['nrd-credential', 'brand-lookalike-credential']);

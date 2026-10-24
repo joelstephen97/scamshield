@@ -213,10 +213,21 @@
 
   // (0.15.0) Exact brand SLD on a ccTLD-shaped, non-abused suffix of a brand that has
   // regional storefronts. Shared shape with heuristics.js isOnBrand's exactBrandCc.
+  // (0.15.0 final fix A, I7) Static list of ccTLDs that are cheap/abused or have no brand storefront
+  // culture; independent of the feed's riskTlds being populated. Judgement, per entry:
+  //   su ru cn  - real storefronts exist (google.ru, amazon.cn) but every one a brand actually runs is in
+  //               its domain list (so it is allowlisted before this runs); paypal.su / paypal.ru are phishing.
+  //   tk ml ga cf gq pw cc ws - free/cheap registries (also in SUSPICIOUS_TLDS; kept here so the list is whole).
+  //   tv to ly gl la im sx cm nu - vanity/cheap ccTLDs that read as ".com" typos or are sold freely.
+  //   co (exact, NOT com.co / co.uk) - the famous ".com" typo suffix; com.co (Colombia) stays regional.
+  // Deliberately NOT here: ph (shopee.ph, lazada.com.ph are real) and every ordinary regional suffix
+  // (co.uk de fr it es nl ae sa in jp com.au com.br com.mx ca ...).
+  const ABUSED_CCTLDS = ['su', 'ru', 'cn', 'tk', 'ml', 'ga', 'cf', 'gq', 'tv', 'to', 'ly', 'gl', 'la', 'im', 'sx', 'ws', 'cc', 'pw', 'cm', 'nu'];
   function isRegionalSite(brand, suffix, riskTlds) {
-    const sfx = String(suffix || '');
+    const sfx = String(suffix || '').toLowerCase();
     if (!sfx) return false;
     const tld = sfx.split('.').pop();
+    if (sfx === 'co' || ABUSED_CCTLDS.includes(tld)) return false;
     const ccShaped = (C.MULTI_LABEL_SUFFIXES || []).includes(sfx) || tld.length === 2;
     if (!ccShaped || (C.SUSPICIOUS_TLDS || []).includes(tld)) return false;
     // (0.15.0) a TLD the feed's abused-TLD table lists is never a "regional site" (paypal.su).
@@ -356,7 +367,7 @@
   return {
     MIN_BRAND_LEN, GRADE_RANK, TENANT_TOKEN_EXCLUDE, INJECTION_TOKEN_EXCLUDE,
     allowlistBrandMatch, fuzzyForm, damerauLevenshtein, homoglyphVariants, fuzzyBrandMatch,
-    brandForeignSuffix, tenantBrandToken,
+    brandForeignSuffix, tenantBrandToken, isRegionalSite, ABUSED_CCTLDS,
     _resetTrieForTest, _resetCandidatesForTest
   };
 });

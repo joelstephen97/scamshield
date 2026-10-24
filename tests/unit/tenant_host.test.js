@@ -33,19 +33,19 @@ test('tenantBrandToken: no DL-1 pass, and common-word brand keys never match', (
   assert.strictEqual(BM.tenantBrandToken('bancaribe'), 'bancaribe');
 });
 test('scoreDom: password form on a tenant host is +0.45; with a brand token it is dangerous', () => {
-  const plain = H.scoreDom({ pageHost: 'my-portfolio-2026.vercel.app', hasPasswordField: true });
+  const plain = H.scoreDom({ pageHost: 'my-portfolio-2026.vercel.app', hasPasswordField: true, hasVisiblePasswordField: true });
   assert.ok(plain.reasons.some((r) => r.code === 'credentialFormOnTenantHost')); assert.ok(plain.score < 0.8);
-  const kit = H.scoreDom({ pageHost: 'signin-att-verifier.webflow.io', hasPasswordField: true });
+  const kit = H.scoreDom({ pageHost: 'signin-att-verifier.webflow.io', hasPasswordField: true, hasVisiblePasswordField: true });
   assert.ok(kit.flags.includes('brand-impersonation-tenant')); assert.ok(kit.score >= 0.9); assert.strictEqual(kit.brand, 'att');
   const noForm = H.scoreDom({ pageHost: 'signin-att-verifier.webflow.io', hasPasswordField: false });
   assert.ok(!noForm.flags.includes('brand-impersonation-tenant')); assert.ok(noForm.score < 0.5);
-  const apex = H.scoreDom({ pageHost: 'vercel.com', hasPasswordField: true });
+  const apex = H.scoreDom({ pageHost: 'vercel.com', hasPasswordField: true, hasVisiblePasswordField: true });
   assert.ok(!apex.reasons.some((r) => r.code === 'credentialFormOnTenantHost'));
 });
 test('platform_legit hosts with a password field never reach dangerous on this signal alone', () => {
   const hosts = fs.readFileSync(path.join(__dirname, 'fixtures/platform_legit.txt'), 'utf8').split('\n').map((l) => l.trim()).filter((l) => l && !l.startsWith('#'));
   for (const h of hosts) {
-    const d = H.scoreDom({ pageHost: h, hasPasswordField: true });
+    const d = H.scoreDom({ pageHost: h, hasPasswordField: true, hasVisiblePasswordField: true });
     assert.ok(d.score < 0.8, h + ' score ' + d.score);
     assert.ok(!d.flags.some((f) => f.startsWith('brand-impersonation-')), h + ' flags ' + JSON.stringify(d.flags));
   }

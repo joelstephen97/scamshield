@@ -592,11 +592,13 @@
 
     // Delivery-fee scam signals (0.6.0): card-number input + small-fee wording.
     const hasCardInput = !!document.querySelector(CARD_INPUT_SEL);
+    // (final fix A) a rendered card field: with a brand-lookalike host it counts like a visible password field.
+    const hasVisibleCardInput = hasCardInput && [...document.querySelectorAll(CARD_INPUT_SEL)].slice(0, 20).some((n) => n.type !== 'hidden' && !n.disabled && isShown(n));
     const deliveryFeeText = /(redeliver|redelivery|customs|clearance|delivery|shipping|postage)\s+fee|unpaid\s+(postage|customs|fee)|pay\s+(a\s+)?(small\s+)?fee|schedule.{0,24}redelivery/i.test(bodyText);
 
     return {
       signals: {
-        pageHost, hasPasswordField: passwordForms.length > 0, hasVisiblePasswordField, passwordFormActions, hiddenIframeCount, scamPhrases,
+        pageHost, hasPasswordField: passwordForms.length > 0, hasVisiblePasswordField, hasVisibleCardInput, passwordFormActions, hiddenIframeCount, scamPhrases,
         titleBrand, ogSiteName, faviconHost, logoAltBrands, seedPhraseForm,
         clickfix, fakeUpdate, hasCardInput, deliveryFeeText
       },
@@ -1359,10 +1361,15 @@
         verdict = Object.assign({}, verdict, { level: 'safe', reasons: [], reasonCodes: [], suppressed: 'engagement' });
       }
     }
-    // Bot-challenge pages (0.15.0): DataDome / PerimeterX / Cloudflare / hCaptcha interstitials
-    // read like a scam ("unusual activity", hidden verification frame) but are the site's own
-    // gate. Decisive flags (feed hit, clickfix, ...) are never silenced, only flag-less verdicts.
-    if (verdict.level !== 'safe' && !(verdict.flags || []).length && SS.isChallengePage) {
+    // Bot-challenge suppression, credential evidence and the surface tier (0.15.0, final fix A): ONE pure
+    // function (engine/doctrine.js finalizeVerdict) so this page and the unit pipeline cannot drift apart.
+    //  - Bot-challenge pages (DataDome / PerimeterX / Cloudflare / hCaptcha interstitials) read like a scam
+    //    ("unusual activity", hidden verification frame) but are the site's own gate. Decisive flags are
+    //    never silenced, only flag-less verdicts, and never a host that imitates a brand (I8).
+    //  - Credential-backed confident flags: new-domain (corroborated) / brand-lookalike evidence earns a
+    //    warning when a VISIBLE password/card field is present, lifting a sub-threshold typosquat (C1).
+    let challengePage = false;
+    if (verdict.level !== 'safe' && !(verdict.flags || []).length && SS.isChallengePage && !((urlRules && urlRules.reasons) || []).some((r) => SS.isLookalikeReason(r))) {
       try {
         const txt = document.body ? document.body.innerText : '';
         const frameHosts = [];
@@ -1370,20 +1377,13 @@
           try { const u = new URL(el.getAttribute('src'), location.href); frameHosts.push(u.hostname + u.pathname); } catch (_) {}
           if (frameHosts.length >= 60) break;
         }
-        if (SS.isChallengePage({ title: document.title, textSample: txt.slice(0, 600), bodyTextLength: txt.trim().length, frameHosts, hasCredentialField: !!(signals.hasVisiblePasswordField || signals.hasCardInput) })) {
-          verdict = Object.assign({}, verdict, { level: 'safe', reasons: [], reasonCodes: [], suppressed: 'challenge' });
-        }
+        challengePage = !!SS.isChallengePage({ title: document.title, textSample: txt.slice(0, 600), bodyTextLength: txt.trim().length, frameHosts, hasCredentialField: !!(signals.hasVisiblePasswordField || signals.hasCardInput) });
       } catch (_) { /* best-effort */ }
     }
-    // Credential-backed confident flags (0.15.0): new-domain / brand-lookalike evidence
-    // only earns a warning when the page also asks for a password. The password check
-    // lives in this one place and uses the visible-field check (a hidden login modal does not count).
-    if (verdict.level !== 'safe' && SS.credentialFlags) {
-      const credFlags = SS.credentialFlags({ verdictFlags: verdict.flags, urlReasons: urlRules && urlRules.reasons, hasPasswordField: !!(signals && signals.hasVisiblePasswordField), popular: feedPopular, host: location.hostname });
-      if (credFlags.length) verdict = Object.assign({}, verdict, { flags: credFlags.concat(verdict.flags || []) });
-    }
     // Warning doctrine (0.15.0): one pure function decides stop / warn / quiet.
-    const tier = SS.surfaceTier(verdict, { popular: feedPopular, strictMode: settings.strictMode === true, isTop: IS_TOP, host: location.hostname });
+    const fin = SS.finalizeVerdict(verdict, { urlRules, domRules, signals, popular: feedPopular, strictMode: settings.strictMode === true, isTop: IS_TOP, host: location.hostname, challengePage });
+    verdict = fin.verdict;
+    const tier = fin.tier;
     // Mid-scroll rescan (0.15.0, Task 17b): only a HIGHER tier than the one already decided goes on. A rescan never
     // downgrades, never re-reports an unchanged page, and never adds a warning the first scan did not have.
     if (rescan && tierRank(tier) <= tierRank(pageTier)) return;

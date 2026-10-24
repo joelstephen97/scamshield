@@ -125,5 +125,6 @@ test('an abused TLD from the feed table is never "regional" (0.15.0)', () => {
   const risk = { '.su': 0.3 };
   assert.ok(scoreUrl('https://paypal.su/', risk).reasons.some((x) => x.code === 'brandFuzzyMatch'));
   assert.ok(!scoreUrl('https://www.paypal.de/', risk).reasons.some((x) => x.code === 'brandFuzzyMatch'));
-  assert.ok(!scoreUrl('https://paypal.su/').reasons.some((x) => x.code === 'brandFuzzyMatch'));
+  // (final fix A, I7) ...and .su is on the static abused list, so it never depends on the feed table being populated.
+  assert.ok(scoreUrl('https://paypal.su/').reasons.some((x) => x.code === 'brandFuzzyMatch'));
 });

@@ -211,8 +211,10 @@ test('subdomain prefixes do not defeat SLD typosquat rules', () => {
   assert.equal(BM.fuzzyBrandMatch('www.paypai.com').grade, 'strong');
   assert.equal(BM.fuzzyBrandMatch('secure.paypa1.com').grade, 'strong');
   assert.equal(BM.fuzzyBrandMatch('mail.paypal.info').grade, 'strong'); // TLD swap behind a subdomain
-  // (0.15.0) ccTLD-shaped suffixes are the brand's regional sites, not a swap.
-  assert.equal(BM.fuzzyBrandMatch('mail.paypal.co'), null);
+  // (0.15.0) ccTLD-shaped suffixes are the brand's regional sites, not a swap...
+  assert.equal(BM.fuzzyBrandMatch('mail.paypal.de'), null);
+  // ...except the abused ones (final fix A, I7): bare .co is the .com typo suffix.
+  assert.equal(BM.fuzzyBrandMatch('mail.paypal.co').grade, 'strong');
 });
 test('short registrable names still get subdomain-injection checks', () => {
   assert.equal(BM.fuzzyBrandMatch('netflix.xy.co').grade, 'strongest');

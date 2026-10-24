@@ -160,3 +160,16 @@ test('canary: a tenant-hosted brand login (a.pages.dev) still shows the danger b
   await page.goto('https://a.pages.dev:5600/phishing-login.html');
   await expect(page.locator('.scamshield-banner.danger')).toBeVisible({ timeout: 8000 });
 });
+
+test('canary: a one-edit brand typosquat (paypla.com) with a visible login shows the banner (final fix A, C1)', async ({ context }) => {
+  const page = await context.newPage();
+  await page.goto('https://paypla.com:5600/clean-login.html');
+  await expect(page.locator('.scamshield-banner')).toBeVisible({ timeout: 8000 });
+});
+
+test('the same typosquat host with NO password field stays quiet (final fix A, C1)', async ({ context }) => {
+  const page = await context.newPage();
+  await page.goto('https://paypla.com:5600/clean.html');
+  await page.waitForTimeout(2500);
+  for (const sel of SURFACES) await expect(page.locator(sel)).toHaveCount(0);
+});
