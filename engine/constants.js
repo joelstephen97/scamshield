@@ -547,12 +547,47 @@
     'storage.googleapis.com', 'firebasestorage.googleapis.com', 'sharepoint.com',
     'onedrive.live.com', '1drv.ms', 'dropbox.com', 'dl.dropboxusercontent.com',
     'notion.site', 'forms.office.com', 'typeform.com', 'jotform.com',
-    'wixsite.com', 'canva.site', 'my.canva.site'
+    'wixsite.com', 'canva.site', 'my.canva.site',
+    // (0.15.0 final fix A, I5) popular platforms where strangers publish pages. Two shapes:
+    //  - USER_CONTENT_TENANT_HOSTS: each user gets a sub-domain (evil.gitbook.io). Only a STRICT
+    //    sub-domain counts as user content; the vendor's apex, www and its own named sub-sites
+    //    (USER_CONTENT_OWN_LABELS: app./blog./help./...) keep the popular shield.
+    //  - USER_CONTENT_PATH_HOSTS: users live under a PATH (medium.com/@evil, linktr.ee/evil), which a
+    //    host check cannot see, so the host stays popular but the shield is lifted for credential-form
+    //    flags only (doctrine.js popularMode 'credential'); heuristics alone never warn there.
+    'gitbook.io', 'squarespace.com', 'substack.com', 'bubble.io', 'zendesk.com', 'freshdesk.com', 'hubspot.com',
+    'list-manage.com', 'sendgrid.net', 'jimdofree.com', 'webnode.page', 'site123.me', 'replit.dev',
+    'stackblitz.com', 'codesandbox.io',
+    'linktr.ee', 'beacons.ai', 'medium.com', 'airtable.com', 'mailchi.mp', 'telegra.ph', 'codepen.io',
+    'mega.nz', 'mediafire.com', 'wetransfer.com'
   ];
+  const USER_CONTENT_TENANT_HOSTS = ['gitbook.io', 'squarespace.com', 'substack.com', 'bubble.io', 'zendesk.com', 'freshdesk.com', 'hubspot.com',
+    'list-manage.com', 'sendgrid.net', 'jimdofree.com', 'webnode.page', 'site123.me', 'replit.dev', 'stackblitz.com', 'codesandbox.io'];
+  const USER_CONTENT_PATH_HOSTS = ['linktr.ee', 'beacons.ai', 'medium.com', 'airtable.com', 'mailchi.mp', 'telegra.ph', 'codepen.io',
+    'mega.nz', 'mediafire.com', 'wetransfer.com'];
+  // Vendor-owned first labels under a tenant apex (a tenant cannot mint these: they are reserved).
+  const USER_CONTENT_OWN_LABELS = ['www', 'app', 'apps', 'blog', 'help', 'support', 'docs', 'developers', 'developer', 'community', 'knowledge', 'status', 'api', 'login', 'accounts', 'account', 'academy', 'learn', 'legal', 'trust', 'designers'];
+  function normHost(host) { return String(host || '').toLowerCase().replace(/\.$/, '').replace(/^www\./, ''); }
+  function matchedUcHost(h) { return USER_CONTENT_HOSTS.find((u) => h === u || h.endsWith('.' + u)) || null; }
   function isUserContentHost(host) {
     if (typeof host !== 'string' || !host) return false;
-    const h = host.toLowerCase().replace(/\.$/, '').replace(/^www\./, '');
-    return USER_CONTENT_HOSTS.some((u) => h === u || h.endsWith('.' + u));
+    const h = normHost(host);
+    const u = matchedUcHost(h);
+    if (!u) return false;
+    // Path-based hosts are handled by isPathUserContentHost (credential-only lift), not here.
+    if (USER_CONTENT_PATH_HOSTS.includes(u)) return false;
+    if (USER_CONTENT_TENANT_HOSTS.includes(u)) {
+      if (h === u) return false; // the vendor's own apex
+      const first = h.slice(0, -(u.length + 1));
+      return !(USER_CONTENT_OWN_LABELS.includes(first)); // app.hubspot.com is hubspot's, evil.hubspot.com is not
+    }
+    return true;
+  }
+  // True for a path-based publishing host (medium.com, telegra.ph, linktr.ee, ...) and its sub-domains.
+  function isPathUserContentHost(host) {
+    if (typeof host !== 'string' || !host) return false;
+    const u = matchedUcHost(normHost(host));
+    return !!u && USER_CONTENT_PATH_HOSTS.includes(u);
   }
 
   function isSafeHost(host) {
@@ -597,7 +632,13 @@
     'webflow.io', 'vercel.app', 'netlify.app', 'pages.dev', 'workers.dev', 'github.io', 'gitlab.io', 'web.app', 'firebaseapp.com',
     'azurewebsites.net', 'web.core.windows.net', 'blob.core.windows.net', 'backblazeb2.com', 'r2.dev', 'surge.sh', 'glitch.me', 'repl.co', 'replit.app',
     'weebly.com', 'wixsite.com', 'blogspot.com', 'wordpress.com', 'godaddysites.com', 'square.site', 'systeme.io', 'carrd.co', 'strikingly.com',
-    'duckdns.org', 'zya.me', 'eu.cc', 'hstn.me', 'fwh.is', '000webhostapp.com', 'ngrok-free.app', 'ngrok.io', 'trycloudflare.com', 'onrender.com', 'fly.dev', 'herokuapp.com', 'koyeb.app', 'railway.app'
+    'duckdns.org', 'zya.me', 'eu.cc', 'hstn.me', 'fwh.is', '000webhostapp.com', 'ngrok-free.app', 'ngrok.io', 'trycloudflare.com', 'onrender.com', 'fly.dev', 'herokuapp.com', 'koyeb.app', 'railway.app',
+    // (0.15.0 final fix A, I6) apexes removed from the static DNR blocklist in Task 7 because blocking the
+    // WHOLE platform sent every legitimate tenant to the block page. Their tenants are still scored here
+    // (credential form, brand token in the label). Shorteners (goo.su, qrco.de) and bt.cn (a vendor
+    // registrable, not a tenant platform) are deliberately NOT tenant platforms.
+    'framer.website', 'framer.app', 'weeblysite.com', 'typedream.app', 'webcindario.com', 'dynv6.net', 'us.cc', 'ct.ws', 'za.com',
+    'happysrv.de', 'my.id', 'dothome.co.kr', 'wasmer.app', 'craftum.io', 'contabostorage.com'
   ];
   // Leftmost label of a tenant-platform host — the part the tenant actually
   // controls — or null for the apex itself, a bare "www", or any non-platform
@@ -793,7 +834,7 @@
     TENANT_PLATFORMS, tenantLabel, scopeDomain, scopeKeys, isTenantApex,
     MULTI_LABEL_SUFFIXES, KNOWN_AUTH_PROVIDERS, KNOWN_BRAND_REGISTRABLES,
     VERIFIED_NAMESPACES, isVerifiedNamespace,
-    registrableParts, registrableDomain, isSafeHost, USER_CONTENT_HOSTS, isUserContentHost, brandNameIn, brandDisplayName,
+    registrableParts, registrableDomain, isSafeHost, USER_CONTENT_HOSTS, isUserContentHost, isPathUserContentHost, brandNameIn, brandDisplayName,
     unwrapSerpRedirect, dedupeCapped,
     luhnValid, isPanShaped, isSamePageAction, CRED_EXFIL_ALLOWLIST, isCredExfilAllowlisted, crossOriginCredPostHost
   };

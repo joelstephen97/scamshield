@@ -271,7 +271,7 @@ test('isSafeHost is false for user-content hosts of safe registrables', () => {
   assert.strictEqual(C.isSafeHost('mail.google.com'), true);
 });
 test('constants owns the user-content list (doctrine re-exports it)', () => {
-  assert.strictEqual(C.USER_CONTENT_HOSTS.length, 18);
+  assert.strictEqual(C.USER_CONTENT_HOSTS.length, 43); // 18 + 25 popular platforms (final fix A, I5)
   assert.strictEqual(C.isUserContentHost('a.sharepoint.com'), true);
   assert.strictEqual(require('../../engine/doctrine').USER_CONTENT_HOSTS, C.USER_CONTENT_HOSTS);
 });
