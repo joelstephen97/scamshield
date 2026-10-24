@@ -44,6 +44,9 @@ test('seed-phrase harvesting page gets the blocking interstitial with a delayed 
   const inter = page.locator('.scamshield-interstitial');
   await expect(inter).toBeVisible({ timeout: 8000 });
   await expect(inter.locator('.ss-card h3')).toContainText(/scam/i);
+  // (0.15.0) the lead is the real cause (the seed-phrase request), never the weak no-HTTPS URL reason.
+  await expect(inter.locator('.ss-lead')).toContainText(/recovery phrase/i);
+  await expect(inter.locator('.ss-lead')).not.toContainText(/HTTPS/i);
   // The risky choice starts disabled (enforced delay), the safe one is focused.
   const cont = inter.locator('.ss-danger-ghost');
   await expect(cont).toBeDisabled();

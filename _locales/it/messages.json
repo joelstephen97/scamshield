@@ -508,6 +508,7 @@
   "gbCopied": { "message": "Una breve nota è stata copiata negli appunti. Non è stato inviato nulla. Se vuoi dire di più, incollala in una issue di GitHub." },
   "gbIssue": { "message": "Apri una issue su GitHub" },
   "gbStatic": { "message": "Questa pagina è statica: nessun account, nessuna analisi e da qui non viene inviato nulla. Tutto ciò che ScamShield aveva salvato stava nel tuo browser ed è sparito con lui." },
+  "gbMadeBy": { "message": "Creato da" },
   "demoFieldEmail": { "message": "Email" },
   "demoFieldPassword": { "message": "Password" },
   "demoFieldLogin": { "message": "Accedi" },

@@ -508,6 +508,7 @@
   "gbCopied": { "message": "Une courte note a été copiée dans votre presse-papiers. Rien n’a été envoyé. Pour en dire plus, collez-la dans un ticket GitHub." },
   "gbIssue": { "message": "Ouvrir un ticket GitHub" },
   "gbStatic": { "message": "Cette page est statique : pas de compte, pas d’analyses, et rien n’est envoyé d’ici. Tout ce que ScamShield avait enregistré se trouvait dans votre navigateur et a disparu avec lui." },
+  "gbMadeBy": { "message": "Créé par" },
   "demoFieldEmail": { "message": "E-mail" },
   "demoFieldPassword": { "message": "Mot de passe" },
   "demoFieldLogin": { "message": "Se connecter" },

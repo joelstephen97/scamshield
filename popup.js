@@ -50,7 +50,7 @@ const chipLabel = (kind) => T('chip' + kind.charAt(0).toUpperCase() + kind.slice
 function renderEvidence(reasons, level, isQuiet) {
   const ul = $('reasons'); ul.replaceChildren();
   // (0.15.0, Task 18) A quiet-tier page lists its top 3 signals under the calm "not enough to warn you" line.
-  const list = (level === 'safe' || level === 'unknown') ? [] : (reasons || []).slice(0, isQuiet ? 3 : 5);
+  const list = (level === 'safe' || level === 'unknown') ? [] : R.primaryOrder(reasons).slice(0, isQuiet ? 3 : 5);
   for (const r of list) {
     const kind = R.reasonKind(r);
     const li = document.createElement('li'); const chip = document.createElement('span'); chip.className = 'chip' + (level === 'dangerous' && !isQuiet ? ' danger' : level === 'suspicious' && !isQuiet ? ' warn' : kind === 'brand' ? ' brand' : '');
@@ -78,7 +78,7 @@ function copyReportText() {
   const verdictLine = T('copyReportVerdict', [lvlLabel], 'Verdict: ' + lvlLabel);
   const signalsLabel = T('copyReportSignals', null, 'Signals:');
   const footerLine = T('copyReportFooter', null, 'Checked on-device by ScamShield — free, open-source: https://joelstephen97.github.io/scamshield/');
-  const reasons = ((verdict && verdict.reasons) || []).slice(0, 4).map((r) => R.resolveReason(r)).filter(Boolean);
+  const reasons = R.primaryOrder(verdict && verdict.reasons).slice(0, 4).map((r) => R.resolveReason(r)).filter(Boolean);
   return (R && R.buildCopyReportText)
     ? R.buildCopyReportText({ headerLine, verdictLine, signalsLabel, reasons, footerLine })
     : [headerLine, verdictLine, signalsLabel].concat(reasons.map((r) => '- ' + r), [footerLine]).join('\n');

@@ -265,18 +265,45 @@
   // by an older version) pass straight through. Params (hostnames, brand
   // names, phrases, URLs) are wrapped in bidi isolates so they read correctly
   // in right-to-left locales.
+  // A quoted run in a locale message ("«$1»") puts the quote marks OUTSIDE the isolate; in RTL text they then
+  // land on different lines from the quoted words. Pull the marks inside so the quote is one LTR run.
+  function quoteInside(s) {
+    return String(s).replace(new RegExp('([«“„])' + LRI, 'g'), LRI + '$1').replace(new RegExp(PDI + '([»”])', 'g'), '$1' + PDI);
+  }
   function resolveReason(r) {
     if (typeof r === 'string') return r;
     if (!r || !r.code) return '';
     const params = (r.params || []).map(String);
     const isolated = params.map(bidiWrap);
     const over = tOverride('reason_' + feedCode(r), isolated);
-    if (over) return over;
+    if (over) return quoteInside(over);
     const api = i18n();
     if (api) {
-      try { const m = api.getMessage('reason_' + feedCode(r), isolated); if (m) return m; } catch (_) {}
+      try { const m = api.getMessage('reason_' + feedCode(r), isolated); if (m) return quoteInside(m); } catch (_) {}
     }
-    return subst(EN[feedCode(r)] || r.code, params, true);
+    // (0.15.0) A code this build has no text for (e.g. a newer feed's) renders nothing, never the raw key:
+    // every caller has its own sentence to fall back on.
+    return EN[feedCode(r)] ? quoteInside(subst(EN[feedCode(r)], params, true)) : '';
+  }
+
+  // (0.15.0) Display order for every surface that picks a lead or lists reasons: decisive runtime/stop reasons first,
+  // then feed hits, brand reasons, content/DOM reasons, and last the weak URL-shape reasons (noHttps, ipHost, ...).
+  // Stable inside each group, pure, and it never mutates its input.
+  const DECISIVE_RE = /^(seedPhraseAsk|clickfix|techScam|fakeUpdate|deliveryFeeScam|wallet|crossOriginCredPost|qrCodeDestination|clipboardCommand|clipboardCryptoAddress)/;
+  const URL_SHAPE = new Set(['noHttps', 'ipHost', 'atSymbol', 'punycodeHost', 'suspiciousTld', 'manySubdomains', 'urgencyKeywords',
+    'randomHost', 'deepSubdomainChain', 'longHostLabel', 'longUrl', 'shortenerHost', 'riskAbusedTld', 'riskDynamicHost']);
+  function reasonRank(r) {
+    const code = r && typeof r === 'object' ? String(r.code || '') : '';
+    const kind = r && typeof r === 'object' ? r.kind : '';
+    if (DECISIVE_RE.test(code)) return 0;
+    if (/^(feed|hot|verifiedFeed)/.test(code)) return 1;
+    if (kind === 'brand') return 2;
+    if (URL_SHAPE.has(code)) return 4;
+    return 3;
+  }
+  function primaryOrder(reasons) {
+    const list = Array.isArray(reasons) ? reasons.filter((r) => r != null) : [];
+    return list.map((r, i) => ({ r, i, k: reasonRank(r) })).sort((a, b) => a.k - b.k || a.i - b.i).map((x) => x.r);
   }
 
   // English regardless of UI locale — for GitHub issue bodies.
@@ -370,7 +397,7 @@
     return Promise.resolve(typeof document !== 'undefined' ? execCommandCopy(text) : false);
   }
 
-  return { resolveReason, reasonToEnglish, reasonKind, EN, isRTL, bidiWrap,
+  return { resolveReason, primaryOrder, reasonToEnglish, reasonKind, EN, isRTL, bidiWrap,
     LOCALES, LANG_NAMES, setOverride, overrideLanguage, tOverride, setFallback, hasFallback, tFallback, messagesToDict, intlTag,
     defangHost, buildCopyReportText, copyToClipboard };
 });

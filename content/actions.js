@@ -59,6 +59,11 @@
     if (r == null) return '';
     return R ? R.resolveReason(r) : (typeof r === 'string' ? r : '');
   }
+  // Display order (decisive reasons first, weak URL-shape reasons last) for every lead / list of reasons.
+  function ordered(list) {
+    const R = root.SSReasons;
+    return R && R.primaryOrder ? R.primaryOrder(list) : (Array.isArray(list) ? list : []);
+  }
   // Isolates an LTR run (hostname, URL, count) so it reads correctly when
   // substituted into a right-to-left sentence. A no-op when ui/reasons.js
   // isn't loaded (defensive only; it always is in both manifests).
@@ -383,17 +388,18 @@
     // (0.15.0, Task 12) Built inside the 'banner' shadow host: a floating card at the top centre on >=600px and
     // a bottom sheet on phones (content/surfaces/styles.js). Hiding unmounts the host.
     S.mount('banner', () => {
+      const rs = ordered(verdict.reasons);
       const bar = el('div', NS + '-banner ' + (danger ? 'danger' : 'suspicious'));
       bar.setAttribute('role', danger ? 'alert' : 'status'); setDir(bar);
       const text = el('div', 'ss-text');
       const head = verdict.brandLabel ? (danger ? t('bannerDangerBrand', [bidi(verdict.brandLabel)], 'Dangerous page — looks like ' + verdict.brandLabel + ", but isn't") : t('bannerTakeCare', null, 'Take care on this site')) : (danger ? t('bannerDanger', null, 'Dangerous page') : t('bannerTakeCare', null, 'Take care on this site'));
-      const reason = el('span', 'ss-reason', reasonText(verdict.reasons[0]) || (danger ? t('popupDangerSummary', null, "Don't enter passwords or card details here.") : t('popupSuspiciousSummary', null, 'Take care before typing anything here.')));
+      const reason = el('span', 'ss-reason', reasonText(rs[0]) || (danger ? t('popupDangerSummary', null, "Don't enter passwords or card details here.") : t('popupSuspiciousSummary', null, 'Take care before typing anything here.')));
       text.append(el('b', null, head), reason);
       // "Why?" toggles the extra reasons (aria-expanded) instead of being a one-way reveal.
-      const more = (verdict.reasons || []).slice(1, 4);
+      const more = rs.slice(1, 4);
       if (more.length) {
         const why = el('button', 'ss-why', t('whyShort', null, 'Why?')); why.type = 'button'; why.setAttribute('aria-expanded', 'false');
-        const ul = el('ul', 'ss-why-list'); ul.hidden = true; for (const r of more) ul.appendChild(el('li', null, reasonText(r)));
+        const ul = el('ul', 'ss-why-list'); ul.hidden = true; for (const r of more) { const txt = reasonText(r); if (txt) ul.appendChild(el('li', null, txt)); }
         onTrustedClick(why, () => { ul.hidden = !ul.hidden; why.setAttribute('aria-expanded', ul.hidden ? 'false' : 'true'); });
         reason.appendChild(why); text.appendChild(ul);
       }
@@ -634,11 +640,12 @@
     const trustable = !x.noTrust && canStore();
     modal('interstitial', NS + '-overlay ' + NS + '-interstitial', { role: 'alertdialog', label: t('ariaScamWarning', null, 'Scam warning'), onEscape: null, onGiveUp: () => { send('escalateBlocked', { url: location.href }); } }, (dlg, ctl) => {
       const card = el('div', 'ss-card'); const head = el('div', 'ss-head'); const h3 = el('h3', null, HEADS[Math.floor(Math.random() * HEADS.length)]); head.append(tile('danger'), h3); card.append(head);
-      card.append(el('p', 'ss-lead', reasonText(verdict.reasons[0]) || t('interstitialFallback', null, 'This page matches the pattern of a known scam.')));
+      const rs = ordered(verdict.reasons);
+      card.append(el('p', 'ss-lead', reasonText(rs[0]) || t('interstitialFallback', null, 'This page matches the pattern of a known scam.')));
       // Address box, same as blocked.html: label + the page URL, LTR-isolated.
       const addr = el('div', 'ss-addr'); addr.append(el('small', null, t('thisPage', null, 'This page')), el('code', null, location.href.slice(0, 200))); card.append(addr);
       if (verdict.brandLabel && verdict.brandUrl) { const cmp = compareRow(verdict.brandLabel, verdict.brandUrl); if (cmp) card.appendChild(cmp); }
-      const ul = el('ul', 'ss-evidence'); for (const r of (verdict.reasons || []).slice(1, 4)) { const li = el('li'); li.append(el('span', 'ss-chip', t('chipWhy', null, 'Why')), el('span', null, reasonText(r))); ul.appendChild(li); } if (ul.children.length) card.appendChild(ul);
+      const ul = el('ul', 'ss-evidence'); for (const r of rs.slice(1, 4)) { const li = el('li'); li.append(el('span', 'ss-chip', t('chipWhy', null, 'Why')), el('span', null, reasonText(r))); ul.appendChild(li); } if (ul.children.length) card.appendChild(ul);
       card.append(el('p', 'ss-sub', t('interstitialReassure', null, "If you already typed a password or card number on this page, change it now.")));
       const actions = el('div', 'ss-actions'); const leave = button('ss-primary', t('leaveThisPage', null, 'Leave this page')); onTrustedClick(leave, () => { x.onLeave ? x.onLeave() : history.back(); }); actions.append(leave);
       const copyBtn = copyReportButton(verdict); actions.append(copyBtn);
@@ -741,7 +748,7 @@
               : t('guardFormDestUnknown', null, 'This form sends your password to a different website than the one you are visiting. This is a common way scammers steal logins.'))
           );
           const ul = el('ul', 'ss-evidence');
-          for (const r of (reasons || []).slice(0, 3)) { const li = el('li'); li.append(el('span', 'ss-chip', t('chipPage', null, 'Page')), el('span', null, reasonText(r))); ul.appendChild(li); }
+          for (const r of ordered(reasons).slice(0, 3)) { const li = el('li'); li.append(el('span', 'ss-chip', t('chipPage', null, 'Page')), el('span', null, reasonText(r))); ul.appendChild(li); }
           card.appendChild(ul);
           const actions = el('div', 'ss-actions');
           const back = button('ss-primary', t('cancelRecommended', null, 'Cancel (recommended)'));
@@ -757,7 +764,7 @@
           // so it really submits without re-triggering this guard.
           onTrustedClick(go, () => { ctl.close(); form.submit(); });
           actions.append(back, go);
-          const rep = button('ss-report', t('reportMistake', null, 'Report a mistake')); onTrustedClick(rep, () => { rep.textContent = t('thanks', null, 'Thanks'); rep.disabled = true; onReport && onReport(); }); actions.prepend(rep);
+          const rep = button('ss-report', t('reportMistake', null, 'Report a mistake')); onTrustedClick(rep, () => { rep.textContent = t('thanks', null, 'Thanks'); rep.disabled = true; onReport && onReport(); }); actions.append(rep);
           card.append(actions); dlg.append(card);
           return { card, safe: back };
         });
@@ -813,7 +820,7 @@
       const card = el('div', 'ss-card');
       const head = el('div', 'ss-head'); const h3 = el('h3', null, t('walletRiskyTitle', null, 'Risky wallet request')); head.append(tile('warn'), h3);
       card.append(head,
-        el('p', null, reasonText(detail.reasons && detail.reasons[0]) || t('guardWalletFallback', null, 'This site is requesting a sensitive wallet action.')),
+        el('p', null, reasonText(ordered(detail.reasons)[0]) || t('guardWalletFallback', null, 'This site is requesting a sensitive wallet action.')),
         el('p', 'ss-sub', t('walletRiskyBody', null, 'If you did not expect this, cancel. Drainers use these requests to steal your crypto.')));
       const actions = el('div', 'ss-actions');
       const cancel = button('ss-primary', t('cancelRecommended', null, 'Cancel (recommended)'));
@@ -969,7 +976,7 @@
       const card = el('div', 'ss-card');
       const head = el('div', 'ss-head'); const h3 = el('h3', null, t('techScamTitle', null, 'Possible tech-support scam')); head.append(tile('danger'), h3);
       card.append(head,
-        el('p', null, reasonText(verdict.reasons && verdict.reasons[0]) || t('guardTechScamFallback', null, 'This page is using scare tactics.')),
+        el('p', null, reasonText(ordered(verdict.reasons)[0]) || t('guardTechScamFallback', null, 'This page is using scare tactics.')),
         el('p', 'ss-sub', t('techScamBody', null, 'This is a web page, not your computer — your computer is fine. Real security warnings never lock your screen or show a phone number. Do not call, and do not pay.')));
       const actions = el('div', 'ss-actions');
       const leave = button('ss-primary', t('getMeOut', null, 'Get me out (close this page)'));

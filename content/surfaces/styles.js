@@ -47,22 +47,24 @@
   // sheet on phones. Logical properties only; the danger tier uses --ss-danger-solid so white text stays
   // >=4.5:1 in dark too (the dark --ss-danger is a light red meant for text on dark surfaces).
   const banner =
-    '.scamshield-banner{position:fixed;inset-block-start:max(12px,env(safe-area-inset-top,0px));inset-inline:0;margin-inline:auto;inline-size:min(880px,calc(100vw - 24px));z-index:2147483647;display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:var(--ss-radius);box-shadow:0 8px 28px rgba(0,0,0,.28),0 1px 2px rgba(0,0,0,.1);font:13px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ss-text)}\n' +
+    '.scamshield-banner{position:fixed;inset-block-start:max(12px,env(safe-area-inset-top,0px));inset-inline:0;margin-inline:auto;inline-size:min(880px,calc(100vw - 24px));z-index:2147483647;display:flex;flex-wrap:wrap;align-items:flex-start;gap:8px 12px;padding:12px 14px;border-radius:var(--ss-radius);box-shadow:0 8px 28px rgba(0,0,0,.28),0 1px 2px rgba(0,0,0,.1);font:13px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ss-text)}\n' +
     '@media (prefers-reduced-motion: no-preference){.scamshield-banner{animation:ss-banner-in .18s ease-out}@keyframes ss-banner-in{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}}\n' +
     '.scamshield-banner.danger{background:var(--ss-danger-solid);color:#fff}\n' +
     '.scamshield-banner.danger .ss-tile{background:rgba(255,255,255,.18);color:#fff}\n' +
     '.scamshield-banner.suspicious{background:var(--ss-warn-bg);color:var(--ss-text);border:1px solid var(--ss-warn)}\n' +
     '.scamshield-banner.suspicious .ss-tile{background:var(--ss-surface);color:var(--ss-warn)}\n' +
-    '.scamshield-banner .ss-text{flex:1;min-inline-size:0;display:flex;flex-direction:column;gap:2px}\n' +
-    '.scamshield-banner .ss-text b{font-weight:600;line-height:1.3;overflow-wrap:anywhere}\n' +
-    '.scamshield-banner .ss-reason{font-size:13px;overflow-wrap:anywhere}\n' +
+    '.scamshield-banner .ss-text{flex:1 1 300px;min-inline-size:min(300px,100%);display:flex;flex-direction:column;gap:2px}\n' +
+    '.scamshield-banner .ss-text>b{font-weight:600;line-height:1.3;overflow-wrap:break-word}\n' +
+    '.scamshield-banner .ss-reason{font-size:13px;overflow-wrap:break-word}\n' +
     '.scamshield-banner .ss-why{display:inline-flex;align-items:center;min-block-size:32px;min-inline-size:32px;background:none;border:0;padding:0;margin-inline-start:6px;color:inherit;text-decoration:underline;text-underline-offset:2px;cursor:pointer;font:inherit;font-size:13px;vertical-align:middle}\n' +
     '@media (pointer: coarse){.scamshield-banner .ss-why{min-block-size:44px;min-inline-size:44px}}\n' +
     '.scamshield-banner .ss-why:focus-visible{outline:2px solid currentColor;outline-offset:2px}\n' +
     '.scamshield-banner .ss-why-list{list-style:none;margin:6px 0 0;padding:0;font-size:13px}.scamshield-banner .ss-why-list[hidden]{display:none}.scamshield-banner .ss-why-list li{padding:3px 0}\n' +
     '.scamshield-banner .ss-compare{align-self:flex-start;margin-block-start:6px;background:rgba(255,255,255,.14);border:0;color:inherit}\n' +
     '.scamshield-banner.danger .ss-compare small{color:rgba(255,255,255,.86)}.scamshield-banner.danger .ss-compare .ss-cmp-fake b{color:#fff}.scamshield-banner.danger .ss-compare .ss-cmp-real b{color:#fff;font-weight:700}.scamshield-banner.danger .ss-compare .ss-cmp-vs{color:rgba(255,255,255,.86)}\n' +
-    '.scamshield-banner .ss-acts{display:flex;gap:6px;align-items:center;justify-content:flex-end;flex-wrap:wrap;flex:0 1 auto;align-self:center;position:relative}\n' +
+    '.scamshield-banner .ss-acts{display:flex;gap:6px;align-items:center;justify-content:flex-end;flex-wrap:wrap;flex:0 1 auto;align-self:center;margin-inline-start:auto;position:relative}\n' +
+    // 600-1023px: stacked like the phone sheet but anchored at the top (text row, compare row, then the actions row).
+    '@media (min-width:600px) and (max-width:1023px){.scamshield-banner .ss-acts{flex:1 1 100%;inline-size:100%}}\n' +
     '.scamshield-banner.danger .ss-acts>.ss-btn{border-color:rgba(255,255,255,.7);color:#fff;background:transparent}\n' +
     '.scamshield-banner.danger .ss-acts>.ss-btn.primary{background:#fff;color:var(--ss-danger-solid);border-color:#fff}\n' +
     '.scamshield-banner.danger .ss-acts>.ss-x,.scamshield-banner.danger .ss-acts>.ss-more{border-color:transparent}\n' +
@@ -78,7 +80,8 @@
     phone([
     [".scamshield-banner", "inset-block-start:auto;inset-block-end:0;inset-inline:0;margin-inline:0;inline-size:auto;flex-wrap:wrap;border-start-start-radius:var(--ss-radius);border-start-end-radius:var(--ss-radius);border-end-start-radius:0;border-end-end-radius:0;padding-block-end:max(12px,env(safe-area-inset-bottom,0px));padding-inline:max(14px,env(safe-area-inset-left,0px)) max(14px,env(safe-area-inset-right,0px));max-block-size:calc(100dvh - 24px);overflow:auto"],
     [".scamshield-banner[dir=rtl]", "padding-inline:max(14px,env(safe-area-inset-right,0px)) max(14px,env(safe-area-inset-left,0px))"],
-    [".scamshield-banner .ss-acts", "flex:1 1 100%;inline-size:100%;align-self:stretch;justify-content:flex-start"],
+    [".scamshield-banner .ss-text", "flex:1 1 0;min-inline-size:0"],
+    [".scamshield-banner .ss-acts", "margin-inline-start:0;flex:1 1 100%;inline-size:100%;align-self:stretch;justify-content:flex-start"],
     [".scamshield-banner .ss-acts>.ss-btn", "flex:1 1 auto;min-block-size:44px;min-inline-size:44px"],
     [".scamshield-banner .ss-acts>.ss-more,.scamshield-banner .ss-acts>.ss-x", "flex:0 0 auto"],
     [".scamshield-banner .ss-x .ss-x-label", "display:none"],

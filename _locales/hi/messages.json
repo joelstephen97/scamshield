@@ -508,6 +508,7 @@
   "gbCopied": { "message": "आपके क्लिपबोर्ड पर एक छोटा नोट कॉपी हो गया। कुछ भी भेजा नहीं गया। अगर आप और कहना चाहें तो इसे GitHub issue में चिपका दें।" },
   "gbIssue": { "message": "GitHub issue खोलें" },
   "gbStatic": { "message": "यह पेज स्थिर है: कोई खाता नहीं, कोई एनालिटिक्स नहीं, और यहाँ से कुछ भी नहीं भेजा जाता। ScamShield ने जो कुछ सहेजा था वह आपके ब्राउज़र में ही था और उसके साथ चला गया।" },
+  "gbMadeBy": { "message": "बनाने वाले" },
   "demoFieldEmail": { "message": "ईमेल" },
   "demoFieldPassword": { "message": "पासवर्ड" },
   "demoFieldLogin": { "message": "लॉग इन करें" },

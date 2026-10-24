@@ -508,6 +508,7 @@
   "gbCopied": { "message": "మీ క్లిప్‌బోర్డ్‌కు ఒక చిన్న నోట్ కాపీ అయింది. ఏదీ పంపబడలేదు. ఇంకా ఏమైనా చెప్పాలనుకుంటే దాన్ని GitHub issue లో పేస్ట్ చేయండి." },
   "gbIssue": { "message": "GitHub issue తెరవండి" },
   "gbStatic": { "message": "ఈ పేజీ స్థిరమైనది: ఖాతా లేదు, అనలిటిక్స్ లేదు, ఇక్కడ నుండి ఏదీ పంపబడదు. ScamShield నిల్వ చేసినదంతా మీ బ్రౌజర్‌లోనే ఉంది, దానితో పాటే పోయింది." },
+  "gbMadeBy": { "message": "రూపొందించినవారు" },
   "demoFieldEmail": { "message": "ఇమెయిల్" },
   "demoFieldPassword": { "message": "పాస్‌వర్డ్" },
   "demoFieldLogin": { "message": "లాగిన్ అవ్వండి" },

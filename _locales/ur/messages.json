@@ -508,6 +508,7 @@
   "gbCopied": { "message": "آپ کی کلپ بورڈ میں ایک مختصر نوٹ کاپی ہو گیا۔ کچھ بھی بھیجا نہیں گیا۔ مزید کچھ کہنا چاہیں تو اسے GitHub issue میں پیسٹ کر دیں۔" },
   "gbIssue": { "message": "GitHub issue کھولیں" },
   "gbStatic": { "message": "یہ صفحہ ساکن ہے: کوئی اکاؤنٹ نہیں، کوئی اینالیٹکس نہیں، اور یہاں سے کچھ بھی نہیں بھیجا جاتا۔ ScamShield نے جو کچھ محفوظ کیا تھا وہ آپ کے براؤزر ہی میں تھا اور اسی کے ساتھ چلا گیا۔" },
+  "gbMadeBy": { "message": "بنانے والا" },
   "demoFieldEmail": { "message": "ای میل" },
   "demoFieldPassword": { "message": "پاس ورڈ" },
   "demoFieldLogin": { "message": "لاگ اِن کریں" },

@@ -508,6 +508,7 @@
   "gbCopied": { "message": "Catatan singkat sudah disalin ke papan klip Anda. Tidak ada yang dikirim. Jika ingin bercerita lebih banyak, tempelkan ke isu GitHub." },
   "gbIssue": { "message": "Buka isu GitHub" },
   "gbStatic": { "message": "Halaman ini statis: tanpa akun, tanpa analitik, dan tidak ada yang dikirim dari sini. Semua yang disimpan ScamShield ada di browser Anda dan ikut hilang bersamanya." },
+  "gbMadeBy": { "message": "Dibuat oleh" },
   "demoFieldEmail": { "message": "Email" },
   "demoFieldPassword": { "message": "Kata sandi" },
   "demoFieldLogin": { "message": "Masuk" },

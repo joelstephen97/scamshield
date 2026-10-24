@@ -57,7 +57,8 @@ async function openIso(ctx, page, url) {
   throw new Error('content-script world never appeared on ' + url);
 }
 const waitSel = (page, sel, timeout = 8000) => page.locator(sel).first().waitFor({ state: 'visible', timeout });
-const toastOn = (call) => async (ctx, page) => { const run = await openIso(ctx, page, BASE + '/clean.html'); await run(call); await waitSel(page, '.scamshield-toast'); };
+const T_HELPER = `var ScamShield_t = (k) => (SSReasons.tOverride(k) || (chrome.i18n && chrome.i18n.getMessage(k)) || '');`;
+const toastOn = (call) => async (ctx, page) => { const run = await openIso(ctx, page, BASE + '/clean.html'); await sleep(900); await run(T_HELPER + call); await waitSel(page, '.scamshield-toast'); };
 
 // Surfaces rendered into an in-page shadow host. Each trigger leaves the surface open on `page`.
 const PAGE_SURFACES = {
@@ -65,7 +66,7 @@ const PAGE_SURFACES = {
   // The brand-compare row ("This site" vs "Real PayPal") only shows for an impersonation verdict: a lookalike host on the fixture server.
   'banner-danger-brand': async (ctx, page) => {
     const run = await openIso(ctx, page, 'https://secure-paypa1-login.com:5600/clean.html');
-    await run(`ScamShield.actions.showBanner({ level: 'dangerous', score: 0.95, flags: ['brand-mismatch'], reasons: [{ code: 'brandMismatch', kind: 'url', params: ['PayPal'] }], reasonCodes: ['brandMismatch'], brand: 'paypal', brandUrl: 'https://paypal.com/', brandLabel: 'PayPal' }, { onLeave() {}, onReport() {}, onHide() {} })`);
+    await run(`ScamShield.actions.showBanner({ level: 'dangerous', score: 0.95, flags: ['brand-mismatch'], reasons: [{ code: 'brandFuzzyMatch', kind: 'brand', params: ['PayPal'], grade: 'strong' }], reasonCodes: ['brandFuzzyMatch'], brand: 'paypal', brandUrl: 'https://paypal.com/', brandLabel: 'PayPal' }, { onLeave() {}, onReport() {}, onHide() {} })`);
     await waitSel(page, '.scamshield-banner.danger .ss-compare');
   },
   // 0.15.0: no static fixture yields a suspicious+confident verdict, so render the suspicious banner from the
@@ -79,13 +80,15 @@ const PAGE_SURFACES = {
   // Form guard: the dangerous banner appears first, then a password submit raises the modal overlay on top.
   formguard: async (ctx, page) => {
     await page.goto(BASE + '/phishing-login.html'); await waitSel(page, '.scamshield-banner.danger'); await sleep(450);
-    await page.fill('input[name="pw"]', 'hunter2'); await page.click('button[type="submit"]'); await waitSel(page, '.scamshield-overlay');
+    // Enter submits the form: the (tall, wrapped) banner can sit over the page's own Log in button at tablet widths.
+    await page.fill('input[name="pw"]', 'hunter2'); await page.press('input[name="pw"]', 'Enter'); await waitSel(page, '.scamshield-overlay');
   },
   wallet: async (ctx, page) => { await page.goto(BASE + '/drainer.html'); await sleep(700); await page.click('#go'); await waitSel(page, '.scamshield-overlay'); },
   techscam: async (ctx, page) => { await page.goto(BASE + '/techscam.html'); await waitSel(page, '.scamshield-overlay'); },
   // Toasts: one per kind (ok / warn / notice / danger), driven through the real actions with the real strings.
   'toast-ok': toastOn('ScamShield.actions.supportToast()'),
-  'toast-warn': toastOn(`ScamShield.actions.privacyToast({ level: 'warn', title: "Don't click Allow here", text: 'This site is trying to get notification permission using a "click Allow to continue" trick. You can safely Block it.', muteKind: 'notify', onMute() {}, onReport() {} })`),
+  // Real message keys resolved the way the content script's t() does (UI-language override first, getMessage as the fallback).
+  'toast-warn': toastOn(`(() => { const m = (k) => ScamShield_t(k); ScamShield.actions.privacyToast({ level: 'warn', title: m('notifyLureTitle'), text: m('guardNotifyLure'), muteKind: 'notify', onMute() {}, onReport() {} }); })()`),
   'toast-notice': toastOn(`ScamShield.actions.clipboardToast({ tier: 'notice', host: 'docs.example.com', reasons: [{ code: 'clipboardCommand' }], onMute() {}, onReport() {} })`),
   'toast-danger': toastOn(`ScamShield.actions.crossOriginCredToast({ code: 'crossOriginCredPost', params: ['pay.example.net'] }, () => {}, () => {}, () => {})`),
   'toast-danger-frame': toastOn('ScamShield.actions.frameFormBlockedToast()'),
@@ -116,14 +119,14 @@ async function waitTranslated(page, sw, lang, name) {
   const msgs = await sw.evaluate(async (l) => {
     const r = await getLangDict(); if (!r || r.lang !== l) return null;
     const en = await loadLangDict('en'); const enSet = new Set(Object.values(en || {}).map((v) => String((v && v.message) || v)));
-    return Object.values(r.dict).map((v) => String((v && v.message) || v)).filter((m) => m.length >= 6 && !/[$]\w/.test(m) && !enSet.has(m));
+    return Object.values(r.dict).map((v) => String((v && v.message) || v)).filter((m) => m.length >= 4 && !/[$]\w/.test(m) && !enSet.has(m));
   }, lang);
   if (!msgs || !msgs.length) throw new Error('lang-not-applied: SW dictionary for ' + lang + ' not ready');
   const deadline = Date.now() + 5000;
   while (Date.now() < deadline) {
     const hit = await page.evaluate((list) => {
       const texts = []; const walk = (r) => { texts.push(r.textContent || ''); for (const n of r.querySelectorAll('*')) if (n.shadowRoot) walk(n.shadowRoot); };
-      walk(document);
+      walk(document.documentElement);
       const all = texts.join('\n').replace(/\s+/g, ' ');
       return list.some((m) => all.includes(m.replace(/\s+/g, ' ')));
     }, msgs).catch(() => false);

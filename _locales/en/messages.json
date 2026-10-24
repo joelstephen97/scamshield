@@ -508,6 +508,7 @@
   "gbCopied": { "message": "Copied a short note to your clipboard. Nothing was sent. If you want to say more, paste it into a GitHub issue." },
   "gbIssue": { "message": "Open a GitHub issue" },
   "gbStatic": { "message": "This page is static: no account, no analytics, and nothing is sent from here. Everything ScamShield stored lived in your browser and went with it." },
+  "gbMadeBy": { "message": "Made by" },
   "demoFieldEmail": { "message": "Email" },
   "demoFieldPassword": { "message": "Password" },
   "demoFieldLogin": { "message": "Log in" },

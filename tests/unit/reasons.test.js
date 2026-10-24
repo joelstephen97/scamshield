@@ -98,11 +98,12 @@ test('reasonToEnglish ignores the UI locale', () => {
   } finally { delete globalThis.chrome; }
 });
 
-test('reasonKind defaults to page; unknown codes degrade to the code itself', () => {
+test('reasonKind defaults to page; unknown codes render nothing (never the raw key)', () => {
   assert.equal(R.reasonKind({ code: 'ipHost', kind: 'link' }), 'link');
   assert.equal(R.reasonKind({ code: 'ipHost' }), 'page');
   assert.equal(R.reasonKind(null), 'page');
-  assert.equal(R.resolveReason({ code: 'notARealCode' }), 'notARealCode');
+  assert.equal(R.resolveReason({ code: 'notARealCode' }), '');
+  assert.equal(R.reasonToEnglish({ code: 'notARealCode' }), 'notARealCode'); // issue bodies keep the code for triage
   assert.equal(R.resolveReason(null), '');
 });
 
@@ -459,4 +460,25 @@ test('feedBlock/feedWarn use the singular key for a count of 1 and never print "
   assert.match(strip(R.resolveReason({ code: 'feedWarn', params: ['2'] })), /\(2 sources\)/);
   assert.match(R.reasonToEnglish({ code: 'feedWarn', params: ['1'] }), /\(1 source\)/);
   for (const t of Object.values(R.EN)) assert.ok(!/\(s\)/.test(t), t);
+});
+
+test('primaryOrder: decisive first, then feed, brand, content, URL-shape; stable and non-mutating', () => {
+  const r = (code, kind) => ({ code, kind: kind || 'link' });
+  const input = [r('noHttps'), r('randomHost'), r('contentPhishingPattern', 'page'), r('brandFuzzyMatch', 'brand'),
+    r('feedWarn'), r('seedPhraseAsk', 'wallet'), r('scamPhrase', 'page'), r('techScamScareText', 'techscam'), r('ipHost')];
+  const copy = input.slice();
+  const out = R.primaryOrder(input).map((x) => x.code);
+  assert.deepEqual(out, ['seedPhraseAsk', 'techScamScareText', 'feedWarn', 'brandFuzzyMatch', 'contentPhishingPattern', 'scamPhrase', 'noHttps', 'randomHost', 'ipHost']);
+  assert.deepEqual(input, copy);
+  assert.deepEqual(R.primaryOrder(undefined), []);
+  assert.equal(R.primaryOrder([r('noHttps'), r('crossOriginCredPost', 'page')])[0].code, 'crossOriginCredPost');
+  assert.deepEqual(R.primaryOrder(['legacy text', r('ipHost')]), ['legacy text', r('ipHost')]);
+});
+
+test('resolveReason keeps the quote marks inside the bidi isolate', () => {
+  R.setOverride('ar', { reason_techScamScareText: 'تنبيه («$1»).' });
+  try {
+    const out = R.resolveReason({ code: 'techScamScareText', kind: 'techscam', params: ['your computer has been blocked'] });
+    assert.ok(out.includes('⁦«your computer has been blocked»⁩'), out);
+  } finally { R.setOverride('', null); }
 });
