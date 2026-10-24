@@ -20,7 +20,17 @@
   };
 
   // (B) Surface SPA route changes (isolated world can't see history calls).
-  function emitNav() { try { window.dispatchEvent(new CustomEvent('scamshield:navigate')); } catch (e) {} }
+  // The tier (section C below) is reset here and ONLY here: a navigation this guard itself observed (its own
+  // pushState/replaceState hooks and popstate) and that changed the URL. A new route starts quiet; if the new
+  // page is still dangerous the isolated world re-sends its tier after its re-scan (~0.4 s). Trust/pause
+  // changed mid-document take effect after the next navigation or reload (documented limit).
+  let tier = ''; // 'warn' | 'stop' | '' - set by the isolated world; a closure variable, never on window
+  let navHref = '';
+  try { navHref = location.href; } catch (_) { /* ignore */ }
+  function emitNav() {
+    try { const h = location.href; if (h !== navHref) { navHref = h; tier = ''; } } catch (_) { /* keep */ }
+    try { window.dispatchEvent(new CustomEvent('scamshield:navigate')); } catch (e) {}
+  }
   for (const m of ['pushState', 'replaceState']) {
     const orig = history[m];
     if (typeof orig === 'function') {
@@ -35,10 +45,9 @@
   // only page data read is the URL argument. The decision comes back synchronously through a cancelable event
   // (the same pattern as formsubmit): the isolated world vetoes only a destination already cached as 'block'.
   // The URL crosses as a plain string (safe on Firefox without cloneInto).
-  let tier = ''; // 'warn' | 'stop' | '' - set by the isolated world; a closure variable, never on window
   try {
     window.addEventListener('scamshield:tier', (e) => {
-      // One-way: once warn/stop is accepted a later lower tier (a page forging '') is ignored.
+      // Once warn/stop is accepted a later lower tier event (a page forging '') is ignored; only an observed navigation resets it.
       try { const d = e && e.detail; if (d === 'warn' || d === 'stop') tier = (tier === 'stop' || d === 'stop') ? 'stop' : 'warn'; } catch (_) { /* keep */ }
     });
   } catch (_) { /* ignore */ }

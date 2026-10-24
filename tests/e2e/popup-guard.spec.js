@@ -140,3 +140,23 @@ test('on a user-trusted page the guard stands aside completely', async ({ contex
   expect(await tryOpen(page, 'http://' + SENTINEL + '/two')).toBe('window');
   await expect(toast(page)).toHaveCount(0);
 });
+
+// 0.15.0 final fix B1: the MAIN tier resets on a navigation the MAIN guard itself observed (pushState/replaceState/popstate).
+test('after an SPA route change away from a warned page the no-gesture window.open is allowed again; a forged empty tier event alone changes nothing', async ({ context }) => {
+  const page = await context.newPage();
+  await page.goto(BASE + '/popup-guard-warn.html');
+  await expect(page.locator('.scamshield-banner, .scamshield-interstitial').first()).toBeVisible({ timeout: 8000 });
+  const res = await page.evaluate(() => new Promise((resolve) => {
+    // Timers only: the evaluate's own activation lapses after 5 s, so every open below is a no-gesture open.
+    const out = {};
+    const open = () => { const w = window.open('http://127.0.0.1:5599/clean.html', '_blank'); return w ? 'opened' : 'refused'; };
+    setTimeout(() => { window.dispatchEvent(new CustomEvent('scamshield:tier', { detail: '' })); out.afterForge = open(); }, 5600);
+    setTimeout(() => {
+      history.pushState({}, '', '/benign-route');
+      document.body.innerHTML = '<h1>Acme Notes</h1><p>Your notes, everywhere.</p>'; // the SPA's new, benign view
+    }, 5900);
+    setTimeout(() => { out.afterRoute = open(); resolve(out); }, 7600);
+  }));
+  expect(res.afterForge).toBe('refused');
+  expect(res.afterRoute).toBe('opened');
+});
