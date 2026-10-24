@@ -834,12 +834,10 @@
           let level = null;
           if (r && typeof r === 'object') {
             if (r.level === 'block') level = 'danger';
-            else if (r.level === 'warn' || r.lookalike) level = 'caution';
-          } else if (SS.fuzzyBrandMatch && SS.allowlistBrandMatch && !SS.allowlistBrandMatch(host)) {
-            // SW unreachable: same local check as before, now with the riskTlds mirrored into settings.
-            const fuzzy = SS.fuzzyBrandMatch(host, serpRiskTlds);
-            if (fuzzy && (fuzzy.grade === 'strongest' || fuzzy.grade === 'strong')) level = 'caution';
+            else if (r.level === 'warn') level = 'caution';
           }
+          // (0.15.0 final) A brand lookalike alone no longer earns a dot (brand-owned sister domains such as
+          // github.careers matched); list verdicts only, and nothing when the SW is unreachable.
           if (level) { paintSerpBadge(a, level); painted++; }
         }
         if (painted && !serpDotLogged) { serpDotLogged = true; surface('serp-dot'); } // once per page load

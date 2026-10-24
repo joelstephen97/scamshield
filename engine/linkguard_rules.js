@@ -27,11 +27,14 @@
   }
 
   // Marking level for one SW result { level, popular, lookalike }. A popular host is never marked
-  // (doctrine: no heuristic-only interruptions on popular sites); a lookalike alone is a warn.
+  // (doctrine: no heuristic-only interruptions on popular sites). A brand lookalike ALONE never marks a link
+  // (0.15.0 final): the benign sweep showed it marking brand-owned sister domains (github.careers,
+  // github.community, go.thehub-amazon.com) on the brand's own pages. Only list verdicts mark; the page-level
+  // engine still judges a lookalike destination when it is opened.
   function levelFor(r) {
     if (!r || typeof r !== 'object' || r.popular) return null;
     if (r.level === 'block') return 'block';
-    if (r.level === 'warn' || r.lookalike) return 'warn';
+    if (r.level === 'warn') return 'warn';
     return null;
   }
 

@@ -31,10 +31,11 @@ test('destination(): unwraps, lowercases, and drops non-http(s), same-site and m
   assert.strictEqual(L.destination('https://other.example/', BASE, 'social.example').host, 'other.example');
 });
 
-test('levelFor(): block/warn pass through, popular never marks, a lookalike alone is warn', () => {
+test('levelFor(): block/warn pass through, popular never marks, a lookalike alone never marks', () => {
   assert.strictEqual(L.levelFor({ level: 'block', popular: false, lookalike: false }), 'block');
   assert.strictEqual(L.levelFor({ level: 'warn', popular: false, lookalike: false }), 'warn');
-  assert.strictEqual(L.levelFor({ level: null, popular: false, lookalike: true }), 'warn');
+  assert.strictEqual(L.levelFor({ level: null, popular: false, lookalike: true }), null, 'brand-owned sister domains (github.careers) look alike');
+  assert.strictEqual(L.levelFor({ level: 'warn', popular: false, lookalike: true }), 'warn');
   assert.strictEqual(L.levelFor({ level: 'block', popular: true, lookalike: false }), null, 'popular host is never marked');
   assert.strictEqual(L.levelFor({ level: null, popular: false, lookalike: false }), null);
   assert.strictEqual(L.levelFor(null), null);
