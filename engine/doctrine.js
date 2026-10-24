@@ -27,7 +27,11 @@
     'nrd-credential', 'brand-lookalike-credential',
     // (recall recovery) insecure-credential: visible login on a plain-http public page; tenant-credential: visible login
     // on a no-code builder tenant.
-    'insecure-credential', 'tenant-credential'];
+    'insecure-credential', 'tenant-credential',
+    // (0.15.0, Joel's call after bench Run 8) nrd-brand-host: a newly registered domain that carries a brand as its own
+    // label or hyphen token (vinted-offer.info, paypal.secure-x.com) or an IDN homograph, on a non-popular host. No form needed:
+    // lure and "offer" pages ask for nothing until the next click.
+    'nrd-brand-host'];
   // Feed intel still counts on popular sites: a validated list hit is not a heuristic.
   const FEED_FLAGS = ['feed-warn-verified', 'feed-warn-corroborated'];
   // Flags that need a credential field on the page. On a path-based publishing host (medium.com/@evil) the
@@ -157,6 +161,16 @@
   //       popular, host, strictMode, isTop, challengePage }
   // Flags that lift a safe verdict to suspicious (the evidence is host- or scheme-shaped, below the 0.5 line by itself).
   const LIFT_FLAGS = ['brand-lookalike-credential', 'insecure-credential', 'tenant-credential'];
+  // nrd-brand-host: needs BOTH the new-domain flag (an nrd.bloom hit) and a host-shaped brand claim that has no innocent
+  // reading - the brand as a whole label or hyphen token (fuzzy grade "strongest", rules a/b) or an IDN homograph. A one-edit
+  // typo (applebees.com) or a suffix swap is not enough. Never on a popular or brand-owned host (the fuzzy matcher skips the
+  // brand's own domains), and only for a verdict the scorers already made suspicious (NRD + URL evidence does that).
+  function nrdBrandHost(v, urlReasons, x) {
+    if (!v || v.level === 'safe') return false;
+    if (!(v.flags || []).includes('new-domain')) return false;
+    if (popularMode(x.popular, x.host) !== 'none' || isLocalOrIpHost(x.host)) return false;
+    return urlReasons.some((r) => r && (r.code === 'idnHomograph' || (r.code === 'brandFuzzyMatch' && r.grade === 'strongest')));
+  }
   function finalizeVerdict(verdict, i) {
     const x = i || {};
     let v = verdict || { level: 'safe', score: 0, reasons: [], reasonCodes: [], flags: [] };
@@ -182,6 +196,9 @@
         next.reasonCodes = add.map((r) => r.code).concat(next.reasonCodes || []);
       }
       v = next;
+    }
+    if (nrdBrandHost(v, urlReasons, x) && !(v.flags || []).includes('nrd-brand-host')) {
+      v = Object.assign({}, v, { flags: ['nrd-brand-host'].concat(v.flags || []) });
     }
     const tier = surfaceTier(v, { popular: x.popular, strictMode: x.strictMode === true, isTop: x.isTop, host: x.host });
     return { verdict: v, tier };

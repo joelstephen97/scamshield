@@ -51,7 +51,7 @@ for (const [name, verdict, c, expected] of table) {
 
 test('STOP_FLAGS and CONFIDENT_FLAGS are exported with the specified members', () => {
   assert.deepStrictEqual([...D.STOP_FLAGS].sort(), ['clickfix', 'delivery-fee-scam', 'fake-browser-update', 'feed-block', 'seed-phrase-harvest']);
-  assert.deepStrictEqual([...D.CONFIDENT_FLAGS].sort(), ['brand-impersonation-content', 'brand-impersonation-tenant', 'brand-impersonation-visual', 'brand-lookalike-credential', 'credential-form-foreign-domain', 'feed-warn-corroborated', 'feed-warn-verified', 'insecure-credential', 'nrd-credential', 'tenant-credential']);
+  assert.deepStrictEqual([...D.CONFIDENT_FLAGS].sort(), ['brand-impersonation-content', 'brand-impersonation-tenant', 'brand-impersonation-visual', 'brand-lookalike-credential', 'credential-form-foreign-domain', 'feed-warn-corroborated', 'feed-warn-verified', 'insecure-credential', 'nrd-brand-host', 'nrd-credential', 'tenant-credential']);
 });
 
 test('isUserContentHost: exact, subdomain, www, case-insensitive', () => {
@@ -107,4 +107,28 @@ test('effectivePopular', () => {
   assert.strictEqual(D.effectivePopular(true, 'www.google.com'), true);
   assert.strictEqual(D.effectivePopular(true, 'sites.google.com'), false);
   assert.strictEqual(D.effectivePopular(false, 'a.test'), false);
+});
+
+// (0.15.0, after bench Run 8) a new domain carrying a brand as a whole label or hyphen token warns without a form.
+test('nrd-brand-host: new domain + strongest brand token warns; every missing piece stays quiet', () => {
+  const fin = (verdict, o = {}) => D.finalizeVerdict(verdict, Object.assign({
+    urlRules: { score: 0.75, reasons: [{ code: 'brandFuzzyMatch', kind: 'brand', params: ['Vinted'], grade: 'strongest' }, { code: 'riskAbusedTld', kind: 'link' }] },
+    domRules: { score: 0, reasons: [] }, signals: {}, popular: false, host: 'vinted-offer.info', isTop: true
+  }, o));
+  const nrd = { level: 'suspicious', score: 0.95, reasons: [], reasonCodes: [], flags: ['new-domain'] };
+  const hit = fin(nrd);
+  assert.strictEqual(hit.tier, 'warn');
+  assert.ok(hit.verdict.flags.includes('nrd-brand-host'));
+  // no new-domain flag (an old site with the same name): quiet
+  assert.strictEqual(fin(Object.assign({}, nrd, { flags: [] })).tier, 'quiet');
+  // popular host: quiet
+  assert.strictEqual(fin(nrd, { popular: true }).tier, 'quiet');
+  // a one-edit typo (grade strong) is not enough without a form
+  assert.strictEqual(fin(nrd, { urlRules: { score: 0.5, reasons: [{ code: 'brandFuzzyMatch', kind: 'brand', grade: 'strong' }] } }).tier, 'quiet');
+  // a safe verdict is never lifted by this flag
+  assert.strictEqual(fin(Object.assign({}, nrd, { level: 'safe' })).tier, 'quiet');
+  // an IDN homograph counts
+  assert.strictEqual(fin(nrd, { urlRules: { score: 0.6, reasons: [{ code: 'idnHomograph', kind: 'brand' }] }, host: 'xn--pypal-4ve.com' }).tier, 'warn');
+  // never stop, even in the normal mode
+  assert.ok(!D.STOP_FLAGS.includes('nrd-brand-host'));
 });

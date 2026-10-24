@@ -63,6 +63,7 @@ function sha256Hex(buf) { return crypto.createHash('sha256').update(buf).digest(
 // (see engine/bloom.js's header comment for the spec this mirrors).
 const NRD_DOMAIN = 'nrd-fixture.example';           // bloom-positive, first-ever visit
 const NRD_ESTABLISHED_DOMAIN = 'nrd-established.example'; // bloom-positive but seen locally 40 days ago
+const NRD_BRAND_DOMAIN = 'vinted-offer-fixture.info'; // bloom-positive AND a brand hyphen token (nrd-brand-host, 0.15.0)
 function nrdOptimalParams(n, p) {
   const m = Math.ceil(-(n * Math.log(p)) / (Math.LN2 * Math.LN2));
   const mBits = Math.max(8, Math.ceil(m / 8) * 8);
@@ -158,7 +159,7 @@ test.beforeAll(() => {
   // positive; NRD_ESTABLISHED_DOMAIN's own suppression comes from a
   // pre-seeded storage.local firstSeen entry (set per-test, since context is
   // fresh per test), not from being absent here.
-  const nrdBloomBuf = buildNrdBloomFixture([NRD_DOMAIN, NRD_ESTABLISHED_DOMAIN], 0.01);
+  const nrdBloomBuf = buildNrdBloomFixture([NRD_DOMAIN, NRD_ESTABLISHED_DOMAIN, NRD_BRAND_DOMAIN], 0.01);
   fs.writeFileSync(path.join(FEED_DIR, 'nrd.bloom'), nrdBloomBuf);
 
   const meta = {
@@ -169,7 +170,7 @@ test.beforeAll(() => {
     prev: null,
     urls: { cdn: FEED_BASE_URL, fallback: FEED_BASE_URL },
     ttlHours: 6,
-    nrd: { file: 'nrd.bloom', sha256: sha256Hex(nrdBloomBuf), n: 2, mBits: nrdOptimalParams(2, 0.01).mBits, k: nrdOptimalParams(2, 0.01).k, windowDays: 14 }
+    nrd: { file: 'nrd.bloom', sha256: sha256Hex(nrdBloomBuf), n: 3, mBits: nrdOptimalParams(3, 0.01).mBits, k: nrdOptimalParams(3, 0.01).k, windowDays: 14 }
   };
   fs.writeFileSync(path.join(FEED_DIR, 'meta.json'), JSON.stringify(meta));
 });
@@ -297,7 +298,7 @@ test('a dyndns-listed host records suspicious-tier evidence but stays quiet: no 
 // 0.14.1 (Task 8 fix round): the feed/risk/NRD lookups are requested together,
 // but each keeps its own full timeout budget from where it is awaited. A cold
 // SW whose one-time Blockstore load takes 4 s (> the 3 s risk/NRD caps) must
-// still deliver the dyndns evidence — the budget must not start at send time.
+// still deliver the dyndns evidence ï¿½ the budget must not start at send time.
 test('slow SW (Blockstore.get +4s): risk-table evidence still reaches the verdict', async ({ context }) => {
   const sw = context.serviceWorkers()[0];
   await installFeed(sw);
@@ -413,6 +414,30 @@ test('an NRD-listed, first-time-visited domain WITH a password field (corroborat
   expect(got.tier).toBe('warn');
   expect(got.flags).toContain('nrd-credential');
   expect(got.codes).toContain('newDomainUnvisited');
+});
+
+test('a new domain carrying a brand hyphen token warns WITHOUT any form (nrd-brand-host, 0.15.0); the same page on an old domain stays quiet', async ({ context }) => {
+  const sw = context.serviceWorkers()[0];
+  await installFeed(sw);
+  const page = await context.newPage();
+  const cdp = await context.newCDPSession(page);
+  const ctxs = [];
+  cdp.on('Runtime.executionContextCreated', (e) => ctxs.push(e.context));
+  await cdp.send('Runtime.enable');
+  await page.goto(`https://${NRD_BRAND_DOMAIN}/clean.html`);
+  await page.waitForTimeout(4000);
+  await expect(page.locator('.scamshield-interstitial')).toHaveCount(0);
+  await expect(page.locator('.scamshield-banner.suspicious')).toBeVisible({ timeout: 8000 });
+  const ext = ctxs.find((x) => x.auxData && x.auxData.type === 'isolated' && /^chrome-extension:\/\//.test(x.origin || ''));
+  const r = await cdp.send('Runtime.evaluate', { contextId: ext.id, returnByValue: true, expression: 'JSON.stringify({ tier: window.__ssLastTier, flags: window.__ssLastVerdict.flags })' });
+  const got = JSON.parse(r.result.value);
+  expect(got.tier).toBe('warn');
+  expect(got.flags).toContain('nrd-brand-host');
+  // canary: the same brand-token shape on a domain NOT in nrd.bloom shows nothing
+  const old = await context.newPage();
+  await old.goto('https://vinted-deals-fixture.info/clean.html');
+  await old.waitForTimeout(2500);
+  await expect(old.locator('.scamshield-banner')).toHaveCount(0);
 });
 
 test('a clean domain (no nrd.bloom hit) gets no evidence chip', async ({ context }) => {
