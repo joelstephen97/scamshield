@@ -61,7 +61,23 @@ function render(info) {
   $('mistake').href = fp;
 }
 
+// (0.15.0 final fix) An escalated page IS the scam page's own history entry: history.back() would land straight
+// back on it (and the worker would escalate again). So Go back never walks history there: close this tab when the
+// window has others, otherwise park it on about:blank (a tab may be navigated there on Chrome and Firefox).
+async function leaveEscalated() {
+  try {
+    const t = await api.tabs.getCurrent();
+    if (t && t.id != null) {
+      let others = false;
+      try { others = (await api.tabs.query({ windowId: t.windowId })).length > 1; } catch (_) {}
+      if (others) { await api.tabs.remove(t.id); return; }
+      try { await api.tabs.update(t.id, { url: 'about:blank' }); return; } catch (_) {}
+    }
+  } catch (_) {}
+  location.replace('about:blank');
+}
 $('back').addEventListener('click', async () => {
+  if (escalated) { await leaveEscalated(); return; }
   if (history.length > 1) { history.back(); return; }
   try { const t = await api.tabs.getCurrent(); if (t && t.id != null) { await api.tabs.remove(t.id); return; } } catch (_) {}
   location.href = api.runtime.getURL('onboarding.html');

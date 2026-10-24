@@ -129,3 +129,24 @@ test('block page in Arabic: dir=rtl, the address stays left-to-right, and nothin
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   await sw.evaluate(() => setSettings({ uiLang: 'auto' }));
 });
+
+// ---- 0.15.0 final fix C1: an escalated page's "Go back" must not walk history back onto the scam page ----------
+test('escalated block page: "Go back" closes the tab when the window has others (never history.back)', async ({ context, extensionId }) => {
+  const keep = await context.newPage();
+  await keep.goto('http://localhost:5599/clean.html');
+  const page = await context.newPage();
+  await page.goto('http://localhost:5599/clean.html');
+  await page.goto(`chrome-extension://${extensionId}/blocked.html?r=escalated#${encodeURIComponent('http://localhost:5599/clean.html')}`);
+  expect(await page.evaluate(() => history.length)).toBeGreaterThan(1); // history.back() would have been possible
+  await page.locator('#back').click();
+  await expect.poll(() => page.isClosed(), { timeout: 5000 }).toBe(true);
+  await keep.close();
+});
+test('escalated block page: "Go back" in a lone tab parks on about:blank, not the scam page', async ({ context, extensionId }) => {
+  const page = await context.newPage();
+  await page.goto('http://localhost:5599/clean.html');
+  await page.goto(`chrome-extension://${extensionId}/blocked.html?r=escalated#${encodeURIComponent('http://localhost:5599/clean.html')}`);
+  for (const p of context.pages()) if (p !== page) await p.close().catch(() => {});
+  await page.locator('#back').click();
+  await expect.poll(() => page.url(), { timeout: 5000 }).toBe('about:blank');
+});
