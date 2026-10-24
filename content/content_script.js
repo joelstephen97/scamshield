@@ -454,7 +454,7 @@
         if (SS.isPanShaped && SS.isPanShaped(inp.value)) { secrets.push(inp.value); secrets.push(String(inp.value).replace(/\D/g, '')); }
       }
       if (!secrets.length) return;
-      const carried = SS.secretInExfilRequest(d.service, d.url, String(d.body || ''), secrets); // values of text-bearing params only (engine/exfil_rules.js)
+      const carried = typeof SS.secretInExfilRequest === 'function' && SS.secretInExfilRequest(d.service, d.url, String(d.body || ''), secrets); // values of text-bearing params only (engine/exfil_rules.js)
       if (!carried) return;
       e.preventDefault();
       const name = d.service === 'telegram' ? 'Telegram' : 'Discord';

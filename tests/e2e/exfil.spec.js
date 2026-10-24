@@ -31,7 +31,7 @@ async function loadKit(context, qs, file) {
 }
 async function typeAndSend(page) {
   await page.fill('#email', 'victim@example.com');
-  await page.fill('#pw', 'hunter2-Secret!');
+  await page.fill('#password', 'hunter2-Secret!');
   await page.click('#go');
 }
 

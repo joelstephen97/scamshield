@@ -62,7 +62,9 @@
   // Static corroboration (fix round 1). A bot URL in an inline script is not enough (shops hard-code one for order
   // or chat notifications). The SAME script text must also read input data: `.val(`, `.value`, `FormData(`, or the words
   // password / passwd / pass / pwd (word-bounded). A widget that sends only document.title / location.href has none.
-  const READS_INPUT = /\.val\s*\(|\.value\b|\bFormData\s*\(|\b(?:password|passwd|pass|pwd)\b/i;
+  // Bare `.value` and bare `pass` are NOT corroboration (select boxes, "season pass"): the static flag is only a warn
+  // banner and the runtime guard is the real protection, so precision wins here.
+  const READS_INPUT = /\.val\s*\(|\bFormData\s*\(|\b(?:password|passwd|pwd)\b/i;
   function exfilCredentialScript(text) {
     const svc = exfilEndpointInText(text);
     if (!svc) return null;
@@ -71,7 +73,7 @@
   // Only classic JS blocks are scanned: no type, or a JavaScript MIME type / module. JSON, ld+json, templates are data.
   const JS_TYPES = ['', 'text/javascript', 'module', 'application/javascript', 'text/ecmascript', 'application/ecmascript'];
   function isJsScriptType(type) {
-    return JS_TYPES.indexOf(String(type == null ? '' : type).trim().toLowerCase()) !== -1;
+    return JS_TYPES.indexOf(String(type == null ? '' : type).split(';')[0].trim().toLowerCase()) !== -1;
   }
 
   // Runtime matching (fix round 1). A typed secret counts only inside the VALUE of a text-bearing parameter of the
@@ -118,10 +120,27 @@
         if (j && typeof j === 'object') { for (const k of Object.keys(j)) take(k, j[k]); parsed = true; }
       } catch (_) { /* raw fallback below */ }
     }
-    if (!parsed && /^[^=&]+=/.test(b)) {
+    if (!parsed && /^[\w.%+-]+=/.test(b)) {
       try { for (const [k, v] of new URLSearchParams(b)) take(k, v); parsed = true; } catch (_) { /* raw fallback */ }
+      if (parsed) {
+        // Also the RAW, undecoded value of each text param (a client that did not percent-encode '+' or '%'), and its
+        // '+' -> space variant.
+        for (const part of b.split('&')) {
+          const eq = part.indexOf('=');
+          if (eq < 1) continue;
+          let k = part.slice(0, eq); try { k = decodeURIComponent(k.replace(/\+/g, ' ')); } catch (_) { /* raw key */ }
+          if (keys.indexOf(k.toLowerCase()) === -1) continue;
+          const rv = part.slice(eq + 1);
+          out.push(rv, rv.replace(/\+/g, ' '));
+        }
+      }
     }
-    if (!parsed) out.push(b);
+    if (!parsed) {
+      // Raw fallback: a numeric password must never equal the chat id or the parse mode.
+      out.push(b.replace(/(?:chat_id|parse_mode)=[^&\s]*/gi, ' ')
+        .replace(/"(?:chat_id|parse_mode)"\s*:\s*(?:"[^"]*"|[^,}\s]*)/gi, ' ')
+        .replace(/name="(?:chat_id|parse_mode)"[ \t]*\r?\n(?:[^\r\n]*\r?\n)?[^\r\n]*/gi, ' '));
+    }
     return out;
   }
   function secretInExfilRequest(service, url, body, secrets) {

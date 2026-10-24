@@ -127,7 +127,7 @@
         if (typeof URLSearchParams === 'function' && b instanceof URLSearchParams) return b.toString().slice(0, 8192);
         if (typeof FormData === 'function' && b instanceof FormData) {
           let out = '';
-          for (const [k, v] of b.entries()) { out += k + '=' + (typeof v === 'string' ? v : '') + '&'; if (out.length >= 8192) break; }
+          for (const [k, v] of b.entries()) { out += encodeURIComponent(k) + '=' + encodeURIComponent(typeof v === 'string' ? v : '') + '&'; if (out.length >= 8192) break; }
           return out.slice(0, 8192);
         }
       } catch (_) { /* '' */ }
