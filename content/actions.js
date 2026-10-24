@@ -862,7 +862,9 @@
       const back = button('ss-primary', t('linkGoBack', null, 'Go back'));
       const open = button('ss-danger-ghost', t('linkOpenAnyway', null, 'Open anyway'));
       onTrustedClick(back, () => c.close());
-      onTrustedClick(open, () => { c.close(); if (typeof o.onOpen === 'function') o.onOpen(); });
+      // Same arm delay as the other risky controls (Trust, 'This site is fine'): a click that lands within 300 ms of the
+      // dialog appearing (a double-click on the link, a click already in flight) is ignored.
+      armedClick(open, () => { c.close(); if (typeof o.onOpen === 'function') o.onOpen(); });
       actions.append(back, open);
       card.append(actions); dlg.append(card);
       return { card, safe: back };
