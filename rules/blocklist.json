@@ -98,20 +98,6 @@
     }
   },
   {
-    "id": 8,
-    "priority": 1,
-    "action": {
-      "type": "block"
-    },
-    "condition": {
-      "urlFilter": "||edgeone.dev^",
-      "resourceTypes": [
-        "main_frame",
-        "sub_frame"
-      ]
-    }
-  },
-  {
     "id": 9,
     "priority": 1,
     "action": {

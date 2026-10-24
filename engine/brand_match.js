@@ -237,28 +237,10 @@
     return !(b && b.ccPolicy === 'closed');
   }
 
-  // (recall recovery, R2) A brand token hyphen-joined with a phishing keyword inside one label of the host
-  // (vinted-offer.info, paypal-login.us, secure-paypal.net): the host itself is the claim, no DOM needed. Word segments
-  // of each label are split on hyphens; the brand token is a candidate brand key of >= 4 letters (homoglyph-aware).
-  // A host on the brand's own allowlist never matches.
-  const PHISH_KEYWORDS = ['offer', 'verify', 'secure', 'login', 'account', 'support', 'refund', 'update', 'billing', 'wallet', 'claim'];
-  function brandKeywordHost(host) {
-    const h = String(host || '').toLowerCase().replace(/\.+$/, '');
-    if (!h || allowlistBrandMatch(h)) return null;
-    const parts = registrableParts(h);
-    const labels = h.split('.').filter(Boolean);
-    const domainLabelCount = parts.domain ? parts.domain.split('.').length : labels.length;
-    const subLabels = labels.slice(0, Math.max(0, labels.length - domainLabelCount));
-    for (const lab of subLabels.concat(parts.sld ? [parts.sld] : [])) {
-      const tokens = lab.split('-').filter(Boolean);
-      if (tokens.length < 2 || !tokens.some((t) => PHISH_KEYWORDS.includes(t))) continue;
-      for (const { brand } of candidates()) {
-        if (brand.length < 4 || INJECTION_TOKEN_EXCLUDE.has(brand)) continue;
-        if (tokens.some((t) => tokenMatchesBrand(t, brand))) return { brand, label: lab };
-      }
-    }
-    return null;
-  }
+  // REJECTED (recall recovery, R2): a "brand token + hyphen + phishing keyword" host rule (vinted-offer.info,
+  // paypal-login.us). It would warn on the URL alone, and brand-owned sister domains have exactly that shape
+  // (rakuten-wallet.co.jp, secure-afterpay.com.au, apple-support-group.org). Its only bench case, vinted-offer.info,
+  // is already recovered with a visible credential field (brand-lookalike-credential). Net-negative for a quiet release.
 
   const GRADE_RANK = { strongest: 3, strong: 2, weak: 1 };
 
@@ -391,7 +373,7 @@
   return {
     MIN_BRAND_LEN, GRADE_RANK, TENANT_TOKEN_EXCLUDE, INJECTION_TOKEN_EXCLUDE,
     allowlistBrandMatch, fuzzyForm, damerauLevenshtein, homoglyphVariants, fuzzyBrandMatch,
-    brandForeignSuffix, tenantBrandToken, isRegionalSite, ABUSED_CCTLDS, brandKeywordHost, PHISH_KEYWORDS,
+    brandForeignSuffix, tenantBrandToken, isRegionalSite, ABUSED_CCTLDS,
     _resetTrieForTest, _resetCandidatesForTest
   };
 });

@@ -38,24 +38,16 @@ test('R1: IPs, localhost, intranet suffixes, single labels and popular hosts nev
   assert.strictEqual(D.isLocalOrIpHost('shop.example.com'), false);
 });
 
-// ---- R2 brand-keyword-host -----------------------------------------------------------------
-test('R2: brand token + hyphen + phishing keyword host warns with no DOM', () => {
-  for (const h of ['vinted-offer.info', 'paypal-login.us', 'secure-paypal.net', 'account-paypal.info']) {
+// ---- R2 was rejected (see engine/brand_match.js): no URL-only brand+keyword rule ---------------------------
+test('R2 rejected: brand-owned sister domains and vinted-offer.info without a login stay quiet; with a visible login it still warns', () => {
+  for (const h of ['rakuten-wallet.co.jp', 'secure-afterpay.com.au', 'apple-support-group.org', 'paypal-login.us']) {
     const r = runPipeline({ url: 'https://' + h + '/', riskTlds: {} });
-    assert.ok(r.verdict.flags.includes('brand-keyword-host'), h);
-    assert.strictEqual(r.tier, 'warn', h);
+    assert.ok(!r.verdict.flags.includes('brand-keyword-host'), h);
   }
-});
-test('R2: popular, brand-owned and non-matching shapes stay quiet', () => {
-  assert.strictEqual(tier({ url: 'https://apple-support-group.org/', popular: true }), 'quiet'); // popular registrables are shielded
-  assert.strictEqual(tier({ url: 'https://amazon-value-service.com/', popular: true }), 'quiet');
-  for (const h of ['www.paypal.com', 'support.paypal.com', 'paypal-community.com', 'my-account-page.com', 'login.example.org', 'vinted.com'])
-    assert.ok(!runPipeline({ url: 'https://' + h + '/' }).verdict.flags.includes('brand-keyword-host'), h);
-});
-test('R2: the engagement-suppressed verdict is not re-lifted', () => {
-  const urlRules = require('../../engine/heuristics.js').scoreUrl('https://vinted-offer.info/');
-  const out = D.finalizeVerdict({ level: 'safe', score: 0, reasons: [], reasonCodes: [], flags: [], suppressed: 'engagement' }, { urlRules, host: 'vinted-offer.info' });
-  assert.strictEqual(out.tier, 'quiet');
+  assert.strictEqual(tier({ url: 'https://rakuten-wallet.co.jp/', riskTlds: {} }), 'quiet');
+  assert.strictEqual(tier({ url: 'https://secure-afterpay.com.au/', riskTlds: {} }), 'quiet');
+  const v = runPipeline({ url: 'https://vinted-offer.info/210558470', signals: Object.assign({ titleBrand: 'Vinted - Sign in' }, PW), riskTlds: {} });
+  assert.strictEqual(v.tier, 'warn');
 });
 
 // ---- R3 tenant-credential + elementor.cloud ------------------------------------------------
@@ -82,5 +74,6 @@ test('R4: elementor.cloud (and the other builder apexes) are tenant platforms an
     assert.ok(!B.has(s, h40(a)), a + ' must not be popular');
   }
   assert.ok(C.BUILDER_TENANT_PLATFORMS.every((a) => C.TENANT_PLATFORMS.includes(a)));
-  assert.ok(!C.TENANT_PLATFORMS.includes('edgeone.dev')); // statically blocked as a whole platform in rules/blocklist.json
+  assert.ok(C.TENANT_PLATFORMS.includes('edgeone.dev')); // its whole-platform static rule was removed (consistent with Task 7)
+  assert.ok(!B.has(s, h40('edgeone.dev')));
 });

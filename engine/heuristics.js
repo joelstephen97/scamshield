@@ -118,9 +118,7 @@
       if (tldHit) { score += 0.20; riskScore += 0.20; reasons.push({ code: 'riskAbusedTld', kind: 'link', params: [tldHit.tld] }); }
     }
 
-    // (recall recovery, R2) metadata for engine/doctrine.js: a brand + phishing-keyword host (no score of its own).
-    const brandKeyword = BM && BM.brandKeywordHost ? BM.brandKeywordHost(host) : null;
-    return { score: clamp(score), reasons, riskScore, brandKeyword };
+    return { score: clamp(score), reasons, riskScore };
   }
 
   // Canonical implementation lives in constants.js; re-exported here for API compat.

@@ -646,7 +646,7 @@
     'framer.website', 'framer.app', 'weeblysite.com', 'typedream.app', 'webcindario.com', 'dynv6.net', 'us.cc', 'ct.ws', 'za.com',
     'happysrv.de', 'my.id', 'dothome.co.kr', 'wasmer.app', 'craftum.io', 'contabostorage.com',
     // (recall recovery, R3/R4) no-code builder apexes: elementor.cloud sat in the popular set and shielded every tenant.
-    'elementor.cloud', 'b12sites.com', 'kleap.io', 'teleporthq.app', 'framer.media', 'framer.ai', 'relumesite.ai', 'created.app', 'grigora.app'
+    'elementor.cloud', 'edgeone.dev', 'b12sites.com', 'kleap.io', 'teleporthq.app', 'framer.media', 'framer.ai', 'relumesite.ai', 'created.app', 'grigora.app'
   ];
   // (recall recovery, R3) Tenants of these no-code BUILDERS are almost all brochure sites, so a visible login on one is a
   // confident phishing signal. Dev hosts (github.io, vercel.app, netlify.app, pages.dev, workers.dev, onrender.com,

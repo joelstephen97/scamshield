@@ -25,9 +25,9 @@
   const CONFIDENT_FLAGS = ['feed-warn-verified', 'feed-warn-corroborated', 'brand-impersonation-content', 'brand-impersonation-visual', 'brand-impersonation-tenant', 'credential-form-foreign-domain',
     // (0.15.0) added by credentialFlags(): corroborated, non-popular evidence + a credential field.
     'nrd-credential', 'brand-lookalike-credential',
-    // (recall recovery) insecure-credential: visible login on a plain-http public page; brand-keyword-host: vinted-offer.info
-    // shape; tenant-credential: visible login on a no-code builder tenant.
-    'insecure-credential', 'brand-keyword-host', 'tenant-credential'];
+    // (recall recovery) insecure-credential: visible login on a plain-http public page; tenant-credential: visible login
+    // on a no-code builder tenant.
+    'insecure-credential', 'tenant-credential'];
   // Feed intel still counts on popular sites: a validated list hit is not a heuristic.
   const FEED_FLAGS = ['feed-warn-verified', 'feed-warn-corroborated'];
   // Flags that need a credential field on the page. On a path-based publishing host (medium.com/@evil) the
@@ -123,12 +123,6 @@
     return false;
   }
 
-  // R2 (recall recovery): a brand token hyphen-joined with a phishing keyword in the host. No DOM, popular hosts skipped.
-  function hostFlags(i) {
-    if (!i || !i.brandKeyword || popularMode(i.popular, i.host) === 'full') return [];
-    return ['brand-keyword-host'];
-  }
-
   function surfaceTier(verdict, ctx) {
     const c = ctx || {};
     if (!verdict || verdict.level === 'safe') return 'quiet';
@@ -162,22 +156,21 @@
   // i = { urlRules, domRules, signals: { hasVisiblePasswordField, hasVisibleCardInput },
   //       popular, host, strictMode, isTop, challengePage }
   // Flags that lift a safe verdict to suspicious (the evidence is host- or scheme-shaped, below the 0.5 line by itself).
-  const LIFT_FLAGS = ['brand-lookalike-credential', 'insecure-credential', 'brand-keyword-host', 'tenant-credential'];
+  const LIFT_FLAGS = ['brand-lookalike-credential', 'insecure-credential', 'tenant-credential'];
   function finalizeVerdict(verdict, i) {
     const x = i || {};
     let v = verdict || { level: 'safe', score: 0, reasons: [], reasonCodes: [], flags: [] };
     const urlReasons = (x.urlRules && x.urlRules.reasons) || [];
     const domReasons = (x.domRules && x.domRules.reasons) || [];
-    if (v.level !== 'safe' && !(v.flags || []).length && x.challengePage === true && !urlReasons.some(isLookalikeReason) && !(x.urlRules && x.urlRules.brandKeyword)) {
+    if (v.level !== 'safe' && !(v.flags || []).length && x.challengePage === true && !urlReasons.some(isLookalikeReason)) {
       v = Object.assign({}, v, { level: 'safe', reasons: [], reasonCodes: [], suppressed: 'challenge' });
     }
     const sg = x.signals || {};
-    const hostEv = hostFlags({ brandKeyword: x.urlRules && x.urlRules.brandKeyword, popular: x.popular, host: x.host });
     const credFlags = credentialFlags({
       verdictFlags: v.flags, urlReasons, urlScore: x.urlRules && x.urlRules.score, domReasons,
       strictLookalike: true, corroborated: lookalikeCorroborated(x, v, urlReasons, domReasons),
       hasPasswordField: !!(sg.hasVisiblePasswordField || sg.hasVisibleCardInput), hasLoginPair: sg.hasLoginPair, popular: x.popular, host: x.host
-    }).concat(hostEv);
+    });
     if (credFlags.length && v.suppressed !== 'engagement') {
       const next = Object.assign({}, v, { flags: credFlags.concat((v.flags || []).filter((f) => !credFlags.includes(f))) });
       if (credFlags.some((f) => LIFT_FLAGS.includes(f)) && next.level === 'safe') {
