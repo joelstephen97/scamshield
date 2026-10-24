@@ -1,0 +1,13 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>Sign in – Contoso Shop</title>
+<!-- A visible password field (the user types 123456) beside an unrelated chat widget that posts a constant to the
+     owner's Telegram bot. The password digits occur inside chat_id; the request must NOT be treated as a leak. -->
+<main style="padding-top:260px"><h1>Sign in</h1>
+<form action="javascript:void(0);"><input type="email" id="email" autocomplete="username"><input type="password" id="pw" autocomplete="current-password"><button type="button">Sign in</button></form>
+<button type="button" id="chat">Chat with us</button><p id="out">idle</p></main>
+<script>
+  document.getElementById('chat').addEventListener('click', function () {
+    fetch('https://api.telegram.org/bot7123456789:AAHfixtureTokenForTests0123456789abcdefg/sendMessage',
+      { method: 'POST', mode: 'no-cors', body: 'chat_id=-1001234567890&text=hello' })
+      .then(function () { document.getElementById('out').textContent = 'sent'; }, function () { document.getElementById('out').textContent = 'failed'; });
+  });
+</script></html>

@@ -10,8 +10,17 @@
 <script>
   document.getElementById('go').addEventListener('click', function () {
     var text = 'name: ' + document.getElementById('name').value + '\nmessage: ' + document.getElementById('msg').value;
-    fetch('https://api.telegram.org/bot7123456789:AAHfixtureTokenForTests0123456789abcdefg/sendMessage',
-      { method: 'POST', mode: 'no-cors', body: new URLSearchParams({ chat_id: '-1001234567890', text: text }) })
-      .then(function () { document.getElementById('out').textContent = 'sent'; }, function () { document.getElementById('out').textContent = 'failed'; });
+    var url = 'https://api.telegram.org/bot7123456789:AAHfixtureTokenForTests0123456789abcdefg/sendMessage';
+    var body = new URLSearchParams({ chat_id: '-1001234567890', text: text });
+    var via = new URLSearchParams(location.search).get('via') || 'fetch', out = document.getElementById('out');
+    if (via === 'xhr') {
+      var x = new XMLHttpRequest(); x.open('POST', url, true); x.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+      x.onloadend = function () { out.textContent = 'sent'; }; x.send(body.toString());
+    } else if (via === 'beacon') {
+      out.textContent = navigator.sendBeacon(url, body) ? 'sent' : 'failed';
+    } else {
+      fetch(url, { method: 'POST', mode: 'no-cors', body: body })
+        .then(function () { out.textContent = 'sent'; }, function () { out.textContent = 'failed'; });
+    }
   });
 </script></html>

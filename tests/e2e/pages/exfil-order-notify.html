@@ -1,0 +1,9 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>Sign in – Contoso Shop</title>
+<!-- A real login form plus a separate inline order-notification script that posts the page URL to the owner's
+     Telegram bot. No input value is read anywhere in the script, so there is no static warning. -->
+<main style="padding-top:260px"><h1>Sign in</h1>
+<form action="/account/login" method="post"><input type="email" name="email" autocomplete="username"><input type="password" name="pw" autocomplete="current-password"><button type="submit">Sign in</button></form></main>
+<script>
+  fetch('https://api.telegram.org/bot7123456789:AAHfixtureTokenForTests0123456789abcdefg/sendMessage',
+    { method: 'POST', mode: 'no-cors', body: 'chat_id=-1001234567890&text=' + encodeURIComponent('visit ' + location.href) });
+</script></html>

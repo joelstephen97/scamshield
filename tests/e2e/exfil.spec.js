@@ -91,12 +91,12 @@ test('(b3) a Discord webhook is blocked the same way and named in the stop page'
   expect((await botHits('discord.com')).length).toBe(0);
 });
 
-test('(c) a contact form with no password that messages a Telegram bot: no surface, the request goes out', async ({ context }) => {
+for (const via of ['fetch', 'xhr', 'beacon']) test(`(c) a contact form with no password that messages a Telegram bot (${via}): no surface, the request goes out`, async ({ context }) => {
   const sw = context.serviceWorkers()[0];
   await sw.evaluate(() => chrome.storage.local.remove('surfaceLog'));
   await resetHits();
   const page = await context.newPage();
-  await page.goto(BASE_HTTPS + '/exfil-contact-benign.html');
+  await page.goto(BASE_HTTPS + '/exfil-contact-benign.html?via=' + via);
   await page.waitForTimeout(2500);
   await expect(page.locator('.scamshield-banner')).toHaveCount(0);
   await page.fill('#name', 'Sam');
@@ -153,4 +153,33 @@ test('(f) a trusted site is not exempt: a typed password still cannot leave for 
       await chrome.storage.local.set({ settings: Object.assign({}, cur, { allowlist: [] }) });
     });
   }
+});
+
+test('(g) a typed 123456 is not matched against chat_id: a chat widget on a page with a password field goes out (1 hit)', async ({ context }) => {
+  const sw = context.serviceWorkers()[0];
+  await sw.evaluate(() => chrome.storage.local.remove('surfaceLog'));
+  await resetHits();
+  const page = await context.newPage();
+  await page.goto(BASE_HTTPS + '/exfil-widget-pw.html');
+  await page.waitForTimeout(2500);
+  await page.fill('#pw', '123456');
+  await page.click('#chat');
+  await expect(page.locator('#out')).toHaveText('sent');
+  await expect.poll(async () => (await botHits('api.telegram.org')).length).toBe(1);
+  await expect(page.locator('.scamshield-interstitial')).toHaveCount(0);
+  await expect(page.locator('.scamshield-banner')).toHaveCount(0);
+  expect(await surfaceKinds(sw)).toEqual([]);
+});
+
+test('(h) a login form plus an order-notification script that posts location.href to a bot: no banner (static flag needs an input read)', async ({ context }) => {
+  const sw = context.serviceWorkers()[0];
+  await sw.evaluate(() => chrome.storage.local.remove('surfaceLog'));
+  await resetHits();
+  const page = await context.newPage();
+  await page.goto(BASE_HTTPS + '/exfil-order-notify.html');
+  await page.waitForTimeout(2500);
+  await expect(page.locator('.scamshield-banner')).toHaveCount(0);
+  await expect(page.locator('.scamshield-interstitial')).toHaveCount(0);
+  await expect.poll(async () => (await botHits('api.telegram.org')).length).toBe(1);
+  expect(await surfaceKinds(sw)).toEqual([]);
 });

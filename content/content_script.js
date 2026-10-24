@@ -454,10 +454,7 @@
         if (SS.isPanShaped && SS.isPanShaped(inp.value)) { secrets.push(inp.value); secrets.push(String(inp.value).replace(/\D/g, '')); }
       }
       if (!secrets.length) return;
-      let carried = SS.bodyCarriesSecret(String(d.body || ''), secrets) || SS.bodyCarriesSecret(d.url, secrets);
-      if (!carried) { // Telegram GET ?text=<secret>: compare against the decoded query values too
-        try { for (const [, v] of new URL(d.url).searchParams) if (secrets.some((s) => v.indexOf(s) !== -1)) { carried = true; break; } } catch (_) { /* url judged above */ }
-      }
+      const carried = SS.secretInExfilRequest(d.service, d.url, String(d.body || ''), secrets); // values of text-bearing params only (engine/exfil_rules.js)
       if (!carried) return;
       e.preventDefault();
       const name = d.service === 'telegram' ? 'Telegram' : 'Discord';
@@ -692,10 +689,11 @@
       try {
         let left = SS.EXFIL_TEXT_CAP || 300 * 1024;
         for (const sc of document.querySelectorAll('script:not([src])')) {
+          if (SS.isJsScriptType && !SS.isJsScriptType(sc.getAttribute('type'))) continue; // JSON / templates are data
           if (left <= 0) break;
           const txt = (sc.textContent || '').slice(0, left);
           left -= txt.length;
-          exfilScript = SS.exfilEndpointInText(txt);
+          exfilScript = SS.exfilCredentialScript ? SS.exfilCredentialScript(txt) : null; // endpoint + an input-value read in the SAME script
           if (exfilScript) break;
         }
       } catch (_) { exfilScript = null; }

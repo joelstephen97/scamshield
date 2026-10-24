@@ -1,5 +1,5 @@
 // Runs in the MAIN world (page JS context) to hook page-level APIs the isolated
-// content script cannot see. It never reads page data; it only emits cancelable
+// content script cannot see. It reads only request URLs (and, for Telegram / Discord bot endpoints alone, the request body); it only emits cancelable
 // signals the isolated content script decides to act on.
 (function () {
   'use strict';
@@ -159,7 +159,7 @@
       const nativeXhrOpen = XHR.open, nativeXhrSend = XHR.send;
       const urls = new WeakMap();
       XHR.open = function (method, url) {
-        try { urls.set(this, url); } catch (_) { /* ignore */ }
+        try { urls.set(this, url); delete this.readyState; delete this.status; } catch (_) { /* ignore */ } // drop the shadow props of an earlier blocked send
         return nativeXhrOpen.apply(this, arguments);
       };
       XHR.send = function (body) {
