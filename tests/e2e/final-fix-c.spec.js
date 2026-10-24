@@ -93,3 +93,22 @@ test('C10: the review ask fails closed when the surface log cannot be read', asy
   await popup2.waitForTimeout(1500);
   await expect(popup2.locator('#askcard')).toBeHidden();
 });
+
+test('C-F2: "Don\'t warn me on this site" in a cross-origin iframe mutes the TOP site and the ack shows', async ({ context }) => {
+  const sw = context.serviceWorkers()[0];
+  await sw.evaluate(() => setSettings({ mutedWarnings: {} }));
+  const page = await context.newPage();
+  await page.goto(BASE + '/cred-frame-host.html');
+  const fr = page.frameLocator('#fr');
+  await page.waitForTimeout(2000);
+  await fr.locator('#cardnumber').fill('4111 1111 1111 1111');
+  await fr.locator('button[type="submit"]').click();
+  await expect(fr.locator('.scamshield-toast')).toBeVisible({ timeout: 8000 });
+  await fr.locator('.scamshield-toast .ss-mute').click();
+  await expect(fr.locator('.scamshield-ack')).toContainText(/localhost/, { timeout: 5000 });
+  const muted = await sw.evaluate(async () => (await getSettings()).mutedWarnings);
+  expect(Object.keys(muted)).toEqual(['localhost']);
+  expect(muted.localhost.credpost).toBeTruthy();
+  await sw.evaluate(() => setSettings({ mutedWarnings: {} }));
+  await page.close();
+});

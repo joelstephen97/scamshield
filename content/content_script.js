@@ -26,9 +26,12 @@
   // lean pass (URL + DOM rules + form guard); page-level UI stays top-frame.
   const IS_TOP = (() => { try { return window === window.top; } catch (_) { return false; } })();
 
+  // (0.15.0 final fix 2) One id per loaded document (renewed on an SPA route change). Every verdict report carries it so the
+  // worker can tell "the same page reporting again" (tiers only rise) from "the page was loaded again" (state resets).
+  let LOAD_ID = Math.random().toString(36).slice(2) + Date.now().toString(36);
   function send(type, extra) {
     return new Promise((res) => {
-      try { api.runtime.sendMessage(Object.assign({ type }, extra), (r) => res(r)); }
+      try { api.runtime.sendMessage(Object.assign({ type }, extra, type === 'reportVerdict' ? { loadId: LOAD_ID } : null), (r) => res(r)); }
       catch (_) { res(null); }
     });
   }
@@ -48,7 +51,7 @@
   function reportMistake(opts) {
     // (0.15.0, Task 18) opts.quiet: the implicit report behind "This site is fine" must not open a GitHub tab.
     send('userReport', { label: 'false_positive', quiet: !!(opts && opts.quiet === true) });
-    if (!(opts && opts.explicit === true)) send('falseAlarm', { domain: scopeOf(location.hostname) }); // the ack's own button follows a quiet report that already counted
+    if (!(opts && opts.explicit === true)) send('falseAlarm', { domain: scopeOf(siteHost()) }); // the ack's own button follows a quiet report that already counted
   }
 
   function needsPageAnalysis(signals, urlRules, domRules) {
@@ -121,18 +124,17 @@
     return keys.some((k) => ((settings && settings.allowlist) || []).includes(k));
   }
   // The top page's host as seen from a sub-frame: ancestorOrigins (Chrome), else the referrer.
-  function topHostFromFrame() {
-    try { const ao = location.ancestorOrigins; if (ao && ao.length) return new URL(ao[ao.length - 1]).hostname; } catch (_) {}
-    try { if (document.referrer) return new URL(document.referrer).hostname; } catch (_) {}
-    return '';
-  }
+  const siteHost = () => (SS.actions && SS.actions.siteHost ? SS.actions.siteHost() : location.hostname);
+  // (shared with actions.js, which owns the one implementation)
+  function topHostFromFrame() { return (SS.actions && SS.actions.topHostFromFrame && SS.actions.topHostFromFrame()) || ''; }
 
   // "Don't warn me on this site" (0.14.0): one implementation for every toast kind.
   function muteHandler(kind) {
     return async () => {
-      const domain = scopeOf(location.hostname);
-      await send('muteWarning', { domain, kind, via: kind + '-toast' });
-      if (SS.actions && SS.actions.ackSurface) SS.actions.ackSurface({ text: t('ackMuted', [bidi(domain)], "ScamShield won't show this warning on " + domain + ' again.'), onUndo: () => send('unmuteWarning', { domain, kind }) });
+      // In a sub-frame the site is the TOP page's host (the worker checks it against the tab's own URL).
+      const domain = scopeOf(siteHost());
+      const r = await send('muteWarning', { domain, kind, via: kind + '-toast' });
+      if (r && r.ok && SS.actions && SS.actions.ackSurface) SS.actions.ackSurface({ text: t('ackMuted', [bidi(domain)], "ScamShield won't show this warning on " + domain + ' again.'), onUndo: () => send('unmuteWarning', { domain, kind }) });
     };
   }
 
@@ -304,7 +306,7 @@
       try { await navigator.clipboard.writeText(t('guardClipboardBlockedPayload', null, 'Blocked by ScamShield — this site put a dangerous command on your clipboard. Do not paste it anywhere.')); } catch (_) { /* overwrite is best-effort */ }
       SS.actions.dangerInterstitial({ level: 'dangerous', reasons: cf.reasons, flags: cf.flags }, { onLeave: () => send('leaveTab'), onReport: reportMistake });
       surface('interstitial');
-      send('reportVerdict', { verdict: { level: 'dangerous', score: 0.95, reasons: cf.reasons, reasonCodes: cf.reasons.map((x) => x.code), flags: cf.flags, modelUsed: false }, subframe: !IS_TOP, tier: 'stop', rescan: true });
+      send('reportVerdict', { verdict: { level: 'dangerous', score: 0.95, reasons: cf.reasons, reasonCodes: cf.reasons.map((x) => x.code), flags: cf.flags, modelUsed: false }, subframe: !IS_TOP, tier: 'stop' });
       send('bumpThreats', { kind: 'clipboard' });
       return;
     }
@@ -348,7 +350,7 @@
         try { window.dispatchEvent(new CustomEvent('scamshield:techscam-escape')); } catch (_) {}
         send('leaveTab');
       }, reportMistake);
-      send('reportVerdict', { verdict: { level: 'dangerous', score: r.score, reasons: r.reasons, reasonCodes: r.reasons.map((x) => x.code), flags: r.flags || [], modelUsed: false }, subframe: !IS_TOP, tier: 'stop', rescan: true });
+      send('reportVerdict', { verdict: { level: 'dangerous', score: r.score, reasons: r.reasons, reasonCodes: r.reasons.map((x) => x.code), flags: r.flags || [], modelUsed: false }, subframe: !IS_TOP, tier: 'stop' });
       send('bumpThreats', { kind: 'techscam' });
     }
   });
@@ -1430,7 +1432,7 @@
         iconMatches: signals.iconMatches || [], detectors: ['page']
       };
     } catch (_) { report = null; }
-    await send('reportVerdict', { verdict, report, subframe: !IS_TOP, tier, rescan });
+    await send('reportVerdict', { verdict, report, subframe: !IS_TOP, tier });
     // A warning the user already dismissed on this page stays dismissed (the tier and badge still update above), except that a
     // jump to 'stop' still shows its interstitial. An explicit pause/trust is handled earlier: a paused site returns silently.
     if (rescan && pageDismissed && tier !== 'stop') { formGuardReasons.splice(0, formGuardReasons.length, ...(verdict.reasons || [])); return; }
@@ -1594,6 +1596,7 @@
   window.addEventListener('scamshield:navigate', () => {
     if (location.href === lastUrl) return;
     lastUrl = location.href;
+    LOAD_ID = Math.random().toString(36).slice(2) + Date.now().toString(36);
     clearTimeout(navTimer);
     // A same-document SPA re-search (e.g. a new query on a search engine
     // that doesn't hard-navigate) gets a fresh badge budget — the old result

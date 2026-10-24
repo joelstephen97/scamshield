@@ -97,12 +97,58 @@ test('blocked.js: an escalated page never calls history.back(); it closes the ta
   assert.ok(!/history\.back/.test(leave));
   assert.ok(/tabs\.remove/.test(leave) && /about:blank/.test(leave));
 });
-test('reportVerdict: a main-scan top-frame report resets fv.tier; rescans and additive detectors only raise it', () => {
+const V = (level) => ({ level, score: 0, reasons: [] });
+const fresh = () => ({ url: 'https://x.example/', top: null, sub: null, counted: false, loadId: '' });
+test('mergeFrameReport: an early additive stop is not wiped by the later quiet main scan of the same load', () => {
+  const fv = fresh();
+  C.mergeFrameReport(fv, { fromSubframe: false, loadId: 'L1', verdict: V('dangerous'), tier: 'stop' });
+  C.mergeFrameReport(fv, { fromSubframe: false, loadId: 'L1', verdict: V('safe'), tier: 'quiet' });
+  assert.strictEqual(fv.tier, 'stop');
+  assert.strictEqual(fv.top.level, 'dangerous');
+});
+test('mergeFrameReport: warn, pause, reload (a new loadId) clears the tier; the same id never lowers it', () => {
+  const fv = fresh();
+  C.mergeFrameReport(fv, { fromSubframe: false, loadId: 'L1', verdict: V('dangerous'), tier: 'warn' });
+  assert.strictEqual(fv.tier, 'warn');
+  C.mergeFrameReport(fv, { fromSubframe: false, loadId: 'L1', verdict: V('safe'), tier: 'quiet' });
+  assert.strictEqual(fv.tier, 'warn');
+  C.mergeFrameReport(fv, { fromSubframe: false, loadId: 'L2', verdict: V('safe'), tier: 'quiet' });
+  assert.strictEqual(fv.tier, 'quiet');
+  assert.strictEqual(fv.top.level, 'safe');
+});
+test('mergeFrameReport: a sub-frame stop holds within a load and is cleared by a reload', () => {
+  const fv = fresh();
+  C.mergeFrameReport(fv, { fromSubframe: false, loadId: 'L1', verdict: V('safe'), tier: 'quiet' });
+  const r = C.mergeFrameReport(fv, { fromSubframe: true, loadId: '', verdict: V('dangerous'), tier: 'stop' });
+  assert.strictEqual(r.silentSub, false);
+  assert.strictEqual(fv.tier, 'stop'); assert.strictEqual(fv.sub.level, 'dangerous');
+  C.mergeFrameReport(fv, { fromSubframe: false, loadId: 'L1', verdict: V('safe'), tier: 'quiet' });
+  assert.strictEqual(fv.sub.level, 'dangerous');
+  C.mergeFrameReport(fv, { fromSubframe: false, loadId: 'L2', verdict: V('safe'), tier: 'quiet' });
+  assert.strictEqual(fv.sub, null); assert.strictEqual(fv.tier, 'quiet');
+});
+test('mergeFrameReport: a silent sub-frame (ad / captcha iframe) changes nothing; a report without an id only rises', () => {
+  const fv = fresh();
+  C.mergeFrameReport(fv, { fromSubframe: false, loadId: 'L1', verdict: V('suspicious'), tier: 'warn' });
+  const r = C.mergeFrameReport(fv, { fromSubframe: true, loadId: '', verdict: V('dangerous'), tier: 'warn' });
+  assert.strictEqual(r.silentSub, true); assert.strictEqual(fv.sub, null); assert.strictEqual(fv.tier, 'warn');
+  C.mergeFrameReport(fv, { fromSubframe: false, loadId: '', verdict: V('safe'), tier: 'quiet' });
+  assert.strictEqual(fv.tier, 'warn');
+});
+test('reportVerdict wiring: the worker merges through mergeFrameReport; the content script sends a per-load id', () => {
   const sw = read('background/service_worker.js');
-  assert.ok(/!fromSubframe && msg\.rescan !== true\) \{[\s\S]{0,400}fv\.tier = fv\.sub \? 'stop' : tier;/.test(sw));
+  assert.ok(/ScamShield\.mergeFrameReport\(fv, \{ fromSubframe, loadId, verdict: msg\.verdict, tier \}\)/.test(sw));
   const cs = read('content/content_script.js');
-  assert.ok(/send\('reportVerdict', \{ verdict, report, subframe: !IS_TOP, tier, rescan \}\)/.test(cs));
-  assert.strictEqual((cs.match(/tier: 'stop', rescan: true \}\)/g) || []).length, 2, 'additive stop senders are not resets');
+  assert.ok(/type === 'reportVerdict' \? \{ loadId: LOAD_ID \}/.test(cs));
+  assert.ok(/LOAD_ID = Math\.random\(\)/.test(cs.slice(cs.indexOf("addEventListener('scamshield:navigate'"))), 'a new id on an SPA route change');
+});
+test('sub-frame trust / mute / false alarm name the TOP host, and an ack needs { ok: true }', () => {
+  const act = read('content/actions.js'), cs = read('content/content_script.js');
+  assert.ok(/SS\.scopeDomain\(siteHost\(\)\)/.test(act));
+  assert.ok(/topHostFromFrame\(\) \|\| location\.hostname/.test(act));
+  assert.strictEqual((act.match(/if \(r && r\.ok\) (ack|trustAck)\(/g) || []).length, 4);
+  assert.ok(/scopeOf\(siteHost\(\)\)/.test(cs) && /if \(r && r\.ok && SS\.actions && SS\.actions\.ackSurface\)/.test(cs));
+  assert.ok(/send\('falseAlarm', \{ domain: scopeOf\(siteHost\(\)\) \}\)/.test(cs));
 });
 test('handleUserReport falls back to the persisted verdict before the default', () => {
   const sw = read('background/service_worker.js');

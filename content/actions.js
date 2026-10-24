@@ -279,13 +279,25 @@
   function canStore() {
     try { const SS = root.ScamShield; return !(SS && SS.isTenantApex && SS.isTenantApex(regDomain())); } catch (_) { return true; }
   }
+  // The top page's host as seen from a sub-frame: ancestorOrigins (Chrome), else the referrer ('' when unknown).
+  function topHostFromFrame() {
+    try { const ao = location.ancestorOrigins; if (ao && ao.length) return new URL(ao[ao.length - 1]).hostname; } catch (_) {}
+    try { if (document.referrer) return new URL(document.referrer).hostname; } catch (_) {}
+    return '';
+  }
+  // The site a trust / pause / mute / false-alarm is ABOUT: this page's host, or in a sub-frame the TOP page's host
+  // (the worker only accepts a domain that matches the sender tab's own top-frame URL).
+  function siteHost() {
+    let top = true; try { top = window === window.top; } catch (_) { top = false; }
+    return top ? location.hostname : (topHostFromFrame() || location.hostname);
+  }
   function regDomain() {
     try {
       const SS = root.ScamShield;
       // 0.14.1: scopeDomain, not registrableDomain — trusting evil.pages.dev
       // must not trust every site on pages.dev.
-      if (SS && typeof SS.scopeDomain === 'function') return SS.scopeDomain(location.hostname);
-      return (SS && typeof SS.registrableDomain === 'function') ? SS.registrableDomain(location.hostname) : location.hostname;
+      if (SS && typeof SS.scopeDomain === 'function') return SS.scopeDomain(siteHost());
+      return (SS && typeof SS.registrableDomain === 'function') ? SS.registrableDomain(siteHost()) : siteHost();
     } catch (_) { return location.hostname; }
   }
   // A small standalone status bar, same visual family as the toasts above —
@@ -395,7 +407,7 @@
       // different domains, so a click must never allowlist the QR's possibly-scam destination.
       const trustable = !x.noTrust && canStore();
       const ack = (domain, restore, onReport) => ackSurface({ text: t('ackTrusted', [bidi(domain)], "ScamShield won't flag " + domain + ' again.'), onUndo: () => send('untrustSite', { domain }), restore, onReport });
-      const trust = trustable ? trustButton(async () => { dismiss(); const domain = regDomain(); await send('trustSite', { domain, via: x.trustVia || 'banner' }); ack(domain, () => showBanner(verdict, Object.assign({}, extra, { restore: true }))); }) : null;
+      const trust = trustable ? trustButton(async () => { dismiss(); const domain = regDomain(); const r = await send('trustSite', { domain, via: x.trustVia || 'banner' }); if (r && r.ok) ack(domain, () => showBanner(verdict, Object.assign({}, extra, { restore: true }))); }) : null;
       // "This site is fine" (0.15.0, Task 12): the mistake control. It reports (userReport false_positive +
       // falseAlarm via x.onReport), THEN trusts the site (via:'mistake') and shows the ack with Undo. Because it
       // allowlists, it passes the same gates as Trust: isTrusted + insideCard (onTrustedClick) and the arm
@@ -403,7 +415,7 @@
       // apex) it stays the report-only "Report a mistake".
       const fine = button('ss-report', trustable ? t('mistakeSiteFine', null, 'This site is fine') : t('reportMistake', null, 'Report a mistake'));
       if (trustable) {
-        armedClick(fine, async () => { dismiss(); x.onReport && x.onReport({ quiet: true }); const domain = regDomain(); await send('trustSite', { domain, via: 'mistake' }); ack(domain, () => showBanner(verdict, Object.assign({}, extra, { restore: true })), x.onReport); });
+        armedClick(fine, async () => { dismiss(); x.onReport && x.onReport({ quiet: true }); const domain = regDomain(); const r = await send('trustSite', { domain, via: 'mistake' }); if (r && r.ok) ack(domain, () => showBanner(verdict, Object.assign({}, extra, { restore: true })), x.onReport); });
       } else {
         onTrustedClick(fine, () => { fine.textContent = t('thanks', null, 'Thanks'); fine.disabled = true; x.onReport && x.onReport(); closeMenu(true); });
       }
@@ -644,12 +656,12 @@
       const consequence = canStore() ? t('continuePausesHour', null, 'Pauses ScamShield on this site for 1 hour.') : t('continueOnce', null, 'Continues to this page once. ScamShield stays on.');
       row1.append(stay, el('span', 'ss-consequence', consequence)); details.append(row1);
       const row2 = el('div', 'ss-dt');
-      const trust = trustable ? trustButton(async () => { ctl.close(); const domain = regDomain(); await send('trustSite', { domain, via: x.trustVia || 'interstitial' }); trustAck(domain, () => dangerInterstitial(verdict, x)); }) : null;
+      const trust = trustable ? trustButton(async () => { ctl.close(); const domain = regDomain(); const r = await send('trustSite', { domain, via: x.trustVia || 'interstitial' }); if (r && r.ok) trustAck(domain, () => dangerInterstitial(verdict, x)); }) : null;
       if (trust) { trust.className = 'ss-trust ss-trust-link'; trust.textContent = t('blockedTrustSite', null, 'Not a scam? Trust this site'); row2.append(trust); }
       // "This site is fine" (0.15.0, Task 12): reports, THEN trusts (via:'mistake') with an Undo ack, behind the same gates as Trust.
       // Where trust is unavailable (bare tenant apex, QR surface) it stays the report-only "Report a mistake".
       const fine = el('button', 'ss-report', trustable ? t('mistakeSiteFine', null, 'This site is fine') : t('reportMistake', null, 'Report a mistake')); fine.type = 'button';
-      if (trustable) armedClick(fine, async () => { ctl.close(); x.onReport && x.onReport({ quiet: true }); const domain = regDomain(); await send('trustSite', { domain, via: 'mistake' }); trustAck(domain, () => dangerInterstitial(verdict, x), x.onReport); });
+      if (trustable) armedClick(fine, async () => { ctl.close(); x.onReport && x.onReport({ quiet: true }); const domain = regDomain(); const r = await send('trustSite', { domain, via: 'mistake' }); if (r && r.ok) trustAck(domain, () => dangerInterstitial(verdict, x), x.onReport); });
       else onTrustedClick(fine, () => { fine.textContent = t('thanks', null, 'Thanks'); fine.disabled = true; x.onReport && x.onReport(); });
       row2.append(fine); details.append(row2); card.append(details);
       let stopCount = null;
@@ -974,5 +986,5 @@
   }
 
   root.ScamShield = root.ScamShield || {};
-  root.ScamShield.actions = { showBanner, guardForms, hideScamBlocks, clearAll, walletConfirmOverlay, clipboardToast, techScamEscapeOverlay, supportToast, dangerInterstitial, armDelayed, privacyToast, crossOriginCredToast, ackSurface, setTheme, frameFormBlockedToast, linkConfirm, linkConfirmAvailable, linkBlockedToast, popupBlockedToast, popunderBlockedToast };
+  root.ScamShield.actions = { siteHost, topHostFromFrame, showBanner, guardForms, hideScamBlocks, clearAll, walletConfirmOverlay, clipboardToast, techScamEscapeOverlay, supportToast, dangerInterstitial, armDelayed, privacyToast, crossOriginCredToast, ackSurface, setTheme, frameFormBlockedToast, linkConfirm, linkConfirmAvailable, linkBlockedToast, popupBlockedToast, popunderBlockedToast };
 })(typeof globalThis !== 'undefined' ? globalThis : self);

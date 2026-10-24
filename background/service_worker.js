@@ -1950,39 +1950,26 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
               shopFindings.delete(tabId);
               if (hasSessionStorage) { try { api.storage.session.remove(sessionPrivacyKey(tabId)); } catch (_) {} }
             }
-            fv = { url: tabUrl, top: null, sub: null };
+            fv = { url: tabUrl, top: null, sub: null, counted: false, loadId: '' };
           }
           // Stats: one "page checked" per top-frame page view. fv.top is null
           // exactly once per (tab, top-level URL) — after that the report is a
           // detector's second opinion on a page already counted, and sub-frame
           // merges are never counted at all.
-          const firstTopReport = !fromSubframe && fv.top == null;
+          const firstTopReport = !fromSubframe && !fv.counted;
+          if (!fromSubframe) fv.counted = true;
           // Warning doctrine (0.15.0): the badge, history and threat counters follow the
           // content script's surface tier. A missing tier (older content script) is derived
           // from level: dangerous -> warn, anything else -> quiet. The tech-scam and
           // clipboard-block senders pass tier 'stop' themselves (decisive detections only).
           const tier = (msg.tier === 'stop' || msg.tier === 'warn' || msg.tier === 'quiet')
             ? msg.tier : (msg.verdict && msg.verdict.level === 'dangerous' ? 'warn' : 'quiet');
-          const TIER_RANK = { quiet: 0, warn: 1, stop: 2 };
-          // Ad/captcha iframes stay silent: a sub-frame only touches the frame split, the
-          // badge and history when it earned a full stop.
-          const silentSub = fromSubframe && tier !== 'stop';
-          if (fromSubframe) {
-            if (!silentSub && rankOf(msg.verdict) > rankOf(fv.sub)) fv.sub = Object.assign({}, msg.verdict, { subframe: true });
-          } else {
-            fv.top = msg.verdict;
-          }
-          // Loudest tier seen on this tab+URL (like the old max-rank merge, a later quiet
-          // rescan must not clear an earlier interruption).
-          if (!silentSub) {
-            const prev = fv.tier || 'quiet';
-            if (!fromSubframe && msg.rescan !== true) {
-              // (0.15.0 final fix) A top-frame report from a main scan (not a mid-page rescan or an additive
-              // detector) IS the page's current state: it resets the tier, so warn -> pause -> reload the same URL
-              // clears the red badge instead of inheriting the old tier. A sub-frame 'stop' seen on this tab stays.
-              fv.tier = fv.sub ? 'stop' : tier;
-            } else fv.tier = TIER_RANK[tier] > TIER_RANK[prev] ? tier : prev;
-          }
+          // Ad/captcha iframes stay silent: a sub-frame only touches the frame split, the badge and history when it
+          // earned a full stop. The merge itself is pure (ScamShield.mergeFrameReport, engine/constants.js): a NEW
+          // per-load id on a top-frame report resets the tab's verdicts and tier (reload, pause then reload); within one
+          // id the tier only rises, so an early additive 'stop' is never wiped by the main scan's quiet report.
+          const loadId = typeof msg.loadId === 'string' ? msg.loadId.slice(0, 64) : '';
+          const { silentSub } = globalThis.ScamShield.mergeFrameReport(fv, { fromSubframe, loadId, verdict: msg.verdict, tier });
           frameVerdicts.set(tabId, fv);
           if (firstTopReport) bumpStat('checked');
           const effective = rankOf(fv.sub) > rankOf(fv.top) ? fv.sub : fv.top;

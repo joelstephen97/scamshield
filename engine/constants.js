@@ -702,6 +702,30 @@
     try { host = new URL(sender.tab.url || '').hostname; } catch (_) { return false; }
     return !!host && scopeDomain(host) === scopeDomain(claimed);
   }
+  // (0.15.0 final fix) Merge one frame's verdict report into the tab's per-URL state `fv` ({top, sub, tier, loadId}).
+  // r = { fromSubframe, loadId, verdict, tier }. A top-frame report with a NEW loadId (the page was loaded again)
+  // clears top/sub/tier first; within one loadId the tier only rises and a more severe top verdict stands. Sub-frame
+  // reports never reset anything and a sub-frame that did not earn a 'stop' stays silent. Returns { silentSub }.
+  function mergeFrameReport(fv, r) {
+    const RANK = { unknown: 0, safe: 1, suspicious: 2, dangerous: 3 };
+    const TIER = { quiet: 0, warn: 1, stop: 2 };
+    const rankOf = (v) => (v ? (RANK[v.level] || 0) : -1);
+    const silentSub = !!r.fromSubframe && r.tier !== 'stop';
+    if (!r.fromSubframe && r.loadId && fv.loadId !== r.loadId) {
+      if (fv.loadId) { fv.top = null; fv.sub = null; fv.tier = null; }
+      fv.loadId = r.loadId;
+    }
+    if (r.fromSubframe) {
+      if (!silentSub && rankOf(r.verdict) > rankOf(fv.sub)) fv.sub = Object.assign({}, r.verdict, { subframe: true });
+    } else {
+      fv.top = (r.loadId && rankOf(fv.top) > rankOf(r.verdict)) ? fv.top : r.verdict;
+    }
+    if (!silentSub) {
+      const prev = fv.tier || 'quiet';
+      fv.tier = TIER[r.tier] > TIER[prev] ? r.tier : prev;
+    }
+    return { silentSub };
+  }
   // Every key a stored trust / pause / mute for this page could live under:
   // the scope, plus the pre-0.14.1 registrable key so legacy entries keep
   // working (they are never silently dropped).
@@ -851,7 +875,7 @@
   return {
     FEATURE_NAMES, THRESHOLDS, BRANDS, BRANDS_BY_KEY, POPULAR_BRANDS, SUSPICIOUS_TLDS, SUSPICIOUS_TOKENS,
     SCAM_PHRASES, matchScamPhrases, SEED_FIELD_RE, SAFE_DOMAINS, BRAND_DOMAINS, SEED_PHRASE_HINTS, CARRIER_BRANDS,
-    TENANT_PLATFORMS, tenantLabel, scopeDomain, scopeKeys, isTenantApex, senderOwnsDomain,
+    TENANT_PLATFORMS, tenantLabel, scopeDomain, scopeKeys, isTenantApex, senderOwnsDomain, mergeFrameReport,
     MULTI_LABEL_SUFFIXES, KNOWN_AUTH_PROVIDERS, KNOWN_BRAND_REGISTRABLES,
     VERIFIED_NAMESPACES, isVerifiedNamespace,
     registrableParts, registrableDomain, isSafeHost, USER_CONTENT_HOSTS, isUserContentHost, isPathUserContentHost, BRAND_OWNED_TENANTS, brandNameIn, brandDisplayName,
