@@ -61,3 +61,26 @@ test('an animated page (classes toggling ~60 times a second for 3 s) causes 0 re
   expect(st.triggers).toBe(0);
   expect(st.triggerMs + st.observerMs).toBeLessThan(5);
 });
+
+// 0.15.0 final fix B (re-review I2): inline-style churn is cheap too.
+test('inline-style animation (element.style.transform at 60 Hz on 50 elements for 3 s) causes 0 rescans and < 5 ms of rescan observer time', async ({ context }) => {
+  const page = await context.newPage();
+  const cdp = await context.newCDPSession(page);
+  const ctxs = [];
+  cdp.on('Runtime.executionContextCreated', (e) => ctxs.push(e.context));
+  await cdp.send('Runtime.enable');
+  const read = async (expression) => {
+    const ext = ctxs.find((x) => x.auxData && x.auxData.type === 'isolated' && /^chrome-extension:\/\//.test(x.origin || ''));
+    if (!ext) return null;
+    return cdp.send('Runtime.evaluate', { expression, contextId: ext.id, returnByValue: true }).then((r) => r.result.value);
+  };
+  await page.goto('http://localhost:5599/rescan-style-anim.html');
+  await expect.poll(async () => await read('window.__ssLastTier'), { timeout: 8000 }).toBe('quiet');
+  await page.waitForFunction(() => window.__animDone === true, null, { timeout: 12000 });
+  await page.waitForTimeout(800);
+  const st = JSON.parse(await read('JSON.stringify(window.__ssRescanStats)'));
+  console.log('STYLE-ANIM rescan stats ' + JSON.stringify(st));
+  expect(st.rescans).toBe(0);
+  expect(st.triggers).toBe(0);
+  expect(st.triggerMs + st.observerMs).toBeLessThan(5);
+});

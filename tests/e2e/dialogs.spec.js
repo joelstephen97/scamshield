@@ -268,3 +268,18 @@ test('hardening (c): a page dialog opened after ours is stacked below it again (
   expect(top).toEqual({ onTop: true, modal: true });
   await page.close();
 });
+
+test('re-stack (re-review I3): two page dialogs opened 200 ms apart still end up below ours', async ({ context }) => {
+  const page = await interstitial(context);
+  await page.evaluate(() => new Promise((resolve) => {
+    const mk = (t) => { const d = document.createElement('dialog'); d.style.cssText = 'position:fixed;inset:0;width:100vw;height:100vh;max-width:none;max-height:none;margin:0;border:0;padding:0;background:#fff'; d.innerHTML = '<p>' + t + '</p>'; document.body.appendChild(d); d.showModal(); };
+    mk('first'); setTimeout(() => { mk('second'); resolve(); }, 200);
+  }));
+  await page.waitForTimeout(1200);
+  const top = await page.evaluate((s) => {
+    const h = document.querySelector(s); const b = h.shadowRoot.querySelector('.ss-primary').getBoundingClientRect();
+    return { onTop: document.elementFromPoint(b.left + b.width / 2, b.top + b.height / 2) === h, modal: h.shadowRoot.querySelector('dialog').matches(':modal') };
+  }, IHOST);
+  expect(top).toEqual({ onTop: true, modal: true });
+  await page.close();
+});

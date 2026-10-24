@@ -236,6 +236,10 @@
         const closed = top && !gone && top.localName === 'dialog' && !top.open && rec.opts && typeof rec.opts.onAttach === 'function';
         if (!gone && !closed) continue;
         seen.add(rec);
+        // A dialog that lost `open`: a page close() also fires a 'close' event, which the surface answers by re-opening (and counts
+        // in its own limit of 3). Look again one task later and act only if it is STILL shut (removeAttribute('open') fires no
+        // event), so one page-forced close is counted once, by one of the two limits, never both.
+        if (closed) { setTimeout(() => recheckClosed(rec), 60); continue; }
         if (!allow(rec, now)) continue;
         if (gone) { try { rec.shadow.appendChild(top); } catch (_) {} }
         const o = rec.opts || {};
@@ -244,20 +248,40 @@
     }
   }
 
+  function recheckClosed(rec) {
+    try {
+      if (live.get(rec.kind) !== rec || rec.closing || !rec.top || rec.top.open || rec.top.parentNode !== rec.shadow) return;
+      if (!allow(rec, Date.now())) return;
+      if (rec.opts && typeof rec.opts.onAttach === 'function') rec.opts.onAttach();
+    } catch (_) {}
+  }
+
   // (c) A new top-layer element after ours (a page dialog/popover opened over a warning) is stacked above it. We re-open
   // ours: close()+showModal() for a modal (through the surface's own onRestack), hidePopover()+showPopover() for a popover
   // host, modals first so the popover toasts end up on top of them as before. Rate limited: one pass per 400 ms and 20 per 10 s.
-  let restackStamps = [], restackLast = 0;
+  // A newcomer inside the 400 ms window is not lost: one trailing pass runs when the window ends (two dialogs opened 200 ms
+  // apart still end with ours on top). When the 20-per-10 s cap is hit the page is fighting for the top layer: each surface's
+  // own give-up path runs once (the interstitial escalates to blocked.html; a banner just stops being re-stacked).
+  // Toasts/acks are not re-stacked (they are transient and sit above dialogs by design): only dialogs and banners.
+  let restackStamps = [], restackLast = 0, restackTimer = 0, restackCapHit = false;
   function restack() {
     const now = Date.now();
-    if (now - restackLast < 400) return;
+    const wait = 400 - (now - restackLast);
+    if (wait > 0) { if (!restackTimer) restackTimer = setTimeout(() => { restackTimer = 0; restack(); }, wait); return; }
     restackStamps = restackStamps.filter((s) => now - s < 10000);
-    if (restackStamps.length >= 20) return;
+    if (restackStamps.length >= 20) {
+      if (!restackCapHit) {
+        restackCapHit = true;
+        for (const rec of Array.from(live.values())) if (!rec.closing && rec.opts && typeof rec.opts.onGaveUp === 'function') { try { rec.opts.onGaveUp(); } catch (_) {} }
+      }
+      return;
+    }
+    restackCapHit = false;
     restackLast = now; restackStamps.push(now);
     const recs = Array.from(live.values()).filter((r) => !r.closing && r.host.isConnected);
     for (const rec of recs) if (rec.opts && typeof rec.opts.onRestack === 'function') { try { rec.opts.onRestack(); } catch (_) {} }
     for (const rec of recs) {
-      if (rec.topLayer !== 'popover') continue;
+      if (rec.topLayer !== 'popover' || rec.kind === 'toast' || rec.kind === 'ack') continue;
       try { if (typeof rec.host.hidePopover === 'function') rec.host.hidePopover(); } catch (_) {}
       popoverShow(rec.host);
     }

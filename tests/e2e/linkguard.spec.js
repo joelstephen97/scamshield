@@ -272,3 +272,49 @@ test('trusting the destination while the page is open (storage change) removes t
   await expect(page.locator('#wrapped')).not.toHaveClass(/scamshield-link-/, { timeout: 6000 });
   await sw.evaluate(() => setSettings({ allowlist: [] }));
 });
+
+// ---- 0.15.0 final fix B, re-review ----
+async function isoCdp(context, page) {
+  const cdp = await context.newCDPSession(page);
+  const ctxs = [];
+  cdp.on('Runtime.executionContextCreated', (e) => ctxs.push(e.context));
+  await cdp.send('Runtime.enable');
+  return async (expression) => {
+    const ext = ctxs.find((x) => x.auxData && x.auxData.type === 'isolated' && /^chrome-extension:\/\//.test(x.origin || ''));
+    return cdp.send('Runtime.evaluate', { expression, contextId: ext.id, returnByValue: true, awaitPromise: true }).then((r) => r.result.value);
+  };
+}
+test('C1: a block verdict never expires: 16 minutes later the marked link still asks before opening', async ({ context }) => {
+  const sw = context.serviceWorkers()[0];
+  await installFeed(sw, [SENTINEL]);
+  const page = await context.newPage();
+  const iso = await isoCdp(context, page);
+  await page.goto(PAGE + '?late=1');
+  await expect(page.locator('#late')).toHaveClass(/scamshield-link-block/, { timeout: 7000 });
+  await iso('ScamShield.__timeOffsetMs = 16 * 60000'); // the isolated world's clock jumps past the 15 min mark
+  await page.locator('#late').click();
+  await expect(confirmDialog(page)).toBeVisible();     // still intercepted (before the fix: the entry had expired and the link just opened)
+  expect(page.url()).toBe(PAGE + '?late=1');
+  await confirmDialog(page).getByRole('button', { name: 'Go back' }).click();
+  await expect(page.locator('#late')).toHaveClass(/scamshield-link-block/); // the mark stayed through the background refresh
+});
+
+test('I1: a 6000-anchor page: the blocked host at index 5500 is marked, and every round stays short', async ({ context }) => {
+  test.setTimeout(60000);
+  const sw = context.serviceWorkers()[0];
+  await installFeed(sw, [SENTINEL]);
+  const page = await context.newPage();
+  const iso = await isoCdp(context, page);
+  await page.goto(PAGE);
+  await expect(page.locator('#wrapped')).toHaveClass(/scamshield-link-block/, { timeout: 7000 });
+  await iso('window.__ssPerf.maxMs = 0'); // measure the bulk work only
+  await page.evaluate(() => {
+    const box = document.createElement('div'); let h = '';
+    for (let i = 0; i < 6000; i++) h += '<a class="six" id="six' + i + '" href="' + (i === 5500 ? 'http://scamshield-test-blocked.example/six' : 'http://linkguard-clean-one.example/p' + i) + '">l' + i + '</a> ';
+    box.innerHTML = h; document.body.appendChild(box);
+  });
+  await expect(page.locator('#six5500')).toHaveClass(/scamshield-link-block/, { timeout: 30000 });
+  const maxMs = await iso('window.__ssPerf.maxMs');
+  console.log('I1 maxMs ' + maxMs);
+  expect(maxMs).toBeLessThan(40); // one round is at most 400 anchors + bounded rect reads, never the whole page at once
+});

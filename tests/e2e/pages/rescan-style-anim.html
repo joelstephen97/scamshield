@@ -1,0 +1,15 @@
+<!doctype html><meta charset="utf-8"><title>Acme Carousel</title>
+<h1>Acme Carousel</h1>
+<!-- An ordinary page: JS writes element.style.transform at 60 Hz on 50 elements for 3 s. Nothing here is a scam signal. -->
+<div id="g"></div>
+<script>
+  var g = document.getElementById('g'), els = [];
+  for (var i = 0; i < 50; i++) { var c = document.createElement('div'); c.style.cssText = 'display:inline-block;width:40px;height:30px;background:#cde;margin:2px;transform:translateX(0px)'; g.appendChild(c); els.push(c); }
+  window.__animDone = false;
+  setTimeout(function () {
+    var n = 0, iv = setInterval(function () {
+      for (var i = 0; i < els.length; i++) els[i].style.transform = 'translateX(' + ((n + i) % 10) + 'px)';
+      if (++n >= 180) { clearInterval(iv); window.__animDone = true; }
+    }, 16);
+  }, 2000);
+</script>

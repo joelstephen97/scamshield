@@ -34,17 +34,30 @@
     if (!/^https?:$/.test(location.protocol) || !document.documentElement) return false;
     started = true;
 
-    // host -> 'block' | 'warn' | null, with a lifetime: a verdict lives 15 min, a clean answer 2 min (the feed can gain
-    // a host while a tab sits open). An expired entry simply reads as absent, so the next sighting looks it up again.
+    // host -> 'block' | 'warn' | null. A block/warn verdict NEVER expires while the page lives (the click interception and the
+    // marks depend on it); it is only refreshed in the background once it is older than 15 min (refreshStale), and the mark
+    // stays until a refresh says clean. A clean answer lives 2 min (the feed can gain a host while a tab sits open), then reads
+    // as absent so the next sighting looks it up again. SS.__timeOffsetMs is a test hook of this isolated world (the page cannot set it).
     const TTL_HIT = 15 * 60000, TTL_CLEAN = 2 * 60000;
+    const now = () => Date.now() + (SS.__timeOffsetMs || 0);
     const cache = (function () {
       const m = new Map();
       return {
-        has(h) { const e = m.get(h); if (!e) return false; if (e.exp <= Date.now()) { m.delete(h); return false; } return true; },
+        has(h) { const e = m.get(h); if (!e) return false; if (!e.v && e.exp <= now()) { m.delete(h); return false; } return true; },
         get(h) { return this.has(h) ? m.get(h).v : undefined; },
-        set(h, v) { m.set(h, { v, exp: Date.now() + (v ? TTL_HIT : TTL_CLEAN) }); }
+        set(h, v) { const t = now(); m.set(h, { v, exp: t + TTL_CLEAN, at: t }); },
+        stale(h) { const e = m.get(h); return !!(e && e.v && now() - e.at >= TTL_HIT); },
+        touch(h) { const e = m.get(h); if (e) e.at = now(); }
       };
     })();
+    // Background re-check of verdicts older than 15 min: one lookup per host (through the budget), the old verdict stays in force meanwhile.
+    function refreshStale(hosts) {
+      for (const h of hosts) {
+        if (!cache.stale(h) || inflight.has(h)) continue;
+        cache.touch(h);
+        try { if (budget.take(Date.now())) lookup([h]); } catch (_) { /* best effort */ }
+      }
+    }
     const inflight = new Set();       // hosts asked and not yet answered
     const pending = new Map();        // host -> Promise of the lookup that will answer it (for request())
     const waiting = new Map();        // host -> Set<anchor> to mark on answer
@@ -103,7 +116,20 @@
       if (!rootNode || rootNode.nodeType !== 1) return;
       if (rootNode.tagName === 'A') { if (rootNode.hasAttribute('href')) anchorQueue.add(rootNode); return; }
       if (typeof rootNode.querySelectorAll !== 'function') return;
+      if (rootNode === document.body) { collectBody(rootNode); return; } // the catch-all root
       for (const a of rootNode.querySelectorAll('a[href]')) { if (anchorQueue.size >= QUEUE_ANCHORS) { catchAll(); break; } anchorQueue.add(a); }
+    }
+    // Catch-all scan of a huge page: only anchors never taken by a round (not in `seen`) and not marked, in chunks; when the
+    // queue fills again the scan is resumed once it drains (bodyIncomplete), so the tail of a 6000-link page is reached.
+    const seen = new WeakSet(); let bodyIncomplete = false;
+    function collectBody(b) {
+      let full = false;
+      for (const a of b.querySelectorAll('a[href]')) {
+        if (seen.has(a) || a.hasAttribute('data-ss-pill')) continue;
+        if (anchorQueue.size >= QUEUE_ANCHORS) { full = true; break; }
+        anchorQueue.add(a);
+      }
+      if (full) bodyIncomplete = true;
     }
     // Queue saturation (500 roots / 4000 anchors): nothing is silently lost. The document body is queued ONCE as a
     // catch-all root, so whatever was dropped is collected again once the queue has drained. Reset when it empties.
@@ -139,7 +165,9 @@
           continue;
         }
         const level = R.levelFor(results[h]);
+        const was = cache.has(h) ? cache.get(h) : undefined;
         cache.set(h, level);
+        if (was && !level) enqueue(document.documentElement); // a refresh says clean now: sweep so the old marks come off
         const set = waiting.get(h); waiting.delete(h);
         if (level && set) for (const a of set) pairs.push([a, level]);
       }
@@ -148,13 +176,13 @@
 
     function nearestFirst(list) {
       const vh = root.innerHeight || document.documentElement.clientHeight || 0;
-      const scored = list.map((a) => {
+      const scored = list.slice(0, 1500).map((a) => { // bounded: rects for at most 1500 anchors per round
         let d = 1e9;
         try { if (a.isConnected) { const r = a.getBoundingClientRect(); d = r.bottom < 0 ? -r.bottom : r.top > vh ? r.top - vh : 0; } } catch (_) {}
         return { a, d };
       });
       scored.sort((x, y) => x.d - y.d);
-      return scored.map((x) => x.a);
+      return scored.map((x) => x.a).concat(list.slice(1500));
     }
 
     async function round() {
@@ -169,19 +197,20 @@
         // read in one batch (no writes in between); the rest wait in the queue for the next round.
         if (anchors.length > ROUND_ANCHORS) anchors = nearestFirst(anchors);
         anchors = anchors.slice(0, ROUND_ANCHORS);
-        for (const a of anchors) anchorQueue.delete(a);
+        for (const a of anchors) { anchorQueue.delete(a); seen.add(a); }
         if (!anchorQueue.size && !rootsQueue.length) catchAllQueued = false;
-        const need = [], pairs = [];
+        const need = [], pairs = [], stale = [];
         for (const a of anchors) {
           if (!a.isConnected) continue;
           const d = hostOf(a);
           if (!d) { if (a.hasAttribute('data-ss-pill')) pairs.push([a, null]); continue; }
-          if (cache.has(d.host)) { pairs.push([a, cache.get(d.host)]); continue; }
+          if (cache.has(d.host)) { pairs.push([a, cache.get(d.host)]); if (cache.stale(d.host)) stale.push(d.host); continue; }
           let set = waiting.get(d.host); if (!set) waiting.set(d.host, set = new Set());
           set.add(a);
           if (!inflight.has(d.host)) need.push(d.host);
         }
         markMany(pairs);
+        if (stale.length) refreshStale(stale);
         perf.rec(t0); t0 = 0;
         let failed = false;
         for (;;) {
@@ -198,6 +227,7 @@
         if (deferred.size) armRetry(failed ? 30000 : 60000);
       } catch (_) { /* best effort, never break the page */ }
       finally { working = false; if (t0) perf.rec(t0); }
+      if (bodyIncomplete && !anchorQueue.size && document.body) { bodyIncomplete = false; rootsQueue.push(document.body); }
       if (rootsQueue.length || anchorQueue.size) schedule();
     }
 
@@ -213,14 +243,23 @@
       rootsQueue.push(node);
     }
 
+    const remarks = new WeakMap(), REMARK_MAX = 5;
     if (!deps.passive) try {
       const mo = new MutationObserver((records) => {
         for (const rec of records) {
           if (rec.type === 'attributes') {
             const tg = rec.target;
             if (tg.tagName !== 'A') continue;
-            // 'class': a re-render that strips our mark classes off an anchor still carrying its pill text gets them back.
-            if (rec.attributeName === 'class' && !(tg.hasAttribute('data-ss-pill') && !MARK_CLASSES.some((c) => tg.classList.contains(c)))) continue;
+            // 'class': a re-render that strips our mark classes off an anchor still carrying its pill text gets them back, at
+            // most REMARK_MAX times per anchor (a page that keeps rewriting className is not fought forever). Coverage tradeoff,
+            // deliberate: only anchors that still carry data-ss-pill are repaired; one whose class AND pill attribute are both
+            // rewritten is re-marked only on its next href change, or when the document is swept again (trust/refresh).
+            if (rec.attributeName === 'class') {
+              if (!(tg.hasAttribute('data-ss-pill') && !MARK_CLASSES.some((c) => tg.classList.contains(c)))) continue;
+              const n = remarks.get(tg) || 0;
+              if (n >= REMARK_MAX) continue;
+              remarks.set(tg, n + 1);
+            }
             if (anchorQueue.size < QUEUE_ANCHORS) anchorQueue.add(tg); else catchAll();
             continue;
           }
@@ -237,7 +276,7 @@
     live = {
       levelOf(host) {
         if (typeof host !== 'string' || !host) return null;
-        if (cache.has(host)) return cache.get(host);
+        if (cache.has(host)) { if (cache.stale(host)) refreshStale([host]); return cache.get(host); }
         if (!inflight.has(host)) {
           try {
             const hosts = R.planBatch([host], cache, budget, Date.now(), 1);
@@ -294,6 +333,7 @@
       const d = hostOf(a);
       const level = d && cache.get(d.host);
       if (!level) return; // not a marked link
+      if (cache.stale(d.host)) refreshStale([d.host]);
       const actions = SS.actions;
       if (!actions || typeof actions.linkConfirm !== 'function') return;
       // Decide BEFORE preventDefault. If the confirm cannot show (another dialog or interstitial is up), a warn
