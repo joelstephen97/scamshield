@@ -515,7 +515,7 @@
   // control that takes initial focus: the safe action).
   function modal(kind, cls, o, fill) {
     const S = surfaces();
-    let dlg = null, safe = null, handle = null, ours = false, held = false, hold = false, reopened = 0;
+    let dlg = null, safe = null, handle = null, ours = false, held = false, hold = false, reopened = 0, restacking = false;
     const release = () => { if (held) { held = false; inertOff(); } };
     const ctl = {
       dialog: null,
@@ -574,6 +574,7 @@
       dlg.addEventListener('cancel', (e) => { e.preventDefault(); if (e.isTrusted) esc(); });
       dlg.addEventListener('close', () => {
         if (ours) return;
+        if (restacking) { restacking = false; return; } // our own close()+showModal() to get back above a page dialog
         if (reopened < 3) { reopened++; show(); return; }
         escalate();
         ctl.close();
@@ -581,6 +582,14 @@
       return { el: dlg, card: built.card };
     }, {
       theme, onShown: o.onShown, onAttach: show, onDetached: o.onDetached, onGaveUp: escalate,
+      // Another top-layer element opened after us: close()+showModal() puts this dialog on top again. The 'close' event is
+      // ours (not a page close, so it does not use up one of the 3 reopenings).
+      onRestack: () => {
+        if (!dlg || !dlg.isConnected || ours || !dlg.open) return;
+        restacking = true;
+        try { dlg.close(); dlg.showModal(); } catch (_) { restacking = false; try { if (!dlg.open) dlg.showModal(); } catch (__) {} }
+        try { if (safe && !dlg.getRootNode().activeElement) safe.focus(); } catch (_) {}
+      },
       onUnmount: () => { ours = true; if (!hold) release(); if (typeof o.onUnmount === 'function') o.onUnmount(); }
     });
     ctl.dialog = dlg;

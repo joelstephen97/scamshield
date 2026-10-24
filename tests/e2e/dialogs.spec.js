@@ -223,3 +223,48 @@ for (const [w, h] of [[320, 568], [375, 667], [1920, 1080], [3440, 1440]]) {
     await page.close();
   });
 }
+
+// ---- 0.15.0 final fix B: watching the open shadow roots ----------------------------------------------------------------
+test('hardening (a): a page rewriting the host style (display:none, tiny box) gets BASE_STYLE back', async ({ context }) => {
+  const page = await interstitial(context);
+  await page.evaluate((s) => { const h = document.querySelector(s); h.style.cssText = 'display:none!important'; h.setAttribute('hidden', ''); }, IHOST);
+  await page.waitForTimeout(400);
+  const r = await page.evaluate((s) => { const h = document.querySelector(s); const d = h.shadowRoot.querySelector('dialog'); return { display: getComputedStyle(h).display, hidden: h.hasAttribute('hidden'), pos: getComputedStyle(h).position, open: d.open, rect: d.getBoundingClientRect().width }; }, IHOST);
+  expect(r.hidden).toBe(false);
+  expect(r.display).not.toBe('none');
+  expect(r.pos).toBe('fixed');
+  expect(r.open).toBe(true);
+  expect(r.rect).toBeGreaterThan(100);
+  await page.close();
+});
+
+test('hardening (b): a page removing the open attribute from our dialog, or emptying our shadow root, is undone', async ({ context }) => {
+  const page = await interstitial(context);
+  await page.evaluate((s) => { const d = document.querySelector(s).shadowRoot.querySelector('dialog'); d.removeAttribute('open'); }, IHOST);
+  await page.waitForTimeout(400);
+  expect((await state(page, IHOST)).modal).toBe(true);
+  await page.evaluate((s) => { const sr = document.querySelector(s).shadowRoot; const d = sr.querySelector('dialog'); d.remove(); }, IHOST);
+  await page.waitForTimeout(500);
+  const s2 = await state(page, IHOST);
+  expect(s2 && s2.modal).toBe(true);
+  await page.close();
+});
+
+test('hardening (c): a page dialog opened after ours is stacked below it again (close+showModal)', async ({ context }) => {
+  const page = await interstitial(context);
+  await page.evaluate(() => {
+    const d = document.createElement('dialog');
+    d.style.cssText = 'position:fixed;inset:0;width:100vw;height:100vh;max-width:none;max-height:none;margin:0;border:0;padding:0;background:#fff';
+    d.innerHTML = '<p>Page dialog over everything</p>';
+    document.body.appendChild(d);
+    d.showModal();
+  });
+  await page.waitForTimeout(700);
+  const top = await page.evaluate((s) => {
+    const h = document.querySelector(s); const b = h.shadowRoot.querySelector('.ss-primary').getBoundingClientRect();
+    const hit = document.elementFromPoint(b.left + b.width / 2, b.top + b.height / 2);
+    return { onTop: hit === h, modal: h.shadowRoot.querySelector('dialog').matches(':modal') };
+  }, IHOST);
+  expect(top).toEqual({ onTop: true, modal: true });
+  await page.close();
+});

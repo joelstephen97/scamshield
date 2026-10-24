@@ -307,3 +307,14 @@ test('banner on a no-meta touch phone follows the visual viewport when the user 
     expect(g.leave.h).toBeGreaterThanOrEqual(43.5);
   } finally { await ctx.close(); }
 });
+
+test('hardening: a page emptying the toast shadow root gets the card back; a hidden/restyled host is restored', async ({ context }) => {
+  const page = await toastPage(context);
+  await page.evaluate((sel) => { const sr = document.querySelector(sel).shadowRoot; sr.querySelector('.scamshield-toast').remove(); }, HOST);
+  await page.waitForTimeout(500);
+  await expect(page.locator('.scamshield-toast')).toBeVisible();
+  await page.evaluate((sel) => { document.querySelector(sel).style.cssText = 'display:none!important'; }, HOST);
+  await page.waitForTimeout(400);
+  await expect(page.locator('.scamshield-toast')).toBeVisible();
+  await page.close();
+});

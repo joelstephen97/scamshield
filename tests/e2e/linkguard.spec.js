@@ -260,3 +260,15 @@ test('"Open anyway" ignores a click that lands within 300 ms of the dialog appea
   expect(page.url()).toBe(PAGE + '?late=1');
   await expect(confirmDialog(page)).toBeVisible(); // nothing happened: still asking
 });
+
+test('trusting the destination while the page is open (storage change) removes the mark without a reload', async ({ context }) => {
+  const sw = context.serviceWorkers()[0];
+  await installFeed(sw, [SENTINEL]);
+  await sw.evaluate(() => setSettings({ allowlist: [] }));
+  const page = await context.newPage();
+  await page.goto(PAGE);
+  await expect(page.locator('#wrapped')).toHaveClass(/scamshield-link-block/, { timeout: 7000 });
+  await sw.evaluate((h) => setSettings({ allowlist: [h] }), SENTINEL);
+  await expect(page.locator('#wrapped')).not.toHaveClass(/scamshield-link-/, { timeout: 6000 });
+  await sw.evaluate(() => setSettings({ allowlist: [] }));
+});
