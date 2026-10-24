@@ -522,4 +522,10 @@ try {
     load();
     if (curTab === 'stats') loadStats();
   });
+  // getMessage answered '' and the packaged English dictionary just landed: re-render what T() built from literals.
+  globalThis.addEventListener('ss-i18n-fallback', () => {
+    renderVersion(); buildLangOptions(); load();
+    if (curTab === 'stats') loadStats();
+    if (curTab === 'surfaces') loadSurfaces();
+  });
 } catch (_) { /* i18n module missing — the English fallbacks already rendered */ }

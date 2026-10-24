@@ -74,7 +74,7 @@ function copyReportText() {
   const host = tab && tab.url ? new URL(tab.url).hostname : '';
   const hostText = bidi(R && R.defangHost ? R.defangHost(host) : host);
   const lvlLabel = levelLabel(level);
-  const headerLine = T('copyReportHeader', [hostText], '⚠ ScamShield flagged this site: ' + host);
+  const headerLine = T('copyReportHeader', [hostText], '⚠ ScamShield flagged this site: ' + hostText);
   const verdictLine = T('copyReportVerdict', [lvlLabel], 'Verdict: ' + lvlLabel);
   const signalsLabel = T('copyReportSignals', null, 'Signals:');
   const footerLine = T('copyReportFooter', null, 'Checked on-device by ScamShield — free, open-source: https://joelstephen97.github.io/scamshield/');

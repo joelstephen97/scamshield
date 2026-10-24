@@ -203,9 +203,17 @@
   // returns '' when there is no override or the key is missing, so callers fall
   // through to chrome.i18n and then to their own English literal — exactly the
   // per-key fallback a partial translation already relies on.
-  function tOverride(key, subs) {
-    if (!overrideDict || !key) return '';
-    const tmpl = overrideDict[key];
+  function tOverride(key, subs) { return lookupIn(overrideDict, key, subs); }
+  // (0.15.0) English safety net, independent of the override: the packaged en/messages.json as a dictionary. Used by
+  // SSi18n only when chrome.i18n.getMessage itself answers '' (Chrome occasionally hands an extension page an empty
+  // message bundle), so a page never degrades to raw keys / unlabelled rows.
+  let fallbackDict = null;
+  function setFallback(dict) { fallbackDict = dict && typeof dict === 'object' ? dict : null; }
+  function hasFallback() { return !!fallbackDict; }
+  function tFallback(key, subs) { return lookupIn(fallbackDict, key, subs); }
+  function lookupIn(dict, key, subs) {
+    if (!dict || !key) return '';
+    const tmpl = dict[key];
     if (typeof tmpl !== 'string' || !tmpl) return '';
     const params = subs == null ? [] : (Array.isArray(subs) ? subs : [subs]);
     // Callers bidi-isolate their own substitutions before calling (same as they
@@ -363,6 +371,6 @@
   }
 
   return { resolveReason, reasonToEnglish, reasonKind, EN, isRTL, bidiWrap,
-    LOCALES, LANG_NAMES, setOverride, overrideLanguage, tOverride, messagesToDict, intlTag,
+    LOCALES, LANG_NAMES, setOverride, overrideLanguage, tOverride, setFallback, hasFallback, tFallback, messagesToDict, intlTag,
     defangHost, buildCopyReportText, copyToClipboard };
 });

@@ -35,7 +35,23 @@
     for (const api of [root.chrome, root.browser]) { // (shadows the module-level `api` on purpose)
       try { if (api && api.i18n && typeof api.i18n.getMessage === 'function') { const m = api.i18n.getMessage(key, subs); if (m) return m; } } catch (_) {}
     }
+    // getMessage answered '' for every provider: serve the packaged English text (loaded once, on first need).
+    try { const R = reasons(); if (R && R.tFallback) { loadFallback(); const f = R.tFallback(key, subs); if (f) return f; } } catch (_) {}
     return '';
+  }
+  let fallbackLoading = false;
+  function loadFallback() {
+    const R = reasons();
+    if (fallbackLoading || !R || !R.hasFallback || R.hasFallback() || !R.messagesToDict || !R.setFallback) return;
+    fallbackLoading = true;
+    try {
+      fetch(api.runtime.getURL('_locales/en/messages.json')).then((r) => r.json()).then((j) => {
+        R.setFallback(R.messagesToDict(j));
+        try { apply(); } catch (_) {}
+        // Pages that build strings in JavaScript re-render on this (options.js does).
+        try { if (typeof root.dispatchEvent === 'function') root.dispatchEvent(new Event('ss-i18n-fallback')); } catch (_) {}
+      }).catch(() => {});
+    } catch (_) {}
   }
   function apply(scope) {
     const el = scope || document;
