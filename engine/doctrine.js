@@ -24,12 +24,15 @@
   // quiet unless other evidence makes the verdict dangerous (0.15.0).
   const CONFIDENT_FLAGS = ['feed-warn-verified', 'feed-warn-corroborated', 'brand-impersonation-content', 'brand-impersonation-visual', 'brand-impersonation-tenant', 'credential-form-foreign-domain',
     // (0.15.0) added by credentialFlags(): corroborated, non-popular evidence + a credential field.
-    'nrd-credential', 'brand-lookalike-credential'];
+    'nrd-credential', 'brand-lookalike-credential',
+    // (recall recovery) insecure-credential: visible login on a plain-http public page; brand-keyword-host: vinted-offer.info
+    // shape; tenant-credential: visible login on a no-code builder tenant.
+    'insecure-credential', 'brand-keyword-host', 'tenant-credential'];
   // Feed intel still counts on popular sites: a validated list hit is not a heuristic.
   const FEED_FLAGS = ['feed-warn-verified', 'feed-warn-corroborated'];
   // Flags that need a credential field on the page. On a path-based publishing host (medium.com/@evil) the
   // popular shield is lifted for these only.
-  const CREDENTIAL_FLAGS = ['credential-form-foreign-domain', 'brand-impersonation-content', 'brand-impersonation-visual', 'brand-lookalike-credential', 'nrd-credential'];
+  const CREDENTIAL_FLAGS = ['credential-form-foreign-domain', 'brand-impersonation-content', 'brand-impersonation-visual', 'brand-lookalike-credential', 'nrd-credential', 'insecure-credential', 'tenant-credential'];
 
   // (0.15.0) USER_CONTENT_HOSTS / isUserContentHost live in engine/constants.js (single source of
   // truth; isSafeHost needs them and constants.js loads first). Re-exported unchanged below.
@@ -71,10 +74,24 @@
   // strong/strongest fuzzy match (edit distance <= 1 to the brand) PLUS in.corroborated (a non-URL signal).
   // finalizeVerdict always sets it; without it the 0.15.0 rule (any lookalike reason) applies. A verdict that is
   // already dangerous warns regardless of this flag.
+  // Hosts where a plain-http login is normal or not public: IP literals, localhost, intranet-style suffixes, single labels.
+  const LOCAL_SUFFIX = /\.(local|localhost|lan|internal|home\.arpa|test|example|invalid|corp|home|intranet)$/;
+  function isLocalOrIpHost(host) {
+    const h = String(host || '').toLowerCase().replace(/^\[|\]$/g, '').replace(/\.+$/, '');
+    if (!h || h.indexOf('.') === -1) return true; // single label (incl. localhost, router)
+    if (h.indexOf(':') !== -1 || /^\d{1,3}(\.\d{1,3}){3}$/.test(h)) return true; // IPv6 / IPv4 literal
+    return LOCAL_SUFFIX.test(h);
+  }
   function credentialFlags(i) {
     const out = [];
     if (!i || !i.hasPasswordField || popularMode(i.popular, i.host) === 'full') return out;
     const urlReasons = i.urlReasons || [], domReasons = i.domReasons || [];
+    // (recall recovery, R1) a visible password/card field on a plain-http public page. The scheme is read off the URL
+    // rules' noHttps reason (they score the page URL), so no new signal is needed.
+    if (urlReasons.some((r) => r && r.code === 'noHttps') && !isLocalOrIpHost(i.host)) out.push('insecure-credential');
+    // (recall recovery, R3) a visible login on a no-code builder tenant. hasLoginPair (a visible text/email/tel/card input
+    // beside the password) is optional: when the content script reports false, a password-only site gate stays quiet.
+    if (C.isBuilderTenantHost && C.isBuilderTenantHost(i.host) && i.hasLoginPair !== false) out.push('tenant-credential');
     if ((i.verdictFlags || []).includes('new-domain')) {
       // (N6) a weak-grade fuzzy match is not brand evidence: not as a reason, and not through the URL score it adds.
       const weak = urlReasons.some((r) => r && r.code === 'brandFuzzyMatch' && !isStrongFuzzy(r));
@@ -104,6 +121,12 @@
     if (PHISH_TITLE.test(title)) return true;
     if (C.brandNameIn && C.brandNameIn([title, sg.ogSiteName || '', ...(sg.logoAltBrands || [])].join(' | '))) return true;
     return false;
+  }
+
+  // R2 (recall recovery): a brand token hyphen-joined with a phishing keyword in the host. No DOM, popular hosts skipped.
+  function hostFlags(i) {
+    if (!i || !i.brandKeyword || popularMode(i.popular, i.host) === 'full') return [];
+    return ['brand-keyword-host'];
   }
 
   function surfaceTier(verdict, ctx) {
@@ -138,25 +161,28 @@
   //   3. the surface tier
   // i = { urlRules, domRules, signals: { hasVisiblePasswordField, hasVisibleCardInput },
   //       popular, host, strictMode, isTop, challengePage }
+  // Flags that lift a safe verdict to suspicious (the evidence is host- or scheme-shaped, below the 0.5 line by itself).
+  const LIFT_FLAGS = ['brand-lookalike-credential', 'insecure-credential', 'brand-keyword-host', 'tenant-credential'];
   function finalizeVerdict(verdict, i) {
     const x = i || {};
     let v = verdict || { level: 'safe', score: 0, reasons: [], reasonCodes: [], flags: [] };
     const urlReasons = (x.urlRules && x.urlRules.reasons) || [];
     const domReasons = (x.domRules && x.domRules.reasons) || [];
-    if (v.level !== 'safe' && !(v.flags || []).length && x.challengePage === true && !urlReasons.some(isLookalikeReason)) {
+    if (v.level !== 'safe' && !(v.flags || []).length && x.challengePage === true && !urlReasons.some(isLookalikeReason) && !(x.urlRules && x.urlRules.brandKeyword)) {
       v = Object.assign({}, v, { level: 'safe', reasons: [], reasonCodes: [], suppressed: 'challenge' });
     }
     const sg = x.signals || {};
+    const hostEv = hostFlags({ brandKeyword: x.urlRules && x.urlRules.brandKeyword, popular: x.popular, host: x.host });
     const credFlags = credentialFlags({
       verdictFlags: v.flags, urlReasons, urlScore: x.urlRules && x.urlRules.score, domReasons,
       strictLookalike: true, corroborated: lookalikeCorroborated(x, v, urlReasons, domReasons),
-      hasPasswordField: !!(sg.hasVisiblePasswordField || sg.hasVisibleCardInput), popular: x.popular, host: x.host
-    });
+      hasPasswordField: !!(sg.hasVisiblePasswordField || sg.hasVisibleCardInput), hasLoginPair: sg.hasLoginPair, popular: x.popular, host: x.host
+    }).concat(hostEv);
     if (credFlags.length && v.suppressed !== 'engagement') {
       const next = Object.assign({}, v, { flags: credFlags.concat((v.flags || []).filter((f) => !credFlags.includes(f))) });
-      if (credFlags.includes('brand-lookalike-credential') && next.level === 'safe') {
+      if (credFlags.some((f) => LIFT_FLAGS.includes(f)) && next.level === 'safe') {
         const have = new Set((next.reasons || []).map((r) => r && r.code));
-        const add = urlReasons.filter((r) => isLookalikeReason(r) && !have.has(r.code));
+        const add = urlReasons.concat(domReasons).filter((r) => r && !have.has(r.code) && (isLookalikeReason(r) || r.code === 'noHttps' || r.code === 'credentialFormOnTenantHost'));
         next.level = 'suspicious';
         next.score = Math.max(next.score || 0, (C.THRESHOLDS && C.THRESHOLDS.suspicious) || 0.5);
         next.reasons = add.concat(next.reasons || []);
@@ -179,5 +205,5 @@
     return p === '/search';
   }
 
-  return { isSerpPage, SERP_HOST, surfaceTier, finalizeVerdict, isUserContentHost, isPathUserContentHost, popularMode, effectivePopular, credentialFlags, isLookalikeReason, STOP_FLAGS, CONFIDENT_FLAGS, CREDENTIAL_FLAGS, USER_CONTENT_HOSTS };
+  return { isSerpPage, SERP_HOST, surfaceTier, finalizeVerdict, isUserContentHost, isPathUserContentHost, popularMode, effectivePopular, credentialFlags, isLocalOrIpHost, isLookalikeReason, STOP_FLAGS, CONFIDENT_FLAGS, CREDENTIAL_FLAGS, USER_CONTENT_HOSTS };
 });

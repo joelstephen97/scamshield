@@ -51,7 +51,7 @@ for (const [name, verdict, c, expected] of table) {
 
 test('STOP_FLAGS and CONFIDENT_FLAGS are exported with the specified members', () => {
   assert.deepStrictEqual([...D.STOP_FLAGS].sort(), ['clickfix', 'delivery-fee-scam', 'fake-browser-update', 'feed-block', 'seed-phrase-harvest']);
-  assert.deepStrictEqual([...D.CONFIDENT_FLAGS].sort(), ['brand-impersonation-content', 'brand-impersonation-tenant', 'brand-impersonation-visual', 'brand-lookalike-credential', 'credential-form-foreign-domain', 'feed-warn-corroborated', 'feed-warn-verified', 'nrd-credential']);
+  assert.deepStrictEqual([...D.CONFIDENT_FLAGS].sort(), ['brand-impersonation-content', 'brand-impersonation-tenant', 'brand-impersonation-visual', 'brand-keyword-host', 'brand-lookalike-credential', 'credential-form-foreign-domain', 'feed-warn-corroborated', 'feed-warn-verified', 'insecure-credential', 'nrd-credential', 'tenant-credential']);
 });
 
 test('isUserContentHost: exact, subdomain, www, case-insensitive', () => {

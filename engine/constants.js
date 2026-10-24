@@ -644,8 +644,19 @@
     // (credential form, brand token in the label). Shorteners (goo.su, qrco.de) and bt.cn (a vendor
     // registrable, not a tenant platform) are deliberately NOT tenant platforms.
     'framer.website', 'framer.app', 'weeblysite.com', 'typedream.app', 'webcindario.com', 'dynv6.net', 'us.cc', 'ct.ws', 'za.com',
-    'happysrv.de', 'my.id', 'dothome.co.kr', 'wasmer.app', 'craftum.io', 'contabostorage.com'
+    'happysrv.de', 'my.id', 'dothome.co.kr', 'wasmer.app', 'craftum.io', 'contabostorage.com',
+    // (recall recovery, R3/R4) no-code builder apexes: elementor.cloud sat in the popular set and shielded every tenant.
+    'elementor.cloud', 'b12sites.com', 'kleap.io', 'teleporthq.app', 'framer.media', 'framer.ai', 'relumesite.ai', 'created.app', 'grigora.app'
   ];
+  // (recall recovery, R3) Tenants of these no-code BUILDERS are almost all brochure sites, so a visible login on one is a
+  // confident phishing signal. Dev hosts (github.io, vercel.app, netlify.app, pages.dev, workers.dev, onrender.com,
+  // herokuapp.com, replit.app) are deliberately excluded: demo logins are normal there.
+  const BUILDER_TENANT_PLATFORMS = ['craftum.io', 'framer.app', 'framer.website', 'framer.media', 'framer.ai', 'elementor.cloud', 'typedream.app',
+    'weeblysite.com', 'webcindario.com', 'b12sites.com', 'kleap.io', 'teleporthq.app', 'relumesite.ai', 'created.app', 'grigora.app'];
+  function isBuilderTenantHost(host) {
+    const h = String(host || '').toLowerCase().replace(/\.+$/, '');
+    return BUILDER_TENANT_PLATFORMS.some((a) => h.endsWith('.' + a)) && !!tenantLabel(h);
+  }
   // Leftmost label of a tenant-platform host — the part the tenant actually
   // controls — or null for the apex itself, a bare "www", or any non-platform
   // host. Used to score credential forms on free-hosting tenants (0.13.0).
@@ -875,7 +886,7 @@
   return {
     FEATURE_NAMES, THRESHOLDS, BRANDS, BRANDS_BY_KEY, POPULAR_BRANDS, SUSPICIOUS_TLDS, SUSPICIOUS_TOKENS,
     SCAM_PHRASES, matchScamPhrases, SEED_FIELD_RE, SAFE_DOMAINS, BRAND_DOMAINS, SEED_PHRASE_HINTS, CARRIER_BRANDS,
-    TENANT_PLATFORMS, tenantLabel, scopeDomain, scopeKeys, isTenantApex, senderOwnsDomain, mergeFrameReport,
+    TENANT_PLATFORMS, BUILDER_TENANT_PLATFORMS, isBuilderTenantHost, tenantLabel, scopeDomain, scopeKeys, isTenantApex, senderOwnsDomain, mergeFrameReport,
     MULTI_LABEL_SUFFIXES, KNOWN_AUTH_PROVIDERS, KNOWN_BRAND_REGISTRABLES,
     VERIFIED_NAMESPACES, isVerifiedNamespace,
     registrableParts, registrableDomain, isSafeHost, USER_CONTENT_HOSTS, isUserContentHost, isPathUserContentHost, BRAND_OWNED_TENANTS, brandNameIn, brandDisplayName,
