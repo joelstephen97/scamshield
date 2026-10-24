@@ -213,21 +213,22 @@
 
   // (0.15.0) Exact brand SLD on a ccTLD-shaped, non-abused suffix of a brand that has
   // regional storefronts. Shared shape with heuristics.js isOnBrand's exactBrandCc.
-  // (0.15.0 final fix A, I7) Static list of ccTLDs that are cheap/abused or have no brand storefront
-  // culture; independent of the feed's riskTlds being populated. Judgement, per entry:
-  //   su ru cn  - real storefronts exist (google.ru, amazon.cn) but every one a brand actually runs is in
-  //               its domain list (so it is allowlisted before this runs); paypal.su / paypal.ru are phishing.
-  //   tk ml ga cf gq pw cc ws - free/cheap registries (also in SUSPICIOUS_TLDS; kept here so the list is whole).
-  //   tv to ly gl la im sx cm nu - vanity/cheap ccTLDs that read as ".com" typos or are sold freely.
-  //   co (exact, NOT com.co / co.uk) - the famous ".com" typo suffix; com.co (Colombia) stays regional.
-  // Deliberately NOT here: ph (shopee.ph, lazada.com.ph are real) and every ordinary regional suffix
-  // (co.uk de fr it es nl ae sa in jp com.au com.br com.mx ca ...).
-  const ABUSED_CCTLDS = ['su', 'ru', 'cn', 'tk', 'ml', 'ga', 'cf', 'gq', 'tv', 'to', 'ly', 'gl', 'la', 'im', 'sx', 'ws', 'cc', 'pw', 'cm', 'nu'];
+  // (0.15.0 final fix A, I7; narrowed in round 2, N2) Static list of free/vanity ccTLDs, independent of the feed's
+  // riskTlds being populated. It applies ONLY when the WHOLE public suffix is that single label (su, tk, ...), so
+  // com.cn / com.ru / org.tv style second-level suffixes and the big national TLDs are untouched.
+  //   Removed in round 2: cn and ru. Brands run real storefronts there (apple.com.cn, amazon.cn, aliexpress.ru).
+  //   Chosen over per-brand suffix data: the brand table only carries suffix lists for the 13 closed-policy brands,
+  //   so a general "suffixes the brand uses" test is not available.
+  //   su - Soviet-era TLD, phishing staple; tk ml ga cf gq pw cc ws - free/cheap registries (most are also in
+  //   SUSPICIOUS_TLDS); tv to ly gl la im sx cm nu - vanity/cheap TLDs read as ".com" typos or sold freely;
+  //   co (exact) - the famous ".com" typo suffix; com.co (Colombia) stays regional.
+  // Deliberately NOT here: ph (shopee.ph), cn, ru, and every ordinary regional suffix.
+  const ABUSED_CCTLDS = ['su', 'tk', 'ml', 'ga', 'cf', 'gq', 'tv', 'to', 'ly', 'gl', 'la', 'im', 'sx', 'ws', 'cc', 'pw', 'cm', 'nu'];
   function isRegionalSite(brand, suffix, riskTlds) {
     const sfx = String(suffix || '').toLowerCase();
     if (!sfx) return false;
     const tld = sfx.split('.').pop();
-    if (sfx === 'co' || ABUSED_CCTLDS.includes(tld)) return false;
+    if (sfx === 'co' || ABUSED_CCTLDS.includes(sfx)) return false;
     const ccShaped = (C.MULTI_LABEL_SUFFIXES || []).includes(sfx) || tld.length === 2;
     if (!ccShaped || (C.SUSPICIOUS_TLDS || []).includes(tld)) return false;
     // (0.15.0) a TLD the feed's abused-TLD table lists is never a "regional site" (paypal.su).

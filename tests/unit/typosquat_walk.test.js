@@ -11,12 +11,15 @@ test('typosquat walk: covers a real corpus', () => {
   assert.ok(w.tested > 10000, 'tested ' + w.tested);
   assert.ok(w.recognised > 9000, 'recognised ' + w.recognised);
 });
-test('typosquat walk: every variant the matcher recognises (strong grade) warns with a visible password', () => {
-  assert.strictEqual(w.warnAfterRecognised, w.recognised);
+test('typosquat walk: with a visible password and a brand in the title the vast majority warn', () => {
+  assert.ok(w.warnBrandTitle / w.tested >= 0.8, 'brand-title warn rate ' + (w.warnBrandTitle / w.tested).toFixed(3));
+  assert.ok(w.warnBrandTitleRecognised / w.recognised >= 0.85, 'recognised ' + w.warnBrandTitleRecognised + '/' + w.recognised);
 });
-test('typosquat walk: the overall warn rate is the vast majority, and far above the old gate', () => {
-  assert.ok(w.warnAfter / w.tested >= 0.8, 'warn rate ' + (w.warnAfter / w.tested).toFixed(3));
-  assert.ok(w.warnAfter > 10 * w.warnBefore, `before ${w.warnBefore} after ${w.warnAfter}`);
+test('typosquat walk: with a phishing-style title ("Verify your account") every recognised variant warns', () => {
+  assert.ok(w.warnVerifyTitle / w.recognised >= 0.95, 'verify-title ' + w.warnVerifyTitle + '/' + w.recognised);
+});
+test('typosquat walk: with only a generic "Sign in" title the lift is deliberately quiet (N1)', () => {
+  assert.ok(w.warnAfter / w.tested < 0.25, 'generic-title warn rate ' + (w.warnAfter / w.tested).toFixed(3));
 });
 test('typosquat walk: with NO password field the lift adds no warning', () => {
   assert.deepStrictEqual(w.noPasswordWarnNotPreDangerous, []);

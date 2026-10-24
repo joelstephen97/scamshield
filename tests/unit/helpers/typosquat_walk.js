@@ -42,17 +42,18 @@ function walk() {
   const isPopular = (d) => B.has(pop, B.hash40FromBytes(crypto.createHash('sha256').update(d).digest()));
   // Bases: the brand KEY (what the reviewer walked) plus the brand's primary-domain label (what the matcher compares
   // against, e.g. key 'steam' -> 'steampowered'), each >= 5 letters.
-  const bases = new Set();
+  const bases = new Map(); // base -> brand display name (for the brand-title scenario)
   for (const b of C.BRANDS) {
     if (b.fuzzy === false) continue;
-    if (/^[a-z]{5,}$/.test(b.key)) bases.add(b.key);
+    const disp = C.brandDisplayName(b.key);
+    if (/^[a-z]{5,}$/.test(b.key) && !bases.has(b.key)) bases.set(b.key, disp);
     const f = C.registrableParts(b.domains[0]).sld;
-    if (/^[a-z]{5,}$/.test(f)) bases.add(f);
+    if (/^[a-z]{5,}$/.test(f) && !bases.has(f)) bases.set(f, disp);
   }
-  const brandKeys = [...bases];
+  const brandKeys = [...bases.keys()];
   const seen = new Set();
   const s = { brands: brandKeys.length, variants: 0, skippedRealBrand: 0, skippedPopular: 0, tested: 0, recognised: 0, unrecognised: 0,
-    warnBefore: 0, warnBeforeRecognised: 0, warnAfter: 0, warnAfterRecognised: 0, quietNoPassword: 0, noPasswordWarn: [], noPasswordWarnNotPreDangerous: [], notWarned: [], unrecognisedSample: [] };
+    warnBefore: 0, warnBeforeRecognised: 0, warnAfter: 0, warnAfterRecognised: 0, warnVerifyTitle: 0, warnBrandTitle: 0, warnBrandTitleRecognised: 0, quietNoPassword: 0, noPasswordWarn: [], noPasswordWarnNotPreDangerous: [], notWarned: [], unrecognisedSample: [] };
   for (const key of brandKeys) for (const v of variantsOf(key)) {
     const host = v + '.com';
     if (seen.has(host)) continue; seen.add(host);
@@ -61,13 +62,17 @@ function walk() {
     if (isPopular(host)) { s.skippedPopular++; continue; }
     s.tested++;
     const url = 'https://' + host + '/signin';
-    const withPw = runPipeline({ url, signals: { hasVisiblePasswordField: true }, riskTlds: {} });
+    const withPw = runPipeline({ url, signals: { hasVisiblePasswordField: true }, riskTlds: {} }); // generic "Sign in" title
+    const verifyPw = runPipeline({ url, signals: { hasVisiblePasswordField: true, titleBrand: 'Verify your account' }, riskTlds: {} });
+    const brandPw = runPipeline({ url, signals: { hasVisiblePasswordField: true, titleBrand: bases.get(key) + ' - Sign in' }, riskTlds: {} });
     const noPw = runPipeline({ url, riskTlds: {} });
     const recognised = withPw.urlRules.reasons.some((r) => r.code === 'brandFuzzyMatch' && (r.grade === 'strong' || r.grade === 'strongest'));
     if (recognised) s.recognised++; else { s.unrecognised++; if (s.unrecognisedSample.length < 40) s.unrecognisedSample.push(host); }
     // "before" = the 0.15.0 gate: credentialFlags only ran when the fused verdict was already not "safe", so a page
     // warned if it was dangerous, or suspicious with a lookalike reason (which then got the confident flag).
     if (withPw.preVerdict.level === 'dangerous' || (withPw.preVerdict.level === 'suspicious' && withPw.urlRules.reasons.some(D.isLookalikeReason))) { s.warnBefore++; if (recognised) s.warnBeforeRecognised++; }
+    if (verifyPw.tier === 'warn') s.warnVerifyTitle++;
+    if (brandPw.tier === 'warn') { s.warnBrandTitle++; if (recognised) s.warnBrandTitleRecognised++; }
     if (withPw.tier === 'warn') { s.warnAfter++; if (recognised) s.warnAfterRecognised++; } else if (s.notWarned.length < 400) s.notWarned.push(host);
     if (noPw.tier === 'quiet') s.quietNoPassword++;
     else { s.noPasswordWarn.push(host); if (noPw.preVerdict.level !== 'dangerous') s.noPasswordWarnNotPreDangerous.push(host); }

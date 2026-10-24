@@ -63,18 +63,47 @@
   //     a Bloom false positive on an old login page must not warn by itself.
   //   brand-lookalike-credential: brand-imitating host + a visible password/card field
   // in = { verdictFlags, urlReasons, urlScore, domReasons, hasPasswordField (a VISIBLE credential field), popular, host }
+  // Fuzzy brand match at a grade that counts (strong/strongest); weak never counts as brand evidence.
+  const isStrongFuzzy = (r) => !!r && r.code === 'brandFuzzyMatch' && (r.grade === 'strong' || r.grade === 'strongest');
+  const WEAK_FUZZY_WEIGHT = 0.25; // engine/heuristics.js FUZZY_BRAND_WEIGHT.weak
+  // in.strictLookalike (final fix A round 2, N1): the lookalike flag needs a typosquat-shaped match, not mere
+  // brand-as-substring (applebees.com, amazonia.com) or a bare suffix swap (dropbox.org): an idnHomograph, OR a
+  // strong/strongest fuzzy match (edit distance <= 1 to the brand) PLUS in.corroborated (a non-URL signal).
+  // finalizeVerdict always sets it; without it the 0.15.0 rule (any lookalike reason) applies. A verdict that is
+  // already dangerous warns regardless of this flag.
   function credentialFlags(i) {
     const out = [];
     if (!i || !i.hasPasswordField || popularMode(i.popular, i.host) === 'full') return out;
     const urlReasons = i.urlReasons || [], domReasons = i.domReasons || [];
     if ((i.verdictFlags || []).includes('new-domain')) {
-      const corroborated = (i.urlScore || 0) >= 0.15
-        || urlReasons.some((r) => r && r.kind === 'brand') || domReasons.some((r) => r && r.kind === 'brand')
+      // (N6) a weak-grade fuzzy match is not brand evidence: not as a reason, and not through the URL score it adds.
+      const weak = urlReasons.some((r) => r && r.code === 'brandFuzzyMatch' && !isStrongFuzzy(r));
+      const urlScore = (i.urlScore || 0) - (weak ? WEAK_FUZZY_WEIGHT : 0);
+      const brandReason = (r) => r && r.kind === 'brand' && (r.code !== 'brandFuzzyMatch' || isStrongFuzzy(r));
+      const corroborated = urlScore >= 0.15 - 1e-9
+        || urlReasons.some(brandReason) || domReasons.some(brandReason)
         || domReasons.some((r) => r && r.code === 'credentialFormForeignDomain');
       if (corroborated) out.push('nrd-credential');
     }
-    if (urlReasons.some(isLookalikeReason)) out.push('brand-lookalike-credential');
+    const lookalike = i.strictLookalike
+      ? (urlReasons.some((r) => r && r.code === 'idnHomograph') || (urlReasons.some(isStrongFuzzy) && i.corroborated === true))
+      : urlReasons.some(isLookalikeReason);
+    if (lookalike) out.push('brand-lookalike-credential');
     return out;
+  }
+
+  // Non-URL corroboration for a safe-level typosquat (N1): a brand named in the title/og/logo, a foreign form action,
+  // a young domain, http, a suspicious TLD, or a generic phishing title.
+  const PHISH_TITLE = /\b(verify|verification|suspended|unlock|locked|restore|confirm your|secure your|update your|re-?activate|unusual)\b/i;
+  function lookalikeCorroborated(x, v, urlReasons, domReasons) {
+    const sg = x.signals || {};
+    if ((v.flags || []).includes('new-domain')) return true;
+    if (urlReasons.some((r) => r && (r.code === 'noHttps' || r.code === 'suspiciousTld' || r.code === 'riskAbusedTld'))) return true;
+    if (domReasons.some((r) => r && (r.kind === 'brand' || r.code === 'credentialFormForeignDomain'))) return true;
+    const title = String(sg.titleBrand || '');
+    if (PHISH_TITLE.test(title)) return true;
+    if (C.brandNameIn && C.brandNameIn([title, sg.ogSiteName || '', ...(sg.logoAltBrands || [])].join(' | '))) return true;
+    return false;
   }
 
   function surfaceTier(verdict, ctx) {
@@ -120,6 +149,7 @@
     const sg = x.signals || {};
     const credFlags = credentialFlags({
       verdictFlags: v.flags, urlReasons, urlScore: x.urlRules && x.urlRules.score, domReasons,
+      strictLookalike: true, corroborated: lookalikeCorroborated(x, v, urlReasons, domReasons),
       hasPasswordField: !!(sg.hasVisiblePasswordField || sg.hasVisibleCardInput), popular: x.popular, host: x.host
     });
     if (credFlags.length && v.suppressed !== 'engagement') {

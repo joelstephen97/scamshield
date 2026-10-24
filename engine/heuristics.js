@@ -85,8 +85,14 @@
       // grades (rules a/b) describe a genuinely different shape and stay.
       const duplicatesForeignSuffix = fuzzy && fsx && fuzzy.brand === fsx.brand &&
         ['c', 'd', 'e'].includes(fuzzy.rule);
+      // (final fix A round 2, N1) The frozen model feature brand_lookalike (+0.45) and a strong rule c/d/e match are the
+      // SAME observation for a TLD swap or a plain one-letter edit (rules c/e: dropbox.org, apples.com, appel.nl): stacking
+      // them pinned those at 0.9 "dangerous" with no other evidence. Count it once; the reason stays so the credential lift
+      // can use it. Homoglyph hosts (rule d: amaz0n.co) and the injection grades (a/b: paypal-login.com) have no innocent
+      // reading and still stack.
+      const sameObservation = !!(get('brand_lookalike') && fuzzy && fuzzy.grade === 'strong' && ['c', 'e'].includes(fuzzy.rule));
       if (fuzzy && !duplicatesForeignSuffix) {
-        score += FUZZY_BRAND_WEIGHT[fuzzy.grade] || 0;
+        if (!sameObservation) score += FUZZY_BRAND_WEIGHT[fuzzy.grade] || 0;
         reasons.push({ code: 'brandFuzzyMatch', kind: 'brand', params: [C.brandDisplayName(fuzzy.brand)], grade: fuzzy.grade }); // grade: read by engine/doctrine.js (0.15.0)
       }
     }
@@ -240,7 +246,10 @@
     // also needs them.)
     const matchedBrand = C.brandNameIn([s.titleBrand, s.ogSiteName, ...(s.logoAltBrands || [])].join(' | '));
     // (0.15.0) needs a VISIBLE password field: a hidden login modal is not a login ask.
-    if (matchedBrand && s.hasVisiblePasswordField && !isOnBrand(matchedBrand)) {
+    // (round 2, N4) paypal.zendesk.com / paypal.gitbook.io: the tenant label IS the brand key - the brand's own help
+    // centre, not an impersonation of it.
+    const ownTenant = !!(C.userContentTenantLabel && C.userContentTenantLabel(s.pageHost) === matchedBrand);
+    if (matchedBrand && s.hasVisiblePasswordField && !ownTenant && !isOnBrand(matchedBrand)) {
       score = Math.max(score, 0.85); flags.push('brand-impersonation-content'); brand = matchedBrand;
       reasons.push({ code: 'brandImpersonationContent', kind: 'brand', params: [matchedBrand] });
     }
