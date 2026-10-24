@@ -590,16 +590,12 @@
     return !!u && USER_CONTENT_PATH_HOSTS.includes(u);
   }
 
-  // The label directly beneath a user-content / tenant apex (paypal.zendesk.com -> 'paypal'), or null. A brand's own
-  // support tenant carries its name there, so brand-impersonation-content skips that exact shape (round 2, N4).
-  function userContentTenantLabel(host) {
-    const h = normHost(host);
-    let best = null;
-    for (const u of USER_CONTENT_HOSTS.concat(TENANT_PLATFORMS)) if (h.endsWith('.' + u) && (!best || u.length > best.length)) best = u;
-    if (!best) return null;
-    const rest = h.slice(0, -(best.length + 1)).split('.').filter(Boolean);
-    return rest.length ? rest[rest.length - 1] : null;
-  }
+  // Hosts on a user-content / tenant platform that are VERIFIED to belong to the brand itself (host -> brand key),
+  // e.g. a brand's own help-centre tenant. Anyone can register any free sub-domain on these platforms
+  // (paypal.gitbook.io, paypal.webflow.io, a paypal.zendesk.com trial), so a tenant label that merely equals the brand
+  // key proves nothing and is NEVER inferred as ownership. Add an entry only after confirming the host is brand-owned
+  // (the brand links to it from its own domain, or it is documented in the brand's official support pages).
+  const BRAND_OWNED_TENANTS = {};
   function isSafeHost(host) {
     const h = String(host || '').toLowerCase();
     if (isUserContentHost(h)) return false; // (0.15.0) never exempt from page checks
@@ -844,7 +840,7 @@
     TENANT_PLATFORMS, tenantLabel, scopeDomain, scopeKeys, isTenantApex,
     MULTI_LABEL_SUFFIXES, KNOWN_AUTH_PROVIDERS, KNOWN_BRAND_REGISTRABLES,
     VERIFIED_NAMESPACES, isVerifiedNamespace,
-    registrableParts, registrableDomain, isSafeHost, USER_CONTENT_HOSTS, isUserContentHost, isPathUserContentHost, userContentTenantLabel, brandNameIn, brandDisplayName,
+    registrableParts, registrableDomain, isSafeHost, USER_CONTENT_HOSTS, isUserContentHost, isPathUserContentHost, BRAND_OWNED_TENANTS, brandNameIn, brandDisplayName,
     unwrapSerpRedirect, dedupeCapped,
     luhnValid, isPanShaped, isSamePageAction, CRED_EXFIL_ALLOWLIST, isCredExfilAllowlisted, crossOriginCredPostHost
   };

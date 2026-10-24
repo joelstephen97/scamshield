@@ -246,9 +246,8 @@
     // also needs them.)
     const matchedBrand = C.brandNameIn([s.titleBrand, s.ogSiteName, ...(s.logoAltBrands || [])].join(' | '));
     // (0.15.0) needs a VISIBLE password field: a hidden login modal is not a login ask.
-    // (round 2, N4) paypal.zendesk.com / paypal.gitbook.io: the tenant label IS the brand key - the brand's own help
-    // centre, not an impersonation of it.
-    const ownTenant = !!(C.userContentTenantLabel && C.userContentTenantLabel(s.pageHost) === matchedBrand);
+    // (N4) a tenant label equal to the brand key is NOT ownership; only the verified BRAND_OWNED_TENANTS allowlist is.
+    const ownTenant = !!(matchedBrand && C.BRAND_OWNED_TENANTS && C.BRAND_OWNED_TENANTS[String(s.pageHost || '').toLowerCase()] === matchedBrand);
     if (matchedBrand && s.hasVisiblePasswordField && !ownTenant && !isOnBrand(matchedBrand)) {
       score = Math.max(score, 0.85); flags.push('brand-impersonation-content'); brand = matchedBrand;
       reasons.push({ code: 'brandImpersonationContent', kind: 'brand', params: [matchedBrand] });

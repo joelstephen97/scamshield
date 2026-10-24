@@ -231,13 +231,19 @@ test('minor 10: a hidden password field on a tenant host is not a credential ask
   assert.ok(shown.reasons.some((r) => r.code === 'credentialFormOnTenantHost'));
 });
 
-// ---- round 2, N4: a brand help-centre tenant -----------------------------------------------------
-test('N4: brand-impersonation-content is skipped when the tenant label IS the brand key', () => {
-  for (const h of ['paypal.zendesk.com', 'paypal.gitbook.io', 'paypal.freshdesk.com'])
-    assert.ok(!runPipeline({ url: 'https://' + h + '/', signals: BRAND_PW, popular: true }).domRules.flags.includes('brand-impersonation-content'), h);
-  // any other tenant naming PayPal is still impersonation
-  assert.ok(runPipeline({ url: 'https://evil.zendesk.com/', signals: BRAND_PW, popular: true }).domRules.flags.includes('brand-impersonation-content'));
-  assert.strictEqual(C.userContentTenantLabel('paypal.zendesk.com'), 'paypal');
-  assert.strictEqual(C.userContentTenantLabel('a.paypal.zendesk.com'), 'paypal');
-  assert.strictEqual(C.userContentTenantLabel('www.example.com'), null);
+// ---- round 2, N4: tenant ownership is never inferred from the label ------------------------------
+test('N4: paypal.gitbook.io / paypal.zendesk.com with a PayPal title and a visible password still warn', () => {
+  for (const h of ['paypal.gitbook.io', 'paypal.zendesk.com', 'paypal.webflow.io']) {
+    const r = runPipeline({ url: 'https://' + h + '/', signals: BRAND_PW, popular: !h.endsWith('webflow.io') }); // webflow.io is a tenant apex, never in the popular set
+    assert.ok(r.domRules.flags.includes('brand-impersonation-content'), h);
+    assert.strictEqual(r.tier, 'warn', h);
+  }
+});
+test('N4: BRAND_OWNED_TENANTS exists, is empty until entries are verified, and only an exact host entry exempts', () => {
+  assert.deepStrictEqual(C.BRAND_OWNED_TENANTS, {});
+  C.BRAND_OWNED_TENANTS['help.example-tenant.zendesk.com'] = 'paypal';
+  try {
+    const r = H.scoreDom({ pageHost: 'help.example-tenant.zendesk.com', hasPasswordField: true, hasVisiblePasswordField: true, titleBrand: 'paypal help' });
+    assert.ok(!r.flags.includes('brand-impersonation-content'));
+  } finally { delete C.BRAND_OWNED_TENANTS['help.example-tenant.zendesk.com']; }
 });
