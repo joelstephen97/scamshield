@@ -96,6 +96,7 @@ test('"Open anyway" navigates, and the block page is the final gate', async ({ c
   await page.goto(PAGE + '?late=1');
   await expect(page.locator('#late')).toHaveClass(/scamshield-link-block/, { timeout: 7000 });
   await page.locator('#late').click();
+  await page.waitForTimeout(450); // the button is armed 300 ms after the dialog appears
   await confirmDialog(page).getByRole('button', { name: 'Open anyway' }).click();
   await expect(page).toHaveURL(/blocked\.html/, { timeout: 8000 });
 });
@@ -129,13 +130,19 @@ test('a feed with 0 matches marks nothing on a link-heavy page (benign canary), 
   await expect(page2.locator('[class*="scamshield-link-"]')).toHaveCount(2, { timeout: 7000 }); // only #wrapped and #card
 });
 
-test('a blocked result on a search results page gets the link mark as well as the SERP dot', async ({ context }) => {
+test('a blocked result on a search results page gets the SERP dot only (no second link mark), and a click on it still asks first', async ({ context }) => {
   const sw = context.serviceWorkers()[0];
   await installFeed(sw, [SENTINEL]);
   const page = await context.newPage();
   await page.goto(BASE_HTTPS.replace('localhost', 'www.google.com') + '/search?block=' + SENTINEL);
   await expect(page.locator('#badge-block-result .scamshield-serp-badge-danger')).toBeVisible({ timeout: 8000 });
-  await expect(page.locator('#badge-block-result a')).toHaveClass(/scamshield-link-block/, { timeout: 8000 });
+  // One annotation per result (final fix B3): the SERP dot is there, so the link mark steps aside; the click confirm still applies.
+  await page.waitForTimeout(1500);
+  await expect(page.locator('#badge-block-result a')).not.toHaveClass(/scamshield-link-/);
+  await expect(page.locator('#badge-block-result a')).not.toHaveAttribute('data-ss-pill', /.+/);
+  await page.locator('#badge-block-result a').evaluate((a) => a.addEventListener('click', (e) => e.preventDefault()));
+  await page.locator('#badge-block-result a').click();
+  await expect(confirmDialog(page)).toBeVisible();
 });
 
 test('surface log records link-block once per page and link-confirm when the dialog shows', async ({ context }) => {
@@ -161,6 +168,7 @@ test('the page swapping the href while the confirm is open cannot redirect "Open
   await page.locator('#wrapped').click();
   await expect(confirmDialog(page)).toBeVisible();
   await page.evaluate(() => { document.getElementById('wrapped').href = 'http://linkguard-swapped.example/evil'; });
+  await page.waitForTimeout(450);
   await confirmDialog(page).getByRole('button', { name: 'Open anyway' }).click();
   await expect(confirmDialog(page)).toHaveCount(0);
   await page.waitForTimeout(1500);
@@ -186,4 +194,69 @@ test('a relative link resolves through <base> (a.href), so it is looked up at it
   const page = await context.newPage();
   await page.goto(PAGE + '?base=1');
   await expect(page.locator('#rel')).toHaveClass(/scamshield-link-block/, { timeout: 7000 });
+});
+
+// 0.15.0 final fix B3: coverage when the queues saturate, and recovery from a failed lookup.
+test('a 700-node append saturates the root queue; the catch-all still marks a late link past the cap (and the 700 clean links stay unmarked)', async ({ context }) => {
+  const sw = context.serviceWorkers()[0];
+  await installFeed(sw, [SENTINEL]);
+  const page = await context.newPage();
+  await page.goto(PAGE);
+  await expect(page.locator('#wrapped')).toHaveClass(/scamshield-link-block/, { timeout: 7000 });
+  await page.evaluate(() => {
+    for (let i = 0; i < 700; i++) {
+      const d = document.createElement('div');
+      d.innerHTML = '<a class="bulk" id="bulk' + i + '" href="' + (i === 650 ? 'http://scamshield-test-blocked.example/bulk' : 'http://linkguard-clean-one.example/p' + i) + '">item ' + i + '</a>';
+      document.body.appendChild(d); // 700 separate insertions: 700 queued roots, cap 500
+    }
+  });
+  await expect(page.locator('#bulk650')).toHaveClass(/scamshield-link-block/, { timeout: 12000 });
+  await expect(page.locator('a.bulk[class*="scamshield-link-"]')).toHaveCount(1);
+});
+
+test('a failed lookup (service worker error once) leaves the link unmarked at first and marks it after the 30 s retry', async ({ context }) => {
+  test.setTimeout(80000);
+  const SECOND = 'linkguard-second-blocked.example';
+  const sw = context.serviceWorkers()[0];
+  await installFeed(sw, [SENTINEL, SECOND]);
+  const page = await context.newPage();
+  const cdp = await context.newCDPSession(page);
+  const ctxs = [];
+  cdp.on('Runtime.executionContextCreated', (e) => ctxs.push(e.context));
+  await cdp.send('Runtime.enable');
+  await page.goto(PAGE);
+  await expect(page.locator('#wrapped')).toHaveClass(/scamshield-link-block/, { timeout: 7000 }); // the guard is up
+  const ext = ctxs.find((x) => x.auxData && x.auxData.type === 'isolated' && /^chrome-extension:\/\//.test(x.origin || ''));
+  // Mock in the extension's own world: the next checkFeedBatch message fails once (as if the service worker were unreachable).
+  await cdp.send('Runtime.evaluate', { contextId: ext.id, expression: `(function(){ const a = (globalThis.browser || globalThis.chrome).runtime; const o = a.sendMessage.bind(a); let fails = 1; a.sendMessage = function (m, cb) { if (m && m.type === 'checkFeedBatch' && fails-- > 0) { if (cb) cb(undefined); return; } return o(m, cb); }; })()` });
+  await page.evaluate((h) => { const a = document.createElement('a'); a.id = 'second'; a.href = 'http://' + h + '/x'; a.textContent = 'second'; document.body.appendChild(a); }, SECOND);
+  await page.waitForTimeout(3000);
+  await expect(page.locator('#second')).not.toHaveClass(/scamshield-link-/);                      // the first lookup failed
+  await expect(page.locator('#second')).toHaveClass(/scamshield-link-block/, { timeout: 45000 }); // retried after 30 s
+});
+
+test('a re-render that strips the mark classes gets them back', async ({ context }) => {
+  const sw = context.serviceWorkers()[0];
+  await installFeed(sw, [SENTINEL]);
+  const page = await context.newPage();
+  await page.goto(PAGE);
+  await expect(page.locator('#wrapped')).toHaveClass(/scamshield-link-block/, { timeout: 7000 });
+  await page.locator('#wrapped').evaluate((a) => { a.className = ''; });
+  await expect(page.locator('#wrapped')).toHaveClass(/scamshield-link-block/, { timeout: 4000 });
+});
+
+test('"Open anyway" ignores a click that lands within 300 ms of the dialog appearing (double-click on the link)', async ({ context }) => {
+  const sw = context.serviceWorkers()[0];
+  await installFeed(sw, [SENTINEL]);
+  const page = await context.newPage();
+  await page.goto(PAGE + '?late=1');
+  await expect(page.locator('#late')).toHaveClass(/scamshield-link-block/, { timeout: 7000 });
+  await page.locator('#late').click();
+  await expect(confirmDialog(page)).toBeVisible();
+  // A real click on the armed-late button, issued at once through the browser input path.
+  const box = await page.evaluate(() => { const b = [...document.querySelector('scamshield-surface').shadowRoot.querySelectorAll('button')].find((x) => /open anyway/i.test(x.textContent)); const r = b.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; });
+  await page.mouse.click(box.x, box.y);
+  await page.waitForTimeout(600);
+  expect(page.url()).toBe(PAGE + '?late=1');
+  await expect(confirmDialog(page)).toBeVisible(); // nothing happened: still asking
 });

@@ -4,7 +4,8 @@
 //
 // Cost: one MutationObserver that only queues added nodes; the work happens in idle time, one batched
 // SW lookup (hash-set membership, no network) per round, at most 200 new distinct hosts a minute,
-// a per-host verdict cache for the page's lifetime, and no getComputedStyle anywhere.
+// a per-host verdict cache (15 min for a verdict, 2 min for 'clean'), and one batched getComputedStyle read pass per
+// stretch (only for anchors about to be marked, reads before writes).
 (function (root) {
   'use strict';
   const SS = root.ScamShield = root.ScamShield || {};
@@ -33,7 +34,17 @@
     if (!/^https?:$/.test(location.protocol) || !document.documentElement) return false;
     started = true;
 
-    const cache = new Map();          // host -> 'block' | 'warn' | null (page lifetime)
+    // host -> 'block' | 'warn' | null, with a lifetime: a verdict lives 15 min, a clean answer 2 min (the feed can gain
+    // a host while a tab sits open). An expired entry simply reads as absent, so the next sighting looks it up again.
+    const TTL_HIT = 15 * 60000, TTL_CLEAN = 2 * 60000;
+    const cache = (function () {
+      const m = new Map();
+      return {
+        has(h) { const e = m.get(h); if (!e) return false; if (e.exp <= Date.now()) { m.delete(h); return false; } return true; },
+        get(h) { return this.has(h) ? m.get(h).v : undefined; },
+        set(h, v) { m.set(h, { v, exp: Date.now() + (v ? TTL_HIT : TTL_CLEAN) }); }
+      };
+    })();
     const inflight = new Set();       // hosts asked and not yet answered
     const pending = new Map();        // host -> Promise of the lookup that will answer it (for request())
     const waiting = new Map();        // host -> Set<anchor> to mark on answer
@@ -52,19 +63,34 @@
     }
 
     const pillText = (level) => level === 'block' ? deps.t('linkPillBlock', null, 'Blocked link') : deps.t('linkPillWarn', null, 'Risky link');
-    function mark(a, level) {
-      if (!a.isConnected) return;
-      if (!level) {
-        if (a.hasAttribute('data-ss-pill')) { a.classList.remove('scamshield-link-block', 'scamshield-link-warn', 'scamshield-link-card'); a.removeAttribute('data-ss-pill'); }
-        return; // a clean link is never written to
+    const MARK_CLASSES = ['scamshield-link-block', 'scamshield-link-warn', 'scamshield-link-card'];
+    // A search result already carries a SERP badge (a sibling dot, content_script.js): one annotation per link, so the
+    // link mark steps aside. The click confirm still works (it is driven by the verdict cache, not by the mark).
+    const serpBadged = (a) => { try { const n = a.nextElementSibling; return !!(n && n.classList && n.classList.contains('scamshield-serp-badge')); } catch (_) { return false; } };
+    function unmark(a) {
+      if (a.hasAttribute('data-ss-pill')) { a.classList.remove(...MARK_CLASSES); a.removeAttribute('data-ss-pill'); }
+    }
+    // Marks many anchors in two passes: every layout read first (a block/flex/grid anchor, i.e. an image card, gets the
+    // pill as a corner badge instead of a flow ::after so nothing shifts; one getComputedStyle per anchor about to be
+    // marked, never for unmarked ones), then every class/attribute write. No read follows a write, so one layout at most.
+    function markMany(pairs) {
+      const todo = [];
+      for (const [a, level] of pairs) {
+        if (!a.isConnected) continue;
+        if (!level) { unmark(a); continue; } // a clean link is never written to
+        if (serpBadged(a)) { unmark(a); continue; }
+        todo.push([a, level]);
       }
-      a.classList.remove('scamshield-link-block', 'scamshield-link-warn');
-      a.classList.add('scamshield-link-' + level);
-      a.setAttribute('data-ss-pill', pillText(level));
-      // A block/flex/grid anchor (an image card) gets the pill as a corner badge instead of a flow ::after, so
-      // nothing shifts. One getComputedStyle per MARKED anchor, never for unmarked ones.
-      try { if (!/^inline/.test(getComputedStyle(a).display)) a.classList.add('scamshield-link-card'); else a.classList.remove('scamshield-link-card'); } catch (_) {}
-      deps.surface('link-' + level, true); // once per page per kind
+      const card = todo.map(([a]) => { try { return !/^inline/.test(getComputedStyle(a).display); } catch (_) { return false; } });
+      todo.forEach(([a, level], i) => {
+        const other = level === 'block' ? 'scamshield-link-warn' : 'scamshield-link-block';
+        if (a.classList.contains(other)) a.classList.remove(other);
+        if (!a.classList.contains('scamshield-link-' + level)) a.classList.add('scamshield-link-' + level);
+        const pill = pillText(level);
+        if (a.getAttribute('data-ss-pill') !== pill) a.setAttribute('data-ss-pill', pill);
+        if (card[i] !== a.classList.contains('scamshield-link-card')) a.classList.toggle('scamshield-link-card', card[i]);
+        deps.surface('link-' + level, true); // once per page per kind
+      });
     }
     // a.href is the browser-resolved URL (honours <base>); an SVG <a> has an object there, so fall back to the attribute.
     const hrefOf = (a) => (typeof a.href === 'string' && a.href) ? a.href : (a.getAttribute('href') || '');
@@ -77,7 +103,16 @@
       if (!rootNode || rootNode.nodeType !== 1) return;
       if (rootNode.tagName === 'A') { if (rootNode.hasAttribute('href')) anchorQueue.add(rootNode); return; }
       if (typeof rootNode.querySelectorAll !== 'function') return;
-      for (const a of rootNode.querySelectorAll('a[href]')) { if (anchorQueue.size >= QUEUE_ANCHORS) break; anchorQueue.add(a); }
+      for (const a of rootNode.querySelectorAll('a[href]')) { if (anchorQueue.size >= QUEUE_ANCHORS) { catchAll(); break; } anchorQueue.add(a); }
+    }
+    // Queue saturation (500 roots / 4000 anchors): nothing is silently lost. The document body is queued ONCE as a
+    // catch-all root, so whatever was dropped is collected again once the queue has drained. Reset when it empties.
+    let catchAllQueued = false;
+    function catchAll() {
+      if (catchAllQueued) return;
+      catchAllQueued = true;
+      const b = document.body || document.documentElement;
+      if (b) rootsQueue.push(b);
     }
 
     function lookup(hosts) {
@@ -95,14 +130,31 @@
       return !!results;
     }
     function applyResults(hosts, results) {
+      const pairs = [];
       for (const h of hosts) {
         inflight.delete(h);
-        if (!results) { waiting.delete(h); continue; } // SW unreachable: retry on a later sighting
+        if (!results) { // SW unreachable / lookup failed: keep the anchors, try again in 30 s
+          const lost = waiting.get(h); waiting.delete(h);
+          if (lost) { for (const a of lost) deferred.add(a); armRetry(30000); }
+          continue;
+        }
         const level = R.levelFor(results[h]);
         cache.set(h, level);
         const set = waiting.get(h); waiting.delete(h);
-        if (level && set) for (const a of set) mark(a, level);
+        if (level && set) for (const a of set) pairs.push([a, level]);
       }
+      markMany(pairs);
+    }
+
+    function nearestFirst(list) {
+      const vh = root.innerHeight || document.documentElement.clientHeight || 0;
+      const scored = list.map((a) => {
+        let d = 1e9;
+        try { if (a.isConnected) { const r = a.getBoundingClientRect(); d = r.bottom < 0 ? -r.bottom : r.top > vh ? r.top - vh : 0; } } catch (_) {}
+        return { a, d };
+      });
+      scored.sort((x, y) => x.d - y.d);
+      return scored.map((x) => x.a);
     }
 
     async function round() {
@@ -112,18 +164,24 @@
       try {
         const roots = rootsQueue; rootsQueue = [];
         for (const r of roots) collect(r);
-        const anchors = Array.from(anchorQueue).slice(0, ROUND_ANCHORS);
+        let anchors = Array.from(anchorQueue);
+        // More anchors than a round (or the host budget) can take: the ones in or near the viewport go first. Rects are
+        // read in one batch (no writes in between); the rest wait in the queue for the next round.
+        if (anchors.length > ROUND_ANCHORS) anchors = nearestFirst(anchors);
+        anchors = anchors.slice(0, ROUND_ANCHORS);
         for (const a of anchors) anchorQueue.delete(a);
-        const need = [];
+        if (!anchorQueue.size && !rootsQueue.length) catchAllQueued = false;
+        const need = [], pairs = [];
         for (const a of anchors) {
           if (!a.isConnected) continue;
           const d = hostOf(a);
-          if (!d) { if (a.hasAttribute('data-ss-pill')) mark(a, null); continue; }
-          if (cache.has(d.host)) { mark(a, cache.get(d.host)); continue; }
+          if (!d) { if (a.hasAttribute('data-ss-pill')) pairs.push([a, null]); continue; }
+          if (cache.has(d.host)) { pairs.push([a, cache.get(d.host)]); continue; }
           let set = waiting.get(d.host); if (!set) waiting.set(d.host, set = new Set());
           set.add(a);
           if (!inflight.has(d.host)) need.push(d.host);
         }
+        markMany(pairs);
         perf.rec(t0); t0 = 0;
         let failed = false;
         for (;;) {
@@ -151,19 +209,26 @@
     }
 
     function enqueue(node) {
-      if (rootsQueue.length >= QUEUE_ROOTS) return;
+      if (rootsQueue.length >= QUEUE_ROOTS) { catchAll(); return; }
       rootsQueue.push(node);
     }
 
     if (!deps.passive) try {
       const mo = new MutationObserver((records) => {
         for (const rec of records) {
-          if (rec.type === 'attributes') { if (rec.target.tagName === 'A') { anchorQueue.add(rec.target); } continue; }
+          if (rec.type === 'attributes') {
+            const tg = rec.target;
+            if (tg.tagName !== 'A') continue;
+            // 'class': a re-render that strips our mark classes off an anchor still carrying its pill text gets them back.
+            if (rec.attributeName === 'class' && !(tg.hasAttribute('data-ss-pill') && !MARK_CLASSES.some((c) => tg.classList.contains(c)))) continue;
+            if (anchorQueue.size < QUEUE_ANCHORS) anchorQueue.add(tg); else catchAll();
+            continue;
+          }
           for (const n of rec.addedNodes) if (n.nodeType === 1) enqueue(n);
         }
         if (rootsQueue.length || anchorQueue.size) schedule();
       });
-      mo.observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['href'] });
+      mo.observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['href', 'class'] });
     } catch (_) { return false; }
     if (!deps.passive) { enqueue(document.documentElement); schedule(); }
 
@@ -181,6 +246,8 @@
         }
         return null;
       },
+      // The user's trusted/paused sites changed: look at the whole document again (a link to a now-trusted host loses its mark).
+      refresh() { if (!deps.passive) { enqueue(document.documentElement); schedule(); } },
       // Verdicts for several hosts at once (0.15.0, Task 17a): Promise<Map host -> 'block'|'warn'|null>. Reuses this
       // guard's cache, in-flight lookups, 50-host batches and 200 hosts/min budget. A host the budget refused (or a
       // failed lookup) is simply absent from the map: unknown, not clean. The caller retries later.
@@ -250,6 +317,7 @@
   SS.linkGuard = {
     start,
     levelOf: (host) => (live ? live.levelOf(host) : null),
-    request: (hosts) => (live ? live.request(hosts) : Promise.resolve(new Map()))
+    request: (hosts) => (live ? live.request(hosts) : Promise.resolve(new Map())),
+    refresh: () => { if (live && live.refresh) live.refresh(); }
   };
 })(typeof globalThis !== 'undefined' ? globalThis : self);
