@@ -48,7 +48,7 @@
   function reportMistake(opts) {
     // (0.15.0, Task 18) opts.quiet: the implicit report behind "This site is fine" must not open a GitHub tab.
     send('userReport', { label: 'false_positive', quiet: !!(opts && opts.quiet === true) });
-    if (!(opts && opts.explicit === true)) send('falseAlarm'); // the ack's own button follows a quiet report that already counted
+    if (!(opts && opts.explicit === true)) send('falseAlarm', { domain: scopeOf(location.hostname) }); // the ack's own button follows a quiet report that already counted
   }
 
   function needsPageAnalysis(signals, urlRules, domRules) {
@@ -304,7 +304,7 @@
       try { await navigator.clipboard.writeText(t('guardClipboardBlockedPayload', null, 'Blocked by ScamShield — this site put a dangerous command on your clipboard. Do not paste it anywhere.')); } catch (_) { /* overwrite is best-effort */ }
       SS.actions.dangerInterstitial({ level: 'dangerous', reasons: cf.reasons, flags: cf.flags }, { onLeave: () => send('leaveTab'), onReport: reportMistake });
       surface('interstitial');
-      send('reportVerdict', { verdict: { level: 'dangerous', score: 0.95, reasons: cf.reasons, reasonCodes: cf.reasons.map((x) => x.code), flags: cf.flags, modelUsed: false }, subframe: !IS_TOP, tier: 'stop' });
+      send('reportVerdict', { verdict: { level: 'dangerous', score: 0.95, reasons: cf.reasons, reasonCodes: cf.reasons.map((x) => x.code), flags: cf.flags, modelUsed: false }, subframe: !IS_TOP, tier: 'stop', rescan: true });
       send('bumpThreats', { kind: 'clipboard' });
       return;
     }
@@ -348,7 +348,7 @@
         try { window.dispatchEvent(new CustomEvent('scamshield:techscam-escape')); } catch (_) {}
         send('leaveTab');
       }, reportMistake);
-      send('reportVerdict', { verdict: { level: 'dangerous', score: r.score, reasons: r.reasons, reasonCodes: r.reasons.map((x) => x.code), flags: r.flags || [], modelUsed: false }, subframe: !IS_TOP, tier: 'stop' });
+      send('reportVerdict', { verdict: { level: 'dangerous', score: r.score, reasons: r.reasons, reasonCodes: r.reasons.map((x) => x.code), flags: r.flags || [], modelUsed: false }, subframe: !IS_TOP, tier: 'stop', rescan: true });
       send('bumpThreats', { kind: 'techscam' });
     }
   });
@@ -1430,7 +1430,7 @@
         iconMatches: signals.iconMatches || [], detectors: ['page']
       };
     } catch (_) { report = null; }
-    await send('reportVerdict', { verdict, report, subframe: !IS_TOP, tier });
+    await send('reportVerdict', { verdict, report, subframe: !IS_TOP, tier, rescan });
     // A warning the user already dismissed on this page stays dismissed (the tier and badge still update above), except that a
     // jump to 'stop' still shows its interstitial. An explicit pause/trust is handled earlier: a paused site returns silently.
     if (rescan && pageDismissed && tier !== 'stop') { formGuardReasons.splice(0, formGuardReasons.length, ...(verdict.reasons || [])); return; }
@@ -1575,7 +1575,7 @@
       for (const rec of records) {
         if (rec.type === 'attributes') {
           if (rec.attributeName === 'style') {
-            if (!rec.oldValue || !HIDDEN_OLD.test(rec.oldValue)) continue;
+            if (!rec.oldValue || rec.oldValue.indexOf('display') < 0 || !HIDDEN_OLD.test(rec.oldValue)) continue; // string check first: JS animations write style 60x/s
             let now = '';
             try { now = rec.target.getAttribute('style') || ''; } catch (_) { now = ''; }
             if (HIDDEN_OLD.test(now)) continue; // still hidden

@@ -10,6 +10,7 @@
   'use strict';
   const CAP = 300;
   const DIAG_ROWS = 100;
+  const DEDUPE_MS = 120000;
   const KINDS = ['banner', 'interstitial', 'toast-clipboard', 'toast-leak', 'toast-notify', 'techscam',
     'hidden-blocks', 'serp-dot', 'wallet', 'form-guard', 'link-block', 'link-warn', 'link-confirm', 'popup-block', 'ad-hidden'];
 
@@ -19,7 +20,11 @@
     if (!row || KINDS.indexOf(row.kind) === -1) return cur;
     const host = typeof row.host === 'string' ? row.host.toLowerCase().slice(0, 253) : '';
     if (!host || /[\/\s?#]/.test(host)) return cur; // hostnames only, never a URL
-    return [{ ts: typeof now === 'number' ? now : Date.now(), host, kind: row.kind }].concat(cur).slice(0, CAP);
+    const ts = typeof now === 'number' ? now : Date.now();
+    // An identical host+kind row straight after the previous one, within 2 minutes, adds nothing (a re-render, a rescan).
+    const top = cur[0];
+    if (top && top.host === host && top.kind === row.kind && typeof top.ts === 'number' && ts - top.ts >= 0 && ts - top.ts < DEDUPE_MS) return cur;
+    return [{ ts, host, kind: row.kind }].concat(cur).slice(0, CAP);
   }
 
   // Plain-text support dump: version, boolean toggles, last 100 {time, host, kind}.

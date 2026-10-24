@@ -98,7 +98,9 @@ const DEFAULTS = {
 const SYNCED_KEYS = ['hideScamContent', 'blockKnownBad', 'pageAnalysis',
   'clickFixGuard', 'fakeUpdateGuard', 'walletGuard', 'clipboardGuard', 'techScamGuard',
   'leakyFormGuard', 'fingerprintDetect', 'notificationGuard', 'strictMode', 'qrAutoScan',
-  'reportingOptIn', 'allowlist', 'allowlistMeta', 'theme', 'otaUrl', 'uiLang', 'mutedWarnings'];
+  'reportingOptIn', 'allowlist', 'allowlistMeta', 'theme', 'otaUrl', 'uiLang', 'mutedWarnings',
+  // 0.15.0: the user-facing toggles added since the list was written (Export / Import / sync keep them)
+  'linkGuard', 'adGuard', 'serpCheck', 'shopGuard'];
 
 // Local-only protection history: ring buffer of { ts, host, kind, level }.
 // Hostnames only, never full URLs; capped; user-clearable. Never transmitted.
@@ -717,7 +719,9 @@ async function handleUserReport(msg, sender) {
   let tabId = msg.tabId != null ? msg.tabId : (sender.tab && sender.tab.id);
   let tab = null; try { tab = tabId != null ? await api.tabs.get(tabId) : null; } catch (_) {}
   let url = tab && tab.url;
-  let verdict = lastVerdict.get(tabId) || { level: 'safe', score: 0, reasons: [] };
+  // (0.15.0 final fix) After a service-worker restart the in-memory map is empty: fall back to the verdict persisted
+  // for the tab (storage.session) before the default, so a report never claims the page was safe/empty.
+  let verdict = lastVerdict.get(tabId) || (tabId != null ? await readPersistedVerdict(tabId) : null) || { level: 'safe', score: 0, reasons: [] };
   // Options-page "Mark as mistake" has no scanned tab of its own — accept an
   // explicit host/level override from a history row instead.
   if (typeof msg.host === 'string' && msg.host && (!url || !/^https?:/.test(url))) {
@@ -767,6 +771,12 @@ function removalKeys(domain) {
 // 0.14.1: a write whose scoped key is a bare tenant apex ('wordpress.com',
 // 'pages.dev') would cover every tenant on the platform — refuse it.
 const TENANT_APEX_REFUSAL = { ok: false, reason: 'tenant-apex' };
+// (0.15.0 final fix) Domain-taking messages from a content script must name the page they come from. Extension
+// pages (popup, options, blocked, onboarding) are exempt - they act on whatever site the user picked.
+const DOMAIN_MISMATCH = { ok: false, reason: 'domain-mismatch' };
+function senderOwns(sender, domain) {
+  try { return globalThis.ScamShield.senderOwnsDomain(sender, domain, api.runtime.getURL('')); } catch (_) { return false; }
+}
 async function addTrust(domain, via, tabId) {
   const d = scopedKey(domain);
   if (!d) return { ok: false };
@@ -789,6 +799,8 @@ async function removeTrust(domain) {
   const allowlistMeta = Object.assign({}, s.allowlistMeta);
   for (const d of ds) delete allowlistMeta[d];
   await setSettings({ allowlist, allowlistMeta });
+  // (0.15.0 final fix) Untrusting is "warn me again": drop the site's interruption budget too, like unpauseSite.
+  for (const d of ds) { try { await updateQuietSite(d, () => ({ entry: null })); } catch (_) {} }
   return { ok: true };
 }
 
@@ -1907,12 +1919,15 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       // message (which never recorded a `via`) is gone; nothing sent it but
       // the banner's trust button, replaced below.
       case 'trustSite':
+        if (!senderOwns(sender, msg.domain)) { sendResponse(DOMAIN_MISMATCH); break; }
         sendResponse(await addTrust(msg.domain, msg.via, sender.tab && sender.tab.id)); break;
       case 'untrustSite':
         sendResponse(await removeTrust(msg.domain)); break;
       case 'removeAllow':
         sendResponse(await removeTrust(msg.domain)); break;
-      case 'muteWarning': sendResponse(await muteWarning(msg.domain, msg.kind, msg.via)); break;
+      case 'muteWarning':
+        if (!senderOwns(sender, msg.domain)) { sendResponse(DOMAIN_MISMATCH); break; }
+        sendResponse(await muteWarning(msg.domain, msg.kind, msg.via)); break;
       case 'unmuteWarning': sendResponse(await unmuteWarning(msg.domain, msg.kind)); break;
       case 'reportVerdict': {
         const tabId = sender.tab && sender.tab.id;
@@ -1961,7 +1976,12 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
           // rescan must not clear an earlier interruption).
           if (!silentSub) {
             const prev = fv.tier || 'quiet';
-            fv.tier = TIER_RANK[tier] > TIER_RANK[prev] ? tier : prev;
+            if (!fromSubframe && msg.rescan !== true) {
+              // (0.15.0 final fix) A top-frame report from a main scan (not a mid-page rescan or an additive
+              // detector) IS the page's current state: it resets the tier, so warn -> pause -> reload the same URL
+              // clears the red badge instead of inheriting the old tier. A sub-frame 'stop' seen on this tab stays.
+              fv.tier = fv.sub ? 'stop' : tier;
+            } else fv.tier = TIER_RANK[tier] > TIER_RANK[prev] ? tier : prev;
           }
           frameVerdicts.set(tabId, fv);
           if (firstTopReport) bumpStat('checked');
@@ -2132,6 +2152,7 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       // compare against a lowercased registrable domain — can never match, so
       // the pause silently does nothing and cannot be undone from options.
       case 'pauseSite': {
+        if (!senderOwns(sender, msg.domain)) { sendResponse(DOMAIN_MISMATCH); break; }
         const d = scopedKey(msg.domain);
         if (!d) { sendResponse({ ok: false }); break; }
         if (globalThis.ScamShield.isTenantApex(d)) { sendResponse(TENANT_APEX_REFUSAL); break; }
@@ -2151,16 +2172,19 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         sendResponse({ ok: true }); break;
       }
       case 'warnBudget': {
+        if (!senderOwns(sender, msg.domain)) { sendResponse({ allow: true }); break; } // fail open, touch nothing
         // Fail open: if the budget cannot be decided, a real warning still shows.
         let r = null;
         try { r = await updateQuietSite(msg.domain, (B, e, now) => { const x = B.decideBudget(e, now); return { allow: x.allow, entry: x.allow ? x.entry : e }; }); } catch (_) {}
         sendResponse({ allow: r ? r.allow : true }); break;
       }
       case 'warnDismissed': {
+        if (!senderOwns(sender, msg.domain)) { sendResponse(DOMAIN_MISMATCH); break; }
         const r = await updateQuietSite(msg.domain, (B, e, now) => ({ entry: B.applyDismissal(e, now) }));
         sendResponse({ ok: !!r }); break;
       }
       case 'unquietSite': {
+        if (!senderOwns(sender, msg.domain)) { sendResponse(DOMAIN_MISMATCH); break; }
         const r = await updateQuietSite(msg.domain, () => ({ entry: null }));
         sendResponse({ ok: !!r }); break;
       }
@@ -2177,6 +2201,8 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       case 'clearSurfaceLog':
         sendResponse(await queueSurface(async () => { try { await api.storage.local.set({ surfaceLog: [] }); return { ok: true }; } catch (_) { return { ok: false }; } })); break;
       case 'falseAlarm':
+        // A content script names its page (the popup / extension pages are exempt, like the other domain handlers).
+        if (!senderOwns(sender, msg.domain)) { sendResponse(DOMAIN_MISMATCH); break; }
         await bumpFalseAlarm(); sendResponse({ ok: true }); break;
       case 'getQuietSites':
         sendResponse(await readQuietSites()); break;
@@ -2213,7 +2239,12 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         const top = sender.frameId === 0 || sender.frameId == null;
         const url = typeof msg.url === 'string' && msg.url.length <= 4096 ? msg.url : '';
         if (tabId != null && top && /^https?:\/\//i.test(url)) {
-          try { if (msg.newTab) await api.tabs.create({ url, openerTabId: tabId, active: true }); else await api.tabs.update(tabId, { url }); } catch (_) {}
+          try {
+            if (msg.newTab) {
+              // Firefox for Android rejects openerTabId: retry the same open without it rather than dropping the click.
+              try { await api.tabs.create({ url, openerTabId: tabId, active: true }); } catch (_) { await api.tabs.create({ url, active: true }); }
+            } else await api.tabs.update(tabId, { url });
+          } catch (_) {}
         }
         sendResponse({ ok: true }); break;
       }
@@ -2233,4 +2264,4 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 // module-scoped. Re-attach the debug/test surface that used to live on the
 // classic worker's global scope — the e2e suite drives these via
 // worker.evaluate, and they're handy in the SW console.
-Object.assign(globalThis, { DEFAULT_FEED_URL, FEED_META_URL, getSettings, setSettings, handleUserReport, runOtaUpdate, flushReports, queueReport, exportSettings, sanitizeImport, pushSync, pullSync, getStats, bumpStat, recordSurface, readSurfaceLog, copyDiagnostics, ensurePrivacyTotal, ensureInstalledAt, getReviewAsk, getReviewAskContext, setReviewAsk, sanitizeReviewAsk, ensureReviewAsk, importReviewAsk, getLangDict, loadLangDict, isValidLang, runFeedUpdate, applyInstallMigrations, fetchExactShardEntries, checkFeedHost, isPopularHost, checkFeedBatchHosts, normalizeFeedHost, checkRiskHosting, checkNrdHost, applyNetworkRules, syncAllowRules, ensureNetworkRules, handleDnrBlocked, applyPendingUpdate, requestStoreUpdateCheck, getUpdateState, setUpdateState, runHotUpdate, applyHotRules, getHotStatus, addTrust, removeTrust, awaitBootReady });
+Object.assign(globalThis, { DEFAULT_FEED_URL, FEED_META_URL, getSettings, setSettings, handleUserReport, runOtaUpdate, flushReports, queueReport, exportSettings, sanitizeImport, pushSync, pullSync, getStats, bumpStat, recordSurface, readSurfaceLog, copyDiagnostics, ensurePrivacyTotal, ensureInstalledAt, getReviewAsk, getReviewAskContext, setReviewAsk, sanitizeReviewAsk, ensureReviewAsk, importReviewAsk, getLangDict, loadLangDict, isValidLang, runFeedUpdate, applyInstallMigrations, fetchExactShardEntries, checkFeedHost, isPopularHost, checkFeedBatchHosts, normalizeFeedHost, checkRiskHosting, checkNrdHost, applyNetworkRules, syncAllowRules, ensureNetworkRules, handleDnrBlocked, applyPendingUpdate, requestStoreUpdateCheck, getUpdateState, setUpdateState, runHotUpdate, applyHotRules, getHotStatus, addTrust, removeTrust, awaitBootReady, lastVerdict, frameVerdicts });

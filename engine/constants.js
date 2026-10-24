@@ -688,6 +688,20 @@
     const s = h.replace(/^www\./, '');
     return s === apex ? apex : s;
   }
+  // (0.15.0 final fix) A content script may only speak for the site it runs on. For a domain-taking message
+  // (trust / pause / mute / budget / false alarm), `sender` is the runtime.onMessage sender: when it carries a tab
+  // AND came from a web page (not one of our own pages, which also show up with a tab), the scope of the TAB's
+  // top-frame URL must equal the scope of the claimed domain. Extension pages and the popup are exempt.
+  function senderOwnsDomain(sender, domain, extBase) {
+    if (!sender || !sender.tab) return true;
+    const own = typeof extBase === 'string' && extBase && typeof sender.url === 'string' && sender.url.indexOf(extBase) === 0;
+    if (own) return true;
+    const claimed = String(domain || '').trim().toLowerCase();
+    if (!claimed) return false;
+    let host = '';
+    try { host = new URL(sender.tab.url || '').hostname; } catch (_) { return false; }
+    return !!host && scopeDomain(host) === scopeDomain(claimed);
+  }
   // Every key a stored trust / pause / mute for this page could live under:
   // the scope, plus the pre-0.14.1 registrable key so legacy entries keep
   // working (they are never silently dropped).
@@ -837,7 +851,7 @@
   return {
     FEATURE_NAMES, THRESHOLDS, BRANDS, BRANDS_BY_KEY, POPULAR_BRANDS, SUSPICIOUS_TLDS, SUSPICIOUS_TOKENS,
     SCAM_PHRASES, matchScamPhrases, SEED_FIELD_RE, SAFE_DOMAINS, BRAND_DOMAINS, SEED_PHRASE_HINTS, CARRIER_BRANDS,
-    TENANT_PLATFORMS, tenantLabel, scopeDomain, scopeKeys, isTenantApex,
+    TENANT_PLATFORMS, tenantLabel, scopeDomain, scopeKeys, isTenantApex, senderOwnsDomain,
     MULTI_LABEL_SUFFIXES, KNOWN_AUTH_PROVIDERS, KNOWN_BRAND_REGISTRABLES,
     VERIFIED_NAMESPACES, isVerifiedNamespace,
     registrableParts, registrableDomain, isSafeHost, USER_CONTENT_HOSTS, isUserContentHost, isPathUserContentHost, BRAND_OWNED_TENANTS, brandNameIn, brandDisplayName,
