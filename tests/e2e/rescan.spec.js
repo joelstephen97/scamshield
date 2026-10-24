@@ -128,7 +128,7 @@ test('iframe-only triggers have their own small cap and do not spend the 5-per-p
   }
   expect((await read()).rescans).toBeLessThanOrEqual(2);
   // a dialog afterwards still gets its rescan
-  await page.evaluate(() => { const d = document.createElement('dialog'); document.body.appendChild(d); d.show(); });
+  await page.evaluate(() => { const d = document.createElement('dialog'); d.innerHTML = '<input name="q">'; document.body.appendChild(d); d.show(); });
   await expect.poll(async () => (await read()).rescans, { timeout: 6000 }).toBeGreaterThan(2 - 1);
 });
 
@@ -139,7 +139,7 @@ test('limits: a flood of triggers causes at most 5 rescans and none closer than 
   await expect.poll(async () => (await read()).tier, { timeout: 8000 }).toBe('quiet');
   const t0 = Date.now();
   for (let i = 0; i < 12; i++) {
-    await page.evaluate(() => { const d = document.createElement('dialog'); document.body.appendChild(d); d.show(); });
+    await page.evaluate(() => { const d = document.createElement('dialog'); d.innerHTML = '<input name="q">'; document.body.appendChild(d); d.show(); });
     await page.waitForTimeout(700);
   }
   const elapsed = (Date.now() - t0) / 1000;
@@ -147,4 +147,29 @@ test('limits: a flood of triggers causes at most 5 rescans and none closer than 
   expect(n).toBeGreaterThanOrEqual(2);
   expect(n).toBeLessThanOrEqual(5);
   expect(n).toBeLessThanOrEqual(Math.floor(elapsed / 3) + 1); // at most one per 3 s
+});
+
+// 0.15.0 final fix B4: rescan cost.
+test('a dialog with no input, frame or scam wording (a cookie notice) is not a rescan trigger; one with an input is', async ({ context }) => {
+  const page = await context.newPage();
+  const read = await extReader(context, page, VARS);
+  await page.goto(BASE + '/rescan-benign-dialog.html');
+  await expect.poll(async () => (await read()).tier, { timeout: 8000 }).toBe('quiet');
+  await page.evaluate(() => { const d = document.createElement('dialog'); d.innerHTML = '<p>We use cookies to improve your experience.</p><button>OK</button>'; document.body.appendChild(d); d.show(); });
+  await page.waitForTimeout(1500);
+  expect((await read()).rescans).toBe(0);
+  await page.evaluate(() => { const d = document.createElement('dialog'); d.innerHTML = '<input name="email">'; document.body.appendChild(d); d.show(); });
+  await expect.poll(async () => (await read()).rescans, { timeout: 5000 }).toBe(1);
+});
+
+test('a reveal by inline style (display:none -> block) still triggers the rescan', async ({ context }) => {
+  const page = await context.newPage();
+  const read = await extReader(context, page, VARS);
+  await page.goto(BASE + '/rescan-benign-dialog.html');
+  await expect.poll(async () => (await read()).tier, { timeout: 8000 }).toBe('quiet');
+  await page.evaluate(() => { const d = document.createElement('div'); d.id = 'step'; d.style.display = 'none'; d.innerHTML = '<input type="password" name="pw">'; document.body.appendChild(d); });
+  await page.waitForTimeout(1200);
+  expect((await read()).rescans).toBe(0);                       // hidden: nothing to look at yet
+  await page.evaluate(() => { document.getElementById('step').style.display = 'block'; });
+  await expect.poll(async () => (await read()).rescans, { timeout: 5000 }).toBe(1);
 });

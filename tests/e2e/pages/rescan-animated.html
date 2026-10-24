@@ -1,0 +1,18 @@
+<!doctype html><meta charset="utf-8"><title>Acme Gallery</title>
+<style>.card{display:inline-block;width:80px;height:60px;margin:4px;background:#ddd}.card.on{background:#9cf}.modal-hint.on{opacity:.9}</style>
+<h1>Acme Gallery</h1>
+<!-- A busy but ordinary page: CSS classes toggle ~60 times a second for 3 s (carousel / hover effects). Nothing here is a scam signal. -->
+<div id="g"></div><div class="modal-hint popup overlay" id="o" style="width:20px;height:20px"></div>
+<script>
+  var g = document.getElementById('g');
+  for (var i = 0; i < 60; i++) { var c = document.createElement('div'); c.className = 'card'; g.appendChild(c); }
+  window.__animDone = false;
+  setTimeout(function () {
+    var n = 0, cards = g.children, o = document.getElementById('o');
+    var iv = setInterval(function () {
+      for (var i = 0; i < cards.length; i++) cards[i].classList.toggle('on', (n + i) % 2 === 0);
+      o.classList.toggle('on');
+      if (++n >= 180) { clearInterval(iv); window.__animDone = true; }
+    }, 16);
+  }, 2000);
+</script>

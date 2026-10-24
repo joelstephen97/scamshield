@@ -163,7 +163,7 @@
   // Copy next to a visible code block" from "the page wrote something the user never saw".
   let lastClickTarget = null;
   for (const type of ['pointerdown', 'click']) {
-    document.addEventListener(type, (ev) => { if (ev && ev.isTrusted) lastClickTarget = ev.target; }, true);
+    document.addEventListener(type, (ev) => { if (ev && ev.isTrusted) lastClickTarget = ev.target; }, { capture: true, passive: true });
   }
   // (0.15.0) "Visibly rendered": a page can hide an element a hundred ways, so a candidate must have a
   // real size, sit inside the document, and not be transparent / clipped / invisible-text on itself or
@@ -200,14 +200,14 @@
   // node, or a range from a visible empty node to the end of a hidden one, fails that block test.
   let lastTrustedInputAt = 0, selChangeTrusted = false;
   const noteInput = (ev) => { if (ev && ev.isTrusted) lastTrustedInputAt = Date.now(); };
-  for (const type of ['pointerdown', 'pointerup', 'keydown', 'keyup']) document.addEventListener(type, noteInput, true);
-  document.addEventListener('pointermove', (ev) => { if (ev && ev.isTrusted && ev.buttons) lastTrustedInputAt = Date.now(); }, true);
+  for (const type of ['pointerdown', 'pointerup', 'keydown', 'keyup']) document.addEventListener(type, noteInput, { capture: true, passive: true });
+  document.addEventListener('pointermove', (ev) => { if (ev && ev.isTrusted && ev.buttons) lastTrustedInputAt = Date.now(); }, { capture: true, passive: true });
   document.addEventListener('selectionchange', (ev) => {
     try {
       if (!ev || !ev.isTrusted) return;
       selChangeTrusted = Date.now() - lastTrustedInputAt < 3000;
     } catch (_) { selChangeTrusted = false; }
-  }, true);
+  }, { capture: true, passive: true });
   const CODE_BLOCK_SEL = 'pre,code,samp,kbd,textarea,input';
   const blockText = (n) => (n && ((n.matches && n.matches('textarea,input') ? n.value : '') || n.innerText || n.textContent)) || '';
   const normText = (t) => String(t == null ? '' : t).replace(/\s+/g, ' ').trim();
@@ -388,6 +388,24 @@
   // an unknown host is allowed and looked up, so the next attempt is refused. Detail is a plain string.
   let popupToastAt = 0;
   let popupSettings = null; // set once the link guard starts; the veto is off until then
+  // The settings the link guard / ad guard / popup veto judge "trusted" by. Kept current when the allowlist or the paused
+  // sites change in storage (the popup, the options page or another tab), instead of only at run().
+  let liveSettings = null;
+  try {
+    api.storage.onChanged.addListener((ch, area) => {
+      try {
+        if (area !== 'local' || !ch || !ch.settings) return;
+        const o = ch.settings.oldValue || {}, n = ch.settings.newValue || {};
+        if (JSON.stringify(o.allowlist) === JSON.stringify(n.allowlist) && JSON.stringify(o.pausedSites) === JSON.stringify(n.pausedSites)) return;
+        send('getSettings').then((st) => {
+          if (!st) return;
+          liveSettings = st;
+          if (popupSettings) popupSettings = st;
+          if (SS && SS.linkGuard && SS.linkGuard.refresh) SS.linkGuard.refresh();
+        });
+      } catch (_) { /* best effort */ }
+    });
+  } catch (_) { /* no storage API in this context */ }
   function popupBlocked(kind) {
     if (Date.now() - popupToastAt < 3000) return; // a page looping window.open must not stack toasts
     popupToastAt = Date.now();
@@ -740,6 +758,8 @@
     // Sibling of the anchor, inline-block + margin only (content/content.css)
     // — never an absolute overlay, so it can't shift or cover result layout.
     a.insertAdjacentElement('afterend', dot);
+    // One annotation per result: the link guard's pill steps aside for the badge (its click confirm still applies).
+    try { if (a.hasAttribute('data-ss-pill')) { a.classList.remove('scamshield-link-block', 'scamshield-link-warn', 'scamshield-link-card'); a.removeAttribute('data-ss-pill'); } } catch (_) {}
   }
 
   // Walks visible result anchors, skipping ones already handled and links
@@ -1110,7 +1130,13 @@
   // time, run() rewrites it in place as the verdict firms up (0.14.1).
   const formGuardReasons = [];
 
+  // run() = runOnce() + release of the rescan hold (see startRescanWatch): the watch starts at the START of the first
+  // run; triggers it sees meanwhile wait in the queue until that run has finished.
   async function run(opts) {
+    try { return await runOnce(opts); }
+    finally { if (!(opts && opts.rescan)) releaseRescanHold(); }
+  }
+  async function runOnce(opts) {
     const rescan = !!(opts && opts.rescan); // (0.15.0, Task 17b) mid-scroll re-check: may only escalate
     if (!SS || typeof SS.scoreUrl !== 'function') return; // engine not loaded
     // Sub-frame gate: only frames a user can actually interact with, and only
@@ -1131,15 +1157,16 @@
     // one. Runs on every top-frame page, trusted ones included (feeds and mail are where the links arrive);
     // destinations the user trusts or that are popular are skipped inside it.
     if (!rescan && IS_TOP && settings.linkGuard !== false && SS.linkGuard) {
-      popupSettings = settings;
-      try { SS.linkGuard.start({ send, surface, t, isTrusted: (h) => isTrustedHost(h, settings) }); } catch (_) {}
+      popupSettings = settings; if (!liveSettings) liveSettings = settings;
+      try { SS.linkGuard.start({ send, surface, t, isTrusted: (h) => isTrustedHost(h, liveSettings || settings) }); } catch (_) {}
     }
     // Scam-ad hiding (0.15.0, Task 17a): only ads that lead to a listed site or read like a scam are collapsed. It
     // reuses the link guard's lookup; with the link guard switched off, that lookup runs passive (no marks, no clicks).
     if (!rescan && IS_TOP && settings.adGuard !== false && SS.adGuard && !userExempt(location.hostname, settings)) {
       try {
-        if (settings.linkGuard === false) SS.linkGuard.start({ send, surface, t, isTrusted: (h) => isTrustedHost(h, settings), passive: true });
-        SS.adGuard.start({ surface, t, isTrusted: (h) => isTrustedHost(h, settings),
+        if (!liveSettings) liveSettings = settings;
+        if (settings.linkGuard === false) SS.linkGuard.start({ send, surface, t, isTrusted: (h) => isTrustedHost(h, liveSettings || settings), passive: true });
+        SS.adGuard.start({ surface, t, isTrusted: (h) => isTrustedHost(h, liveSettings || settings),
           // Re-read each round: trusting or pausing the site, or switching the ad guard off, takes effect without a reload.
           exempt: async () => { const st = await send('getSettings'); return !st || !st.enabled || st.adGuard === false || userExempt(location.hostname, st); } });
       } catch (_) {}
@@ -1156,6 +1183,7 @@
       if (IS_TOP) await send('reportVerdict', { verdict: { level: 'safe', score: 0, reasons: [], modelUsed: false } });
       return;
     }
+    if (!rescan && IS_TOP && !rescanStarted) { rescanStarted = true; rescanHold = true; try { startRescanWatch(); } catch (_) { rescanHold = false; } }
     // QR auto-scan (0.11.0, Task P4): default-on, settings-gated, top-frame
     // only. Fire-and-forget — a QR decode pass must never delay the rest of
     // this page's own verdict — and scheduled onto idle time so it never
@@ -1166,6 +1194,7 @@
     }
 
     const { signals, foreignForms, scamBlocks, exfilForms } = collectSignals(settings);
+    rescanQueue.clear(); // everything queued so far was part of what was just scanned; only later arrivals are triggers
     // riskTlds (0.9.0, Task B3): risk.json's abused-TLD weight table, mirrored
     // into settings by background/service_worker.js's runFeedUpdate() — no new
     // message round-trip needed since `settings` is already fetched above.
@@ -1442,7 +1471,6 @@
       // hideScamBlocks returns how many blocks it newly hid (it skips already-hidden nodes), so a re-run logs nothing.
       if (SS.actions.hideScamBlocks(scamBlocks) > 0) surface('hidden-blocks');
     }
-    if (!rescan && IS_TOP && !rescanStarted) { rescanStarted = true; try { startRescanWatch(); } catch (_) {} }
   }
 
   // ---- Mid-scroll rescan (0.15.0, Task 17b) --------------------------------------------------------------
@@ -1452,6 +1480,12 @@
   // navigation resets the counter. The observer callback only queues nodes; every check runs in the debounced
   // pass, on at most 30 candidates, so a busy page pays nothing per mutation.
   const tierRank = (t) => (t === 'stop' ? 2 : t === 'warn' ? 1 : 0);
+  let rescanHold = false;
+  function releaseRescanHold() {
+    if (!rescanHold) return;
+    rescanHold = false;
+    if (rescanQueue.size && !rescanTimer) rescanTimer = setTimeout(rescanPass, RESCAN_DEBOUNCE);
+  }
   let pageDismissed = false, rescanStarted = false, rescanCount = 0, rescanLast = 0, rescanTimer = 0, rescanGapTimer = 0, rescanRunning = false, rescanIframeCount = 0, rescanPendingKind = '', rescanMo = null;
   const rescanQueue = new Set();
   const RESCAN_MAX = 5, RESCAN_GAP = 3000, RESCAN_DEBOUNCE = 500, RESCAN_BATCH = 30;
@@ -1460,13 +1494,20 @@
   // budget. A big iframe alone is cheap to check but weak evidence, so it has its own small cap and cannot starve the rest.
   const RESCAN_IFRAME_MAX = 2;
   const RESCAN_STYLE_HINT = /fixed|sticky/i, RESCAN_CLASS_HINT = /overlay|modal|popup|lightbox|backdrop|fixed|sticky|alert|warning|dialog/i;
-  const rescanStats = { triggers: 0, rescans: 0, triggerMs: 0 };
+  const rescanStats = { triggers: 0, rescans: 0, triggerMs: 0, observerMs: 0 };
+  // A dialog is a trigger only if it can take input, embeds a frame or reads like a scam (a cookie notice or a menu does not).
+  function dialogWorthy(el) {
+    try {
+      if (el.querySelector('input, textarea, iframe')) return true;
+      return !!(SS && SS.matchScamPhrases && SS.matchScamPhrases(String(el.textContent || '').replace(/\s+/g, ' ').slice(0, 2000)).length);
+    } catch (_) { return false; }
+  }
   try { window.__ssRescanStats = rescanStats; } catch (_) {}
 
   function rescanCandidateHits(el, vw, vh) {
     if (!el || el.nodeType !== 1 || el.localName === 'scamshield-surface' || !el.isConnected) return '';
     const tag = el.localName;
-    if (tag === 'dialog' || el.getAttribute('role') === 'dialog' || el.getAttribute('role') === 'alertdialog') return el.getClientRects().length > 0 ? 'dialog' : '';
+    if (tag === 'dialog' || el.getAttribute('role') === 'dialog' || el.getAttribute('role') === 'alertdialog') return el.getClientRects().length > 0 && dialogWorthy(el) ? 'dialog' : '';
     if (tag === 'iframe') { const r = el.getBoundingClientRect(); return r.width >= 300 && r.height >= 300 ? 'iframe' : ''; }
     // A new visible password / card field: in this element, its subtree, or its own open shadow root.
     let fields = null;
@@ -1491,6 +1532,7 @@
 
   function rescanPass() {
     rescanTimer = 0;
+    if (rescanHold) return; // the first run is still going: the queue waits for it (releaseRescanHold)
     const t0 = performance.now();
     const vw = window.innerWidth || 0, vh = window.innerHeight || 0;
     const nodes = Array.from(rescanQueue).slice(0, RESCAN_BATCH); rescanQueue.clear();
@@ -1525,14 +1567,26 @@
   function startRescanWatch() {
     if (!('MutationObserver' in root) || !document.documentElement || rescanMo) return;
     const queue = (n) => { if (rescanQueue.size < 200 && n && n.nodeType === 1) rescanQueue.add(n); };
+    // Attributes: only `hidden` and `open`, and `style` solely for the display:none -> visible flip (judged from
+    // attributeOldValue by one regex). `class` is NOT watched: animations and framework re-renders toggle classes all day.
+    const HIDDEN_OLD = /display\s*:\s*none/i;
     const mo = rescanMo = new MutationObserver((records) => {
+      const t0 = performance.now();
       for (const rec of records) {
-        if (rec.type === 'attributes') queue(rec.target);
-        else for (const n of rec.addedNodes) queue(n);
+        if (rec.type === 'attributes') {
+          if (rec.attributeName === 'style') {
+            if (!rec.oldValue || !HIDDEN_OLD.test(rec.oldValue)) continue;
+            let now = '';
+            try { now = rec.target.getAttribute('style') || ''; } catch (_) { now = ''; }
+            if (HIDDEN_OLD.test(now)) continue; // still hidden
+          }
+          queue(rec.target);
+        } else for (const n of rec.addedNodes) queue(n);
       }
-      if (rescanQueue.size && !rescanTimer) rescanTimer = setTimeout(rescanPass, RESCAN_DEBOUNCE);
+      if (rescanQueue.size && !rescanTimer && !rescanHold) rescanTimer = setTimeout(rescanPass, RESCAN_DEBOUNCE);
+      rescanStats.observerMs += performance.now() - t0;
     });
-    mo.observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'class', 'hidden', 'open'] });
+    mo.observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeOldValue: true, attributeFilter: ['style', 'hidden', 'open'] });
   }
 
   let lastUrl = location.href;
