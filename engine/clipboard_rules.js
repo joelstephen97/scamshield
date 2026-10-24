@@ -50,16 +50,23 @@
     // paste-then-Enter); with one, a dangerous payload is blocked even if the user "selected" it.
     const strong = s.strongLure === true;
     if (s.userGesture === true && s.selectionMatches === true && !strong) return 'none';
+    // (final fix A, I4) A real click/keypress on a POPULAR host (docs, Stack Overflow, a vendor KB) never blocks without a
+    // strong ClickFix lure: a copy button whose payload we could not tie to a visible block is a notice, not a stop.
+    if (s.userGesture === true && s.popular === true && !strong) return 'notice';
     if (s.clickfixLevel === 'dangerous' && (s.userGesture === false || s.selectionMatches === false || strong)) return 'block';
     return s.userGesture === true ? 'notice' : 'warn';
   }
   // Whitespace-insensitive comparison helpers (pure, so unit-testable). `candidates` are the
   // texts the user could have copied: the selection, the clicked element, its code block.
-  function normalizeCopyText(t) { return String(t == null ? '' : t).replace(/\s+/g, ' ').trim(); }
+  // Leading shell prompts are not part of what a Copy button copies (docs show `$ npm i x`, the button copies `npm i x`):
+  // `$ `, `> `, `# `, `PS> `, `PS C:\path> ` at the start of a line are dropped before comparing.
+  const PROMPT_RE = /^[ \t]*(?:PS(?:[ \t]+[^>\n]*)?>[ \t]*|[$>#][ \t]+)/;
+  function stripPrompts(t) { return String(t == null ? '' : t).replace(/\r\n?/g, '\n').split('\n').map((l) => l.replace(PROMPT_RE, '')).join('\n'); }
+  function normalizeCopyText(t) { return stripPrompts(t).replace(/\s+/g, ' ').trim(); }
   function copyMatches(payload, candidates) {
     const p = normalizeCopyText(payload);
     if (!p) return false;
     return (candidates || []).some((c) => normalizeCopyText(c) === p);
   }
-  return { analyzeClipboardWrite, clipboardTier, normalizeCopyText, copyMatches };
+  return { analyzeClipboardWrite, clipboardTier, normalizeCopyText, copyMatches, stripPrompts };
 });

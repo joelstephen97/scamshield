@@ -66,3 +66,29 @@ test('clipboardTier: a strong ClickFix lure beats a matching selection (0.15.0 f
   assert.strictEqual(T({ level: 'dangerous', clickfixLevel: 'none', userGesture: true, selectionMatches: true, strongLure: true }), 'notice');
   assert.strictEqual(T({ level: 'safe', clickfixLevel: 'dangerous', userGesture: true, selectionMatches: true, strongLure: true }), 'none');
 });
+
+test('clipboardTier (final fix A, I4): on a popular host a gesture copy needs a strong lure to be blocked', () => {
+  const T = clipboardTier;
+  const mismatch = { level: 'dangerous', clickfixLevel: 'dangerous', userGesture: true, selectionMatches: false };
+  assert.strictEqual(T(mismatch), 'block'); // unpopular: unchanged
+  assert.strictEqual(T(Object.assign({}, mismatch, { popular: true })), 'notice');
+  assert.strictEqual(T(Object.assign({}, mismatch, { popular: true, strongLure: true })), 'block');
+  // no gesture: the page wrote it on its own, popular or not
+  assert.strictEqual(T({ level: 'dangerous', clickfixLevel: 'dangerous', userGesture: false, popular: true }), 'block');
+});
+
+test('copyMatches strips leading shell prompts on both sides (final fix A, I4)', () => {
+  const { stripPrompts, copyMatches } = require('../../engine/clipboard_rules');
+  assert.strictEqual(stripPrompts('$ npm install foo'), 'npm install foo');
+  assert.strictEqual(stripPrompts('> dir'), 'dir');
+  assert.strictEqual(stripPrompts('PS> Get-Date'), 'Get-Date');
+  assert.strictEqual(stripPrompts('PS C:\Users\me> Get-Date'), 'Get-Date');
+  assert.strictEqual(stripPrompts('# apt update'), 'apt update');
+  assert.strictEqual(stripPrompts('$ a\n$ b'), 'a\nb');
+  assert.strictEqual(stripPrompts('echo $HOME'), 'echo $HOME');
+  assert.strictEqual(copyMatches('npm install foo', ['$ npm install foo']), true);
+  assert.strictEqual(copyMatches('$ npm install foo', ['npm install foo']), true);
+  assert.strictEqual(copyMatches('PS C:\> irm x | iex', ['irm x |   iex']), true);
+  assert.strictEqual(copyMatches('npm install evil', ['$ npm install foo']), false);
+  assert.strictEqual(copyMatches('$ ', ['$ ']), false);
+});

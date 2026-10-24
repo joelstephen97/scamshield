@@ -295,7 +295,9 @@
     // (0.15.0) selectionMatches is computed HERE from the DOM, never taken from the MAIN-world
     // event: did the user copy exactly what they selected / what the clicked button's code block shows?
     const selectionMatches = userGesture && SS.copyMatches ? SS.copyMatches(detail.full || detail.sample, copyCandidates()) : false;
-    const tier = SS.clipboardTier({ level: detail.level, clickfixLevel: cf.level, userGesture, selectionMatches, strongLure: cf.strongLure === true });
+    // (final fix A, I4) on a popular host a user-gesture copy is blocked only with a strong ClickFix lure.
+    const popular = userGesture ? await isPopularHere() : false;
+    const tier = SS.clipboardTier({ level: detail.level, clickfixLevel: cf.level, userGesture, selectionMatches, strongLure: cf.strongLure === true, popular });
     // 'none' also covers a matching user copy: we never overwrite the clipboard in that case.
     if (tier === 'none') return;
     if (tier === 'block' && SS.actions.dangerInterstitial) {
