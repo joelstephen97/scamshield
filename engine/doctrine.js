@@ -50,6 +50,8 @@
   //   'full'       popular: heuristic and model signals can never warn
   function popularMode(popular, host) {
     if (!popular) return 'none';
+    // (0.15.0 tenant shield) a tenant sub-domain of a shared-hosting platform is never popular; the bare apex and www stay so.
+    if (C.tenantLabel && C.tenantLabel(host)) return 'none';
     if (isUserContentHost(host)) return 'none';
     if (isPathUserContentHost && isPathUserContentHost(host)) return 'credential';
     return 'full';

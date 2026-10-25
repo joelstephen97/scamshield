@@ -132,3 +132,44 @@ test('nrd-brand-host: new domain + strongest brand token warns; every missing pi
   // never stop, even in the normal mode
   assert.ok(!D.STOP_FLAGS.includes('nrd-brand-host'));
 });
+
+// 0.15.0 tenant shield: a tenant sub-domain of a shared-hosting platform is never shielded by the popular guard.
+const tcf = (o) => D.credentialFlags(Object.assign({ verdictFlags: [], urlReasons: [], urlScore: 0.2, hasPasswordField: true, hasLoginPair: true, popular: true, host: 'example.test' }, o));
+test('tenant shield: popularMode is none on a dyn-DNS tenant, full on the apex and www', () => {
+  assert.strictEqual(D.popularMode(true, 'daniho.dyn.ddnss.de'), 'none');
+  assert.strictEqual(D.popularMode(true, 'storslnea.z15.web.core.windows.net'), 'none');
+  assert.strictEqual(D.popularMode(true, 'xmbx1.duckdns.org'), 'none');
+  assert.strictEqual(D.popularMode(true, 'www.ddnss.de'), 'full');
+  assert.strictEqual(D.popularMode(true, 'duckdns.org'), 'full');
+  assert.strictEqual(D.popularMode(true, 'mail.google.com'), 'full');
+});
+test('tenant shield: daniho.dyn.ddnss.de credential-form-foreign-domain with popular:true -> warn', () => {
+  assert.strictEqual(D.surfaceTier(v('dangerous', ['credential-form-foreign-domain']), ctx({ popular: true, host: 'daniho.dyn.ddnss.de' })), 'warn');
+});
+test('tenant shield: apex / www dyn-DNS and mail.google.com stay shielded', () => {
+  for (const host of ['www.ddnss.de', 'duckdns.org', 'mail.google.com'])
+    assert.strictEqual(D.surfaceTier(v('dangerous', ['credential-form-foreign-domain']), ctx({ popular: true, host })), 'quiet', host);
+});
+test('tenant shield: risk-hosting alone on a duckdns tenant stays quiet', () => {
+  assert.strictEqual(D.surfaceTier(v('suspicious', ['risk-hosting']), ctx({ popular: true, host: 'xmbx1.duckdns.org' })), 'quiet');
+});
+test('tenant shield: storage tenant with a login pair -> tenant-credential and warn; dev hosts do not', () => {
+  const host = 'storslnea.z15.web.core.windows.net';
+  assert.deepStrictEqual(tcf({ host }), ['tenant-credential']);
+  assert.strictEqual(D.surfaceTier(v('suspicious', ['tenant-credential']), ctx({ popular: true, host })), 'warn');
+  assert.deepStrictEqual(tcf({ host: 'foo.github.io', popular: false }), []);
+  assert.deepStrictEqual(tcf({ host: 'foo.pages.dev', popular: false }), []);
+  assert.deepStrictEqual(tcf({ host, hasLoginPair: false }), []);
+  assert.deepStrictEqual(tcf({ host: 'abc.r2.dev' }), ['tenant-credential']);
+  assert.deepStrictEqual(tcf({ host: 'www.web.core.windows.net' }), []);
+});
+test('tenant shield: new dyn-DNS apexes are tenant platforms; scope is per-tenant', () => {
+  const C = require('../../engine/constants.js');
+  for (const a of ['ddnss.de', 'dyn.ddnss.de', 'ddns.net', 'no-ip.org', 'no-ip.biz', 'hopto.org', 'zapto.org', 'sytes.net', 'servebeer.com', 'serveftp.com', 'myftp.org', 'freeddns.org', 'dynu.net', 'dyndns.org', 'ddnsfree.com', 'myddns.me', 'duckdns.org', 'ooguy.com', 'dns-dynamic.net']) {
+    assert.ok(C.TENANT_PLATFORMS.includes(a), a);
+    assert.ok(C.isTenantApex(a), a);
+    assert.strictEqual(C.tenantLabel('evil.' + a), 'evil');
+    assert.strictEqual(C.scopeDomain('evil.' + a), 'evil.' + a);
+  }
+  assert.strictEqual(C.tenantLabel('www.ddnss.de'), null);
+});
