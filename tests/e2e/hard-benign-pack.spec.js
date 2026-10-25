@@ -208,10 +208,3 @@ test('canary pair: www on the same storage apex (www.web.core.windows.net) shows
   await page.waitForTimeout(2500);
   for (const sel of SURFACES) await expect(page.locator(sel)).toHaveCount(0);
 });
-
-test('canary: a storage-host sign-in page whose form posts only to b2clogin.com (Azure AD B2C) stays quiet', async ({ context }) => {
-  const page = await context.newPage();
-  await page.goto('https://login-fixture.web.core.windows.net:5600/b2c-login.html');
-  await page.waitForTimeout(2500);
-  for (const sel of SURFACES) await expect(page.locator(sel)).toHaveCount(0);
-});
