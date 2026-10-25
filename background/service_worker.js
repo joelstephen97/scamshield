@@ -1479,8 +1479,8 @@ async function isPopularHost(host) {
   try {
     const normalized = normalizeFeedHost(host);
     if (!normalized) return false;
-    // (0.15.0 tenant shield) a tenant sub-domain of a TENANT_PLATFORMS apex is never popular (bare apex and www stay).
-    if (globalThis.ScamShield.tenantLabel && globalThis.ScamShield.tenantLabel(normalized)) return false;
+    // (0.15.0 tenant shield) a tenant sub-domain of a TENANT_PLATFORMS apex is never popular (pure rule: popularEligible).
+    if (globalThis.ScamShield.popularEligible && !globalThis.ScamShield.popularEligible(normalized)) return false;
     const set = await loadPopularSet();
     if (!set) return false;
     const reg = globalThis.ScamShield.registrableDomain(normalized);

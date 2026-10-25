@@ -50,8 +50,8 @@
   //   'full'       popular: heuristic and model signals can never warn
   function popularMode(popular, host) {
     if (!popular) return 'none';
-    // (0.15.0 tenant shield) a tenant sub-domain of a shared-hosting platform is never popular; the bare apex and www stay so.
-    if (C.tenantLabel && C.tenantLabel(host)) return 'none';
+    // (0.15.0 tenant shield) a tenant sub-domain of a shared-hosting platform is never popular (defence in depth).
+    if (C.popularEligible && !C.popularEligible(host)) return 'none';
     if (isUserContentHost(host)) return 'none';
     if (isPathUserContentHost && isPathUserContentHost(host)) return 'credential';
     return 'full';
@@ -99,7 +99,7 @@
     if (urlReasons.some((r) => r && r.code === 'noHttps') && !isLocalOrIpHost(i.host)) out.push('insecure-credential');
     // (recall recovery, R3) a visible login on a no-code builder tenant. hasLoginPair (a visible text/email/tel/card input
     // beside the password) is optional: when the content script reports false, a password-only site gate stays quiet.
-    if (C.isBuilderTenantHost && C.isBuilderTenantHost(i.host) && i.hasLoginPair !== false) out.push('tenant-credential');
+    if (C.isBuilderTenantHost && C.isBuilderTenantHost(i.host) && i.hasLoginPair !== false && !(C.allActionsKnownAuth && C.allActionsKnownAuth(i.formActions))) out.push('tenant-credential');
     if ((i.verdictFlags || []).includes('new-domain')) {
       // (N6) a weak-grade fuzzy match is not brand evidence: not as a reason, and not through the URL score it adds.
       const weak = urlReasons.some((r) => r && r.code === 'brandFuzzyMatch' && !isStrongFuzzy(r));
@@ -187,7 +187,7 @@
     const credFlags = credentialFlags({
       verdictFlags: v.flags, urlReasons, urlScore: x.urlRules && x.urlRules.score, domReasons,
       strictLookalike: true, corroborated: lookalikeCorroborated(x, v, urlReasons, domReasons),
-      hasPasswordField: !!(sg.hasVisiblePasswordField || sg.hasVisibleCardInput), hasLoginPair: sg.hasLoginPair, popular: x.popular, host: x.host
+      hasPasswordField: !!(sg.hasVisiblePasswordField || sg.hasVisibleCardInput), hasLoginPair: sg.hasLoginPair, formActions: sg.passwordFormActions, popular: x.popular, host: x.host
     });
     if (credFlags.length && v.suppressed !== 'engagement') {
       const next = Object.assign({}, v, { flags: credFlags.concat((v.flags || []).filter((f) => !credFlags.includes(f))) });

@@ -648,7 +648,7 @@
     // (recall recovery, R3/R4) no-code builder apexes: elementor.cloud sat in the popular set and shielded every tenant.
     'elementor.cloud', 'edgeone.dev', 'b12sites.com', 'kleap.io', 'teleporthq.app', 'framer.media', 'framer.ai', 'relumesite.ai', 'created.app', 'grigora.app',
     // (0.15.0 tenant shield) dynamic-DNS services: anyone mints a sub-domain. Tenants are never "popular".
-    'ddnss.de', 'dyn.ddnss.de', 'ddns.net', 'no-ip.org', 'no-ip.biz', 'hopto.org', 'zapto.org', 'sytes.net', 'servebeer.com', 'serveftp.com',
+    'ddnss.de', 'ddns.net', 'no-ip.org', 'no-ip.biz', 'hopto.org', 'zapto.org', 'sytes.net', 'servebeer.com', 'serveftp.com',
     'myftp.org', 'freeddns.org', 'dynu.net', 'dyndns.org', 'ddnsfree.com', 'myddns.me', 'ooguy.com', 'dns-dynamic.net'
   ];
   // (recall recovery, R3) Tenants of these no-code BUILDERS are almost all brochure sites, so a visible login on one is a
@@ -671,9 +671,22 @@
     const h = String(host || '').toLowerCase().replace(/\.+$/, '');
     const apex = TENANT_PLATFORMS.find((a) => h.endsWith('.' + a));
     if (!apex) return null;
-    const first = h.slice(0, -(apex.length + 1)).split('.').filter(Boolean)[0];
-    if (!first || first === 'www') return null;
-    return first;
+    // A leading 'www' is skipped: www.evil.duckdns.org is still evil's tenant; a bare www.<apex> is not.
+    const labels = h.slice(0, -(apex.length + 1)).split('.').filter(Boolean);
+    if (labels[0] === 'www') labels.shift();
+    return labels[0] || null;
+  }
+  // (0.15.0 tenant shield) May this host ever be shielded by the popular guard? A tenant sub-domain of a TENANT_PLATFORMS
+  // apex never may (anyone can mint it). Platform apexes are excluded from the popular set at build time instead.
+  function popularEligible(host) { return !tenantLabel(host); }
+  // Hosts that run real sign-in for others (Azure AD B2C, Microsoft, Live). A storage/builder-tenant login form that posts
+  // ONLY to one of these is a hosted custom page for that provider, not a harvest form. Absolute action URLs only.
+  const KNOWN_AUTH_ACTION_RE = /^(([a-z0-9-]+\.)*b2clogin\.com|login\.microsoftonline\.com|login\.live\.com)$/;
+  function allActionsKnownAuth(actions) {
+    if (!Array.isArray(actions) || !actions.length) return false;
+    return actions.every((a) => {
+      try { return KNOWN_AUTH_ACTION_RE.test(new URL(String(a)).hostname.toLowerCase()); } catch (_) { return false; }
+    });
   }
 
   // The scope a user's trust / pause / mute / engagement applies to (0.14.1).
@@ -893,7 +906,7 @@
   return {
     FEATURE_NAMES, THRESHOLDS, BRANDS, BRANDS_BY_KEY, POPULAR_BRANDS, SUSPICIOUS_TLDS, SUSPICIOUS_TOKENS,
     SCAM_PHRASES, matchScamPhrases, SEED_FIELD_RE, SAFE_DOMAINS, BRAND_DOMAINS, SEED_PHRASE_HINTS, CARRIER_BRANDS,
-    TENANT_PLATFORMS, BUILDER_TENANT_PLATFORMS, STORAGE_TENANT_PLATFORMS, isBuilderTenantHost, tenantLabel, scopeDomain, scopeKeys, isTenantApex, senderOwnsDomain, mergeFrameReport,
+    TENANT_PLATFORMS, BUILDER_TENANT_PLATFORMS, STORAGE_TENANT_PLATFORMS, isBuilderTenantHost, tenantLabel, popularEligible, allActionsKnownAuth, scopeDomain, scopeKeys, isTenantApex, senderOwnsDomain, mergeFrameReport,
     MULTI_LABEL_SUFFIXES, KNOWN_AUTH_PROVIDERS, KNOWN_BRAND_REGISTRABLES,
     VERIFIED_NAMESPACES, isVerifiedNamespace,
     registrableParts, registrableDomain, isSafeHost, USER_CONTENT_HOSTS, isUserContentHost, isPathUserContentHost, BRAND_OWNED_TENANTS, brandNameIn, brandDisplayName,

@@ -135,19 +135,32 @@ test('nrd-brand-host: new domain + strongest brand token warns; every missing pi
 
 // 0.15.0 tenant shield: a tenant sub-domain of a shared-hosting platform is never shielded by the popular guard.
 const tcf = (o) => D.credentialFlags(Object.assign({ verdictFlags: [], urlReasons: [], urlScore: 0.2, hasPasswordField: true, hasLoginPair: true, popular: true, host: 'example.test' }, o));
-test('tenant shield: popularMode is none on a dyn-DNS tenant, full on the apex and www', () => {
+test('tenant shield: popularMode is none on a tenant sub-domain (defence in depth, popular input forced true)', () => {
   assert.strictEqual(D.popularMode(true, 'daniho.dyn.ddnss.de'), 'none');
   assert.strictEqual(D.popularMode(true, 'storslnea.z15.web.core.windows.net'), 'none');
   assert.strictEqual(D.popularMode(true, 'xmbx1.duckdns.org'), 'none');
-  assert.strictEqual(D.popularMode(true, 'www.ddnss.de'), 'full');
-  assert.strictEqual(D.popularMode(true, 'duckdns.org'), 'full');
+  assert.strictEqual(D.popularMode(true, 'www.evil.duckdns.org'), 'none');
   assert.strictEqual(D.popularMode(true, 'mail.google.com'), 'full');
 });
-test('tenant shield: daniho.dyn.ddnss.de credential-form-foreign-domain with popular:true -> warn', () => {
+test('tenant shield: popularEligible is false for tenants, true for ordinary hosts (the rule isPopularHost calls)', () => {
+  const C = require('../../engine/constants.js');
+  for (const h of ['daniho.dyn.ddnss.de', 'storslnea.z15.web.core.windows.net', 'x.duckdns.org', 'www.evil.duckdns.org']) assert.strictEqual(C.popularEligible(h), false, h);
+  for (const h of ['mail.google.com', 'www.google.com', 'wikipedia.org']) assert.strictEqual(C.popularEligible(h), true, h);
+});
+test('tenant shield: www.evil.<apex> keeps evil as its tenant label; bare www.<apex> and the apex have none', () => {
+  const C = require('../../engine/constants.js');
+  assert.strictEqual(C.tenantLabel('www.evil.duckdns.org'), 'evil');
+  assert.strictEqual(C.tenantLabel('www.x.web.core.windows.net'), 'x');
+  assert.strictEqual(C.tenantLabel('www.duckdns.org'), null);
+  assert.strictEqual(C.tenantLabel('ddnss.de'), null);
+  assert.strictEqual(C.tenantLabel('www.ddnss.de'), null);
+  assert.strictEqual(C.tenantLabel('daniho.dyn.ddnss.de'), 'daniho');
+});
+test('tenant shield: daniho.dyn.ddnss.de credential-form-foreign-domain (even with popular:true) -> warn; ddnss.de has no tenant label', () => {
   assert.strictEqual(D.surfaceTier(v('dangerous', ['credential-form-foreign-domain']), ctx({ popular: true, host: 'daniho.dyn.ddnss.de' })), 'warn');
 });
-test('tenant shield: apex / www dyn-DNS and mail.google.com stay shielded', () => {
-  for (const host of ['www.ddnss.de', 'duckdns.org', 'mail.google.com'])
+test('tenant shield: with popular:true (the SW sets it only for set members), mail.google.com stays shielded', () => {
+  for (const host of ['mail.google.com'])
     assert.strictEqual(D.surfaceTier(v('dangerous', ['credential-form-foreign-domain']), ctx({ popular: true, host })), 'quiet', host);
 });
 test('tenant shield: risk-hosting alone on a duckdns tenant stays quiet', () => {
@@ -165,11 +178,21 @@ test('tenant shield: storage tenant with a login pair -> tenant-credential and w
 });
 test('tenant shield: new dyn-DNS apexes are tenant platforms; scope is per-tenant', () => {
   const C = require('../../engine/constants.js');
-  for (const a of ['ddnss.de', 'dyn.ddnss.de', 'ddns.net', 'no-ip.org', 'no-ip.biz', 'hopto.org', 'zapto.org', 'sytes.net', 'servebeer.com', 'serveftp.com', 'myftp.org', 'freeddns.org', 'dynu.net', 'dyndns.org', 'ddnsfree.com', 'myddns.me', 'duckdns.org', 'ooguy.com', 'dns-dynamic.net']) {
+  for (const a of ['ddnss.de', 'ddns.net', 'no-ip.org', 'no-ip.biz', 'hopto.org', 'zapto.org', 'sytes.net', 'servebeer.com', 'serveftp.com', 'myftp.org', 'freeddns.org', 'dynu.net', 'dyndns.org', 'ddnsfree.com', 'myddns.me', 'duckdns.org', 'ooguy.com', 'dns-dynamic.net']) {
     assert.ok(C.TENANT_PLATFORMS.includes(a), a);
     assert.ok(C.isTenantApex(a), a);
     assert.strictEqual(C.tenantLabel('evil.' + a), 'evil');
     assert.strictEqual(C.scopeDomain('evil.' + a), 'evil.' + a);
   }
   assert.strictEqual(C.tenantLabel('www.ddnss.de'), null);
+});
+test('tenant shield: Azure AD B2C style forms (every action on a known auth host) get no tenant-credential', () => {
+  const host = 'bucket.z15.web.core.windows.net';
+  assert.deepStrictEqual(tcf({ host, formActions: ['https://contoso.b2clogin.com/contoso.onmicrosoft.com/B2C_1_signin/SelfAsserted'] }), []);
+  assert.deepStrictEqual(tcf({ host, formActions: ['https://login.microsoftonline.com/common/login'] }), []);
+  assert.deepStrictEqual(tcf({ host, formActions: ['https://login.live.com/ppsecure/post.srf'] }), []);
+  assert.deepStrictEqual(tcf({ host, formActions: ['https://evil.example/post', 'https://x.b2clogin.com/a'] }), ['tenant-credential']);
+  assert.deepStrictEqual(tcf({ host, formActions: ['https://b2clogin.com.evil.example/a'] }), ['tenant-credential']);
+  assert.deepStrictEqual(tcf({ host, formActions: ['/relative'] }), ['tenant-credential']);
+  assert.deepStrictEqual(tcf({ host }), ['tenant-credential']);
 });

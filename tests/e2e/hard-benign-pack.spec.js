@@ -196,9 +196,7 @@ test('the same builder tenant with an email + password login warns (positive twi
 });
 
 // 0.15.0 tenant shield: a tenant of a popular shared-hosting platform is never shielded by the popular guard.
-test('a static-storage tenant (login-fixture.web.core.windows.net) with a login pair warns, and is not popular', async ({ context }) => {
-  const sw = context.serviceWorkers()[0];
-  expect(await sw.evaluate(() => isPopularHost('login-fixture.web.core.windows.net'))).toBe(false);
+test('a static-storage tenant (login-fixture.web.core.windows.net) with a login pair warns', async ({ context }) => {
   const page = await context.newPage();
   await page.goto('https://login-fixture.web.core.windows.net:5600/framer-login.html');
   await expect(page.locator('.scamshield-banner, .scamshield-interstitial').first()).toBeVisible({ timeout: 8000 });
@@ -207,6 +205,13 @@ test('a static-storage tenant (login-fixture.web.core.windows.net) with a login 
 test('canary pair: www on the same storage apex (www.web.core.windows.net) shows no banner', async ({ context }) => {
   const page = await context.newPage();
   await page.goto('https://www.web.core.windows.net:5600/framer-login.html');
+  await page.waitForTimeout(2500);
+  for (const sel of SURFACES) await expect(page.locator(sel)).toHaveCount(0);
+});
+
+test('canary: a storage-host sign-in page whose form posts only to b2clogin.com (Azure AD B2C) stays quiet', async ({ context }) => {
+  const page = await context.newPage();
+  await page.goto('https://login-fixture.web.core.windows.net:5600/b2c-login.html');
   await page.waitForTimeout(2500);
   for (const sel of SURFACES) await expect(page.locator(sel)).toHaveCount(0);
 });
