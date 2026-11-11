@@ -28,7 +28,7 @@ test('forged Escape does not close the form-guard overlay', async ({ context }) 
   await page.goto(BASE + '/phishing-login.html');
   await expect(page.locator('.scamshield-banner.danger')).toBeVisible({ timeout: 8000 });
   await page.fill('input[name="pw"]', 'secret');
-  await page.click('button[type="submit"]');
+  await page.press('input[name="pw"]', 'Enter'); // implicit submission; the banner may cover the button
   const ov = page.locator('.scamshield-overlay');
   await expect(ov).toBeVisible();
   await forgeEscape(page);

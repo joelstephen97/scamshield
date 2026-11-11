@@ -14,7 +14,8 @@ test('phishing login form triggers banner and submit overlay', async ({ context 
   await page.goto(BASE + '/phishing-login.html');
   await expect(page.locator('.scamshield-banner.danger')).toBeVisible({ timeout: 8000 });
   await page.fill('input[name="pw"]', 'secret');
-  await page.click('button[type="submit"]');
+  // Enter = implicit submission (a trusted click on the default button); the danger banner may cover the button itself on small layouts
+  await page.press('input[name="pw"]', 'Enter');
   await expect(page.locator('.scamshield-overlay')).toBeVisible();
   await expect(page.locator('.scamshield-overlay h3')).toContainText('phishing');
 });
@@ -440,7 +441,7 @@ test('banner has Leave + Report actions and the overlay has evidence rows', asyn
   await expect(page.locator('.scamshield-banner.danger .ss-leave')).toBeVisible({ timeout: 8000 });
   await openMore(page.locator('.scamshield-banner'));
   await expect(page.locator('.scamshield-banner .ss-report')).toBeVisible();
-  await page.fill('input[name="pw"]', 'x'); await page.click('button[type="submit"]');
+  await page.fill('input[name="pw"]', 'x'); await page.press('input[name="pw"]', 'Enter');
   await expect(page.locator('.scamshield-overlay .ss-evidence li')).not.toHaveCount(0);
   // (0.15.0) the form guard is a modal <dialog> now: the banner behind it is inert until the dialog is dismissed.
   await page.click('.scamshield-overlay .ss-primary'); await expect(page.locator('.scamshield-overlay')).toHaveCount(0);

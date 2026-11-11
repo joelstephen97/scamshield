@@ -8,5 +8,7 @@ title = "ScamShield gitleaks config"
 useDefault = true
 
 [allowlist]
-description = "Test-only fixtures: self-signed localhost key for tests/e2e/server.js, fake bot tokens in exfil tests"
-paths = ['''tests/e2e/certs/localhost\.key''', '''tests/unit/exfil_rules\.test\.js''']
+description = "Test-only fixtures: self-signed localhost key for tests/e2e/server.js; the one fake Telegram bot token used by the exfil unit test"
+paths = ['''tests/e2e/certs/localhost\.key''']
+# Matched against the secret value only, so any other secret added to that test file is still caught.
+regexes = ['''^AAH7x9Qk2LmN4pRsT6uVwXyZ0aBcDeFgHiJ$''']

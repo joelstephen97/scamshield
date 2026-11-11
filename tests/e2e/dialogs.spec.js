@@ -125,7 +125,7 @@ test('Escape does nothing on the interstitial; a real Escape closes the form gua
   const p2 = await context.newPage();
   await p2.goto(BASE + '/phishing-login.html');
   await expect(p2.locator('.scamshield-banner.danger')).toBeVisible({ timeout: 8000 });
-  await p2.fill('input[name="pw"]', 'x'); await p2.click('button[type="submit"]');
+  await p2.fill('input[name="pw"]', 'x'); await p2.press('input[name="pw"]', 'Enter'); // banner may cover the button
   await expect(p2.locator('.scamshield-overlay')).toBeVisible();
   expect((await state(p2, DHOST)).inert).toBe(true);
   await p2.keyboard.press('Escape');
