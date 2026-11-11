@@ -2,7 +2,7 @@
 
 All notable changes to ScamShield. Versions are git tags (`vX.Y.Z`); the version on the [Chrome Web Store](https://chromewebstore.google.com/detail/fojjjofjimbfoddafoampojopijnlihl) may lag a tag by a few days while Google reviews it. Privacy-relevant changes are also reflected in the [privacy policy](https://joelstephen97.github.io/scamshield/privacy.html).
 
-## 0.15.0 — 2026-10-24
+## 0.15.0 — 2026-11-11
 
 ScamShield was warning on ordinary pages, and that is the opposite of what it
 is for. This release makes it quiet until it matters, and adds protection while
@@ -27,6 +27,11 @@ you scroll.
 - **Scam ads are hidden.** This is not a general ad blocker.
 - **Pages can no longer pop open blocked sites.** Scam iframes and scripts from
   listed sites are blocked too.
+- **Stops phishing kits that send your password to Telegram or Discord.** If a
+  page tries to send a password you typed to a Telegram bot or Discord webhook,
+  the request is blocked and you are warned.
+- **New sites that borrow a brand name get a warning** when the page already
+  looks suspicious.
 - **"What ScamShield showed" in Options**, with Copy diagnostics, so you can see
   exactly what it did and share it if something looks wrong.
 - **New onboarding** with a demo warning.
