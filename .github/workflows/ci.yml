@@ -152,6 +152,8 @@ jobs:
 
       - name: Unpack for lint, guard and e2e
         run: |
+          # build.js also writes these folders; start clean so the checks see exactly what is in the zips
+          rm -rf dist/unpacked-chrome dist/unpacked-firefox
           unzip -q dist/scamshield-chrome.zip -d dist/unpacked-chrome
           unzip -q dist/scamshield-firefox.zip -d dist/unpacked-firefox
 
@@ -239,7 +241,7 @@ jobs:
         with:
           name: scamshield-zips
           path: dist
-      - run: unzip -q dist/scamshield-chrome.zip -d dist/unpacked-chrome
+      - run: rm -rf dist/unpacked-chrome && unzip -q dist/scamshield-chrome.zip -d dist/unpacked-chrome
 
       - name: Playwright version
         id: pw

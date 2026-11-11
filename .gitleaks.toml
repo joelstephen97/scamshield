@@ -8,5 +8,5 @@ title = "ScamShield gitleaks config"
 useDefault = true
 
 [allowlist]
-description = "Self-signed localhost certificate for tests/e2e/server.js (not a secret)"
-paths = ['''tests/e2e/certs/localhost\.key''']
+description = "Test-only fixtures: self-signed localhost key for tests/e2e/server.js, fake bot tokens in exfil tests"
+paths = ['''tests/e2e/certs/localhost\.key''', '''tests/unit/exfil_rules\.test\.js''']
