@@ -47,11 +47,11 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.14.0",
-    "@playwright/test": "^1.48.0",
-    "chrome-webstore-upload-cli": "^4.0.1",
-    "linkedom": "^0.18.13",
+    "@playwright/test": "^1.65.0",
+    "chrome-webstore-upload-cli": "^4.0.2",
+    "linkedom": "^0.18.15",
     "qrcode": "^1.5.4",
-    "web-ext": "^10.6.0"
+    "web-ext": "^10.8.0"
   },
   "engines": {
     "node": ">=18"
